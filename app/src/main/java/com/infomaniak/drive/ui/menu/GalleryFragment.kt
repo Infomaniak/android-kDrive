@@ -42,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getAdjustedColumnNumber
+import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.android.synthetic.main.fragment_gallery.*
@@ -49,7 +50,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY) {
+class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.INoItemsLayoutView {
+
+    override val noItemsIcon = R.drawable.ic_images
+    override val noItemsTitle = R.string.picturesNoFile
+    override val noItemsInitialListView: View by lazy { galleryFastScroller }
 
     private val galleryViewModel: GalleryViewModel by viewModels()
     private lateinit var galleryAdapter: GalleryAdapter
@@ -77,12 +82,6 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY) {
         setupPagination()
 
         val isCurrentlyInGallery = menuGalleryBinding != null
-
-        noGalleryLayout.setup(
-            icon = R.drawable.ic_images,
-            title = R.string.picturesNoFile,
-            initialListView = galleryFastScroller,
-        )
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, isCurrentlyInGallery) {
             if (multiSelectManager.isMultiSelectOn) closeMultiSelect() else findNavController().popBackStack()
@@ -112,6 +111,8 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY) {
 
         galleryRecyclerView.adapter = galleryAdapter
         configGalleryLayoutManager()
+
+        noGalleryLayout.iNoItemsLayoutView = this
 
         mainViewModel.observeDownloadOffline(requireContext()).observe(viewLifecycleOwner) { workInfoList ->
             if (workInfoList.isEmpty()) return@observe

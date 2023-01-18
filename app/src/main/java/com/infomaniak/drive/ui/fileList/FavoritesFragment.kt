@@ -38,6 +38,9 @@ class FavoritesFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = true
 
+    override val noItemsRootIcon = R.drawable.ic_star_filled
+    override val noItemsRootTitle = R.string.favoritesNoFile
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -53,7 +56,6 @@ class FavoritesFragment : FileListFragment() {
             downloadFiles = DownloadFiles()
             folderId = OTHER_ROOT_ID
         }
-        setNoFilesLayout = SetNoFilesLayout()
     }
 
     private fun setupAdapter() {
@@ -62,14 +64,18 @@ class FavoritesFragment : FileListFragment() {
 
             onFileClicked = { file ->
                 if (file.isFolder()) {
-                    fileListViewModel.cancelDownloadFiles()
-                    safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(file.id, file.name))
+                    file.openFavoriteFolder()
                 } else {
                     val fileList = getFileObjectsList(mainViewModel.realm)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList)
                 }
             }
         }
+    }
+
+    private fun File.openFavoriteFolder() {
+        fileListViewModel.cancelDownloadFiles()
+        safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(id, name))
     }
 
     private fun setupMultiSelectLayout() {
@@ -101,16 +107,6 @@ class FavoritesFragment : FileListFragment() {
 
     companion object {
         const val MATOMO_CATEGORY = "favoritesFileAction"
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_star_filled,
-                title = R.string.favoritesNoFile,
-                initialListView = fileRecyclerView
-            )
-        }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

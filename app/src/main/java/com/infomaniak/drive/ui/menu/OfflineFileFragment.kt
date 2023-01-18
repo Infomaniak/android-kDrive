@@ -31,6 +31,9 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var allowCancellation: Boolean = false
 
+    override val noItemsRootIcon = R.drawable.ic_offline
+    override val noItemsRootTitle = R.string.offlineFileNoFile
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
         super.onViewCreated(view, savedInstanceState)
@@ -40,7 +43,7 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
 
     private fun initParams() {
         downloadFiles = DownloadFiles()
-        setNoFilesLayout = SetNoFilesLayout()
+        noFilesLayout.description = R.string.offlineFileNoFileDescription
         folderId = Utils.OTHER_ROOT_ID
     }
 
@@ -56,17 +59,6 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
 
     companion object {
         const val MATOMO_CATEGORY = "offlineFileAction"
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_offline,
-                title = R.string.offlineFileNoFile,
-                description = R.string.offlineFileNoFileDescription,
-                initialListView = fileRecyclerView
-            )
-        }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

@@ -300,7 +300,8 @@ class MainActivity : BaseActivity() {
         when (destination.id) {
             R.id.favoritesFragment,
             R.id.homeFragment,
-            R.id.menuFragment -> {
+            R.id.menuFragment,
+            R.id.mySharesFragment -> {
                 // Defining default root folder
                 mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
             }
@@ -347,6 +348,7 @@ class MainActivity : BaseActivity() {
             R.id.fileListFragment,
             R.id.homeFragment,
             R.id.menuFragment,
+            R.id.mySharesFragment,
             R.id.sharedWithMeFragment -> shouldHideBottomNavigation != true
             else -> false
         }

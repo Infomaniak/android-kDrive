@@ -27,7 +27,6 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import kotlinx.android.synthetic.main.empty_icon_layout.view.*
 import kotlinx.android.synthetic.main.view_no_items.view.*
-import kotlin.properties.Delegates
 
 class NoItemsLayoutView @JvmOverloads constructor(
     context: Context,
@@ -35,34 +34,18 @@ class NoItemsLayoutView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private lateinit var initialListView: View
-    private var icon by Delegates.notNull<Int>()
-    private var title by Delegates.notNull<Int>()
-    private var description: Int? = null
-    private var viewsToDisable: List<View>? = null
-    private var onNetworkUnavailableRefresh: (() -> Unit)? = null
+    lateinit var iNoItemsLayoutView: INoItemsLayoutView
+
+    var description: Int? = null
+    var viewsToDisable: List<View>? = null
+    var onNetworkUnavailableRefresh: (() -> Unit)? = null
 
     init {
         inflate(context, R.layout.view_no_items, this)
     }
 
-    // TODO : AttributeSet ?
-    fun setup(
-        icon: Int = R.drawable.ic_folder_filled,
-        title: Int,
-        description: Int? = null,
-        initialListView: View,
-        secondaryBackground: Boolean = false,
-        viewsToDisable: List<View>? = null,
-        onNetworkUnavailableRefresh: (() -> Unit)? = null,
-    ) {
-        this.icon = icon
-        this.title = title
-        this.description = description
-        this.initialListView = initialListView
-        this.viewsToDisable = viewsToDisable
-        this.onNetworkUnavailableRefresh = onNetworkUnavailableRefresh
-        if (secondaryBackground) noItemsIconLayout.setBackgroundResource(R.drawable.round_empty_secondary)
+    fun enableSecondaryBackground() {
+        noItemsIconLayout.setBackgroundResource(R.drawable.round_empty_secondary)
     }
 
     fun toggleVisibility(isVisible: Boolean, noNetwork: Boolean = false, showRefreshButton: Boolean = true) {
@@ -70,7 +53,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
         if (isVisible) {
             this.isVisible = true
             viewsToDisable?.forEach { it.isEnabled = false }
-            initialListView.isGone = true
+            iNoItemsLayoutView.noItemsInitialListView.isGone = true
 
             if (noNetwork) {
                 noItemsIconLayout.icon.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_no_network))
@@ -80,8 +63,8 @@ class NoItemsLayoutView @JvmOverloads constructor(
                     noItemsRefreshButton.setOnClickListener { onNetworkUnavailableRefresh?.invoke() }
                 }
             } else {
-                noItemsIconLayout.icon.setImageResource(icon)
-                noItemsTitle.setText(title)
+                noItemsIconLayout.icon.setImageResource(iNoItemsLayoutView.noItemsIcon)
+                noItemsTitle.setText(iNoItemsLayoutView.noItemsTitle)
                 noItemsRefreshButton.isGone = true
             }
 
@@ -94,7 +77,13 @@ class NoItemsLayoutView @JvmOverloads constructor(
         } else {
             this.isGone = true
             viewsToDisable?.forEach { it.isEnabled = true }
-            initialListView.isVisible = true
+            iNoItemsLayoutView.noItemsInitialListView.isVisible = true
         }
+    }
+
+    interface INoItemsLayoutView {
+        val noItemsIcon: Int
+        val noItemsTitle: Int
+        val noItemsInitialListView: View
     }
 }

@@ -36,6 +36,10 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     private val recentChangesViewModel: RecentChangesViewModel by viewModels()
 
     override var enabledMultiSelectMode: Boolean = true
+
+    override val noItemsRootIcon = R.drawable.ic_clock
+    override val noItemsRootTitle = R.string.homeNoActivities
+
     private var isDownloadingChanges = false
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
@@ -59,7 +63,6 @@ class RecentChangesFragment : FileSubTypeListFragment() {
 
     private fun initParams() {
         downloadFiles = DownloadFiles()
-        setNoFilesLayout = SetNoFilesLayout()
         folderId = Utils.OTHER_ROOT_ID
     }
 
@@ -75,16 +78,6 @@ class RecentChangesFragment : FileSubTypeListFragment() {
 
     companion object {
         const val MATOMO_CATEGORY = "recentChangesFileAction"
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_clock,
-                title = R.string.homeNoActivities,
-                initialListView = fileRecyclerView,
-            )
-        }
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

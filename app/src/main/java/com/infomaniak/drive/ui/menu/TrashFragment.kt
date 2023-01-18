@@ -48,6 +48,9 @@ class TrashFragment : FileSubTypeListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var sortTypeUsage = SortTypeUsage.TRASH
 
+    override val noItemsRootIcon = R.drawable.ic_delete
+    override val noItemsRootTitle = R.string.trashNoFile
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -72,7 +75,7 @@ class TrashFragment : FileSubTypeListFragment() {
         downloadFiles = DownloadFiles(
             if (folderId == ROOT_ID) null else File(id = folderId, driveId = AccountUtils.currentDriveId, name = folderName)
         )
-        setNoFilesLayout = SetNoFilesLayout()
+        noFilesLayout.viewsToDisable = if (folderId == ROOT_ID) listOf(emptyTrash) else null
     }
 
     private fun setupTrashEmptying() {
@@ -168,17 +171,6 @@ class TrashFragment : FileSubTypeListFragment() {
                 sortButton.setText(fileListViewModel.sortType.translation)
                 downloadFiles(true, true)
             }
-        }
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_delete,
-                title = R.string.trashNoFile,
-                initialListView = fileRecyclerView,
-                viewsToDisable = if (folderId == ROOT_ID) listOf(emptyTrash) else null,
-            )
         }
     }
 

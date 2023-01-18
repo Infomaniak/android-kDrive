@@ -48,6 +48,9 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
 
+    override val noItemsRootIcon = R.drawable.ic_share
+    override val noItemsRootTitle = R.string.sharedWithMeNoFile
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,7 +69,6 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 else -> File(id = folderId, driveId = navigationArgs.driveId, name = folderName)
             }
         )
-        setNoFilesLayout = SetNoFilesLayout()
 
         fileListViewModel.isSharedWithMe = true
         super.onViewCreated(view, savedInstanceState)
@@ -79,10 +81,10 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             when {
                 file.isDrive() -> {
                     DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
-                        if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else openSharedWithMeFolder(file)
+                        if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
                     }
                 }
-                file.isFolder() -> openSharedWithMeFolder(file)
+                file.isFolder() -> file.openSharedWithMeFolder()
                 else -> {
                     val fileList = fileAdapter.getFileObjectsList(realm)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)
@@ -105,12 +107,12 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         )
     }
 
-    private fun openSharedWithMeFolder(file: File) {
+    private fun File.openSharedWithMeFolder() {
         safeNavigate(
             SharedWithMeFragmentDirections.actionSharedWithMeFragmentSelf(
-                folderId = if (file.isDrive()) ROOT_ID else file.id,
-                folderName = file.name,
-                driveId = file.driveId
+                folderId = if (isDrive()) ROOT_ID else id,
+                folderName = name,
+                driveId = driveId,
             )
         )
     }
@@ -134,16 +136,6 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     companion object {
         const val MATOMO_CATEGORY = "sharedWithMeFileAction"
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_share,
-                title = R.string.sharedWithMeNoFile,
-                initialListView = fileRecyclerView
-            )
-        }
     }
 
     private inner class DownloadFiles() : (Boolean, Boolean) -> Unit {

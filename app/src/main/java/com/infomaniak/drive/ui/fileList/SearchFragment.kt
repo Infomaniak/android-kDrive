@@ -52,6 +52,9 @@ class SearchFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = false
 
+    override val noItemsIcon = R.drawable.ic_search_grey
+    override val noItemsTitle = R.string.searchNoFile
+
     private lateinit var filtersAdapter: SearchFiltersAdapter
     private lateinit var recentSearchesAdapter: RecentSearchesAdapter
     private lateinit var recentSearchesView: View
@@ -60,7 +63,6 @@ class SearchFragment : FileListFragment() {
     @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
-        setNoFilesLayout = SetNoFilesLayout()
         recentSearchesView = layoutInflater.inflate(R.layout.recent_searches, null)
 
         configureFileListViewModel()
@@ -328,7 +330,7 @@ class SearchFragment : FileListFragment() {
             if (categoryId != null) {
                 categoriesFilter?.let { categories ->
                     val filteredCategories = categories.filter { it.id != categoryId }
-                    categoriesFilter = if (filteredCategories.isEmpty()) null else filteredCategories
+                    categoriesFilter = filteredCategories.ifEmpty { null }
                 }
             }
         }
@@ -370,16 +372,6 @@ class SearchFragment : FileListFragment() {
             VisibilityMode.RECENT_SEARCHES -> displayRecentSearches()
             VisibilityMode.LOADING -> displayLoadingView()
             VisibilityMode.NO_RESULTS, VisibilityMode.RESULTS -> displaySearchResult(mode)
-        }
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            noFilesLayout.setup(
-                icon = R.drawable.ic_search_grey,
-                title = R.string.searchNoFile,
-                initialListView = fileRecyclerView,
-            )
         }
     }
 

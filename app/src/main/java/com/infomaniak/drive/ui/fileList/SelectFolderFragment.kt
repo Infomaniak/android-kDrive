@@ -44,9 +44,10 @@ class SelectFolderFragment : FileListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
     override var showPendingFiles: Boolean = false
 
+    override val noItemsTitle = R.string.noFilesDescription
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         userDrive = selectFolderViewModel.userDrive
-        setNoFilesLayout = SetNoFilesLayout()
         super.onViewCreated(view, savedInstanceState)
 
         folderName = if (folderId == ROOT_ID) selectFolderViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
@@ -99,14 +100,5 @@ class SelectFolderFragment : FileListFragment() {
 
     private fun onBackPressed() {
         if (folderId == ROOT_ID) requireActivity().finish() else Utils.ignoreCreateFolderBackStack(findNavController(), true)
-    }
-
-    private inner class SetNoFilesLayout : () -> Unit {
-        override fun invoke() {
-            noFilesLayout.setup(
-                title = R.string.noFilesDescription,
-                initialListView = fileRecyclerView
-            )
-        }
     }
 }

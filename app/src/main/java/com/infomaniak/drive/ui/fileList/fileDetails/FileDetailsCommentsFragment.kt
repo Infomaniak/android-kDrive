@@ -28,13 +28,18 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.views.NoItemsLayoutView
 import kotlinx.android.synthetic.main.fragment_file_details.*
 import kotlinx.android.synthetic.main.fragment_file_details_comments.*
 
-class FileDetailsCommentsFragment : FileDetailsSubFragment() {
+class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.INoItemsLayoutView {
 
     private lateinit var commentsAdapter: FileCommentsAdapter
     private lateinit var currentFile: File
+
+    override val noItemsIcon = R.drawable.ic_comment
+    override var noItemsTitle = R.string.fileDetailsCommentsUnavailable
+    override val noItemsInitialListView: View by lazy { fileCommentsRecyclerView }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_file_details_comments, container, false)
@@ -51,23 +56,13 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
 
     private fun setupView() {
         val onClickAddCommentButton: (view: View) -> Unit
+        noCommentsLayout.iNoItemsLayoutView = this
         if (currentFile.isOnlyOfficePreview()) {
-            noCommentsLayout.setup(
-                icon = R.drawable.ic_comment,
-                title = R.string.fileDetailsCommentsUnavailable,
-                initialListView = fileCommentsRecyclerView,
-                secondaryBackground = true
-            )
             noCommentsLayout.toggleVisibility(isVisible = true)
             onClickAddCommentButton = { openOnlyOfficeDocument(currentFile) }
         } else {
+            noItemsTitle = R.string.fileDetailsNoComments
             setCommentsAdapter()
-            noCommentsLayout.setup(
-                icon = R.drawable.ic_comment,
-                title = R.string.fileDetailsNoComments,
-                initialListView = fileCommentsRecyclerView,
-                secondaryBackground = true
-            )
 
             onClickAddCommentButton = {
                 Utils.createPromptNameDialog(
@@ -93,6 +88,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment() {
             }
         }
 
+        noCommentsLayout.enableSecondaryBackground()
         requireParentFragment().addCommentButton.setOnClickListener(onClickAddCommentButton)
     }
 
