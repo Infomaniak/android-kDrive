@@ -12,12 +12,14 @@ android {
 
     compileSdkVersion 33
 
+    ndkVersion "25.1.8937393"
+
     defaultConfig {
         testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 4_02_012_01
+        versionCode 4_02_012_02
         versionName '4.2.12'
 
         setProperty "archivesBaseName", "kdrive-" + getVersionName()
