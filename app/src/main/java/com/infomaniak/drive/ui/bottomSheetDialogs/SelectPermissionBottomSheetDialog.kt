@@ -40,13 +40,9 @@ import com.infomaniak.drive.data.models.ShareLink.*
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
-import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.SnackbarUtils
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.*
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.fragment_select_permission.*
 import kotlinx.coroutines.Dispatchers

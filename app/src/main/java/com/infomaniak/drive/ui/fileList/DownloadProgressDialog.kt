@@ -37,8 +37,8 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.IsComplete
-import com.infomaniak.drive.utils.setBackNavigationResult
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.setBackNavigationResult
 import kotlinx.android.synthetic.main.dialog_download_progress.*
 import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.coroutines.Dispatchers
