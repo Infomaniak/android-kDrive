@@ -32,6 +32,7 @@ import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
@@ -134,7 +135,7 @@ class LoginActivity : AppCompatActivity() {
                                 launchMainActivity()
                             }
                             is ApiResponse<*> -> withContext(Dispatchers.Main) {
-                                if (user.error?.code?.equals("no_drive") == true) {
+                                if (user.error?.code?.equals(ErrorCode.NO_DRIVE.code) == true) {
                                     launchNoDriveActivity()
                                 } else {
                                     showError(getString(user.translatedError))
@@ -191,7 +192,7 @@ class LoginActivity : AppCompatActivity() {
                             allDrivesDataResponse.data?.drives?.main?.isEmpty() == true -> {
                                 return ApiResponse<DriveInfo>(
                                     result = ApiResponse.Status.ERROR,
-                                    error = ApiError(code = "no_drive")
+                                    error = ApiError(code = ErrorCode.NO_DRIVE.code)
                                 )
                             }
                             else -> {

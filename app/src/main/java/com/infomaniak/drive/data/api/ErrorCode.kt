@@ -24,11 +24,12 @@ import com.infomaniak.lib.core.models.ApiResponse
 @Suppress("unused")
 enum class ErrorCode(val code: String, @StringRes val translateRes: Int) {
     AN_ERROR_HAS_OCCURRED("an_error_has_occured", R.string.anErrorHasOccurred),
+    CATEGORY_ALREADY_EXISTS("category_already_exist_error", R.string.errorCategoryAlreadyExists),
     COLLABORATIVE_FOLDER_ALREADY_EXISTS_FOR_FILE("collaborative_folder_already_exists_for_file", R.string.anErrorHasOccurred),
     CONFLICT_ERROR("conflict_error", R.string.errorConflict),
     DESTINATION_ALREADY_EXISTS("destination_already_exists", R.string.errorFileCreate),
-    SHARE_LINK_ALREADY_EXISTS("file_share_link_already_exists", R.string.errorShareLink),
-    CATEGORY_ALREADY_EXISTS("category_already_exist_error", R.string.errorCategoryAlreadyExists);
+    NO_DRIVE("no_drive", R.string.noDriveTitle),
+    SHARE_LINK_ALREADY_EXISTS("file_share_link_already_exists", R.string.errorShareLink);
 
     companion object {
 
