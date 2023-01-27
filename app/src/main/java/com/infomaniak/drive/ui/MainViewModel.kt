@@ -410,7 +410,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                             fileDeleted.add(uploadFile)
                         }
                     }
-                }
+                } ?: fileDeleted.add(uploadFile)
             } catch (exception: SecurityException) {
                 Sentry.captureException(exception)
                 exception.printStackTrace()
