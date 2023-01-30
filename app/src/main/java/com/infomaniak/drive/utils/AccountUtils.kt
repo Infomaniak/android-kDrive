@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
@@ -116,8 +117,10 @@ object AccountUtils : CredentialManager() {
             ApiRepository.getAllDrivesData(okHttpClient).apply {
                 if (result != ApiResponse.Status.ERROR) {
                     handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
-                } else if (error?.code?.equals("no_drive") == true) {
-                    removeUserAndDeleteToken(context, user)
+                } else {
+                    if (error?.code?.equals(ErrorCode.NO_DRIVE.code) == true) {
+                        removeUserAndDeleteToken(context, user)
+                    }
                 }
             }
         }
