@@ -45,8 +45,6 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.fragment.findNavController
 import coil.load
 import coil.request.Disposable
@@ -165,34 +163,6 @@ fun ImageView.animateRotation(isDeployed: Boolean = false) {
                 fillAfter = true
                 repeatCount = 0
             })
-}
-
-/**
- * Send a value to the previous navigation
- */
-fun <T> Fragment.setBackNavigationResult(key: String, value: T) {
-    findNavController().apply {
-        previousBackStackEntry?.savedStateHandle?.set(key, value)
-        popBackStack()
-    }
-}
-
-/**
- * Get the value sent by navigation popbackStack in the current navigation
- */
-fun <T> Fragment.getBackNavigationResult(key: String, onResult: (result: T) -> Unit) {
-    val backStackEntry = findNavController().currentBackStackEntry
-    val observer = LifecycleEventObserver { _, event ->
-        if (event == Lifecycle.Event.ON_RESUME && backStackEntry?.savedStateHandle?.contains(key) == true) {
-            backStackEntry.savedStateHandle.get<T>(key)?.let(onResult)
-            backStackEntry.savedStateHandle.remove<T>(key)
-        }
-    }
-
-    backStackEntry?.lifecycle?.addObserver(observer)
-    viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
-        if (event == Lifecycle.Event.ON_DESTROY) backStackEntry?.lifecycle?.removeObserver(observer)
-    })
 }
 
 /**

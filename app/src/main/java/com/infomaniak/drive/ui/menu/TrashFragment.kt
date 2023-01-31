@@ -35,9 +35,9 @@ import com.infomaniak.drive.ui.fileList.multiSelect.TrashMultiSelectActionsBotto
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.getBackNavigationResult
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.SnackbarUtils
+import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_file_list.*
 
