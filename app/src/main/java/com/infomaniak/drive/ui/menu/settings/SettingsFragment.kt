@@ -17,11 +17,7 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
-import android.annotation.SuppressLint
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,6 +38,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.isKeyguardSecure
+import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_settings.*
 
@@ -76,7 +73,7 @@ class SettingsFragment : Fragment() {
             openThemeSettings()
         }
         notifications.setOnClickListener {
-            openAppNotificationSettings()
+            requireContext().openAppNotificationSettings()
         }
         appSecurity.apply {
             if (requireContext().isKeyguardSecure()) {
@@ -138,21 +135,6 @@ class SettingsFragment : Fragment() {
             else -> R.string.themeSettingsSystemLabel
         }
         themeSettingsValue.setText(themeTextValue)
-    }
-
-    @SuppressLint("InlinedApi")
-    private fun openAppNotificationSettings() = with(requireContext()) {
-        Intent().apply {
-            action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
-            when {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                else -> {
-                    putExtra("app_package", packageName)
-                    putExtra("app_uid", applicationInfo.uid)
-                }
-            }
-            startActivity(this)
-        }
     }
 
     private fun trackSettingsEvent(name: String, value: Boolean? = null) {
