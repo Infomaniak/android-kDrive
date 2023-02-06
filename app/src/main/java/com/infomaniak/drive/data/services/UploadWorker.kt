@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.services
 
+import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
@@ -343,7 +344,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         runCatching {
             contentResolver.query(contentUri, null, selection, args, sortOrder)
                 ?.use { cursor ->
-                    Log.d(TAG, "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found")
+                    val messageLog = "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found"
+                    Log.d(TAG, messageLog)
+                    Sentry.addBreadcrumb(Breadcrumb().apply {
+                        category = BREADCRUMB_TAG
+                        message = messageLog
+                        level = SentryLevel.INFO
+                    })
 
                     while (cursor.moveToNext()) {
                         localMediaFound(cursor, contentUri, mediaFolder, syncSettings)
@@ -361,7 +368,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val fileName = SyncUtils.getFileName(cursor)
         val fileSize = uri.getFileSize(cursor)
 
-        Log.d(TAG, "getLocalLastMediasAsync > ${mediaFolder.name}/$fileName found")
+        val messageLog = "localMediaFound > ${mediaFolder.name}/$fileName found"
+        Log.d(TAG, messageLog)
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = BREADCRUMB_TAG
+            message = messageLog
+            level = SentryLevel.INFO
+        })
 
         if (fileName != null && UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
             UploadFile(
@@ -425,6 +438,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 scope.setExtra("volume names", volumeNames)
                 Sentry.captureMessage("getLocalLastMediasAsync() ERROR")
             }
+        } else {
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.ERROR
+                scope.setExtra("uri", contentUri.toString())
+                Sentry.captureException(exception)
+            }
         }
     }
 
@@ -470,6 +489,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
         }
 
+        @SuppressLint("MissingPermission")
         fun Context.showSyncConfigNotification() {
             val pendingIntent = syncSettingsActivityPendingIntent()
             val notificationManagerCompat = NotificationManagerCompat.from(this)
