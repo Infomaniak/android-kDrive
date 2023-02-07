@@ -195,7 +195,6 @@ class UploadInProgressFragment : FileListFragment() {
         lifecycleScope.launch(Dispatchers.IO) {
             var needPopBackStack = false
             uploadFile?.let {
-                it.initOkHttpClient()
                 it.uploadToken?.let { token ->
                     ApiRepository.cancelSession(AccountUtils.currentDriveId, token, it.okHttpClient)
                 }

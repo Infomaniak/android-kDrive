@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -73,6 +74,7 @@ class UploadTask(
     private var uploadNotificationElapsedTime = ELAPSED_TIME
     private var uploadNotificationStartTime = 0L
 
+    @SuppressLint("MissingPermission")
     suspend fun start() = withContext(Dispatchers.IO) {
         notificationManagerCompat = NotificationManagerCompat.from(context)
 
@@ -186,6 +188,7 @@ class UploadTask(
         onFinish(uri)
     }
 
+    @SuppressLint("MissingPermission")
     private suspend fun onFinish(uri: Uri) = with(uploadFile) {
         with(ApiRepository.finishSession(driveId, uploadToken!!, okHttpClient)) {
             if (!isSuccess()) manageUploadErrors()
@@ -281,6 +284,7 @@ class UploadTask(
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun CoroutineScope.updateProgress(currentBytes: Int, bytesWritten: Long, contentLength: Long) {
         val totalBytesWritten = currentBytes + previousChunkBytesWritten
         val progress = ((totalBytesWritten.toDouble() / uploadFile.fileSize.toDouble()) * 100).toInt()

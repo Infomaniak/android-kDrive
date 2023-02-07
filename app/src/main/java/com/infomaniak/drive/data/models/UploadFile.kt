@@ -38,6 +38,7 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
 import io.realm.kotlin.oneOf
 import io.sentry.Sentry
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.io.File
 import java.util.*
@@ -58,13 +59,8 @@ open class UploadFile(
     var userId: Int = -1
 ) : RealmObject() {
 
-    @Ignore
-    lateinit var okHttpClient: OkHttpClient
-        private set
-
-    suspend fun initOkHttpClient() {
-        okHttpClient = AccountUtils.getHttpClient(userId = userId, timeout = 120)
-    }
+    @delegate:Ignore
+    val okHttpClient: OkHttpClient by lazy { runBlocking { AccountUtils.getHttpClient(userId = userId, timeout = 120) } }
 
     fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {
         remoteSubFolder = parent + if (createDatedSubFolders) "/${fileModifiedAt.format("yyyy/MM")}" else ""
@@ -303,7 +299,7 @@ open class UploadFile(
             }
         }
 
-        suspend fun cancelAllPendingFilesSessions(folderId: Int) {
+        fun cancelAllPendingFilesSessions(folderId: Int) {
             getRealmInstance().use { realm ->
                 realm.uploadTable
                     .equalTo(UploadFile::remoteFolder.name, folderId)
@@ -311,7 +307,6 @@ open class UploadFile(
                     .isNotNull(UploadFile::uploadToken.name)
                     .findAll()?.onEach { uploadFileProxy ->
                         with(uploadFileProxy) {
-                            initOkHttpClient()
                             ApiRepository.cancelSession(driveId, uploadToken!!, okHttpClient)
                         }
                     }
