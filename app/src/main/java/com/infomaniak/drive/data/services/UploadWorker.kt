@@ -435,14 +435,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 scope.setExtra("uri", contentUri.toString())
                 scope.setExtra("folder", mediaFolder.name)
                 scope.setExtra("volume names", volumeNames)
+                scope.setExtra("exception", exception.toString())
                 Sentry.captureMessage("getLocalLastMediasAsync() ERROR")
             }
         } else {
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.ERROR
-                scope.setExtra("uri", contentUri.toString())
-                Sentry.captureException(exception)
-            }
+            throw exception
         }
     }
 
