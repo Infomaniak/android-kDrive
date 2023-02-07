@@ -184,7 +184,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         currentUploadFile = this@initUpload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         updateUploadCountNotification(applicationContext, pendingCount)
-        initOkHttpClient()
 
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
