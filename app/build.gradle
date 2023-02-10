@@ -22,7 +22,7 @@ android {
         versionCode 4_02_014_02
         versionName '4.2.14'
 
-        setProperty "archivesBaseName", "kdrive-" + getVersionName()
+        setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
