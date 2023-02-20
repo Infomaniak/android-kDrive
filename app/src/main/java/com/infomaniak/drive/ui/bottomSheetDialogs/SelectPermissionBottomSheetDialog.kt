@@ -44,7 +44,9 @@ import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.fragment_select_permission.*
+import kotlinx.android.synthetic.main.fragment_select_permission.permissionsRecyclerView
+import kotlinx.android.synthetic.main.fragment_select_permission.saveButton
+import kotlinx.android.synthetic.main.fragment_select_permission.toolbar
 import kotlinx.coroutines.Dispatchers
 
 class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {

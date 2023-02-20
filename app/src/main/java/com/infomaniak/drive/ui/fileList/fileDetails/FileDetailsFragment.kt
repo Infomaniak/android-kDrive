@@ -41,10 +41,11 @@ import com.infomaniak.drive.utils.getFolderIcon
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.*
-import kotlinx.android.synthetic.main.empty_icon_layout.view.*
+import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
 import kotlinx.android.synthetic.main.fragment_file_details.*
-import kotlinx.android.synthetic.main.fragment_file_details.view.*
-import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
+import kotlinx.android.synthetic.main.fragment_file_details.view.fileDetailsCollapsingToolbar
+import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.subTitle
+import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.title
 import kotlin.math.abs
 
 class FileDetailsFragment : FileDetailsSubFragment() {

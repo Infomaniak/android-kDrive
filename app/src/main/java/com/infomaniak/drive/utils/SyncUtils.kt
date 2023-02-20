@@ -34,7 +34,7 @@ import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.FileObserveService
 import com.infomaniak.drive.data.sync.FileObserveServiceApi24
-import java.util.*
+import java.util.Date
 
 object SyncUtils {
 

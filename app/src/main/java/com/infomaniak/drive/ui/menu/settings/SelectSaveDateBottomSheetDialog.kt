@@ -22,7 +22,8 @@ import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.views.SelectBottomSheetDialog
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.selectRecyclerView
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.selectTitle
 
 class SelectSaveDateBottomSheetDialog : SelectBottomSheetDialog() {
 

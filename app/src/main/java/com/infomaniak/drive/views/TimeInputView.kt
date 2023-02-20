@@ -32,8 +32,9 @@ import com.infomaniak.lib.core.utils.*
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener
 import com.wdullaer.materialdatetimepicker.time.Timepoint
-import kotlinx.android.synthetic.main.view_time_input.view.*
-import java.util.*
+import kotlinx.android.synthetic.main.view_time_input.view.timeValueInput
+import java.util.Calendar
+import java.util.Date
 
 class TimeInputView @JvmOverloads constructor(
     context: Context,

@@ -43,7 +43,8 @@ import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.android.synthetic.main.activity_migration.*
-import kotlinx.android.synthetic.main.fragment_intro.view.*
+import kotlinx.android.synthetic.main.fragment_intro.view.description
+import kotlinx.android.synthetic.main.fragment_intro.view.title
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

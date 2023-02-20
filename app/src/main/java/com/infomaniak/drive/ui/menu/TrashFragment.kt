@@ -39,7 +39,10 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.SnackbarUtils
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_file_list.*
+import kotlinx.android.synthetic.main.fragment_file_list.emptyTrash
+import kotlinx.android.synthetic.main.fragment_file_list.noFilesLayout
+import kotlinx.android.synthetic.main.fragment_file_list.sortButton
+import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 class TrashFragment : FileSubTypeListFragment() {
 

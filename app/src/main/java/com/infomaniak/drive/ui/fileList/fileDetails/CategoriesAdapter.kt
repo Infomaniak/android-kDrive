@@ -29,7 +29,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_category.view.*
-import java.util.*
+import java.util.Date
 
 class CategoriesAdapter(
     private val onCategoryChanged: (id: Int, isSelected: Boolean) -> Unit

@@ -30,7 +30,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import java.util.*
+import java.util.Date
 
 class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : ListenableWorker(context, workerParams) {
 

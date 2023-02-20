@@ -26,7 +26,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderAdapter.Companion.COLORS
 import com.infomaniak.lib.core.utils.setBackNavigationResult
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_color_folder.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_color_folder.colorsRecyclerView
 
 class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
 

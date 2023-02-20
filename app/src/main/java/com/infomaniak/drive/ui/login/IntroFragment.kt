@@ -23,7 +23,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.infomaniak.drive.R
-import kotlinx.android.synthetic.main.fragment_intro.*
+import kotlinx.android.synthetic.main.fragment_intro.description
+import kotlinx.android.synthetic.main.fragment_intro.icon
+import kotlinx.android.synthetic.main.fragment_intro.title
+import kotlinx.android.synthetic.main.fragment_intro.waveBackground
 
 class IntroFragment : Fragment() {
 

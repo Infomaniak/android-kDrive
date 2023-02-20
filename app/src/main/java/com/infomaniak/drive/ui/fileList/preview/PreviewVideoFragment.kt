@@ -45,9 +45,13 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
-import kotlinx.android.synthetic.main.fragment_preview_others.*
-import kotlinx.android.synthetic.main.fragment_preview_video.*
+import kotlinx.android.synthetic.main.fragment_preview_others.bigOpenWithButton
+import kotlinx.android.synthetic.main.fragment_preview_others.fileIcon
+import kotlinx.android.synthetic.main.fragment_preview_others.fileName
+import kotlinx.android.synthetic.main.fragment_preview_others.previewDescription
 import kotlinx.android.synthetic.main.fragment_preview_video.container
+import kotlinx.android.synthetic.main.fragment_preview_video.errorLayout
+import kotlinx.android.synthetic.main.fragment_preview_video.playerView
 import java.io.File
 
 open class PreviewVideoFragment : PreviewFragment() {

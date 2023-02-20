@@ -22,8 +22,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import kotlinx.android.synthetic.main.activity_no_drive.*
-import kotlinx.android.synthetic.main.empty_icon_layout.view.*
+import kotlinx.android.synthetic.main.activity_no_drive.anotherProfileButton
+import kotlinx.android.synthetic.main.activity_no_drive.noDriveActionButton
+import kotlinx.android.synthetic.main.activity_no_drive.noDriveIconLayout
+import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
 
 class NoDriveActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

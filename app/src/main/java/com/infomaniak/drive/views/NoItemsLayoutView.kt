@@ -25,8 +25,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
-import kotlinx.android.synthetic.main.empty_icon_layout.view.*
-import kotlinx.android.synthetic.main.view_no_items.view.*
+import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
+import kotlinx.android.synthetic.main.view_no_items.view.noItemsDescription
+import kotlinx.android.synthetic.main.view_no_items.view.noItemsIconLayout
+import kotlinx.android.synthetic.main.view_no_items.view.noItemsRefreshButton
+import kotlinx.android.synthetic.main.view_no_items.view.noItemsTitle
 
 class NoItemsLayoutView @JvmOverloads constructor(
     context: Context,

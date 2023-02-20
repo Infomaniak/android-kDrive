@@ -24,7 +24,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
+import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectActiveIcon
+import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectText
 
 class SelectIntervalTypeBottomSheetAdapter(
     private val selectedIntervalType: SyncSettings.IntervalType,

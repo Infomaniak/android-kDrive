@@ -31,8 +31,10 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_file_list.view.*
-import kotlinx.android.synthetic.main.item_file.view.*
+import kotlinx.android.synthetic.main.cardview_file_list.view.fileCardView
+import kotlinx.android.synthetic.main.item_file.view.fileDate
+import kotlinx.android.synthetic.main.item_file.view.fileSize
+import kotlinx.android.synthetic.main.item_file.view.menuButton
 
 class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : RecyclerView.Adapter<ViewHolder>() {
 

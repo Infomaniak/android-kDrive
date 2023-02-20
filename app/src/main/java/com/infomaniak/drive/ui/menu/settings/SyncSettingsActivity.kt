@@ -56,7 +56,8 @@ import kotlinx.android.synthetic.main.activity_sync_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Date
+import java.util.TimeZone
 
 class SyncSettingsActivity : BaseActivity() {
 

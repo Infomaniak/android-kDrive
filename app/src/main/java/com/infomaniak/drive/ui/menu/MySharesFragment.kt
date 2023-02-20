@@ -29,7 +29,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_file_list.*
+import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 class MySharesFragment : FileSubTypeListFragment() {
 

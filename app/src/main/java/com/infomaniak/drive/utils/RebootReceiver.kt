@@ -37,7 +37,7 @@ import com.infomaniak.lib.core.utils.hasPermissions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.UUID
 
 class RebootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {

@@ -32,7 +32,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import io.realm.Realm
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.ensureActive
-import java.util.*
+import java.util.Date
 import java.io.File as IOFile
 
 object SyncOfflineUtils {

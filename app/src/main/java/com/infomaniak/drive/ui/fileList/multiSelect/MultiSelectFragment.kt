@@ -58,7 +58,7 @@ import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.util.*
+import java.util.UUID
 
 abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
 

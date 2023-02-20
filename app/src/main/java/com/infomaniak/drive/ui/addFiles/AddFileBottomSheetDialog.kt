@@ -54,7 +54,7 @@ import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.util.*
+import java.util.Date
 
 class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 

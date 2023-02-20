@@ -53,7 +53,7 @@ import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setBackNavigationResult
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.fileInfoActionsView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

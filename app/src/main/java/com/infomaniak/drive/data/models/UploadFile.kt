@@ -41,7 +41,7 @@ import io.sentry.Sentry
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.io.File
-import java.util.*
+import java.util.Date
 
 open class UploadFile(
     @PrimaryKey var uri: String = "",

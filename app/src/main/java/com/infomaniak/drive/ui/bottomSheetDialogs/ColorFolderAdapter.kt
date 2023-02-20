@@ -25,7 +25,7 @@ import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.view_color_round_button.view.*
+import kotlinx.android.synthetic.main.view_color_round_button.view.colorButtonView
 
 class ColorFolderAdapter(
     private val onColorSelected: (color: String) -> Unit

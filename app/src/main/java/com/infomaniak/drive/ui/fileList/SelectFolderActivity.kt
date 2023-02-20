@@ -33,7 +33,8 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
-import kotlinx.android.synthetic.main.activity_select_folder.*
+import kotlinx.android.synthetic.main.activity_select_folder.hostFragment
+import kotlinx.android.synthetic.main.activity_select_folder.saveButton
 
 class SelectFolderActivity : BaseActivity() {
 

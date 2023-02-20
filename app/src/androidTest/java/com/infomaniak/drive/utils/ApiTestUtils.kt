@@ -32,7 +32,7 @@ import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import org.junit.jupiter.api.Assertions
-import java.util.*
+import java.util.UUID
 
 object ApiTestUtils {
 

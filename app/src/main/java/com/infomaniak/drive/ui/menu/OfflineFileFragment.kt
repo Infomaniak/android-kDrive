@@ -24,7 +24,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.OfflineMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
-import kotlinx.android.synthetic.main.fragment_file_list.*
+import kotlinx.android.synthetic.main.fragment_file_list.noFilesLayout
+import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 open class OfflineFileFragment : FileSubTypeListFragment() {
 

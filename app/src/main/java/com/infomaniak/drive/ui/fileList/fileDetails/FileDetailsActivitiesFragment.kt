@@ -24,8 +24,8 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.isLastPage
-import kotlinx.android.synthetic.main.fragment_file_details.*
-import kotlinx.android.synthetic.main.fragment_file_details_activities.*
+import kotlinx.android.synthetic.main.fragment_file_details.addCommentButton
+import kotlinx.android.synthetic.main.fragment_file_details_activities.fileActivitiesRecyclerView
 
 class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
 

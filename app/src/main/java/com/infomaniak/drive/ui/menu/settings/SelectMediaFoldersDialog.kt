@@ -40,7 +40,10 @@ import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.views.DividerItemDecorator
 import io.realm.Realm
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.mediaFolderList
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.noMediaFolderLayout
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.swipeRefreshLayout
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

@@ -32,8 +32,10 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setUserView
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.user.User
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.*
-import kotlinx.android.synthetic.main.popup_select_user.view.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.driveList
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.toolbar
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.userCardview
+import kotlinx.android.synthetic.main.popup_select_user.view.usersRecyclerView
 
 class SelectDriveDialog : FullScreenBottomSheetDialog() {
 

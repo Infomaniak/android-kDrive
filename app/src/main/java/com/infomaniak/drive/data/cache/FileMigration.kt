@@ -33,7 +33,7 @@ import io.realm.RealmMigration
 import io.realm.RealmSchema
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import java.util.*
+import java.util.Date
 
 class FileMigration : RealmMigration {
 

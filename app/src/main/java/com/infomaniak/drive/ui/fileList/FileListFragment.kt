@@ -68,7 +68,8 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import kotlinx.android.synthetic.main.fragment_file_list.*
+import kotlinx.android.synthetic.main.fragment_file_list.collapsingToolbarLayout
+import kotlinx.android.synthetic.main.fragment_file_list.toolbar
 import kotlinx.coroutines.*
 
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,

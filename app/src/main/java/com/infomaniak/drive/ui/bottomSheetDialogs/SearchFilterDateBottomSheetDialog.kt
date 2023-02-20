@@ -35,7 +35,8 @@ import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
 import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 import androidx.core.util.Pair as AndroidPair
 
 class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {

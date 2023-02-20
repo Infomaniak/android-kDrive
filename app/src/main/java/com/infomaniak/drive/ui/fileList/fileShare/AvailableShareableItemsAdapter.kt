@@ -34,7 +34,10 @@ import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
-import kotlinx.android.synthetic.main.item_user.view.*
+import kotlinx.android.synthetic.main.item_user.view.chevron
+import kotlinx.android.synthetic.main.item_user.view.userAvatar
+import kotlinx.android.synthetic.main.item_user.view.userEmail
+import kotlinx.android.synthetic.main.item_user.view.userName
 
 /**
  * Note :

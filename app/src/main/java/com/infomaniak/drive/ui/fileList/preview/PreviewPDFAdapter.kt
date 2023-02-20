@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.PdfCore
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_pdfview.view.*
+import kotlinx.android.synthetic.main.item_pdfview.view.imageView
 
 class PreviewPDFAdapter(private val pdfCore: PdfCore) : RecyclerView.Adapter<ViewHolder>() {
 

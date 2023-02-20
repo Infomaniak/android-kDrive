@@ -22,7 +22,10 @@ import android.view.View
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.actionButton
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.description
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.illu
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.title
 
 class SyncAfterMigrationBottomSheetDialog : InformationBottomSheetDialog() {
 
