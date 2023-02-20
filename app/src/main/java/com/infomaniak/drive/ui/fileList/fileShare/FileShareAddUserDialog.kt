@@ -42,6 +42,7 @@ import com.infomaniak.drive.utils.getDriveUsers
 import com.infomaniak.drive.utils.setupAvailableShareableItems
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
@@ -158,7 +159,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                             initials = item.getInitials(),
                             background = getBackgroundColorBasedOnId(item.id)
                         )
-                        val imageLoader = ImageLoader.Builder(this).build()
                         val request = ImageRequest.Builder(this)
                             .data(item.avatar)
                             .transformations(CircleCropTransformation())
@@ -166,7 +166,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                             .error(fallback)
                             .placeholder(R.drawable.ic_account)
                             .build()
-                        imageLoader.execute(request).drawable?.let {
+                        simpleImageLoader.execute(request).drawable?.let {
                             withContext(Dispatchers.Main) {
                                 chip.chipIcon = it
                             }
