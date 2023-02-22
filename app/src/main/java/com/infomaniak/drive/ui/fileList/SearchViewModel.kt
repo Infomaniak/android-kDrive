@@ -33,7 +33,7 @@ import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
-import java.util.*
+import java.util.Date
 
 class SearchViewModel : ViewModel() {
 

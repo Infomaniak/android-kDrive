@@ -23,7 +23,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.requestCredentials
-import kotlinx.android.synthetic.main.activity_lock.*
+import kotlinx.android.synthetic.main.activity_lock.unLock
 
 class LockActivity : AppCompatActivity() {
 

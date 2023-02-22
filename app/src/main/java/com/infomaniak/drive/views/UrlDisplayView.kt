@@ -22,7 +22,9 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.shareText
-import kotlinx.android.synthetic.main.view_url_display.view.*
+import kotlinx.android.synthetic.main.view_url_display.view.cardViewUrlValue
+import kotlinx.android.synthetic.main.view_url_display.view.shareUrlButton
+import kotlinx.android.synthetic.main.view_url_display.view.urlValue
 
 class UrlDisplayView @JvmOverloads constructor(
     context: Context,

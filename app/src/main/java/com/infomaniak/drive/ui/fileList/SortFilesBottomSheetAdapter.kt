@@ -25,7 +25,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
+import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectActiveIcon
+import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectText
 
 class SortFilesBottomSheetAdapter(
     private val selectedType: SortType,

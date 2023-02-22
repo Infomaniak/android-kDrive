@@ -59,7 +59,7 @@ import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Date
 
 class SaveExternalFilesActivity : BaseActivity() {
 

@@ -43,7 +43,10 @@ import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.currentFile
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.delete
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.restoreFileIn
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.restoreFileToOriginalPlace
 
 class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 

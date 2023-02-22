@@ -26,7 +26,7 @@ import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_create_folder.*
+import kotlinx.android.synthetic.main.fragment_create_folder.createFolderButton
 
 class CreatePrivateFolderFragment : CreateFolderFragment() {
 

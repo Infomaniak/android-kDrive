@@ -54,8 +54,9 @@ import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setBackNavigationResult
 import kotlinx.android.synthetic.main.fragment_select_categories.*
-import kotlinx.android.synthetic.main.item_search_view.*
-import java.util.*
+import kotlinx.android.synthetic.main.item_search_view.clearButton
+import kotlinx.android.synthetic.main.item_search_view.searchView
+import java.util.Date
 
 class SelectCategoriesFragment : Fragment() {
 

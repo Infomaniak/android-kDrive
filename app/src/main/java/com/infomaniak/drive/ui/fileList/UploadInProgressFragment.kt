@@ -41,7 +41,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.navigateToUploadView
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.realm.RealmResults
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.mainFab
 import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

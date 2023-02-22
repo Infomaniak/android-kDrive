@@ -50,7 +50,8 @@ import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 open class ManageDropboxFragment : Fragment() {
 

@@ -31,8 +31,9 @@ import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.fragment_file_details.view.*
-import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.*
+import kotlinx.android.synthetic.main.fragment_file_details.view.toolbar
+import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.subTitle
+import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.title
 import kotlin.math.abs
 
 class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(

@@ -23,7 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.secondaryActionButton
 
 open class InformationBottomSheetDialog : BottomSheetDialogFragment() {
 

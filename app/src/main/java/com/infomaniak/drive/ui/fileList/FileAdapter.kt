@@ -44,9 +44,10 @@ import io.realm.OrderedRealmCollection
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmRecyclerViewAdapter
-import kotlinx.android.synthetic.main.cardview_file_list.view.*
+import kotlinx.android.synthetic.main.cardview_file_list.view.disabled
+import kotlinx.android.synthetic.main.cardview_file_list.view.fileCardView
 import kotlinx.android.synthetic.main.item_file.view.*
-import java.util.*
+import java.util.UUID
 
 open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,

@@ -24,7 +24,10 @@ import android.view.ViewGroup
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
-import kotlinx.android.synthetic.main.fragment_preview_others.*
+import kotlinx.android.synthetic.main.fragment_preview_others.bigOpenWithButton
+import kotlinx.android.synthetic.main.fragment_preview_others.container
+import kotlinx.android.synthetic.main.fragment_preview_others.fileIcon
+import kotlinx.android.synthetic.main.fragment_preview_others.fileName
 
 class PreviewOtherFragment : PreviewFragment() {
 

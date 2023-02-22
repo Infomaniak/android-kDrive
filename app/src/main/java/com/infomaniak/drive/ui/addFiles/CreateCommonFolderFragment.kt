@@ -37,7 +37,7 @@ import com.infomaniak.lib.core.utils.hideKeyboard
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.showProgress
-import kotlinx.android.synthetic.main.empty_icon_layout.view.*
+import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
 import kotlinx.android.synthetic.main.fragment_create_folder.*
 
 class CreateCommonFolderFragment : CreateFolderFragment() {

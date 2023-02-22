@@ -29,7 +29,9 @@ import com.infomaniak.drive.ui.fileList.multiSelect.RecentChangesMultiSelectActi
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.setPagination
-import kotlinx.android.synthetic.main.fragment_file_list.*
+import kotlinx.android.synthetic.main.fragment_file_list.fileRecyclerView
+import kotlinx.android.synthetic.main.fragment_file_list.sortButton
+import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 class RecentChangesFragment : FileSubTypeListFragment() {
 

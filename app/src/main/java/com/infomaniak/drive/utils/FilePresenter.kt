@@ -31,7 +31,7 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_main.mainFab
 import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader

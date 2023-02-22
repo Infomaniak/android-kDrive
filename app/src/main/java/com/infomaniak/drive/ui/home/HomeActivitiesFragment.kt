@@ -32,7 +32,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setPagination
-import kotlinx.android.synthetic.main.fragment_home_tabs.*
+import kotlinx.android.synthetic.main.fragment_home_tabs.homeTabsRecyclerView
 
 class HomeActivitiesFragment : Fragment() {
     private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)

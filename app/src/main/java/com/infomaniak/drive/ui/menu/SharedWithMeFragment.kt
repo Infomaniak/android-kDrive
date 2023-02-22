@@ -38,7 +38,9 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.utils.safeNavigate
 import io.realm.Realm
-import kotlinx.android.synthetic.main.fragment_file_list.*
+import kotlinx.android.synthetic.main.fragment_file_list.collapsingToolbarLayout
+import kotlinx.android.synthetic.main.fragment_file_list.sortButton
+import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 class SharedWithMeFragment : FileSubTypeListFragment() {
 

@@ -29,8 +29,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.NoItemsLayoutView
-import kotlinx.android.synthetic.main.fragment_file_details.*
-import kotlinx.android.synthetic.main.fragment_file_details_comments.*
+import kotlinx.android.synthetic.main.fragment_file_details.addCommentButton
+import kotlinx.android.synthetic.main.fragment_file_details_comments.fileCommentsRecyclerView
+import kotlinx.android.synthetic.main.fragment_file_details_comments.noCommentsLayout
 
 class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.INoItemsLayoutView {
 

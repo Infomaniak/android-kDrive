@@ -48,7 +48,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
@@ -70,6 +69,7 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
+import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
@@ -405,7 +405,6 @@ class MainActivity : BaseActivity() {
                         background = context.getBackgroundColorBasedOnId(id)
                     )
                 val menuItemView = (bottomNavigation.getChildAt(0) as BottomNavigationMenuView)[4] as NavigationBarItemView
-                val imageLoader = ImageLoader.Builder(this@MainActivity).build()
                 val request = ImageRequest.Builder(context)
                     .data(avatar)
                     .crossfade(true)
@@ -414,7 +413,7 @@ class MainActivity : BaseActivity() {
                     .error(fallback)
                     .placeholder(R.drawable.ic_account)
                     .build()
-                val userAvatar = imageLoader.execute(request).drawable
+                val userAvatar = this@MainActivity.simpleImageLoader.execute(request).drawable
 
                 userAvatar?.let {
                     val selectedAvatar = generateSelectedAvatar(userAvatar)

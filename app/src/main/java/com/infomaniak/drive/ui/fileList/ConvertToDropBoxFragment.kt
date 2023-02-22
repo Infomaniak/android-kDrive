@@ -30,7 +30,10 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
-import kotlinx.android.synthetic.main.fragment_manage_dropbox.*
+import kotlinx.android.synthetic.main.fragment_manage_dropbox.disableButton
+import kotlinx.android.synthetic.main.fragment_manage_dropbox.fileShareCollapsingToolbarLayout
+import kotlinx.android.synthetic.main.fragment_manage_dropbox.saveButton
+import kotlinx.android.synthetic.main.fragment_manage_dropbox.shareLinkCardView
 import kotlinx.android.synthetic.main.item_dropbox_settings.*
 
 class ConvertToDropBoxFragment : ManageDropboxFragment() {

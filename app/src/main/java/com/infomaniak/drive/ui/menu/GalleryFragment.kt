@@ -45,7 +45,9 @@ import com.infomaniak.drive.utils.getAdjustedColumnNumber
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.setPagination
-import kotlinx.android.synthetic.main.fragment_gallery.*
+import kotlinx.android.synthetic.main.fragment_gallery.galleryFastScroller
+import kotlinx.android.synthetic.main.fragment_gallery.galleryRecyclerView
+import kotlinx.android.synthetic.main.fragment_gallery.noGalleryLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

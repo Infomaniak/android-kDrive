@@ -32,8 +32,10 @@ import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_gallery.view.*
-import kotlinx.android.synthetic.main.title_recycler_section.view.*
+import kotlinx.android.synthetic.main.cardview_gallery.view.mediaChecked
+import kotlinx.android.synthetic.main.cardview_gallery.view.preview
+import kotlinx.android.synthetic.main.cardview_gallery.view.videoViews
+import kotlinx.android.synthetic.main.title_recycler_section.view.title
 
 class GalleryAdapter(
     private val multiSelectManager: MultiSelectManager,

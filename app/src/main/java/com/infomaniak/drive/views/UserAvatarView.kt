@@ -28,7 +28,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.drive.utils.loadAvatar
-import kotlinx.android.synthetic.main.item_user_avatar.view.*
+import kotlinx.android.synthetic.main.item_user_avatar.view.avatarImageView
+import kotlinx.android.synthetic.main.item_user_avatar.view.remainingText
 
 class UserAvatarView @JvmOverloads constructor(
     context: Context,

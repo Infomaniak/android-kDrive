@@ -39,7 +39,7 @@ import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.ViewHolder
 import kotlinx.android.synthetic.main.cardview_permission.view.*
-import kotlinx.android.synthetic.main.item_user_avatar.view.*
+import kotlinx.android.synthetic.main.item_user_avatar.view.remainingText
 
 class PermissionsAdapter(
     var selectionPosition: Int? = null,

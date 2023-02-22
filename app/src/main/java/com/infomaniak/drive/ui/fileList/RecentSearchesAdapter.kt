@@ -24,7 +24,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_search_result.view.*
+import kotlinx.android.synthetic.main.item_search_result.view.searchResultCard
+import kotlinx.android.synthetic.main.item_search_result.view.searchResultText
 
 class RecentSearchesAdapter(
     var searches: ArrayList<String>,

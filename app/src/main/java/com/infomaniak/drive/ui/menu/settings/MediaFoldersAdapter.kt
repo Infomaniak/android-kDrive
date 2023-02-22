@@ -24,7 +24,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_media_folder.view.*
+import kotlinx.android.synthetic.main.item_media_folder.view.mediaFolderSwitch
+import kotlinx.android.synthetic.main.item_media_folder.view.mediaFolderTitle
 
 class MediaFoldersAdapter(
     private val onSwitchChanged: (mediaFolder: MediaFolder, isChecked: Boolean) -> Unit

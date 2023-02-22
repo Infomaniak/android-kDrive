@@ -28,13 +28,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
 import com.facebook.stetho.Stetho
-import com.facebook.stetho.okhttp3.StethoInterceptor
-import com.infomaniak.drive.BuildConfig.DRIVE_API_V2
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.MatomoDrive.buildTracker
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
@@ -44,14 +38,11 @@ import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
-import com.infomaniak.lib.core.BuildConfig.INFOMANIAK_API
 import com.infomaniak.lib.core.InfomaniakCore
-import com.infomaniak.lib.core.auth.TokenAuthenticator
-import com.infomaniak.lib.core.auth.TokenInterceptor
 import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.CoilUtils
 import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
@@ -65,10 +56,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
 import org.matomo.sdk.Tracker
-import java.util.*
+import java.util.Locale
+import java.util.UUID
 
 class ApplicationMain : Application(), ImageLoaderFactory {
 
@@ -149,36 +139,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         }
     }
 
-    override fun newImageLoader(): ImageLoader {
-        return ImageLoader.Builder(applicationContext)
-            .crossfade(true)
-            .components {
-                add(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) ImageDecoderDecoder.Factory() else GifDecoder.Factory())
-            }
-            .okHttpClient {
-                OkHttpClient.Builder().apply {
-                    addInterceptor(Interceptor { chain ->
-                        var request = chain.request()
-                        if (request.url.toString().contains(DRIVE_API_V2) || request.url.toString().contains(INFOMANIAK_API)) {
-                            request = request.newBuilder().headers(HttpUtils.getHeaders()).removeHeader("Cache-Control").build()
-                        }
-                        chain.proceed(request)
-                    })
-                    addInterceptor(TokenInterceptor(tokenInterceptorListener()))
-                    authenticator(TokenAuthenticator(tokenInterceptorListener()))
-                    if (com.infomaniak.lib.core.BuildConfig.DEBUG) {
-                        addNetworkInterceptor(StethoInterceptor())
-                    }
-                }.build()
-            }
-            .memoryCache {
-                MemoryCache.Builder(applicationContext).build()
-            }
-            .diskCache {
-                DiskCache.Builder().directory(applicationContext.cacheDir.resolve(COIL_CACHE_DIR)).build()
-            }
-            .build()
-    }
+    override fun newImageLoader(): ImageLoader = CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), true)
 
     private val refreshTokenError: (User) -> Unit = { user ->
         val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()

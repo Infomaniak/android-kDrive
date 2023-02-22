@@ -57,10 +57,11 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.showToast
-import kotlinx.android.synthetic.main.dialog_download_progress.view.*
-import kotlinx.android.synthetic.main.dialog_name_prompt.view.*
+import kotlinx.android.synthetic.main.dialog_download_progress.view.downloadProgress
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.icon
-import java.util.*
+import kotlinx.android.synthetic.main.dialog_name_prompt.view.nameEditText
+import kotlinx.android.synthetic.main.dialog_name_prompt.view.nameLayout
+import java.util.Date
 import kotlin.math.min
 import kotlin.math.pow
 

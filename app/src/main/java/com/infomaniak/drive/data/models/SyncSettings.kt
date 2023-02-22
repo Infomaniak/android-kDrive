@@ -20,7 +20,7 @@ package com.infomaniak.drive.data.models
 import com.infomaniak.drive.R
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import java.util.*
+import java.util.Date
 
 open class SyncSettings(
     @PrimaryKey var userId: Int = -1,

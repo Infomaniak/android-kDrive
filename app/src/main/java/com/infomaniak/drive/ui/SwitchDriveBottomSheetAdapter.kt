@@ -27,7 +27,9 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.*
+import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectActiveIcon
+import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectIcon
+import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectText
 
 class SwitchDriveBottomSheetAdapter(
     private var driveList: ArrayList<Drive>,

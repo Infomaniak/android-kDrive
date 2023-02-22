@@ -29,7 +29,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.activity_no_drive.*
-import kotlinx.android.synthetic.main.empty_icon_layout.view.*
+import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
 import kotlinx.coroutines.launch
 
 class MaintenanceActivity : AppCompatActivity() {

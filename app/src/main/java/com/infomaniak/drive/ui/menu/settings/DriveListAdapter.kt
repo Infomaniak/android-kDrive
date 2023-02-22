@@ -27,7 +27,9 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_drive.view.*
+import kotlinx.android.synthetic.main.cardview_drive.view.driveIcon
+import kotlinx.android.synthetic.main.cardview_drive.view.driveName
+import kotlinx.android.synthetic.main.cardview_drive.view.switchDrive
 
 class DriveListAdapter(
     var driveList: ArrayList<Drive>,

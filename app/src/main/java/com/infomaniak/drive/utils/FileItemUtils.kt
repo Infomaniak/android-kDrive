@@ -54,13 +54,6 @@ import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.cardview_file_grid.view.filePreview2
 import kotlinx.android.synthetic.main.item_file.view.*
-import kotlinx.android.synthetic.main.item_file.view.categoriesLayout
-import kotlinx.android.synthetic.main.item_file.view.fileFavorite
-import kotlinx.android.synthetic.main.item_file.view.fileName
-import kotlinx.android.synthetic.main.item_file.view.fileOffline
-import kotlinx.android.synthetic.main.item_file.view.fileOfflineProgression
-import kotlinx.android.synthetic.main.item_file.view.filePreview
-import kotlinx.android.synthetic.main.item_file.view.progressLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

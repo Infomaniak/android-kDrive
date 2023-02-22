@@ -41,7 +41,8 @@ import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
 import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.fragment_file_share_link_settings.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.expirationDateSwitch
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 class FileShareLinkSettingsFragment : Fragment() {
     private val navigationArgs: FileShareLinkSettingsFragmentArgs by navArgs()

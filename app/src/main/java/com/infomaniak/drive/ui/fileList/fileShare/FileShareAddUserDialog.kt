@@ -26,7 +26,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.chip.Chip
@@ -42,6 +41,7 @@ import com.infomaniak.drive.utils.getDriveUsers
 import com.infomaniak.drive.utils.setupAvailableShareableItems
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
@@ -158,7 +158,6 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                             initials = item.getInitials(),
                             background = getBackgroundColorBasedOnId(item.id)
                         )
-                        val imageLoader = ImageLoader.Builder(this).build()
                         val request = ImageRequest.Builder(this)
                             .data(item.avatar)
                             .transformations(CircleCropTransformation())
@@ -166,7 +165,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                             .error(fallback)
                             .placeholder(R.drawable.ic_account)
                             .build()
-                        imageLoader.execute(request).drawable?.let {
+                        simpleImageLoader.execute(request).drawable?.let {
                             withContext(Dispatchers.Main) {
                                 chip.chipIcon = it
                             }

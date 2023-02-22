@@ -39,8 +39,9 @@ import com.infomaniak.drive.utils.PdfCore
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.android.synthetic.main.fragment_preview_others.*
-import kotlinx.android.synthetic.main.fragment_preview_pdf.*
 import kotlinx.android.synthetic.main.fragment_preview_pdf.container
+import kotlinx.android.synthetic.main.fragment_preview_pdf.downloadLayout
+import kotlinx.android.synthetic.main.fragment_preview_pdf.pdfViewRecycler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
