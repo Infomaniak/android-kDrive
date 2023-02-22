@@ -27,7 +27,6 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.View
-import android.view.WindowManager
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -56,6 +55,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
+import com.infomaniak.lib.core.utils.showKeyboard
 import com.infomaniak.lib.core.utils.showToast
 import kotlinx.android.synthetic.main.dialog_download_progress.view.downloadProgress
 import kotlinx.android.synthetic.main.dialog_name_prompt.view.icon
@@ -161,8 +161,8 @@ object Utils {
             .setCancelable(false)
             .create()
             .apply {
-                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
                 show()
+                showKeyboard()
             }
 
         val buttonPositive = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
