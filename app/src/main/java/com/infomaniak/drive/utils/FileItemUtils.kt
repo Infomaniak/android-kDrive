@@ -141,18 +141,17 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
     setupFileProgress(file)
 }
 
-private fun Context.getTintedDrawable(viewHolder: FileViewHolder?, icon: Int, tint: String): Drawable? {
+private fun Context.getTintedDrawable(viewHolder: FileViewHolder?, icon: Int, tint: String): Drawable {
 
-    fun getDrawable(): Drawable? = ContextCompat.getDrawable(this, icon)?.mutate()
+    fun getDrawable(): Drawable = ContextCompat.getDrawable(this, icon)!!.mutate()
 
     val drawable = if (viewHolder == null) {
         getDrawable()
     } else {
-        if (viewHolder.tintedDrawable == null) viewHolder.tintedDrawable = getDrawable()
-        viewHolder.tintedDrawable
+        viewHolder.tintedDrawable ?: run { getDrawable().also { viewHolder.tintedDrawable = it } }
     }
 
-    return drawable?.apply { setTint(tint.toColorInt()) }
+    return drawable.apply { setTint(tint.toColorInt()) }
 }
 
 private fun View.displayCategories(file: File) {
