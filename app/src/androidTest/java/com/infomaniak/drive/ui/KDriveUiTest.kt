@@ -38,8 +38,8 @@ import androidx.test.uiautomator.*
 import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.ui.fileList.FileViewHolder
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.lib.core.views.ViewHolder
 import de.mannodermaus.junit5.ActivityScenarioExtension
 import org.hamcrest.Description
 import org.hamcrest.Matcher
@@ -115,7 +115,7 @@ open class KDriveUiTest : KDriveTest() {
         if (mustBeInList) {
             // Try to scroll to the file
             onView(withResourceName("fileRecyclerView")).perform(
-                RecyclerViewActions.scrollTo<FileViewHolder>(hasDescendant(withText(fileName)))
+                RecyclerViewActions.scrollTo<ViewHolder>(hasDescendant(withText(fileName)))
             )
             onView(isRoot()).perform(waitUntilShown(withText(fileName), SHORT_TIMEOUT))
             // Assert the file is displayed

@@ -121,7 +121,6 @@ class UploadTask(
         return@withContext false
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     private suspend fun launchTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
         val uri = uploadFile.getUriObject()
         context.contentResolver.openInputStream(uploadFile.getOriginalUri(context)).use { fileInputStream ->

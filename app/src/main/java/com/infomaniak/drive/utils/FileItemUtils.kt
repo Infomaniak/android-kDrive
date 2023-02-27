@@ -46,7 +46,6 @@ import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
-import com.infomaniak.drive.ui.fileList.FileViewHolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.utils.FormatterFileSize
@@ -59,13 +58,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-fun View.setFileItem(file: File, isGrid: Boolean = false, viewHolder: FileViewHolder? = null) {
+fun View.setFileItem(file: File, isGrid: Boolean = false) {
     fileName.text = file.name
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
     displaySize(file)
-    displayIcon(file, isGrid, viewHolder)
+    displayIcon(file, isGrid)
     displayCategories(file)
     displayExternalImport(file)
 }
@@ -91,22 +90,22 @@ private fun View.displaySize(file: File) {
     }
 }
 
-private fun View.displayIcon(file: File, isGrid: Boolean, viewHolder: FileViewHolder?) {
+private fun View.displayIcon(file: File, isGrid: Boolean) {
     filePreview.scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
     when {
-        file.isFolder() -> displayFolderIcon(file, viewHolder)
-        file.isDrive() -> displayDriveIcon(file, viewHolder)
+        file.isFolder() -> displayFolderIcon(file)
+        file.isDrive() -> displayDriveIcon(file)
         else -> displayFileIcon(file, isGrid)
     }
 }
 
-private fun View.displayFolderIcon(file: File, viewHolder: FileViewHolder?) {
+private fun View.displayFolderIcon(file: File) {
     val (icon, tint) = file.getFolderIcon()
-    if (tint == null) filePreview.load(icon) else filePreview.load(context.getTintedDrawable(viewHolder, icon, tint))
+    if (tint == null) filePreview.load(icon) else filePreview.load(getTintedDrawable(context, icon, tint))
 }
 
-private fun View.displayDriveIcon(file: File, viewHolder: FileViewHolder?) {
-    filePreview.load(context.getTintedDrawable(viewHolder, R.drawable.ic_drive, file.driveColor))
+private fun View.displayDriveIcon(file: File) {
+    filePreview.load(getTintedDrawable(context, R.drawable.ic_drive, file.driveColor))
 }
 
 private fun View.displayFileIcon(file: File, isGrid: Boolean) {
@@ -141,17 +140,10 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
     setupFileProgress(file)
 }
 
-private fun Context.getTintedDrawable(viewHolder: FileViewHolder?, icon: Int, tint: String): Drawable {
+fun getTintedDrawable(context: Context, icon: Int, tint: String): Drawable {
+    fun getDrawable(): Drawable = ContextCompat.getDrawable(context, icon)!!.mutate()
 
-    fun getDrawable(): Drawable = ContextCompat.getDrawable(this, icon)!!.mutate()
-
-    val drawable = if (viewHolder == null) {
-        getDrawable()
-    } else {
-        viewHolder.tintedDrawable ?: run { getDrawable().also { viewHolder.tintedDrawable = it } }
-    }
-
-    return drawable.apply { setTint(tint.toColorInt()) }
+    return getDrawable().apply { setTint(tint.toColorInt()) }
 }
 
 private fun View.displayCategories(file: File) {
@@ -197,14 +189,13 @@ fun File.getFolderIcon(): Pair<Int, String?> {
     return if (isDisabled()) R.drawable.ic_folder_disable to null
     else when (getVisibilityType()) {
         VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
-        VisibilityType.IS_TEAM_SPACE_FOLDER -> R.drawable.ic_folder_common_documents to getCommonFolderDefaultColor()
+        VisibilityType.IS_TEAM_SPACE_FOLDER -> R.drawable.ic_folder_common_documents to null
         VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
         VisibilityType.IS_DROPBOX -> R.drawable.ic_folder_dropbox to color
         else -> R.drawable.ic_folder_filled to color
     }
 }
 
-@Suppress("BlockingMethodInNonBlockingContext")
 suspend fun Context.getLocalThumbnail(file: File): Bitmap? = withContext(Dispatchers.IO) {
     val fileUri = file.path.toUri()
     val thumbnailSize = 100
