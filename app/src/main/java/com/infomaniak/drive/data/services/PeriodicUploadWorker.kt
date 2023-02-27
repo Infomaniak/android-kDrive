@@ -39,8 +39,8 @@ class PeriodicUploadWorker(appContext: Context, params: WorkerParameters) : Coro
             val request = PeriodicWorkRequestBuilder<PeriodicUploadWorker>(syncInterval, TimeUnit.SECONDS)
                 .setConstraints(UploadWorker.workConstraints())
                 .build()
-            WorkManager.getInstance(context)
-                .enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
+
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.UPDATE, request)
         }
     }
 }

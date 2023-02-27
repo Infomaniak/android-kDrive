@@ -116,7 +116,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':Core')
 
-    def work_version = '2.7.1'
+    def work_version = '2.8.0'
     implementation "androidx.work:work-runtime-ktx:$work_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
@@ -125,13 +125,13 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
     implementation 'androidx.webkit:webkit:1.6.0'
 
-    def exoplayer_version = '2.18.2'
+    def exoplayer_version = '2.18.3'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:5.2.0'
+    implementation 'com.airbnb.android:lottie:6.0.0'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.2.1'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
     implementation 'com.tbuonomo:dotsindicator:4.3'
@@ -162,7 +162,7 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidx_test_version"
     androidTestImplementation "androidx.test:runner:1.5.2"
 
-    def jupiter_version = '5.9.1'
+    def jupiter_version = '5.9.2'
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter_version"
 
