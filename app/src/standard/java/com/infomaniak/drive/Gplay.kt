@@ -17,14 +17,13 @@
  */
 package com.infomaniak.drive
 
-import android.app.Activity
-import android.content.Context
+import androidx.fragment.app.FragmentActivity
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.review.ReviewManagerFactory
 
-fun Context.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
+fun FragmentActivity.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
     AppUpdateManagerFactory.create(this).appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
         val updateIsAvailable = appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
                 appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
@@ -33,7 +32,7 @@ fun Context.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Uni
     }
 }
 
-fun Activity.launchInAppReview() {
+fun FragmentActivity.launchInAppReview() {
     ReviewManagerFactory.create(this).apply {
         val requestReviewFlow = requestReviewFlow()
         requestReviewFlow.addOnCompleteListener { request ->
