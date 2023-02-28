@@ -17,11 +17,10 @@
  */
 package com.infomaniak.drive
 
-import android.app.Activity
-import android.content.Context
+import androidx.fragment.app.FragmentActivity
 
-fun Context.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
+fun FragmentActivity.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
     onResult(false)
 }
 
-fun Activity.launchInAppReview() = Unit
+fun FragmentActivity.launchInAppReview() = Unit

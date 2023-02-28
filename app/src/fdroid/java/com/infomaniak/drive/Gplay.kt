@@ -17,11 +17,17 @@
  */
 package com.infomaniak.drive
 
-import android.app.Activity
-import android.content.Context
+import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
+import com.infomaniak.lib.core.fdroidTools.FdroidApiTools
+import kotlinx.coroutines.launch
 
-fun Context.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
-    onResult(false)
+fun FragmentActivity.checkUpdateIsAvailable(onResult: (updateIsAvailable: Boolean) -> Unit) {
+    lifecycleScope.launch {
+        val lastVersionCode = FdroidApiTools().getLastRelease(BuildConfig.APPLICATION_ID)
+
+        onResult(BuildConfig.VERSION_CODE < lastVersionCode)
+    }
 }
 
-fun Activity.launchInAppReview() = Unit
+fun FragmentActivity.launchInAppReview() = Unit
