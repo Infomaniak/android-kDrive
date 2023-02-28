@@ -209,7 +209,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         openManageCategoriesBottomSheetDialog(intArrayOf(fileId), navigationArgs.userDrive)
     }
 
-    override fun colorFolderClicked(color: String) {
+    override fun colorFolderClicked(color: String?) {
         super.colorFolderClicked(color)
         openColorFolderBottomSheetDialog(color)
     }

@@ -92,8 +92,7 @@ open class File(
     /**
      * DIRECTORY ONLY
      */
-    @SerializedName("color")
-    private var _color: String? = null,
+    var color: String? = null,
     var dropbox: DropBox? = null,
     @SerializedName("external_import")
     var externalImport: FileExternalImport? = null,
@@ -371,15 +370,7 @@ open class File(
                 && getVisibilityType() != VisibilityType.IS_TEAM_SPACE
     }
 
-    fun getCommonFolderDefaultColor(): String = _color ?: "#5287FF" // R.drawable.ic_folder_common_documents tint color
-
     fun hasCreationRight() = isFolder() && rights?.canCreateFile == true
-
-    var color: String
-        get() = _color ?: "#9F9F9F" // R.color.secondaryText
-        set(color) {
-            _color = color
-        }
 
     // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {

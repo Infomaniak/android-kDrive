@@ -444,7 +444,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun addFavoritesClicked() = trackFileActionEvent("favorite", !currentFile.isFavorite)
         fun cancelExternalImportClicked() = trackFileActionEvent("cancelExternalImport")
-        fun colorFolderClicked(color: String) = context.trackEvent("colorFolder", "switch")
+        fun colorFolderClicked(color: String?) = context.trackEvent("colorFolder", "switch")
         fun displayInfoClicked()
         fun downloadFileClicked() = trackFileActionEvent("download")
         fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
