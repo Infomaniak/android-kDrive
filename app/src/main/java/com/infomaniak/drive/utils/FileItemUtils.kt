@@ -141,9 +141,7 @@ private fun View.displayFileIcon(file: File, isGrid: Boolean) {
 }
 
 fun getTintedDrawable(context: Context, icon: Int, tint: String): Drawable {
-    fun getDrawable(): Drawable = ContextCompat.getDrawable(context, icon)!!.mutate()
-
-    return getDrawable().apply { setTint(tint.toColorInt()) }
+    return ContextCompat.getDrawable(context, icon)!!.mutate().apply { setTint(tint.toColorInt()) }
 }
 
 private fun View.displayCategories(file: File) {
