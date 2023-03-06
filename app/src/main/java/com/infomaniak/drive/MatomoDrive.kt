@@ -28,10 +28,6 @@ object MatomoDrive : MatomoCore {
     override val Context.tracker: Tracker get() = (this as ApplicationMain).matomoTracker
     override val siteId = 8
 
-    fun Context.trackAccountEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("account", name, action, value)
-    }
-
     fun Fragment.trackCategoriesEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent("categories", name, action, value)
     }
