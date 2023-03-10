@@ -61,6 +61,8 @@ android {
             dimension 'distribution'
             apply plugin: 'com.google.gms.google-services'
 
+            getIsDefault().set(true)
+
             dependencies {
                 def geniusscansdk_version = '4.7.4'
                 implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"

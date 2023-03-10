@@ -79,6 +79,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="false"
         tools:targetApi="s">
 
         <meta-data
@@ -180,14 +181,6 @@
         <service
             android:name=".data.sync.FileObserveServiceApi24"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
-            android:name=".DriveMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
 
         <receiver
             android:name=".utils.RebootReceiver"
