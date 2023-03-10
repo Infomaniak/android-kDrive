@@ -21,17 +21,18 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.addCallback
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
@@ -46,7 +47,6 @@ import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -77,6 +77,10 @@ class LoginActivity : AppCompatActivity() {
                 signInButton.isEnabled = true
             }
         }
+    }
+
+    private val createAccountResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        result.handleCreateAccountActivityResult()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,11 +117,29 @@ class LoginActivity : AppCompatActivity() {
 
         signInButton.setOnClickListener {
             trackAccountEvent("openCreationWebview")
-            openUrl(ApiRoutes.orderDrive())
+            infomaniakLogin.startCreateAccountWebView(
+                resultLauncher = createAccountResultLauncher,
+                createAccountUrl = BuildConfig.CREATE_ACCOUNT_URL,
+                successHost = BuildConfig.CREATE_ACCOUNT_SUCCESS_HOST,
+                cancelHost = BuildConfig.CREATE_ACCOUNT_CANCEL_HOST,
+            )
         }
 
         onBackPressedDispatcher.addCallback {
             if (introViewpager.currentItem == 0) finish() else introViewpager.currentItem -= 1
+        }
+    }
+
+    private fun ActivityResult.handleCreateAccountActivityResult() {
+        if (resultCode == RESULT_OK) {
+            val translatedError = data?.getStringExtra(InfomaniakLogin.ERROR_TRANSLATED_TAG)
+            when {
+                translatedError.isNullOrBlank() -> infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher, false)
+                else -> showError(translatedError)
+            }
+        } else {
+            connectButton.isEnabled = true
+            signInButton.isEnabled = true
         }
     }
 
@@ -154,6 +176,7 @@ class LoginActivity : AppCompatActivity() {
         showSnackbar(error)
         connectButton?.hideProgress(R.string.connect)
         signInButton.isEnabled = true
+        if (!connectButton.isEnabled) connectButton.isEnabled = true
     }
 
     private fun launchMainActivity() {
