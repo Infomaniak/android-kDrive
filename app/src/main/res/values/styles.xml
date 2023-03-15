@@ -74,7 +74,6 @@
 
     <style name="AppTheme.LockBase" parent="AppThemeBase">
         <item name="appIcon">@drawable/ic_logo</item>
-        <item name="lockIcon">@drawable/ic_lock_screen</item>
         <item name="primaryButtonStyle">@style/ButtonInfomaniak</item>
         <item name="titleStyle">@style/H2</item>
     </style>
