@@ -96,8 +96,6 @@
 
         <activity android:name=".ui.menu.settings.SyncSettingsActivity" />
 
-        <activity android:name=".ui.LockActivity" />
-
         <activity android:name=".ui.MaintenanceActivity" />
 
         <activity android:name=".ui.SwitchUserActivity" />
@@ -175,6 +173,10 @@
             android:name="com.infomaniak.lib.login.WebViewCreateAccountActivity"
             android:configChanges="orientation|screenSize"
             android:theme="@style/WebViewTheme" />
+
+        <activity
+            android:name="com.infomaniak.lib.applock.LockActivity"
+            android:theme="@style/AppTheme.Lock" />
 
         <activity
             android:name=".ui.login.MigrationActivity"

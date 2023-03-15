@@ -25,8 +25,8 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
-import com.infomaniak.drive.utils.requestCredentials
+import com.infomaniak.lib.applock.LockActivity.Companion.FACE_ID_LOG_TAG
+import com.infomaniak.lib.core.utils.requestCredentials
 import kotlinx.android.synthetic.main.view_switch_settings.*
 
 class AppSecuritySettingsActivity : AppCompatActivity() {

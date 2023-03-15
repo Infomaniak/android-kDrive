@@ -72,6 +72,15 @@
         <item name="themeLoginToolbar">@style/LoginToolbarTheme</item>
     </style>
 
+    <style name="AppTheme.LockBase" parent="AppThemeBase">
+        <item name="appIcon">@drawable/ic_logo</item>
+        <item name="lockIcon">@drawable/ic_lock_screen</item>
+        <item name="primaryButtonStyle">@style/ButtonInfomaniak</item>
+        <item name="titleStyle">@style/H2</item>
+    </style>
+
+    <style name="AppTheme.Lock" parent="AppTheme.LockBase" />
+
     <!--AppBar-->
 
     <style name="AppTheme.AppBarOverlay" parent="Widget.Design.AppBarLayout">

@@ -33,8 +33,15 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
+    <style name="AppTheme.Lock23" parent="AppTheme.LockBase">
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
     <style name="AppTheme" parent="AppThemeBase23" />
 
     <style name="AppTheme.Login" parent="AppTheme.Login23" />
+
+    <style name="AppTheme.Lock" parent="AppTheme.Lock23" />
 
 </resources>

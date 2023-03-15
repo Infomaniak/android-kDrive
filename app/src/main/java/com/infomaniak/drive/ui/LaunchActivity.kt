@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -34,6 +35,7 @@ import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUse
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isKeyguardSecure
+import com.infomaniak.lib.applock.LockActivity
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -45,6 +47,12 @@ class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var extrasOpenSpecificFile: Bundle? = null
+
+    private val appLockResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,9 +83,10 @@ class LaunchActivity : AppCompatActivity() {
                 }
             }
 
-            startActivity(Intent(this@LaunchActivity, destinationClass).apply {
+            val intent = Intent(this@LaunchActivity, destinationClass).apply {
                 if (destinationClass == MainActivity::class.java) extrasOpenSpecificFile?.let { putExtras(it) }
-            })
+            }
+            if (destinationClass == LockActivity::class.java) appLockResultLauncher.launch(intent) else startActivity(intent)
         }
         trackScreen()
     }

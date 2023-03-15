@@ -254,25 +254,6 @@ fun Fragment.showSnackbar(
     activity?.let { it.showSnackbar(title, if (showAboveFab) it.mainFab else null, actionButtonTitle, onActionClicked) }
 }
 
-@SuppressLint("NewApi")
-fun FragmentActivity.requestCredentials(onSuccess: () -> Unit) {
-    val biometricPrompt = BiometricPrompt(this,
-        ContextCompat.getMainExecutor(this),
-        object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                super.onAuthenticationSucceeded(result)
-                onSuccess()
-            }
-        })
-
-    val promptInfo = BiometricPrompt.PromptInfo.Builder()
-        .setTitle(getString(R.string.app_name))
-        .setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK)
-        .build()
-
-    biometricPrompt.authenticate(promptInfo)
-}
-
 fun Fragment.openOnlyOfficeDocument(file: File) {
     if (file.conversion?.whenOnlyoffice == true) {
         findNavController().navigate(
