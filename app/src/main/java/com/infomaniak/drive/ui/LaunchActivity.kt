@@ -51,7 +51,14 @@ class LaunchActivity : AppCompatActivity() {
     private var extrasOpenSpecificFile: Bundle? = null
 
     private val appLockResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { startActivity(Intent(this, MainActivity::class.java)) }
+        it.whenResultIsOk {
+            startActivity(
+                Intent(this@LaunchActivity, MainActivity::class.java).apply {
+                    extrasOpenSpecificFile?.let(::putExtras)
+                    clearStack()
+                }
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -84,7 +91,7 @@ class LaunchActivity : AppCompatActivity() {
             }
 
             val intent = Intent(this@LaunchActivity, destinationClass).apply {
-                if (destinationClass == MainActivity::class.java) extrasOpenSpecificFile?.let { putExtras(it) }
+                if (destinationClass == MainActivity::class.java) extrasOpenSpecificFile?.let(::putExtras)
             }
 
             if (destinationClass == LockActivity::class.java) {
