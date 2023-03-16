@@ -174,7 +174,6 @@
     <string name="buttonSwitchDrive">Change drive</string>
     <string name="buttonTakePhotoOrVideo">Take a photo or video</string>
     <string name="buttonToggleDisplay">Switch to grid or list mode</string>
-    <string name="buttonUnlock">Unlock</string>
     <string name="buttonUpdate">Update</string>
     <string name="buttonUpgradeOffer">Upgrade my plan</string>
     <string name="buttonUpload">Upload from phone</string>
@@ -470,7 +469,6 @@
     <string name="inputExpirationTime">Expiration time</string>
     <string name="lastEditsTitle">Most recent changes</string>
     <string name="locateButton">Locate</string>
-    <string name="lockAppTitle">Application locked</string>
     <string name="manageCategoriesCreateTitle">Create %s</string>
     <string name="manageCategoriesNoCategory">No category</string>
     <string name="manageCategoriesTitle">Manage categories</string>

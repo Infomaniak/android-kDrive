@@ -163,7 +163,6 @@
     <string name="buttonSwitchDrive">Changer de drive</string>
     <string name="buttonTakePhotoOrVideo">Prendre une photo ou une vidéo</string>
     <string name="buttonToggleDisplay">Passer en mode grille ou mode liste</string>
-    <string name="buttonUnlock">Déverrouiller</string>
     <string name="buttonUpdate">Mettre à jour</string>
     <string name="buttonUpgradeOffer">Mettre à niveau mon offre</string>
     <string name="buttonUpload">Importer depuis le téléphone</string>
@@ -459,7 +458,6 @@
     <string name="inputExpirationTime">Heure d’expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="locateButton">Localiser</string>
-    <string name="lockAppTitle">Application verrouillée</string>
     <string name="manageCategoriesCreateTitle">Créer %s</string>
     <string name="manageCategoriesNoCategory">Aucune catégorie</string>
     <string name="manageCategoriesTitle">Gérer les catégories</string>

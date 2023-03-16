@@ -163,7 +163,6 @@
     <string name="buttonSwitchDrive">Cambiar de drive</string>
     <string name="buttonTakePhotoOrVideo">Hacer una foto o un vídeo</string>
     <string name="buttonToggleDisplay">Pasar al modo cuadrícula o lista</string>
-    <string name="buttonUnlock">Desbloquear</string>
     <string name="buttonUpdate">Actualizar</string>
     <string name="buttonUpgradeOffer">Mejorar mi oferta</string>
     <string name="buttonUpload">Importar desde el teléfono</string>
@@ -459,7 +458,6 @@
     <string name="inputExpirationTime">Tiempo de expiración</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
     <string name="locateButton">Localizar</string>
-    <string name="lockAppTitle">Aplicación bloqueada</string>
     <string name="manageCategoriesCreateTitle">Crear %s</string>
     <string name="manageCategoriesNoCategory">Sin categoría</string>
     <string name="manageCategoriesTitle">Gestionar las categorías</string>
