@@ -23,7 +23,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.lib.core.utils.silentlyReverseSwitch
+import com.infomaniak.lib.applock.Utils.silentlyReverseSwitch
 import kotlinx.android.synthetic.main.view_switch_settings.*
 
 class AppSecuritySettingsActivity : AppCompatActivity() {

@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.utils
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.KeyguardManager
@@ -38,13 +37,10 @@ import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.navigation.fragment.findNavController
 import coil.load
 import coil.request.Disposable
@@ -75,9 +71,16 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.login.InfomaniakLogin
 import io.realm.RealmList
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.item_file.view.*
-import kotlinx.android.synthetic.main.item_user.view.*
+import kotlinx.android.synthetic.main.activity_main.bottomNavigation
+import kotlinx.android.synthetic.main.activity_main.mainFab
+import kotlinx.android.synthetic.main.item_file.view.fileName
+import kotlinx.android.synthetic.main.item_file.view.filePreview
+import kotlinx.android.synthetic.main.item_file.view.fileProgression
+import kotlinx.android.synthetic.main.item_file.view.fileSize
+import kotlinx.android.synthetic.main.item_user.view.chevron
+import kotlinx.android.synthetic.main.item_user.view.userAvatar
+import kotlinx.android.synthetic.main.item_user.view.userEmail
+import kotlinx.android.synthetic.main.item_user.view.userName
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
