@@ -49,6 +49,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -383,7 +384,7 @@ class UploadTask(
             "lock_error" -> throw LockErrorException()
             "not_authorized" -> throw NotAuthorizedException()
             "product_maintenance" -> {
-                if (error?.context?.get("reason")?.asString == Drive.MaintenanceReason.TECHNICAL.value) {
+                if (error?.context?.get("reason")?.jsonPrimitive?.content == Drive.MaintenanceReason.TECHNICAL.value) {
                     throw ProductMaintenanceException()
                 } else {
                     throw ProductBlockedException()
