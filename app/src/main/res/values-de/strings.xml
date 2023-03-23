@@ -163,7 +163,6 @@
     <string name="buttonSwitchDrive">Drive wechseln</string>
     <string name="buttonTakePhotoOrVideo">Foto oder Video aufnehmen</string>
     <string name="buttonToggleDisplay">Zum Raster- oder Listenmodus wechseln</string>
-    <string name="buttonUnlock">Entsperren</string>
     <string name="buttonUpdate">Aktualisieren</string>
     <string name="buttonUpgradeOffer">Mein Angebot erweitern</string>
     <string name="buttonUpload">Vom Telefon importieren</string>
@@ -459,7 +458,6 @@
     <string name="inputExpirationTime">Verfallszeit</string>
     <string name="lastEditsTitle">Letzte Änderungen</string>
     <string name="locateButton">Finden Sie</string>
-    <string name="lockAppTitle">Anwendung gesperrt</string>
     <string name="manageCategoriesCreateTitle">%s erstellen</string>
     <string name="manageCategoriesNoCategory">Keine Kategorie</string>
     <string name="manageCategoriesTitle">Kategorien verwalten</string>

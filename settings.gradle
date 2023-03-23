@@ -1,2 +1,2 @@
-include ':app', ':Core'
+include ':app', ':Core', ':Core:AppLock'
 rootProject.name = "kDrive"

@@ -18,15 +18,12 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.os.Bundle
-import android.util.Log
-import android.widget.CompoundButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.ui.LockActivity.Companion.FACE_ID_LOG_TAG
-import com.infomaniak.drive.utils.requestCredentials
+import com.infomaniak.lib.applock.Utils.silentlyReverseSwitch
 import kotlinx.android.synthetic.main.view_switch_settings.*
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
@@ -43,26 +40,13 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
         usersRecyclerView.isGone = true
         addUser.isGone = true
 
-        enableFaceId.setOnClickListener { enableFaceIdSwitch.isChecked = !enableFaceIdSwitch.isChecked }
-        enableFaceIdSwitch.isChecked = AppSettings.appSecurityLock
-        enableFaceIdSwitch.setOnCheckedChangeListener { _, _ ->
-            // Reverse switch (before official parameter changed) by silent click
-            if (enableFaceIdSwitch.tag == null) {
-                enableFaceIdSwitch.silentClick()
-                requestCredentials { onCredentialsSuccessful() }
+        enableFaceIdSwitch.apply {
+            enableFaceId.setOnClickListener { isChecked = !isChecked }
+            isChecked = AppSettings.appSecurityLock
+            setOnCheckedChangeListener { _, _ ->
+                // Reverse switch (before official parameter changed) by silent click
+                silentlyReverseSwitch(this) { shouldLock -> AppSettings.appSecurityLock = shouldLock }
             }
         }
-    }
-
-    private fun onCredentialsSuccessful() {
-        Log.i(FACE_ID_LOG_TAG, "success")
-        enableFaceIdSwitch.silentClick() // Click that doesn't pass in listener
-        AppSettings.appSecurityLock = enableFaceIdSwitch.isChecked
-    }
-
-    private fun CompoundButton.silentClick() {
-        tag = true
-        performClick()
-        tag = null
     }
 }

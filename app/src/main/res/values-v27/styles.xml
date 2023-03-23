@@ -32,6 +32,11 @@
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
+    <style name="AppTheme.Lock" parent="AppTheme.Lock23">
+        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
     <style name="BottomSheetDialogTheme" parent="BottomSheetDialogTheme.Base">
         <item name="android:navigationBarColor">@color/appBar</item>
     </style>

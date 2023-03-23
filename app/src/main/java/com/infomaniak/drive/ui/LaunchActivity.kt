@@ -34,6 +34,7 @@ import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUse
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isKeyguardSecure
+import com.infomaniak.lib.applock.LockActivity
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -75,9 +76,18 @@ class LaunchActivity : AppCompatActivity() {
                 }
             }
 
-            startActivity(Intent(this@LaunchActivity, destinationClass).apply {
-                if (destinationClass == MainActivity::class.java) extrasOpenSpecificFile?.let { putExtras(it) }
-            })
+            if (destinationClass == LockActivity::class.java) {
+                LockActivity.startAppLockActivity(
+                    context = this@LaunchActivity,
+                    destinationClass = MainActivity::class.java,
+                    destinationClassArgs = extrasOpenSpecificFile
+                )
+            } else {
+                Intent(this@LaunchActivity, destinationClass).apply {
+                    if (destinationClass == MainActivity::class.java) extrasOpenSpecificFile?.let(::putExtras)
+                    startActivity(this)
+                }
+            }
         }
         trackScreen()
     }
