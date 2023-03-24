@@ -58,6 +58,21 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- For video player -->
 
+    <!-- Remove "required" for camera permission. This is from GeniusScan and must be optional for chromebooks -->
+    <uses-permission
+        android:name="android.permission.CAMERA"
+        android:required="false"
+        tools:replace="required" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"
+        tools:replace="required" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false"
+        tools:replace="required" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
