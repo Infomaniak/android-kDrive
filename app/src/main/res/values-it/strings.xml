@@ -123,7 +123,6 @@
     <string name="buttonEmpty">Svuota</string>
     <string name="buttonEmptyTrash">Svuota il cestino</string>
     <string name="buttonFileRights">Condivisione e diritti</string>
-    <string name="buttonLater">Più tardi</string>
     <string name="buttonLeaveShare">Abbandona la condivisione</string>
     <string name="buttonLike">Mi piace</string>
     <string name="buttonLogin">Connettiti</string>
@@ -163,7 +162,6 @@
     <string name="buttonSwitchDrive">Cambia drive</string>
     <string name="buttonTakePhotoOrVideo">Scatta una foto o gira un video</string>
     <string name="buttonToggleDisplay">Passa in modalità a griglia o a elenco</string>
-    <string name="buttonUpdate">Aggiorna</string>
     <string name="buttonUpgradeOffer">Fai evolvere la tua offerta</string>
     <string name="buttonUpload">Importa dal telefono</string>
     <string name="buttonValid">Convalida</string>
@@ -678,8 +676,6 @@
         <item quantity="one">%s ripristinato nell’ubicazione di origine</item>
         <item quantity="other">%d elementi ipristinati nell’ubicazione di origine</item>
     </plurals>
-    <string name="updateAvailableDescription">Per vivere la migliore esperienza con kDrive, ti consigliamo di aggiornare la tua applicazione.</string>
-    <string name="updateAvailableTitle">Aggiornamento disponibile!</string>
     <string name="uploadCancelDescription">L’importazione è stata annullata dall’utente</string>
     <string name="uploadCancelTitle">Importazione annullata</string>
     <string name="uploadErrorTitle">Errore di importazione</string>

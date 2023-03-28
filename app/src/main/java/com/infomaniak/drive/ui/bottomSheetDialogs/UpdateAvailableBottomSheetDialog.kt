@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.lib.core.utils.getAppName
 import com.infomaniak.lib.core.utils.goToPlaystore
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
@@ -30,7 +31,7 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
         super.onViewCreated(view, savedInstanceState)
 
         title.setText(R.string.updateAvailableTitle)
-        description.setText(R.string.updateAvailableDescription)
+        description.text = getString(R.string.updateAvailableDescription, requireContext().getAppName())
         illu.setAnimation(R.raw.illu_upgrade)
 
         secondaryActionButton.setOnClickListener {

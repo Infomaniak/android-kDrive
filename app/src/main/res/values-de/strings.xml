@@ -123,7 +123,6 @@
     <string name="buttonEmpty">Leeren</string>
     <string name="buttonEmptyTrash">Papierkorb leeren</string>
     <string name="buttonFileRights">Freigabe und Rechte</string>
-    <string name="buttonLater">Später</string>
     <string name="buttonLeaveShare">Freigabe abbrechen</string>
     <string name="buttonLike">Gefällt mir</string>
     <string name="buttonLogin">Anmelden</string>
@@ -163,7 +162,6 @@
     <string name="buttonSwitchDrive">Drive wechseln</string>
     <string name="buttonTakePhotoOrVideo">Foto oder Video aufnehmen</string>
     <string name="buttonToggleDisplay">Zum Raster- oder Listenmodus wechseln</string>
-    <string name="buttonUpdate">Aktualisieren</string>
     <string name="buttonUpgradeOffer">Mein Angebot erweitern</string>
     <string name="buttonUpload">Vom Telefon importieren</string>
     <string name="buttonValid">Validieren</string>
@@ -678,8 +676,6 @@
         <item quantity="one">%s am ursprünglichen Ort wiederhergestellt</item>
         <item quantity="other">%d Elemente am ursprünglichen Ort wiederhergestellt</item>
     </plurals>
-    <string name="updateAvailableDescription">Mit Blick auf ein optimales kDrive-Benutzererlebnis empfehlen wir Ihnen, Ihre Anwendung zu aktualisieren.</string>
-    <string name="updateAvailableTitle">Aktualisierung verfügbar!</string>
     <string name="uploadCancelDescription">Der Import wurde vom Benutzer abgebrochen</string>
     <string name="uploadCancelTitle">Import abgebrochen</string>
     <string name="uploadErrorTitle">Fehler beim Import</string>
