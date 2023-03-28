@@ -58,6 +58,22 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- For video player -->
 
+    <!-- Remove "required" for Camera permission. -->
+    <!-- This is from GeniusScan SDK, and it has to be optional so kDrive can be installed on ChromeBooks. -->
+    <uses-permission
+        android:name="android.permission.CAMERA"
+        android:required="false"
+        tools:replace="required" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"
+        tools:replace="required" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false"
+        tools:replace="required" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
