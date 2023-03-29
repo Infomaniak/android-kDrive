@@ -55,13 +55,11 @@ import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
-import com.infomaniak.drive.checkUpdateIsAvailable
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
-import com.infomaniak.drive.launchInAppReview
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
@@ -74,6 +72,8 @@ import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
+import com.infomaniak.lib.stores.checkUpdateIsAvailable
+import com.infomaniak.lib.stores.launchInAppReview
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -90,7 +90,6 @@ class MainActivity : BaseActivity() {
     private lateinit var downloadReceiver: DownloadReceiver
 
     private var lastCloseApp = Date()
-    private var updateAvailableShow = false
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
     private var hasDisplayedInformationPanel: Boolean = false
 
@@ -216,11 +215,8 @@ class MainActivity : BaseActivity() {
 
     private fun handleUpdates(navController: NavController) {
         if (!UiSettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
-            checkUpdateIsAvailable { updateIsAvailable ->
-                if (!updateAvailableShow && updateIsAvailable) {
-                    navController.navigate(R.id.updateAvailableBottomSheetDialog)
-                    updateAvailableShow = true
-                }
+            checkUpdateIsAvailable(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) { updateIsAvailable ->
+                if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
             }
         }
     }
