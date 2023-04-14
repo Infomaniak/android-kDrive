@@ -64,7 +64,7 @@ class DownloadProgressDialog : DialogFragment() {
             .setTitle(fileName)
             .setView(dialogView)
             .setOnKeyListener { _, keyCode, event ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
+                if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
                     findNavController().popBackStack()
                     true
                 } else false

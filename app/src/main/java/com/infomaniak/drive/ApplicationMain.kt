@@ -115,10 +115,9 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         }
 
         InfomaniakCore.init(
+            appVersionCode = BuildConfig.VERSION_CODE,
             appVersionName = BuildConfig.VERSION_NAME,
             clientId = BuildConfig.CLIENT_ID,
-            credentialManager = null,
-            isDebug = BuildConfig.DEBUG
         )
 
         AccountUtils.onRefreshTokenError = refreshTokenError
