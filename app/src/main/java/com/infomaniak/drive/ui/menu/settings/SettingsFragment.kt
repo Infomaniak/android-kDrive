@@ -37,7 +37,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.isKeyguardSecure
+import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.fragment_settings.*

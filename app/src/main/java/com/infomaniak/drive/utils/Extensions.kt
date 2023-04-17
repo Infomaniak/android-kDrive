@@ -19,7 +19,6 @@ package com.infomaniak.drive.utils
 
 import android.app.Activity
 import android.app.ActivityManager
-import android.app.KeyguardManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -96,10 +95,6 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     return ActivityManager.MemoryInfo().also { memoryInfo ->
         activityManager.getMemoryInfo(memoryInfo)
     }
-}
-
-fun Context.isKeyguardSecure(): Boolean {
-    return (getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.isKeyguardSecure ?: false
 }
 
 fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image): Disposable {

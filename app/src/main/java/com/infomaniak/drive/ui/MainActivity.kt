@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -67,6 +66,7 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.applock.LockActivity
+import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
 import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
@@ -227,7 +227,9 @@ class MainActivity : BaseActivity() {
         if (isKeyguardSecure() && AppSettings.appSecurityLock) {
             val lastCloseAppWithTolerance = Date(lastCloseApp.time + SECURITY_APP_TOLERANCE)
             val now = Date()
-            if (now.after(lastCloseAppWithTolerance)) startActivity(Intent(this, LockActivity::class.java))
+            if (now.after(lastCloseAppWithTolerance)) {
+                LockActivity.startAppLockActivity(context = this, destinationClass = this::class.java)
+            }
         }
 
         launchAllUpload(drivePermissions)
