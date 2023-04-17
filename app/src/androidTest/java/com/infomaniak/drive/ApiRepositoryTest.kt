@@ -456,17 +456,6 @@ class ApiRepositoryTest : KDriveTest() {
             assertFalse(ApiRepository.getShareLink(testFile).isSuccess(), "Share link check should fail")
         }
 
-        //        @Test
-//        @DisplayName("Create a default share link on test file")
-        fun shareLink() {
-            //TODO
-//            val fileShareLink = postFileShare(testFile)
-//            assertTrue(
-//                fileShareLink.contains("$DRIVE_API[0-9]+/file/[0-9]+/share".toRegex()),
-//                "Link should match regex '$DRIVE_API[0-9]+/file/[0-9]+/share/'",
-//            )
-        }
-
         @Test
         @DisplayName("Add a category to the test file, then delete this category")
         fun addCategoryToFile() {

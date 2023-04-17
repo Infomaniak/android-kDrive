@@ -147,5 +147,5 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         }
     }
 
-    override fun deliveryComplete(token: IMqttDeliveryToken?) {}
+    override fun deliveryComplete(token: IMqttDeliveryToken?) = Unit
 }
