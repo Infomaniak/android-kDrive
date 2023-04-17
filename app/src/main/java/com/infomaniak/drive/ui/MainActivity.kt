@@ -89,7 +89,7 @@ class MainActivity : BaseActivity() {
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
     private lateinit var downloadReceiver: DownloadReceiver
 
-    private var lastCloseApp = Date()
+    private var lastAppClosing = Date()
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
     private var hasDisplayedInformationPanel: Boolean = false
 
@@ -225,11 +225,7 @@ class MainActivity : BaseActivity() {
         super.onResume()
 
         if (isKeyguardSecure() && AppSettings.appSecurityLock) {
-            val lastCloseAppWithTolerance = Date(lastCloseApp.time + SECURITY_APP_TOLERANCE)
-            val now = Date()
-            if (now.after(lastCloseAppWithTolerance)) {
-                LockActivity.startAppLockActivity(context = this, destinationClass = this::class.java)
-            }
+            LockActivity.lockAfterTimeout(lastAppClosing = lastAppClosing, context = this, destinationClass = this::class.java)
         }
 
         launchAllUpload(drivePermissions)
@@ -247,7 +243,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onPause() {
-        lastCloseApp = Date()
+        lastAppClosing = Date()
         super.onPause()
     }
 
