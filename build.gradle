@@ -14,9 +14,9 @@ buildscript {
 
     dependencies {
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation_version"
-        classpath 'io.realm:realm-gradle-plugin:10.11.1'
+        classpath 'io.realm:realm-gradle-plugin:10.13.3-transformer-api'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.0.0-rc01'
         classpath 'com.google.gms:google-services:4.3.15'
         classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.8.2.1'
     }

@@ -124,16 +124,16 @@ dependencies {
     implementation project(path: ':Core:AppLock')
     implementation project(path: ':Core:Stores')
 
-    def work_version = '2.8.0'
+    def work_version = '2.8.1'
     implementation "androidx.work:work-runtime-ktx:$work_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
-    implementation 'androidx.webkit:webkit:1.6.0'
+    implementation 'androidx.webkit:webkit:1.6.1'
 
-    def exoplayer_version = '2.18.4'
+    def exoplayer_version = '2.18.5'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
@@ -151,7 +151,7 @@ dependencies {
 
     implementation 'com.googlecode.plist:dd-plist:1.26'
 
-    implementation 'com.github.hannesa2:paho.mqtt.android:3.5.1'
+    implementation 'com.github.hannesa2:paho.mqtt.android:3.5.2'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.10.0'
     testImplementation 'io.github.serpro69:kotlin-faker:1.13.0'

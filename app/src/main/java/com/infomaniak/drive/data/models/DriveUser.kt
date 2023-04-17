@@ -54,8 +54,8 @@ open class DriveUser(
 
     fun getInitials(): String {
         displayName.split(" ").let { initials ->
-            val initialFirst = initials.firstOrNull()?.firstOrEmpty()?.uppercaseChar() ?: ""
-            val initialSecond = initials.getOrNull(1)?.firstOrEmpty()?.uppercaseChar() ?: ""
+            val initialFirst = initials.firstOrNull()?.firstOrEmpty()?.uppercase() ?: ""
+            val initialSecond = initials.getOrNull(1)?.firstOrEmpty()?.uppercase() ?: ""
             return@getInitials "$initialFirst$initialSecond"
         }
     }

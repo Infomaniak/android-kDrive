@@ -104,7 +104,7 @@
 
         <meta-data
             android:name="io.sentry.dsn"
-            android:value="https://b466d0f977d74c2d9244610a858c91fe@sentry.infomaniak.com/3" />
+            android:value="https://034ade81b662408396e5f945a9fe35c5@sentry-mobile.infomaniak.com/7" />
 
         <activity
             android:name=".ui.MainActivity"
