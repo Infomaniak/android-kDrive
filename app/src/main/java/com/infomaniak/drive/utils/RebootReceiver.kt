@@ -60,7 +60,8 @@ class RebootReceiver : BroadcastReceiver() {
                     if (context.hasPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
                         MediaFolder.getAllCount(realm) == 0L
                     ) {
-                        ArrayList(MediaFoldersProvider.getAllMediaFolders(realm, contentResolver))
+                        // Sync local media folders with realm
+                        MediaFoldersProvider.getAllMediaFolders(realm, contentResolver)
                     }
                 }
             }
