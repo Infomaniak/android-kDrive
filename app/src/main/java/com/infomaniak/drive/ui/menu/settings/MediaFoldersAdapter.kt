@@ -39,7 +39,7 @@ class MediaFoldersAdapter(
         notifyItemRangeInserted(beforeItemCount, newItemList.size)
     }
 
-    fun removeItemsById(idList: ArrayList<Long>) {
+    fun removeItemsById(idList: List<Long>) {
         idList.forEach { id ->
             itemList.indexOfFirst { it.id == id }.let { index ->
                 if (index != -1) {
