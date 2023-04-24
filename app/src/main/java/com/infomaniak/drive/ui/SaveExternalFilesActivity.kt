@@ -310,6 +310,22 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun handleSendSingle() {
+
+        fun getExtraTextFileName(): String {
+            val extension = if (intent.getStringExtra(Intent.EXTRA_TEXT)?.isValidUrl() == true) ".url" else ".txt"
+            val name = (intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: "").let {
+                it.ifEmpty { Date().format(FORMAT_NEW_FILE) }
+            } + extension
+            return name
+        }
+
+        fun getExtraStreamFileName(): String? {
+            return (intent.parcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
+                currentUri = uri
+                uri.fileName()
+            }
+        }
+
         fileNameEdit.addTextChangedListener {
             fileNameEdit.showOrHideEmptyError()
             checkEnabledSaveButton()
@@ -329,30 +345,19 @@ class SaveExternalFilesActivity : BaseActivity() {
             *fileNameEdit.filters
         )
 
-        var showEditText = false
 
-        if (intent.hasExtra(Intent.EXTRA_TEXT)) {
-            val extension = if (intent.getStringExtra(Intent.EXTRA_TEXT)?.isValidUrl() == true) ".url" else ".txt"
-            val name = (intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: "").let {
-                it.ifEmpty { Date().format(FORMAT_NEW_FILE) }
-            } + extension
-
-            fileNameEdit.setText(name)
-            showEditText = true
-
-        } else {
-            (intent.getParcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
-                currentUri = uri
-                showEditText = true
-                fileNameEdit.setText(uri.fileName())
-            }
+        val fileName = when {
+            intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return
+            intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
+            else -> return
         }
 
-        fileNameEditLayout.isVisible = showEditText
+        fileNameEdit.setText(fileName)
+        fileNameEditLayout.isVisible = true
     }
 
     private fun handleSendMultiple() {
-        val uris = intent.getParcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
+        val uris = intent.parcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
             ?.filterIsInstance<Uri>()
             ?.map { it to it.fileName() }
             ?: emptyList()
@@ -391,8 +396,13 @@ class SaveExternalFilesActivity : BaseActivity() {
                     }
                     true
                 }
-                intent.hasExtra(Intent.EXTRA_TEXT) -> storeText(userId, driveId, folderId)
-                else -> store(currentUri!!, fileNameEdit.text.toString().trim(), userId, driveId, folderId)
+                intent.hasExtra(Intent.EXTRA_STREAM) -> {
+                    store(currentUri!!, fileNameEdit.text.toString().trim(), userId, driveId, folderId)
+                }
+                intent.hasExtra(Intent.EXTRA_TEXT) -> {
+                    storeText(userId, driveId, folderId)
+                }
+                else -> false
 
             }
         } catch (exception: Exception) {
