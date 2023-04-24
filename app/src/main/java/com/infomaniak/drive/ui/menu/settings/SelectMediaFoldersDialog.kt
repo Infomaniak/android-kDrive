@@ -167,8 +167,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
             realm.executeTransaction { currentRealm ->
                 forEach { cachedFileId ->
                     if (!upToDateMediasIds.contains(cachedFileId)) {
-                        currentRealm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, cachedFileId).findFirst()
-                            ?.deleteFromRealm()
+                        MediaFolder.delete(currentRealm, cachedFileId)
                         deletedMediaFolderList.add(cachedFileId)
                     }
                 }
