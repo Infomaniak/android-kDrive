@@ -618,7 +618,7 @@
     <string name="sharedWithMeNoFile">No files shared with me</string>
     <string name="sharedWithMeTitle">Shared with me</string>
     <string name="snackBarCategoryDeleted">Category successfully deleted</string>
-    <string name="snackBarInvalidFileNameError">Character \"%s\" of file %s not supported for offline availability</string>
+    <string name="snackBarInvalidFileNameError">Character \"%1$s\" of file %2$s not supported for offline availability</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">A file could not be imported</item>
         <item quantity="other">%d files could not be imported</item>
@@ -654,6 +654,8 @@
     <string name="syncSettingsButtonSyncScreenshot">Upload screenshots</string>
     <string name="syncSettingsButtonSyncVideo">Upload videos</string>
     <string name="syncSettingsDescription">Automatically save the photos and videos taken with your device to your kDrive.</string>
+    <string name="syncSettingsNotSavedDescription">Do you really want to leave this page? Your changes will not be saved.</string>
+    <string name="syncSettingsNotSavedTitle">Unsaved changes</string>
     <string name="syncSettingsSaveDateAllPictureValue">All photos</string>
     <string name="syncSettingsSaveDateFromDateValue">from date</string>
     <string name="syncSettingsSaveDateFromDateValue2">From date</string>

@@ -607,7 +607,7 @@
     <string name="sharedWithMeNoFile">No hay archivos compartidos conmigo</string>
     <string name="sharedWithMeTitle">Usos compartidos conmigo</string>
     <string name="snackBarCategoryDeleted">Categoría eliminada correctamente</string>
-    <string name="snackBarInvalidFileNameError">El carácter \"%s\" del archivo %s no es compatible con el uso fuera de línea</string>
+    <string name="snackBarInvalidFileNameError">El carácter \"%1$s\" del archivo %2$s no es compatible con el uso fuera de línea</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">No se ha podido importar un archivo</item>
         <item quantity="other">No se han podido importar %d archivos</item>
@@ -643,6 +643,8 @@
     <string name="syncSettingsButtonSyncScreenshot">Importar las capturas de pantalla</string>
     <string name="syncSettingsButtonSyncVideo">Importar los vídeos</string>
     <string name="syncSettingsDescription">Haz copia de seguridad automáticamente de tus fotos y vídeos tomados con tu dispositivo en tu kDrive.</string>
+    <string name="syncSettingsNotSavedDescription">¿Realmente desea abandonar esta página? Sus cambios no se guardarán.</string>
+    <string name="syncSettingsNotSavedTitle">Modificaciones no guardadas</string>
     <string name="syncSettingsSaveDateAllPictureValue">Todas las fotos</string>
     <string name="syncSettingsSaveDateFromDateValue">a partir de la fecha</string>
     <string name="syncSettingsSaveDateFromDateValue2">De una fecha</string>

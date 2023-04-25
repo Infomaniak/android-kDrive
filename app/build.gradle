@@ -12,7 +12,7 @@ android {
 
     compileSdkVersion 33
 
-    ndkVersion "25.1.8937393"
+    ndkVersion "25.2.9519653"
 
     defaultConfig {
         testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
@@ -67,7 +67,7 @@ android {
             getIsDefault().set(true)
 
             dependencies {
-                def geniusscansdk_version = '4.9.0'
+                def geniusscansdk_version = '4.10.1'
                 implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
@@ -133,7 +133,7 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
     implementation 'androidx.webkit:webkit:1.6.1'
 
-    def exoplayer_version = '2.18.5'
+    def exoplayer_version = '2.18.6'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
@@ -149,12 +149,12 @@ dependencies {
 
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.1.2'
 
-    implementation 'com.googlecode.plist:dd-plist:1.26'
+    implementation 'com.googlecode.plist:dd-plist:1.27'
 
     implementation 'com.github.hannesa2:paho.mqtt.android:3.5.2'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.10.0'
-    testImplementation 'io.github.serpro69:kotlin-faker:1.13.0'
+    testImplementation 'io.github.serpro69:kotlin-faker:1.14.0'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
     def espresso_version = '3.5.1'
