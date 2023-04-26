@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import coil.ImageLoaderFactory
 import com.facebook.stetho.Stetho
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.MatomoDrive.buildTracker
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -114,11 +115,14 @@ class ApplicationMain : Application(), ImageLoaderFactory {
             }
         }
 
-        InfomaniakCore.init(
-            appVersionCode = BuildConfig.VERSION_CODE,
-            appVersionName = BuildConfig.VERSION_NAME,
-            clientId = BuildConfig.CLIENT_ID,
-        )
+        InfomaniakCore.apply {
+            init(
+                appVersionCode = BuildConfig.VERSION_CODE,
+                appVersionName = BuildConfig.VERSION_NAME,
+                clientId = BuildConfig.CLIENT_ID,
+            )
+            apiErrorCodes = ErrorCode.apiErrorCodes
+        }
 
         AccountUtils.onRefreshTokenError = refreshTokenError
         initNotificationChannel()

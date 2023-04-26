@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,31 +17,24 @@
  */
 package com.infomaniak.drive.data.api
 
-import androidx.annotation.StringRes
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.ApiErrorCode
 
-@Suppress("unused")
-enum class ErrorCode(val code: String, @StringRes val translateRes: Int) {
-    AN_ERROR_HAS_OCCURRED("an_error_has_occured", R.string.anErrorHasOccurred),
-    CATEGORY_ALREADY_EXISTS("category_already_exist_error", R.string.errorCategoryAlreadyExists),
-    COLLABORATIVE_FOLDER_ALREADY_EXISTS_FOR_FILE("collaborative_folder_already_exists_for_file", R.string.anErrorHasOccurred),
-    CONFLICT_ERROR("conflict_error", R.string.errorConflict),
-    DESTINATION_ALREADY_EXISTS("destination_already_exists", R.string.errorFileCreate),
-    NO_DRIVE("no_drive", R.string.noDriveTitle),
-    SHARE_LINK_ALREADY_EXISTS("file_share_link_already_exists", R.string.errorShareLink);
+object ErrorCode {
 
-    companion object {
+    const val CATEGORY_ALREADY_EXISTS = "category_already_exist_error"
+    const val COLLABORATIVE_FOLDER_ALREADY_EXISTS_FOR_FILE = "collaborative_folder_already_exists_for_file"
+    const val CONFLICT_ERROR = "conflict_error"
+    const val DESTINATION_ALREADY_EXISTS = "destination_already_exists"
+    const val NO_DRIVE = "no_drive"
+    const val SHARE_LINK_ALREADY_EXISTS = "file_share_link_already_exists"
 
-        @StringRes
-        fun <T> ApiResponse<T>.translateError(): Int {
-            return formatError().translateRes
-        }
-
-        fun <T> ApiResponse<T>.formatError(): ErrorCode {
-            return if (error?.code == null) AN_ERROR_HAS_OCCURRED
-            else values().firstOrNull { it.code.equals(error?.code, true) }
-                ?: AN_ERROR_HAS_OCCURRED
-        }
-    }
+    val apiErrorCodes = listOf(
+        ApiErrorCode(CATEGORY_ALREADY_EXISTS, R.string.errorCategoryAlreadyExists),
+        ApiErrorCode(COLLABORATIVE_FOLDER_ALREADY_EXISTS_FOR_FILE, R.string.anErrorHasOccurred),
+        ApiErrorCode(CONFLICT_ERROR, R.string.errorConflict),
+        ApiErrorCode(DESTINATION_ALREADY_EXISTS, R.string.errorFileCreate),
+        ApiErrorCode(NO_DRIVE, R.string.noDriveTitle),
+        ApiErrorCode(SHARE_LINK_ALREADY_EXISTS, R.string.errorShareLink),
+    )
 }

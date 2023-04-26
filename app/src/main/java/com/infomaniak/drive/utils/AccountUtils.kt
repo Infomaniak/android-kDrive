@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.core.os.bundleOf
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
@@ -118,7 +118,7 @@ object AccountUtils : CredentialManager() {
                 if (result != ApiResponse.Status.ERROR) {
                     handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
                 } else {
-                    if (error?.code?.equals(ErrorCode.NO_DRIVE.code) == true) {
+                    if (error?.code == ErrorCode.NO_DRIVE) {
                         removeUserAndDeleteToken(context, user)
                     }
                 }

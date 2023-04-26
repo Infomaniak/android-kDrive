@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.ApiError
@@ -157,7 +157,7 @@ class LoginActivity : AppCompatActivity() {
                                 launchMainActivity()
                             }
                             is ApiResponse<*> -> withContext(Dispatchers.Main) {
-                                if (user.error?.code?.equals(ErrorCode.NO_DRIVE.code) == true) {
+                                if (user.error?.code == ErrorCode.NO_DRIVE) {
                                     launchNoDriveActivity()
                                 } else {
                                     showError(getString(user.translatedError))
@@ -215,7 +215,7 @@ class LoginActivity : AppCompatActivity() {
                             allDrivesDataResponse.data?.drives?.main?.isEmpty() == true -> {
                                 return ApiResponse<DriveInfo>(
                                     result = ApiResponse.Status.ERROR,
-                                    error = ApiError(code = ErrorCode.NO_DRIVE.code)
+                                    error = ApiError(code = ErrorCode.NO_DRIVE)
                                 )
                             }
                             else -> {

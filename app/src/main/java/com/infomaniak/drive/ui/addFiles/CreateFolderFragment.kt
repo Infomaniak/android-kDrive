@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ErrorCode
-import com.infomaniak.drive.data.api.ErrorCode.Companion.formatError
-import com.infomaniak.drive.data.api.ErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Share
@@ -38,7 +35,9 @@ import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideKeyboard
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
@@ -125,7 +124,7 @@ open class CreateFolderFragment : Fragment() {
                     val redirectToShareDetails = newFolderViewModel.currentPermission == FolderPermission.SPECIFIC_USERS
                     onFolderCreated(apiResponse.data, redirectToShareDetails)
                 } else {
-                    if (apiResponse.formatError() == ErrorCode.DESTINATION_ALREADY_EXISTS) {
+                    if (apiResponse.error?.code == ErrorCode.DESTINATION_ALREADY_EXISTS) {
                         folderNameValueLayout.error = getString(apiResponse.translateError())
                     }
                     showSnackbar(apiResponse.translateError())
