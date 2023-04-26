@@ -21,6 +21,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -55,7 +56,6 @@ import com.infomaniak.lib.core.utils.*
 import kotlinx.android.synthetic.main.activity_sync_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Date
 import java.util.TimeZone
 
@@ -78,7 +78,7 @@ class SyncSettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sync_settings)
 
-        toolbar.setNavigationOnClickListener { onBackPressed() }
+        setOnBackPressed()
 
         val permission = DrivePermissions().apply {
             registerPermissions(this@SyncSettingsActivity)
@@ -94,8 +94,14 @@ class SyncSettingsActivity : BaseActivity() {
             selectedDrive.value = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
         }
 
+        val oldIntervalTypeValue = oldSyncSettings?.getIntervalType() ?: IntervalType.IMMEDIATELY
+        val oldSyncVideoValue = oldSyncSettings?.syncVideo ?: true
+        val oldCreateDatedSubFoldersValue = oldSyncSettings?.createDatedSubFolders ?: false
+        val oldDeleteAfterSyncValue = oldSyncSettings?.deleteAfterSync ?: false
+        val oldSaveOldPicturesValue = SavePicturesDate.SINCE_NOW
+
         syncSettingsViewModel.apply {
-            syncIntervalType.value = oldSyncSettings?.getIntervalType() ?: IntervalType.IMMEDIATELY
+            syncIntervalType.value = oldIntervalTypeValue
             syncFolder.value = oldSyncSettings?.syncFolder
             saveOldPictures.value = SavePicturesDate.SINCE_NOW
         }
@@ -172,6 +178,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncSettingsViewModel.saveOldPictures.observe(this) {
+            if (it != oldSaveOldPicturesValue) editNumber++
             changeSaveButtonStatus()
             syncDateValue.text = getString(it.shortTitle).lowercase()
             if (it == SavePicturesDate.SINCE_DATE) {
@@ -185,16 +192,14 @@ class SyncSettingsActivity : BaseActivity() {
         syncDatePicker.setOnClickListener { showSyncDatePicker() }
 
         syncSettingsViewModel.syncIntervalType.observe(this) {
-            if (syncSettingsViewModel.syncIntervalType.value != oldSyncSettings?.getIntervalType()) editNumber++
+            if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
             changeSaveButtonStatus()
             syncPeriodicityValue.text = getString(it.title).lowercase()
         }
 
-        val syncVideoDefaultValue = true
-        syncVideoSwitch.isChecked = oldSyncSettings?.syncVideo ?: syncVideoDefaultValue
-        val syncAdvancedOptionsDefaultValue = false
-        createDatedSubFoldersSwitch.isChecked = oldSyncSettings?.createDatedSubFolders ?: syncAdvancedOptionsDefaultValue
-        deletePicturesAfterSyncSwitch.isChecked = oldSyncSettings?.deleteAfterSync ?: syncAdvancedOptionsDefaultValue
+        syncVideoSwitch.isChecked = oldSyncVideoValue
+        createDatedSubFoldersSwitch.isChecked = oldCreateDatedSubFoldersValue
+        deletePicturesAfterSyncSwitch.isChecked = oldDeleteAfterSyncValue
 
         activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -209,17 +214,17 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncVideoSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.syncVideo ?: syncVideoDefaultValue == isChecked) editNumber-- else editNumber++
+            if (oldSyncVideoValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
         createDatedSubFoldersSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.createDatedSubFolders ?: syncAdvancedOptionsDefaultValue == isChecked) editNumber-- else editNumber++
+            if (oldCreateDatedSubFoldersValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
         deletePicturesAfterSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (oldSyncSettings?.deleteAfterSync ?: syncAdvancedOptionsDefaultValue == isChecked) editNumber-- else editNumber++
+            if (oldDeleteAfterSyncValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
@@ -235,6 +240,24 @@ class SyncSettingsActivity : BaseActivity() {
         saveButton.setOnClickListener {
             if (permission.checkSyncPermissions()) saveSettings()
         }
+    }
+
+    private fun setOnBackPressed() {
+
+        fun finishIfPossible() {
+            if (editNumber > 0) {
+                Utils.createConfirmation(
+                    context = this,
+                    title = getString(R.string.syncSettingsNotSavedTitle),
+                    message = getString(R.string.syncSettingsNotSavedDescription),
+                ) { finish() }
+            } else {
+                finish()
+            }
+        }
+
+        toolbar.setNavigationOnClickListener { finishIfPossible() }
+        onBackPressedDispatcher.addCallback(this) { finishIfPossible() }
     }
 
     fun onDialogDismissed() {
@@ -325,9 +348,7 @@ class SyncSettingsActivity : BaseActivity() {
 
             trackPhotoSyncEvent(if (activateSyncSwitch.isChecked) "enabled" else "disabled")
 
-            withContext(Dispatchers.Main) {
-                onBackPressed()
-            }
+            finish()
         }
     }
 

@@ -607,7 +607,7 @@
     <string name="sharedWithMeNoFile">Keine Datei mit mir geteilt</string>
     <string name="sharedWithMeTitle">Mit mir geteilt</string>
     <string name="snackBarCategoryDeleted">Kategorie erfolgreich gelöscht</string>
-    <string name="snackBarInvalidFileNameError">Das Zeichen \"%s\" in der Datei %s wird für die Offline-Schaltung nicht unterstützt</string>
+    <string name="snackBarInvalidFileNameError">Das Zeichen \"%1$s\" in der Datei %2$s wird für die Offline-Schaltung nicht unterstützt</string>
     <plurals name="snackBarUploadError">
         <item quantity="one">Eine Datei konnte nicht importiert werden</item>
         <item quantity="other">%d Dateien konnten nicht importiert werden</item>
@@ -643,6 +643,8 @@
     <string name="syncSettingsButtonSyncScreenshot">Screenshots importieren</string>
     <string name="syncSettingsButtonSyncVideo">Videos importieren</string>
     <string name="syncSettingsDescription">Speichern Sie Ihre mit Ihrem Gerät aufgenommenen Fotos und Videos automatisch in Ihrem kDrive.</string>
+    <string name="syncSettingsNotSavedDescription">Möchten Sie diese Seite wirklich verlassen? Ihre Änderungen werden nicht gespeichert.</string>
+    <string name="syncSettingsNotSavedTitle">Nicht gespeicherte Änderungen</string>
     <string name="syncSettingsSaveDateAllPictureValue">Alle Fotos</string>
     <string name="syncSettingsSaveDateFromDateValue">vom Datum</string>
     <string name="syncSettingsSaveDateFromDateValue2">Ab einem Datum</string>
