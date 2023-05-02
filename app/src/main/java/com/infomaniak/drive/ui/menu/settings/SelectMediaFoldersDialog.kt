@@ -99,7 +99,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
         mediaViewModel.getAllMediaFolders(requireActivity().contentResolver)
             .observe(viewLifecycleOwner) { (isComplete, mediaFolders) ->
                 mediaFolderList.post {
-                    if (!isComplete || mediaFolders.isNotEmpty() && isComplete) {
+                    if (!isComplete || mediaFolders.isNotEmpty()) {
                         mediaFoldersAdapter.addAll(mediaFolders)
                         noMediaFolderLayout.toggleVisibility(
                             isVisible = mediaFoldersAdapter.itemCount == 0,
@@ -141,7 +141,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
                                 coroutineScope = getMediaFilesJob
                             )
                         )
-                        cacheMediaFolders.map { it.id }.removeObsoleteMediaFolders(realm, localMediaFolders.map { it.id })
+                        cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders.map { it.id })
 
                         viewModelScope.launch(Dispatchers.Main) {
                             emit(true to localMediaFolders.newMediaFolders(cacheMediaFolders))
@@ -162,13 +162,13 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
             } as ArrayList<MediaFolder>
         }
 
-        private fun List<Long>.removeObsoleteMediaFolders(realm: Realm, upToDateMediasIds: List<Long>) {
+        private fun List<MediaFolder>.removeObsoleteMediaFolders(realm: Realm, upToDateMediasIds: List<Long>) {
             val deletedMediaFolderList = mutableListOf<Long>()
             realm.executeTransaction { currentRealm ->
-                forEach { cachedFileId ->
-                    if (!upToDateMediasIds.contains(cachedFileId)) {
-                        MediaFolder.delete(currentRealm, cachedFileId)
-                        deletedMediaFolderList.add(cachedFileId)
+                forEach { cachedFile ->
+                    if (!upToDateMediasIds.contains(cachedFile.id)) {
+                        MediaFolder.delete(currentRealm, cachedFile.id)
+                        deletedMediaFolderList.add(cachedFile.id)
                     }
                 }
             }
