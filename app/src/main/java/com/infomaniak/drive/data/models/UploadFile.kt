@@ -346,14 +346,16 @@ open class UploadFile(
             }
         }
 
-        fun deleteAllSyncFile() {
-            getRealmInstance().use { realm ->
-                realm.executeTransaction {
+        fun deleteAllSyncFile(realm: Realm? = null) {
+            val block: (Realm) -> Unit = { realm ->
+                val transaction: (Realm) -> Unit = {
                     it.uploadTable
                         .equalTo(UploadFile::type.name, Type.SYNC.name)
                         .findAll()?.deleteAllFromRealm()
                 }
+                if (realm.isInTransaction) transaction(realm) else realm.executeTransaction(transaction)
             }
+            realm?.let(block) ?: getRealmInstance().use(block)
         }
 
         fun removeAppSyncSettings() {
@@ -366,9 +368,7 @@ open class UploadFile(
 
         fun setAppSyncSettings(syncSettings: SyncSettings) {
             getRealmInstance().use { realm ->
-                realm.executeTransaction {
-                    it.insertOrUpdate(syncSettings)
-                }
+                realm.executeTransaction { it.insertOrUpdate(syncSettings) }
             }
         }
 
