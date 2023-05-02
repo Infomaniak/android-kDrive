@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
 import java.io.FileOutputStream
-import java.util.*
+import java.util.Date
 
 object GeniusScanUtils : IGeniusScanUtils {
 
@@ -53,7 +53,7 @@ object GeniusScanUtils : IGeniusScanUtils {
         "deu" to R.raw.deu,
         "eng" to R.raw.eng,
         "ita" to R.raw.ita,
-        "spa" to R.raw.spa
+        "spa" to R.raw.spa,
     )
 
     private fun Context.getOcrConfiguration(): ScanConfiguration.OcrConfiguration {
@@ -152,5 +152,4 @@ object GeniusScanUtils : IGeniusScanUtils {
 
         return getSerializableExtra(SCAN_RESULT_KEY) as ScanResult
     }
-
 }
