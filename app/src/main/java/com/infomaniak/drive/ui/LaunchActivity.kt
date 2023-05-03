@@ -55,24 +55,22 @@ class LaunchActivity : AppCompatActivity() {
             handleNotificationDestinationIntent()
             handleDeeplink()
 
-            val destinationClass = when {
-                AccountUtils.requestCurrentUser() == null -> {
-                    if (getOldkDriveUser().isEmpty) LoginActivity::class.java else MigrationActivity::class.java
+            val destinationClass = if (AccountUtils.requestCurrentUser() == null) {
+                if (getOldkDriveUser().isEmpty) LoginActivity::class.java else MigrationActivity::class.java
+            } else {
+                trackUserId(AccountUtils.currentUserId)
+
+                // When DriveInfosController is migrated
+                if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
+                    AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
                 }
-                isKeyguardSecure() && AppSettings.appSecurityLock -> {
-                    LockActivity::class.java
-                }
-                else -> {
-                    trackUserId(AccountUtils.currentUserId)
-                    // When DriveInfosController is migrated
-                    if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
-                        AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
-                    }
-                    if (DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance }) {
+
+                when {
+                    DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance } -> {
                         MaintenanceActivity::class.java
-                    } else {
-                        MainActivity::class.java
                     }
+                    isKeyguardSecure() && AppSettings.appSecurityLock -> LockActivity::class.java
+                    else -> MainActivity::class.java
                 }
             }
 
