@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import kotlinx.android.synthetic.main.item_media_folder.view.mediaFolderSwitch
 import kotlinx.android.synthetic.main.item_media_folder.view.mediaFolderTitle
 
 class MediaFoldersAdapter(
-    private val onSwitchChanged: (mediaFolder: MediaFolder, isChecked: Boolean) -> Unit
+    private val onSwitchChanged: (mediaFolder: MediaFolder, isChecked: Boolean) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     private var itemList: ArrayList<MediaFolder> = arrayListOf()
@@ -39,7 +39,7 @@ class MediaFoldersAdapter(
         notifyItemRangeInserted(beforeItemCount, newItemList.size)
     }
 
-    fun removeItemsById(idList: ArrayList<Long>) {
+    fun removeItemsById(idList: List<Long>) {
         idList.forEach { id ->
             itemList.indexOfFirst { it.id == id }.let { index ->
                 if (index != -1) {

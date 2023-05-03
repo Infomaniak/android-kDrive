@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ open class UploadFile(
     var remoteSubFolder: String? = null,
     var type: String = Type.SYNC.name,
     var uploadAt: Date? = null,
-    var userId: Int = -1
+    var userId: Int = -1,
 ) : RealmObject() {
 
     @delegate:Ignore
@@ -346,14 +346,16 @@ open class UploadFile(
             }
         }
 
-        fun deleteAllSyncFile() {
-            getRealmInstance().use { realm ->
-                realm.executeTransaction {
+        fun deleteAllSyncFile(realm: Realm? = null) {
+            val block: (Realm) -> Unit = { realm ->
+                val transaction: (Realm) -> Unit = {
                     it.uploadTable
                         .equalTo(UploadFile::type.name, Type.SYNC.name)
                         .findAll()?.deleteAllFromRealm()
                 }
+                if (realm.isInTransaction) transaction(realm) else realm.executeTransaction(transaction)
             }
+            realm?.let(block) ?: getRealmInstance().use(block)
         }
 
         fun removeAppSyncSettings() {
@@ -366,9 +368,7 @@ open class UploadFile(
 
         fun setAppSyncSettings(syncSettings: SyncSettings) {
             getRealmInstance().use { realm ->
-                realm.executeTransaction {
-                    it.insertOrUpdate(syncSettings)
-                }
+                realm.executeTransaction { it.insertOrUpdate(syncSettings) }
             }
         }
 

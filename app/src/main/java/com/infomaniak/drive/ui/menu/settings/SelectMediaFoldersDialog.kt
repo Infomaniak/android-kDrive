@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
         mediaViewModel.getAllMediaFolders(requireActivity().contentResolver)
             .observe(viewLifecycleOwner) { (isComplete, mediaFolders) ->
                 mediaFolderList.post {
-                    if (!isComplete || mediaFolders.isNotEmpty() && isComplete) {
+                    if (!isComplete || mediaFolders.isNotEmpty()) {
                         mediaFoldersAdapter.addAll(mediaFolders)
                         noMediaFolderLayout.toggleVisibility(
                             isVisible = mediaFoldersAdapter.itemCount == 0,
@@ -122,7 +122,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
     class MediaViewModel : ViewModel() {
 
         private var getMediaFilesJob: Job = Job()
-        val elementsToRemove = MutableLiveData<ArrayList<Long>>()
+        val elementsToRemove = MutableLiveData<List<Long>>()
 
         fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<IsComplete, ArrayList<MediaFolder>>> {
             getMediaFilesJob = Job()
@@ -141,7 +141,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
                                 coroutineScope = getMediaFilesJob
                             )
                         )
-                        cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders)
+                        cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders.map { it.id })
 
                         viewModelScope.launch(Dispatchers.Main) {
                             emit(true to localMediaFolders.newMediaFolders(cacheMediaFolders))
@@ -162,17 +162,12 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
             } as ArrayList<MediaFolder>
         }
 
-        private fun ArrayList<MediaFolder>.removeObsoleteMediaFolders(
-            realm: Realm,
-            upToDateMedias: ArrayList<MediaFolder>
-        ) {
-            val deletedMediaFolderList = arrayListOf<Long>()
+        private fun List<MediaFolder>.removeObsoleteMediaFolders(realm: Realm, upToDateMediasIds: List<Long>) {
+            val deletedMediaFolderList = mutableListOf<Long>()
             realm.executeTransaction { currentRealm ->
                 forEach { cachedFile ->
-                    val exist = upToDateMedias.any { cachedFile.id == it.id }
-                    if (!exist) {
-                        currentRealm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, cachedFile.id).findFirst()
-                            ?.deleteFromRealm()
+                    if (!upToDateMediasIds.contains(cachedFile.id)) {
+                        MediaFolder.delete(currentRealm, cachedFile.id)
                         deletedMediaFolderList.add(cachedFile.id)
                     }
                 }

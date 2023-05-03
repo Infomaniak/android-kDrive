@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import io.realm.annotations.PrimaryKey
 open class MediaFolder(
     @PrimaryKey var id: Long = 0L,
     var name: String = "",
-    var isSynced: Boolean = false
+    var isSynced: Boolean = false,
 ) : RealmObject() {
 
     fun storeOrUpdate() {
@@ -51,10 +51,12 @@ open class MediaFolder(
 
     companion object {
 
+        private inline val Realm.mediaFolderTable get() = where(MediaFolder::class.java)
+
         fun getRealmInstance() = UploadFile.getRealmInstance()
 
         private fun findByIdQuery(realm: Realm, id: Long) =
-            realm.where(MediaFolder::class.java).equalTo(MediaFolder::id.name, id).findFirst()
+            realm.mediaFolderTable.equalTo(MediaFolder::id.name, id).findFirst()
 
         fun findById(realm: Realm, id: Long): MediaFolder? {
             return findByIdQuery(realm, id)?.let { mediaFolder ->
@@ -63,15 +65,14 @@ open class MediaFolder(
         }
 
         fun getAll(realm: Realm): ArrayList<MediaFolder> {
-            return realm.where(MediaFolder::class.java)
-                .sort(MediaFolder::name.name, Sort.ASCENDING).findAll()?.let { results ->
-                    ArrayList(realm.copyFromRealm(results, 0))
-                } ?: arrayListOf()
+            return realm.mediaFolderTable.sort(MediaFolder::name.name, Sort.ASCENDING).findAll()?.let { results ->
+                ArrayList(realm.copyFromRealm(results, 0))
+            } ?: arrayListOf()
         }
 
         fun getAllSyncedFolders(): ArrayList<MediaFolder> {
             return getRealmInstance().use { realm ->
-                realm.where(MediaFolder::class.java).equalTo(MediaFolder::isSynced.name, true).findAll()?.let { results ->
+                realm.mediaFolderTable.equalTo(MediaFolder::isSynced.name, true).findAll()?.let { results ->
                     ArrayList(realm.copyFromRealm(results, 0))
                 } ?: arrayListOf()
             }
@@ -79,13 +80,16 @@ open class MediaFolder(
 
         fun getAllSyncedFoldersCount(): Long {
             return getRealmInstance().use { realm ->
-                realm.where(MediaFolder::class.java).equalTo(MediaFolder::isSynced.name, true).count()
+                realm.mediaFolderTable.equalTo(MediaFolder::isSynced.name, true).count()
             }
         }
 
         fun getAllCount(realm: Realm): Long {
-            return realm.where(MediaFolder::class.java).count()
+            return realm.mediaFolderTable.count()
+        }
 
+        fun delete(realm: Realm, mediaFolderId: Long) {
+            realm.mediaFolderTable.equalTo(MediaFolder::id.name, mediaFolderId).findFirst()?.deleteFromRealm()
         }
     }
 }
