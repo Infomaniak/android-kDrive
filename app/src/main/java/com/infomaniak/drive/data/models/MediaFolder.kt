@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import io.realm.annotations.PrimaryKey
 open class MediaFolder(
     @PrimaryKey var id: Long = 0L,
     var name: String = "",
-    var isSynced: Boolean = false
+    var isSynced: Boolean = false,
 ) : RealmObject() {
 
     fun storeOrUpdate() {

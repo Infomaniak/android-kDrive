@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class RebootReceiver : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent?) {
         with(context) {
 
@@ -60,7 +61,7 @@ class RebootReceiver : BroadcastReceiver() {
                     if (context.hasPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
                         MediaFolder.getAllCount(realm) == 0L
                     ) {
-                        // Sync local media folders with realm
+                        // Sync local media folders with Realm
                         MediaFoldersProvider.getAllMediaFolders(realm, contentResolver)
                     }
                 }
