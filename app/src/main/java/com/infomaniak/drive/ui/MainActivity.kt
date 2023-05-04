@@ -201,7 +201,6 @@ class MainActivity : BaseActivity() {
     private fun setupDrivePermissions() {
         drivePermissions = DrivePermissions().apply {
             registerPermissions(this@MainActivity)
-            checkWriteStoragePermission()
         }
     }
 
