@@ -173,15 +173,13 @@ object AccountUtils : CredentialManager() {
         }
     }
 
-    private suspend fun requestUser(user: User) {
+    private suspend fun requestUser(remoteUser: User) {
         TokenAuthenticator.mutex.withLock {
-            if (currentUserId == user.id) {
-                user.apply {
-                    organizations = arrayListOf()
-                    requestCurrentUser()?.let { user ->
-                        setUserToken(this, user.apiToken)
-                        currentUser = this
-                    }
+            if (remoteUser.id == currentUserId) {
+                remoteUser.organizations = arrayListOf()
+                requestCurrentUser()?.let { localUser ->
+                    setUserToken(remoteUser, localUser.apiToken)
+                    currentUser = remoteUser
                 }
             }
         }
