@@ -182,7 +182,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     private var pendingJob = Job()
     val currentAdapterPendingFiles = MutableLiveData<ArrayList<File>>()
-    val indexUploadToDelete = Transformations.switchMap(currentAdapterPendingFiles) { files ->
+    val indexUploadToDelete = currentAdapterPendingFiles.switchMap { files ->
         val adapterPendingFileIds = files.map { it.id }
         val isFileType = files.firstOrNull()?.type == Type.FILE.value
         pendingFilesToDelete(adapterPendingFileIds, isFileType)

@@ -44,12 +44,14 @@ android {
         resValue 'string', 'EXPOSED_OFFLINE_DIR', 'offline_storage'
     }
 
+    def javaVersion = JavaVersion.VERSION_17
+
     compileOptions {
-        sourceCompatibility rootProject.ext.java_version
-        targetCompatibility rootProject.ext.java_version
+        sourceCompatibility javaVersion
+        targetCompatibility javaVersion
     }
 
-    kotlinOptions { jvmTarget = rootProject.ext.java_version }
+    kotlinOptions { jvmTarget = javaVersion }
 
     buildTypes {
         release {
@@ -169,7 +171,7 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidx_test_version"
     androidTestImplementation "androidx.test:runner:1.5.2"
 
-    def jupiter_version = '5.9.2'
+    def jupiter_version = '5.9.3'
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter_version"
 

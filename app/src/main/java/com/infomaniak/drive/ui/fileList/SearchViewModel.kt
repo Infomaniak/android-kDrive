@@ -42,7 +42,7 @@ class SearchViewModel : ViewModel() {
     val visibilityMode = MutableLiveData(VisibilityMode.RECENT_SEARCHES)
 
     val searchFileByName = MutableLiveData<Pair<String, SortType>>()
-    val searchResults = Transformations.switchMap(searchFileByName) { (query, sortType) ->
+    val searchResults = searchFileByName.switchMap { (query, sortType) ->
         searchFiles(query, sortType, currentPage)
     }
 

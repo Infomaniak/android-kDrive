@@ -34,7 +34,7 @@ class GalleryViewModel : ViewModel() {
     var lastGalleryLastPage = 1
 
     val loadMoreGallery = MutableLiveData<Pair<Int, Boolean>>()
-    val galleryApiResult = Transformations.switchMap(loadMoreGallery) { (driveId, ignoreCloud) ->
+    val galleryApiResult = loadMoreGallery.switchMap { (driveId, ignoreCloud) ->
         getLastGallery(driveId, ignoreCloud)
     }
 
