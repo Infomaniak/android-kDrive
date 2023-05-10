@@ -26,6 +26,7 @@ import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -34,10 +35,14 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.DialogImportFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SyncUtils.getFileDates
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
+import com.infomaniak.drive.utils.getAvailableMemory
+import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
@@ -102,21 +107,18 @@ class ImportFilesDialog : DialogFragment() {
                 showSnackbar(resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount), true)
             }
         }
-        lifecycleScope.launchWhenResumed { findNavController().popBackStack() }
+        lifecycleScope.launch { lifecycle.withResumed { findNavController().popBackStack() } }
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val fileName = SyncUtils.getFileName(cursor)
+                val fileName = cursor.getFileName(uri)
                 val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
 
                 when {
                     isLowMemory() -> withContext(Dispatchers.Main) {
                         showSnackbar(R.string.uploadOutOfMemoryError, true)
-                    }
-                    fileName == null -> withContext(Dispatchers.Main) {
-                        showSnackbar(R.string.anErrorHasOccurred, true)
                     }
                     else -> {
                         val outputFile = getOutputFile(uri, fileModifiedAt)

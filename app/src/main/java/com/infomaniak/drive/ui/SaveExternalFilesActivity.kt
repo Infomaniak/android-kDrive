@@ -59,6 +59,7 @@ import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.URLDecoder
 import java.util.Date
 
 class SaveExternalFilesActivity : BaseActivity() {
@@ -502,18 +503,9 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun Uri.fileName(): String {
-        return runCatching {
-            contentResolver.query(this, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) SyncUtils.getFileName(cursor) else null
-            } ?: toString().substringAfterLast("/")
-        }.getOrElse { exception ->
-            // Add sentry logs for java.lang.UnsupportedOperationException: Queries are not supported.
-            Sentry.withScope { scope ->
-                scope.setExtra("data", "$this")
-                Sentry.captureException(exception)
-            }
-            ""
-        }
+        return contentResolver.query(this, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) cursor.getFileName(this) else null
+        } ?: URLDecoder.decode(toString(), "UTF-8").substringAfterLast("/")
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
