@@ -23,9 +23,7 @@ import android.database.Cursor
 import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.provider.OpenableColumns
 import android.util.Log
-import androidx.core.database.getStringOrNull
 import androidx.fragment.app.FragmentActivity
 import androidx.work.*
 import com.infomaniak.drive.data.models.SyncSettings
@@ -43,16 +41,6 @@ object SyncUtils {
         else "datetaken"
 
     inline val Context.uploadFolder get() = java.io.File(cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
-
-    fun getFileName(cursor: Cursor): String? {
-        val columnIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-        return when {
-            columnIndex != -1 -> cursor.getStringOrNull(columnIndex)
-            else -> null
-        }
-    }
-
-    fun getFileSize(cursor: Cursor) = cursor.getLong(cursor.getColumnIndexOrThrow(OpenableColumns.SIZE))
 
     fun getFileDates(cursor: Cursor): Pair<Date?, Date> {
         val dateTakenIndex = cursor.getColumnIndex(DATE_TAKEN)

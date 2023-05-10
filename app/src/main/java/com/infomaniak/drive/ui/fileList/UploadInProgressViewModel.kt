@@ -32,8 +32,8 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.getFileSize
 import io.realm.Realm
 import io.realm.RealmResults
 import io.sentry.Sentry
@@ -113,7 +113,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                 try {
                     context.contentResolver?.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
-                            val size = SyncUtils.getFileSize(cursor)
+                            val size = cursor.getFileSize()
                             files.add(
                                 File(
                                     id = uploadFile.uri.hashCode(),

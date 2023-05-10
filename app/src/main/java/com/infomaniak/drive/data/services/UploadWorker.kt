@@ -50,6 +50,8 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.api.ApiController
+import com.infomaniak.lib.core.utils.getFileName
+import com.infomaniak.lib.core.utils.getFileSize
 import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -364,7 +366,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val uri = cursor.uri(contentUri)
 
         val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
-        val fileName = SyncUtils.getFileName(cursor)
+        val fileName = cursor.getFileName(contentUri)
         val fileSize = uri.getFileSize(cursor)
 
         val messageLog = "localMediaFound > ${mediaFolder.name}/$fileName found"
@@ -375,7 +377,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             level = SentryLevel.INFO
         })
 
-        if (fileName != null && UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
+        if (UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
             UploadFile(
                 uri = uri.toString(),
                 driveId = syncSettings.driveId,
@@ -397,7 +399,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun Uri.getFileSize(cursor: Cursor) = calculateFileSize(this) ?: SyncUtils.getFileSize(cursor)
+    private fun Uri.getFileSize(cursor: Cursor) = calculateFileSize(this) ?: cursor.getFileSize()
 
     /**
      * Calculate file size from an uri
