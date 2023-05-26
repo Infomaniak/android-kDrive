@@ -25,7 +25,7 @@ import org.matomo.sdk.Tracker
 
 object MatomoDrive : MatomoCore {
 
-    override val Context.tracker: Tracker get() = (this as ApplicationMain).matomoTracker
+    override val Context.tracker: Tracker get() = (this as MainApplication).matomoTracker
     override val siteId = 8
 
     fun Fragment.trackCategoriesEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {

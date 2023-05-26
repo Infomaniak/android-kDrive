@@ -61,7 +61,7 @@ import org.matomo.sdk.Tracker
 import java.util.Locale
 import java.util.UUID
 
-class ApplicationMain : Application(), ImageLoaderFactory {
+class MainApplication : Application(), ImageLoaderFactory {
 
     val matomoTracker: Tracker by lazy { buildTracker() }
     var geniusScanIsReady = false
@@ -159,7 +159,7 @@ class ApplicationMain : Application(), ImageLoaderFactory {
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            AccountUtils.removeUserAndDeleteToken(this@ApplicationMain, user)
+            AccountUtils.removeUserAndDeleteToken(this@MainApplication, user)
         }
     }
 

@@ -19,7 +19,7 @@ package com.infomaniak.drive.ui.fileList
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.infomaniak.drive.ApplicationMain
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
@@ -36,7 +36,7 @@ import kotlinx.coroutines.sync.withLock
 
 class FileListViewModel(application: Application) : AndroidViewModel(application) {
 
-    private inline val context get() = getApplication<ApplicationMain>().applicationContext
+    private inline val context get() = getApplication<MainApplication>().applicationContext
 
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
