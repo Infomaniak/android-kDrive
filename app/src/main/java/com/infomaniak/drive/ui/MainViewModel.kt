@@ -27,7 +27,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.JsonObject
-import com.infomaniak.drive.ApplicationMain
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -79,7 +79,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
 
-    private fun getContext() = getApplication<ApplicationMain>()
+    private fun getContext() = getApplication<MainApplication>()
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
         // Clear FileListFragment stack

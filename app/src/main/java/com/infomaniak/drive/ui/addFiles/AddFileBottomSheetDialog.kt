@@ -32,7 +32,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.infomaniak.drive.ApplicationMain
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
@@ -122,7 +122,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         formCreate.setOnClickListener { createFile(Office.FORM) }
         noteCreate.setOnClickListener { createFile(Office.TXT) }
 
-        documentScanning.isVisible = (context?.applicationContext as ApplicationMain).geniusScanIsReady
+        documentScanning.isVisible = (context?.applicationContext as MainApplication).geniusScanIsReady
     }
 
     override fun onDismiss(dialog: DialogInterface) {
