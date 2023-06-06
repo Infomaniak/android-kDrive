@@ -209,7 +209,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         return startUploadFile(cacheFile.length()).also { isUploaded ->
             if (isUploaded) {
-                deleteIfExists()
+                deleteIfExists(keepFile = isSync())
                 if (!isSyncOffline()) cacheFile.delete()
             }
         }
@@ -217,11 +217,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
         return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) startUploadFile(uri.getFileSize(cursor)) else null
-        } ?: run {
-            deleteIfExists()
-            false
-        }
+            if (cursor.moveToFirst()) startUploadFile(uri.getFileSize(cursor)) else false
+        }.also { isUploaded ->
+            if (isUploaded == true) deleteIfExists(keepFile = isSync())
+        } ?: false
     }
 
     private suspend fun UploadFile.startUploadFile(size: Long): Boolean {
