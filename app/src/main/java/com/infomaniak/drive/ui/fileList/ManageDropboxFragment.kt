@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.fixIconPaddingIssue
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.MatomoCore.TrackerAction
@@ -45,6 +46,7 @@ import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
+import kotlinx.android.synthetic.main.fragment_file_share_link_settings.passwordTextLayout
 import kotlinx.android.synthetic.main.fragment_manage_dropbox.*
 import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import kotlinx.android.synthetic.main.view_share_link_container.view.*
@@ -89,6 +91,8 @@ open class ManageDropboxFragment : Fragment() {
 
         disableButton.isEnabled = false
         saveButton.isEnabled = false
+
+        passwordTextLayout.fixIconPaddingIssue()
 
         FileController.getFileById(navigationArgs.fileId)?.let { file ->
             disableButton.isEnabled = true

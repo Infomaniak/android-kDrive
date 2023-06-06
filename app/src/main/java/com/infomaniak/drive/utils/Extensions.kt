@@ -35,15 +35,18 @@ import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
+import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import coil.load
 import coil.request.Disposable
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.internal.CheckableImageButton
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
@@ -375,4 +378,11 @@ fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPag
 
 fun Context.getInfomaniakLogin(): InfomaniakLogin {
     return InfomaniakLogin(this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
+}
+
+// TODO : Waiting https://github.com/material-components/material-components-android/issues/366 (icon padding issue)
+fun TextInputLayout.fixIconPaddingIssue() {
+    findViewById<CheckableImageButton>(R.id.text_input_end_icon)?.apply {
+        setPadding(resources.getDimensionPixelSize(R.dimen.marginStandardMedium))
+    }
 }

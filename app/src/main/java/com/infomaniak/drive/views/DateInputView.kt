@@ -27,8 +27,10 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
+import com.infomaniak.drive.utils.fixIconPaddingIssue
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_date_input.view.dateValueInput
+import kotlinx.android.synthetic.main.view_date_input.view.dateValueLayout
 import java.util.Calendar
 import java.util.Date
 
@@ -50,6 +52,8 @@ class DateInputView @JvmOverloads constructor(
         onDateSet: ((timestamp: Long) -> Unit)? = null,
     ) {
         currentCalendarDate = defaultDate
+
+        dateValueLayout.fixIconPaddingIssue()
 
         dateValueInput.apply {
             text = SpannableStringBuilder(currentCalendarDate.format())
@@ -88,7 +92,6 @@ class DateInputView @JvmOverloads constructor(
             .setSelection(defaultDate.time)
             .setCalendarConstraints(calendarConstraints)
 
-        // TODO : Waiting https://github.com/material-components/material-components-android/issues/366 (icon padding issue)
         materialDatePickerBuilder.build().apply {
             addOnNegativeButtonClickListener { this@DateInputView.clearFocus() }
             addOnCancelListener { this@DateInputView.clearFocus() }
