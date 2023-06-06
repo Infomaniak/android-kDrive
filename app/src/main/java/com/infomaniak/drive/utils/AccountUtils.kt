@@ -188,7 +188,7 @@ object AccountUtils : CredentialManager() {
     suspend fun removeUserAndDeleteToken(context: Context, user: User) {
         CoroutineScope(Dispatchers.IO).launch {
             context.getInfomaniakLogin().deleteToken(
-                HttpClient.okHttpClientNoInterceptor,
+                HttpClient.okHttpClientNoTokenInterceptor,
                 user.apiToken,
                 onError = {
                     Log.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")

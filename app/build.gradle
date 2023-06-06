@@ -69,7 +69,7 @@ android {
             getIsDefault().set(true)
 
             dependencies {
-                def geniusscansdk_version = '4.10.1'
+                def geniusscansdk_version = '4.12.0'
                 implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
@@ -132,10 +132,10 @@ dependencies {
 
     implementation 'androidx.biometric:biometric:1.1.0'
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
-    implementation 'androidx.viewpager2:viewpager2:1.1.0-beta01'
-    implementation 'androidx.webkit:webkit:1.6.1'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
+    implementation 'androidx.webkit:webkit:1.7.0'
 
-    def exoplayer_version = '2.18.6'
+    def exoplayer_version = '2.18.7'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
@@ -144,7 +144,7 @@ dependencies {
     implementation 'com.airbnb.android:lottie:6.0.0'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.2.1'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
-    implementation 'com.tbuonomo:dotsindicator:4.3'
+    implementation 'com.tbuonomo:dotsindicator:5.0'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
     implementation 'io.realm:android-adapters:4.0.0'

@@ -100,7 +100,7 @@ class MigrationActivity : AppCompatActivity() {
                 var apiToken: ApiToken? = null
                 var errorStatus: InfomaniakLogin.ErrorStatus? = null
                 infomaniakLogin.getToken(
-                    HttpClient.okHttpClientNoInterceptor,
+                    HttpClient.okHttpClientNoTokenInterceptor,
                     username = oldUser.key,
                     password = oldUser.value,
                     onSuccess = { apiToken = it },

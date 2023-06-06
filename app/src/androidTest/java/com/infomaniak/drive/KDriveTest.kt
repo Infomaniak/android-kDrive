@@ -63,7 +63,7 @@ open class KDriveTest {
             } else {
                 InfomaniakCore.bearerToken = Env.TOKEN
 
-                val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoInterceptor)
+                val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoTokenInterceptor)
                 assertApiResponseData(apiResponse)
                 user = apiResponse.data!!
                 user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)
