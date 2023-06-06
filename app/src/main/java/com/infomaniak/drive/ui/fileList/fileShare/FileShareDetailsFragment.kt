@@ -113,7 +113,7 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun refreshUi() {
-        //TODO Need refactor
+        // TODO Need refactor
         sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
         sharedUsersRecyclerView.adapter = sharedItemsAdapter
 

@@ -36,7 +36,7 @@ import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-//TODO Making migration of others actions as openFolder, or preview
+// TODO Making migration of others actions as openFolder, or preview
 /**
  * Responsible for file opening actions from [com.infomaniak.drive.ui.fileList.FileListFragment]
  */
