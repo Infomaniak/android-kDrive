@@ -60,7 +60,7 @@ android {
         }
     }
 
-    flavorDimensions 'distribution'
+    flavorDimensions += 'distribution'
     productFlavors {
         standard {
             dimension 'distribution'
