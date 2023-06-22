@@ -226,17 +226,16 @@ class UploadInProgressFragment : FileListFragment() {
 
     private fun isPendingFolders() = folderId == Utils.OTHER_ROOT_ID
 
-    private fun popBackStack() {
+    private fun popBackStack() = with(findNavController()) {
         mainViewModel.refreshActivities.value = true
 
         fun notIgnorePendingFoldersIfNeeded(): Boolean {
-            val isFromPendingFolders =
-                findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
+            val isFromPendingFolders = previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
 
             return if (UploadFile.getAllPendingFoldersCount(uploadInProgressViewModel.realmUpload) in 0..1 && isFromPendingFolders) {
-                val lastIndex = findNavController().backQueue.lastIndex
-                val previousDestinationId = findNavController().backQueue[lastIndex - 2].destination.id
-                findNavController().popBackStack(previousDestinationId, false)
+                // TODO: Need refactor
+                popBackStack()
+                popBackStack()
                 false
             } else true
         }

@@ -63,7 +63,7 @@ open class PreviewFragment : Fragment() {
                 val backStackEntry = findNavController().currentBackStackEntry
                 val previousName = findNavController().previousBackStackEntry?.destination?.displayName
                 scope.setExtra("destination", "${backStackEntry?.destination?.displayName}")
-                scope.setExtra("destination lifecycle", "${backStackEntry?.getLifecycle()?.currentState}")
+                scope.setExtra("destination lifecycle", "${backStackEntry?.lifecycle?.currentState}")
                 scope.setExtra("previous", previousName ?: "")
                 scope.setExtra("exception", exception.stackTraceToString())
                 Sentry.captureException(exception)

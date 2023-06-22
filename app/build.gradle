@@ -141,7 +141,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:6.0.0'
+    implementation 'com.airbnb.android:lottie:6.0.1'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.2.1'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
     implementation 'com.tbuonomo:dotsindicator:5.0'
