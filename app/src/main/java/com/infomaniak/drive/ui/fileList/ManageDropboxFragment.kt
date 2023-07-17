@@ -38,7 +38,6 @@ import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.fixIconPaddingIssue
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.MatomoCore.TrackerAction
@@ -91,8 +90,6 @@ open class ManageDropboxFragment : Fragment() {
 
         disableButton.isEnabled = false
         saveButton.isEnabled = false
-
-        passwordTextLayout.fixIconPaddingIssue()
 
         FileController.getFileById(navigationArgs.fileId)?.let { file ->
             disableButton.isEnabled = true

@@ -28,13 +28,11 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
 import com.infomaniak.drive.R
-import com.infomaniak.drive.utils.fixIconPaddingIssue
 import com.infomaniak.lib.core.utils.*
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener
 import com.wdullaer.materialdatetimepicker.time.Timepoint
 import kotlinx.android.synthetic.main.view_time_input.view.timeValueInput
-import kotlinx.android.synthetic.main.view_time_input.view.timeValueLayout
 import java.util.Calendar
 import java.util.Date
 
@@ -60,8 +58,6 @@ class TimeInputView @JvmOverloads constructor(
 
         hours = defaultDate.hours()
         minutes = defaultDate.minutes()
-
-        timeValueLayout.fixIconPaddingIssue()
 
         timeValueInput.apply {
             text = SpannableStringBuilder(defaultDate.format(FORMAT_DATE_HOUR_MINUTE))
