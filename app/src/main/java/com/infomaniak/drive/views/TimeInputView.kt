@@ -28,7 +28,6 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
 import com.infomaniak.drive.R
-import com.infomaniak.drive.utils.fixIconPaddingIssue
 import com.infomaniak.lib.core.utils.*
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener

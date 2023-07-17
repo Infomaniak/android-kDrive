@@ -30,6 +30,7 @@ import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.fixIconPaddingIssue
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
 import kotlinx.android.synthetic.main.fragment_create_folder.*
