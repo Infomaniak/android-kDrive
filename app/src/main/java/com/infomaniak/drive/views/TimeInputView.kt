@@ -60,8 +60,6 @@ class TimeInputView @JvmOverloads constructor(
         hours = defaultDate.hours()
         minutes = defaultDate.minutes()
 
-        timeValueLayout.fixIconPaddingIssue()
-
         timeValueInput.apply {
             text = SpannableStringBuilder(defaultDate.format(FORMAT_DATE_HOUR_MINUTE))
             keyListener = null

@@ -71,8 +71,6 @@ class FileShareLinkSettingsFragment : Fragment() {
             setupShareLinkSettingsUi()
         }
 
-        passwordTextLayout.fixIconPaddingIssue()
-
         setupUiListeners()
         setupFreeAccountUi()
         setupShareLinkSettingsUi()

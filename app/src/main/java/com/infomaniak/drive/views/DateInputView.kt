@@ -27,7 +27,6 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.utils.fixIconPaddingIssue
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_date_input.view.dateValueInput
 import kotlinx.android.synthetic.main.view_date_input.view.dateValueLayout
@@ -52,8 +51,6 @@ class DateInputView @JvmOverloads constructor(
         onDateSet: ((timestamp: Long) -> Unit)? = null,
     ) {
         currentCalendarDate = defaultDate
-
-        dateValueLayout.fixIconPaddingIssue()
 
         dateValueInput.apply {
             text = SpannableStringBuilder(currentCalendarDate.format())
