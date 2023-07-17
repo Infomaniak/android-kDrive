@@ -33,7 +33,6 @@ import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener
 import com.wdullaer.materialdatetimepicker.time.Timepoint
 import kotlinx.android.synthetic.main.view_time_input.view.timeValueInput
-import kotlinx.android.synthetic.main.view_time_input.view.timeValueLayout
 import java.util.Calendar
 import java.util.Date
 

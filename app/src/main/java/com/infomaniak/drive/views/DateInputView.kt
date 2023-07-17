@@ -29,7 +29,6 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.format
 import kotlinx.android.synthetic.main.view_date_input.view.dateValueInput
-import kotlinx.android.synthetic.main.view_date_input.view.dateValueLayout
 import java.util.Calendar
 import java.util.Date
 
