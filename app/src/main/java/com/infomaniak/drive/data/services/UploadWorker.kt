@@ -50,9 +50,7 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.utils.getFileName
-import com.infomaniak.lib.core.utils.getFileSize
-import com.infomaniak.lib.core.utils.hasPermissions
+import com.infomaniak.lib.core.utils.*
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -400,30 +398,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private fun Uri.getFileSize(cursor: Cursor) = calculateFileSize(this) ?: cursor.getFileSize()
 
-    /**
-     * Calculate file size from an uri
-     * The size in MediaStore is often wrong on some devices, so we calculate it
-     * @param uri Uri of the file
-     * @return the size result
-     */
     private fun calculateFileSize(uri: Uri): Long? {
-        return runCatching {
-            contentResolver.openInputStream(uri)?.use { inputStream ->
-                var currentSize: Int
-                val byteArray = ByteArray(1024)
-                var fileSize = 0L
-                while (inputStream.read(byteArray).also { currentSize = it } != -1) {
-                    fileSize += currentSize
-                }
-                fileSize
-            }
-        }.getOrElse { exception ->
+        return uri.calculateFileSize(contentResolver) ?: null.also {
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
                 scope.setExtra("uri", uri.toString())
-                Sentry.captureException(exception)
+                Sentry.captureException(Exception("Cannot calculate the file size"))
             }
-            null
         }
     }
 
