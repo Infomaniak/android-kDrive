@@ -135,25 +135,25 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
     implementation 'androidx.webkit:webkit:1.7.0'
 
-    def exoplayer_version = '2.18.7'
+    def exoplayer_version = '2.19.0'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:6.0.1'
-    implementation 'com.github.MikeOrtiz:TouchImageView:3.2.1'
+    implementation 'com.airbnb.android:lottie:6.1.0'
+    implementation 'com.github.MikeOrtiz:TouchImageView:3.3'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
     implementation 'com.tbuonomo:dotsindicator:5.0'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
     implementation 'io.realm:android-adapters:4.0.0'
 
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.1.2'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.2.0'
 
     implementation 'com.googlecode.plist:dd-plist:1.27'
 
-    implementation 'com.github.hannesa2:paho.mqtt.android:3.5.2'
+    implementation 'com.github.hannesa2:paho.mqtt.android:3.5.3'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.10.0'
     testImplementation 'io.github.serpro69:kotlin-faker:1.14.0'
