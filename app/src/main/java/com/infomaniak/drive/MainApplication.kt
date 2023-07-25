@@ -178,8 +178,6 @@ class MainApplication : Application(), ImageLoaderFactory {
     }
 
     private companion object {
-        const val COIL_CACHE_DIR = "coil_cache"
-
         private val acceptedLocale = arrayOf("fr", "de", "it", "en", "es")
         private val defaultLocale = Locale.ENGLISH
     }
