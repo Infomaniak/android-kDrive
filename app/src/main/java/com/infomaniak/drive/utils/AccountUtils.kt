@@ -117,10 +117,8 @@ object AccountUtils : CredentialManager() {
             ApiRepository.getAllDrivesData(okHttpClient).apply {
                 if (result != ApiResponse.Status.ERROR) {
                     handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
-                } else {
-                    if (error?.code == ErrorCode.NO_DRIVE) {
-                        removeUserAndDeleteToken(context, user)
-                    }
+                } else if (error?.code == ErrorCode.NO_DRIVE) {
+                    removeUserAndDeleteToken(context, user)
                 }
             }
         }
@@ -179,7 +177,6 @@ object AccountUtils : CredentialManager() {
                 remoteUser.organizations = arrayListOf()
                 requestCurrentUser()?.let { localUser ->
                     setUserToken(remoteUser, localUser.apiToken)
-                    currentUser = remoteUser
                 }
             }
         }
