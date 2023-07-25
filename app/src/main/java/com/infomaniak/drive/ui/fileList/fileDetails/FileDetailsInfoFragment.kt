@@ -141,7 +141,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setPath(path: String) {
         val drive = DriveInfosController.getDrive(AccountUtils.currentUserId, driveId = file.driveId)!!
         driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
-        pathValue.text = "${drive.name}${path.substringBeforeLast("/")}"
+        pathValue.text = "${drive.name}$path"
         pathView.isVisible = true
     }
 
