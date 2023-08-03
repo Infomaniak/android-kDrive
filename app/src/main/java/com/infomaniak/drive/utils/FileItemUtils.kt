@@ -187,7 +187,7 @@ fun File.getFolderIcon(): Pair<Int, String?> {
     return if (isDisabled()) R.drawable.ic_folder_disable to null
     else when (getVisibilityType()) {
         VisibilityType.IS_TEAM_SPACE -> R.drawable.ic_folder_common_documents to null
-        VisibilityType.IS_TEAM_SPACE_FOLDER -> R.drawable.ic_folder_common_documents to null
+        VisibilityType.IS_TEAM_SPACE_FOLDER -> R.drawable.ic_folder_common_documents to color
         VisibilityType.IS_SHARED_SPACE -> R.drawable.ic_folder_shared to null
         VisibilityType.IS_DROPBOX -> R.drawable.ic_folder_dropbox to color
         else -> R.drawable.ic_folder_filled to color
