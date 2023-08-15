@@ -115,13 +115,14 @@ open class File(
      * LOCAL
      */
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
+//    var cursor: String = "",
     var isComplete: Boolean = false,
     var isFromActivities: Boolean = false,
     var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
     var isOffline: Boolean = false,
-    var versionCode: Int = 0,
     var responseAt: Long = 0,
+    var versionCode: Int = 0,
 
     ) : RealmObject(), Parcelable {
 
