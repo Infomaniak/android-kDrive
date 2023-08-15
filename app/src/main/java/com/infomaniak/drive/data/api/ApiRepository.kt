@@ -203,7 +203,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun deleteFile(file: File): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.fileURL(file), DELETE)
+        return callApi(ApiRoutes.fileURLV2(file), DELETE)
     }
 
     fun renameFile(file: File, newName: String): ApiResponse<CancellableAction> {
@@ -396,7 +396,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun emptyTrash(driveId: Int): ApiResponse<Boolean> = callApi(ApiRoutes.emptyTrash(driveId), DELETE)
 
-    fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURL(file), DELETE)
+    fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURLV2(file), DELETE)
 
     fun getMySharedFiles(
         okHttpClient: OkHttpClient,
