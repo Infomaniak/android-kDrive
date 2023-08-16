@@ -503,6 +503,7 @@
     <string name="mySharesNoFile">Keine Datei freigegeben</string>
     <string name="mySharesTitle">Meine Freigaben</string>
     <string name="newFolderTitle">Was möchten Sie hinzufügen?</string>
+    <string name="newMediaDetected">Neue Medien entdeckt</string>
     <string name="noDriveDescription">kDrive kostenlos testen oder sich mit einem anderen Benutzerkonto verbinden.</string>
     <string name="noDriveTitle">Sie haben kDrive noch nicht!</string>
     <string name="noFilesDescription">Dieser Ordner ist leer.</string>

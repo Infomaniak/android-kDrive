@@ -514,6 +514,7 @@
     <string name="mySharesNoFile">No file shared</string>
     <string name="mySharesTitle">My shares</string>
     <string name="newFolderTitle">What would you like to add?</string>
+    <string name="newMediaDetected">New media detected</string>
     <string name="noDriveDescription">Try kDrive for free or log in with a different user account.</string>
     <string name="noDriveTitle">You don’t have a kDrive yet!</string>
     <string name="noFilesDescription">This folder is empty.</string>

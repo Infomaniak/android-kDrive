@@ -503,6 +503,7 @@
     <string name="mySharesNoFile">Non ci sono file condivisi</string>
     <string name="mySharesTitle">Le mie condivisioni</string>
     <string name="newFolderTitle">Cosa vuoi aggiungere?</string>
+    <string name="newMediaDetected">Nuovi media rilevati</string>
     <string name="noDriveDescription">Prova kDrive gratuitamente o accedi con un altro account utente.</string>
     <string name="noDriveTitle">Non hai ancora kDrive!</string>
     <string name="noFilesDescription">La cartella è vuota.</string>
