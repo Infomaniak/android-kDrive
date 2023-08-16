@@ -25,7 +25,7 @@ import androidx.work.*
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker.Companion.showSyncConfigNotification
-import com.infomaniak.drive.data.sync.FileObserveService.Companion.TRIGGER_CONTENT_DELAY
+import com.infomaniak.drive.data.sync.MediaObserverService.Companion.TRIGGER_CONTENT_DELAY
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.NotificationUtils.fileObserveServiceNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
@@ -37,7 +37,7 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 @RequiresApi(api = Build.VERSION_CODES.N)
-class FileObserveWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
+class MediaObserverWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         Log.d("MediaContentJob", "$TAG> JOB STARTED!")
@@ -62,10 +62,10 @@ class FileObserveWorker(appContext: Context, params: WorkerParameters) : Corouti
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     companion object {
-        private const val TAG = "FileObserveWorker"
+        private const val TAG = "MediaObserverWorker"
 
         fun scheduleWork(context: Context) {
-            val workRequest = OneTimeWorkRequestBuilder<FileObserveWorker>().build()
+            val workRequest = OneTimeWorkRequestBuilder<MediaObserverWorker>().build()
             WorkManager.getInstance(context).enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, workRequest)
         }
 
@@ -74,7 +74,7 @@ class FileObserveWorker(appContext: Context, params: WorkerParameters) : Corouti
             val syncSetting = UploadFile.getAppSyncSettings()
 
             if (syncSetting == null) {
-                Sentry.captureMessage("FileObserveServiceApi24: disableAutoSync")
+                Sentry.captureMessage("$TAG: disableAutoSync")
                 context.disableAutoSync()
                 return
             }
@@ -90,7 +90,7 @@ class FileObserveWorker(appContext: Context, params: WorkerParameters) : Corouti
                 }
                 .build()
 
-            val workRequest = OneTimeWorkRequestBuilder<FileObserveWorker>()
+            val workRequest = OneTimeWorkRequestBuilder<MediaObserverWorker>()
                 .setConstraints(constraints)
                 .build()
 
