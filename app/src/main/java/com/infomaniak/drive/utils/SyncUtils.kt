@@ -31,7 +31,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.FileObserveService
-import com.infomaniak.drive.data.sync.FileObserveServiceApi24
+import com.infomaniak.drive.data.sync.FileObserveWorker
 import java.util.Date
 
 object SyncUtils {
@@ -136,14 +136,14 @@ object SyncUtils {
         if (UploadFile.getAppSyncSettings()?.syncImmediately == true) {
             Log.d("kDrive", "start content observer!")
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) FileObserveServiceApi24.scheduleJob(this)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) FileObserveWorker.scheduleWork(this)
             else startService(Intent(applicationContext, FileObserveService::class.java))
         }
     }
 
     private fun Context.cancelContentObserver() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            FileObserveServiceApi24.cancelJob(applicationContext)
+            FileObserveWorker.cancelWork(applicationContext)
         } else {
             applicationContext.stopService(Intent(applicationContext, FileObserveService::class.java))
         }

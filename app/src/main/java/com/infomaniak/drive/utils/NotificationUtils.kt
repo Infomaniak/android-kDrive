@@ -83,6 +83,14 @@ object NotificationUtils : NotificationUtilsCore() {
         }
     }
 
+    fun Context.fileObserveServiceNotification(): NotificationCompat.Builder {
+        val channelId = getString(R.string.notification_channel_id_upload_service)
+        return NotificationCompat.Builder(this, channelId).apply {
+            setSmallIcon(DEFAULT_SMALL_ICON)
+            setContentText(getString(R.string.newMediaDetected))
+        }
+    }
+
     fun Context.buildGeneralNotification(
         title: String,
         description: String? = null

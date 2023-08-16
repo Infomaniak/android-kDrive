@@ -202,7 +202,7 @@
 
         <service android:name=".data.sync.FileObserveService" />
         <service
-            android:name=".data.sync.FileObserveServiceApi24"
+            android:name=".data.sync.FileObserveWorker"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <receiver
