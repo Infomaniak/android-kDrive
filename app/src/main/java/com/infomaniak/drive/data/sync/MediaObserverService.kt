@@ -34,7 +34,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 
-class FileObserveService : Service() {
+class MediaObserverService : Service() {
     private lateinit var tableObserver: TableObserver
     private var syncJob: Job? = null
 
@@ -102,7 +102,7 @@ class FileObserveService : Service() {
     }
 
     companion object {
-        const val TAG = "FileObserveService"
+        const val TAG = "MediaObserverService"
         const val TRIGGER_CONTENT_DELAY = 5_000L
 
         var isRunning = false
