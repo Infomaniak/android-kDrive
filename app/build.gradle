@@ -10,7 +10,7 @@ android {
 
     namespace 'com.infomaniak.drive'
 
-    compileSdk 33
+    compileSdk 34
 
     ndkVersion "25.2.9519653"
 
@@ -18,9 +18,9 @@ android {
         testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 4_02_022_01
-        versionName '4.2.22'
+        targetSdkVersion 34
+        versionCode 4_02_023_01
+        versionName '4.2.23'
 
         setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
