@@ -201,9 +201,6 @@
             tools:ignore="LockedOrientationActivity" />
 
         <service android:name=".data.sync.MediaObserverService" />
-        <service
-            android:name=".data.sync.MediaObserverWorker"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <receiver
             android:name=".utils.RebootReceiver"
