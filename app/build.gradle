@@ -98,6 +98,10 @@ android {
             events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
         }
     }
+
+    androidResources {
+        generateLocaleConfig true
+    }
 }
 
 sentry {
@@ -134,7 +138,7 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
     implementation 'androidx.webkit:webkit:1.7.0'
 
-    def exoplayer_version = '2.19.0'
+    def exoplayer_version = '2.19.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
