@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.R
+import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
@@ -378,7 +379,7 @@ class UploadTask(
     }
 
     private fun <T> ApiResponse<T>.manageUploadErrors() {
-        if (translatedError == R.string.connectionError) throw NetworkException()
+        if (error?.exception is ApiController.NetworkException) throw NetworkException()
         when (error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()

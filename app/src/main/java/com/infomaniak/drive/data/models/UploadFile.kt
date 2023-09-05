@@ -31,7 +31,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
-import com.infomaniak.lib.core.R
+import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.utils.format
 import io.realm.*
 import io.realm.annotations.Ignore
@@ -125,7 +125,7 @@ open class UploadFile(
                 // Cancel session if exists
                 uploadFileProxy.uploadToken?.let {
                     with(ApiRepository.cancelSession(uploadFileProxy.driveId, it, okHttpClient)) {
-                        if (translatedError == R.string.connectionError) throw UploadTask.NetworkException()
+                        if (error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
                     }
                 }
                 // Delete in realm

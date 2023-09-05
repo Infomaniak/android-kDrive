@@ -168,9 +168,9 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             }
             remoteFile
         } else {
-            val translatedError = fileDetails.translatedError
-            if (translatedError == R.string.connectionError) throw UploadTask.NetworkException()
+            if (fileDetails.error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
 
+            val translatedError = fileDetails.translatedError
             val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
             val translatedErrorText = if (translatedError == 0) "" else applicationContext.getString(translatedError)
             val responseJson = ApiController.gson.toJson(fileDetails, responseGsonType)
