@@ -49,11 +49,7 @@ class FileShareViewModel : ViewModel() {
     }
 
     fun editFileShareLink(file: File, shareLink: ShareLink) = liveData(Dispatchers.IO) {
-        val shareLinkSettings = shareLink.ShareLinkSettings().apply {
-            validUntil = if (AccountUtils.getCurrentDrive()?.isFreePack == true) null else shareLink.validUntil
-        }
-
-        with(ApiRepository.updateShareLink(file, shareLinkSettings.toJsonElement())) {
+        with(ApiRepository.updateShareLink(file, shareLink.ShareLinkSettings().toJsonElement())) {
             if (data == true) FileController.updateShareLinkWithRemote(file.id)
             emit(this)
         }
