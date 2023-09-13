@@ -23,6 +23,7 @@ import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmObject
@@ -189,6 +190,7 @@ open class ShareLink(
                 JsonParser.parseString(toJson(this@ShareLinkSettings)).asJsonObject.apply {
                     if (password == null) remove(ShareLinkSettings::password.name)
                     if (right == null) remove(ShareLinkSettings::right.name)
+                    if (AccountUtils.getCurrentDrive()?.isFreePack == true) remove("valid_until")
                 }
             }
         }
