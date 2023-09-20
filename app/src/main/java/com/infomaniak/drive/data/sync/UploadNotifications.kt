@@ -41,6 +41,18 @@ object UploadNotifications {
 
     const val NOTIFICATION_FILES_LIMIT = 5
 
+    fun getCurrentUploadNotification(context: Context, pendingCount: Int): NotificationCompat.Builder {
+        val pendingTitle = context.getString(R.string.uploadInProgressTitle)
+        val pendingDescription = context.resources.getQuantityString(
+            R.plurals.uploadInProgressNumberFile,
+            pendingCount,
+            pendingCount
+        )
+        val intent = Intent(context, LaunchActivity::class.java).clearStack()
+        val contentIntent = PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)
+        return getNotificationBuilder(context, pendingTitle, pendingDescription, contentIntent)
+    }
+
     fun setupCurrentUploadNotification(context: Context, pendingCount: Int) {
         val pendingTitle = context.getString(R.string.uploadInProgressTitle)
         val pendingDescription = context.resources.getQuantityString(
@@ -194,7 +206,18 @@ object UploadNotifications {
         locateButton: Boolean = false
     ) {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
-        context.uploadNotification().apply {
+        val notificationBuilder = getNotificationBuilder(context, title, description, contentIntent, locateButton)
+        notificationManagerCompat.notify(notificationId, notificationBuilder.build())
+    }
+
+    private fun getNotificationBuilder(
+        context: Context,
+        title: String,
+        description: String,
+        contentIntent: PendingIntent? = null,
+        locateButton: Boolean = false
+    ): NotificationCompat.Builder {
+        return context.uploadNotification().apply {
             setTicker(title)
             setAutoCancel(true)
             setContentTitle(title)
@@ -205,7 +228,6 @@ object UploadNotifications {
                     NotificationCompat.Action(R.drawable.ic_export, context.getString(R.string.locateButton), contentIntent)
                 )
             }
-            notificationManagerCompat.notify(notificationId, this.build())
         }
     }
 

@@ -39,7 +39,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.NOTIFICATION_FILES_LIMIT
-import com.infomaniak.drive.data.sync.UploadNotifications.setupCurrentUploadNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.utils.*
@@ -47,7 +46,6 @@ import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.uploadServiceNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.utils.*
@@ -68,7 +66,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
-    var pendingCount = 0
+    private var pendingCount = 0
 
     override suspend fun doWork(): Result {
 
@@ -77,8 +75,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         // Checks if the maximum number of retry allowed is reached
         if (runAttemptCount >= MAX_RETRY_COUNT) return Result.failure()
-
-        moveServiceToForeground()
 
         return runUploadCatching {
             // Check if we have the required permissions before continuing
@@ -100,11 +96,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun moveServiceToForeground() {
-        applicationContext.uploadServiceNotification().apply {
-            setContentTitle(applicationContext.getString(R.string.notificationUploadServiceChannelName))
-            setForeground(ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, build()))
-        }
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        val pendingCount = if (this.pendingCount > 0) this.pendingCount else UploadFile.getAllPendingUploadsCount()
+        val currentUploadNotification = UploadNotifications.getCurrentUploadNotification(applicationContext, pendingCount)
+        return ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, currentUploadNotification.build())
     }
 
     private fun checkPermissions(): Result? {
@@ -144,7 +139,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         for (uploadFile in uploadFiles) {
             Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
 
-            if (uploadFile.initUpload(pendingCount)) {
+            if (uploadFile.initUpload()) {
                 successNames.add(uploadFile.fileName)
                 successCount++
             } else {
@@ -178,12 +173,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun UploadFile.initUpload(pendingCount: Int) = withContext(Dispatchers.IO) {
+    private suspend fun UploadFile.initUpload() = withContext(Dispatchers.IO) {
         val uri = getUriObject()
 
         currentUploadFile = this@initUpload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        updateUploadCountNotification(applicationContext, pendingCount)
+        updateUploadCountNotification(applicationContext)
 
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
@@ -239,6 +234,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 Sentry.captureMessage("Deleted file with size 0")
             }
             false
+        }
+    }
+
+    private var uploadCountNotificationJob: Job? = null
+    private fun CoroutineScope.updateUploadCountNotification(context: Context) {
+        uploadCountNotificationJob?.cancel()
+        uploadCountNotificationJob = launch {
+            // We wait a little otherwise it is too fast and the notification may not be updated
+            delay(NotificationUtils.ELAPSED_TIME)
+            if (isActive) UploadNotifications.setupCurrentUploadNotification(context, pendingCount)
         }
     }
 
@@ -456,15 +461,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             return WorkQuery.Builder.fromUniqueWorkNames(listOf(TAG))
                 .addStates(states)
                 .build()
-        }
-
-        fun CoroutineScope.updateUploadCountNotification(context: Context, pendingCount: Int) {
-            launch {
-                // We wait a little otherwise it is too fast and the notification may not be updated
-                delay(NotificationUtils.ELAPSED_TIME)
-                ensureActive()
-                setupCurrentUploadNotification(context, pendingCount)
-            }
         }
 
         @SuppressLint("MissingPermission")

@@ -114,6 +114,7 @@ object UploadWorkerThrowable {
     }
 
     private fun UploadWorker.cancelUploadNotification() {
+        applicationContext.cancelNotification(NotificationUtils.UPLOAD_SERVICE_ID)
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = UploadWorker.BREADCRUMB_TAG

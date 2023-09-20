@@ -31,7 +31,6 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.data.services.UploadWorker.Companion.updateUploadCountNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
@@ -315,7 +314,6 @@ class UploadTask(
         ensureActive()
 
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
-            updatePendingCountNotificationIfNeeded()
             uploadNotification.apply {
                 setContentIntent(uploadFile.progressPendingIntent(context))
                 setContentText("${currentProgress}%")
@@ -334,14 +332,6 @@ class UploadTask(
             "kDrive",
             " upload >> ${currentProgress}%, totalBytesWritten:$totalBytesWritten, fileSize:${uploadFile.fileSize}"
         )
-    }
-
-    private fun CoroutineScope.updatePendingCountNotificationIfNeeded() {
-        val latestPendingCount = UploadFile.getAllPendingUploadsCount()
-        if (worker.pendingCount != latestPendingCount) {
-            updateUploadCountNotification(context, latestPendingCount)
-            worker.pendingCount = latestPendingCount
-        }
     }
 
     private suspend fun shareProgress(progress: Int = 0, isUploaded: Boolean = false) {
