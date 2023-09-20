@@ -45,12 +45,9 @@ import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
-import com.infomaniak.lib.core.utils.clearStack
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.android.synthetic.main.activity_login.*
@@ -148,26 +145,35 @@ class LoginActivity : AppCompatActivity() {
             infomaniakLogin.getToken(
                 okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
                 code = authCode,
-                onSuccess = {
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        when (val user = authenticateUser(this@LoginActivity, it)) {
-                            is User -> {
-                                trackUserId(AccountUtils.currentUserId)
-                                trackAccountEvent("loggedIn")
-                                launchMainActivity()
-                            }
-                            is ApiResponse<*> -> withContext(Dispatchers.Main) {
-                                if (user.error?.code == ErrorCode.NO_DRIVE) {
-                                    launchNoDriveActivity()
-                                } else {
-                                    showError(getString(user.translatedError))
-                                }
-                            }
-                            else -> withContext(Dispatchers.Main) { showError(getString(R.string.anErrorHasOccurred)) }
-                        }
-                    }
-                },
+                onSuccess = ::onGetTokenSuccess,
                 onError = { showError(getLoginErrorDescription(this@LoginActivity, it)) },
+            )
+        }
+    }
+
+    private fun onGetTokenSuccess(apiToken: ApiToken) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            when (val returnValue = authenticateUser(this@LoginActivity, apiToken)) {
+                is User -> {
+                    trackUserId(AccountUtils.currentUserId)
+                    trackAccountEvent("loggedIn")
+                    launchMainActivity()
+                    return@launch
+                }
+                is ApiResponse<*> -> withContext(Dispatchers.Main) {
+                    if (returnValue.error?.code == ErrorCode.NO_DRIVE) {
+                        launchNoDriveActivity()
+                    } else {
+                        showError(getString(returnValue.translatedError))
+                    }
+                }
+                else -> withContext(Dispatchers.Main) { showError(getString(R.string.anErrorHasOccurred)) }
+            }
+
+            infomaniakLogin.deleteToken(
+                okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+                token = apiToken,
+                onError = { SentryLog.e("DeleteTokenError", "API response error: $it") },
             )
         }
     }
