@@ -614,7 +614,7 @@ class CloudStorageProvider : DocumentsProvider() {
                     setContentIntent(
                         PendingIntent.getActivity(
                             context,
-                            0,
+                            syncPermissionNotifId,
                             Intent(
                                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                                 Uri.parse("package:${context.packageName}")

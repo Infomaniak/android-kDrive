@@ -470,7 +470,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             buildGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
                 setContentText(getString(R.string.noSyncFolderNotificationDescription))
                 setContentIntent(pendingIntent)
-                notificationManagerCompat.notify(NotificationUtils.FILE_OBSERVE_ID, this.build())
+                notificationManagerCompat.notify(NotificationUtils.SYNC_CONFIG_ID, this.build())
             }
         }
 
