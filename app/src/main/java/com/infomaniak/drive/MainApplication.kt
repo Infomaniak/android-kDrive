@@ -146,12 +146,13 @@ class MainApplication : Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader = CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), true)
 
     private val refreshTokenError: (User) -> Unit = { user ->
+        val hashCode = UUID.randomUUID().hashCode()
         val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, pendingIntentFlags)
+        val pendingIntent = PendingIntent.getActivity(this, hashCode, openAppIntent, pendingIntentFlags)
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         buildGeneralNotification(getString(R.string.refreshTokenError)).apply {
             setContentIntent(pendingIntent)
-            notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
+            notificationManagerCompat.notify(hashCode, build())
         }
         Sentry.withScope { scope ->
             scope.level = SentryLevel.ERROR

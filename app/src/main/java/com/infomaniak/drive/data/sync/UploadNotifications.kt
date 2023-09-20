@@ -31,11 +31,13 @@ import com.infomaniak.drive.ui.LaunchActivityArgs
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.NotificationUtils
+import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_SERVICE_ID
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
 import com.infomaniak.lib.core.utils.clearStack
 import io.sentry.Sentry
+import java.util.UUID
 
 object UploadNotifications {
 
@@ -49,7 +51,7 @@ object UploadNotifications {
             pendingCount
         )
         val intent = Intent(context, LaunchActivity::class.java).clearStack()
-        val contentIntent = PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)
+        val contentIntent = PendingIntent.getActivity(context, UPLOAD_SERVICE_ID, intent, pendingIntentFlags)
         return getNotificationBuilder(context, pendingTitle, pendingDescription, contentIntent)
     }
 
@@ -61,8 +63,8 @@ object UploadNotifications {
             pendingCount
         )
         val intent = Intent(context, LaunchActivity::class.java).clearStack()
-        val contentIntent = PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)
-        showNotification(context, pendingTitle, pendingDescription, NotificationUtils.UPLOAD_SERVICE_ID, contentIntent)
+        val contentIntent = PendingIntent.getActivity(context, UPLOAD_SERVICE_ID, intent, pendingIntentFlags)
+        showNotification(context, pendingTitle, pendingDescription, UPLOAD_SERVICE_ID, contentIntent)
     }
 
     fun UploadFile.networkErrorNotification(context: Context) {
@@ -130,7 +132,7 @@ object UploadNotifications {
 
     fun permissionErrorNotification(context: Context) {
         val mainActivityIntent = PendingIntent.getActivity(
-            context, 0,
+            context, NotificationUtils.UPLOAD_STATUS_ID,
             Intent(context, MainActivity::class.java).clearStack(), pendingIntentFlags
         )
         showNotification(
@@ -256,10 +258,15 @@ object UploadNotifications {
             )
         }
 
-        return PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)
+        return PendingIntent.getActivity(context, NotificationUtils.UPLOAD_STATUS_ID, intent, pendingIntentFlags)
     }
 
     fun Context.syncSettingsActivityPendingIntent(): PendingIntent {
-        return PendingIntent.getActivity(this, 0, Intent(this, SyncSettingsActivity::class.java).clearStack(), pendingIntentFlags)
+        return PendingIntent.getActivity(
+            /* context = */ this,
+            /* requestCode = */ UUID.randomUUID().hashCode(),
+            /* intent = */ Intent(this, SyncSettingsActivity::class.java).clearStack(),
+            /* flags = */ pendingIntentFlags
+        )
     }
 }

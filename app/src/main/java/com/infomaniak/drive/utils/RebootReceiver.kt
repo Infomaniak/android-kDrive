@@ -46,13 +46,19 @@ class RebootReceiver : BroadcastReceiver() {
 
             if (!getOldkDriveUser().isEmpty) {
                 val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-                val pendingIntent = PendingIntent.getActivity(this, 0, openAppIntent, NotificationUtilsCore.pendingIntentFlags)
+                val hashCode = UUID.randomUUID().hashCode()
+                val pendingIntent = PendingIntent.getActivity(
+                    /* context = */ this,
+                    /* requestCode = */hashCode,
+                    /* intent = */openAppIntent,
+                    /* flags = */NotificationUtilsCore.pendingIntentFlags
+                )
                 val notificationManagerCompat = NotificationManagerCompat.from(context)
 
                 buildGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {
                     setContentText(getString(R.string.migrateNotificationDescription))
                     setContentIntent(pendingIntent)
-                    notificationManagerCompat.notify(UUID.randomUUID().hashCode(), build())
+                    notificationManagerCompat.notify(hashCode, build())
                 }
             }
 

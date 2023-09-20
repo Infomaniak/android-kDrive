@@ -30,7 +30,7 @@ object NotificationUtils : NotificationUtilsCore() {
     const val UPLOAD_SERVICE_ID = 1
     const val UPLOAD_STATUS_ID = 2
     const val CURRENT_UPLOAD_ID = 3
-    const val FILE_OBSERVE_ID = 4
+    const val SYNC_CONFIG_ID = 4
 
     const val ELAPSED_TIME = 500L
 
