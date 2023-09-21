@@ -39,6 +39,7 @@ import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
+import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.user.User
@@ -152,7 +153,7 @@ class MainApplication : Application(), ImageLoaderFactory {
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         buildGeneralNotification(getString(R.string.refreshTokenError)).apply {
             setContentIntent(pendingIntent)
-            notificationManagerCompat.notify(hashCode, build())
+            notificationManagerCompat.notifyCompat(this@MainApplication, hashCode, build())
         }
         Sentry.withScope { scope ->
             scope.level = SentryLevel.ERROR

@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -34,6 +33,7 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
+import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.api.ApiController
@@ -74,14 +74,13 @@ class UploadTask(
     private var uploadNotificationElapsedTime = ELAPSED_TIME
     private var uploadNotificationStartTime = 0L
 
-    @SuppressLint("MissingPermission")
     suspend fun start() = withContext(Dispatchers.IO) {
         notificationManagerCompat = NotificationManagerCompat.from(context)
 
         uploadNotification = context.uploadProgressNotification()
         uploadNotification.apply {
             setContentTitle(uploadFile.fileName)
-            notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
+            notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
         }
 
         try {
@@ -187,7 +186,6 @@ class UploadTask(
         onFinish(uri)
     }
 
-    @SuppressLint("MissingPermission")
     private suspend fun onFinish(uri: Uri) = with(uploadFile) {
         with(ApiRepository.finishSession(driveId, uploadToken!!, okHttpClient)) {
             if (!isSuccess()) manageUploadErrors()
@@ -197,7 +195,7 @@ class UploadTask(
             setContentText("100%")
             setSmallIcon(android.R.drawable.stat_sys_upload_done)
             setProgress(0, 0, false)
-            notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
+            notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
         }
         shareProgress(100, true)
         UploadFile.uploadFinished(uri)
@@ -283,7 +281,6 @@ class UploadTask(
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun CoroutineScope.updateProgress(currentBytes: Int, bytesWritten: Long, contentLength: Long) {
         val totalBytesWritten = currentBytes + previousChunkBytesWritten
         val progress = ((totalBytesWritten.toDouble() / uploadFile.fileSize.toDouble()) * 100).toInt()
@@ -318,7 +315,7 @@ class UploadTask(
                 setContentIntent(uploadFile.progressPendingIntent(context))
                 setContentText("${currentProgress}%")
                 setProgress(100, currentProgress, false)
-                notificationManagerCompat.notify(CURRENT_UPLOAD_ID, build())
+                notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
                 uploadNotificationStartTime = System.currentTimeMillis()
                 uploadNotificationElapsedTime = 0L
             }

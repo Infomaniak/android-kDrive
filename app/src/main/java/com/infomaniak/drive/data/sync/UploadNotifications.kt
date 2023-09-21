@@ -32,6 +32,7 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_SERVICE_ID
+import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
@@ -209,7 +210,7 @@ object UploadNotifications {
     ) {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         val notificationBuilder = getNotificationBuilder(context, title, description, contentIntent, locateButton)
-        notificationManagerCompat.notify(notificationId, notificationBuilder.build())
+        notificationManagerCompat.notifyCompat(context, notificationId, notificationBuilder.build())
     }
 
     private fun getNotificationBuilder(

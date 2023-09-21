@@ -29,6 +29,7 @@ import androidx.work.WorkerParameters
 import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.MqttNotification
+import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import java.util.Date
 
@@ -76,7 +77,7 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
     }
 
     private fun launchObserver(onOperationFinished: () -> Unit) {
-        mqttNotificationsObserver = Observer<MqttNotification> { notification ->
+        mqttNotificationsObserver = Observer { notification ->
             if (notification.isProgressNotification() && notification.actionUuid == actionUuid) {
                 lastReception = Date()
                 if (notification.progress!!.todo == 0) {
@@ -88,7 +89,7 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
                         setContentTitle(string)
                         setContentText("${notification.progress.percent}%")
                         setProgress(100, notification.progress.percent, false)
-                        notificationManagerCompat.notify(notificationId, build())
+                        notificationManagerCompat.notifyCompat(applicationContext, notificationId, build())
                     }
                 }
             }

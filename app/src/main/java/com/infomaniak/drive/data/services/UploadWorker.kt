@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.services
 
-import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
@@ -46,14 +45,18 @@ import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.calculateFileSize
+import com.infomaniak.lib.core.utils.getFileName
+import com.infomaniak.lib.core.utils.getFileSize
+import com.infomaniak.lib.core.utils.hasPermissions
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
-import java.util.*
+import java.util.Date
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
@@ -463,14 +466,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 .build()
         }
 
-        @SuppressLint("MissingPermission")
         fun Context.showSyncConfigNotification() {
             val pendingIntent = syncSettingsActivityPendingIntent()
             val notificationManagerCompat = NotificationManagerCompat.from(this)
             buildGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
                 setContentText(getString(R.string.noSyncFolderNotificationDescription))
                 setContentIntent(pendingIntent)
-                notificationManagerCompat.notify(NotificationUtils.SYNC_CONFIG_ID, this.build())
+                notificationManagerCompat.notifyCompat(applicationContext, NotificationUtils.SYNC_CONFIG_ID, this.build())
             }
         }
 

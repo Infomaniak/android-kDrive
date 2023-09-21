@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MediaUtils
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
+import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
@@ -138,7 +139,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             downloadNotification.apply {
                 setContentText("$progress%")
                 setProgress(100, progress, false)
-                notificationManagerCompat.notify(file.id, build())
+                notificationManagerCompat.notifyCompat(applicationContext, file.id, build())
             }
         }
 
@@ -153,7 +154,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             downloadNotification.apply {
                 setContentText("100%")
                 setProgress(100, 100, false)
-                notificationManagerCompat.notify(file.id, build())
+                notificationManagerCompat.notifyCompat(applicationContext, file.id, build())
             }
             Result.success()
         } else Result.failure()

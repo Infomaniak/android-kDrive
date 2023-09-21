@@ -28,6 +28,7 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
+import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.activateSyncIfNeeded
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -58,7 +59,7 @@ class RebootReceiver : BroadcastReceiver() {
                 buildGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {
                     setContentText(getString(R.string.migrateNotificationDescription))
                     setContentIntent(pendingIntent)
-                    notificationManagerCompat.notify(hashCode, build())
+                    notificationManagerCompat.notifyCompat(context, hashCode, build())
                 }
             }
 
