@@ -528,7 +528,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun refreshActivities() {
         val isUploadInProgressNavigation = findNavController().currentDestination?.id == R.id.uploadInProgressFragment
 
-        if (folderId == OTHER_ROOT_ID || isUploadInProgressNavigation || !fileAdapter.isComplete) return
+        if (folderId in arrayOf(OTHER_ROOT_ID, ROOT_ID) || isUploadInProgressNavigation || !fileAdapter.isComplete) return
 
         if (isLoadingActivities) {
             retryLoadingActivities = true
