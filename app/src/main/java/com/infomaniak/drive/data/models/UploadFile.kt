@@ -56,6 +56,7 @@ open class UploadFile(
     var remoteSubFolder: String? = null,
     var type: String = Type.SYNC.name,
     var uploadAt: Date? = null,
+    var uploadHost: String? = null,
     var userId: Int = -1,
 ) : RealmObject() {
 
@@ -84,7 +85,7 @@ open class UploadFile(
 
     fun resetUploadToken() {
         getRealmInstance().use { realm ->
-            syncFileByUriQuery(realm, uri).findFirst()?.apply {
+            uploadFileByUriQuery(realm, uri).findFirst()?.apply {
                 realm.executeTransaction { uploadToken = null }
             }
         }
@@ -103,17 +104,20 @@ open class UploadFile(
 
     fun updateFileSize(newFileSize: Long) {
         getRealmInstance().use { realm ->
-            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+            uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
                 realm.executeTransaction { uploadFile.fileSize = newFileSize }
             }
         }
         fileSize = newFileSize
     }
 
-    fun updateUploadToken(newUploadToken: String) {
+    fun updateUploadToken(newUploadToken: String, uploadHost: String) {
         getRealmInstance().use { realm ->
-            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                realm.executeTransaction { uploadFile.uploadToken = newUploadToken }
+            uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
+                realm.executeTransaction {
+                    uploadFile.uploadToken = newUploadToken
+                    uploadFile.uploadHost = uploadHost
+                }
             }
         }
         uploadToken = newUploadToken
@@ -121,7 +125,7 @@ open class UploadFile(
 
     fun deleteIfExists(keepFile: Boolean = false) {
         getRealmInstance().use { realm ->
-            syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFileProxy ->
+            uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFileProxy ->
                 // Cancel session if exists
                 uploadFileProxy.uploadToken?.let {
                     with(ApiRepository.cancelSession(uploadFileProxy.driveId, it, okHttpClient)) {
@@ -166,7 +170,7 @@ open class UploadFile(
             }
         }
 
-        private fun syncFileByUriQuery(realm: Realm, uri: String): RealmQuery<UploadFile> {
+        private fun uploadFileByUriQuery(realm: Realm, uri: String): RealmQuery<UploadFile> {
             return realm.uploadTable.equalTo(UploadFile::uri.name, uri)
         }
 
@@ -271,7 +275,7 @@ open class UploadFile(
 
         fun canUpload(uri: Uri, lastModified: Date): Boolean {
             return getRealmInstance().use { realm ->
-                syncFileByUriQuery(realm, uri.toString())
+                uploadFileByUriQuery(realm, uri.toString())
                     .equalTo(UploadFile::fileModifiedAt.name, lastModified)
                     .findFirst() == null
             }
@@ -281,7 +285,7 @@ open class UploadFile(
             getRealmInstance().use {
                 it.executeTransaction { realm ->
                     uploadFiles.forEach { uploadFile ->
-                        syncFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { uploadFileRealm ->
+                        uploadFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { uploadFileRealm ->
                             // Don't delete definitively if it's a sync
                             if (uploadFileRealm.type == Type.SYNC.name) {
                                 uploadFileRealm.deletedAt = Date()
