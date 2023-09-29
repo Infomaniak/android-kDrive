@@ -215,7 +215,7 @@ object ApiRoutes {
 
     fun startUploadSession(driveId: Int) = "${uploadSessionUrlV3(driveId)}/start"
 
-    fun addChunkToSession(uploadHost: String?, driveId: Int, uploadToken: String) =
+    fun addChunkToSession(uploadHost: String, driveId: Int, uploadToken: String) =
         "$uploadHost/3/drive/$driveId/upload/session/$uploadToken/chunk"
 
     fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrlV3(driveId)}/$uploadToken/finish"
