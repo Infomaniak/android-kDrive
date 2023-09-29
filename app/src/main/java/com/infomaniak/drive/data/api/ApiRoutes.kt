@@ -34,19 +34,19 @@ object ApiRoutes {
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
     private fun driveURLV2(driveId: Int) = "${DRIVE_API_V2}${driveId}"
-    private fun driveURLV3(driveId: Int) = "${DRIVE_API_V3}${driveId}"
+    private fun driveURL(driveId: Int) = "${DRIVE_API_V3}${driveId}"
 
     private fun filesURLV2(driveId: Int) = "${driveURLV2(driveId)}/files"
-    private fun filesURLV3(driveId: Int) = "${driveURLV3(driveId)}/files"
+    private fun filesURL(driveId: Int) = "${driveURL(driveId)}/files"
 
     private fun fileURLV2(driveId: Int, fileId: FileId) = "${filesURLV2(driveId)}/${fileId}"
-    private fun fileURLV3(driveId: Int, fileId: FileId) = "${filesURLV3(driveId)}/${fileId}"
+    private fun fileURL(driveId: Int, fileId: FileId) = "${filesURL(driveId)}/${fileId}"
 
     fun fileURLV2(file: File) = fileURLV2(file.driveId, file.id)
-    private fun fileURLV3(file: File) = fileURLV3(file.driveId, file.id)
+    private fun fileURL(file: File) = fileURL(file.driveId, file.id)
 
     fun trashURLV2(file: File) = "${driveURLV2(file.driveId)}/trash/${file.id}"
-    private fun trashURLV3(file: File) = "${driveURLV3(file.driveId)}/trash/${file.id}"
+    private fun trashURL(file: File) = "${driveURL(file.driveId)}/trash/${file.id}"
 
     /** V1 */
     //region V1
@@ -79,7 +79,7 @@ object ApiRoutes {
 
     /** Action */
     //region Action
-    fun undoAction(driveId: Int) = "${driveURLV3(driveId)}/cancel"
+    fun undoAction(driveId: Int) = "${driveURL(driveId)}/cancel"
     //endregion
 
     /** Activities */
@@ -91,16 +91,16 @@ object ApiRoutes {
             "&actions[]=comment_create"
 
     fun getLastActivities(driveId: Int) =
-        "${filesURLV3(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
+        "${filesURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
 
-    fun getFileActivities(file: File) = "${fileURLV3(file)}/activities"
+    fun getFileActivities(file: File) = "${fileURL(file)}/activities"
 
     fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
         "${filesURLV2(driveId)}/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
                 "&actions[]=file_rename" +
                 "&actions[]=file_update"
 
-    fun getTrashedFilesActivities(file: File) = "${trashURLV3(file)}/activities"
+    fun getTrashedFilesActivities(file: File) = "${trashURL(file)}/activities"
     //endregion
 
     /** Category */
@@ -137,7 +137,7 @@ object ApiRoutes {
 
     /** Favorite */
     //region Favorite
-    fun getFavoriteFiles(driveId: Int, order: SortType) = "${filesURLV3(driveId)}/favorites?$fileWithQuery&${orderQuery(order)}"
+    fun getFavoriteFiles(driveId: Int, order: SortType) = "${filesURL(driveId)}/favorites?$fileWithQuery&${orderQuery(order)}"
 
     fun favorite(file: File) = "${fileURLV2(file)}/favorite"
     //endregion
@@ -145,13 +145,13 @@ object ApiRoutes {
     /** File/Directory */
     //region File/Directory
     fun getFolderFiles(driveId: Int, parentId: Int, order: SortType) =
-        "${fileURLV3(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
+        "${fileURL(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
 
-    fun getFileDetails(file: File) = "${fileURLV3(file)}?$fileExtraWithQuery"
+    fun getFileDetails(file: File) = "${fileURL(file)}?$fileExtraWithQuery"
 
-    fun createFolder(driveId: Int, parentId: Int) = "${fileURLV3(driveId, parentId)}/directory?$fileWithQuery"
+    fun createFolder(driveId: Int, parentId: Int) = "${fileURL(driveId, parentId)}/directory?$fileWithQuery"
 
-    fun createOfficeFile(driveId: Int, folderId: Int) = "${fileURLV3(driveId, folderId)}/file?$fileWithQuery"
+    fun createOfficeFile(driveId: Int, folderId: Int) = "${fileURL(driveId, folderId)}/file?$fileWithQuery"
 
     fun thumbnailFile(file: File) = "${fileURLV2(file)}/thumbnail?t=${file.lastModifiedAt}"
 
@@ -161,24 +161,24 @@ object ApiRoutes {
 
     fun convertFile(file: File): String = "${fileURLV2(file)}/convert?$fileWithQuery"
 
-    fun moveFile(file: File, newParentId: Int) = "${fileURLV3(file)}/move/$newParentId"
+    fun moveFile(file: File, newParentId: Int) = "${fileURL(file)}/move/$newParentId"
 
-    fun duplicateFile(file: File) = "${fileURLV3(file)}/duplicate?$fileWithQuery"
+    fun duplicateFile(file: File) = "${fileURL(file)}/duplicate?$fileWithQuery"
 
-    fun copyFile(file: File, destinationId: Int) = "${fileURLV3(file)}/copy/$destinationId?$fileWithQuery"
+    fun copyFile(file: File, destinationId: Int) = "${fileURL(file)}/copy/$destinationId?$fileWithQuery"
 
-    fun renameFile(file: File) = "${fileURLV3(file)}/rename"
+    fun renameFile(file: File) = "${fileURL(file)}/rename"
 
     fun getFileCount(file: File) = "${fileURLV2(file)}/count"
 
-    fun getFolderSize(file: File, depth: String) = "${fileURLV3(file)}/size?depth=$depth"
+    fun getFolderSize(file: File, depth: String) = "${fileURL(file)}/size?depth=$depth"
 
     fun updateFolderColor(file: File) = "${fileURLV2(file)}/color"
     //endregion
 
     /** Search */
     //region Search
-    fun searchFiles(driveId: Int, sortType: SortType) = "${filesURLV3(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
+    fun searchFiles(driveId: Int, sortType: SortType) = "${filesURL(driveId)}/search?$fileWithQuery&${orderQuery(sortType)}"
     //endregion
 
     /** Share link */
@@ -193,13 +193,13 @@ object ApiRoutes {
 
     /** Trash */
     //region Trash
-    fun driveTrash(driveId: Int, order: SortType) = "${driveURLV3(driveId)}/trash?${orderQuery(order)}&$fileWithQuery"
+    fun driveTrash(driveId: Int, order: SortType) = "${driveURL(driveId)}/trash?${orderQuery(order)}&$fileWithQuery"
 
     fun emptyTrash(driveId: Int) = "${driveURLV2(driveId)}/trash"
 
-    fun trashedFile(file: File) = "${trashURLV3(file)}?$fileExtraWithQuery"
+    fun trashedFile(file: File) = "${trashURL(file)}?$fileExtraWithQuery"
 
-    fun trashedFolderFiles(file: File, order: SortType) = "${trashURLV3(file)}/files?${orderQuery(order)}&$fileWithQuery"
+    fun trashedFolderFiles(file: File, order: SortType) = "${trashURL(file)}/files?${orderQuery(order)}&$fileWithQuery"
 
     fun thumbnailTrashFile(file: File) = "${trashURLV2(file)}/thumbnail?t=${file.lastModifiedAt}"
 
@@ -225,12 +225,12 @@ object ApiRoutes {
     //region Root Directory
     fun bulkAction(driveId: Int) = "${filesURLV2(driveId)}/bulk"
 
-    fun getLastModifiedFiles(driveId: Int) = "${filesURLV3(driveId)}/last_modified?$fileWithQuery"
+    fun getLastModifiedFiles(driveId: Int) = "${filesURL(driveId)}/last_modified?$fileWithQuery"
 
-    fun createTeamFolder(driveId: Int) = "${filesURLV3(driveId)}/team_directory?$fileWithQuery"
+    fun createTeamFolder(driveId: Int) = "${filesURL(driveId)}/team_directory?$fileWithQuery"
 
     fun getMySharedFiles(driveId: Int, sortType: SortType) =
-        "${filesURLV3(driveId)}/my_shared?${orderQuery(sortType)}&$fileWithQuery,users"
+        "${filesURL(driveId)}/my_shared?${orderQuery(sortType)}&$fileWithQuery,users"
     //endregion
 
     /** Others */
