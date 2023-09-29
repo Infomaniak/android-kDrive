@@ -208,15 +208,17 @@ object ApiRoutes {
 
     /** Upload */
     //region Upload
-    private fun uploadSessionUrl(driveId: Int) = "${driveURLV2(driveId)}/upload/session"
+    private fun uploadSessionUrlV2(driveId: Int) = "${driveURLV2(driveId)}/upload/session"
+    private fun uploadSessionUrlV3(driveId: Int) = "${driveURLV3(driveId)}/upload/session"
 
-    fun getSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken"
+    fun getSession(driveId: Int, uploadToken: String) = "${uploadSessionUrlV2(driveId)}/$uploadToken"
 
-    fun startUploadSession(driveId: Int) = "${uploadSessionUrl(driveId)}/start"
+    fun startUploadSession(driveId: Int) = "${uploadSessionUrlV3(driveId)}/start"
 
-    fun addChunkToSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/chunk"
+    fun addChunkToSession(uploadHost: String?, driveId: Int, uploadToken: String) =
+        "$uploadHost/3/drive/$driveId/upload/session/$uploadToken/chunk"
 
-    fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/finish"
+    fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrlV3(driveId)}/$uploadToken/finish"
 
     fun uploadFile(driveId: Int) = "${driveURLV2(driveId)}/upload"
     //endregion
