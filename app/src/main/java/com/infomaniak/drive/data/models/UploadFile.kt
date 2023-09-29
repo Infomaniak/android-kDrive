@@ -251,9 +251,11 @@ open class UploadFile(
 
         fun uploadFinished(uri: Uri) {
             getRealmInstance().use { realm ->
-                syncFileByUriQuery(realm, uri.toString()).findFirst()?.let { syncFile ->
+                uploadFileByUriQuery(realm, uri.toString()).findFirst()?.let { uploadFile ->
                     realm.executeTransaction {
-                        syncFile.uploadAt = Date()
+                        uploadFile.uploadToken = null
+                        uploadFile.uploadHost = null
+                        uploadFile.uploadAt = Date()
                     }
                 }
             }
