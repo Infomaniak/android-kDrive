@@ -115,7 +115,6 @@ open class File(
      * LOCAL
      */
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
-//    var cursor: String = "",
     var isComplete: Boolean = false,
     var isFromActivities: Boolean = false,
     var isFromSearch: Boolean = false,
