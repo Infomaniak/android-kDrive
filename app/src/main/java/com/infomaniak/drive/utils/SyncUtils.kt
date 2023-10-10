@@ -84,9 +84,7 @@ object SyncUtils {
         if (!isSyncActive() || force) {
             val request = OneTimeWorkRequestBuilder<UploadWorker>()
                 .setConstraints(UploadWorker.workConstraints())
-                .apply {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                }
+                .setExpeditedIfAvailable()
                 .setInputData(data)
                 .build()
             WorkManager.getInstance(this).enqueueUniqueWork(UploadWorker.TAG, ExistingWorkPolicy.REPLACE, request)

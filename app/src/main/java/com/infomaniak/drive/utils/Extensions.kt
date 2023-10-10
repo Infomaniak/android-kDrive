@@ -41,6 +41,8 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OutOfQuotaPolicy
 import coil.load
 import coil.request.Disposable
 import com.google.android.material.card.MaterialCardView
@@ -376,3 +378,9 @@ fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPag
 fun Context.getInfomaniakLogin(): InfomaniakLogin {
     return InfomaniakLogin(this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
 }
+
+//region Worker
+fun OneTimeWorkRequest.Builder.setExpeditedIfAvailable() = apply {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+}
+//endregion
