@@ -44,6 +44,7 @@ import com.infomaniak.drive.data.models.SyncSettings.IntervalType
 import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.databinding.ActivitySyncSettingsBinding
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
@@ -53,13 +54,14 @@ import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
-import kotlinx.android.synthetic.main.activity_sync_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.TimeZone
 
 class SyncSettingsActivity : BaseActivity() {
+
+    private val binding: ActivitySyncSettingsBinding by lazy { ActivitySyncSettingsBinding.inflate(layoutInflater) }
 
     private val syncSettingsViewModel: SyncSettingsViewModel by viewModels()
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
@@ -74,9 +76,9 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sync_settings)
+        setContentView(root)
 
         setOnBackPressed()
 
@@ -106,7 +108,7 @@ class SyncSettingsActivity : BaseActivity() {
             saveOldPictures.value = SavePicturesDate.SINCE_NOW
         }
 
-        AccountUtils.getAllUsers().observe(this) { users ->
+        AccountUtils.getAllUsers().observe(this@SyncSettingsActivity) { users ->
             if (users.size > 1) {
                 activeSelectDrive()
             } else {
@@ -120,21 +122,21 @@ class SyncSettingsActivity : BaseActivity() {
             }
         }
 
-        syncSettingsViewModel.customDate.observe(this) { date ->
+        syncSettingsViewModel.customDate.observe(this@SyncSettingsActivity) { date ->
             syncDatePicker.apply {
                 isGone = date == null
                 text = date?.format(FORMAT_DATE_CLEAR_MONTH) ?: ""
             }
         }
 
-        selectDriveViewModel.selectedDrive.observe(this) {
+        selectDriveViewModel.selectedDrive.observe(this@SyncSettingsActivity) {
             it?.let {
                 driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
                 driveName.text = it.name
                 selectDivider.isVisible = true
                 selectPath.isVisible = true
             } ?: run {
-                driveIcon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.iconColor))
+                driveIcon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@SyncSettingsActivity, R.color.iconColor))
                 driveName.setText(R.string.selectDriveTitle)
                 selectDivider.isGone = true
                 selectPath.isGone = true
@@ -149,7 +151,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         selectPath.setOnClickListener {
-            Intent(this, SelectFolderActivity::class.java).apply {
+            Intent(this@SyncSettingsActivity, SelectFolderActivity::class.java).apply {
                 putExtras(
                     SelectFolderActivityArgs(
                         userId = selectDriveViewModel.selectedUserId.value!!,
@@ -162,7 +164,7 @@ class SyncSettingsActivity : BaseActivity() {
             }
         }
 
-        syncSettingsViewModel.syncFolder.observe(this) { syncFolderId ->
+        syncSettingsViewModel.syncFolder.observe(this@SyncSettingsActivity) { syncFolderId ->
 
             val selectedUserId = selectDriveViewModel.selectedUserId.value
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
@@ -177,7 +179,7 @@ class SyncSettingsActivity : BaseActivity() {
             mediaFoldersSettingsVisibility(syncFolderId != null)
         }
 
-        syncSettingsViewModel.saveOldPictures.observe(this) {
+        syncSettingsViewModel.saveOldPictures.observe(this@SyncSettingsActivity) {
             if (it != oldSaveOldPicturesValue) editNumber++
             changeSaveButtonStatus()
             syncDateValue.text = getString(it.shortTitle).lowercase()
@@ -191,7 +193,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         syncDatePicker.setOnClickListener { showSyncDatePicker() }
 
-        syncSettingsViewModel.syncIntervalType.observe(this) {
+        syncSettingsViewModel.syncIntervalType.observe(this@SyncSettingsActivity) {
             if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
             changeSaveButtonStatus()
             syncPeriodicityValue.text = getString(it.title).lowercase()
@@ -236,7 +238,7 @@ class SyncSettingsActivity : BaseActivity() {
             SelectIntervalTypeBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectIntervalTypeBottomSheetDialog")
         }
 
-        saveButton.initProgress(this)
+        saveButton.initProgress(this@SyncSettingsActivity)
         saveButton.setOnClickListener {
             if (permission.checkSyncPermissions()) saveSettings()
         }
@@ -256,7 +258,7 @@ class SyncSettingsActivity : BaseActivity() {
             }
         }
 
-        toolbar.setNavigationOnClickListener { finishIfPossible() }
+        binding.toolbar.setNavigationOnClickListener { finishIfPossible() }
         onBackPressedDispatcher.addCallback(this) { finishIfPossible() }
     }
 
@@ -265,29 +267,29 @@ class SyncSettingsActivity : BaseActivity() {
         changeSaveButtonStatus()
     }
 
-    private fun activeSelectDrive() {
+    private fun activeSelectDrive() = with(binding) {
         switchDrive.isVisible = true
         selectDrive.setOnClickListener { SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog") }
     }
 
-    private fun saveSettingVisibility(isVisible: Boolean) {
+    private fun saveSettingVisibility(isVisible: Boolean) = with(binding) {
         mediaFoldersSettingsVisibility(isVisible && syncSettingsViewModel.syncFolder.value != null)
         saveSettingsTitle.isVisible = isVisible
         saveSettingsLayout.isVisible = isVisible
     }
 
-    private fun mediaFoldersSettingsVisibility(isVisible: Boolean) {
+    private fun mediaFoldersSettingsVisibility(isVisible: Boolean) = with(binding) {
         syncSettingsVisibility(isVisible && MediaFolder.getAllSyncedFoldersCount() > 0)
         mediaFoldersSettingsTitle.isVisible = isVisible
         mediaFoldersSettingsLayout.isVisible = isVisible
     }
 
-    private fun syncSettingsVisibility(isVisible: Boolean) {
+    private fun syncSettingsVisibility(isVisible: Boolean) = with(binding) {
         syncSettingsTitle.isVisible = isVisible
         syncSettingsLayout.isVisible = isVisible
     }
 
-    private fun changeSaveButtonStatus() {
+    private fun changeSaveButtonStatus() = with(binding) {
         val allSyncedFoldersCount = MediaFolder.getAllSyncedFoldersCount().toInt()
         val isEdited = (editNumber > 0)
                 || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
@@ -320,7 +322,7 @@ class SyncSettingsActivity : BaseActivity() {
         trackPhotoSyncEvent(dateName)
     }
 
-    private fun saveSettings() {
+    private fun saveSettings() = with(binding) {
         saveButton.showProgress()
         lifecycleScope.launch(Dispatchers.IO) {
             val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
