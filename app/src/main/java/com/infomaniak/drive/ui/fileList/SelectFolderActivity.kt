@@ -23,20 +23,24 @@ import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.databinding.ActivitySelectFolderBinding
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
-import kotlinx.android.synthetic.main.activity_select_folder.hostFragment
-import kotlinx.android.synthetic.main.activity_select_folder.saveButton
 
 class SelectFolderActivity : BaseActivity() {
+
+    private val binding: ActivitySelectFolderBinding by lazy { ActivitySelectFolderBinding.inflate(layoutInflater) }
+
+    private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
+    private val navController by lazy { navHostFragment.navController }
 
     private val selectFolderViewModel: SelectFolderViewModel by viewModels()
     private val mainViewModel: MainViewModel by viewModels()
@@ -61,7 +65,7 @@ class SelectFolderActivity : BaseActivity() {
         }
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_select_folder)
+        setContentView(binding.root)
         setSaveButton(customArgs)
 
         currentFolderId?.let { folderId ->
@@ -74,9 +78,9 @@ class SelectFolderActivity : BaseActivity() {
 
     private fun Int.getIntOrNull(): Int? = if (this <= 0) null else this
 
-    private fun setSaveButton(customArgs: Bundle?) {
+    private fun setSaveButton(customArgs: Bundle?) = with(binding) {
         saveButton.setOnClickListener {
-            val currentFragment = hostFragment.childFragmentManager.fragments.first() as SelectFolderFragment
+            val currentFragment = navHostFragment.childFragmentManager.fragments.first() as SelectFolderFragment
             Intent().apply {
                 putExtras(
                     SelectFolderActivityArgs(
@@ -113,22 +117,20 @@ class SelectFolderActivity : BaseActivity() {
 
     private fun navigateToCurrentFolder() {
         navigationIds.forEach { folderId ->
-            findNavController(R.id.hostFragment).navigate(
-                SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId)
-            )
+            navController.navigate(SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId))
         }
     }
 
     fun showSaveButton() {
-        saveButton.isVisible = true
+        binding.saveButton.isVisible = true
     }
 
     fun enableSaveButton(enable: Boolean) {
-        saveButton.isEnabled = enable
+        binding.saveButton.isEnabled = enable
     }
 
     fun hideSaveButton() {
-        saveButton.isGone = true
+        binding.saveButton.isGone = true
     }
 
     class SelectFolderViewModel : ViewModel() {
