@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.services
 import android.content.Context
 import android.content.Intent
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager

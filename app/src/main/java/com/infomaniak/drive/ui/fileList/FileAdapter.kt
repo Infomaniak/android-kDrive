@@ -358,7 +358,7 @@ open class FileAdapter(
     private fun View.checkIfEnableFile(file: File) = when {
         uploadInProgress -> {
             if (file.isPendingUploadFolder()) {
-                fileDate?.setText(file.path)
+                fileDate?.text = file.path
             } else {
                 val enable = file.currentProgress > 0 && context.isSyncActive()
                 val title = when {

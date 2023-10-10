@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.sync
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.work.*
 import com.infomaniak.drive.data.models.MediaFolder

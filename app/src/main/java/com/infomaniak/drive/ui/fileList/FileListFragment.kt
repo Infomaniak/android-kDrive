@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.fileList
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -164,8 +163,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             }
         }
 
-        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) {
-            it?.let { file -> if (file.isFolder()) file.openFolder() else file.displayFile(withCurrentFiles = false) }
+        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
+            if (file.isFolder()) file.openFolder() else file.displayFile(withCurrentFiles = false)
         }
 
         mainViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
@@ -247,12 +246,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
 
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
-            it?.let {
-                showPendingFiles()
-                when (findNavController().currentDestination?.id) {
-                    R.id.searchFragment, R.id.sharedWithMeFragment -> Unit
-                    else -> refreshActivities()
-                }
+            showPendingFiles()
+            when (findNavController().currentDestination?.id) {
+                R.id.searchFragment, R.id.sharedWithMeFragment -> Unit
+                else -> refreshActivities()
             }
         }
 
@@ -477,12 +474,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             setPagination({ if (!fileAdapter.isComplete) fileAdapter.showLoading() })
         }
 
-        mainViewModel.updateOfflineFile.observe(viewLifecycleOwner) {
-            it?.let { fileId ->
-                if (findNavController().currentDestination?.id == R.id.offlineFileFragment) {
-                    fileAdapter.deleteByFileId(fileId)
-                    checkIfNoFiles()
-                }
+        mainViewModel.updateOfflineFile.observe(viewLifecycleOwner) { fileId ->
+            if (findNavController().currentDestination?.id == R.id.offlineFileFragment) {
+                fileAdapter.deleteByFileId(fileId)
+                checkIfNoFiles()
             }
         }
     }

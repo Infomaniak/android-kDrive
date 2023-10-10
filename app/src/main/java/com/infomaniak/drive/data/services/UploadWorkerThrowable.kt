@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.services
 
-import android.util.Log
 import androidx.work.ListenableWorker.Result
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification

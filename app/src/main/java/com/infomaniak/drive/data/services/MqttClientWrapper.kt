@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.services
 
 import android.content.Context
 import android.os.CountDownTimer
-import android.util.Log
 import androidx.lifecycle.LiveData
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.MqttAction

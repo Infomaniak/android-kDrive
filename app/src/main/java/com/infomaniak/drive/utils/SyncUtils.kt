@@ -23,7 +23,6 @@ import android.database.Cursor
 import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.work.*
 import com.infomaniak.drive.data.models.SyncSettings

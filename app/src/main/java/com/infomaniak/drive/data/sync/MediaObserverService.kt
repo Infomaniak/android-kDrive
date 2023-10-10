@@ -24,7 +24,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.IBinder
 import android.provider.MediaStore
-import android.util.Log
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker.Companion.showSyncConfigNotification

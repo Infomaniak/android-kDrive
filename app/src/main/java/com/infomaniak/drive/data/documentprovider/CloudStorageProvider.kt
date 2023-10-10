@@ -30,7 +30,6 @@ import android.os.*
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.provider.Settings
-import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
