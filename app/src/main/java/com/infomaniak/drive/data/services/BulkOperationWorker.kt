@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import java.util.Date
+import java.util.UUID
 
 class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : ListenableWorker(context, workerParams) {
 
@@ -44,7 +45,7 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
     private lateinit var timer: CountDownTimer
     private lateinit var lastReception: Date
 
-    private var notificationId: Int = 0
+    private var notificationId: Int = UUID.randomUUID().hashCode()
     private var totalFiles: Int = 0
 
     override fun startWork(): ListenableFuture<Result> {
