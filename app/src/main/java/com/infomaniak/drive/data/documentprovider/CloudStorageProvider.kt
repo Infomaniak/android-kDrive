@@ -53,6 +53,7 @@ import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.NotificationUtilsCore
+import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -71,7 +72,7 @@ class CloudStorageProvider : DocumentsProvider() {
     private lateinit var cacheDir: java.io.File
 
     override fun onCreate(): Boolean {
-        Log.d(TAG, "onCreate")
+        SentryLog.d(TAG, "onCreate")
 
         var result = false
         runBlocking {
@@ -85,7 +86,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun queryRoots(projection: Array<out String>?): Cursor {
-        Log.d(TAG, "queryRoots")
+        SentryLog.d(TAG, "queryRoots")
         val cursor = MatrixCursor(projection ?: DEFAULT_ROOT_PROJECTION)
 
         AccountUtils.getAllUsersSync().forEach { user ->
@@ -102,7 +103,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun queryDocument(documentId: String, projection: Array<out String>?): Cursor {
-        Log.d(TAG, "queryDocument(), documentId=$documentId")
+        SentryLog.d(TAG, "queryDocument(), documentId=$documentId")
 
         return MatrixCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION).apply {
             val userId = getUserId(documentId)
@@ -139,7 +140,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor {
-        Log.d(TAG, "queryChildDocuments(), parentDocumentId=$parentDocumentId, sort=$sortOrder")
+        SentryLog.d(TAG, "queryChildDocuments(), parentDocumentId=$parentDocumentId, sort=$sortOrder")
 
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
 
@@ -147,7 +148,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val isNewJob = uri != oldQueryChildUri || needRefresh
         val isLoading = uri == oldQueryChildUri && oldQueryChildCursor?.job?.isCompleted == false || isNewJob
 
-        Log.i(TAG, "queryChildDocuments(), isLoading=$isLoading, isNew=$isNewJob")
+        SentryLog.i(TAG, "queryChildDocuments(), isLoading=$isLoading, isNew=$isNewJob")
 
         cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to isLoading)
         cursor.setNotificationUri(context?.contentResolver, uri)
@@ -230,7 +231,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun openDocument(documentId: String, mode: String, signal: CancellationSignal?): ParcelFileDescriptor? {
-        Log.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
+        SentryLog.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
         val context = context ?: return null
 
         val isWrite = mode.indexOf('w') != -1
@@ -249,7 +250,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun querySearchDocuments(rootId: String, query: String, projection: Array<out String>?): Cursor {
-        Log.d(TAG, "querySearchDocuments(), rootId=$rootId, query=$query, projection=$projection, $currentParentDocumentId")
+        SentryLog.d(TAG, "querySearchDocuments(), rootId=$rootId, query=$query, projection=$projection, $currentParentDocumentId")
 
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
 
@@ -296,7 +297,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun openDocumentThumbnail(documentId: String, sizeHint: Point?, signal: CancellationSignal?): AssetFileDescriptor {
-        Log.d(TAG, "openDocumentThumbnail(), id=$documentId, signalIsCancelled: ${signal?.isCanceled}")
+        SentryLog.d(TAG, "openDocumentThumbnail(), id=$documentId, signalIsCancelled: ${signal?.isCanceled}")
 
         val fileId = getFileIdFromDocumentId(documentId)
         val userId = getUserId(documentId)
@@ -344,7 +345,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
-        Log.d(TAG, "createDocument(), parentId=$parentDocumentId, mimeType=$mimeType, name=$displayName")
+        SentryLog.d(TAG, "createDocument(), parentId=$parentDocumentId, mimeType=$mimeType, name=$displayName")
 
         return if (mimeType.equals(DocumentsContract.Document.MIME_TYPE_DIR, true)) {
             createNewFolder(parentDocumentId, displayName) // If we want to create a new folder
@@ -354,7 +355,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun deleteDocument(documentId: String) {
-        Log.d(TAG, "deleteDocument(), id=$documentId")
+        SentryLog.d(TAG, "deleteDocument(), id=$documentId")
 
         val context = context ?: throw IllegalStateException("Delete document failed: missing Android Context")
 
@@ -380,7 +381,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun renameDocument(documentId: String, displayName: String): String? {
-        Log.d(TAG, "renameDocument(), id=$documentId, name=$displayName")
+        SentryLog.d(TAG, "renameDocument(), id=$documentId, name=$displayName")
 
         FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
             FileController.getFileProxyById(getFileIdFromDocumentId(documentId), customRealm = realm)?.let { file ->
@@ -402,7 +403,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun copyDocument(sourceDocumentId: String, targetParentDocumentId: String): String {
-        Log.d(TAG, "copyDocument(), sourceId=$sourceDocumentId, targetParentId=$targetParentDocumentId")
+        SentryLog.d(TAG, "copyDocument(), sourceId=$sourceDocumentId, targetParentId=$targetParentDocumentId")
 
         return FileController.getRealmInstance(createUserDrive(sourceDocumentId)).use { realm ->
 
@@ -427,7 +428,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
-        Log.d(
+        SentryLog.d(
             TAG, "moveDocument(), " +
                     "sourceId=$sourceDocumentId, " +
                     "sourceParentId=$sourceParentDocumentId, " +
@@ -572,7 +573,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 fileUrl = ApiRoutes.downloadFile(file),
                 okHttpClient = okHttpClient
             ) { progress ->
-                Log.i(TAG, "open currentProgress: $progress")
+                SentryLog.i(TAG, "open currentProgress: $progress")
             }
 
             if (response.isSuccessful) {

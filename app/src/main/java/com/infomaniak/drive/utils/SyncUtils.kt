@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.MediaObserverService
 import com.infomaniak.drive.data.sync.MediaObserverWorker
+import com.infomaniak.lib.core.utils.SentryLog
 import java.util.Date
 
 object SyncUtils {
@@ -137,7 +138,7 @@ object SyncUtils {
 
     fun Context.startContentObserverService() {
         if (UploadFile.getAppSyncSettings()?.syncImmediately == true) {
-            Log.d("kDrive", "start content observer!")
+            SentryLog.d("kDrive", "start content observer!")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) MediaObserverWorker.scheduleWork(this)
             else startService(Intent(applicationContext, MediaObserverService::class.java))

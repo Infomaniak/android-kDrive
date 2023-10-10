@@ -27,6 +27,7 @@ import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.api.ApiController.gson
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
@@ -88,7 +89,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         try {
             client.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
-                    Log.i("MQTT connection", "Success : true")
+                    SentryLog.i("MQTT connection", "Success : true")
                     currentToken?.let {
                         subscribe(topicFor(it))
                         completion()
@@ -108,7 +109,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
                     exception?.printStackTrace()
-                    Log.i("MQTT connection", "Success : false")
+                    SentryLog.i("MQTT connection", "Success : false")
                 }
 
             })
@@ -133,7 +134,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
     }
 
     override fun connectionLost(cause: Throwable?) {
-        Log.e("MQTT Error", "Connection has been lost. Stacktrace below.")
+        SentryLog.e("MQTT Error", "Connection has been lost. Stacktrace below.")
         cause?.printStackTrace()
     }
 

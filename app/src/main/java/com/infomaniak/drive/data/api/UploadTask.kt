@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.api
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
@@ -41,6 +40,7 @@ import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -147,7 +147,7 @@ class UploadTask(
                     level = SentryLevel.INFO
                 })
 
-                Log.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
+                SentryLog.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
 
                 val validChunksIds = uploadedChunks?.validChunksIds
                 previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
@@ -155,13 +155,13 @@ class UploadTask(
                 for (chunkNumber in 1..totalChunks) {
                     requestSemaphore.acquire()
                     if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
-                        Log.d("kDrive", "chunk:$chunkNumber ignored")
+                        SentryLog.d("kDrive", "chunk:$chunkNumber ignored")
                         input.skip(chunkSize.toLong())
                         requestSemaphore.release()
                         continue
                     }
 
-                    Log.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
+                    SentryLog.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
                     var data = ByteArray(chunkSize)
                     val count = input.read(data, 0, chunkSize)
                     if (count == -1) {
@@ -172,7 +172,7 @@ class UploadTask(
                     data = if (count == chunkSize) data else data.copyOf(count)
 
                     val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count)
-                    Log.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
+                    SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
                     waitingCoroutines.add(
                         coroutineScope.uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
@@ -268,7 +268,7 @@ class UploadTask(
     private fun manageApiResponse(response: Response) {
         response.use {
             val bodyResponse = it.body?.string()
-            Log.i("UploadTask", "response successful ${it.isSuccessful}")
+            SentryLog.i("UploadTask", "response successful ${it.isSuccessful}")
             if (!it.isSuccessful) {
                 notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
                 val apiResponse = try {
@@ -298,7 +298,7 @@ class UploadTask(
                 scope.setExtra("chunk size", "$chunkSize")
                 Sentry.captureMessage("Chunk total size exceed fileSize 😢")
             }
-            Log.d(
+            SentryLog.d(
                 "UploadWorker",
                 "progress >> ${uploadFile.fileName} exceed with ${uploadFile.fileSize}/${previousChunkBytesWritten}"
             )
@@ -325,7 +325,7 @@ class UploadTask(
             launch { shareProgress(currentProgress) }
         }
 
-        Log.i(
+        SentryLog.i(
             "kDrive",
             " upload >> ${currentProgress}%, totalBytesWritten:$totalBytesWritten, fileSize:${uploadFile.fileSize}"
         )

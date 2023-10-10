@@ -41,6 +41,7 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
+import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
@@ -188,7 +189,7 @@ object AccountUtils : CredentialManager() {
                 HttpClient.okHttpClientNoTokenInterceptor,
                 user.apiToken,
                 onError = {
-                    Log.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
+                    SentryLog.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
                 }
             )
         }
@@ -248,7 +249,7 @@ object AccountUtils : CredentialManager() {
                 filesDir.deleteRecursively()
                 cacheDir.deleteRecursively()
             }
-            Log.i("AccountUtils", "resetApp> all user data has been deleted")
+            SentryLog.i("AccountUtils", "resetApp> all user data has been deleted")
         }
     }
 

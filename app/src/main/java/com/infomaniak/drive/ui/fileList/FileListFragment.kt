@@ -576,7 +576,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                     }
                 }
             }
-            Log.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
+            SentryLog.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
         }
 
         mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {

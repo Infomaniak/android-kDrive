@@ -31,6 +31,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.showSyncConfigN
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 
@@ -39,7 +40,7 @@ class MediaObserverService : Service() {
     private var syncJob: Job? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d("kDrive", "$TAG > started")
+        SentryLog.d("kDrive", "$TAG > started")
         isRunning = true
         initial()
         return START_STICKY
@@ -68,7 +69,7 @@ class MediaObserverService : Service() {
         super.onDestroy()
         isRunning = false
         contentResolver.unregisterContentObserver(tableObserver)
-        Log.d("kDrive", "$TAG > destroyed")
+        SentryLog.d("kDrive", "$TAG > destroyed")
     }
 
     private inner class TableObserver(handler: Handler?) : ContentObserver(handler) {
@@ -81,7 +82,7 @@ class MediaObserverService : Service() {
         }
 
         override fun onChange(selfChange: Boolean, uri: Uri?) {
-            Log.d(TAG, "URL : " + uri.toString())
+            SentryLog.d(TAG, "URL : " + uri.toString())
 
             uri?.let {
                 if (!applicationContext.isSyncActive()) {
