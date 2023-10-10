@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.services
 import android.content.Context
 import android.content.Intent
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -67,28 +68,36 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         )
     }
 
-    override suspend fun doWork(): Result {
-        file = FileController.getFileById(fileId, userDrive)
-        offlineFile = file?.getOfflineFile(applicationContext, userDrive.userId)
-
-        return try {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        runCatching {
+            SentryLog.i(TAG, "Work started")
+            file = FileController.getFileById(fileId, userDrive)
+            offlineFile = file?.getOfflineFile(applicationContext, userDrive.userId)
             initOfflineDownload()
-
-        } catch (exception: CancellationException) {
+        }.getOrElse { exception ->
             exception.printStackTrace()
-            offlineFile?.let {
-                if (it.exists() && file?.isIntactFile(it) == false) it.delete()
+            when (exception) {
+                is CancellationException -> {
+                    offlineFile?.let {
+                        if (it.exists() && file?.isIntactFile(it) == false) it.delete()
+                    }
+                    notifyDownloadCancelled()
+                    Result.failure()
+                }
+                is UploadTask.NetworkException -> {
+                    Result.failure()
+                }
+                is RemoteFileException -> {
+                    Sentry.captureException(exception)
+                    Result.failure()
+                }
+                else -> {
+                    SentryLog.e(TAG, "Failure", exception)
+                    Result.failure()
+                }
             }
-            notifyDownloadCancelled()
-            Result.failure()
-        } catch (exception: UploadTask.NetworkException) {
-            Result.failure()
-        } catch (exception: RemoteFileException) {
-            Sentry.captureException(exception)
-            Result.failure()
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-            Result.failure()
+        }.also {
+            Log.i(TAG, "Work finished")
         }
     }
 
@@ -198,7 +207,6 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         const val PROGRESS = "progress"
         const val USER_ID = "user_id"
 
-        @Throws(Exception::class)
         fun downloadFileResponse(
             fileUrl: String,
             okHttpClient: OkHttpClient = HttpClient.okHttpClient,
@@ -211,7 +219,6 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
                 .newCall(request).execute()
         }
 
-        @Throws(Exception::class)
         fun saveRemoteData(
             response: Response,
             outputFile: IOFile? = null,
@@ -228,7 +235,6 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             }
         }
 
-        @Throws(Exception::class)
         fun downloadProgressInterceptor(onProgress: (progress: Int) -> Unit) = Interceptor { chain: Interceptor.Chain ->
             val originalResponse = chain.proceed(chain.request())
 
