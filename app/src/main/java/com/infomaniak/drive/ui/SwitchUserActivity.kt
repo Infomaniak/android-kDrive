@@ -22,26 +22,25 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
-import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.models.user.User
-import kotlinx.android.synthetic.main.view_switch_settings.addUser
-import kotlinx.android.synthetic.main.view_switch_settings.toolbar
-import kotlinx.android.synthetic.main.view_switch_settings.usersRecyclerView
 
 class SwitchUserActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private val binding: ViewSwitchSettingsBinding by lazy { ViewSwitchSettingsBinding.inflate(layoutInflater) }
+
+    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.view_switch_settings)
+        setContentView(root)
 
         toolbar.setNavigationOnClickListener {
             onBackPressed()
         }
 
-        AccountUtils.getAllUsers().observe(this) { users ->
+        AccountUtils.getAllUsers().observe(this@SwitchUserActivity) { users ->
             usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>) { user ->
                 trackAccountEvent("switch")
                 AccountUtils.currentUser = user
@@ -52,7 +51,7 @@ class SwitchUserActivity : AppCompatActivity() {
 
         addUser.setOnClickListener {
             trackAccountEvent("add")
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(Intent(this@SwitchUserActivity, LoginActivity::class.java))
         }
     }
 }
