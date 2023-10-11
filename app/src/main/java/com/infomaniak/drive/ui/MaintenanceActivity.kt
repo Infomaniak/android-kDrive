@@ -25,18 +25,19 @@ import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.databinding.ActivityNoDriveBinding
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.format
-import kotlinx.android.synthetic.main.activity_no_drive.*
-import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
 import kotlinx.coroutines.launch
 
 class MaintenanceActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private val binding: ActivityNoDriveBinding by lazy { ActivityNoDriveBinding.inflate(layoutInflater) }
+
+    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_no_drive)
+        setContentView(root)
 
         DriveInfosController.getDrives(AccountUtils.currentUserId).apply {
             val firstDrive = firstOrNull()
