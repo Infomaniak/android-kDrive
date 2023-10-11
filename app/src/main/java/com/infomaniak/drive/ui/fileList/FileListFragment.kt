@@ -67,8 +67,6 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import kotlinx.android.synthetic.main.fragment_file_list.collapsingToolbarLayout
-import kotlinx.android.synthetic.main.fragment_file_list.toolbar
 import kotlinx.coroutines.*
 
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
@@ -265,7 +263,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun setupToolbars() {
         fun MaterialToolbar.removeInsets() = setContentInsetsRelative(0, 0)
-        toolbar.removeInsets()
+        binding.toolbar.removeInsets()
         multiSelectLayout?.toolbarMultiSelect?.removeInsets()
     }
 
@@ -485,7 +483,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected open fun homeClassName(): String? = null
 
     protected fun setToolbarTitle(@StringRes rootTitleRes: Int? = null) {
-        collapsingToolbarLayout.title = if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
+        binding.collapsingToolbarLayout.title = if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
     }
 
     private fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
