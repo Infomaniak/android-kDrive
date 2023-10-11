@@ -72,7 +72,7 @@ import kotlinx.coroutines.*
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
     NoItemsLayoutView.INoItemsLayoutView {
 
-    private lateinit var binding: FragmentFileListBinding
+    lateinit var binding: FragmentFileListBinding
 
     protected lateinit var fileAdapter: FileAdapter
     protected val fileListViewModel: FileListViewModel by viewModels()
