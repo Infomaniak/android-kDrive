@@ -97,6 +97,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
                 }
             }
         }.also {
+            file?.id?.let(notificationManagerCompat::cancel)
             Log.i(TAG, "Work finished")
         }
     }
@@ -112,25 +113,33 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         if (offlineFile?.exists() == true) offlineFile?.delete()
         if (cacheFile?.exists() == true) cacheFile.delete()
 
-        val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
-        val cancelAction =
-            NotificationCompat.Action(null, applicationContext.getString(R.string.buttonCancel), cancelPendingIntent)
-        val downloadNotification = applicationContext.downloadProgressNotification().apply {
-            setOngoing(true)
-            setContentTitle(fileName)
-            addAction(cancelAction)
-            setForeground(ForegroundInfo(fileId, build()))
-        }
 
         if (file == null || offlineFile == null) getFileFromRemote()
 
-        return startOfflineDownload(downloadNotification)
+        return startOfflineDownload()
     }
 
-    private suspend fun startOfflineDownload(
-        downloadNotification: NotificationCompat.Builder,
-    ): Result = withContext(Dispatchers.IO) {
+    private fun DownloadWorker.downloadNotification(): NotificationCompat.Builder {
+        val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
+        val cancelAction = NotificationCompat.Action(
+            /* icon = */ null,
+            /* title = */ applicationContext.getString(R.string.buttonCancel),
+            /* intent = */ cancelPendingIntent
+        )
+        return applicationContext.downloadProgressNotification().apply {
+            setOngoing(true)
+            setContentTitle(fileName)
+            addAction(cancelAction)
+        }
+    }
+
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        return ForegroundInfo(fileId, downloadNotification().build())
+    }
+
+    private suspend fun startOfflineDownload(): Result = withContext(Dispatchers.IO) {
         val (file, offlineFile) = file!! to offlineFile!!
+        val downloadNotification = downloadNotification()
         val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
         val response = downloadFileResponse(

@@ -282,6 +282,7 @@ object Utils {
             .addTag(file.getWorkerTag())
             .setInputData(inputData)
             .setConstraints(constraints)
+            .setExpeditedIfAvailable()
             .build()
 
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
