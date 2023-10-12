@@ -23,14 +23,16 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
 import com.infomaniak.lib.applock.Utils.silentlyReverseSwitch
-import kotlinx.android.synthetic.main.view_switch_settings.*
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private val binding: ViewSwitchSettingsBinding by lazy { ViewSwitchSettingsBinding.inflate(layoutInflater) }
+
+    override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.view_switch_settings)
+        setContentView(root)
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
         switchSettingsTitle.text = getString(R.string.appSecurityTitle)
