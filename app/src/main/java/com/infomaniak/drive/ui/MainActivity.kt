@@ -32,7 +32,6 @@ import android.os.Bundle
 import android.os.FileObserver
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
@@ -69,6 +68,7 @@ import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
 import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
@@ -175,7 +175,7 @@ class MainActivity : BaseActivity() {
 
     private fun listenToNetworkStatus() {
         LiveDataNetworkStatus(this).observe(this) { isAvailable ->
-            Log.d("Internet availability", if (isAvailable) "Available" else "Unavailable")
+            SentryLog.d("Internet availability", if (isAvailable) "Available" else "Unavailable")
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = "Network"
                 message = "Internet access is available : $isAvailable"

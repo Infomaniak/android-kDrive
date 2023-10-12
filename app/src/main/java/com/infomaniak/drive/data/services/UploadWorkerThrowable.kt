@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.services
 
-import android.util.Log
 import androidx.work.ListenableWorker.Result
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
@@ -32,6 +31,7 @@ import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.lib.core.api.ApiController
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -63,7 +63,7 @@ object UploadWorkerThrowable {
             Result.retry()
 
         } catch (exception: CancellationException) { // Work has been cancelled
-            Log.d(UploadWorker.TAG, "UploadWorker > is CancellationException !")
+            SentryLog.d(UploadWorker.TAG, "UploadWorker > is CancellationException !")
             if (applicationContext.isSyncActive()) Result.failure() else Result.retry()
 
         } catch (exception: UploadTask.LockErrorException) {

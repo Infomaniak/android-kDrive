@@ -20,7 +20,6 @@ package com.infomaniak.drive.views
 import android.content.Context
 import android.content.Intent
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
@@ -53,6 +52,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.safeNavigate
 import io.sentry.Sentry
 import kotlinx.android.synthetic.main.view_file_info_actions.view.*
@@ -354,7 +354,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             val fileId: Int = currentFile.id
             val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
 
-            Log.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
+            SentryLog.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
 
             currentFile.currentProgress = progress
             // Check isOffline because progressing to 100 doesn't necessarily mean it's finish

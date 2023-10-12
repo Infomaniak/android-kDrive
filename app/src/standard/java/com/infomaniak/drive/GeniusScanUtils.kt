@@ -19,7 +19,6 @@ package com.infomaniak.drive
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -36,6 +35,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IGeniusScanUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
@@ -92,7 +92,7 @@ object GeniusScanUtils : IGeniusScanUtils {
         true
     } catch (licenseException: LicenseException) {
         licenseException.printStackTrace()
-        Log.e("GeniusScanSDK", "The license is expired or invalid")
+        SentryLog.e("GeniusScanSDK", "The license is expired or invalid")
         Sentry.captureException(licenseException)
         false
     }

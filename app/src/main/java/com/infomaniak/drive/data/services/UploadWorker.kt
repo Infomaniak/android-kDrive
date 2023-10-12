@@ -24,7 +24,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
@@ -48,10 +47,7 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.utils.calculateFileSize
-import com.infomaniak.lib.core.utils.getFileName
-import com.infomaniak.lib.core.utils.getFileSize
-import com.infomaniak.lib.core.utils.hasPermissions
+import com.infomaniak.lib.core.utils.*
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -73,7 +69,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     override suspend fun doWork(): Result {
 
-        Log.d(TAG, "UploadWorker starts job!")
+        SentryLog.d(TAG, "UploadWorker starts job!")
         contentResolver = applicationContext.contentResolver
 
         // Checks if the maximum number of retry allowed is reached
@@ -108,7 +104,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun checkPermissions(): Result? {
         if (!applicationContext.hasPermissions(DrivePermissions.permissions)) {
             UploadNotifications.permissionErrorNotification(applicationContext)
-            Log.d(TAG, "UploadWorker no permissions")
+            SentryLog.d(TAG, "UploadWorker no permissions")
             return Result.failure()
         }
         return null
@@ -116,7 +112,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun retrieveLatestNotSyncedMedia(): SyncSettings? {
         return UploadFile.getAppSyncSettings()?.also {
-            Log.d(TAG, "UploadWorker check locals")
+            SentryLog.d(TAG, "UploadWorker check locals")
             checkLocalLastMedias(it)
         }
     }
@@ -125,7 +121,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val isCancelledByUser = inputData.getBoolean(CANCELLED_BY_USER, false)
         if (UploadFile.getAllPendingUploadsCount() == 0 && isCancelledByUser) {
             UploadNotifications.showCancelledByUserNotification(applicationContext)
-            Log.d(TAG, "UploadWorker cancelled by user")
+            SentryLog.d(TAG, "UploadWorker cancelled by user")
             return Result.success()
         }
         return null
@@ -137,10 +133,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
-        Log.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
+        SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
 
         for (uploadFile in uploadFiles) {
-            Log.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
+            SentryLog.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
 
             if (uploadFile.initUpload()) {
                 successNames.add(uploadFile.fileName)
@@ -157,7 +153,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         uploadedCount = successCount
 
-        Log.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
+        SentryLog.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
         currentUploadFile?.showUploadedFilesNotification(applicationContext, successCount, successNames, failedCount, failedNames)
         if (uploadedCount > 0) Result.success() else Result.failure()
@@ -225,12 +221,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
             currentUploadTask = UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker)
             currentUploadTask!!.start().also {
-                Log.d(TAG, "startUploadFile> end upload $fileName")
+                SentryLog.d(TAG, "startUploadFile> end upload $fileName")
             }
 
         } else {
             deleteIfExists()
-            Log.d("kDrive", "$TAG > $fileName deleted size:$size")
+            SentryLog.d("kDrive", "$TAG > $fileName deleted size:$size")
             Sentry.withScope { scope ->
                 scope.setExtra("data", ApiController.gson.toJson(this))
                 scope.setExtra("fileName", fileName)
@@ -288,7 +284,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         var customSelection: String
         var customArgs: Array<String>
 
-        Log.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
+        SentryLog.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
         MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
             // Add log
@@ -297,7 +293,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 message = "sync ${mediaFolder.name}"
                 level = SentryLevel.DEBUG
             })
-            Log.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
+            SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
 
             // Sync media folder
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
@@ -351,7 +347,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             contentResolver.query(contentUri, null, selection, args, sortOrder)
                 ?.use { cursor ->
                     val messageLog = "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found"
-                    Log.d(TAG, messageLog)
+                    SentryLog.d(TAG, messageLog)
                     Sentry.addBreadcrumb(Breadcrumb().apply {
                         category = BREADCRUMB_TAG
                         message = messageLog
@@ -375,7 +371,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val fileSize = uri.getFileSize(cursor)
 
         val messageLog = "localMediaFound > ${mediaFolder.name}/$fileName found"
-        Log.d(TAG, messageLog)
+        SentryLog.d(TAG, messageLog)
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = BREADCRUMB_TAG
             message = messageLog

@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.sync
 
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.work.*
 import com.infomaniak.drive.data.models.MediaFolder
@@ -31,6 +30,7 @@ import com.infomaniak.drive.utils.NotificationUtils.fileObserveServiceNotificati
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit
 class MediaObserverWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        Log.d("MediaContentJob", "$TAG> JOB STARTED!")
+        SentryLog.d("MediaContentJob", "$TAG> JOB STARTED!")
 
         triggeredContentAuthorities.ifEmpty { null }?.let {
             if (!applicationContext.isSyncActive()) {
@@ -70,7 +70,7 @@ class MediaObserverWorker(appContext: Context, params: WorkerParameters) : Corou
         }
 
         fun nextScheduleWork(context: Context) {
-            Log.d("MediaContentJob", "JOB INIT!")
+            SentryLog.d("MediaContentJob", "JOB INIT!")
             val syncSetting = UploadFile.getAppSyncSettings()
 
             if (syncSetting == null) {

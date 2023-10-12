@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.services
 import android.content.Context
 import android.content.Intent
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -43,6 +42,7 @@ import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import okhttp3.Interceptor
@@ -135,7 +135,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             launch(Dispatchers.Main) {
                 setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
             }
-            Log.d(TAG, "download $progress%")
+            SentryLog.d(TAG, "download $progress%")
             downloadNotification.apply {
                 setContentText("$progress%")
                 setProgress(100, progress, false)
@@ -218,7 +218,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             outputStream: AutoCloseOutputStream? = null,
             onFinish: (() -> Unit)? = null
         ) {
-            Log.d(TAG, "save remote data to ${outputFile?.path}")
+            SentryLog.d(TAG, "save remote data to ${outputFile?.path}")
             BufferedInputStream(response.body?.byteStream()).use { input ->
                 val stream = outputStream ?: outputFile?.outputStream()
                 stream?.use { output ->

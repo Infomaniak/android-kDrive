@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
 import androidx.core.view.isGone
@@ -39,6 +38,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.navigateToUploadView
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.realm.RealmResults
 import kotlinx.android.synthetic.main.activity_main.mainFab
@@ -114,7 +114,7 @@ class UploadInProgressFragment : FileListFragment() {
                 }
             }
 
-            Log.d("uploadInProgress", "$fileName $progress%")
+            SentryLog.d("uploadInProgress", "$fileName $progress%")
         }
     }
 
