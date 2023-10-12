@@ -83,10 +83,10 @@ class PreviewPDFFragment : PreviewFragment() {
             setOnClickListener { openWithClicked() }
         }
 
-        previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner, Observer { progress ->
+        previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
             if (progress >= 100 && previewPDFViewModel.pdfJob.isCancelled) downloadPdf()
             downloadProgress.progress = progress
-        })
+        }
 
         pdfViewRecycler.onClicked = { toggleFullscreen() }
         downloadLayout.setOnClickListener { toggleFullscreen() }
@@ -140,7 +140,7 @@ class PreviewPDFFragment : PreviewFragment() {
             previewSliderViewModel.pdfIsDownloading.value = true
             isDownloading = true
             previewPDFViewModel.downloadPdfFile(requireContext(), file, previewSliderViewModel.userDrive)
-                .observe(viewLifecycleOwner, Observer { apiResponse ->
+                .observe(viewLifecycleOwner) { apiResponse ->
                     apiResponse.data?.let { pdfCore ->
                         this.pdfCore = pdfCore
                         showPdf(pdfCore)
@@ -151,7 +151,7 @@ class PreviewPDFFragment : PreviewFragment() {
                     }
                     previewSliderViewModel.pdfIsDownloading.value = false
                     isDownloading = false
-                })
+                }
         }
     }
 
