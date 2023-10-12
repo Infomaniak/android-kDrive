@@ -108,47 +108,9 @@ class SyncSettingsActivity : BaseActivity() {
             saveOldPictures.value = SavePicturesDate.SINCE_NOW
         }
 
-        AccountUtils.getAllUsers().observe(this@SyncSettingsActivity) { users ->
-            if (users.size > 1) {
-                activeSelectDrive()
-            } else {
-                val currentUserDrives = DriveInfosController.getDrives(AccountUtils.currentUserId)
-                if (currentUserDrives.size > 1) {
-                    activeSelectDrive()
-                } else {
-                    selectDriveViewModel.selectedUserId.value = AccountUtils.currentUserId
-                    selectDriveViewModel.selectedDrive.value = currentUserDrives.firstOrNull()
-                }
-            }
-        }
-
-        syncSettingsViewModel.customDate.observe(this@SyncSettingsActivity) { date ->
-            syncDatePicker.apply {
-                isGone = date == null
-                text = date?.format(FORMAT_DATE_CLEAR_MONTH) ?: ""
-            }
-        }
-
-        selectDriveViewModel.selectedDrive.observe(this@SyncSettingsActivity) {
-            it?.let {
-                driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
-                driveName.text = it.name
-                selectDivider.isVisible = true
-                selectPath.isVisible = true
-            } ?: run {
-                driveIcon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this@SyncSettingsActivity, R.color.iconColor))
-                driveName.setText(R.string.selectDriveTitle)
-                selectDivider.isGone = true
-                selectPath.isGone = true
-            }
-            if (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId ||
-                selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId ||
-                syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder
-            ) {
-                syncSettingsViewModel.syncFolder.value = null
-            }
-            changeSaveButtonStatus()
-        }
+        observeAllUsers()
+        observeCustomDate()
+        observeSelectedDrive()
 
         selectPath.setOnClickListener {
             Intent(this@SyncSettingsActivity, SelectFolderActivity::class.java).apply {
@@ -164,40 +126,12 @@ class SyncSettingsActivity : BaseActivity() {
             }
         }
 
-        syncSettingsViewModel.syncFolder.observe(this@SyncSettingsActivity) { syncFolderId ->
-
-            val selectedUserId = selectDriveViewModel.selectedUserId.value
-            val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
-            if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
-                FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
-                    pathName.text = it.name
-                    changeSaveButtonStatus()
-                }
-            } else {
-                pathName.setText(R.string.selectFolderTitle)
-            }
-            mediaFoldersSettingsVisibility(syncFolderId != null)
-        }
-
-        syncSettingsViewModel.saveOldPictures.observe(this@SyncSettingsActivity) {
-            if (it != oldSaveOldPicturesValue) editNumber++
-            changeSaveButtonStatus()
-            syncDateValue.text = getString(it.shortTitle).lowercase()
-            if (it == SavePicturesDate.SINCE_DATE) {
-                syncSettingsViewModel.customDate.value = Date().startOfTheDay()
-                syncDatePicker.text = syncSettingsViewModel.customDate.value?.format(FORMAT_DATE_CLEAR_MONTH)
-            } else {
-                syncSettingsViewModel.customDate.value = null
-            }
-        }
+        observeSyncFolder()
+        observeSaveOldPictures(oldSaveOldPicturesValue)
 
         syncDatePicker.setOnClickListener { showSyncDatePicker() }
 
-        syncSettingsViewModel.syncIntervalType.observe(this@SyncSettingsActivity) {
-            if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
-            changeSaveButtonStatus()
-            syncPeriodicityValue.text = getString(it.title).lowercase()
-        }
+        observeSyncIntervalType(oldIntervalTypeValue)
 
         syncVideoSwitch.isChecked = oldSyncVideoValue
         createDatedSubFoldersSwitch.isChecked = oldCreateDatedSubFoldersValue
@@ -241,6 +175,94 @@ class SyncSettingsActivity : BaseActivity() {
         saveButton.initProgress(this@SyncSettingsActivity)
         saveButton.setOnClickListener {
             if (permission.checkSyncPermissions()) saveSettings()
+        }
+    }
+
+    private fun observeAllUsers() {
+        AccountUtils.getAllUsers().observe(this@SyncSettingsActivity) { users ->
+            if (users.size > 1) {
+                activeSelectDrive()
+            } else {
+                val currentUserDrives = DriveInfosController.getDrives(AccountUtils.currentUserId)
+                if (currentUserDrives.size > 1) {
+                    activeSelectDrive()
+                } else {
+                    selectDriveViewModel.selectedUserId.value = AccountUtils.currentUserId
+                    selectDriveViewModel.selectedDrive.value = currentUserDrives.firstOrNull()
+                }
+            }
+        }
+    }
+
+    private fun observeCustomDate() = with(binding) {
+        syncSettingsViewModel.customDate.observe(this@SyncSettingsActivity) { date ->
+            syncDatePicker.apply {
+                isGone = date == null
+                text = date?.format(FORMAT_DATE_CLEAR_MONTH) ?: ""
+            }
+        }
+    }
+
+    private fun observeSelectedDrive() = with(binding) {
+        selectDriveViewModel.selectedDrive.observe(this@SyncSettingsActivity) {
+            it?.let {
+                driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
+                driveName.text = it.name
+                selectDivider.isVisible = true
+                selectPath.isVisible = true
+            } ?: run {
+                driveIcon.imageTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(this@SyncSettingsActivity, R.color.iconColor))
+                driveName.setText(R.string.selectDriveTitle)
+                selectDivider.isGone = true
+                selectPath.isGone = true
+            }
+            if (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId ||
+                selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId ||
+                syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder
+            ) {
+                syncSettingsViewModel.syncFolder.value = null
+            }
+            changeSaveButtonStatus()
+        }
+    }
+
+    private fun observeSyncFolder() = with(binding) {
+        syncSettingsViewModel.syncFolder.observe(this@SyncSettingsActivity) { syncFolderId ->
+
+            val selectedUserId = selectDriveViewModel.selectedUserId.value
+            val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
+            if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
+                FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
+                    pathName.text = it.name
+                    changeSaveButtonStatus()
+                }
+            } else {
+                pathName.setText(R.string.selectFolderTitle)
+            }
+            mediaFoldersSettingsVisibility(syncFolderId != null)
+        }
+    }
+
+    private fun observeSaveOldPictures(oldSaveOldPicturesValue: SavePicturesDate) = with(binding) {
+        syncSettingsViewModel.saveOldPictures.observe(this@SyncSettingsActivity) {
+            if (it != oldSaveOldPicturesValue) editNumber++
+            changeSaveButtonStatus()
+            syncDateValue.text = getString(it.shortTitle).lowercase()
+            if (it == SavePicturesDate.SINCE_DATE) {
+                syncSettingsViewModel.customDate.value = Date().startOfTheDay()
+                syncDatePicker.text = syncSettingsViewModel.customDate.value?.format(FORMAT_DATE_CLEAR_MONTH)
+            } else {
+                syncSettingsViewModel.customDate.value = null
+            }
+        }
+    }
+
+    private fun observeSyncIntervalType(oldIntervalTypeValue: IntervalType) = with(binding) {
+        syncSettingsViewModel.syncIntervalType.observe(this@SyncSettingsActivity) {
+            if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
+            changeSaveButtonStatus()
+            syncPeriodicityValue.text = getString(it.title).lowercase()
         }
     }
 
