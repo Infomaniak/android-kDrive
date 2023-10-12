@@ -338,6 +338,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun onDestroyView() {
         isDownloading = false
+        showLoadingTimer.cancel()
         super.onDestroyView()
     }
 
