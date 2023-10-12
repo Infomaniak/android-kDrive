@@ -449,6 +449,5 @@ class MainActivity : BaseActivity() {
 
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
-        private const val SECURITY_APP_TOLERANCE = 1 * 60 * 1000 // 1min (ms)
     }
 }

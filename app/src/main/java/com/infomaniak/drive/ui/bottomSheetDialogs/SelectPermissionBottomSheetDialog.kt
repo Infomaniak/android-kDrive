@@ -207,7 +207,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         var currentPermission: Permission? = null
 
         fun editFileShareLinkOfficePermission(file: File, canEdit: Boolean) = liveData(Dispatchers.IO) {
-            val body = JsonObject().apply { addProperty(ShareLinkSettings::canEdit.name, canEdit) }
+            val body = JsonObject().apply { addProperty("can_edit", canEdit) }
             val apiResponse = ApiRepository.updateShareLink(file, body)
             if (apiResponse.data == true) FileController.updateShareLinkWithRemote(file.id)
             emit(apiResponse)
