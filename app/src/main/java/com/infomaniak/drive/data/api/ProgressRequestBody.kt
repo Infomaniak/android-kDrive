@@ -45,7 +45,6 @@ class ProgressRequestBody(
 
     override fun isOneShot() = true
 
-    @Throws(IOException::class)
     override fun writeTo(sink: BufferedSink) {
         val isCalledByCallServerInterceptor = Thread.currentThread().stackTrace.any { stackTraceElement ->
             stackTraceElement.className == CallServerInterceptor::class.java.canonicalName

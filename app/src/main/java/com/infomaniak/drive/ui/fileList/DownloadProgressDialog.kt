@@ -114,7 +114,6 @@ class DownloadProgressDialog : DialogFragment() {
             }
         }
 
-        @Throws(Exception::class)
         private fun LiveDataScope<Pair<Int, IsComplete>?>.saveData(
             file: File,
             outputFile: java.io.File,

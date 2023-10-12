@@ -34,7 +34,6 @@ class ProgressResponseBody(val responseBody: ResponseBody, val progressListener:
         return object : ForwardingSource(source) {
             var totalBytesRead = 0L
 
-            @Throws(IOException::class)
             override fun read(sink: Buffer, byteCount: Long): Long {
                 val bytesRead: Long = super.read(sink, byteCount)
                 // read() returns the number of bytes read, or -1 if this source is exhausted.
