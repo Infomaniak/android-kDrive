@@ -18,6 +18,7 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
+import com.google.gson.JsonParser
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
@@ -39,7 +40,7 @@ object PreviewPDFUtils {
         userDrive: UserDrive,
         onProgress: (progress: Int) -> Unit
     ): ApiResponse<PdfCore> {
-        return try {
+        return runCatching {
             val outputFile = when {
                 file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
                 file.isOffline -> file.getOfflineFile(context, userDrive.userId)!!
@@ -55,9 +56,17 @@ object PreviewPDFUtils {
             }
 
             ApiResponse(ApiResponse.Status.SUCCESS, PdfCore(context, outputFile))
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ApiResponse(ApiResponse.Status.ERROR, null, translatedError = R.string.anErrorHasOccurred)
+        }.getOrElse { exception ->
+            exception.printStackTrace()
+            val error = when (exception) {
+                is PasswordProtectedException -> R.string.previewFileProtectedError
+                else -> R.string.previewNoPreview
+            }
+            ApiResponse(
+                result = ApiResponse.Status.ERROR,
+                data = null,
+                translatedError = error
+            )
         }
     }
 
@@ -75,7 +84,10 @@ object PreviewPDFUtils {
             .newCall(request).execute()
 
         response.use {
-            if (!it.isSuccessful) throw Exception("Download error ")
+            if (!it.isSuccessful) {
+                val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
+                if (errorCode == "password_protected_error") throw PasswordProtectedException() else throw Exception("Download error")
+            }
             when (it.body?.contentType()?.toString()) {
                 "application/pdf" -> createTempPdfFile(it, externalOutputFile)
                 else -> throw UnsupportedOperationException("File not supported")
@@ -90,4 +102,6 @@ object PreviewPDFUtils {
             }
         }
     }
+
+    private class PasswordProtectedException : Exception()
 }

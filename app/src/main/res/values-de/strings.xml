@@ -541,6 +541,7 @@
         <item quantity="other">Vorbereitung auf den Import von %d Dateien</item>
     </plurals>
     <string name="previewDownloadIndication">Wird geladen, bitte warten…</string>
+    <string name="previewFileProtectedError">Keine Vorschau verfügbar, diese Datei ist passwortgeschützt.</string>
     <string name="previewLoadError">Vorschau kann nicht geladen werden</string>
     <string name="previewNoPreview">Es scheint, als ob diese Datei keine Vorschau hat.</string>
     <string name="previewPdfPages">%1$d von %2$d</string>

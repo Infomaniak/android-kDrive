@@ -541,6 +541,7 @@
         <item quantity="other">Preparando la importación de %d archivos</item>
     </plurals>
     <string name="previewDownloadIndication">Cambio en curso, espera…</string>
+    <string name="previewFileProtectedError">No hay vista previa disponible, este archivo está protegido por contraseña.</string>
     <string name="previewLoadError">No se puede cargar la vista previa</string>
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>
     <string name="previewPdfPages">%1$d de %2$d</string>

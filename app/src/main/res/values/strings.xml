@@ -552,6 +552,7 @@
         <item quantity="other">Preparing to upload %d files</item>
     </plurals>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
+    <string name="previewFileProtectedError">No preview available, this file is password protected.</string>
     <string name="previewLoadError">Unable to load preview</string>
     <string name="previewNoPreview">This file appears to have no preview.</string>
     <string name="previewPdfPages">%1$d out of %2$d</string>
