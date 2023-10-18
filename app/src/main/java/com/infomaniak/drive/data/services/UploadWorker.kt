@@ -200,20 +200,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         return startUploadFile(cacheFile.length()).also { isUploaded ->
-            if (isUploaded) {
-                deleteIfExists(keepFile = isSync())
-                if (!isSyncOffline()) cacheFile.delete()
-            }
+            if (isUploaded && !isSyncOffline()) cacheFile.delete()
         }
     }
 
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
         return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) startUploadFile(uri.getFileSize(cursor)) else false
-        }.also { isUploaded ->
-            if (isUploaded == true && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
-                deleteIfExists(keepFile = isSync())
-            }
         } ?: false
     }
 
@@ -222,7 +215,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             if (fileSize != size) updateFileSize(size)
 
             currentUploadTask = UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker)
-            currentUploadTask!!.start().also {
+            currentUploadTask!!.start().also { isUploaded ->
+                if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
+                    deleteIfExists(keepFile = isSync())
+                }
+
                 SentryLog.d(TAG, "startUploadFile> end upload $fileName")
             }
 
