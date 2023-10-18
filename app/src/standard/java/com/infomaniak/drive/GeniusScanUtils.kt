@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.Utils
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
 import java.io.FileOutputStream
@@ -50,13 +51,20 @@ object GeniusScanUtils : IGeniusScanUtils {
     private const val SCAN_RESULT_KEY = "SCAN_RESULT_KEY"
     private const val ERROR_KEY = "ERROR_KEY"
 
-    private val supportedLanguages = mapOf(
-        "fra" to R.raw.fra,
-        "deu" to R.raw.deu,
-        "eng" to R.raw.eng,
-        "ita" to R.raw.ita,
-        "spa" to R.raw.spa,
-    )
+    private val supportedLanguages by lazy {
+        mutableMapOf(
+            "fra" to R.raw.fra,
+            "deu" to R.raw.deu,
+            "eng" to R.raw.eng,
+        ).apply {
+            Utils.getPreferredLocaleList().forEach {
+                when (it.language) {
+                    "it" -> put("ita", R.raw.ita)
+                    "es" -> put("spa", R.raw.spa)
+                }
+            }
+        }
+    }
 
     private fun Context.getOcrConfiguration(): OcrConfiguration {
         copyOcrDataFiles()
