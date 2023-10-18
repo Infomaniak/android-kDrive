@@ -45,6 +45,7 @@ import java.util.Calendar
 import java.util.Date
 
 class FileShareLinkSettingsFragment : Fragment() {
+
     private var binding: FragmentFileShareLinkSettingsBinding by safeBinding()
 
     private val navigationArgs: FileShareLinkSettingsFragmentArgs by navArgs()
