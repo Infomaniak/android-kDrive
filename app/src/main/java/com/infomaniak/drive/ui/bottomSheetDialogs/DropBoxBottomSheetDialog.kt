@@ -24,11 +24,10 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class DropBoxBottomSheetDialog : InformationBottomSheetDialog() {
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         title.setText(R.string.dropBoxTitle)
