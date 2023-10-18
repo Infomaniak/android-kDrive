@@ -27,7 +27,7 @@ import com.infomaniak.lib.core.utils.safeBinding
 
 open class InformationBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private var binding: FragmentBottomSheetInformationBinding by safeBinding()
+    protected var binding: FragmentBottomSheetInformationBinding by safeBinding()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentBottomSheetInformationBinding.inflate(inflater, container, false).also { binding = it }.root
