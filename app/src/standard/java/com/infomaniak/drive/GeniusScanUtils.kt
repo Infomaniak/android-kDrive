@@ -27,6 +27,7 @@ import com.geniusscansdk.core.GeniusScanSDK
 import com.geniusscansdk.core.LicenseException
 import com.geniusscansdk.scanflow.ScanActivity
 import com.geniusscansdk.scanflow.ScanConfiguration
+import com.geniusscansdk.scanflow.ScanConfiguration.*
 import com.geniusscansdk.scanflow.ScanResult
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
@@ -41,6 +42,7 @@ import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
 import java.io.FileOutputStream
 import java.util.Date
+import java.util.EnumSet
 
 object GeniusScanUtils : IGeniusScanUtils {
 
@@ -56,10 +58,11 @@ object GeniusScanUtils : IGeniusScanUtils {
         "spa" to R.raw.spa,
     )
 
-    private fun Context.getOcrConfiguration(): ScanConfiguration.OcrConfiguration {
+    private fun Context.getOcrConfiguration(): OcrConfiguration {
         copyOcrDataFiles()
 
-        return ScanConfiguration.OcrConfiguration().apply {
+        return OcrConfiguration().apply {
+            outputFormats = EnumSet.of(OcrOutputFormat.TEXT_LAYER_IN_PDF)
             languages = supportedLanguages.keys.toList()
             languagesDirectory = getOCRdataDirectory()
         }
@@ -139,7 +142,7 @@ object GeniusScanUtils : IGeniusScanUtils {
 
     private fun Context.scanWithConfiguration(
         scanConfiguration: ScanConfiguration,
-        resultLauncher: ActivityResultLauncher<Intent>
+        resultLauncher: ActivityResultLauncher<Intent>,
     ) {
         Intent(this, ScanActivity::class.java).apply {
             putExtra(SCAN_CONFIGURATION_KEY, scanConfiguration)
