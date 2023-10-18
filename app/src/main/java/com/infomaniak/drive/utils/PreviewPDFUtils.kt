@@ -61,7 +61,6 @@ object PreviewPDFUtils {
         }
     }
 
-    @Throws(Exception::class)
     private fun downloadFile(
         externalOutputFile: java.io.File,
         fileModel: File,
@@ -84,7 +83,6 @@ object PreviewPDFUtils {
         }
     }
 
-    @Throws(Exception::class)
     private fun createTempPdfFile(response: Response, file: java.io.File) {
         BufferedInputStream(response.body?.byteStream(), BUFFER_SIZE).use { input ->
             file.outputStream().use { output ->
