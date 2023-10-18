@@ -34,9 +34,6 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
-import kotlinx.android.synthetic.main.fragment_create_folder.*
-import kotlinx.android.synthetic.main.item_dropbox_settings.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
@@ -44,7 +41,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
     var showAdvancedSettings = false
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         advancedSettings.isVisible = true
@@ -94,23 +91,25 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
         trackNewElementEvent("createDropbox")
 
-        val emailWhenFinished = emailWhenFinishedSwitch.isChecked
-        val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
-        val password = passwordTextInput.text.toString()
-        val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toDoubleOrNull() ?: 1.0)
+        with(binding.dropboxSettings) {
+            val emailWhenFinished = emailWhenFinishedSwitch.isChecked
+            val validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
+            val password = passwordTextInput.text.toString()
+            val limitFileSize = Utils.convertGigaByteToBytes(limitStorageValue.text.toString().toDoubleOrNull() ?: 1.0)
 
-        createFolder(false) { file, _ ->
-            file?.let {
-                mainViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)
-                    .observe(viewLifecycleOwner) { apiResponse ->
-                        when (apiResponse?.result) {
-                            ApiResponse.Status.SUCCESS -> apiResponse.data?.let { dropBox ->
-                                file.dropbox = dropBox
-                                onDropBoxCreated(file)
+            createFolder(false) { file, _ ->
+                file?.let {
+                    mainViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)
+                        .observe(viewLifecycleOwner) { apiResponse ->
+                            when (apiResponse?.result) {
+                                ApiResponse.Status.SUCCESS -> apiResponse.data?.let { dropBox ->
+                                    file.dropbox = dropBox
+                                    onDropBoxCreated(file)
+                                }
+                                else -> onError(getString(apiResponse.translateError()))
                             }
-                            else -> onError(getString(apiResponse.translateError()))
                         }
-                    }
+                }
             }
         }
     }
@@ -135,13 +134,13 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         showAdvancedSettings(showAdvancedSettings, true)
     }
 
-    private fun showAdvancedSettings(show: Boolean, displayAnimation: Boolean = false) {
+    private fun showAdvancedSettings(show: Boolean, displayAnimation: Boolean = false) = with(binding) {
         if (displayAnimation) advancedSettingsChevron.animateRotation(show)
         dropboxSettingsDivider.isVisible = show
-        dropboxSettings.isVisible = show
+        dropboxSettings.root.isVisible = show
     }
 
-    private fun setupAdvancedSettings() {
+    private fun setupAdvancedSettings() = with(binding.dropboxSettings) {
         showAdvancedSettings(showAdvancedSettings)
         passwordSwitch.setOnCheckedChangeListener(createOnCheckedChangeListener(passwordTextLayout))
         expirationDateSwitch.setOnCheckedChangeListener(createOnCheckedChangeListener(expirationDateInput))
@@ -159,7 +158,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
             viewsToReveal.forEach { it.isVisible = isChecked }
         }
 
-    private fun isValid(): Boolean {
+    private fun isValid(): Boolean = with(binding.dropboxSettings) {
         var result = true
         if (passwordSwitch.isChecked) {
             result = !passwordTextInput.showOrHideEmptyError()

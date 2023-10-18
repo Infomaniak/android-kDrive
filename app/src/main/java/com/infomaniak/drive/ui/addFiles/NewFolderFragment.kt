@@ -28,17 +28,20 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.databinding.FragmentNewFolderBinding
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_new_folder.*
 
 class NewFolderFragment : Fragment() {
+
+    private var binding: FragmentNewFolderBinding by safeBinding()
 
     private val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     private val arguments: NewFolderFragmentArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_new_folder, container, false)
+        return FragmentNewFolderBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -50,7 +53,7 @@ class NewFolderFragment : Fragment() {
             currentPermission = null
         }
 
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
 
@@ -60,12 +63,12 @@ class NewFolderFragment : Fragment() {
     }
 
     private fun initPrivateFolder() {
-        privateFolder.setOnClickListener {
+        binding.privateFolder.setOnClickListener {
             safeNavigate(R.id.createPrivateFolderFragment)
         }
     }
 
-    private fun initCommonFolder() {
+    private fun initCommonFolder() = with(binding) {
         val drive = newFolderViewModel.userDrive?.let {
             DriveInfosController.getDrive(it.userId, it.driveId)
         } ?: AccountUtils.getCurrentDrive()
@@ -81,7 +84,7 @@ class NewFolderFragment : Fragment() {
     }
 
     private fun initDropBoxFolder() {
-        dropBox.setOnClickListener {
+        binding.dropBox.setOnClickListener {
             safeNavigate(
                 if (AccountUtils.getCurrentDrive()?.packFunctionality?.dropbox == true) R.id.createDropBoxFolderFragment
                 else R.id.dropBoxBottomSheetDialog
