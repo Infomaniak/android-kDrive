@@ -38,13 +38,13 @@ import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
 import androidx.webkit.WebViewClientCompat
 import androidx.webkit.WebViewFeature
 import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ActivityOnlyOfficeBinding
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.showToast
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.android.synthetic.main.activity_only_office.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,10 +54,12 @@ import java.net.URL
 
 class OnlyOfficeActivity : AppCompatActivity() {
 
+    private val binding by lazy { ActivityOnlyOfficeBinding.inflate(layoutInflater) }
+
     @SuppressLint("SetJavaScriptEnabled")
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_only_office)
+        setContentView(binding.root)
 
         val url = intent.getStringExtra(ONLYOFFICE_URL_TAG)!!
         val filename = intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)!!
@@ -94,7 +96,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     @SuppressLint("RequiresFeature")
-    private fun setDarkMode() {
+    private fun setDarkMode() = with(binding) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
             WebSettingsCompat.setAlgorithmicDarkeningAllowed(webView.settings, isNightModeEnabled())
         } else {
@@ -171,7 +173,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
         }
 
         onBackPressedDispatcher.addCallback {
-            if (webView.canGoBack()) webView.goBack() else finish()
+            with(binding.webView) { if (canGoBack()) goBack() else finish() }
         }
     }
 
