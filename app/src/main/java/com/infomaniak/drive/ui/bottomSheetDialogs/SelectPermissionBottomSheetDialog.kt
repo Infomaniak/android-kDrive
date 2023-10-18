@@ -39,30 +39,31 @@ import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink.*
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
+import com.infomaniak.drive.databinding.FragmentSelectPermissionBinding
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
 import kotlinx.android.parcel.Parcelize
-import kotlinx.android.synthetic.main.fragment_select_permission.permissionsRecyclerView
-import kotlinx.android.synthetic.main.fragment_select_permission.saveButton
-import kotlinx.android.synthetic.main.fragment_select_permission.toolbar
 import kotlinx.coroutines.Dispatchers
 
 class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
+
+    private var binding: FragmentSelectPermissionBinding by safeBinding()
+
     private lateinit var adapter: PermissionsAdapter
     private lateinit var permissionsGroup: PermissionsGroup
     private val navigationArgs: SelectPermissionBottomSheetDialogArgs by navArgs()
     private val selectPermissionViewModel: SelectPermissionViewModel by viewModels()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_select_permission, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentSelectPermissionBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         selectPermissionViewModel.apply {
             currentPermission = currentPermission ?: navigationArgs.currentPermission
@@ -83,7 +84,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             setAll(getPermissions())
             selectionPosition = permissionList.indexOf(selectPermissionViewModel.currentPermission)
         }
-        permissionsRecyclerView.adapter = adapter
+        binding.permissionsRecyclerView.adapter = adapter
     }
 
     private fun getPermissions(): ArrayList<Permission> {
@@ -124,7 +125,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun configureSaveButton() {
-        saveButton.setOnClickListener {
+        binding.saveButton.setOnClickListener {
             with(selectPermissionViewModel) {
                 when (permissionsGroup) {
                     PermissionsGroup.EXTERNAL_USERS_RIGHTS, PermissionsGroup.USERS_RIGHTS -> {
@@ -148,7 +149,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun updateShareLinkOfficePermission(file: File, permission: Permission?) {
+    private fun updateShareLinkOfficePermission(file: File, permission: Permission?) = with(binding) {
         saveButton.initProgress(viewLifecycleOwner)
         saveButton.showProgress()
         selectPermissionViewModel.editFileShareLinkOfficePermission(
@@ -159,7 +160,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun updatePermission(file: File, shareableItem: Shareable?, permission: ShareablePermission? = null) {
+    private fun updatePermission(file: File, shareableItem: Shareable?, permission: ShareablePermission? = null) = with(binding) {
         saveButton.initProgress(viewLifecycleOwner)
         saveButton.showProgress()
         shareableItem?.let { shareable ->
@@ -198,7 +199,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         } else {
             SnackbarUtils.showSnackbar(requireView(), errorMessage)
         }
-        saveButton.hideProgress(R.string.buttonSave)
+        binding.saveButton.hideProgress(R.string.buttonSave)
     }
 
     internal class SelectPermissionViewModel : ViewModel() {
