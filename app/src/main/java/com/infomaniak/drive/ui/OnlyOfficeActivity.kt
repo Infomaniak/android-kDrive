@@ -172,10 +172,8 @@ class OnlyOfficeActivity : AppCompatActivity() {
             }
         }
 
-        with(binding) {
-            onBackPressedDispatcher.addCallback {
-                if (webView.canGoBack()) webView.goBack() else finish()
-            }
+        onBackPressedDispatcher.addCallback {
+            with(binding.webView) { if (canGoBack()) goBack() else finish() }
         }
     }
 
