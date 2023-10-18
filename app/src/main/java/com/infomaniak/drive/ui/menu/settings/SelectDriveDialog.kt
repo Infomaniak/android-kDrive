@@ -67,7 +67,7 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                     popupWindow = PopupWindow(
                         popupLayoutBinding.root,
                         binding.userCardview.root.width,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
                     ).apply {
                         isOutsideTouchable = true
                         isFocusable = true

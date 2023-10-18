@@ -48,6 +48,7 @@ import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
 
 class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
+
     private var binding: FragmentSelectPermissionBinding by safeBinding()
 
     private lateinit var adapter: PermissionsAdapter
