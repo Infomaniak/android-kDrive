@@ -112,7 +112,7 @@ open class CreateFolderFragment : Fragment() {
 
     protected fun createFolder(
         onlyForMe: Boolean,
-        onFolderCreated: (file: File?, redirectToShareDetails: Boolean) -> Unit
+        onFolderCreated: (file: File?, redirectToShareDetails: Boolean) -> Unit,
     ) = with(binding) {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgress()
