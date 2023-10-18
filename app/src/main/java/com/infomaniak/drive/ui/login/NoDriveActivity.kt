@@ -21,16 +21,16 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.databinding.ActivityNoDriveBinding
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import kotlinx.android.synthetic.main.activity_no_drive.anotherProfileButton
-import kotlinx.android.synthetic.main.activity_no_drive.noDriveActionButton
-import kotlinx.android.synthetic.main.activity_no_drive.noDriveIconLayout
-import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
 
 class NoDriveActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+
+    private val binding by lazy { ActivityNoDriveBinding.inflate(layoutInflater) }
+
+    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_no_drive)
+        setContentView(root)
 
         noDriveIconLayout.icon.setImageResource(R.drawable.ic_no_drive)
 
