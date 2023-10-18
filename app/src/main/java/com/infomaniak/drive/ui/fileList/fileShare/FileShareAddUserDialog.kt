@@ -33,6 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.databinding.FragmentBottomSheetFileShareBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
@@ -45,13 +46,14 @@ import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_share.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.Serializable
 
 class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
+
+    private var binding: FragmentBottomSheetFileShareBinding by safeBinding()
 
     private lateinit var availableUsersAdapter: AvailableShareableItemsAdapter
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
@@ -60,16 +62,16 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
     private var selectedPermission: Shareable.ShareablePermission = Shareable.ShareablePermission.READ
         set(value) {
-            filePermissionsIcon.setImageResource(value.icon)
-            filePermissionsValue.setText(value.translation)
+            binding.filePermissionsIcon.setImageResource(value.icon)
+            binding.filePermissionsValue.setText(value.translation)
             field = value
         }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_file_share, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentBottomSheetFileShareBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
@@ -105,7 +107,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             selectedPermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
         }
 
-        shareButton.initProgress(this)
+        shareButton.initProgress(this@FileShareAddUserDialog)
         shareButton.setOnClickListener {
             shareButton.showProgress()
             trackShareRightsEvent("inviteUser")
@@ -115,7 +117,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun addToSharedElementList(element: Shareable) {
+    private fun addToSharedElementList(element: Shareable) = with(binding) {
         selectedItems.apply {
             when (element) {
                 is Invitation -> {
@@ -184,7 +186,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             }
         }
 
-        selectedItemsChipGroup.addView(chip)
+        binding.selectedItemsChipGroup.addView(chip)
         return chip
     }
 
@@ -195,14 +197,14 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             } else {
                 SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
             }
-            shareButton.hideProgress(R.string.buttonShare)
+            binding.shareButton.hideProgress(R.string.buttonShare)
         }
     }
 
     private fun checkShare(
         newPermission: Shareable.ShareablePermission,
         onCheckApproved: (file: File, body: MutableMap<String, Serializable>) -> Unit
-    ) {
+    ) = with(binding) {
         fileShareViewModel.currentFile.value?.let { file ->
             val body = mutableMapOf(
                 "emails" to ArrayList(selectedItems.invitations.map { it.email }),
