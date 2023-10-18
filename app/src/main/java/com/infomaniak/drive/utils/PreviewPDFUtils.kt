@@ -65,7 +65,7 @@ object PreviewPDFUtils {
             ApiResponse(
                 result = ApiResponse.Status.ERROR,
                 data = null,
-                translatedError = error
+                translatedError = error,
             )
         }
     }
