@@ -23,13 +23,12 @@ import androidx.core.view.isGone
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
 
     private val navigationArgs: DriveMaintenanceBottomSheetDialogArgs by navArgs()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         illu.apply {

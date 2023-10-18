@@ -31,14 +31,13 @@ import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
 
     val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: NotSupportedExtensionBottomSheetDialogArgs by navArgs()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
         FileController.getFileById(navigationArgs.fileId)?.let { currentFile ->
 
@@ -54,7 +53,7 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
                 dismiss()
             }
 
-            actionButton.initProgress(this)
+            actionButton.initProgress(this@NotSupportedExtensionBottomSheetDialog)
             actionButton.text = getString(R.string.buttonCreateOnlyOfficeCopy, currentFile.conversion?.onlyofficeExtension)
             actionButton.setOnClickListener {
                 actionButton.showProgress()

@@ -24,13 +24,12 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class DropBoxResultBottomSheetDialog : InformationBottomSheetDialog() {
 
     private val arguments: DropBoxResultBottomSheetDialogArgs by navArgs()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
         title.text = getString(R.string.dropBoxResultTitle, arguments.name)
         description.setText(R.string.dropBoxResultDescription)

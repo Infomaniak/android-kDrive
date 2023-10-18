@@ -22,17 +22,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.infomaniak.drive.R
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.secondaryActionButton
+import com.infomaniak.drive.databinding.FragmentBottomSheetInformationBinding
+import com.infomaniak.lib.core.utils.safeBinding
 
 open class InformationBottomSheetDialog : BottomSheetDialogFragment() {
 
+    protected var binding: FragmentBottomSheetInformationBinding by safeBinding()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_information, container, false)
+        return FragmentBottomSheetInformationBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        secondaryActionButton.setOnClickListener { dismiss() }
+        binding.secondaryActionButton.setOnClickListener { dismiss() }
     }
 }

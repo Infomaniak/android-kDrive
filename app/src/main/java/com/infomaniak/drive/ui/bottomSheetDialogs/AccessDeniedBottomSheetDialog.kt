@@ -35,7 +35,6 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 import kotlinx.coroutines.Dispatchers
 
 class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
@@ -43,7 +42,7 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
     private val informationBottomSheetViewModel: InformationBottomSheetViewModel by viewModels()
     private val navigationArgs: AccessDeniedBottomSheetDialogArgs by navArgs()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         illu.setImageResource(R.drawable.ic_stop)
@@ -51,7 +50,7 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
 
         if (navigationArgs.isAdmin) {
             description.setText(R.string.accessDeniedDescriptionIsAdmin)
-            actionButton.initProgress(this)
+            actionButton.initProgress(this@AccessDeniedBottomSheetDialog)
             actionButton.setText(R.string.buttonConfirmNotify)
             actionButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_error))
             actionButton.setOnClickListener {

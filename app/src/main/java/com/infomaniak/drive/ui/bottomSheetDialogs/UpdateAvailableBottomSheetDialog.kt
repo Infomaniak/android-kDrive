@@ -23,11 +23,10 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.lib.core.utils.getAppName
 import com.infomaniak.lib.core.utils.goToPlayStore
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.*
 
 class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         title.setText(R.string.updateAvailableTitle)

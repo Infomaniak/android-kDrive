@@ -23,14 +23,10 @@ import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.actionButton
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.description
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.illu
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_information.title
 
 class SyncConfigureBottomSheetDialog : InformationBottomSheetDialog() {
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
         title.setText(R.string.syncConfigureTitle)
         description.text = getString(R.string.syncConfigureDescription, AccountUtils.getCurrentDrive()?.name)
