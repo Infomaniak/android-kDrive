@@ -146,7 +146,7 @@ class PreviewPDFFragment : PreviewFragment() {
                         showPdf(pdfCore)
                     } ?: run {
                         downloadProgress.isGone = true
-                        previewDescription.setText(R.string.previewNoPreview)
+                        previewDescription.setText(apiResponse.translatedError)
                         bigOpenWithButton.isVisible = true
                     }
                     previewSliderViewModel.pdfIsDownloading.value = false
