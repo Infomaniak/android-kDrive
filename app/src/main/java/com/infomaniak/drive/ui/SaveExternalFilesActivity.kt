@@ -45,6 +45,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.databinding.ActivitySaveExternalFileBinding
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
@@ -55,7 +56,6 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.android.synthetic.main.activity_save_external_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -63,6 +63,8 @@ import java.net.URLDecoder
 import java.util.Date
 
 class SaveExternalFilesActivity : BaseActivity() {
+
+    private val binding by lazy { ActivitySaveExternalFileBinding.inflate(layoutInflater) }
 
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
     private val saveExternalFilesViewModel: SaveExternalFilesViewModel by viewModels()
@@ -86,9 +88,9 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_save_external_file)
+        setContentView(root)
 
         if (!isAuth() || isExtrasNull()) {
             finish()
@@ -169,8 +171,8 @@ class SaveExternalFilesActivity : BaseActivity() {
         selectedDrive.observe(this@SaveExternalFilesActivity) {
             it?.let { drive ->
                 displaySelectedDrive(drive)
-                saveButton.isEnabled = false
-                pathTitle.isVisible = true
+                binding.saveButton.isEnabled = false
+                binding.pathTitle.isVisible = true
                 setupSelectPath()
                 getSelectedFolder().let { (userId, driveId, folderId) ->
                     saveExternalFilesViewModel.folderId.value = if (userId == selectedUserId.value && driveId == drive.id) {
@@ -203,18 +205,19 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun canSaveFilesPref() = canUseExternalFilesPref() || navigationArgs.folderId == -1
 
-    private fun displaySelectedDrive(drive: Drive) {
+    private fun displaySelectedDrive(drive: Drive) = with(binding) {
         driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
         driveName.text = drive.name
     }
 
-    private fun displayDriveSelection() {
-        driveIcon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.iconColor))
+    private fun displayDriveSelection() = with(binding) {
+        driveIcon.imageTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(this@SaveExternalFilesActivity, R.color.iconColor))
         driveName.setText(R.string.selectDriveTitle)
     }
 
     private fun setupSelectPath() {
-        selectPath.apply {
+        binding.selectPath.apply {
             isVisible = true
             setOnClickListener {
                 Intent(this@SaveExternalFilesActivity, SelectFolderActivity::class.java).apply {
@@ -249,16 +252,16 @@ class SaveExternalFilesActivity : BaseActivity() {
                 } else {
                     folder.name
                 }
-                pathName.text = folderName
+                binding.pathName.text = folderName
                 checkEnabledSaveButton()
             } ?: run {
-                pathName.setText(R.string.selectFolderTitle)
+                binding.pathName.setText(R.string.selectFolderTitle)
             }
         }
     }
 
     private fun setupSaveButton() = with(selectDriveViewModel) {
-        saveButton.apply {
+        binding.saveButton.apply {
             initProgress(this@SaveExternalFilesActivity)
             setOnClickListener {
                 showProgress()
@@ -276,7 +279,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                             finish()
                         } else {
                             withContext(Dispatchers.Main) {
-                                saveButton?.hideProgress(R.string.buttonSave)
+                                binding.saveButton?.hideProgress(R.string.buttonSave)
                                 showSnackbar(R.string.errorSave)
                             }
                         }
@@ -310,7 +313,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         }
     }
 
-    private fun handleSendSingle() {
+    private fun handleSendSingle() = with(binding) {
 
         fun getExtraTextFileName(): String {
             val extension = if (intent.getStringExtra(Intent.EXTRA_TEXT)?.isValidUrl() == true) ".url" else ".txt"
@@ -357,7 +360,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         fileNameEditLayout.isVisible = true
     }
 
-    private fun handleSendMultiple() {
+    private fun handleSendMultiple() = with(binding) {
         val uris = intent.parcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
             ?.filterIsInstance<Uri>()
             ?.map { it to it.fileName() }
@@ -372,22 +375,22 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun checkEnabledSaveButton() {
-        saveButton.isEnabled = isValidFields()
+        binding.saveButton.isEnabled = isValidFields()
     }
 
     private fun isValidFields(): Boolean {
-        return (isMultiple || !fileNameEdit.showOrHideEmptyError()) &&
+        return (isMultiple || !binding.fileNameEdit.showOrHideEmptyError()) &&
                 selectDriveViewModel.selectedUserId.value != null &&
                 selectDriveViewModel.selectedDrive.value != null &&
                 saveExternalFilesViewModel.folderId.value != null
     }
 
-    private fun activeSelectDrive() {
+    private fun activeSelectDrive() = with(binding) {
         switchDrive.isVisible = true
         selectDrive.setOnClickListener { SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog") }
     }
 
-    private fun storeFiles(userId: Int, driveId: Int, folderId: Int): Boolean {
+    private fun storeFiles(userId: Int, driveId: Int, folderId: Int): Boolean = with(binding) {
         return try {
             when {
                 isMultiple -> {
@@ -425,7 +428,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun storeText(userId: Int, driveId: Int, folderId: Int): Boolean {
         intent.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
-            val fileName = fileNameEdit.text.toString().trim()
+            val fileName = binding.fileNameEdit.text.toString().trim()
             val lastModified = Date()
             val outputFile = getOutputFile(fileName)
 
