@@ -49,29 +49,40 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
         title.setText(R.string.accessDeniedTitle)
 
         if (navigationArgs.isAdmin) {
+
             description.setText(R.string.accessDeniedDescriptionIsAdmin)
-            actionButton.initProgress(this@AccessDeniedBottomSheetDialog)
-            actionButton.setText(R.string.buttonConfirmNotify)
-            actionButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_error))
-            actionButton.setOnClickListener {
-                actionButton.showProgress()
-                informationBottomSheetViewModel.forceFolderAccess(navigationArgs.folderId)
-                    .observe(viewLifecycleOwner) { apiResponse ->
-                        if (apiResponse.data == null) {
-                            SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
-                        } else {
-                            apiResponse.data?.let { hasAccess ->
-                                if (hasAccess) navigateToTargetFolder() else closeAndShowRightError()
+
+            actionButton.apply {
+                initProgress(this@AccessDeniedBottomSheetDialog)
+                setText(R.string.buttonConfirmNotify)
+                setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_error))
+                setOnClickListener {
+                    showProgress()
+                    informationBottomSheetViewModel.forceFolderAccess(navigationArgs.folderId)
+                        .observe(viewLifecycleOwner) { apiResponse ->
+                            if (apiResponse.data == null) {
+                                SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
+                            } else {
+                                apiResponse.data?.let { hasAccess ->
+                                    if (hasAccess) navigateToTargetFolder() else closeAndShowRightError()
+                                }
                             }
+                            hideProgress(R.string.buttonConfirmNotify)
                         }
-                        actionButton.hideProgress(R.string.buttonConfirmNotify)
-                    }
+                }
             }
+
             secondaryActionButton.setText(R.string.buttonBack)
+
         } else {
+
             description.setText(R.string.accessDeniedDescriptionIsNotAdmin)
-            actionButton.setText(R.string.buttonClose)
-            actionButton.setOnClickListener { dismiss() }
+
+            actionButton.apply {
+                setText(R.string.buttonClose)
+                setOnClickListener { dismiss() }
+            }
+
             secondaryActionButton.isGone = true
         }
     }
