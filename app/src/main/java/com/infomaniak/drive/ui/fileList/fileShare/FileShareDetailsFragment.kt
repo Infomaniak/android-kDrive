@@ -32,6 +32,7 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.databinding.FragmentFileShareDetailsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
@@ -43,10 +44,12 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.hideKeyboard
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_file_share_details.*
 
 class FileShareDetailsFragment : Fragment() {
+
+    private var binding: FragmentFileShareDetailsBinding by safeBinding()
 
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -61,8 +64,9 @@ class FileShareDetailsFragment : Fragment() {
     private lateinit var allTeams: List<Team>
     private var shareLink: ShareLink? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.fragment_file_share_details, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentFileShareDetailsBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -77,7 +81,7 @@ class FileShareDetailsFragment : Fragment() {
 
             setAvailableShareableItems()
             setToolbarTitle()
-            sharedUsersTitle.isGone = true
+            binding.sharedUsersTitle.isGone = true
             setupShareLink(file.sharelink)
             refreshUi()
             setBackActionHandlers()
@@ -85,7 +89,7 @@ class FileShareDetailsFragment : Fragment() {
         }
     }
 
-    private fun setAvailableShareableItems() {
+    private fun setAvailableShareableItems() = with(binding) {
         allUserList = AccountUtils.getCurrentDrive().getDriveUsers()
         allTeams = DriveInfosController.getTeams(AccountUtils.getCurrentDrive()!!)
 
@@ -102,7 +106,7 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun setToolbarTitle() {
-        fileShareCollapsingToolbarLayout.title = getString(
+        binding.fileShareCollapsingToolbarLayout.title = getString(
             if (file.type == File.Type.DIRECTORY.value) {
                 R.string.fileShareDetailsFolderTitle
             } else {
@@ -112,7 +116,7 @@ class FileShareDetailsFragment : Fragment() {
         )
     }
 
-    private fun refreshUi() {
+    private fun refreshUi() = with(binding) {
         // TODO Need refactor
         sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
         sharedUsersRecyclerView.adapter = sharedItemsAdapter
@@ -184,7 +188,7 @@ class FileShareDetailsFragment : Fragment() {
         }
     }
 
-    private fun setBackPressedHandlers() {
+    private fun setBackPressedHandlers() = with(binding) {
         toolbar.setNavigationOnClickListener { onBackPressed() }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
         closeButton.setOnClickListener { onBackPressed() }
@@ -205,12 +209,12 @@ class FileShareDetailsFragment : Fragment() {
 
     private fun setupDropBoxShareLink() {
         showShareLinkView()
-        shareLinkContainer.setup(file)
+        binding.shareLinkContainer.setup(file)
     }
 
     private fun setupNormalShareLink(shareLink: ShareLink?) {
         showShareLinkView()
-        shareLinkContainer.setup(
+        binding.shareLinkContainer.setup(
             file = file,
             shareLink = shareLink,
             onTitleClicked = { newShareLink -> handleOnShareLinkTitleClicked(newShareLink) },
@@ -247,17 +251,17 @@ class FileShareDetailsFragment : Fragment() {
     }
 
     private fun showShareLinkView() {
-        shareLinkLayout.isVisible = true
+        binding.shareLinkLayout.isVisible = true
     }
 
     private fun hideShareLinkView() {
-        shareLinkLayout.isGone = true
+        binding.shareLinkLayout.isGone = true
     }
 
     private fun createShareLink() {
         mainViewModel.createShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
-                shareLinkContainer.update(apiResponse.data)
+                binding.shareLinkContainer.update(apiResponse.data)
             } else {
                 showSnackbar(R.string.errorShareLink)
             }
@@ -268,7 +272,7 @@ class FileShareDetailsFragment : Fragment() {
         mainViewModel.deleteFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             val success = apiResponse.data == true
             if (success) {
-                shareLinkContainer.update(null)
+                binding.shareLinkContainer.update(null)
             } else {
                 showSnackbar(apiResponse.translateError())
             }
