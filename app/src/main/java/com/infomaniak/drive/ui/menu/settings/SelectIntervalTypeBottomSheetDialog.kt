@@ -22,14 +22,12 @@ import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.views.SelectBottomSheetDialog
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.selectRecyclerView
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.selectTitle
 
 class SelectIntervalTypeBottomSheetDialog : SelectBottomSheetDialog() {
 
     private val syncSettingsViewModel: SyncSettingsActivity.SyncSettingsViewModel by activityViewModels()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         selectTitle.setText(R.string.syncSettingsButtonSyncPeriodicity)
