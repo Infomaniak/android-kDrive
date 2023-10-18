@@ -28,17 +28,15 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.databinding.FragmentBottomSheetSelectMediaFoldersBinding
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.drive.views.NoItemsLayoutView
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.views.DividerItemDecorator
 import io.realm.Realm
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.mediaFolderList
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.noMediaFolderLayout
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.swipeRefreshLayout
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_media_folders.toolbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -46,18 +44,20 @@ import kotlinx.coroutines.runInterruptible
 
 class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutView.INoItemsLayoutView {
 
+    private var binding: FragmentBottomSheetSelectMediaFoldersBinding by safeBinding()
+
     private val mediaViewModel: MediaViewModel by viewModels()
     private lateinit var mediaFoldersAdapter: MediaFoldersAdapter
 
     override val noItemsIcon = R.drawable.ic_folder_filled
     override val noItemsTitle = R.string.noMediaFolderTitle
-    override val noItemsInitialListView: View by lazy { mediaFolderList }
+    override val noItemsInitialListView: View by lazy { binding.mediaFolderList }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_select_media_folders, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentBottomSheetSelectMediaFoldersBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
@@ -66,7 +66,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
 
         swipeRefreshLayout.isEnabled = false
 
-        noMediaFolderLayout.iNoItemsLayoutView = this
+        noMediaFolderLayout.iNoItemsLayoutView = this@SelectMediaFoldersDialog
 
         mediaFoldersAdapter = MediaFoldersAdapter { mediaFolder, isChecked ->
             lifecycleScope.launch(Dispatchers.IO) {
@@ -84,7 +84,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
         if (drivePermissions.checkWriteStoragePermission()) loadFolders()
     }
 
-    private fun loadFolders() {
+    private fun loadFolders() = with(binding) {
         swipeRefreshLayout.isRefreshing = true
         mediaViewModel.elementsToRemove.observe(viewLifecycleOwner) { elementsToRemove ->
             mediaFolderList.post {
@@ -103,7 +103,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
                         )
                     }
                     if (isComplete) {
-                        swipeRefreshLayout?.isRefreshing = false
+                        swipeRefreshLayout.isRefreshing = false
                     }
                 }
             }
