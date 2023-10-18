@@ -33,30 +33,29 @@ import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.databinding.FragmentCreateFolderBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.hideKeyboard
-import com.infomaniak.lib.core.utils.hideProgress
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
-import kotlinx.android.synthetic.main.fragment_create_folder.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 open class CreateFolderFragment : Fragment() {
+
+    protected var binding: FragmentCreateFolderBinding by safeBinding()
 
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected lateinit var adapter: PermissionsAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_create_folder, container, false)
+        return FragmentCreateFolderBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         createFolderButton.initProgress(viewLifecycleOwner)
@@ -93,11 +92,11 @@ open class CreateFolderFragment : Fragment() {
                 toggleCreateFolderButton()
             },
         )
-        permissionsRecyclerView.adapter = adapter
+        binding.permissionsRecyclerView.adapter = adapter
     }
 
-    private fun toggleCreateFolderButton() {
-        createFolderButton?.isEnabled = newFolderViewModel.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
+    private fun toggleCreateFolderButton() = with(binding) {
+        createFolderButton.isEnabled = newFolderViewModel.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
     }
 
     protected fun getShare(onSuccess: (share: Share) -> Unit) {
@@ -111,7 +110,10 @@ open class CreateFolderFragment : Fragment() {
         }
     }
 
-    protected fun createFolder(onlyForMe: Boolean, onFolderCreated: (file: File?, redirectToShareDetails: Boolean) -> Unit) {
+    protected fun createFolder(
+        onlyForMe: Boolean,
+        onFolderCreated: (file: File?, redirectToShareDetails: Boolean) -> Unit
+    ) = with(binding) {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgress()
         newFolderViewModel.currentFolderId.value?.let { parentId ->
