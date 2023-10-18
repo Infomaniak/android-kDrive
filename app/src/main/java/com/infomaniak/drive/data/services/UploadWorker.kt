@@ -211,7 +211,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) startUploadFile(uri.getFileSize(cursor)) else false
         }.also { isUploaded ->
-            if (isUploaded == true) deleteIfExists(keepFile = isSync())
+            if (isUploaded == true && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
+                deleteIfExists(keepFile = isSync())
+            }
         } ?: false
     }
 
