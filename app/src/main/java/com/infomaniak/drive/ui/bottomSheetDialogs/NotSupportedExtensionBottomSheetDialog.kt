@@ -39,32 +39,40 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
+
         FileController.getFileById(navigationArgs.fileId)?.let { currentFile ->
 
             title.text = getString(R.string.notSupportedExtensionTitle, currentFile.getFileExtension())
             description.text = getString(R.string.notSupportedExtensionDescription, currentFile.name)
-            illu.layoutParams.height = 50.toPx()
-            illu.layoutParams.width = 50.toPx()
-            illu.setImageResource(R.drawable.ic_info)
 
-            secondaryActionButton.setText(R.string.buttonOpenReadOnly)
-            secondaryActionButton.setOnClickListener {
-                requireContext().openOnlyOfficeActivity(currentFile)
-                dismiss()
+            illu.apply {
+                layoutParams.height = 50.toPx()
+                layoutParams.width = 50.toPx()
+                setImageResource(R.drawable.ic_info)
             }
 
-            actionButton.initProgress(this@NotSupportedExtensionBottomSheetDialog)
-            actionButton.text = getString(R.string.buttonCreateOnlyOfficeCopy, currentFile.conversion?.onlyofficeExtension)
-            actionButton.setOnClickListener {
-                actionButton.showProgress()
-                mainViewModel.convertFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
-                    when (apiResponse?.result) {
-                        ApiResponse.Status.SUCCESS -> apiResponse.data?.let { newFile ->
-                            requireContext().openOnlyOfficeActivity(newFile)
-                        }
-                        else -> showSnackbar(apiResponse.translateError())
-                    }
+            secondaryActionButton.apply {
+                setText(R.string.buttonOpenReadOnly)
+                setOnClickListener {
+                    requireContext().openOnlyOfficeActivity(currentFile)
                     dismiss()
+                }
+            }
+
+            actionButton.apply {
+                initProgress(this@NotSupportedExtensionBottomSheetDialog)
+                text = getString(R.string.buttonCreateOnlyOfficeCopy, currentFile.conversion?.onlyofficeExtension)
+                setOnClickListener {
+                    showProgress()
+                    mainViewModel.convertFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+                        when (apiResponse?.result) {
+                            ApiResponse.Status.SUCCESS -> apiResponse.data?.let { newFile ->
+                                requireContext().openOnlyOfficeActivity(newFile)
+                            }
+                            else -> showSnackbar(apiResponse.translateError())
+                        }
+                        dismiss()
+                    }
                 }
             }
         }

@@ -33,6 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.Shareable.*
 import com.infomaniak.drive.databinding.FragmentBottomSheetFileShareBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
@@ -60,7 +61,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     private val navigationArgs: FileShareAddUserDialogArgs by navArgs()
     private val selectedItems: Share = Share()
 
-    private var selectedPermission: Shareable.ShareablePermission = Shareable.ShareablePermission.READ
+    private var selectedPermission: ShareablePermission = ShareablePermission.READ
         set(value) {
             binding.filePermissionsIcon.setImageResource(value.icon)
             binding.filePermissionsValue.setText(value.translation)
@@ -71,7 +72,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         return FragmentBottomSheetFileShareBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
@@ -107,12 +108,14 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             selectedPermission = bundle.getParcelable(PERMISSION_BUNDLE_KEY)!!
         }
 
-        shareButton.initProgress(this@FileShareAddUserDialog)
-        shareButton.setOnClickListener {
-            shareButton.showProgress()
-            trackShareRightsEvent("inviteUser")
-            checkShare(selectedPermission) { file, body ->
-                createShareAndCloseDialog(file, body)
+        shareButton.apply {
+            initProgress(this@FileShareAddUserDialog)
+            setOnClickListener {
+                showProgress()
+                trackShareRightsEvent("inviteUser")
+                checkShare(selectedPermission) { file, body ->
+                    createShareAndCloseDialog(file, body)
+                }
             }
         }
     }
@@ -202,9 +205,10 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun checkShare(
-        newPermission: Shareable.ShareablePermission,
-        onCheckApproved: (file: File, body: MutableMap<String, Serializable>) -> Unit
+        newPermission: ShareablePermission,
+        onCheckApproved: (file: File, body: MutableMap<String, Serializable>) -> Unit,
     ) = with(binding) {
+
         fileShareViewModel.currentFile.value?.let { file ->
             val body = mutableMapOf(
                 "emails" to ArrayList(selectedItems.invitations.map { it.email }),
@@ -234,9 +238,9 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun showConflictDialog(
-        newPermission: Shareable.ShareablePermission,
+        newPermission: ShareablePermission,
         checkResults: ArrayList<FileCheckResult>,
-        onConflictApproved: () -> Unit
+        onConflictApproved: () -> Unit,
     ) {
         val conflictedUsers = checkResults.filter { it.isConflict }
 
