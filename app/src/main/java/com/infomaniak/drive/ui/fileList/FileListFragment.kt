@@ -90,7 +90,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private var retryLoadingActivities = false
 
     protected val showLoadingTimer: CountDownTimer by lazy {
-        createRefreshTimer { if (_binding != null) binding.swipeRefreshLayout.isRefreshing = true }
+        createRefreshTimer { _binding?.let { it.swipeRefreshLayout.isRefreshing = true } }
     }
 
     protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
@@ -734,7 +734,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 trackEvent("fileList", newSortType.name)
                 fileListViewModel.sortType = newSortType
-                if (_binding != null) binding.sortButton.setText(fileListViewModel.sortType.translation)
+                _binding?.let { it.sortButton.setText(fileListViewModel.sortType.translation) }
 
                 downloadFiles(fileListViewModel.isSharedWithMe, true)
 
