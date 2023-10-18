@@ -24,59 +24,64 @@ import android.view.ViewGroup
 import android.widget.PopupWindow
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.databinding.FragmentBottomSheetSelectDriveBinding
+import com.infomaniak.drive.databinding.PopupSelectUserBinding
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setUserView
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.user.User
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.driveList
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.toolbar
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select_drive.userCardview
-import kotlinx.android.synthetic.main.popup_select_user.view.usersRecyclerView
+import com.infomaniak.lib.core.utils.safeBinding
 
 class SelectDriveDialog : FullScreenBottomSheetDialog() {
 
+    private var binding: FragmentBottomSheetSelectDriveBinding by safeBinding()
+    private var popupLayoutBinding: PopupSelectUserBinding by safeBinding()
+
     private val selectDriveViewModel: SelectDriveViewModel by activityViewModels()
-    private lateinit var popupLayout: View
+
     private lateinit var popupWindow: PopupWindow
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        popupLayout = inflater.inflate(R.layout.popup_select_user, container, false)
-        return inflater.inflate(R.layout.fragment_bottom_sheet_select_drive, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        popupLayoutBinding = PopupSelectUserBinding.inflate(inflater, container, false)
+        return FragmentBottomSheetSelectDriveBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(selectDriveViewModel) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener { dismiss() }
+        binding.toolbar.setNavigationOnClickListener { dismiss() }
 
         val driveListAdapter = DriveListAdapter(getDriveList(), false) { newSelectedDrive ->
             selectedDrive.value = newSelectedDrive
             dismiss()
         }
-        driveList.adapter = driveListAdapter
+        binding.driveList.adapter = driveListAdapter
 
         AccountUtils.getAllUsers().observe(viewLifecycleOwner) { users ->
             if (users.size > 1) {
                 val selectedUser = users.find { it.id == selectedUserId.value } ?: users.first()
-                userCardview.setUserView(selectedUser) {
-                    popupWindow = PopupWindow(popupLayout, userCardview.width, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                binding.userCardview.root.setUserView(selectedUser) {
+                    popupWindow = PopupWindow(
+                        popupLayoutBinding.root,
+                        binding.userCardview.root.width,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
                         isOutsideTouchable = true
                         isFocusable = true
                         elevation = 20.0f
-                        showAsDropDown(userCardview)
+                        showAsDropDown(binding.userCardview.root)
                     }
                 }
-                userCardview.isVisible = true
+                binding.userCardview.root.isVisible = true
 
-                popupLayout.usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>, isCardview = false) { user ->
+                popupLayoutBinding.usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>, isCardview = false) { user ->
                     selectedUserId.value = user.id
                     driveListAdapter.setDrives(getDriveList())
 
-                    userCardview.setUserView(user) { popupWindow.showAsDropDown(userCardview) }
+                    binding.userCardview.root.setUserView(user) { popupWindow.showAsDropDown(binding.userCardview.root) }
 
                     popupWindow.dismiss()
                 }
