@@ -41,6 +41,7 @@ import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
 import java.io.FileOutputStream
 import java.util.Date
+import java.util.EnumSet
 
 object GeniusScanUtils : IGeniusScanUtils {
 
@@ -60,6 +61,7 @@ object GeniusScanUtils : IGeniusScanUtils {
         copyOcrDataFiles()
 
         return ScanConfiguration.OcrConfiguration().apply {
+            outputFormats = EnumSet.of(ScanConfiguration.OcrOutputFormat.TEXT_LAYER_IN_PDF)
             languages = supportedLanguages.keys.toList()
             languagesDirectory = getOCRdataDirectory()
         }
