@@ -67,14 +67,13 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import kotlinx.android.synthetic.main.fragment_file_list.collapsingToolbarLayout
-import kotlinx.android.synthetic.main.fragment_file_list.toolbar
 import kotlinx.coroutines.*
 
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
     NoItemsLayoutView.INoItemsLayoutView {
 
-    private lateinit var binding: FragmentFileListBinding
+    private var _binding: FragmentFileListBinding? = null
+    val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     protected lateinit var fileAdapter: FileAdapter
     protected val fileListViewModel: FileListViewModel by viewModels()
@@ -91,7 +90,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private var retryLoadingActivities = false
 
     protected val showLoadingTimer: CountDownTimer by lazy {
-        createRefreshTimer { if (::binding.isInitialized) binding.swipeRefreshLayout.isRefreshing = true }
+        createRefreshTimer { _binding?.let { it.swipeRefreshLayout.isRefreshing = true } }
     }
 
     protected open var downloadFiles: (ignoreCache: Boolean, isNewSort: Boolean) -> Unit = DownloadFiles()
@@ -139,7 +138,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         folderId = navigationArgs.folderId
         folderName = if (folderId == ROOT_ID) AccountUtils.getCurrentDrive()?.name ?: "/" else navigationArgs.folderName
-        binding = FragmentFileListBinding.inflate(inflater, container, false)
+        _binding = FragmentFileListBinding.inflate(inflater, container, false)
 
         return binding.root
     }
@@ -265,7 +264,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun setupToolbars() {
         fun MaterialToolbar.removeInsets() = setContentInsetsRelative(0, 0)
-        toolbar.removeInsets()
+        binding.toolbar.removeInsets()
         multiSelectLayout?.toolbarMultiSelect?.removeInsets()
     }
 
@@ -336,6 +335,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun onDestroyView() {
         isDownloading = false
         super.onDestroyView()
+        _binding = null
     }
 
     private fun showUploadedFiles() {
@@ -485,7 +485,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected open fun homeClassName(): String? = null
 
     protected fun setToolbarTitle(@StringRes rootTitleRes: Int? = null) {
-        collapsingToolbarLayout.title = if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
+        binding.collapsingToolbarLayout.title = if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
     }
 
     private fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
@@ -734,7 +734,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 trackEvent("fileList", newSortType.name)
                 fileListViewModel.sortType = newSortType
-                if (::binding.isInitialized) binding.sortButton.setText(fileListViewModel.sortType.translation)
+                _binding?.let { it.sortButton.setText(fileListViewModel.sortType.translation) }
 
                 downloadFiles(fileListViewModel.isSharedWithMe, true)
 
@@ -812,7 +812,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         changeControlsVisibility: Boolean = true,
         ignoreOffline: Boolean = false
     ) {
-        if (!::binding.isInitialized) return
+        if (_binding == null) return
 
         with(binding) {
             val isOffline = mainViewModel.isInternetAvailable.value == false

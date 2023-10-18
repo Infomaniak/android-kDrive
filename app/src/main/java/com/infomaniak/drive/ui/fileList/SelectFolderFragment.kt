@@ -33,8 +33,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_file_list.collapsingToolbarLayout
-import kotlinx.android.synthetic.main.fragment_file_list.toolbar
 
 class SelectFolderFragment : FileListFragment() {
 
@@ -47,7 +45,7 @@ class SelectFolderFragment : FileListFragment() {
 
     override val noItemsTitle = R.string.noFilesDescription
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         userDrive = selectFolderViewModel.userDrive
         super.onViewCreated(view, savedInstanceState)
 
