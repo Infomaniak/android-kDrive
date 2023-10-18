@@ -34,6 +34,7 @@ import androidx.work.WorkManager
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.databinding.ActivityMigrationBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
@@ -42,15 +43,14 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
-import kotlinx.android.synthetic.main.activity_migration.*
-import kotlinx.android.synthetic.main.fragment_intro.view.description
-import kotlinx.android.synthetic.main.fragment_intro.view.title
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
 class MigrationActivity : AppCompatActivity() {
+
+    private val binding by lazy { ActivityMigrationBinding.inflate(layoutInflater) }
 
     private val oldNotificationChannel = arrayListOf(
         "NOTIFICATION_CHANNEL_GENERAL",
@@ -64,18 +64,22 @@ class MigrationActivity : AppCompatActivity() {
 
     private lateinit var infomaniakLogin: InfomaniakLogin
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_migration)
+        setContentView(root)
 
-        infomaniakLogin = InfomaniakLogin(context = this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
+        infomaniakLogin = InfomaniakLogin(
+            context = this@MigrationActivity,
+            appUID = BuildConfig.APPLICATION_ID,
+            clientID = BuildConfig.CLIENT_ID
+        )
 
         header.title.setText(R.string.migrationTitle)
         header.description.setText(R.string.migrationDescription)
 
         loginInManuallyButton.setOnClickListener {
             clearOldUser()
-            startActivity(Intent(this, LoginActivity::class.java).clearStack())
+            startActivity(Intent(this@MigrationActivity, LoginActivity::class.java).clearStack())
         }
 
         clearApplicationData()
@@ -129,12 +133,12 @@ class MigrationActivity : AppCompatActivity() {
                 if (newUserList.isEmpty()) {
                     showError(textError)
                 }
-                startButton.isVisible = true
+                binding.startButton.isVisible = true
             }
         }
     }
 
-    private fun showError(error: String) {
+    private fun showError(error: String) = with(binding) {
         showSnackbar(error)
         startButton.setOnClickListener {
             authenticateOldUsers()
@@ -145,7 +149,7 @@ class MigrationActivity : AppCompatActivity() {
         progressMigrationDescription.isGone = true
     }
 
-    private fun showLoading() {
+    private fun showLoading() = with(binding) {
         startButton.isGone = true
         loginInManuallyButton.isGone = true
         progressMigration.isVisible = true
@@ -153,7 +157,7 @@ class MigrationActivity : AppCompatActivity() {
         startButton.setOnClickListener {
             AppSettings.migrated = true
             clearOldUser()
-            startActivity(Intent(this, MainActivity::class.java).clearStack())
+            startActivity(Intent(this@MigrationActivity, MainActivity::class.java).clearStack())
         }
     }
 
