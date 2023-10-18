@@ -211,8 +211,9 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun displayDriveSelection() = with(binding) {
-        driveIcon.imageTintList =
-            ColorStateList.valueOf(ContextCompat.getColor(this@SaveExternalFilesActivity, R.color.iconColor))
+        driveIcon.imageTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(this@SaveExternalFilesActivity, R.color.iconColor),
+        )
         driveName.setText(R.string.selectDriveTitle)
     }
 
