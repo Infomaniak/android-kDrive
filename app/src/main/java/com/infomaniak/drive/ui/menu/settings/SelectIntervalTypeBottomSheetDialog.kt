@@ -37,5 +37,4 @@ class SelectIntervalTypeBottomSheetDialog : SelectBottomSheetDialog() {
             dismiss()
         }
     }
-
 }

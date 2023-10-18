@@ -29,7 +29,7 @@ import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectTe
 
 class SelectIntervalTypeBottomSheetAdapter(
     private val selectedIntervalType: SyncSettings.IntervalType,
-    private val onItemClicked: (intervalType: SyncSettings.IntervalType) -> Unit
+    private val onItemClicked: (intervalType: SyncSettings.IntervalType) -> Unit,
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

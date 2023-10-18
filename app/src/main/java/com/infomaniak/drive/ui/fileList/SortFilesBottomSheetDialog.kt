@@ -29,10 +29,16 @@ class SortFilesBottomSheetDialog : SelectBottomSheetDialog() {
 
     private val navigationArgs: SortFilesBottomSheetDialogArgs by navArgs()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
-        binding.selectTitle.setText(R.string.sortTitle)
-        binding.selectRecyclerView.adapter = SortFilesBottomSheetAdapter(sortType, sortTypeUsage) { onSortTypeClicked(it) }
+
+        selectTitle.setText(R.string.sortTitle)
+
+        selectRecyclerView.adapter = SortFilesBottomSheetAdapter(
+            selectedType = navigationArgs.sortType,
+            usage = navigationArgs.sortTypeUsage,
+            onItemClicked = ::onSortTypeClicked,
+        )
     }
 
     private fun onSortTypeClicked(sortType: SortType) {
