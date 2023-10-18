@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.databinding.ActivityLoginBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
@@ -50,12 +51,13 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
-import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
+
+    private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
 
     private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
@@ -70,8 +72,8 @@ class LoginActivity : AppCompatActivity() {
                     else -> showError(getString(R.string.anErrorHasOccurred))
                 }
             } else {
-                connectButton?.hideProgress(R.string.connect)
-                signInButton.isEnabled = true
+                binding.connectButton.hideProgress(R.string.connect)
+                binding.signInButton.isEnabled = true
             }
         }
     }
@@ -80,10 +82,10 @@ class LoginActivity : AppCompatActivity() {
         result.handleCreateAccountActivityResult()
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         lockOrientationForSmallScreens()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+        setContentView(root)
 
         introViewpager.apply {
             adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
@@ -127,7 +129,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun ActivityResult.handleCreateAccountActivityResult() {
+    private fun ActivityResult.handleCreateAccountActivityResult() = with(binding) {
         if (resultCode == RESULT_OK) {
             val translatedError = data?.getStringExtra(InfomaniakLogin.ERROR_TRANSLATED_TAG)
             when {
@@ -178,9 +180,9 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun showError(error: String) {
+    private fun showError(error: String) = with(binding) {
         showSnackbar(error)
-        connectButton?.hideProgress(R.string.connect)
+        connectButton.hideProgress(R.string.connect)
         signInButton.isEnabled = true
         if (!connectButton.isEnabled) connectButton.isEnabled = true
     }
@@ -189,9 +191,9 @@ class LoginActivity : AppCompatActivity() {
         startActivity(Intent(this, MainActivity::class.java).clearStack())
     }
 
-    private fun launchNoDriveActivity() {
-        Intent(this, NoDriveActivity::class.java).apply { startActivity(this) }
-        connectButton?.hideProgress(R.string.connect)
+    private fun launchNoDriveActivity() = with(binding) {
+        Intent(this@LoginActivity, NoDriveActivity::class.java).apply { startActivity(this) }
+        connectButton.hideProgress(R.string.connect)
         signInButton.isEnabled = true
     }
 
