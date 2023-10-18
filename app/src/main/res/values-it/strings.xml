@@ -541,7 +541,7 @@
         <item quantity="other">Preparazione all’importazione di %d file</item>
     </plurals>
     <string name="previewDownloadIndication">Modifica in corso, attendere prego…</string>
-    <string name="previewFileProtectedError">Non è disponibile un\'anteprima, questo file è protetto da password.</string>
+    <string name="previewFileProtectedError">Non è disponibile un’anteprima, questo file è protetto da password.</string>
     <string name="previewLoadError">Impossibile caricare l’anteprima</string>
     <string name="previewNoPreview">Sembra che il file non abbia anteprima.</string>
     <string name="previewPdfPages">%1$d di %2$d</string>
