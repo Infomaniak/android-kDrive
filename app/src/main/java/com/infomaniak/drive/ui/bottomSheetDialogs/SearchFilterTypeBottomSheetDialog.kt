@@ -25,15 +25,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
 import com.infomaniak.drive.views.SelectBottomSheetDialog
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.selectRecyclerView
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.selectTitle
 
 class SearchFilterTypeBottomSheetDialog : SelectBottomSheetDialog() {
 
     private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
     private val navigationArgs: SearchFilterTypeBottomSheetDialogArgs by navArgs()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
         selectTitle.text = getString(R.string.fileTypeFilterTitle)
         selectRecyclerView.adapter = SearchFilterTypeBottomSheetAdapter(

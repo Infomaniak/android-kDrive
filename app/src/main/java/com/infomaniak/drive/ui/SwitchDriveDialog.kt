@@ -28,12 +28,10 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.DriveBlockedBottomSheetDialogA
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.views.SelectBottomSheetDialog
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.selectRecyclerView
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_select.selectTitle
 
 class SwitchDriveDialog : SelectBottomSheetDialog() {
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         selectTitle.setText(R.string.buttonSwitchDrive)
