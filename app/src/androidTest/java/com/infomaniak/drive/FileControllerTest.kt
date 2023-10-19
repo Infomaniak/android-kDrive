@@ -153,10 +153,10 @@ class FileControllerTest : KDriveTest() {
         // Get remote files
         val remoteFiles = arrayListOf<File>()
         var isCompletedRemoteFiles = false
-        getMySharedFiles(userDrive, File.SortType.NAME_AZ) { files, isComplete ->
+        getMySharedFiles(userDrive, File.SortType.NAME_AZ, transaction = { files, isComplete ->
             remoteFiles.addAll(files)
             isCompletedRemoteFiles = isComplete
-        }
+        })
         assertNotNull(remoteFiles, "remote my shares data cannot be null")
         assertTrue(isCompletedRemoteFiles, "remote my shares data must be complete")
         assertFalse(remoteFiles.isEmpty(), "remote files should not be empty")
@@ -164,10 +164,10 @@ class FileControllerTest : KDriveTest() {
         // Get local files
         val localFiles = arrayListOf<File>()
         var isCompletedLocaleFiles = false
-        getMySharedFiles(userDrive, File.SortType.NAME_AZ, 1, true) { files, isComplete ->
+        getMySharedFiles(userDrive, File.SortType.NAME_AZ, onlyLocal = true, transaction = { files, isComplete ->
             localFiles.addAll(files)
             isCompletedLocaleFiles = isComplete
-        }
+        })
         assertNotNull(localFiles, "local my shares data cannot be null")
         assertTrue(isCompletedLocaleFiles, "local my shares data must be complete")
 
