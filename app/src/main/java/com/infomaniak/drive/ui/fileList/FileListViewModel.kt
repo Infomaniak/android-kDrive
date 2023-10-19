@@ -54,7 +54,6 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     fun getFiles(
         parentId: Int,
-        page: Int = 1,
         ignoreCache: Boolean,
         order: SortType,
         ignoreCloud: Boolean = false,
@@ -64,11 +63,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFolderActivitiesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            suspend fun recursiveDownload(parentId: Int, page: Int) {
+            suspend fun recursiveDownload(parentId: Int, nextPage: Boolean = false) {
                 getFilesJob.ensureActive()
                 val resultList = FileController.getFilesFromCacheOrDownload(
                     parentId = parentId,
-                    page = page,
+                    loadNextPage = nextPage,
                     ignoreCache = ignoreCache,
                     ignoreCloud = ignoreCloud,
                     order = order,
@@ -79,17 +78,17 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 when {
                     resultList == null -> emit(null)
                     resultList.second.size < ApiRepository.PER_PAGE -> {
-                        emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                        emit(FolderFilesResult(resultList.first, resultList.second, true, !nextPage))
                     }
                     else -> {
-                        if (page == 1) {
-                            emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                        if (!nextPage) {
+                            emit(FolderFilesResult(resultList.first, resultList.second, isComplete = true, isFirstPage = true))
                         }
-                        recursiveDownload(parentId, page + 1)
+                        recursiveDownload(parentId, true)
                     }
                 }
             }
-            recursiveDownload(parentId, page)
+            recursiveDownload(parentId)
         }
     }
 
@@ -105,11 +104,23 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                         apiResponse.data.isNullOrEmpty() -> emit(null)
                         apiResponse.data!!.size < ApiRepository.PER_PAGE -> {
                             FileController.saveFavoritesFiles(apiResponse.data!!, page == 1)
-                            emit(FolderFilesResult(files = apiResponse.data!!, isComplete = true, page = apiResponse.page))
+                            emit(
+                                FolderFilesResult(
+                                    files = apiResponse.data!!,
+                                    isComplete = true,
+                                    isFirstPage = apiResponse.page == 1,
+                                )
+                            )
                         }
                         else -> {
                             apiResponse.data?.let { FileController.saveFavoritesFiles(it, page == 1) }
-                            emit(FolderFilesResult(files = apiResponse.data!!, isComplete = false, page = apiResponse.page))
+                            emit(
+                                FolderFilesResult(
+                                    files = apiResponse.data!!,
+                                    isComplete = false,
+                                    isFirstPage = apiResponse.page == 1,
+                                )
+                            )
                             recursive(page + 1)
                         }
                     }
@@ -117,7 +128,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                     FolderFilesResult(
                         files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
                         isComplete = true,
-                        page = 1
+                        isFirstPage = true,
                     )
                 )
             }

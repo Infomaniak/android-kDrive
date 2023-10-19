@@ -485,7 +485,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected open fun homeClassName(): String? = null
 
     protected fun setToolbarTitle(@StringRes rootTitleRes: Int? = null) {
-        binding.collapsingToolbarLayout.title = if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
+        binding.collapsingToolbarLayout.title =
+            if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
     }
 
     private fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
@@ -754,7 +755,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
 
-                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+                    if (fileAdapter.itemCount == 0 || !result.isFirstPage || isNewSort) {
 
                         FileController.getRealmLiveFiles(
                             parentId = folderId,
@@ -798,7 +799,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val parentFolder: File? = null,
         val files: ArrayList<File>,
         val isComplete: Boolean,
-        val page: Int
+        val isFirstPage: Boolean,
     )
 
     /**

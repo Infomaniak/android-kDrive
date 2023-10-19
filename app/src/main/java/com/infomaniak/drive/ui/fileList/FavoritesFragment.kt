@@ -114,7 +114,7 @@ class FavoritesFragment : FileListFragment() {
             fileAdapter.isComplete = false
             fileListViewModel.getFavoriteFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
                 it?.let { result ->
-                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+                    if (fileAdapter.itemCount == 0 || result.isFirstPage || isNewSort) {
                         val realmFiles = FileController.getRealmLiveFiles(
                             isFavorite = true,
                             order = fileListViewModel.sortType,
