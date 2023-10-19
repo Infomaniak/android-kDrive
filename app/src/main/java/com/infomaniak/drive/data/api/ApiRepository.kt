@@ -81,8 +81,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFavoriteFiles(driveId: Int, order: File.SortType, page: Int = 1): ApiResponse<ArrayList<File>> {
-        val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${pagination(page)}"
+    fun getFavoriteFiles(driveId: Int, order: File.SortType, cursor: String?): ApiResponse<ArrayList<File>> {
+        val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${loadCursor(cursor)}"
         return callApi(url, GET)
     }
 
@@ -97,11 +97,7 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String? = null,
         order: File.SortType
     ): ApiResponse<List<File>> {
-        val url = if (cursor == null) {
-            "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&limit=$PER_PAGE"
-        } else {
-            "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&cursor=$cursor&limit=$PER_PAGE"
-        }
+        val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
@@ -428,4 +424,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"
+    private fun loadCursor(cursor: String?, perPage: Int = PER_PAGE): String {
+        return "limit=$perPage${if (cursor == null) "" else "&cursor=$cursor"}"
+    }
 }
