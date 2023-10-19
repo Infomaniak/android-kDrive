@@ -63,7 +63,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFolderActivitiesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            suspend fun recursiveDownload(parentId: Int, nextPage: Boolean = false) {
+            tailrec suspend fun recursiveDownload(parentId: Int, nextPage: Boolean = false) {
                 getFilesJob.ensureActive()
                 val resultList = FileController.getFilesFromCacheOrDownload(
                     parentId = parentId,
@@ -96,32 +96,32 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            suspend fun recursive(page: Int) {
+            tailrec suspend fun recursive(isFirstPage: Boolean, cursor: String? = null) {
                 getFilesJob.ensureActive()
-                val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, page)
+                val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, cursor)
                 if (apiResponse.isSuccess()) {
                     when {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
                         apiResponse.data!!.size < ApiRepository.PER_PAGE -> {
-                            FileController.saveFavoritesFiles(apiResponse.data!!, page == 1)
+                            FileController.saveFavoritesFiles(apiResponse.data!!, isFirstPage)
                             emit(
                                 FolderFilesResult(
                                     files = apiResponse.data!!,
                                     isComplete = true,
-                                    isFirstPage = apiResponse.page == 1,
+                                    isFirstPage = isFirstPage,
                                 )
                             )
                         }
                         else -> {
-                            apiResponse.data?.let { FileController.saveFavoritesFiles(it, page == 1) }
+                            apiResponse.data?.let { FileController.saveFavoritesFiles(it, isFirstPage) }
                             emit(
                                 FolderFilesResult(
                                     files = apiResponse.data!!,
                                     isComplete = false,
-                                    isFirstPage = apiResponse.page == 1,
+                                    isFirstPage = isFirstPage,
                                 )
                             )
-                            recursive(page + 1)
+                            recursive(isFirstPage = false, cursor = apiResponse.cursor)
                         }
                     }
                 } else emit(
@@ -132,7 +132,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                     )
                 )
             }
-            recursive(1)
+            recursive(isFirstPage = true)
         }
     }
 
