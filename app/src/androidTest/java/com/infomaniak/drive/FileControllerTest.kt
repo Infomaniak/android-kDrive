@@ -107,7 +107,7 @@ class FileControllerTest : KDriveTest() {
         ApiRepository.postFavoriteFile(remoteFile)
 
         // Get remote favorite files
-        val remoteResult = ApiRepository.getFavoriteFiles(Env.DRIVE_ID, File.SortType.NAME_AZ, 1)
+        val remoteResult = ApiRepository.getFavoriteFiles(Env.DRIVE_ID, File.SortType.NAME_AZ, null)
         assertTrue(remoteResult.isSuccess(), "get favorite files request must pass successfully")
         assertFalse(remoteResult.data.isNullOrEmpty(), "remote favorite files cannot be empty ")
 
