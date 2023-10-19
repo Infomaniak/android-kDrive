@@ -29,7 +29,6 @@ import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,7 +39,7 @@ class ActivityFilesFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         downloadFiles = DownloadFiles(navigationArgs.fileIdList)
         super.onViewCreated(view, savedInstanceState)
         swipeRefreshLayout.isEnabled = false
@@ -48,7 +47,7 @@ class ActivityFilesFragment : FileListFragment() {
         initActivity()
     }
 
-    private fun initActivity() {
+    private fun initActivity() = with(binding) {
         currentActivity.isVisible = true
         navigationArgs.activityUser?.let { user -> currentActivityAvatar.loadAvatar(user) }
         currentActivityContent.text =
@@ -57,7 +56,7 @@ class ActivityFilesFragment : FileListFragment() {
 
     private inner class DownloadFiles(private var fileIdList: IntArray) : (Boolean, Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
-            collapsingToolbarLayout.title = getString(R.string.fileDetailsActivitiesTitle)
+            binding.collapsingToolbarLayout.title = getString(R.string.fileDetailsActivitiesTitle)
             val fileList = FileController.getFilesFromIdList(
                 realm = mainViewModel.realm,
                 idList = fileIdList.toTypedArray(),
