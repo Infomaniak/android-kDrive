@@ -194,9 +194,9 @@ class CloudStorageProvider : DocumentsProvider() {
                 CoroutineScope(Dispatchers.IO + cursor.job).launch {
                     if (parentDocumentId.contains(MY_SHARES_FOLDER_ID.toString())) {
                         FileController.getMySharedFiles(
-                            UserDrive(userId, driveId),
-                            sortType
-                        ) { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) }
+                            userDrive = UserDrive(userId, driveId),
+                            sortType = sortType,
+                            transaction = { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) })
                     } else {
                         FileController.getCloudStorageFiles(
                             parentId = fileFolderId,

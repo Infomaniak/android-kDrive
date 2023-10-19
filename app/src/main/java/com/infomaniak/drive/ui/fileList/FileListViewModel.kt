@@ -152,9 +152,9 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            FileController.getMySharedFiles(UserDrive(), sortType) { files, isComplete ->
+            FileController.getMySharedFiles(UserDrive(), sortType, transaction = { files, isComplete ->
                 runBlocking { emit(files to isComplete) }
-            }
+            })
         }
     }
 
