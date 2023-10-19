@@ -192,7 +192,7 @@ class TrashFragment : FileSubTypeListFragment() {
                         populateFileList(
                             files = result.files,
                             isComplete = isComplete,
-                            forceClean = result.page == 1,
+                            forceClean = result.isFirstPage,
                             isNewSort = isNewSort,
                         )
                     }
@@ -203,7 +203,7 @@ class TrashFragment : FileSubTypeListFragment() {
                         populateFileList(
                             files = result?.files ?: ArrayList(),
                             isComplete = result?.isComplete ?: true,
-                            forceClean = result?.page == 1,
+                            forceClean = result?.isFirstPage == true,
                             isNewSort = isNewSort,
                         )
                     }

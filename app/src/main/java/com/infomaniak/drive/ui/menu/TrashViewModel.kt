@@ -49,7 +49,7 @@ class TrashViewModel : ViewModel() {
                                 parentFolder = file,
                                 files = ArrayList(data),
                                 isComplete = true,
-                                page = page
+                                isFirstPage = page == 1,
                             )
                         )
                         else -> {
@@ -58,7 +58,7 @@ class TrashViewModel : ViewModel() {
                                     parentFolder = file,
                                     files = ArrayList(data),
                                     isComplete = false,
-                                    page = page
+                                    isFirstPage = page == 1
                                 )
                             )
                             recursive(page + 1)
@@ -83,7 +83,7 @@ class TrashViewModel : ViewModel() {
                             FileListFragment.FolderFilesResult(
                                 files = apiResponse.data!!,
                                 isComplete = true,
-                                page = page
+                                isFirstPage = page == 1,
                             )
                         )
                         else -> {
@@ -91,7 +91,7 @@ class TrashViewModel : ViewModel() {
                                 FileListFragment.FolderFilesResult(
                                     files = apiResponse.data!!,
                                     isComplete = false,
-                                    page = page
+                                    isFirstPage = page == 1,
                                 )
                             )
                             recursive(page + 1)

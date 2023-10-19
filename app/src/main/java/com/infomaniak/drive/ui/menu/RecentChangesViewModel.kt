@@ -44,14 +44,14 @@ class RecentChangesViewModel : ViewModel() {
                     val isComplete = apiResponse.isLastPage()
                     val isFirstPage = currentPage == 1
                     FileController.storeRecentChanges(data, isFirstPage)
-                    emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, page = currentPage))
+                    emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, isFirstPage = isFirstPage))
                 }
             } else {
                 emit(
                     FileListFragment.FolderFilesResult(
                         files = FileController.getRecentChanges(),
                         isComplete = true,
-                        page = currentPage
+                        isFirstPage = true,
                     )
                 )
             }
