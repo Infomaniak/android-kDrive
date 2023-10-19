@@ -402,9 +402,9 @@ object ApiRepository : ApiRepositoryCore() {
         okHttpClient: OkHttpClient,
         driveId: Int,
         sortType: File.SortType,
-        page: Int
+        cursor: String?
     ): ApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.getMySharedFiles(driveId, sortType)}&${pagination(page)}", GET, okHttpClient = okHttpClient)
+        return callApi("${ApiRoutes.getMySharedFiles(driveId, sortType)}&${loadCursor(cursor)}", GET, okHttpClient = okHttpClient)
     }
 
     fun undoAction(action: CancellableAction): ApiResponse<Boolean> {

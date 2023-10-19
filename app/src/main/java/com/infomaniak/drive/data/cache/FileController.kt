@@ -428,34 +428,35 @@ object FileController {
         if (files.size >= ApiRepository.PER_PAGE) getCloudStorageFiles(parentId, userDrive, sortType, true, transaction)
     }
 
-    suspend fun getMySharedFiles(
+    tailrec suspend fun getMySharedFiles(
         userDrive: UserDrive,
         sortType: SortType,
-        page: Int = 1,
+        cursor: String? = null,
         onlyLocal: Boolean = false,
-        transaction: (files: ArrayList<File>, isComplete: Boolean) -> Unit
+        transaction: (files: ArrayList<File>, isComplete: Boolean) -> Unit,
+        isFirstPage: Boolean = true,
     ) {
         if (onlyLocal) {
             transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         } else {
             val apiResponse = ApiRepository.getMySharedFiles(
-                AccountUtils.getHttpClient(userDrive.userId), userDrive.driveId, sortType, page
+                AccountUtils.getHttpClient(userDrive.userId), userDrive.driveId, sortType, cursor
             )
             if (apiResponse.isSuccess()) {
                 val apiResponseData = apiResponse.data
                 when {
                     apiResponseData.isNullOrEmpty() -> transaction(arrayListOf(), true)
                     apiResponseData.size < ApiRepository.PER_PAGE -> {
-                        saveMySharesFiles(userDrive, apiResponseData, page == 1)
+                        saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
                         transaction(apiResponseData, true)
                     }
                     else -> {
-                        saveMySharesFiles(userDrive, apiResponseData, page == 1)
+                        saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
                         transaction(apiResponseData, false)
-                        getMySharedFiles(userDrive, sortType, page + 1, false, transaction)
+                        getMySharedFiles(userDrive, sortType, apiResponse.cursor, false, transaction, isFirstPage = false)
                     }
                 }
-            } else if (page == 1) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
+            } else if (isFirstPage) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         }
     }
 
