@@ -755,7 +755,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             getFolderFiles(ignoreCache, onFinish = {
                 it?.let { result ->
 
-                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+                    if (fileAdapter.itemCount == 0 || !result.isFirstPage || isNewSort) {
 
                         FileController.getRealmLiveFiles(
                             parentId = folderId,
@@ -799,7 +799,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val parentFolder: File? = null,
         val files: ArrayList<File>,
         val isComplete: Boolean,
-        val page: Int
+        val isFirstPage: Boolean,
     )
 
     /**
