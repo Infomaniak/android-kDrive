@@ -94,10 +94,14 @@ object ApiRepository : ApiRepositoryCore() {
         okHttpClient: OkHttpClient,
         driveId: Int,
         parentId: Int,
-        page: Int = 1,
+        cursor: String? = null,
         order: File.SortType
     ): ApiResponse<List<File>> {
-        val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${pagination(page)}"
+        val url = if (cursor == null) {
+            "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&limit=$PER_PAGE"
+        } else {
+            "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&cursor=$cursor&limit=$PER_PAGE"
+        }
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 

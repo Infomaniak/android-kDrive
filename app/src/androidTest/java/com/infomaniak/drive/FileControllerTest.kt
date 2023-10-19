@@ -119,7 +119,7 @@ class FileControllerTest : KDriveTest() {
         val localFavoriteFiles =
             getFilesFromCacheOrDownload(
                 parentId = FAVORITES_FILE_ID,
-                page = 1,
+                loadNextPage = false,
                 ignoreCache = false,
                 userDrive = userDrive,
                 customRealm = realm,

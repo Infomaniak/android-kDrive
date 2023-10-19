@@ -413,19 +413,19 @@ object FileController {
         parentId: Int,
         userDrive: UserDrive,
         sortType: SortType,
-        page: Int = 1,
+        loadNextPage: Boolean = false,
         transaction: (files: ArrayList<File>) -> Unit
     ) {
         val filesFromCacheOrDownload = getFilesFromCacheOrDownload(
             parentId = parentId,
-            page = page,
+            loadNextPage = loadNextPage,
             ignoreCache = true,
             order = sortType,
             userDrive = userDrive
         )
         val files = filesFromCacheOrDownload?.second ?: arrayListOf()
         transaction(files)
-        if (files.size >= ApiRepository.PER_PAGE) getCloudStorageFiles(parentId, userDrive, sortType, page + 1, transaction)
+        if (files.size >= ApiRepository.PER_PAGE) getCloudStorageFiles(parentId, userDrive, sortType, true, transaction)
     }
 
     suspend fun getMySharedFiles(
@@ -612,7 +612,7 @@ object FileController {
 
     fun getFilesFromCacheOrDownload(
         parentId: Int,
-        page: Int,
+        loadNextPage: Boolean,
         ignoreCache: Boolean = false,
         ignoreCloud: Boolean = false,
         order: SortType = SortType.NAME_AZ,
@@ -625,11 +625,12 @@ object FileController {
             return query.count() != query.distinct(File::id.name).count()
         }
 
-        val operation: (Realm) -> Pair<File, ArrayList<File>>? = { realm ->
+        val operation: (Realm) -> Pair<File, ArrayList<File>>? = operation@{ realm ->
             var result: Pair<File, ArrayList<File>>? = null
             var folderProxy = getFileById(realm, parentId)
             val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) }
             val hasDuplicatesFiles = folderProxy?.children?.where()?.let(::hasDuplicatesFiles) ?: false
+            if (loadNextPage && folderProxy?.cursor == null) return@operation null
 
             val needToDownload = ignoreCache
                     || folderProxy == null
@@ -653,13 +654,13 @@ object FileController {
                 result = realm.downloadAndSaveFiles(
                     localFolderProxy = folderProxy,
                     order = order,
-                    page = page,
+                    loadNextPage = loadNextPage,
                     parentId = parentId,
                     driveId = driveId,
                     okHttpClient = okHttpClient,
                     withChildren = withChildren
                 )
-            } else if (page == 1 && localFolderWithoutChildren != null) {
+            } else if (!loadNextPage && localFolderWithoutChildren != null) {
                 val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(folderProxy, order) else arrayListOf()
                 result = (localFolderWithoutChildren to localSortedFolderFiles)
             }
@@ -678,25 +679,25 @@ object FileController {
     private fun Realm.downloadAndSaveFiles(
         localFolderProxy: File?,
         order: SortType,
-        page: Int,
+        loadNextPage: Boolean,
         parentId: Int,
         driveId: Int,
         okHttpClient: OkHttpClient,
-        withChildren: Boolean
+        withChildren: Boolean,
     ): Pair<File, ArrayList<File>>? {
         var result: Pair<File, ArrayList<File>>? = null
 
-        val apiResponse = ApiRepository.getDirectoryFiles(okHttpClient, driveId, parentId, page, order)
+        val apiResponse = ApiRepository.getDirectoryFiles(okHttpClient, driveId, parentId, localFolderProxy?.cursor, order)
         val localFolder = localFolderProxy?.realm?.copyFromRealm(localFolderProxy, 1)
             ?: ApiRepository.getFileDetails(File(id = parentId, driveId = driveId)).data
 
         if (apiResponse.isSuccess()) {
             val remoteFiles = apiResponse.data
             if (remoteFiles != null && localFolder != null) {
-                saveRemoteFiles(localFolderProxy, localFolder, apiResponse, page)
+                saveRemoteFiles(localFolderProxy, localFolder, apiResponse, loadNextPage)
                 result = (localFolder to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
             }
-        } else if (page == 1 && localFolderProxy != null) {
+        } else if (loadNextPage && localFolderProxy != null) {
             val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolderProxy, order) else arrayListOf()
             result = (localFolder!! to localSortedFolderFiles)
         }
@@ -707,7 +708,7 @@ object FileController {
         localFolderProxy: File?,
         remoteFolder: File?,
         apiResponse: ApiResponse<List<File>>,
-        page: Int,
+        isFirstPage: Boolean,
     ) {
         val remoteFiles = apiResponse.data!!
 
@@ -723,12 +724,13 @@ object FileController {
         (localFolderProxy ?: newLocalFolderProxy)?.let { folderProxy ->
             executeTransaction {
                 // Remove old children
-                if (page == 1) folderProxy.children.clear()
+                if (isFirstPage) folderProxy.children.clear()
                 // Add children
                 folderProxy.children.addAll(remoteFiles)
                 // Update folder properties
                 if (remoteFiles.size < ApiRepository.PER_PAGE) folderProxy.isComplete = true
                 folderProxy.responseAt = apiResponse.responseAt
+                folderProxy.cursor = apiResponse.cursor
                 folderProxy.versionCode = BuildConfig.VERSION_CODE
             }
         }
