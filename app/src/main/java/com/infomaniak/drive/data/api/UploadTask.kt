@@ -172,7 +172,7 @@ class UploadTask(
 
                     data = if (count == chunkSize) data else data.copyOf(count)
 
-                    val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count)
+                    val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count, uploadHost = uploadHost)
                     SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
                     waitingCoroutines.add(
