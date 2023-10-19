@@ -27,7 +27,6 @@ import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import io.realm.Realm
-import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 /**
  * Is Used for all "subtypes" of list fragment like Trash, SharedWithMe, MyShares,
@@ -82,7 +81,7 @@ open class FileSubTypeListFragment : FileListFragment() {
 
         fileAdapter.isComplete = isComplete
         showLoadingTimer.cancel()
-        swipeRefreshLayout.isRefreshing = false
+        binding.swipeRefreshLayout.isRefreshing = false
 
         changeNoFilesLayoutVisibility(
             files.isEmpty(),
