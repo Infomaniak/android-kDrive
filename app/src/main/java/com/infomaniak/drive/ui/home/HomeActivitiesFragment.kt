@@ -31,13 +31,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeTabsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
-import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setPagination
 
 class HomeActivitiesFragment : Fragment() {
 
-    private var binding: FragmentHomeTabsBinding by safeBinding()
+    private var _binding: FragmentHomeTabsBinding? = null
+    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -47,13 +47,18 @@ class HomeActivitiesFragment : Fragment() {
     private var paginationListener: RecyclerView.OnScrollListener? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentHomeTabsBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentHomeTabsBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initAdapter()
         AccountUtils.getCurrentDrive()?.let { currentDrive -> getLastActivities(currentDrive.id) }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun initAdapter() {
@@ -102,6 +107,8 @@ class HomeActivitiesFragment : Fragment() {
     }
 
     fun getLastActivities(driveId: Int, forceDownload: Boolean = false) {
+        if (_binding == null) return
+
         (binding.homeTabsRecyclerView.adapter as? LastActivitiesAdapter)?.apply {
             if (forceDownload) {
                 homeViewModel.apply {
