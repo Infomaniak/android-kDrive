@@ -24,8 +24,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.OfflineMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
-import kotlinx.android.synthetic.main.fragment_file_list.noFilesLayout
-import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 open class OfflineFileFragment : FileSubTypeListFragment() {
 
@@ -39,12 +37,12 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
         initParams()
         super.onViewCreated(view, savedInstanceState)
         setToolbarTitle(R.string.offlineFileTitle)
-        swipeRefreshLayout.isEnabled = false
+        binding.swipeRefreshLayout.isEnabled = false
     }
 
     private fun initParams() {
         downloadFiles = DownloadFiles()
-        noFilesLayout.description = R.string.offlineFileNoFileDescription
+        binding.noFilesLayout.description = R.string.offlineFileNoFileDescription
         folderId = Utils.OTHER_ROOT_ID
     }
 
@@ -71,7 +69,7 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
             }
 
             fileAdapter.isComplete = true
-            swipeRefreshLayout.isRefreshing = false
+            binding.swipeRefreshLayout.isRefreshing = false
             changeNoFilesLayoutVisibility(
                 fileAdapter.fileList.isEmpty(),
                 changeControlsVisibility = true,
