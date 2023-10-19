@@ -32,7 +32,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 class FavoritesFragment : FileListFragment() {
 
@@ -41,7 +40,7 @@ class FavoritesFragment : FileListFragment() {
     override val noItemsRootIcon = R.drawable.ic_star_filled
     override val noItemsRootTitle = R.string.favoritesNoFile
 
-    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
@@ -132,7 +131,7 @@ class FavoritesFragment : FileListFragment() {
                     fileAdapter.isComplete = true
                 }
                 showLoadingTimer.cancel()
-                swipeRefreshLayout.isRefreshing = false
+                binding.swipeRefreshLayout.isRefreshing = false
             }
         }
     }
