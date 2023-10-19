@@ -17,44 +17,57 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isLastPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class RecentChangesViewModel : ViewModel() {
 
-    private var getRecentChangesJob = Job()
+    private var getRecentChangesJob: Job? = null
 
     var currentPage = 1
+    var currentCursor: String? = null
 
-    fun getRecentChanges(driveId: Int): LiveData<FileListFragment.FolderFilesResult?> {
-        getRecentChangesJob.cancel()
-        getRecentChangesJob = Job()
+    var recentChangesResults = MutableLiveData<FileListFragment.FolderFilesResult?>()
+    var isNewSort = false
 
-        return liveData(Dispatchers.IO + getRecentChangesJob) {
-            val apiResponse = ApiRepository.getLastModifiedFiles(driveId, currentPage)
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { data ->
-                    val isComplete = apiResponse.isLastPage()
-                    val isFirstPage = currentPage == 1
-                    FileController.storeRecentChanges(data, isFirstPage)
-                    emit(FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, isFirstPage = isFirstPage))
-                }
-            } else {
-                emit(
-                    FileListFragment.FolderFilesResult(
-                        files = FileController.getRecentChanges(),
-                        isComplete = true,
-                        isFirstPage = true,
-                    )
-                )
+    fun loadRecentChanges() {
+        getRecentChangesJob?.cancel()
+        getRecentChangesJob = viewModelScope.launch(Dispatchers.IO) {
+            recentChangesResults.postValue(getRecentChanges(cursor = null, isFirstPage = true))
+        }
+    }
+
+    fun loadNextPage() = viewModelScope.launch(Dispatchers.IO) {
+        currentCursor?.let {
+            recentChangesResults.postValue(getRecentChanges(cursor = it, isFirstPage = false))
+        }
+    }
+
+    private fun getRecentChanges(cursor: String?, isFirstPage: Boolean): FileListFragment.FolderFilesResult? {
+
+        val apiResponse = ApiRepository.getLastModifiedFiles(AccountUtils.currentDriveId, cursor)
+        return if (apiResponse.isSuccess()) {
+            apiResponse.data?.let { data ->
+                val isComplete = apiResponse.isLastPage()
+                currentCursor = apiResponse.cursor
+                FileController.storeRecentChanges(data, isFirstPage)
+                FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, isFirstPage = isFirstPage)
             }
+        } else {
+            FileListFragment.FolderFilesResult(
+                files = FileController.getRecentChanges(),
+                isComplete = true,
+                isFirstPage = true,
+            )
         }
     }
 }
