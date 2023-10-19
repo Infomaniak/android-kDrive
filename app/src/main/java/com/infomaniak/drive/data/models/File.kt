@@ -88,6 +88,7 @@ open class File(
     @SerializedName("capabilities")
     var rights: Rights? = null,
     var categories: @RawValue RealmList<FileCategory> = RealmList(),
+    var cursor: String? = null,
 
     /**
      * DIRECTORY ONLY
@@ -406,8 +407,8 @@ open class File(
     }
 
     enum class SortType(val order: String, val orderBy: String, val translation: Int) {
-        NAME_AZ("asc", "path", R.string.sortNameAZ),
-        NAME_ZA("desc", "path", R.string.sortNameZA),
+        NAME_AZ("asc", "name", R.string.sortNameAZ),
+        NAME_ZA("desc", "name", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
         OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
