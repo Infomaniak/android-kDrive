@@ -84,30 +84,30 @@ class TrashViewModel : ViewModel() {
 
     private fun getDriveTrash(driveId: Int, order: File.SortType, isNewSort: Boolean): FolderFilesResult? {
 
-        fun recursive(page: Int): FolderFilesResult? {
-            val apiResponse = ApiRepository.getDriveTrash(driveId, order, page)
+        tailrec fun recursive(isFirstPage: Boolean, cursor: String? = null): FileListFragment.FolderFilesResult? {
+            val apiResponse = ApiRepository.getDriveTrash(driveId, order, cursor)
             return when {
                 apiResponse.data.isNullOrEmpty() -> null
-                apiResponse.data!!.size < ApiRepository.PER_PAGE ->
-                    FolderFilesResult(
+                apiResponse.cursor == null ->
+                    FileListFragment.FolderFilesResult(
                         files = apiResponse.data!!,
                         isComplete = true,
-                        isFirstPage = page == 1,
+                        isFirstPage = isFirstPage,
                         isNewSort = isNewSort,
                     )
                 else -> {
                     FolderFilesResult(
                         files = apiResponse.data!!,
                         isComplete = false,
-                        isFirstPage = page == 1,
+                        isFirstPage = isFirstPage,
                         isNewSort = isNewSort,
                     )
-                    recursive(page + 1)
+                    recursive(isFirstPage = false, cursor = apiResponse.cursor)
                 }
             }
         }
 
-        return recursive(1)
+        return recursive(isFirstPage = true)
     }
 
     fun emptyTrash(driveId: Int) = liveData(Dispatchers.IO) {
