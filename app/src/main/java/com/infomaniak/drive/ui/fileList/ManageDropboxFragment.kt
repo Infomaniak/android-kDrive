@@ -36,6 +36,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.databinding.FragmentManageDropboxBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showOrHideEmptyError
@@ -44,17 +45,20 @@ import com.infomaniak.lib.core.MatomoCore.TrackerAction
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.showProgress
-import kotlinx.android.synthetic.main.fragment_file_share_link_settings.passwordTextLayout
-import kotlinx.android.synthetic.main.fragment_manage_dropbox.*
-import kotlinx.android.synthetic.main.item_dropbox_settings.*
-import kotlinx.android.synthetic.main.view_share_link_container.view.*
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Date
 import java.util.Locale
 
 open class ManageDropboxFragment : Fragment() {
+
+    protected var binding: FragmentManageDropboxBinding by safeBinding()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentManageDropboxBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
     private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
     private var currentDropBox: DropBox? = null
@@ -66,11 +70,7 @@ open class ManageDropboxFragment : Fragment() {
 
     protected open var isManageDropBox = true
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_manage_dropbox, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
@@ -79,7 +79,7 @@ open class ManageDropboxFragment : Fragment() {
 
         fileShareCollapsingToolbarLayout.title = getString(R.string.manageDropboxTitle, navigationArgs.fileName)
 
-        shareLinkContainer.apply {
+        shareLinkContainer.binding.apply {
             shareLinkTitle.text = getString(R.string.dropBoxLinkTitle)
             shareLinkUrl.isVisible = true
             shareLinkIcon.isGone = true
@@ -95,7 +95,7 @@ open class ManageDropboxFragment : Fragment() {
             disableButton.isEnabled = true
 
             if (isManageDropBox) {
-                file.dropbox?.url?.let { url -> shareLinkContainer.shareLinkUrl.setUrl(url) }
+                file.dropbox?.url?.let { url -> shareLinkContainer.binding.shareLinkUrl.setUrl(url) }
 
                 mainViewModel.getDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse?.isSuccess() == true) {
@@ -108,7 +108,7 @@ open class ManageDropboxFragment : Fragment() {
         }
     }
 
-    protected fun updateUi(file: File, dropBox: DropBox?) {
+    protected fun updateUi(file: File, dropBox: DropBox?) = with(binding.settings) {
         currentDropBox = dropBox?.apply { initLocalValue() }
 
         dropBox?.let {
@@ -139,7 +139,7 @@ open class ManageDropboxFragment : Fragment() {
         setupSaveButton(file)
     }
 
-    private fun setupSwitches(dropBox: DropBox) {
+    private fun setupSwitches(dropBox: DropBox) = with(binding.settings) {
         with(dropBox) {
             emailWhenFinishedSwitch.isChecked = hasNotification
             expirationDateSwitch.isChecked = validUntil != null
@@ -154,7 +154,7 @@ open class ManageDropboxFragment : Fragment() {
         }
     }
 
-    private fun setupOnCheckedChangeListeners(dropBox: DropBox?) {
+    private fun setupOnCheckedChangeListeners(dropBox: DropBox?) = with(binding.settings) {
         emailWhenFinishedSwitch.setOnCheckedChangeListener { _, isChecked -> emailSwitched(dropBox, isChecked) }
         passwordSwitch.setOnCheckedChangeListener { _, isChecked -> passwordSwitched(dropBox, isChecked) }
         expirationDateSwitch.setOnCheckedChangeListener { _, isChecked -> expirationDateSwitched(dropBox, isChecked) }
@@ -166,7 +166,7 @@ open class ManageDropboxFragment : Fragment() {
         }
     }
 
-    private fun setupDisableButton(file: File) {
+    private fun setupDisableButton(file: File) = with(binding) {
         disableButton.apply {
             initProgress(this@ManageDropboxFragment)
             setOnClickListener {
@@ -184,14 +184,14 @@ open class ManageDropboxFragment : Fragment() {
         }
     }
 
-    private fun setupSaveButton(file: File) {
+    private fun setupSaveButton(file: File) = with(binding) {
         saveButton.apply {
             initProgress(this@ManageDropboxFragment)
             setOnClickListener {
                 trackDropboxEvent("saveDropbox")
-                currentDropBox?.newPasswordValue = passwordTextInput.text?.toString()
-                currentDropBox?.newLimitFileSize = if (limitStorageSwitch.isChecked) {
-                    limitStorageValue.text?.toString()?.toDoubleOrNull()?.let { Utils.convertGigaByteToBytes(it) }
+                currentDropBox?.newPasswordValue = settings.passwordTextInput.text?.toString()
+                currentDropBox?.newLimitFileSize = if (settings.limitStorageSwitch.isChecked) {
+                    settings.limitStorageValue.text?.toString()?.toDoubleOrNull()?.let { Utils.convertGigaByteToBytes(it) }
                 } else {
                     null
                 }
@@ -210,7 +210,7 @@ open class ManageDropboxFragment : Fragment() {
         }
     }
 
-    private fun limitStorageChanged(it: Editable?) {
+    private fun limitStorageChanged(it: Editable?) = with(binding.settings) {
         val inputtedSizeGb = it.toString().toDoubleOrNull()
         if (limitStorageSwitch.isChecked && (it.toString().isBlank() || inputtedSizeGb == 0.0 || inputtedSizeGb == null)) {
             hasErrors = currentDropBox?.limitFileSize != null
@@ -237,7 +237,7 @@ open class ManageDropboxFragment : Fragment() {
         enableSaveButton()
     }
 
-    private fun passwordSwitched(dropBox: DropBox?, isChecked: Boolean) {
+    private fun passwordSwitched(dropBox: DropBox?, isChecked: Boolean) = with(binding.settings) {
         trackDropboxEvent("switchProtectWithPassword", value = isChecked.toFloat())
 
         if (dropBox?.hasPassword == isChecked) validationCount-- else validationCount++
@@ -254,7 +254,7 @@ open class ManageDropboxFragment : Fragment() {
 
         if ((dropBox?.validUntil != null) == isChecked) validationCount-- else validationCount++
 
-        expirationDateInput.isVisible = isChecked
+        binding.settings.expirationDateInput.isVisible = isChecked
 
         currentDropBox?.newValidUntil =
             if (isChecked) currentDropBox?.validUntil ?: Date()
@@ -263,7 +263,7 @@ open class ManageDropboxFragment : Fragment() {
         enableSaveButton()
     }
 
-    private fun limitStorageSwitched(dropBox: DropBox?, isChecked: Boolean) {
+    private fun limitStorageSwitched(dropBox: DropBox?, isChecked: Boolean) = with(binding.settings) {
         trackDropboxEvent("switchLimitStorageSpace", value = isChecked.toFloat())
 
         if ((dropBox?.limitFileSize != null) == isChecked) validationCount-- else validationCount++
@@ -273,7 +273,7 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     protected fun enableSaveButton() {
-        saveButton.isEnabled = !isManageDropBox || (validationCount > 0 && !hasErrors)
+        binding.saveButton.isEnabled = !isManageDropBox || (validationCount > 0 && !hasErrors)
     }
 
     private fun trackDropboxEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
