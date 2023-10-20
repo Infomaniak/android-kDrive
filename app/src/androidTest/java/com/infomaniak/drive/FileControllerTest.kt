@@ -180,7 +180,7 @@ class FileControllerTest : KDriveTest() {
     @DisplayName("Retrieve remote picture then store it in realm and compare results")
     fun getPictures_CanGetRemoteSavedFilesFromRealm() {
         // Get remote pictures
-        val apiResponseData = ApiRepository.getLastGallery(Env.DRIVE_ID, 1).let {
+        val apiResponseData = ApiRepository.getLastGallery(Env.DRIVE_ID, null).let {
             assertApiResponseData(it)
             it.data!!
         }
