@@ -30,24 +30,19 @@ import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideProgress
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
-import kotlinx.android.synthetic.main.fragment_manage_dropbox.disableButton
-import kotlinx.android.synthetic.main.fragment_manage_dropbox.fileShareCollapsingToolbarLayout
-import kotlinx.android.synthetic.main.fragment_manage_dropbox.saveButton
-import kotlinx.android.synthetic.main.fragment_manage_dropbox.shareLinkCardView
-import kotlinx.android.synthetic.main.item_dropbox_settings.*
 
 class ConvertToDropBoxFragment : ManageDropboxFragment() {
 
     private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
     override var isManageDropBox = false
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding.settings) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileShareCollapsingToolbarLayout.title = getString(R.string.convertToDropboxTitle, navigationArgs.fileName)
+        binding.fileShareCollapsingToolbarLayout.title = getString(R.string.convertToDropboxTitle, navigationArgs.fileName)
 
-        shareLinkCardView.isGone = true
-        disableButton.isGone = true
+        binding.shareLinkCardView.isGone = true
+        binding.disableButton.isGone = true
 
         FileController.getFileById(navigationArgs.fileId)?.let { file ->
             updateUi(file, null)
@@ -55,24 +50,30 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
             expirationDateInput.init(fragmentManager = parentFragmentManager)
 
             enableSaveButton()
-            saveButton.initProgress(this)
-            saveButton.setOnClickListener {
-                val limitFileSize = if (limitStorageSwitch.isChecked) limitStorageValue.text.toString().toDoubleOrNull() else null
-                saveButton.showProgress()
-                mainViewModel.createDropBoxFolder(
-                    file,
-                    emailWhenFinished = emailWhenFinishedSwitch.isChecked,
-                    password = if (passwordSwitch.isChecked) passwordTextInput.text?.toString() else null,
-                    limitFileSize = limitFileSize?.let { Utils.convertGigaByteToBytes(it) },
-                    validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
-                ).observe(viewLifecycleOwner) { apiResponse ->
-                    if (apiResponse.isSuccess()) {
-                        mainViewModel.createDropBoxSuccess.value = apiResponse.data
-                        findNavController().popBackStack()
+            binding.saveButton.apply {
+                initProgress(viewLifecycleOwner)
+                setOnClickListener {
+                    val limitFileSize = if (limitStorageSwitch.isChecked) {
+                        limitStorageValue.text.toString().toDoubleOrNull()
                     } else {
-                        showSnackbar(apiResponse.translateError())
+                        null
                     }
-                    saveButton.hideProgress(R.string.buttonSave)
+                    showProgress()
+                    mainViewModel.createDropBoxFolder(
+                        file = file,
+                        emailWhenFinished = emailWhenFinishedSwitch.isChecked,
+                        password = if (passwordSwitch.isChecked) passwordTextInput.text?.toString() else null,
+                        limitFileSize = limitFileSize?.let { Utils.convertGigaByteToBytes(it) },
+                        validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
+                    ).observe(viewLifecycleOwner) { apiResponse ->
+                        if (apiResponse.isSuccess()) {
+                            mainViewModel.createDropBoxSuccess.value = apiResponse.data
+                            findNavController().popBackStack()
+                        } else {
+                            showSnackbar(apiResponse.translateError())
+                        }
+                        hideProgress(R.string.buttonSave)
+                    }
                 }
             }
         }
