@@ -158,7 +158,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                     parentId = if (folder.isDrive()) ROOT_ID else folder.id,
                     ignoreCache = true,
                     order = fileListViewModel.sortType,
-                    userDrive = userDrive
+                    userDrive = userDrive,
+                    isNewSort = isNewSort,
                 ).observe(viewLifecycleOwner) {
                     it?.let { (_, children, _) ->
                         mainViewModel.currentFolder.value = it.parentFolder

@@ -646,6 +646,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             if (isNotEmpty == true) {
                 getFolderFiles(
                     ignoreCache = false,
+                    isNewSort = false,
                     onFinish = {
                         it?.let { (_, files, _) ->
                             changeNoFilesLayoutVisibility(
@@ -659,14 +660,15 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun getFolderFiles(ignoreCache: Boolean, onFinish: ((FolderFilesResult?) -> Unit)? = null) {
+    private fun getFolderFiles(ignoreCache: Boolean, isNewSort: Boolean, onFinish: ((FolderFilesResult?) -> Unit)? = null) {
         showPendingFiles()
         fileListViewModel.getFiles(
             folderId,
             ignoreCache = ignoreCache,
             ignoreCloud = mainViewModel.isInternetAvailable.value == false,
             order = fileListViewModel.sortType,
-            userDrive = userDrive
+            userDrive = userDrive,
+            isNewSort = isNewSort,
         ).observe(viewLifecycleOwner) {
             onFinish?.invoke(it)
         }
@@ -752,7 +754,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             isDownloading = true
             fileAdapter.isComplete = false
 
-            getFolderFiles(ignoreCache, onFinish = {
+            getFolderFiles(ignoreCache, isNewSort, onFinish = {
                 it?.let { result ->
 
                     if (fileAdapter.itemCount == 0 || !result.isFirstPage || isNewSort) {
@@ -800,6 +802,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val files: ArrayList<File>,
         val isComplete: Boolean,
         val isFirstPage: Boolean,
+        val isNewSort: Boolean,
     )
 
     /**
