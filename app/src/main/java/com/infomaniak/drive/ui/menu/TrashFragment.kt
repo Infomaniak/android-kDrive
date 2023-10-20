@@ -66,6 +66,8 @@ class TrashFragment : FileSubTypeListFragment() {
         }
 
         setupMultiSelectLayout()
+        observeDriveTrash()
+        observeTrashedFolderFiles()
     }
 
     private fun initParams() = with(binding) {
@@ -155,6 +157,30 @@ class TrashFragment : FileSubTypeListFragment() {
         binding.noFilesLayout.toggleVisibility(fileAdapter.getFiles().isEmpty())
     }
 
+    private fun observeDriveTrash() {
+        trashViewModel.driveTrashResults.observe(viewLifecycleOwner) { result ->
+            populateFileList(
+                files = result?.files ?: ArrayList(),
+                isComplete = result?.isComplete ?: true,
+                forceClean = result?.isFirstPage == true,
+                isNewSort = result?.isNewSort ?: false,
+            )
+        }
+    }
+
+    private fun observeTrashedFolderFiles() {
+        trashViewModel.trashedFolderFilesResults.observe(viewLifecycleOwner) {
+            it?.let { result ->
+                populateFileList(
+                    files = result.files,
+                    isComplete = result.isComplete,
+                    forceClean = result.isFirstPage,
+                    isNewSort = result.isNewSort,
+                )
+            }
+        }
+    }
+
     companion object {
         const val MATOMO_CATEGORY = "trashFileAction"
     }
@@ -187,26 +213,13 @@ class TrashFragment : FileSubTypeListFragment() {
             fileAdapter.isComplete = false
 
             folder?.let { folder ->
-                trashViewModel.getTrashedFolderFiles(folder, fileListViewModel.sortType).observe(viewLifecycleOwner) { result ->
-                    result?.apply {
-                        populateFileList(
-                            files = result.files,
-                            isComplete = isComplete,
-                            forceClean = result.isFirstPage,
-                            isNewSort = isNewSort,
-                        )
-                    }
-                }
+                trashViewModel.loadTrashedFolderFiles(
+                    file = folder,
+                    order = fileListViewModel.sortType,
+                    isNewSort = isNewSort,
+                )
             } ?: run {
-                trashViewModel.getDriveTrash(AccountUtils.currentDriveId, fileListViewModel.sortType)
-                    .observe(viewLifecycleOwner) { result ->
-                        populateFileList(
-                            files = result?.files ?: ArrayList(),
-                            isComplete = result?.isComplete ?: true,
-                            forceClean = result?.isFirstPage == true,
-                            isNewSort = isNewSort,
-                        )
-                    }
+                trashViewModel.loadDriveTrash(AccountUtils.currentDriveId, fileListViewModel.sortType, isNewSort)
             }
         }
     }
