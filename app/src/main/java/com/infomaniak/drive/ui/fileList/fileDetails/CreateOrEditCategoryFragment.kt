@@ -42,13 +42,13 @@ import kotlin.math.max
 
 class CreateOrEditCategoryFragment : Fragment() {
 
+    private var binding: FragmentCreateOrEditCategoryBinding by safeBinding()
+
     private val mainViewModel: MainViewModel by activityViewModels()
     private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
     private val navigationArgs: CreateOrEditCategoryFragmentArgs by navArgs()
 
     private val colorsAdapter: CreateOrEditCategoryAdapter by lazy { CreateOrEditCategoryAdapter() }
-
-    private var binding: FragmentCreateOrEditCategoryBinding by safeBinding()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentCreateOrEditCategoryBinding.inflate(inflater, container, false).also { binding = it }.root
