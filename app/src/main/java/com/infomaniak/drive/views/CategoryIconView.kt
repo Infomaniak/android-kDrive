@@ -21,13 +21,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.databinding.ItemCategoryIconBinding
 import com.infomaniak.drive.utils.isPositive
-import kotlinx.android.synthetic.main.item_category_icon.view.*
 
 class CategoryIconView @JvmOverloads constructor(
     context: Context,
@@ -35,13 +35,11 @@ class CategoryIconView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    init {
-        inflate(context, R.layout.item_category_icon, this)
-    }
+    private val binding by lazy { ItemCategoryIconBinding.inflate(LayoutInflater.from(context), this, true) }
 
     fun setCategoryIconOrHide(category: Category?) {
         category?.let {
-            categoryImageView.setBackgroundColor(Color.parseColor(it.color))
+            binding.categoryImageView.setBackgroundColor(Color.parseColor(it.color))
             isVisible = true
         } ?: run {
             isGone = true
@@ -49,7 +47,7 @@ class CategoryIconView @JvmOverloads constructor(
     }
 
     @SuppressLint("SetTextI18n")
-    fun setRemainingCategoriesNumber(category: Category?, number: Int) {
+    fun setRemainingCategoriesNumber(category: Category?, number: Int) = with(binding) {
         category?.let {
             remainingText.apply {
                 if (number.isPositive()) {
