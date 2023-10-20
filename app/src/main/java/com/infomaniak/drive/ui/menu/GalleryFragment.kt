@@ -133,7 +133,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
         if (!isGalleryAdapterInitialized) {
             if (isCurrentlyInGallery) refreshTimer.start()
-            loadMoreGallery(AccountUtils.currentDriveId, true)
+            loadGallery(AccountUtils.currentDriveId, true)
         }
 
         observeApiResultPagination()
@@ -168,10 +168,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             paginationListener = setPagination(
                 whenLoadMoreIsPossible = {
                     if (!galleryAdapter.isComplete && !isDownloadingGallery) {
-                        galleryViewModel.lastGalleryPage++
-                        galleryViewModel.lastGalleryLastPage++
-
-                        loadMoreGallery(AccountUtils.currentDriveId)
+                        loadGallery(AccountUtils.currentDriveId)
                     }
                 },
                 triggerOffset = 100
@@ -206,22 +203,17 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
         binding.galleryRecyclerView.layoutManager = gridLayoutManager
     }
 
-    private fun loadMoreGallery(driveId: Int, forceDownload: Boolean = false) {
+    private fun loadGallery(driveId: Int, isRefresh: Boolean = false) {
         galleryAdapter.apply {
-            if (forceDownload) {
-                galleryViewModel.apply {
-                    lastGalleryPage = 1
-                    lastGalleryLastPage = 1
-                }
-                clean()
-            }
+            if (isRefresh) clean()
 
             showLoading()
             isComplete = false
             isDownloadingGallery = true
 
-            val ignoreCloud = mainViewModel.isInternetAvailable.value == false
-            galleryViewModel.loadMoreGallery.value = driveId to ignoreCloud
+            val networkAvailable = mainViewModel.isInternetAvailable.value == true
+            if (isRefresh) galleryViewModel.loadLastGallery(driveId, !networkAvailable)
+            else if (networkAvailable) galleryViewModel.loadMoreGallery(driveId, !networkAvailable)
         }
     }
 
@@ -235,7 +227,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
     fun onRefreshGallery() {
         if (isResumed) {
             galleryAdapter.clearGallery()
-            loadMoreGallery(AccountUtils.currentDriveId, true)
+            loadGallery(AccountUtils.currentDriveId, true)
         }
     }
 
