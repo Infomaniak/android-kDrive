@@ -29,8 +29,8 @@ import androidx.core.view.isVisible
 import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.databinding.ViewCategoriesContainerBinding
 import com.infomaniak.drive.utils.getName
-import kotlinx.android.synthetic.main.view_categories_container.view.*
 
 class CategoriesContainerView @JvmOverloads constructor(
     context: Context,
@@ -38,27 +38,25 @@ class CategoriesContainerView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    private val binding by lazy { ViewCategoriesContainerBinding.inflate(LayoutInflater.from(context), this, true) }
+
     private var categories: List<Category> = emptyList()
     private var canPutCategoryOnFile: Boolean = false
     private var onClicked: (() -> Unit)? = null
-
-    init {
-        inflate(context, R.layout.view_categories_container, this)
-    }
 
     fun setup(categories: List<Category>, canPutCategoryOnFile: Boolean, layoutInflater: LayoutInflater, onClicked: () -> Unit) {
         this.categories = categories
         this.canPutCategoryOnFile = canPutCategoryOnFile
         this.onClicked = onClicked
 
-        categorySwitch.isVisible = canPutCategoryOnFile
+        binding.categorySwitch.isVisible = canPutCategoryOnFile
         setCategoryTitle()
         setClickListener()
         setCategories(layoutInflater)
     }
 
     private fun setCategoryTitle() {
-        categoryTitle.setText(
+        binding.categoryTitle.setText(
             if (canPutCategoryOnFile) {
                 if (categories.isEmpty()) R.string.addCategoriesTitle else R.string.manageCategoriesTitle
             } else {
@@ -69,11 +67,11 @@ class CategoriesContainerView @JvmOverloads constructor(
 
     private fun setClickListener() {
         if (canPutCategoryOnFile) {
-            categoriesContainerView.setOnClickListener { onClicked?.invoke() }
+            binding.categoriesContainerView.setOnClickListener { onClicked?.invoke() }
         }
     }
 
-    private fun setCategories(layoutInflater: LayoutInflater) = with(categoriesGroup) {
+    private fun setCategories(layoutInflater: LayoutInflater) = with(binding.categoriesGroup) {
         if (categories.isEmpty()) {
             isGone = true
         } else {
