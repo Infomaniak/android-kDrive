@@ -36,29 +36,29 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
     private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
     override var isManageDropBox = false
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding.settings) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.fileShareCollapsingToolbarLayout.title = getString(R.string.convertToDropboxTitle, navigationArgs.fileName)
+        fileShareCollapsingToolbarLayout.title = getString(R.string.convertToDropboxTitle, navigationArgs.fileName)
 
-        binding.shareLinkCardView.isGone = true
-        binding.disableButton.isGone = true
+        shareLinkCardView.isGone = true
+        disableButton.isGone = true
 
         FileController.getFileById(navigationArgs.fileId)?.let { file ->
             updateUi(file, null)
 
-            expirationDateInput.init(fragmentManager = parentFragmentManager)
+            settings.expirationDateInput.init(fragmentManager = parentFragmentManager)
 
             enableSaveButton()
-            binding.saveButton.apply {
-                initProgress(viewLifecycleOwner)
-                setOnClickListener {
+            saveButton.initProgress(viewLifecycleOwner)
+            saveButton.setOnClickListener {
+                settings.apply {
                     val limitFileSize = if (limitStorageSwitch.isChecked) {
                         limitStorageValue.text.toString().toDoubleOrNull()
                     } else {
                         null
                     }
-                    showProgress()
+                    saveButton.showProgress()
                     mainViewModel.createDropBoxFolder(
                         file = file,
                         emailWhenFinished = emailWhenFinishedSwitch.isChecked,
@@ -72,7 +72,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
                         } else {
                             showSnackbar(apiResponse.translateError())
                         }
-                        hideProgress(R.string.buttonSave)
+                        saveButton.hideProgress(R.string.buttonSave)
                     }
                 }
             }
