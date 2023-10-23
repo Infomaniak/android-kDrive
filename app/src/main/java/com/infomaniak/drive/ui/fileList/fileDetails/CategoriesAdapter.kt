@@ -26,14 +26,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.CardviewCategoryBinding
+import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.CategoriesViewHolder
 import com.infomaniak.drive.utils.setCornersRadius
-import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_category.view.*
 import java.util.Date
 
 class CategoriesAdapter(
     private val onCategoryChanged: (id: Int, isSelected: Boolean) -> Unit
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<CategoriesViewHolder>() {
 
     var canEditCategory: Boolean = false
     var canDeleteCategory: Boolean = false
@@ -43,21 +43,25 @@ class CategoriesAdapter(
     var filteredCategories: List<UiCategory> = listOf()
     private var filterQuery: String = ""
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_category, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoriesViewHolder {
+        return CategoriesViewHolder(CardviewCategoryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
 
     override fun getItemCount() = filteredCategories.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.categoryCard) {
+    override fun onBindViewHolder(holder: CategoriesViewHolder, position: Int) = with(holder.binding) {
         val category = filteredCategories[position]
-        isCheckable = false
-        isEnabled = true
+        categoryCard.apply {
+            isCheckable = false
+            isEnabled = true
+            setCorners(position)
+            setMenuButton(category)
+            handleSelectedState(category)
+            setClickOnCategory(category)
+        }
+
         categoryIcon.setBackgroundColor(Color.parseColor(category.color))
         categoryTitle.text = category.name
-        setCorners(position)
-        setMenuButton(category)
-        handleSelectedState(category)
-        setClickOnCategory(category)
     }
 
     private fun MaterialCardView.setCorners(position: Int) {
@@ -67,23 +71,23 @@ class CategoriesAdapter(
         setCornersRadius(topCornerRadius, bottomCornerRadius)
     }
 
-    private fun MaterialCardView.setMenuButton(category: UiCategory) {
+    private fun CardviewCategoryBinding.setMenuButton(category: UiCategory) {
         menuButton.apply {
             isVisible = canEditCategory || (canDeleteCategory && !category.isPredefined)
             setOnClickListener { onMenuClicked?.invoke(category) }
         }
     }
 
-    private fun MaterialCardView.handleSelectedState(category: UiCategory) {
+    private fun CardviewCategoryBinding.handleSelectedState(category: UiCategory) {
         category.selectedState.let {
             categoryProgressBar.isVisible = it == SelectedState.PROCESSING
             checkIcon.isVisible = it == SelectedState.SELECTED
         }
     }
 
-    private fun MaterialCardView.setClickOnCategory(category: UiCategory) {
-        setOnClickListener {
-            isEnabled = false
+    private fun CardviewCategoryBinding.setClickOnCategory(category: UiCategory) {
+        categoryCard.setOnClickListener {
+            categoryCard.isEnabled = false
             categoryProgressBar.isVisible = true
             checkIcon.isGone = true
             val isSelected = category.selectedState == SelectedState.NOT_SELECTED
@@ -208,4 +212,6 @@ class CategoriesAdapter(
             }
         }
     }
+
+    class CategoriesViewHolder(val binding: CardviewCategoryBinding) : RecyclerView.ViewHolder(binding.root)
 }
