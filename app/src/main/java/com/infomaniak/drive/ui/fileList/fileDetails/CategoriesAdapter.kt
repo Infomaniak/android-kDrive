@@ -85,9 +85,9 @@ class CategoriesAdapter(
         }
     }
 
-    private fun CardviewCategoryBinding.setClickOnCategory(category: UiCategory) {
-        categoryCard.setOnClickListener {
-            categoryCard.isEnabled = false
+    private fun CardviewCategoryBinding.setClickOnCategory(category: UiCategory) = with(categoryCard) {
+        setOnClickListener {
+            isEnabled = false
             categoryProgressBar.isVisible = true
             checkIcon.isGone = true
             val isSelected = category.selectedState == SelectedState.NOT_SELECTED
