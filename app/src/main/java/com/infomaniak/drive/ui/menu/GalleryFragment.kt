@@ -203,7 +203,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             }
         }
 
-        binding.galleryRecyclerView?.layoutManager = gridLayoutManager
+        _binding?.galleryRecyclerView?.layoutManager = gridLayoutManager
     }
 
     private fun loadMoreGallery(driveId: Int, forceDownload: Boolean = false) {
