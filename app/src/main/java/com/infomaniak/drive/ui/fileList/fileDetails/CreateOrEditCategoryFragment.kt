@@ -32,15 +32,17 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.FragmentCreateOrEditCategoryBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.getScreenSizeInDp
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import kotlinx.android.synthetic.main.fragment_create_or_edit_category.*
 import kotlin.math.max
 
 class CreateOrEditCategoryFragment : Fragment() {
+
+    private var binding: FragmentCreateOrEditCategoryBinding by safeBinding()
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val createOrEditCategoryViewModel: CreateOrEditCategoryViewModel by viewModels()
@@ -48,22 +50,23 @@ class CreateOrEditCategoryFragment : Fragment() {
 
     private val colorsAdapter: CreateOrEditCategoryAdapter by lazy { CreateOrEditCategoryAdapter() }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_create_or_edit_category, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentCreateOrEditCategoryBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         setCategoryName()
         configureColorsAdapter()
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        val isCreateCategory = categoryId == CREATE_CATEGORY_ID
+        val isCreateCategory = navigationArgs.categoryId == CREATE_CATEGORY_ID
         appBarTitle.title = getString(if (isCreateCategory) R.string.createCategoryTitle else R.string.editCategoryTitle)
         editCategoryWarning.isGone = isCreateCategory
         setSaveButton(isCreateCategory)
 
-        createOrEditCategoryViewModel.init(filesIds).observe(viewLifecycleOwner) { hasNoFiles ->
+        createOrEditCategoryViewModel.init(navigationArgs.filesIds).observe(viewLifecycleOwner) { hasNoFiles ->
             if (hasNoFiles) findNavController().popBackStack()
         }
     }
@@ -73,24 +76,24 @@ class CreateOrEditCategoryFragment : Fragment() {
         configCategoriesLayoutManager()
     }
 
-    private fun setCategoryName() = with(navigationArgs) {
+    private fun setCategoryName() = with(binding) {
         categoryNameValueInput.apply {
-            setText(categoryName)
+            setText(navigationArgs.categoryName)
             addTextChangedListener { saveButton.isEnabled = it.toString().isNotEmpty() }
         }
-        categoryNameValueLayout.isGone = categoryIsPredefined
+        categoryNameValueLayout.isGone = navigationArgs.categoryIsPredefined
     }
 
     private fun configureColorsAdapter() {
         colorsAdapter.apply {
             selectedPosition = COLORS.indexOfFirst { it == navigationArgs.categoryColor }.let { if (it == -1) 0 else it }
             configCategoriesLayoutManager()
-            categoriesRecyclerView.adapter = this
+            binding.categoriesRecyclerView.adapter = this
         }
     }
 
     private fun setSaveButton(isCreateCategory: Boolean) = with(navigationArgs) {
-        saveButton.apply {
+        binding.saveButton.apply {
             initProgress(this@CreateOrEditCategoryFragment)
             isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
             setOnClickListener {
@@ -109,7 +112,7 @@ class CreateOrEditCategoryFragment : Fragment() {
     private fun configCategoriesLayoutManager() {
         val numCategoriesColumns = getNumColorsColumns()
         val gridLayoutManager = GridLayoutManager(context, numCategoriesColumns)
-        categoriesRecyclerView.layoutManager = gridLayoutManager
+        binding.categoriesRecyclerView.layoutManager = gridLayoutManager
     }
 
     private fun getNumColorsColumns(): Int {
@@ -121,8 +124,8 @@ class CreateOrEditCategoryFragment : Fragment() {
         return max(minNumberOfColumns, (screenWidth - margins) / expectedItemSize)
     }
 
-    private fun createCategory() = with(createOrEditCategoryViewModel) {
-        createCategory(
+    private fun createCategory() = with(binding) {
+        createOrEditCategoryViewModel.createCategory(
             name = categoryNameValueInput.text.toString(),
             color = COLORS[colorsAdapter.selectedPosition],
         ).observe(viewLifecycleOwner) { apiResponse ->
@@ -147,14 +150,14 @@ class CreateOrEditCategoryFragment : Fragment() {
                 if (isSuccess()) {
                     findNavController().popBackStack()
                 } else {
-                    saveButton.hideProgress(R.string.buttonSave)
+                    binding.saveButton.hideProgress(R.string.buttonSave)
                     SnackbarUtils.showSnackbar(requireView(), translateError())
                 }
             }
         }
     }
 
-    private fun editCategory(categoryId: Int) {
+    private fun editCategory(categoryId: Int) = with(binding) {
         createOrEditCategoryViewModel.editCategory(
             categoryId = categoryId,
             name = categoryNameValueInput.text.toString().let { it.ifEmpty { null } },

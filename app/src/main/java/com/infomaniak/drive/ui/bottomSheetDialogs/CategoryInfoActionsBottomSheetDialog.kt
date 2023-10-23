@@ -33,15 +33,16 @@ import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.databinding.FragmentBottomSheetCategoryInfoActionsBinding
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SnackbarUtils
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setBackNavigationResult
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_category_info_actions.*
 import kotlinx.coroutines.Dispatchers
 
 class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
@@ -49,15 +50,18 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
     private val categoryInfoActionViewModel: CategoryInfoActionViewModel by viewModels()
     private val navigationArgs: CategoryInfoActionsBottomSheetDialogArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_category_info_actions, container, false)
+    private var binding: FragmentBottomSheetCategoryInfoActionsBinding by safeBinding()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentBottomSheetCategoryInfoActionsBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
-        categoryIcon.setBackgroundColor(Color.parseColor(categoryColor))
-        categoryTitle.text = categoryName
+        binding.categoryIcon.setBackgroundColor(Color.parseColor(categoryColor))
+        binding.categoryTitle.text = categoryName
         handleRights()
-        editCategory.setOnClickListener {
+        binding.editCategory.setOnClickListener {
             safeNavigate(
                 CategoryInfoActionsBottomSheetDialogDirections.actionCategoryInfoActionsBottomSheetDialogToCreateOrEditCategoryFragment(
                     filesIds = filesIds,
@@ -68,7 +72,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 )
             )
         }
-        deleteCategory.setOnClickListener {
+        binding.deleteCategory.setOnClickListener {
             Utils.createConfirmation(
                 context = requireContext(),
                 title = getString(R.string.buttonDelete),
@@ -83,11 +87,12 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun handleRights() = with(DriveInfosController.getCategoryRights()) {
-        disabledEditCategory.isGone = canEditCategory
-        editCategory.isEnabled = canEditCategory
+    private fun handleRights() = with(binding) {
+        val categoryRights = DriveInfosController.getCategoryRights()
+        disabledEditCategory.isGone = categoryRights.canEditCategory
+        editCategory.isEnabled = categoryRights.canEditCategory
 
-        with(canDeleteCategory && !navigationArgs.categoryIsPredefined) {
+        with(categoryRights.canDeleteCategory && !navigationArgs.categoryIsPredefined) {
             disabledDeleteCategory.isGone = this
             deleteCategory.isEnabled = this
         }

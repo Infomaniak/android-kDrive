@@ -36,6 +36,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.databinding.FragmentSelectCategoriesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialogArgs
@@ -48,17 +49,13 @@ import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.SnackbarUtils
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setBackNavigationResult
-import kotlinx.android.synthetic.main.fragment_select_categories.*
-import kotlinx.android.synthetic.main.item_search_view.clearButton
-import kotlinx.android.synthetic.main.item_search_view.searchView
 import java.util.Date
 
 class SelectCategoriesFragment : Fragment() {
+
+    private var binding: FragmentSelectCategoriesBinding by safeBinding()
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val selectCategoriesViewModel: SelectCategoriesViewModel by viewModels()
@@ -69,8 +66,9 @@ class SelectCategoriesFragment : Fragment() {
     private val driveId: Int by lazy { navigationArgs.userDrive?.driveId ?: AccountUtils.currentDriveId }
     private val usageMode: CategoriesUsageMode by lazy { navigationArgs.categoriesUsageMode }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_select_categories, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentSelectCategoriesBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
@@ -90,7 +88,7 @@ class SelectCategoriesFragment : Fragment() {
 
                 configureToolbar()
                 requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { setBackNavResult() }
-                createCategoryRow.setOnClickListener { navigateToCreateCategory() }
+                binding.createCategoryRow.setOnClickListener { navigateToCreateCategory() }
                 setBackActionHandlers()
             } else {
                 findNavController().popBackStack()
@@ -108,15 +106,15 @@ class SelectCategoriesFragment : Fragment() {
                 SELECTED_CATEGORIES -> updateSelectedCategoriesModeUi()
                 else -> updateFileCategoriesModeUi()
             }
-            categoriesRecyclerView.adapter = this
+            binding.categoriesRecyclerView.adapter = this
         }
     }
 
     private fun setAddCategoryButton(canCreateCategory: Boolean) {
-        toolbar.menu.findItem(R.id.addCategory).isVisible = canCreateCategory
+        binding.toolbar.menu.findItem(R.id.addCategory).isVisible = canCreateCategory
     }
 
-    private fun configureToolbar() = with(toolbar) {
+    private fun configureToolbar() = with(binding.toolbar) {
         setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.addCategory) {
                 navigateToCreateCategory()
@@ -128,24 +126,24 @@ class SelectCategoriesFragment : Fragment() {
         setNavigationOnClickListener { setBackNavResult() }
     }
 
-    private fun configureSearchView(canCreateCategory: Boolean) {
+    private fun configureSearchView(canCreateCategory: Boolean) = with(binding.searchViewCard) {
         searchView.hint = getString(R.string.searchTitle)
         clearButton.setOnClickListener { searchView.setText("") }
         setSearchViewTextChangedListener(canCreateCategory)
         setSearchViewEditorActionListener()
     }
 
-    private fun setSearchViewTextChangedListener(canCreateCategory: Boolean) = with(searchView) {
-        addTextChangedListener(DebouncingTextWatcher(lifecycle) {
+    private fun setSearchViewTextChangedListener(canCreateCategory: Boolean) = with(binding.searchViewCard) {
+        searchView.addTextChangedListener(DebouncingTextWatcher(lifecycle) {
             if (isResumed) {
                 clearButton.isInvisible = it.isNullOrEmpty()
-                categoriesAdapter.updateFilter(text.toString())
+                categoriesAdapter.updateFilter(searchView.text.toString())
                 configureCreateCategoryRow(canCreateCategory, it?.trim())
             }
         })
     }
 
-    private fun setSearchViewEditorActionListener() = with(searchView) {
+    private fun setSearchViewEditorActionListener() = with(binding.searchViewCard.searchView) {
         setOnEditorActionListener { _, actionId, _ ->
             if (EditorInfo.IME_ACTION_SEARCH == actionId) {
                 categoriesAdapter.updateFilter(text.toString())
@@ -219,7 +217,7 @@ class SelectCategoriesFragment : Fragment() {
             SelectCategoriesFragmentDirections.actionSelectCategoriesFragmentToCreateOrEditCategoryFragment(
                 filesIds = navigationArgs.filesIds,
                 categoryId = CreateOrEditCategoryFragment.CREATE_CATEGORY_ID,
-                categoryName = searchView.text.toString(),
+                categoryName = binding.searchViewCard.searchView.text.toString(),
                 categoryColor = null,
             )
         )
@@ -235,7 +233,7 @@ class SelectCategoriesFragment : Fragment() {
 
     private fun setCreateCategoryRowTitle(categoryName: String?) {
         categoryName?.let {
-            addCategoryTitle.text = HtmlCompat.fromHtml(
+            binding.addCategoryTitle.text = HtmlCompat.fromHtml(
                 getString(R.string.manageCategoriesCreateTitle, "<b>$it</b>"),
                 HtmlCompat.FROM_HTML_MODE_COMPACT,
             )
@@ -245,10 +243,10 @@ class SelectCategoriesFragment : Fragment() {
     private fun setCreateCategoryRowCorners() {
         val radius = resources.getDimension(R.dimen.cardViewRadius)
         val topCornerRadius = if (categoriesAdapter.filteredCategories.isEmpty()) radius else 0.0f
-        createCategoryRow.setCornersRadius(topCornerRadius, radius)
+        binding.createCategoryRow.setCornersRadius(topCornerRadius, radius)
     }
 
-    private fun setCreateCategoryRowVisibility(categoryName: String?) {
+    private fun setCreateCategoryRowVisibility(categoryName: String?) = with(binding) {
         val isVisible = categoryName?.isNotBlank() == true && !categoriesAdapter.doesCategoryExist(categoryName)
         categoriesAdapter.isCreateRowVisible = isVisible
         createCategoryRow.isVisible = isVisible
