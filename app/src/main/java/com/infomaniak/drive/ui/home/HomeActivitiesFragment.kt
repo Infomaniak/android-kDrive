@@ -28,13 +28,17 @@ import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.FragmentHomeTabsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setPagination
-import kotlinx.android.synthetic.main.fragment_home_tabs.homeTabsRecyclerView
 
 class HomeActivitiesFragment : Fragment() {
+
+    private var _binding: FragmentHomeTabsBinding? = null
+    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
+
     private val homeViewModel: HomeViewModel by navGraphViewModels(R.id.homeFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
 
@@ -42,8 +46,8 @@ class HomeActivitiesFragment : Fragment() {
 
     private var paginationListener: RecyclerView.OnScrollListener? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_home_tabs, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentHomeTabsBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -52,8 +56,13 @@ class HomeActivitiesFragment : Fragment() {
         AccountUtils.getCurrentDrive()?.let { currentDrive -> getLastActivities(currentDrive.id) }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun initAdapter() {
-        homeTabsRecyclerView.apply {
+        binding.homeTabsRecyclerView.apply {
             homeViewModel.lastActivityPage = 1
             paginationListener?.let(::removeOnScrollListener)
 
@@ -98,7 +107,9 @@ class HomeActivitiesFragment : Fragment() {
     }
 
     fun getLastActivities(driveId: Int, forceDownload: Boolean = false) {
-        (homeTabsRecyclerView?.adapter as? LastActivitiesAdapter)?.apply {
+        if (_binding == null) return
+
+        (binding.homeTabsRecyclerView.adapter as? LastActivitiesAdapter)?.apply {
             if (forceDownload) {
                 homeViewModel.apply {
                     lastActivityPage = 1
