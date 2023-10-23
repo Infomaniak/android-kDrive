@@ -24,19 +24,20 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.view_color_round_button.view.colorButtonView
+import com.infomaniak.drive.databinding.ViewColorRoundButtonBinding
+import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.CategoriesBulletViewHolder
 
-class CreateOrEditCategoryAdapter : RecyclerView.Adapter<ViewHolder>() {
+class CreateOrEditCategoryAdapter : RecyclerView.Adapter<CategoriesBulletViewHolder>() {
 
     var selectedPosition = 0
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_color_round_button, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoriesBulletViewHolder {
+        return CategoriesBulletViewHolder(ViewColorRoundButtonBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
 
     override fun getItemCount(): Int = COLORS.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.colorButtonView) {
+    override fun onBindViewHolder(holder: CategoriesBulletViewHolder, position: Int) = with(holder.binding.colorButtonView) {
         val color = ColorStateList.valueOf(COLORS[position].toColorInt())
         val white = ContextCompat.getColorStateList(context, R.color.white)
 
@@ -78,4 +79,6 @@ class CreateOrEditCategoryAdapter : RecyclerView.Adapter<ViewHolder>() {
             "#70AD47",
         )
     }
+
+    class CategoriesBulletViewHolder(val binding: ViewColorRoundButtonBinding) : RecyclerView.ViewHolder(binding.root)
 }
