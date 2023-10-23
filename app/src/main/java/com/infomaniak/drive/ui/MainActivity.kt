@@ -59,6 +59,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
+import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
@@ -78,13 +79,14 @@ import com.infomaniak.lib.stores.launchInAppReview
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 
 class MainActivity : BaseActivity() {
+
+    private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val mainViewModel: MainViewModel by viewModels()
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
@@ -120,7 +122,7 @@ class MainActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
 
         downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
@@ -148,7 +150,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setupBottomNavigation(navController: NavController) {
+    private fun setupBottomNavigation(navController: NavController) = with(binding) {
         bottomNavigation.apply {
             setupWithNavControllerCustom(navController)
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
@@ -168,7 +170,7 @@ class MainActivity : BaseActivity() {
     private fun handleNavigateToDestinationFileId(navController: NavController) {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
-                bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
+                binding.bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
                 mainViewModel.navigateFileListTo(navController, it.destinationFileId)
             }
         }
@@ -192,9 +194,9 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setupMainFab(navController: NavController) {
+    private fun setupMainFab(navController: NavController) = with(binding) {
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
-        mainViewModel.currentFolder.observe(this) { file ->
+        mainViewModel.currentFolder.observe(this@MainActivity) { file ->
             mainFab.isEnabled = file?.rights?.canCreateFile == true
         }
     }
@@ -291,9 +293,9 @@ class MainActivity : BaseActivity() {
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
 
         // TODO: Find a better way to do this. Currently, we need to put that
-        // here and not in the preview slider fragment because of APIs <= 27.
+        //  here and not in the preview slider fragment because of APIs <= 27.
         if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
-            bottomNavigation.setOnApplyWindowInsetsListener(null)
+            binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
         }
 
         when (destination.id) {
@@ -338,7 +340,7 @@ class MainActivity : BaseActivity() {
         trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
     }
 
-    private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) {
+    private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) = with(binding) {
 
         val isVisible = when (destinationId) {
             R.id.addFileBottomSheetDialog,
@@ -367,7 +369,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun saveLastNavigationItemSelected() {
-        UiSettings(this).bottomNavigationSelectedItem = bottomNavigation.selectedItemId
+        UiSettings(this).bottomNavigationSelectedItem = binding.bottomNavigation.selectedItemId
     }
 
     override fun onDestroy() {
@@ -403,7 +405,8 @@ class MainActivity : BaseActivity() {
                         initials = getInitials(),
                         background = context.getBackgroundColorBasedOnId(id)
                     )
-                val menuItemView = (bottomNavigation.getChildAt(0) as BottomNavigationMenuView)[4] as NavigationBarItemView
+                val bottomNavigationMenuView = binding.bottomNavigation.getChildAt(0) as BottomNavigationMenuView
+                val menuItemView = bottomNavigationMenuView[4] as NavigationBarItemView
                 val request = ImageRequest.Builder(context)
                     .data(avatar)
                     .crossfade(true)
@@ -426,7 +429,7 @@ class MainActivity : BaseActivity() {
                     withContext(Dispatchers.Main) {
                         menuItemView.setIconTintList(null)
                         menuItemView.setIcon(stateListDrawable)
-                        bottomNavigation.menu.findItem(R.id.menuFragment).icon = stateListDrawable
+                        binding.bottomNavigation.menu.findItem(R.id.menuFragment).icon = stateListDrawable
                     }
                 }
             }
@@ -448,9 +451,7 @@ class MainActivity : BaseActivity() {
         return bitmap
     }
 
-    fun getMainFab(): FloatingActionButton? {
-        return mainFab
-    }
+    fun getMainFab(): FloatingActionButton = binding.mainFab
 
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
