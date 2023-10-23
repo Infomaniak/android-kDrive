@@ -39,10 +39,6 @@ import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SnackbarUtils
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_file_list.emptyTrash
-import kotlinx.android.synthetic.main.fragment_file_list.noFilesLayout
-import kotlinx.android.synthetic.main.fragment_file_list.sortButton
-import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 class TrashFragment : FileSubTypeListFragment() {
 
@@ -54,7 +50,7 @@ class TrashFragment : FileSubTypeListFragment() {
     override val noItemsRootIcon = R.drawable.ic_delete
     override val noItemsRootTitle = R.string.trashNoFile
 
-    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()
@@ -72,7 +68,7 @@ class TrashFragment : FileSubTypeListFragment() {
         setupMultiSelectLayout()
     }
 
-    private fun initParams() {
+    private fun initParams() = with(binding) {
         fileListViewModel.sortType = SortType.RECENT_TRASHED
         sortFiles = SortFiles()
         downloadFiles = DownloadFiles(
@@ -82,7 +78,7 @@ class TrashFragment : FileSubTypeListFragment() {
     }
 
     private fun setupTrashEmptying() {
-        emptyTrash.setupEmptyTrashButton()
+        binding.emptyTrash.setupEmptyTrashButton()
         multiSelectLayout?.emptyTrashButton?.setupEmptyTrashButton()
     }
 
@@ -146,7 +142,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
     override fun closeMultiSelect() {
         super.closeMultiSelect()
-        swipeRefreshLayout?.isEnabled = true
+        binding.swipeRefreshLayout.isEnabled = true
     }
 
     private fun showTrashedFileActions(file: File) {
@@ -156,7 +152,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
     private fun removeFileFromAdapter(fileId: Int) {
         fileAdapter.deleteByFileId(fileId)
-        noFilesLayout.toggleVisibility(fileAdapter.getFiles().isEmpty())
+        binding.noFilesLayout.toggleVisibility(fileAdapter.getFiles().isEmpty())
     }
 
     companion object {
@@ -171,7 +167,7 @@ class TrashFragment : FileSubTypeListFragment() {
                     SortType.RECENT -> SortType.RECENT_TRASHED
                     else -> newSortType
                 }
-                sortButton.setText(fileListViewModel.sortType.translation)
+                binding.sortButton.setText(fileListViewModel.sortType.translation)
                 downloadFiles(true, true)
             }
         }
