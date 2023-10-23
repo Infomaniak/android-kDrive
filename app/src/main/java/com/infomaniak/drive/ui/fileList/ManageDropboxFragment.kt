@@ -56,10 +56,6 @@ open class ManageDropboxFragment : Fragment() {
 
     protected var binding: FragmentManageDropboxBinding by safeBinding()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentManageDropboxBinding.inflate(inflater, container, false).also { binding = it }.root
-    }
-
     private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
     private var currentDropBox: DropBox? = null
     protected val mainViewModel: MainViewModel by activityViewModels()
@@ -69,6 +65,10 @@ open class ManageDropboxFragment : Fragment() {
     private var needNewPassword = false
 
     protected open var isManageDropBox = true
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentManageDropboxBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
