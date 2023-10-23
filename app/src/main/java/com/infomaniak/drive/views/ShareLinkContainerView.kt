@@ -19,6 +19,7 @@ package com.infomaniak.drive.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -26,9 +27,9 @@ import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.databinding.ViewShareLinkContainerBinding
 import com.infomaniak.drive.utils.shareText
 import com.infomaniak.lib.core.utils.format
-import kotlinx.android.synthetic.main.view_share_link_container.view.*
 
 class ShareLinkContainerView @JvmOverloads constructor(
     context: Context,
@@ -39,9 +40,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
     private var urlValue: String = ""
     private lateinit var currentFile: File
 
-    init {
-        inflate(context, R.layout.view_share_link_container, this)
-    }
+    val binding by lazy { ViewShareLinkContainerBinding.inflate(LayoutInflater.from(context), this, true) }
 
     fun setup(
         file: File,
@@ -57,9 +56,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
         selectUi(file.isDropBox())
 
         if (!file.isDropBox()) {
-            titleContainer.setOnClickListener { onTitleClicked?.invoke(this.shareLink) }
-            shareLinkSettings.setOnClickListener { this.shareLink?.let { shareLink -> onSettingsClicked?.invoke(shareLink) } }
-            shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
+            binding.titleContainer.setOnClickListener { onTitleClicked?.invoke(this.shareLink) }
+            binding.shareLinkSettings.setOnClickListener {
+                this.shareLink?.let { shareLink -> onSettingsClicked?.invoke(shareLink) }
+            }
+            binding.shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
         }
     }
 
@@ -73,7 +74,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         when {
             isDropbox -> {
                 setDropboxUi()
-                shareLinkSwitch.isGone = true
+                binding.shareLinkSwitch.isGone = true
             }
             shareLink == null && urlValue.isBlank() -> {
                 context?.trackShareRightsEvent("restrictedShareLink")
@@ -113,7 +114,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         )
     }
 
-    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, status: String) {
+    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, status: String) = with(binding) {
         shareLinkIcon.setImageResource(iconId)
         shareLinkTitle.text = title
         shareLinkBottomContainer.isVisible = containerVisibility
