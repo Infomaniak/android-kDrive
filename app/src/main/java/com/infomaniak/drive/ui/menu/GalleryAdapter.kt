@@ -21,21 +21,19 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.viewbinding.ViewBinding
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.databinding.CardviewGalleryBinding
+import com.infomaniak.drive.databinding.TitleRecyclerSectionBinding
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
-import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_gallery.view.mediaChecked
-import kotlinx.android.synthetic.main.cardview_gallery.view.preview
-import kotlinx.android.synthetic.main.cardview_gallery.view.videoViews
-import kotlinx.android.synthetic.main.title_recycler_section.view.title
 
 class GalleryAdapter(
     private val multiSelectManager: MultiSelectManager,
@@ -47,8 +45,15 @@ class GalleryAdapter(
 
     private var lastSectionTitle = ""
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(viewType, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = if (viewType == R.layout.title_recycler_section) {
+            TitleRecyclerSectionBinding.inflate(layoutInflater, parent, false)
+        } else {
+            CardviewGalleryBinding.inflate(layoutInflater, parent, false)
+        }
+
+        return GalleryViewHolder(binding)
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -61,25 +66,33 @@ class GalleryAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with((holder as GalleryViewHolder).binding) {
         when {
             super.getItemViewType(position) == VIEW_TYPE_LOADING -> {
-                if (position == 0) holder.itemView.title.resetLoader() else (holder.itemView as LoaderCardView).start()
+                if (position == 0) {
+                    (this as TitleRecyclerSectionBinding).title.resetLoader()
+                } else {
+                    (this as CardviewGalleryBinding).root.start()
+                }
             }
-            getItemViewType(position) == DisplayType.TITLE.layout -> holder.itemView.title.text = (itemList[position] as String)
-            getItemViewType(position) == DisplayType.PREVIEW.layout -> bindGalleryDisplayType(position, holder)
+            getItemViewType(position) == DisplayType.TITLE.layout -> {
+                (this as TitleRecyclerSectionBinding).title.text = (itemList[position] as String)
+            }
+            getItemViewType(position) == DisplayType.PREVIEW.layout -> {
+                (this as CardviewGalleryBinding).bindGalleryDisplayType(position)
+            }
         }
     }
 
-    private fun bindGalleryDisplayType(position: Int, holder: ViewHolder) = with((holder.itemView as LoaderCardView)) {
+    private fun CardviewGalleryBinding.bindGalleryDisplayType(position: Int) {
         val file = (itemList[position] as File)
         displayThumbnail(file)
         handleCheckmark(file)
         setupCardClicksListeners(file)
     }
 
-    private fun LoaderCardView.displayThumbnail(file: File) {
-        stop()
+    private fun CardviewGalleryBinding.displayThumbnail(file: File) {
+        root.stop()
         videoViews.isVisible = file.getFileType() == ExtensionType.VIDEO
         preview.apply {
             loadAny(file.thumbnail())
@@ -87,7 +100,7 @@ class GalleryAdapter(
         }
     }
 
-    private fun LoaderCardView.handleCheckmark(file: File) {
+    private fun CardviewGalleryBinding.handleCheckmark(file: File) {
         mediaChecked.apply {
 
             isClickable = false
@@ -101,23 +114,19 @@ class GalleryAdapter(
         }
     }
 
-    private fun LoaderCardView.setupCardClicksListeners(file: File) = with(multiSelectManager) {
+    private fun CardviewGalleryBinding.setupCardClicksListeners(file: File) = with(multiSelectManager) {
 
-        setOnClickListener {
-            if (isMultiSelectOn) {
-                mediaChecked.onFileSelected(file)
-            } else {
-                onFileClicked(file)
-            }
-        }
+        root.apply {
+            setOnClickListener { if (isMultiSelectOn) mediaChecked.onFileSelected(file) else onFileClicked(file) }
 
-        setOnLongClickListener {
-            if (isMultiSelectAuthorized) {
-                mediaChecked.onFileSelected(file)
-                if (!isMultiSelectOn) openMultiSelect?.invoke()
-                true
-            } else {
-                false
+            setOnLongClickListener {
+                if (isMultiSelectAuthorized) {
+                    mediaChecked.onFileSelected(file)
+                    if (!isMultiSelectOn) openMultiSelect?.invoke()
+                    true
+                } else {
+                    false
+                }
             }
         }
     }
@@ -254,4 +263,6 @@ class GalleryAdapter(
             else -> ""
         }
     }
+
+    class GalleryViewHolder(val binding: ViewBinding) : ViewHolder(binding.root)
 }
