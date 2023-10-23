@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.BulkOperationType
+import com.infomaniak.drive.databinding.FragmentBottomSheetMultiSelectActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openManageCategoriesBottomSheetDialog
@@ -42,16 +43,18 @@ import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
+import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
 
 abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: String) : BottomSheetDialogFragment() {
+
+    private var binding: FragmentBottomSheetMultiSelectActionsBinding by safeBinding()
 
     private val mainViewModel: MainViewModel by activityViewModels()
     val navigationArgs: MultiSelectActionsBottomSheetDialogArgs by navArgs()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_multi_select_actions, container, false)
+        return FragmentBottomSheetMultiSelectActionsBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -73,7 +76,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         configureDeletePermanently()
     }
 
-    protected open fun configureManageCategories(areIndividualActionsVisible: Boolean) {
+    protected open fun configureManageCategories(areIndividualActionsVisible: Boolean) = with(binding) {
         if (areIndividualActionsVisible) {
             disabledManageCategories.isGone = computeManageCategoriesAvailability()
             manageCategories.apply {
@@ -88,7 +91,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         file?.isDisabled() == false
     }
 
-    protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
+    protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean): Unit = with(binding) {
         val (text, action) = with(navigationArgs) {
             addFavoritesIcon.isEnabled = onlyFavorite
             if (onlyFavorite) {
@@ -104,7 +107,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
     }
 
-    protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
+    protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) = with(binding) {
         if (areIndividualActionsVisible) {
             disabledColoredFolder.isGone = computeColoredFolderAvailability()
             coloredFolder.apply {
@@ -119,21 +122,19 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         file?.isAllowedToBeColored() == true
     }
 
-    protected open fun configureAvailableOffline() {
-        with(navigationArgs) {
-            availableOfflineIcon.isGone = onlyOffline
-            availableOfflineComplete.isVisible = onlyOffline
-            disabledAvailableOffline.isVisible = onlyFolders
+    protected open fun configureAvailableOffline(): Unit = with(binding) {
+        availableOfflineIcon.isGone = navigationArgs.onlyOffline
+        availableOfflineComplete.isVisible = navigationArgs.onlyOffline
+        disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
 
-            availableOfflineSwitch.apply {
-                isChecked = onlyOffline
-                setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
-            }
+        availableOfflineSwitch.apply {
+            isChecked = navigationArgs.onlyOffline
+            setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
+        }
 
-            availableOffline.apply {
-                isGone = isAllSelected
-                setOnClickListener { selectOfflineDialogActionCallBack() }
-            }
+        availableOffline.apply {
+            isGone = navigationArgs.isAllSelected
+            setOnClickListener { selectOfflineDialogActionCallBack() }
         }
     }
 
@@ -149,7 +150,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             }
         }
 
-        downloadFile.apply {
+        binding.downloadFile.apply {
             setOnClickListener {
                 if (drivePermissions.checkWriteStoragePermission()) {
                     trackEvent(matomoCategory, "bulkDownload")
@@ -162,23 +163,23 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     protected open fun configureMoveFile() {
-        moveFile.setOnClickListener { onActionSelected(SelectDialogAction.MOVE) }
+        binding.moveFile.setOnClickListener { onActionSelected(SelectDialogAction.MOVE) }
     }
 
     protected open fun configureDuplicateFile() {
-        duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
+        binding.duplicateFile.setOnClickListener { onActionSelected(SelectDialogAction.DUPLICATE) }
     }
 
     protected open fun configureRestoreFileIn() {
-        restoreFileIn.isGone = true
+        binding.restoreFileIn.isGone = true
     }
 
     protected open fun configureRestoreFileToOriginalPlace() {
-        restoreFileToOriginalPlace.isGone = true
+        binding.restoreFileToOriginalPlace.isGone = true
     }
 
     protected open fun configureDeletePermanently() {
-        deletePermanently.isGone = true
+        binding.deletePermanently.isGone = true
     }
 
     private fun download() {
