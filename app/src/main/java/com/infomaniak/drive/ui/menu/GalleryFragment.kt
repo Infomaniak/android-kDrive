@@ -304,7 +304,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
     }
 
     fun setScrollbarTrackOffset(offset: Int) {
-        _binding?.let { it.galleryFastScroller.trackMarginEnd = offset }
+        _binding?.galleryFastScroller?.trackMarginEnd = offset
     }
 
     companion object {
