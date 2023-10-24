@@ -30,10 +30,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBottomSheetDialog
+import com.infomaniak.lib.core.utils.safeBinding
 
 class MenuGalleryFragment : Fragment() {
 
-    private lateinit var binding: FragmentMenuGalleryBinding
+    private var binding: FragmentMenuGalleryBinding by safeBinding()
 
     private var galleryFragment = GalleryFragment()
 

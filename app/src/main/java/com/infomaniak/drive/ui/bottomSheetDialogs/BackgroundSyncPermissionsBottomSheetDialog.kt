@@ -31,17 +31,17 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentBottomSheetBackgroundSyncBinding
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
+import com.infomaniak.lib.core.utils.safeBinding
 
 class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private lateinit var binding: FragmentBottomSheetBackgroundSyncBinding
+    private var binding: FragmentBottomSheetBackgroundSyncBinding by safeBinding()
     private val drivePermissions = DrivePermissions()
     private var hasDoneNecessary = false
     private var hadBatteryLifePermission = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentBottomSheetBackgroundSyncBinding.inflate(inflater, container, false)
-        return binding.root
+        return FragmentBottomSheetBackgroundSyncBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
