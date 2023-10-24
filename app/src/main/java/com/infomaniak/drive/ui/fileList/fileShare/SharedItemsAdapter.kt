@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.fileShare
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -29,42 +28,43 @@ import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.Share.UserFileAccess
+import com.infomaniak.drive.databinding.ItemShareableItemBinding
+import com.infomaniak.drive.ui.fileList.fileShare.SharedItemsAdapter.SharedItemsViewHolder
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_shareable_item.view.*
 
 class SharedItemsAdapter(
     private val file: File,
     private val onItemClicked: (item: Shareable) -> Unit
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<SharedItemsViewHolder>() {
 
     private var itemList: ArrayList<Shareable> = ArrayList()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_shareable_item, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SharedItemsViewHolder {
+        return SharedItemsViewHolder(ItemShareableItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
 
     override fun getItemCount() = itemList.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SharedItemsViewHolder, position: Int) = with(holder.binding) {
         val item = itemList[position]
-        holder.itemView.apply {
-            if (item.id != file.createdBy && file.rights?.canShare == true) {
-                setOnClickListener { onItemClicked(item) }
-                chevron.isVisible = true
-            } else {
-                chevron.isInvisible = true
-            }
+        if (item.id != file.createdBy && file.rights?.canShare == true) {
+            root.setOnClickListener { onItemClicked(item) }
+            chevron.isVisible = true
+        } else {
+            chevron.isInvisible = true
+        }
 
-            when (item) {
-                is UserFileAccess -> bindDriveUser(item)
-                is Invitation -> bindInvitation(item)
-                is Team -> bindTeam(item)
-            }
+        when (item) {
+            is UserFileAccess -> bindDriveUser(item)
+            is Invitation -> bindInvitation(item)
+            is Team -> bindTeam(item)
         }
     }
 
-    private fun View.bindDriveUser(userFileAccess: UserFileAccess) {
+    private fun ItemShareableItemBinding.bindDriveUser(userFileAccess: UserFileAccess) {
         name.text = userFileAccess.name
         infos.text = userFileAccess.email
         userFileAccess.user?.let { avatar.loadAvatar(it) }
@@ -86,7 +86,7 @@ class SharedItemsAdapter(
         }
     }
 
-    private fun View.bindInvitation(invitation: Invitation) {
+    private fun ItemShareableItemBinding.bindInvitation(invitation: Invitation) {
         if (invitation.name.isEmpty()) {
             name.text = invitation.email
             infos.isGone = true
@@ -105,11 +105,11 @@ class SharedItemsAdapter(
         }
 
         if (invitation.id != file.createdBy && file.rights?.canShare == true) {
-            setOnClickListener { onItemClicked(invitation) }
+            root.setOnClickListener { onItemClicked(invitation) }
         }
     }
 
-    private fun View.bindTeam(team: Team) {
+    private fun ItemShareableItemBinding.bindTeam(team: Team) {
         if (team.isAllUsers()) {
             name.setText(R.string.allAllDriveUsers)
             avatar.load(R.drawable.ic_circle_drive)
@@ -165,4 +165,6 @@ class SharedItemsAdapter(
     }
 
     private fun getIndexOfShareable(id: Int) = itemList.indexOfFirst { it.id == id }
+
+    class SharedItemsViewHolder(val binding: ItemShareableItemBinding) : ViewHolder(binding.root)
 }
