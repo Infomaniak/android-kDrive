@@ -274,13 +274,25 @@ class FileControllerTest : KDriveTest() {
 
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
         // Get and save remote root files in realm db test
-        return getFilesFromCacheOrDownload(Utils.ROOT_ID, 1, true, userDrive = userDrive, customRealm = realm).also {
+        return getFilesFromCacheOrDownload(
+            Utils.ROOT_ID,
+            loadNextPage = false,
+            ignoreCache = true,
+            userDrive = userDrive,
+            customRealm = realm
+        ).also {
             assertNotNull(it, "remote root files cannot be null")
         }
     }
 
     private fun getLocalRootFiles() =
-        getFilesFromCacheOrDownload(Utils.ROOT_ID, 1, false, userDrive = userDrive, customRealm = realm)
+        getFilesFromCacheOrDownload(
+            Utils.ROOT_ID,
+            loadNextPage = false,
+            ignoreCache = false,
+            userDrive = userDrive,
+            customRealm = realm
+        )
 
     private fun createAndStoreOfficeFile(transaction: ((remoteFile: File) -> Unit)? = null): File {
         val remoteFile = createFileForTest()

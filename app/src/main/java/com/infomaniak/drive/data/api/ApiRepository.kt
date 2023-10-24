@@ -446,6 +446,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"
+
     private fun loadCursor(cursor: String?, perPage: Int = PER_PAGE): String {
         return "limit=$perPage${if (cursor == null) "" else "&cursor=$cursor"}"
     }
