@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.databinding.FragmentBottomSheetFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
@@ -49,16 +50,14 @@ import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setBackNavigationResult
-import com.infomaniak.lib.core.utils.whenResultIsOk
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_file_info_actions.fileInfoActionsView
+import com.infomaniak.lib.core.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
+
+    private var binding: FragmentBottomSheetFileInfoActionsBinding by safeBinding()
 
     private lateinit var drivePermissions: DrivePermissions
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -72,7 +71,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_file_info_actions, container, false)
+        return FragmentBottomSheetFileInfoActionsBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -87,7 +86,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             registerPermissions(this@FileInfoActionsBottomSheetDialog) { authorized -> if (authorized) downloadFileClicked() }
         }
 
-        fileInfoActionsView.apply {
+        binding.fileInfoActionsView.apply {
             init(
                 ownerFragment = this@FileInfoActionsBottomSheetDialog,
                 mainViewModel = mainViewModel,
@@ -107,7 +106,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            lifecycleScope.launchWhenResumed { fileInfoActionsView.refreshBottomSheetUi(currentFile) }
+            lifecycleScope.launchWhenResumed { binding.fileInfoActionsView.refreshBottomSheetUi(currentFile) }
         }
 
         getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
@@ -129,17 +128,17 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun onResume() {
+    override fun onResume() = with(binding) {
         super.onResume()
         // Fix the popBackStack in onViewCreated because onResume is still called
         if (findNavController().currentDestination?.id != R.id.fileInfoActionsBottomSheetDialog) return
+        fileInfoActionsView.observeOfflineProgression(this@FileInfoActionsBottomSheetDialog) {}
         fileInfoActionsView.updateAvailableOfflineItem()
-        fileInfoActionsView.observeOfflineProgression(this) {}
     }
 
     override fun onPause() {
         super.onPause()
-        fileInfoActionsView.removeOfflineObservations(this)
+        binding.fileInfoActionsView.removeOfflineObservations(this)
     }
 
     override fun editDocumentClicked() {
@@ -192,7 +191,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun sharePublicLink() {
         super.sharePublicLink()
-        fileInfoActionsView.createPublicShareLink(onSuccess = {
+        binding.fileInfoActionsView.createPublicShareLink(onSuccess = {
             context?.shareText(it)
             findNavController().popBackStack()
         }, onError = { translatedError -> showSnackbar(translatedError, true) })
@@ -200,7 +199,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun downloadFileClicked() {
         super.downloadFileClicked()
-        fileInfoActionsView.downloadFile(drivePermissions) {
+        binding.fileInfoActionsView.downloadFile(drivePermissions) {
             findNavController().popBackStack()
         }
     }
@@ -245,7 +244,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 if (findNavController().previousBackStackEntry?.destination?.id == R.id.offlineFileFragment) {
                     findNavController().popBackStack()
                 } else {
-                    fileInfoActionsView.refreshBottomSheetUi(currentFile)
+                    binding.fileInfoActionsView.refreshBottomSheetUi(currentFile)
                 }
                 mainViewModel.updateOfflineFile.value = currentFile.id
             }
@@ -276,7 +275,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) {
         if (isResumed) {
-            fileInfoActionsView.onRenameFile(mainViewModel, newName,
+            binding.fileInfoActionsView.onRenameFile(mainViewModel, newName,
                 onSuccess = { action ->
                     mainViewModel.refreshActivities.value = true
                     transmitActionAndPopBack(
