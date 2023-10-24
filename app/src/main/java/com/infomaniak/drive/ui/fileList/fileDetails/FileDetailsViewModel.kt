@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.utils.isLastPage
 import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -38,7 +37,7 @@ class FileDetailsViewModel : ViewModel() {
         getFileActivitiesJob = Job()
 
         return liveData(Dispatchers.IO + getFileActivitiesJob) {
-            manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileActivities(file, page, false) }
+            manageRecursiveApiResponse(file) { file, cursor -> ApiRepository.getFileActivities(file, cursor, false) }
         }
     }
 
@@ -47,7 +46,7 @@ class FileDetailsViewModel : ViewModel() {
         getFileCommentsJob = Job()
 
         return liveData(Dispatchers.IO + getFileCommentsJob) {
-            manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileComments(file, page) }
+            manageRecursiveApiResponse(file) { file, cursor -> ApiRepository.getFileComments(file, cursor) }
         }
     }
 
@@ -77,22 +76,22 @@ class FileDetailsViewModel : ViewModel() {
 
     private suspend fun <T> LiveDataScope<ApiResponse<ArrayList<T>>?>.manageRecursiveApiResponse(
         file: File,
-        apiResponseCallback: (file: File, page: Int) -> ApiResponse<ArrayList<T>>
+        apiResponseCallback: (file: File, cursor: String?) -> ApiResponse<ArrayList<T>>
     ) {
-        suspend fun recursive(page: Int) {
-            with(apiResponseCallback(file, page)) {
+        suspend fun recursive(cursor: String?) {
+            with(apiResponseCallback(file, cursor)) {
                 if (isSuccess()) {
                     when {
                         data.isNullOrEmpty() -> emit(null)
-                        isLastPage() -> emit(this)
+                        this.cursor == null -> emit(this)
                         else -> {
                             emit(this)
-                            recursive(page + 1)
+                            recursive(this.cursor)
                         }
                     }
                 }
             }
         }
-        recursive(1)
+        recursive(null)
     }
 }

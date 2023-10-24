@@ -105,7 +105,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
             fileDetailsViewModel.getFileComments(currentFile).observe(viewLifecycleOwner) { apiResponse ->
                 apiResponse?.data?.let { comments ->
                     addAll(comments)
-                    isComplete = apiResponse.isLastPage()
+                    isComplete = apiResponse.cursor == null
                 } ?: also {
                     isComplete = true
                 }
