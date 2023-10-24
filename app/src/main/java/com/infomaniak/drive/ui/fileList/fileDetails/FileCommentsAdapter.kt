@@ -23,17 +23,55 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.TooltipCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileComment
+import com.infomaniak.drive.databinding.ItemFileCommentBinding
 import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_file_comment.view.*
 
-class FileCommentsAdapter(
-    val onLikeButtonClicked: (currentComment: FileComment) -> Unit
-) : LoaderAdapter<FileComment>() {
+class FileCommentsAdapter(val onLikeButtonClicked: (currentComment: FileComment) -> Unit) : LoaderAdapter<FileComment>() {
 
     var onEditClicked: ((comment: FileComment) -> Unit)? = null
     var onDeleteClicked: ((comment: FileComment) -> Unit)? = null
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileCommentsViewHolder {
+        return FileCommentsViewHolder(ItemFileCommentBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with((holder as FileCommentsViewHolder).binding) {
+        if (getItemViewType(position) == VIEW_TYPE_LOADING) {
+            commentUserName.resetLoader()
+            commentValue.resetLoader()
+            commentDateValue.resetLoader()
+            return
+        }
+
+        val currentComment = itemList[position]
+
+        commentUserAvatar.loadAvatar(currentComment.user)
+        commentUserName.text = currentComment.user.displayName
+        commentValue.text = currentComment.body
+        commentDateValue.text = getRelativeDateTimeString(
+            context,
+            currentComment.createdAt.time,
+            DAY_IN_MILLIS,
+            2 * DAY_IN_MILLIS,
+            FORMAT_ABBREV_ALL
+        )
+        likeButton.apply {
+            text = currentComment.likesCount.toString()
+            setOnClickListener { onLikeButtonClicked(currentComment) }
+            setIconTintResource(if (currentComment.liked) R.color.primary else R.color.iconColor)
+            TooltipCompat.setTooltipText(this, currentComment.likes?.joinToString(separator = "\n") { it.displayName })
+        }
+        editButton.setOnClickListener {
+            onEditClicked?.invoke(currentComment)
+        }
+
+        deleteButton.setOnClickListener {
+            onDeleteClicked?.invoke(currentComment)
+        }
+    }
 
     fun updateComment(comment: FileComment) {
         getCommentIndex(comment).let { index ->
@@ -54,49 +92,9 @@ class FileCommentsAdapter(
         notifyItemInserted(itemCount - 1)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_file_comment, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
-        if (getItemViewType(position) == VIEW_TYPE_LOADING) {
-            commentUserName.resetLoader()
-            commentValue.resetLoader()
-            commentDateValue.resetLoader()
-            return
-        }
-
-        val currentComment = itemList[position]
-
-        commentUserAvatar.loadAvatar(currentComment.user)
-        commentUserName.text = currentComment.user.displayName
-        commentValue.text = currentComment.body
-        commentDateValue.text = getRelativeDateTimeString(
-            context,
-            currentComment.createdAt.time,
-            DAY_IN_MILLIS,
-            2 * DAY_IN_MILLIS,
-            FORMAT_ABBREV_ALL
-        )
-        likeButton.text = currentComment.likesCount.toString()
-        likeButton.setOnClickListener {
-            onLikeButtonClicked(currentComment)
-        }
-        likeButton.setIconTintResource(if (currentComment.liked) R.color.primary else R.color.iconColor)
-        TooltipCompat.setTooltipText(
-            likeButton,
-            currentComment.likes?.joinToString(separator = "\n") { it.displayName })
-
-        editButton.setOnClickListener {
-            onEditClicked?.invoke(currentComment)
-        }
-
-        deleteButton.setOnClickListener {
-            onDeleteClicked?.invoke(currentComment)
-        }
-    }
-
     private fun getCommentIndex(comment: FileComment): Int {
         return itemList.indexOf(itemList.find { it.id == comment.id })
     }
+
+    class FileCommentsViewHolder(val binding: ItemFileCommentBinding) : ViewHolder(binding.root)
 }
