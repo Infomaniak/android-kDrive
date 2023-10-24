@@ -21,27 +21,27 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ItemSearchResultBinding
 import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_search_result.view.searchResultCard
-import kotlinx.android.synthetic.main.item_search_result.view.searchResultText
 
 class RecentSearchesAdapter(
     var searches: ArrayList<String>,
     private val onSearchClicked: (search: String) -> Unit,
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<RecentSearchesAdapter.RecentSearchesViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_result, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentSearchesViewHolder =
+        RecentSearchesViewHolder(ItemSearchResultBinding.inflate(LayoutInflater.from(parent.context), parent, false))
 
     override fun getItemCount() = searches.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.searchResultCard) {
+    override fun onBindViewHolder(holder: RecentSearchesViewHolder, position: Int) = with(holder.binding) {
         val search = searches[position]
-        setCorners(position, itemCount)
+        searchResultCard.apply {
+            setCorners(position, itemCount)
+            setOnClickListener { onSearchClicked(search) }
+        }
         searchResultText.text = search
-        setOnClickListener { onSearchClicked(search) }
     }
 
     fun setItems(newSearches: List<String>) {
@@ -72,4 +72,6 @@ class RecentSearchesAdapter(
             }
         }
     }
+
+    class RecentSearchesViewHolder(val binding: ItemSearchResultBinding) : ViewHolder(binding.root)
 }
