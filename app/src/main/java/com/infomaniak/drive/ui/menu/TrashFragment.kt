@@ -181,30 +181,6 @@ class TrashFragment : FileSubTypeListFragment() {
         }
     }
 
-    private fun observeDriveTrash() {
-        trashViewModel.driveTrashResults.observe(viewLifecycleOwner) { result ->
-            populateFileList(
-                files = result?.files ?: ArrayList(),
-                isComplete = result?.isComplete ?: true,
-                forceClean = result?.isFirstPage == true,
-                isNewSort = result?.isNewSort ?: false,
-            )
-        }
-    }
-
-    private fun observeTrashedFolderFiles() {
-        trashViewModel.trashedFolderFilesResults.observe(viewLifecycleOwner) {
-            it?.let { result ->
-                populateFileList(
-                    files = result.files,
-                    isComplete = result.isComplete,
-                    forceClean = result.isFirstPage,
-                    isNewSort = result.isNewSort,
-                )
-            }
-        }
-    }
-
     companion object {
         const val MATOMO_CATEGORY = "trashFileAction"
     }

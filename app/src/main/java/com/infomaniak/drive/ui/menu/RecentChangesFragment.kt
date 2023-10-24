@@ -106,7 +106,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
             startLoading(isNewSort)
             fileAdapter.isComplete = false
 
-            recentChangesViewModel.loadRecentChanges()
+            recentChangesViewModel.loadRecentChanges(isNewSort)
         }
     }
 }
