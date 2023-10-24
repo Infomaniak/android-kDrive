@@ -785,23 +785,23 @@ object FileController {
         return files?.let { ArrayList(it) } ?: arrayListOf()
     }
 
-    fun getFolderActivities(folder: File, page: Int, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
+    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
         return getRealmInstance(userDrive).use { realm ->
-            getFolderActivitiesRec(realm, folder, page, userDrive)
+            getFolderActivitiesRec(realm, folder, userDrive)
         }
     }
 
     private fun getFolderActivitiesRec(
         realm: Realm,
         folder: File,
-        page: Int,
-        userDrive: UserDrive? = null
+        userDrive: UserDrive? = null,
+        cursor: String? = null,
     ): Map<out Int, FileActivity> {
         val okHttpClient = runBlocking {
             userDrive?.userId?.let { AccountUtils.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
         }
         val returnResponse = arrayMapOf<Int, FileActivity>()
-        val apiResponse = ApiRepository.getFileActivities(folder, page, true, okHttpClient)
+        val apiResponse = ApiRepository.getFileActivities(folder, cursor, true, okHttpClient)
         if (!apiResponse.isSuccess()) return returnResponse
 
         return if (apiResponse.data?.isNotEmpty() == true) {
@@ -820,7 +820,7 @@ object FileController {
                 }
                 returnResponse
 
-            } else returnResponse.apply { putAll(getFolderActivitiesRec(realm, folder, page + 1, userDrive)) }
+            } else returnResponse.apply { putAll(getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor)) }
         } else {
             if (apiResponse.responseAt > 0L) {
                 updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
