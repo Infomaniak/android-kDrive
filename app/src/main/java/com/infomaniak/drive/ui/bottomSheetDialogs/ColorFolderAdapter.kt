@@ -24,21 +24,23 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ViewColorRoundButtonBinding
+import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderAdapter.ColorFolderViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.view_color_round_button.view.colorButtonView
 
 class ColorFolderAdapter(
     private val onColorSelected: (color: String) -> Unit
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<ColorFolderViewHolder>() {
 
     var selectedPosition = -1
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.view_color_round_button, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ColorFolderViewHolder {
+        return ColorFolderViewHolder(ViewColorRoundButtonBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
 
     override fun getItemCount(): Int = COLORS.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView.colorButtonView) {
+    override fun onBindViewHolder(holder: ColorFolderViewHolder, position: Int) = with(holder.binding.colorButtonView) {
         val color = ColorStateList.valueOf(COLORS[position].toColorInt())
 
         backgroundTintList = color
@@ -46,6 +48,8 @@ class ColorFolderAdapter(
 
         setOnClickListener { onColorSelected(COLORS[position]) }
     }
+
+    class ColorFolderViewHolder(val binding: ViewColorRoundButtonBinding) : ViewHolder(binding.root)
 
     companion object {
         val COLORS = arrayListOf(
