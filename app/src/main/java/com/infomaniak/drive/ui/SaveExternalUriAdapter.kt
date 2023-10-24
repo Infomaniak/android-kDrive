@@ -19,42 +19,37 @@ package com.infomaniak.drive.ui
 
 import android.net.Uri
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.databinding.CardviewFileListBinding
+import com.infomaniak.drive.ui.SaveExternalUriAdapter.SaveExternalUriViewHolder
 import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_file_list.view.fileCardView
-import kotlinx.android.synthetic.main.item_file.view.fileDate
-import kotlinx.android.synthetic.main.item_file.view.fileSize
-import kotlinx.android.synthetic.main.item_file.view.menuButton
 
-class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : RecyclerView.Adapter<ViewHolder>() {
+class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : RecyclerView.Adapter<SaveExternalUriViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.cardview_file_list, parent, false)
-        )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SaveExternalUriViewHolder {
+        return SaveExternalUriViewHolder(CardviewFileListBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SaveExternalUriViewHolder, position: Int): Unit = with(holder.binding) {
         val (uri, name) = uris[position]
 
-        with(holder.itemView) {
-            val file = File(
-                id = uri.hashCode(),
-                name = name,
-                path = uri.toString(),
-                isFromUploads = true
-            )
+        val file = File(
+            id = uri.hashCode(),
+            name = name,
+            path = uri.toString(),
+            isFromUploads = true,
+        )
 
+        root.apply {
             setFileItem(file)
             initView(position)
             setOnClickListener { onItemClicked(file, position) }
@@ -68,14 +63,16 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Recycle
         notifyItemChanged(position)
     }
 
-    private fun View.initView(position: Int) {
-        fileSize.isGone = true
-        fileDate.isGone = true
+    private fun CardviewFileListBinding.initView(position: Int) {
+        itemViewFile.apply {
+            fileSize.isGone = true
+            fileDate.isGone = true
+        }
 
         fileCardView.setMargins(left = 0, right = 0)
         fileCardView.setCorners(position, itemCount)
 
-        menuButton.apply {
+        itemViewFile.menuButton.apply {
             isVisible = true
             isEnabled = false
             isClickable = false
@@ -83,7 +80,7 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Recycle
         }
     }
 
-    private fun View.onItemClicked(file: File, position: Int) {
+    private fun CardviewFileListBinding.onItemClicked(file: File, position: Int) {
         Utils.createPromptNameDialog(
             context = context,
             title = R.string.buttonRename,
@@ -96,4 +93,6 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Recycle
             dialog.dismiss()
         }
     }
+
+    class SaveExternalUriViewHolder(val binding: CardviewFileListBinding) : RecyclerView.ViewHolder(binding.root)
 }
