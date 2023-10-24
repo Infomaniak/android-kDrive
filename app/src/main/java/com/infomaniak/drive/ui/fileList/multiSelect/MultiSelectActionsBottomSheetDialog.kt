@@ -48,7 +48,7 @@ import kotlinx.coroutines.Dispatchers
 
 abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: String) : BottomSheetDialogFragment() {
 
-    private var binding: FragmentBottomSheetMultiSelectActionsBinding by safeBinding()
+    protected var binding: FragmentBottomSheetMultiSelectActionsBinding by safeBinding()
 
     private val mainViewModel: MainViewModel by activityViewModels()
     val navigationArgs: MultiSelectActionsBottomSheetDialogArgs by navArgs()
