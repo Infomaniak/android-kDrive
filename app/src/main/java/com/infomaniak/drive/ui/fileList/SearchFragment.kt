@@ -43,6 +43,7 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setPagination
 
@@ -57,11 +58,12 @@ class SearchFragment : FileListFragment() {
 
     private lateinit var filtersAdapter: SearchFiltersAdapter
     private lateinit var recentSearchesAdapter: RecentSearchesAdapter
-    private lateinit var recentSearchesBinding: RecentSearchesBinding
+    private var recentSearchesBinding: RecentSearchesBinding by safeBinding()
+
     private var isDownloading = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        recentSearchesBinding = RecentSearchesBinding.inflate(inflater, container, false)
+        RecentSearchesBinding.inflate(inflater, container, false).also { recentSearchesBinding = it }.root
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
