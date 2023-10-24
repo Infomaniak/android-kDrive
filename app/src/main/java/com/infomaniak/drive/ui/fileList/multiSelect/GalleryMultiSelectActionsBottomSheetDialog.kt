@@ -19,11 +19,10 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import androidx.core.view.isGone
 import com.infomaniak.drive.ui.menu.GalleryFragment
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.coloredFolder
 
 class GalleryMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(GalleryFragment.MATOMO_CATEGORY) {
 
     override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
-        coloredFolder.isGone = true
+        binding.coloredFolder.isGone = true
     }
 }

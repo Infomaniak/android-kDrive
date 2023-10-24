@@ -20,50 +20,49 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.ui.menu.TrashFragment
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_multi_select_actions.*
 
 class TrashMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(TrashFragment.MATOMO_CATEGORY) {
 
     override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
-        coloredFolder.isGone = true
+        binding.coloredFolder.isGone = true
     }
 
     override fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
-        addFavorites.isGone = true
+        binding.addFavorites.isGone = true
     }
 
     override fun configureAvailableOffline() {
-        availableOffline.isGone = true
+        binding.availableOffline.isGone = true
     }
 
     override fun configureDownload() {
-        downloadFile.isGone = true
+        binding.downloadFile.isGone = true
     }
 
     override fun configureMoveFile() {
-        moveFile.isGone = true
+        binding.moveFile.isGone = true
     }
 
     override fun configureDuplicateFile() {
-        duplicateFile.isGone = true
+        binding.duplicateFile.isGone = true
     }
 
     override fun configureRestoreFileIn() {
-        restoreFileIn.apply {
+        binding.restoreFileIn.apply {
             isVisible = true
             setOnClickListener { onActionSelected(SelectDialogAction.RESTORE_IN) }
         }
     }
 
     override fun configureRestoreFileToOriginalPlace() {
-        restoreFileToOriginalPlace.apply {
+        binding.restoreFileToOriginalPlace.apply {
             isVisible = true
             setOnClickListener { onActionSelected(SelectDialogAction.RESTORE_TO_ORIGIN) }
         }
     }
 
     override fun configureDeletePermanently() {
-        deletePermanently.apply {
+        binding.deletePermanently.apply {
             isVisible = true
             setOnClickListener { onActionSelected(SelectDialogAction.DELETE_PERMANENTLY) }
         }

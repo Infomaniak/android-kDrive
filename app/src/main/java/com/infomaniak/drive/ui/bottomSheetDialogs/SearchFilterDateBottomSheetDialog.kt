@@ -32,20 +32,23 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
+import com.infomaniak.drive.databinding.FragmentBottomSheetSearchFilterDateBinding
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
 import com.infomaniak.lib.core.utils.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_search_filter_date.*
 import java.util.Calendar
 import java.util.Date
 import androidx.core.util.Pair as AndroidPair
 
 class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
 
+    private var binding: FragmentBottomSheetSearchFilterDateBinding by safeBinding()
+
     private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
     private val navigationArgs: SearchFilterDateBottomSheetDialogArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_search_filter_date, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentBottomSheetSearchFilterDateBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -56,7 +59,7 @@ class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
         setCustomDateClick()
     }
 
-    private fun setCheckIconsVisibility() {
+    private fun setCheckIconsVisibility() = with(binding) {
         when (navigationArgs.date?.key) {
             DateFilterKey.TODAY -> todayFilterEndIcon.isVisible = true
             DateFilterKey.YESTERDAY -> yesterdayFilterEndIcon.isVisible = true
@@ -72,7 +75,7 @@ class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun setTodayClick() {
-        todayFilterLayout.setOnClickListener {
+        binding.todayFilterLayout.setOnClickListener {
             with(Date()) {
                 updateDateFilter(DateFilterKey.TODAY, startOfTheDay(), endOfTheDay(), getString(R.string.allToday))
             }
@@ -80,7 +83,7 @@ class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun setYesterdayClick() {
-        yesterdayFilterLayout.setOnClickListener {
+        binding.yesterdayFilterLayout.setOnClickListener {
             with(Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }.time) {
                 updateDateFilter(DateFilterKey.YESTERDAY, startOfTheDay(), endOfTheDay(), getString(R.string.allYesterday))
             }
@@ -88,7 +91,7 @@ class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun setLastSevenDaysClick() {
-        lastSevenDaysFilterLayout.setOnClickListener {
+        binding.lastSevenDaysFilterLayout.setOnClickListener {
             val start = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -6) }.time.startOfTheDay()
             val end = Date().endOfTheDay()
             updateDateFilter(DateFilterKey.LAST_SEVEN_DAYS, start, end, intervalAsText(start, end))
@@ -96,7 +99,7 @@ class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun setCustomDateClick() {
-        customFilterLayout.setOnClickListener {
+        binding.customFilterLayout.setOnClickListener {
             showDateRangePicker { startTime, endTime ->
                 val start = Date(startTime).startOfTheDay()
                 val end = Date(endTime).endOfTheDay()

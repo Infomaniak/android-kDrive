@@ -23,19 +23,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.FragmentBottomSheetColorFolderBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderAdapter.Companion.COLORS
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.setBackNavigationResult
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_color_folder.colorsRecyclerView
 
 class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
 
+    private var binding: FragmentBottomSheetColorFolderBinding by safeBinding()
     private val navigationArgs: ColorFolderBottomSheetDialogArgs by navArgs()
 
     private lateinit var colorsAdapter: ColorFolderAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_bottom_sheet_color_folder, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentBottomSheetColorFolderBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,7 +50,7 @@ class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
         ).apply {
             selectedPosition = COLORS.indexOfFirst { it == navigationArgs.color }
         }.also {
-            colorsRecyclerView.adapter = it
+            binding.colorsRecyclerView.adapter = it
         }
     }
 
