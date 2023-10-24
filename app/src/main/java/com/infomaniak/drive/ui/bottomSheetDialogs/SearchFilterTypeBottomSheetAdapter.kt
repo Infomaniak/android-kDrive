@@ -21,26 +21,26 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
+import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
+import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetAdapter.SearchFilterTypeViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectActiveIcon
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectIcon
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectText
 
 class SearchFilterTypeBottomSheetAdapter(
     private val types: List<ExtensionType>,
     private val selectedType: ExtensionType?,
     private val onTypeClicked: (type: ExtensionType) -> Unit
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<SearchFilterTypeViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchFilterTypeViewHolder {
+        return SearchFilterTypeViewHolder(
+            ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
     }
 
     override fun getItemCount() = types.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+    override fun onBindViewHolder(holder: SearchFilterTypeViewHolder, position: Int) = with(holder.binding) {
         types[position].let { type ->
             itemSelectIcon.apply {
                 isVisible = true
@@ -48,7 +48,9 @@ class SearchFilterTypeBottomSheetAdapter(
             }
             itemSelectText.setText(type.searchFilterName)
             itemSelectActiveIcon.isVisible = type.value == selectedType?.value
-            setOnClickListener { onTypeClicked(type) }
+            root.setOnClickListener { onTypeClicked(type) }
         }
     }
+
+    class SearchFilterTypeViewHolder(val binding: ItemSelectBottomSheetBinding) : ViewHolder(binding.root)
 }
