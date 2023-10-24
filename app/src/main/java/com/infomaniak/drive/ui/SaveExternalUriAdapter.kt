@@ -64,7 +64,7 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Recycle
     }
 
     private fun CardviewFileListBinding.initView(position: Int) {
-        itemviewFile.apply {
+        itemViewFile.apply {
             fileSize.isGone = true
             fileDate.isGone = true
         }
@@ -72,7 +72,7 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Recycle
         fileCardView.setMargins(left = 0, right = 0)
         fileCardView.setCorners(position, itemCount)
 
-        itemviewFile.menuButton.apply {
+        itemViewFile.menuButton.apply {
             isVisible = true
             isEnabled = false
             isClickable = false

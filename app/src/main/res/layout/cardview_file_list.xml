@@ -26,7 +26,7 @@
     app:cardElevation="0dp">
 
     <include
-        android:id="@+id/itemviewFile"
+        android:id="@+id/itemViewFile"
         layout="@layout/item_file"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
