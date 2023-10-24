@@ -24,7 +24,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.isLastPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -57,10 +56,13 @@ class RecentChangesViewModel : ViewModel() {
         val apiResponse = ApiRepository.getLastModifiedFiles(AccountUtils.currentDriveId, cursor)
         return if (apiResponse.isSuccess()) {
             apiResponse.data?.let { data ->
-                val isComplete = apiResponse.isLastPage()
                 currentCursor = apiResponse.cursor
                 FileController.storeRecentChanges(data, isFirstPage)
-                FileListFragment.FolderFilesResult(files = data, isComplete = isComplete, isFirstPage = isFirstPage)
+                FileListFragment.FolderFilesResult(
+                    files = data,
+                    isComplete = currentCursor == null,
+                    isFirstPage = isFirstPage
+                )
             }
         } else {
             FileListFragment.FolderFilesResult(
