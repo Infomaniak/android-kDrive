@@ -30,6 +30,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.databinding.FragmentBottomSheetTrashedFileActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
@@ -41,13 +42,12 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiErrorCode
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.currentFile
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.delete
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.restoreFileIn
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_trashed_file_actions.restoreFileToOriginalPlace
 
 class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
+
+    private var binding: FragmentBottomSheetTrashedFileActionsBinding by safeBinding()
 
     private val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -68,14 +68,14 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_trashed_file_actions, container, false)
+        return FragmentBottomSheetTrashedFileActionsBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
         currentTrashedFile = trashViewModel.selectedFile.value ?: File()
 
-        currentFile.setFileItem(currentTrashedFile)
+        currentFile.root.setFileItem(currentTrashedFile)
         restoreFileIn.setOnClickListener {
             trackTrashEvent("restoreGivenFolder")
             Intent(requireContext(), SelectFolderActivity::class.java).apply {
@@ -91,24 +91,25 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         restoreFileToOriginalPlace.setOnClickListener {
             trackTrashEvent("restoreOriginFolder")
-            mainViewModel.restoreTrashFile(currentTrashedFile).observe(this) { apiResponse ->
+            mainViewModel.restoreTrashFile(currentTrashedFile).observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
                 restoreResult(apiResponse, originalPlace = true)
             }
         }
 
         delete.setOnClickListener {
             Utils.confirmFileDeletion(requireContext(), fileName = currentTrashedFile.name, fromTrash = true) { dialog ->
-                mainViewModel.deleteTrashFile(currentTrashedFile).observe(this) { apiResponse ->
-                    trackTrashEvent("deleteFromTrash")
-                    dialog.dismiss()
-                    if (apiResponse.data == true) {
-                        showSnackbar(getString(R.string.snackbarDeleteConfirmation, currentTrashedFile.name))
-                        dismissAndRemoveFileFromList()
-                    } else {
-                        showSnackbar(R.string.errorDelete)
-                        findNavController().popBackStack()
+                mainViewModel.deleteTrashFile(currentTrashedFile)
+                    .observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
+                        trackTrashEvent("deleteFromTrash")
+                        dialog.dismiss()
+                        if (apiResponse.data == true) {
+                            showSnackbar(getString(R.string.snackbarDeleteConfirmation, currentTrashedFile.name))
+                            dismissAndRemoveFileFromList()
+                        } else {
+                            showSnackbar(R.string.errorDelete)
+                            findNavController().popBackStack()
+                        }
                     }
-                }
             }
         }
     }
