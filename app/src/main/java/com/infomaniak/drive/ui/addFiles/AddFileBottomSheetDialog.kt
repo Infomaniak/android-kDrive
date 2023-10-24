@@ -42,6 +42,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Office
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.databinding.FragmentBottomSheetAddFileBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
@@ -50,13 +51,14 @@ import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_add_file.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Date
 
 class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
+
+    private var binding: FragmentBottomSheetAddFileBinding by safeBinding()
 
     private lateinit var currentFolderFile: File
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -89,18 +91,18 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private val filePicker = FilePicker(this)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let {
-            currentFolderFile = it
-            inflater.inflate(R.layout.fragment_bottom_sheet_add_file, container, false)
+        return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let { file ->
+            currentFolderFile = file
+            FragmentBottomSheetAddFileBinding.inflate(inflater, container, false).also { binding = it }.root
         } ?: run {
             findNavController().popBackStack()
             null
         } // TODO Temporary fix
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
-        currentFolder.setFileItem(currentFolderFile)
+        currentFolder.root.setFileItem(currentFolderFile)
 
         openCameraWritePermissions = DrivePermissions().apply {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
@@ -122,7 +124,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         formCreate.setOnClickListener { createFile(Office.FORM) }
         noteCreate.setOnClickListener { createFile(Office.TXT) }
 
-        documentScanning.isVisible = (context?.applicationContext as MainApplication).geniusScanIsReady
+        documentScanning.isVisible = (context.applicationContext as MainApplication).geniusScanIsReady
     }
 
     override fun onDismiss(dialog: DialogInterface) {
@@ -133,7 +135,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun openCamera() {
         if (openCameraWritePermissions.checkSyncPermissions() && openCameraPermissions.checkCameraPermission()) {
             trackNewElement("takePhotoOrVideo")
-            openCamera.isEnabled = false
+            binding.openCamera.isEnabled = false
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
@@ -154,7 +156,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun uploadFiles() {
         if (uploadFilesPermissions.checkSyncPermissions()) {
             trackNewElement("uploadFile")
-            documentUpload.isEnabled = false
+            binding.documentUpload.isEnabled = false
             filePicker.open { uris ->
                 findNavController().popBackStack()
                 onSelectFilesResult(uris)
