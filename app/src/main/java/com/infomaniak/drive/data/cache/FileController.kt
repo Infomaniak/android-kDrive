@@ -656,7 +656,7 @@ object FileController {
                 result = realm.downloadAndSaveFiles(
                     localFolderProxy = folderProxy,
                     order = order,
-                    loadNextPage = loadNextPage,
+                    isFirstPage = !loadNextPage,
                     parentId = parentId,
                     driveId = driveId,
                     okHttpClient = okHttpClient,
@@ -681,7 +681,7 @@ object FileController {
     private fun Realm.downloadAndSaveFiles(
         localFolderProxy: File?,
         order: SortType,
-        loadNextPage: Boolean,
+        isFirstPage: Boolean,
         parentId: Int,
         driveId: Int,
         okHttpClient: OkHttpClient,
@@ -696,10 +696,10 @@ object FileController {
         if (apiResponse.isSuccess()) {
             val remoteFiles = apiResponse.data
             if (remoteFiles != null && localFolder != null) {
-                saveRemoteFiles(localFolderProxy, localFolder, apiResponse, loadNextPage)
+                saveRemoteFiles(localFolderProxy, localFolder, apiResponse, isFirstPage)
                 result = (localFolder to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
             }
-        } else if (loadNextPage && localFolderProxy != null) {
+        } else if (isFirstPage && localFolderProxy != null) {
             val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolderProxy, order) else arrayListOf()
             result = (localFolder!! to localSortedFolderFiles)
         }
@@ -791,16 +791,16 @@ object FileController {
         }
     }
 
-    private fun getFolderActivitiesRec(
+    private tailrec fun getFolderActivitiesRec(
         realm: Realm,
         folder: File,
         userDrive: UserDrive? = null,
         cursor: String? = null,
+        returnResponse: ArrayMap<Int, FileActivity> = arrayMapOf(),
     ): Map<out Int, FileActivity> {
         val okHttpClient = runBlocking {
             userDrive?.userId?.let { AccountUtils.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
         }
-        val returnResponse = arrayMapOf<Int, FileActivity>()
         val apiResponse = ApiRepository.getFileActivities(folder, cursor, true, okHttpClient)
         if (!apiResponse.isSuccess()) return returnResponse
 
@@ -820,7 +820,7 @@ object FileController {
                 }
                 returnResponse
 
-            } else returnResponse.apply { putAll(getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor)) }
+            } else getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor, returnResponse)
         } else {
             if (apiResponse.responseAt > 0L) {
                 updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
