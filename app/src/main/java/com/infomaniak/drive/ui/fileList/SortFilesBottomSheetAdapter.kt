@@ -21,30 +21,27 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
+import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
+import com.infomaniak.drive.ui.fileList.SortFilesBottomSheetAdapter.SortFilesViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectActiveIcon
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectText
 
 class SortFilesBottomSheetAdapter(
     private val selectedType: SortType,
     private val usage: SortTypeUsage,
     private val onItemClicked: (sortType: SortType) -> Unit
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<SortFilesViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SortFilesViewHolder {
+        return SortFilesViewHolder(ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SortFilesViewHolder, position: Int) = with(holder.binding) {
         usage.types()[position].let { sortType ->
-            holder.itemView.apply {
-                itemSelectText.setText(sortType.translation)
-                itemSelectActiveIcon.isVisible = selectedType == sortType
-                setOnClickListener { onItemClicked(sortType) }
-            }
+            itemSelectText.setText(sortType.translation)
+            itemSelectActiveIcon.isVisible = selectedType == sortType
+            root.setOnClickListener { onItemClicked(sortType) }
         }
     }
 
@@ -64,4 +61,6 @@ class SortFilesBottomSheetAdapter(
     private fun Array<SortType>.trashTypes(): Array<SortType> {
         return filter { it != SortType.OLDER && it != SortType.RECENT }.toTypedArray()
     }
+
+    class SortFilesViewHolder(val binding: ItemSelectBottomSheetBinding) : ViewHolder(binding.root)
 }

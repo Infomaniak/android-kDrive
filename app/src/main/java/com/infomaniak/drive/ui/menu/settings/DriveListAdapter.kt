@@ -23,19 +23,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.databinding.CardviewDriveBinding
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_drive.view.driveIcon
-import kotlinx.android.synthetic.main.cardview_drive.view.driveName
-import kotlinx.android.synthetic.main.cardview_drive.view.switchDrive
 
 class DriveListAdapter(
-    var driveList: ArrayList<Drive>,
+    private var driveList: ArrayList<Drive>,
     private val hideCurrentDriveChevron: Boolean = true,
     private val onItemClicked: (drive: Drive) -> Unit
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<DriveListAdapter.DriveListViewHolder>() {
 
     fun setDrives(driveList: ArrayList<Drive>) {
         val max = this.driveList.size
@@ -43,20 +40,22 @@ class DriveListAdapter(
         notifyItemRangeChanged(0, maxOf(max, driveList.size))
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_drive, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DriveListViewHolder {
+        return DriveListViewHolder(CardviewDriveBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: DriveListViewHolder, position: Int) {
         driveList[position].let { drive ->
-            holder.itemView.apply {
+            holder.binding.apply {
                 switchDrive.isGone = (drive.id == AccountUtils.currentDriveId) && hideCurrentDriveChevron
                 driveName.text = drive.name
                 driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
-                setOnClickListener { onItemClicked(drive) }
+                root.setOnClickListener { onItemClicked(drive) }
             }
         }
     }
 
     override fun getItemCount() = driveList.size
+
+    class DriveListViewHolder(val binding: CardviewDriveBinding) : ViewHolder(binding.root)
 }

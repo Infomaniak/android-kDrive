@@ -25,24 +25,23 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
+import com.infomaniak.drive.ui.SwitchDriveBottomSheetAdapter.SwitchDriveViewHolder
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectActiveIcon
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectIcon
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectText
 
 class SwitchDriveBottomSheetAdapter(
     private var driveList: ArrayList<Drive>,
     private val onItemClicked: (drive: Drive) -> Unit,
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<SwitchDriveViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SwitchDriveViewHolder {
+        return SwitchDriveViewHolder(ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun getItemCount() = driveList.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+    override fun onBindViewHolder(holder: SwitchDriveViewHolder, position: Int) = with(holder.binding) {
         val drive = driveList[position]
 
         itemSelectIcon.apply {
@@ -54,6 +53,8 @@ class SwitchDriveBottomSheetAdapter(
         itemSelectText.text = drive.name
         itemSelectActiveIcon.isVisible = drive.id == AccountUtils.currentDriveId
 
-        setOnClickListener { onItemClicked(drive) }
+        root.setOnClickListener { onItemClicked(drive) }
     }
+
+    class SwitchDriveViewHolder(val binding: ItemSelectBottomSheetBinding) : ViewHolder(binding.root)
 }
