@@ -787,7 +787,7 @@ object FileController {
 
     fun getFolderActivities(folder: File, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
         return getRealmInstance(userDrive).use { realm ->
-            getFolderActivitiesRec(realm, folder, userDrive)
+            getFolderActivitiesRec(realm, folder, userDrive, folder.cursor)
         }
     }
 
@@ -811,7 +811,10 @@ object FileController {
 
             if ((apiResponse.data?.size ?: 0) < ApiRepository.PER_PAGE) {
                 if (apiResponse.responseAt > 0L) {
-                    updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+                    updateFile(folder.id, realm) { file ->
+                        file.responseAt = apiResponse.responseAt
+                        apiResponse.cursor?.let { file.cursor = it }
+                    }
                 } else {
                     Sentry.withScope { scope ->
                         scope.setExtra("data", apiResponse.toString())
