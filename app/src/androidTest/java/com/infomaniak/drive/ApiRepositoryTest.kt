@@ -273,7 +273,7 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Check if the file activities are correctly retrieved")
         fun getFileActivities() {
-            with(getFileActivities(testFile, 1, false)) {
+            with(getFileActivities(testFile, null, false)) {
                 if (isSuccess()) {
                     assertApiResponseData(this)
                 } else {
@@ -293,7 +293,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Gets comments
-            with(getFileComments(testFile, 1)) {
+            with(getFileComments(testFile, null)) {
                 assertApiResponseData(this)
                 assertTrue(data!!.isNotEmpty(), "Test file should have 1 comment")
                 assertEquals(commentBody, data!![0].body, "Comment body should be $commentBody")
@@ -314,7 +314,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Makes sure comment has been updated
-            with(getFileComments(testFile, 1)) {
+            with(getFileComments(testFile, null)) {
                 assertApiResponseData(this)
                 assertEquals("42", data!![0].body, "Comment body should be 42")
             }
@@ -328,7 +328,7 @@ class ApiRepositoryTest : KDriveTest() {
                 assertApiResponseData(this)
                 // Delete the comment
                 deleteFileComment(testFile, data!!.id)
-                assertTrue(getFileComments(testFile, 1).data.isNullOrEmpty(), "There should not be comment on the test file")
+                assertTrue(getFileComments(testFile, null).data.isNullOrEmpty(), "There should not be comment on the test file")
             }
         }
 
@@ -348,7 +348,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Gets the comment
-            with(getFileComments(testFile, 1)) {
+            with(getFileComments(testFile, null)) {
                 assertApiResponseData(this)
                 val comment = data!!.find { comment -> comment.id == commentID }
                 assertNotNull(comment, "Comment should not be null")
@@ -362,7 +362,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Make sure data has been updated
-            with(getFileComments(testFile, 1)) {
+            with(getFileComments(testFile, null)) {
                 val comment = data?.find { commentRes -> commentRes.id == commentID }
                 assertNotNull(comment, "Comment should not be null")
                 assertFalse(comment?.liked ?: true, "Comment should not be liked anymore")
