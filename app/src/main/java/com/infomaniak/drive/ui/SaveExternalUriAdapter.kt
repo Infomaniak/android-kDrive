@@ -32,6 +32,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.views.ViewHolder
 
 class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : RecyclerView.Adapter<SaveExternalUriViewHolder>() {
 
@@ -94,5 +95,5 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Recycle
         }
     }
 
-    class SaveExternalUriViewHolder(val binding: CardviewFileListBinding) : RecyclerView.ViewHolder(binding.root)
+    class SaveExternalUriViewHolder(val binding: CardviewFileListBinding) : ViewHolder(binding.root)
 }

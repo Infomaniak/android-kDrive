@@ -29,6 +29,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.CardviewCategoryBinding
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.CategoriesViewHolder
 import com.infomaniak.drive.utils.setCornersRadius
+import com.infomaniak.lib.core.views.ViewHolder
 import java.util.Date
 
 class CategoriesAdapter(
@@ -213,5 +214,5 @@ class CategoriesAdapter(
         }
     }
 
-    class CategoriesViewHolder(val binding: CardviewCategoryBinding) : RecyclerView.ViewHolder(binding.root)
+    class CategoriesViewHolder(val binding: CardviewCategoryBinding) : ViewHolder(binding.root)
 }

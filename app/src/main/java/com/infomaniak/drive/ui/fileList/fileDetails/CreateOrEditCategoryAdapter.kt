@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewColorRoundButtonBinding
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.CategoriesBulletViewHolder
+import com.infomaniak.lib.core.views.ViewHolder
 
 class CreateOrEditCategoryAdapter : RecyclerView.Adapter<CategoriesBulletViewHolder>() {
 
@@ -80,5 +81,5 @@ class CreateOrEditCategoryAdapter : RecyclerView.Adapter<CategoriesBulletViewHol
         )
     }
 
-    class CategoriesBulletViewHolder(val binding: ViewColorRoundButtonBinding) : RecyclerView.ViewHolder(binding.root)
+    class CategoriesBulletViewHolder(val binding: ViewColorRoundButtonBinding) : ViewHolder(binding.root)
 }
