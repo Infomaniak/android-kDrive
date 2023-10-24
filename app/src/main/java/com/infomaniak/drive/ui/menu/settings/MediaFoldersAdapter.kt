@@ -21,17 +21,37 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.databinding.ItemMediaFolderBinding
+import com.infomaniak.drive.ui.menu.settings.MediaFoldersAdapter.MediaFoldersViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_media_folder.view.mediaFolderSwitch
-import kotlinx.android.synthetic.main.item_media_folder.view.mediaFolderTitle
 
 class MediaFoldersAdapter(
     private val onSwitchChanged: (mediaFolder: MediaFolder, isChecked: Boolean) -> Unit,
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<MediaFoldersViewHolder>() {
 
     private var itemList: ArrayList<MediaFolder> = arrayListOf()
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaFoldersViewHolder {
+        return MediaFoldersViewHolder(ItemMediaFolderBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
+
+    override fun onBindViewHolder(holder: MediaFoldersViewHolder, position: Int): Unit = with(holder.binding) {
+        val mediaFolder = itemList[position]
+        mediaFolderTitle.text = mediaFolder.name
+        mediaFolderSwitch.apply {
+            isChecked = mediaFolder.isSynced
+            isVisible = true
+            setOnCheckedChangeListener { _, isChecked ->
+                if (mediaFolderSwitch.isPressed) {
+                    onSwitchChanged(mediaFolder, isChecked)
+                    mediaFolder.isSynced = isChecked
+                }
+            }
+        }
+    }
+
+    override fun getItemCount(): Int = itemList.size
 
     fun addAll(newItemList: ArrayList<MediaFolder>) {
         val beforeItemCount = itemCount
@@ -50,27 +70,5 @@ class MediaFoldersAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
-        LayoutInflater.from(parent.context).inflate(R.layout.item_media_folder, parent, false)
-    )
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.itemView.apply {
-            itemList[position].let { mediaFolder ->
-                mediaFolderTitle.text = mediaFolder.name
-                mediaFolderSwitch.apply {
-                    isChecked = mediaFolder.isSynced
-                    isVisible = true
-                    setOnCheckedChangeListener { _, isChecked ->
-                        if (mediaFolderSwitch.isPressed) {
-                            onSwitchChanged(mediaFolder, isChecked)
-                            mediaFolder.isSynced = isChecked
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun getItemCount(): Int = itemList.size
+    class MediaFoldersViewHolder(val binding: ItemMediaFolderBinding) : ViewHolder(binding.root)
 }
