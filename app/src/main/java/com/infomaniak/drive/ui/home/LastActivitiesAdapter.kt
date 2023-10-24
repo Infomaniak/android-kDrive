@@ -31,42 +31,43 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.databinding.CardviewHomeFileActivityBinding
+import com.infomaniak.drive.databinding.EmptyIconLayoutBinding
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.views.LoaderAdapter
-import com.infomaniak.lib.core.views.LoaderCardView
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_home_file_activity.view.*
-import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
 
 class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 
     var onFileClicked: ((currentFile: File, validPreviewFiles: ArrayList<File>) -> Unit)? = null
     var onMoreFilesClicked: ((fileActivity: FileActivity, validPreviewFiles: ArrayList<File>) -> Unit)? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_home_file_activity, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LastActivitiesViewHolder {
+        return LastActivitiesViewHolder(
+            CardviewHomeFileActivityBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        (holder.itemView as LoaderCardView).apply {
-            if (getItemViewType(position) == VIEW_TYPE_LOADING) {
-                startLoading()
-                userName.resetLoader()
-                actionValue.resetLoader()
-                dateValue.resetLoader()
-            } else {
-                stopLoading()
-                val fileActivity = itemList[position]
-                fileActivity.user?.let { user -> this.createActivity(fileActivity, user) }
-            }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int): Unit = with((holder as LastActivitiesViewHolder).binding) {
+        if (getItemViewType(position) == VIEW_TYPE_LOADING) {
+            root.startLoading()
+            userName.resetLoader()
+            actionValue.resetLoader()
+            dateValue.resetLoader()
+        } else {
+            root.stopLoading()
+            val fileActivity = itemList[position]
+            fileActivity.user?.let { user -> createActivity(fileActivity, user) }
         }
     }
 
-    private fun View.createActivity(fileActivity: FileActivity, user: DriveUser) {
+    private fun CardviewHomeFileActivityBinding.createActivity(fileActivity: FileActivity, user: DriveUser) {
         val fileActivityName: CharSequence = fileActivity.file?.name ?: fileActivity.newPath.substringAfterLast("/")
         val sizeMergedFile = fileActivity.mergedFileActivities.size
-        actionValue.text = resources.getQuantityString(fileActivity.homeTranslation, sizeMergedFile + 1, sizeMergedFile + 1)
+        actionValue.text =
+            context.resources.getQuantityString(fileActivity.homeTranslation, sizeMergedFile + 1, sizeMergedFile + 1)
         userAvatar.loadAvatar(user)
         userName.text = user.displayName
         dateValue.text = getRelativeDateTimeString(
@@ -84,9 +85,9 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             fileIcon2.isVisible = true
             fileName2.isVisible = true
 
-            fileActivity.file.loadPreview(filePreview1, filePreviewIcon1 as ConstraintLayout)
+            fileActivity.file.loadPreview(filePreview1, filePreviewIcon1)
             val file2 = fileActivity.mergedFileActivities[0].file
-            file2.loadPreview(filePreview2, filePreviewIcon2 as ConstraintLayout)
+            file2.loadPreview(filePreview2, filePreviewIcon2)
             fileIcon2.load(getFileTypeIcon(file2))
             fileName2.text = file2?.name ?: fileActivity.mergedFileActivities[0].newPath.substringAfterLast("/")
 
@@ -102,7 +103,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
                 fileName3.isVisible = true
 
                 val file3 = fileActivity.mergedFileActivities[1].file
-                file3.loadPreview(filePreview3, filePreviewIcon3 as ConstraintLayout)
+                file3.loadPreview(filePreview3, filePreviewIcon3)
                 (cardFilePreview1.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "1:1"
                 (cardFilePreview2.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "1:1"
 
@@ -125,7 +126,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             fileName2.isGone = true
             fileName3.isGone = true
             (cardFilePreview1.layoutParams as ConstraintLayout.LayoutParams).dimensionRatio = "3:1"
-            fileActivity.file.loadPreview(filePreview1, filePreviewIcon1 as ConstraintLayout)
+            fileActivity.file.loadPreview(filePreview1, filePreviewIcon1)
         }
 
         fileActivity.file?.let { file ->
@@ -165,17 +166,19 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
         }
     }
 
-    private fun File?.loadPreview(imageView: ImageView, iconView: ConstraintLayout) {
+    private fun File?.loadPreview(imageView: ImageView, iconViewBinding: EmptyIconLayoutBinding) {
         if (this?.hasThumbnail == true && getFileType() == ExtensionType.IMAGE || this?.getFileType() == ExtensionType.VIDEO) {
-            iconView.isGone = true
+            iconViewBinding.root.isGone = true
             imageView.isVisible = true
             imageView.loadAny(thumbnail(), getFileType().icon)
         } else {
             imageView.isGone = true
-            iconView.isVisible = true
-            iconView.icon.load(getFileTypeIcon(this))
+            iconViewBinding.root.isVisible = true
+            iconViewBinding.icon.load(getFileTypeIcon(this))
         }
     }
 
     private fun getFileTypeIcon(file: File?) = file?.getFileType()?.icon ?: R.drawable.ic_file
+
+    class LastActivitiesViewHolder(val binding: CardviewHomeFileActivityBinding) : ViewHolder(binding.root)
 }
