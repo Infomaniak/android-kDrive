@@ -39,7 +39,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     override val noItemsRootIcon = R.drawable.ic_share
     override val noItemsRootTitle = R.string.mySharesNoFile
 
-    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = binding.swipeRefreshLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()

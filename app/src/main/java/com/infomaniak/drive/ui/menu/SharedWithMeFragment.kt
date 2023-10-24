@@ -72,8 +72,11 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         fileListViewModel.isSharedWithMe = true
         super.onViewCreated(view, savedInstanceState)
 
-        binding.collapsingToolbarLayout.title =
-            if (inDriveList) getString(R.string.sharedWithMeTitle) else navigationArgs.folderName
+        binding.collapsingToolbarLayout.title = if (inDriveList) {
+            getString(R.string.sharedWithMeTitle)
+        } else {
+            navigationArgs.folderName
+        }
 
         binding.sortButton.isGone = inDriveList
         fileAdapter.onFileClicked = { file ->
