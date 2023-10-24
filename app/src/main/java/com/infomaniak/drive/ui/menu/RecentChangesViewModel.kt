@@ -73,7 +73,7 @@ class RecentChangesViewModel : ViewModel() {
                 files = FileController.getRecentChanges(),
                 isComplete = true,
                 isFirstPage = true,
-                isNewSort = isNewSort
+                isNewSort = isNewSort,
             )
         }
     }
