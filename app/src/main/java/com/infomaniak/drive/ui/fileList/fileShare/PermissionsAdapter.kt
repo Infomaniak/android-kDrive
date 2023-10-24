@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.fileShare
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -27,19 +26,19 @@ import coil.load
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
+import com.infomaniak.drive.databinding.CardviewPermissionBinding
+import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter.PermissionsViewHolder
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.models.user.User
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.cardview_permission.view.*
-import kotlinx.android.synthetic.main.item_user_avatar.view.remainingText
 
 class PermissionsAdapter(
     var selectionPosition: Int? = null,
@@ -47,12 +46,12 @@ class PermissionsAdapter(
     private var isExternalUser: Boolean = false,
     private var sharedUsers: ArrayList<UserFileAccess> = ArrayList(),
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<PermissionsViewHolder>() {
 
     var permissionList: ArrayList<Permission> = ArrayList()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.cardview_permission, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionsViewHolder {
+        return PermissionsViewHolder(CardviewPermissionBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     fun setAll(newPermissions: ArrayList<Permission>) {
@@ -69,7 +68,7 @@ class PermissionsAdapter(
         notifyItemInserted(permissionList.size)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+    override fun onBindViewHolder(holder: PermissionsViewHolder, position: Int) = with(holder.binding) {
         val permission = permissionList[position]
 
         permissionCard.apply {
@@ -93,24 +92,24 @@ class PermissionsAdapter(
         }
     }
 
-    private fun View.setupTexts(permission: Permission) {
+    private fun CardviewPermissionBinding.setupTexts(permission: Permission) {
         permissionTitle.setText(permission.translation)
         permissionDescription.text = context.getString(permission.description, AccountUtils.getCurrentDrive()?.name)
     }
 
-    private fun View.setupMainIcon() {
+    private fun CardviewPermissionBinding.setupMainIcon() {
         mainIcon.shapeAppearanceModel = ShapeAppearanceModel()
             .toBuilder()
             .setAllCornerSizes(RelativeCornerSize(0.5f))
             .build()
     }
 
-    private fun View.setupOnlyMePermissionUi() {
+    private fun CardviewPermissionBinding.setupOnlyMePermissionUi() {
         currentUser?.let { user -> mainIcon.loadAvatar(user) }
         permissionDescription.isGone = true
     }
 
-    private fun View.setupInheritPermissionUi() {
+    private fun CardviewPermissionBinding.setupInheritPermissionUi() {
         if (sharedUsers.isNotEmpty()) {
 
             sharedUsers.firstOrNull()?.let { firstUser -> firstUser.user?.let { mainIcon.loadAvatar(it) } }
@@ -124,7 +123,7 @@ class PermissionsAdapter(
 
             thirdIcon.apply {
                 if (sharedUsers.size > 2) {
-                    isVisible = true
+                    root.isVisible = true
                     remainingText.apply {
                         isVisible = true
                         text = "+${sharedUsers.size - 2}"
@@ -134,7 +133,7 @@ class PermissionsAdapter(
         }
     }
 
-    private fun View.setupOthersPermissionUi(permission: Permission) {
+    private fun CardviewPermissionBinding.setupOthersPermissionUi(permission: Permission) {
         mainIcon.load(permission.icon)
         mainIcon.shapeAppearanceModel = ShapeAppearanceModel()
 
@@ -147,8 +146,8 @@ class PermissionsAdapter(
         }
     }
 
-    private fun View.enableViewHolder(enabled: Boolean) {
-        isEnabled = enabled
+    private fun CardviewPermissionBinding.enableViewHolder(enabled: Boolean) {
+        root.isEnabled = enabled
         disabled.isGone = enabled
         upgradeOffer.isGone = true
         userExternalWarning.isGone = true
@@ -160,4 +159,6 @@ class PermissionsAdapter(
     }
 
     override fun getItemCount() = permissionList.size
+
+    class PermissionsViewHolder(val binding: CardviewPermissionBinding) : ViewHolder(binding.root)
 }
