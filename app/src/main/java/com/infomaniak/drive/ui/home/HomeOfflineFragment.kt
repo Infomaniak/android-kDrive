@@ -28,13 +28,12 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.menu.OfflineFileFragment
 import com.infomaniak.drive.utils.SentryLinearLayoutManager
 import com.infomaniak.lib.core.utils.setMargins
-import kotlinx.android.synthetic.main.fragment_file_list.*
 
 class HomeOfflineFragment : OfflineFileFragment() {
 
     override var enabledMultiSelectMode: Boolean = false
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         appBar.isGone = true
@@ -49,7 +48,7 @@ class HomeOfflineFragment : OfflineFileFragment() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        fileRecyclerView?.adapter = fileAdapter
+        binding.fileRecyclerView.adapter = fileAdapter
     }
 
     override fun setupFileAdapter() {

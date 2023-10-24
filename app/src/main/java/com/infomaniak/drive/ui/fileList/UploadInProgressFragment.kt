@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerSucceeded
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -41,8 +42,6 @@ import com.infomaniak.drive.utils.navigateToUploadView
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.realm.RealmResults
-import kotlinx.android.synthetic.main.activity_main.mainFab
-import kotlinx.android.synthetic.main.fragment_file_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,16 +79,16 @@ class UploadInProgressFragment : FileListFragment() {
         if (isPendingFolders()) {
             fileAdapter.onFileClicked = { navigateToUploadView(it.id, it.name) }
         } else {
-            toolbar.setNavigationOnClickListener { popBackStack() }
+            binding.toolbar.setNavigationOnClickListener { popBackStack() }
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
         }
 
-        sortLayout.isGone = true
+        binding.sortLayout.isGone = true
     }
 
     private fun setupCollapsingToolbarLayout() {
         val fromPendingFolders = findNavController().previousBackStackEntry?.destination?.id == R.id.uploadInProgressFragment
-        collapsingToolbarLayout.title = if (folderId > 0 && fromPendingFolders) {
+        binding.collapsingToolbarLayout.title = if (folderId > 0 && fromPendingFolders) {
             folderName
         } else {
             getString(R.string.uploadInProgressTitle)
@@ -167,7 +166,7 @@ class UploadInProgressFragment : FileListFragment() {
         }
 
         if (fileAdapter.fileList.isEmpty()) {
-            if (isResumed) noFilesLayout?.toggleVisibility(true)
+            if (isResumed) binding.noFilesLayout.toggleVisibility(true)
             activity?.showSnackbar(R.string.allUploadFinishedTitle)
             popBackStack()
         }
@@ -206,7 +205,7 @@ class UploadInProgressFragment : FileListFragment() {
                 if (isPendingFolders()) UploadFile.deleteAll(null)
                 else UploadFile.deleteAll(folderId = it)
 
-                fileRecyclerView?.post {
+                binding.fileRecyclerView.post {
                     fileAdapter.setFiles(listOf())
                 }
 
@@ -261,10 +260,10 @@ class UploadInProgressFragment : FileListFragment() {
         private fun downloadPendingFolders() {
             UploadFile.getAllPendingFolders(uploadInProgressViewModel.realmUpload)?.let { pendingFolders ->
                 if (pendingFolders.count() == 1) navigateToFirstFolder(pendingFolders) else showPendingFolders()
-            } ?: noFilesLayout.toggleVisibility(true)
+            } ?: binding.noFilesLayout.toggleVisibility(true)
         }
 
-        private fun navigateToFirstFolder(pendingFolders: RealmResults<UploadFile>) {
+        private fun navigateToFirstFolder(pendingFolders: RealmResults<UploadFile>) = with(binding) {
             val uploadFile = pendingFolders.first()!!
             val isSharedWithMe = AccountUtils.currentDriveId != uploadFile.driveId
             val userDrive = UserDrive(driveId = uploadFile.driveId, sharedWithMe = isSharedWithMe)
@@ -276,12 +275,15 @@ class UploadInProgressFragment : FileListFragment() {
                     navigateToUploadView(uploadFile.remoteFolder, folder.name)
                 } ?: run {
                     popBackStack()
-                    requireActivity().showSnackbar(R.string.uploadFolderNotFoundError, requireActivity().mainFab)
+                    requireActivity().showSnackbar(
+                        R.string.uploadFolderNotFoundError,
+                        (requireActivity() as MainActivity).getMainFab()
+                    )
                 }
             }
         }
 
-        private fun showPendingFolders() {
+        private fun showPendingFolders() = with(binding) {
             swipeRefreshLayout.isRefreshing = true
             uploadInProgressViewModel.getPendingFolders().observe(viewLifecycleOwner) {
                 it?.let { uploadFolders ->
@@ -296,7 +298,7 @@ class UploadInProgressFragment : FileListFragment() {
             }
         }
 
-        private fun downloadPendingFilesByFolderId() {
+        private fun downloadPendingFilesByFolderId() = with(binding) {
             swipeRefreshLayout.isRefreshing = true
             uploadInProgressViewModel.getPendingFiles(folderId).observe(viewLifecycleOwner) {
                 it?.let { (files, uploadFiles) ->

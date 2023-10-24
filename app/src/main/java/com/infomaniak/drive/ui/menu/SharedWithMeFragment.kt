@@ -38,9 +38,6 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.utils.safeNavigate
 import io.realm.Realm
-import kotlinx.android.synthetic.main.fragment_file_list.collapsingToolbarLayout
-import kotlinx.android.synthetic.main.fragment_file_list.sortButton
-import kotlinx.android.synthetic.main.fragment_file_list.swipeRefreshLayout
 
 class SharedWithMeFragment : FileSubTypeListFragment() {
 
@@ -53,7 +50,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override val noItemsRootIcon = R.drawable.ic_share
     override val noItemsRootTitle = R.string.sharedWithMeNoFile
 
-    override fun initSwipeRefreshLayout(): SwipeRefreshLayout? = swipeRefreshLayout
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val inDriveList = folderId == ROOT_ID && !navigationArgs.driveId.isPositive()
@@ -75,9 +72,13 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         fileListViewModel.isSharedWithMe = true
         super.onViewCreated(view, savedInstanceState)
 
-        collapsingToolbarLayout.title = if (inDriveList) getString(R.string.sharedWithMeTitle) else navigationArgs.folderName
+        binding.collapsingToolbarLayout.title = if (inDriveList) {
+            getString(R.string.sharedWithMeTitle)
+        } else {
+            navigationArgs.folderName
+        }
 
-        sortButton.isGone = inDriveList
+        binding.sortButton.isGone = inDriveList
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
             when {

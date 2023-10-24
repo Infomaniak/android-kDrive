@@ -49,6 +49,7 @@ import androidx.navigation.fragment.NavHostFragment
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackScreen
@@ -445,6 +446,10 @@ class MainActivity : BaseActivity() {
 
         canvas.drawCircle(50F, 50F, 46F, paint)
         return bitmap
+    }
+
+    fun getMainFab(): FloatingActionButton? {
+        return mainFab
     }
 
     companion object {
