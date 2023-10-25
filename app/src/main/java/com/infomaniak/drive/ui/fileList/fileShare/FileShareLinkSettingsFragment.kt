@@ -40,7 +40,6 @@ import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
 import com.infomaniak.lib.core.utils.*
-import kotlinx.android.synthetic.main.item_dropbox_settings.expirationDateSwitch
 import java.util.Calendar
 import java.util.Date
 
@@ -98,7 +97,7 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun setupAddPassword() = with(binding) {
-        addPasswordSwitch?.setOnCheckedChangeListener { _, isChecked ->
+        addPasswordSwitch.setOnCheckedChangeListener { _, isChecked ->
             val actionPasswordVisible = shareLink.right == ShareLink.ShareLinkFilePermission.PASSWORD
             newPasswordButton.isVisible = actionPasswordVisible && isChecked
             passwordTextLayout.isVisible = !actionPasswordVisible && isChecked
@@ -139,7 +138,7 @@ class FileShareLinkSettingsFragment : Fragment() {
                 showProgress()
                 trackShareRightsEvents(
                     protectWithPassword = addPasswordSwitch.isChecked,
-                    expirationDate = expirationDateSwitch?.isChecked,
+                    expirationDate = addExpirationDateSwitch.isChecked,
                     downloadFromLink = allowDownloadValue.isChecked,
                 )
                 val isValid = checkPasswordStatus()
@@ -232,7 +231,7 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
         addPasswordDescription.text = getString(
             R.string.shareLinkPasswordRightDescription,
-            context?.getString(getTypeName(navigationArgs.isFolder, navigationArgs.isOnlyOfficeFile))
+            context.getString(getTypeName(navigationArgs.isFolder, navigationArgs.isOnlyOfficeFile))
         )
 
         addExpirationDateSwitch.isChecked = shareLink.validUntil != null
