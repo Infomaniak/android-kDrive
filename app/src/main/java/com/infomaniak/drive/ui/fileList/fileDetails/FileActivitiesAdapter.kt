@@ -26,20 +26,21 @@ import androidx.core.view.isVisible
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.databinding.ItemFileActivityBinding
 import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.views.LoaderAdapter
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_file_activity.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 class FileActivitiesAdapter(val isFolder: Boolean) : LoaderAdapter<FileActivity>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_file_activity, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileActivitiesViewHolder {
+        return FileActivitiesViewHolder(ItemFileActivityBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with((holder as FileActivitiesViewHolder).binding) {
         if (getItemViewType(position) == VIEW_TYPE_LOADING) {
             activityDateCardView.startLoading()
             activityUserName.resetLoader()
@@ -79,4 +80,6 @@ class FileActivitiesAdapter(val isFolder: Boolean) : LoaderAdapter<FileActivity>
         val simpleDateFormat = SimpleDateFormat("yyyyMMdd")
         return simpleDateFormat.format(date1).equals(simpleDateFormat.format(date2))
     }
+
+    class FileActivitiesViewHolder(val binding: ItemFileActivityBinding) : ViewHolder(binding.root)
 }

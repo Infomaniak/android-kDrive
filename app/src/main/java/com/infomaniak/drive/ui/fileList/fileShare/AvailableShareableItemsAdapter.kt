@@ -31,13 +31,10 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.databinding.ItemUserBinding
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isEmail
 import com.infomaniak.drive.utils.loadAvatar
-import kotlinx.android.synthetic.main.item_user.view.chevron
-import kotlinx.android.synthetic.main.item_user.view.userAvatar
-import kotlinx.android.synthetic.main.item_user.view.userEmail
-import kotlinx.android.synthetic.main.item_user.view.userName
 
 /**
  * Note :
@@ -93,10 +90,11 @@ class AvailableShareableItemsAdapter(
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        val item = itemList[position]
+        val itemUserBinding = (convertView?.tag as? ItemUserBinding ?: inflateNewBinding(parent))
 
-        return (convertView ?: inflater.inflate(R.layout.item_user, parent, false)).apply {
+        return with(itemUserBinding) {
+
+            val item = itemList[position]
             when (item) {
                 is DriveUser -> {
                     userAvatar.loadAvatar(item)
@@ -116,15 +114,17 @@ class AvailableShareableItemsAdapter(
                     userAvatar.setBackgroundColor(item.getParsedColor())
                     userName.text = item.name
                     userEmail.text =
-                        resources.getQuantityString(R.plurals.shareUsersCount, teamUsersCount, teamUsersCount)
+                        context.resources.getQuantityString(R.plurals.shareUsersCount, teamUsersCount, teamUsersCount)
                     chevron.isGone = true
                 }
             }
 
-            setOnClickListener {
-                onItemClick(item)
-            }
+            root.apply { setOnClickListener { onItemClick(item) } }
         }
+    }
+
+    private fun inflateNewBinding(parent: ViewGroup): ItemUserBinding {
+        return ItemUserBinding.inflate(LayoutInflater.from(parent.context), parent, false).apply { root.tag = this }
     }
 
     override fun getCount() = itemList.size
