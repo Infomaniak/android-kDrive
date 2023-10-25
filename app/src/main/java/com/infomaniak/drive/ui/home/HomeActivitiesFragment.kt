@@ -64,7 +64,6 @@ class HomeActivitiesFragment : Fragment() {
 
     private fun initAdapter() {
         binding.homeTabsRecyclerView.apply {
-            homeViewModel.lastActivityPage = 1
             paginationListener?.let(::removeOnScrollListener)
 
             val lastActivitiesAdapter = LastActivitiesAdapter()
@@ -75,10 +74,9 @@ class HomeActivitiesFragment : Fragment() {
             paginationListener = setPagination(
                 whenLoadMoreIsPossible = {
                     if (!lastActivitiesAdapter.isComplete && !isDownloadingActivities) {
-                        homeViewModel.lastActivityPage++
-                        homeViewModel.lastActivityLastPage++
-
-                        AccountUtils.getCurrentDrive()?.let { currentDrive -> getLastActivities(currentDrive.id) }
+                        AccountUtils.getCurrentDrive()?.let { currentDrive ->
+                            homeViewModel.loadMoreActivities(currentDrive.id)
+                        }
                     }
                 })
 
@@ -112,10 +110,6 @@ class HomeActivitiesFragment : Fragment() {
 
         (binding.homeTabsRecyclerView.adapter as? LastActivitiesAdapter)?.apply {
             if (forceDownload) {
-                homeViewModel.apply {
-                    lastActivityPage = 1
-                    lastActivityLastPage = 1
-                }
                 clean()
             }
             showLoading()

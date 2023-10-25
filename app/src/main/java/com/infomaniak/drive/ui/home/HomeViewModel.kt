@@ -28,39 +28,53 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus.SUCCESS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import java.util.Date
 
 class HomeViewModel : ViewModel() {
-    private var lastActivityJob: Job? = null
 
-    var lastActivityPage = 1
-
-    var lastActivityLastPage = 1
     var lastActivitiesResult = MutableLiveData<LastActivityResult?>()
 
+    private var lastActivityJob: Job? = null
+
     private var lastActivitiesTime: Long = 0
+    private var currentCursor: String? = null
     private var lastActivities = arrayListOf<FileActivity>()
     private var lastMergedActivities = arrayListOf<FileActivity>()
 
     fun loadLastActivities(driveId: Int, forceDownload: Boolean = false) {
+        loadLastActivities(driveId, forceDownload, isFirstPage = true)
+    }
+
+    fun loadMoreActivities(driveId: Int) {
+        loadLastActivities(driveId, forceDownload = false, cursor = currentCursor)
+    }
+
+    private fun loadLastActivities(
+        driveId: Int,
+        forceDownload: Boolean = false,
+        isFirstPage: Boolean = false,
+        cursor: String? = null,
+    ) {
         lastActivityJob?.cancel()
         lastActivityJob = viewModelScope.launch(Dispatchers.IO) {
-            lastActivitiesResult.postValue(getLastActivities(driveId, forceDownload, isFirstPage = true))
+            val lastActivityResult = getLastActivities(driveId, forceDownload, isFirstPage, cursor)
+            if (lastActivityJob?.isActive == true) lastActivitiesResult.postValue(lastActivityResult)
         }
     }
 
     private fun getLastActivities(
         driveId: Int,
-        forceDownload: Boolean = false,
-        isFirstPage: Boolean = false,
+        forceDownload: Boolean,
+        isFirstPage: Boolean,
+        cursor: String?,
     ): LastActivityResult? {
 
         val ignoreDownload =
             isFirstPage && lastActivitiesTime != 0L && (Date().time - lastActivitiesTime) < DOWNLOAD_INTERVAL && !forceDownload
 
         if (ignoreDownload) {
-            lastActivityPage = lastActivityLastPage
             return LastActivityResult(
                 mergedActivities = lastMergedActivities,
                 isComplete = false,
@@ -70,7 +84,8 @@ class HomeViewModel : ViewModel() {
 
         lastActivitiesTime = Date().time
 
-        val apiResponse = ApiRepository.getLastActivities(driveId, lastActivityPage)
+        val apiResponse = ApiRepository.getLastActivities(driveId, cursor)
+        lastActivityJob?.ensureActive()
         val data = apiResponse.data
 
         return if (apiResponse.isSuccess() || (isFirstPage && data != null)) {
@@ -79,6 +94,8 @@ class HomeViewModel : ViewModel() {
                 lastActivities = arrayListOf()
                 lastMergedActivities = arrayListOf()
             }
+
+            currentCursor = apiResponse.cursor
 
             when {
                 data.isNullOrEmpty() -> null

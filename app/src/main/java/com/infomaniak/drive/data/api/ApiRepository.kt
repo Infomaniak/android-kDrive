@@ -368,8 +368,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }))
     }
 
-    fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {
-        val url = ApiRoutes.getLastActivities(driveId) + "&${pagination(page)}"
+    fun getLastActivities(driveId: Int, cursor: String?): ApiResponse<ArrayList<FileActivity>> {
+        val url = ApiRoutes.getLastActivities(driveId) + "&${loadCursor(cursor)}"
         return callApi(url, GET)
     }
 
