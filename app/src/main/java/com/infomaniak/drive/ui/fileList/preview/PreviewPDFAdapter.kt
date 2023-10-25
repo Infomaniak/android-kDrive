@@ -23,12 +23,12 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ItemPdfViewBinding
+import com.infomaniak.drive.ui.fileList.preview.PreviewPDFAdapter.PreviewPDFViewHolder
 import com.infomaniak.drive.utils.PdfCore
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_pdfview.view.imageView
 
-class PreviewPDFAdapter(private val pdfCore: PdfCore) : RecyclerView.Adapter<ViewHolder>() {
+class PreviewPDFAdapter(private val pdfCore: PdfCore) : RecyclerView.Adapter<PreviewPDFViewHolder>() {
 
     private var whiteBitmap: Bitmap
 
@@ -36,30 +36,23 @@ class PreviewPDFAdapter(private val pdfCore: PdfCore) : RecyclerView.Adapter<Vie
         whiteBitmap = createWhiteBitmap()
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.item_pdfview, parent, false)
-        )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PreviewPDFViewHolder {
+        return PreviewPDFViewHolder(ItemPdfViewBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.itemView.apply {
-            imageView.setImageBitmap(whiteBitmap)
-            pdfCore.renderPage(position) { bitmap ->
-                imageView.setImageBitmap(bitmap)
-            }
-        }
+    override fun onBindViewHolder(holder: PreviewPDFViewHolder, position: Int): Unit = with(holder.binding) {
+        imageView.setImageBitmap(whiteBitmap)
+        pdfCore.renderPage(position) { bitmap -> imageView.setImageBitmap(bitmap) }
     }
 
     private fun createWhiteBitmap(): Bitmap {
-        val bitmap = Bitmap.createBitmap(
-            pdfCore.bitmapWidth, pdfCore.bitmapHeight, Bitmap.Config.ARGB_8888
-        )
+        val bitmap = Bitmap.createBitmap(pdfCore.bitmapWidth, pdfCore.bitmapHeight, Bitmap.Config.ARGB_8888)
+        Canvas(bitmap).drawColor(Color.WHITE)
 
-        val canvas = Canvas(bitmap)
-        canvas.drawColor(Color.WHITE)
         return bitmap
     }
 
     override fun getItemCount() = pdfCore.getPdfPages()
+
+    class PreviewPDFViewHolder(val binding: ItemPdfViewBinding) : ViewHolder(binding.root)
 }

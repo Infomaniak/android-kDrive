@@ -21,30 +21,31 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
+import com.infomaniak.drive.ui.menu.settings.SelectIntervalTypeBottomSheetAdapter.SelectIntervalTypeViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectActiveIcon
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectText
 
 class SelectIntervalTypeBottomSheetAdapter(
     private val selectedIntervalType: SyncSettings.IntervalType,
     private val onItemClicked: (intervalType: SyncSettings.IntervalType) -> Unit,
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<SelectIntervalTypeViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectIntervalTypeViewHolder {
+        return SelectIntervalTypeViewHolder(
+            ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: SelectIntervalTypeViewHolder, position: Int) = with(holder.binding) {
         SyncSettings.IntervalType.values()[position].let { intervalType ->
-            holder.itemView.apply {
-                itemSelectText.setText(intervalType.title)
-                itemSelectActiveIcon.isVisible = selectedIntervalType == intervalType
-                setOnClickListener { onItemClicked(intervalType) }
-            }
+            itemSelectText.setText(intervalType.title)
+            itemSelectActiveIcon.isVisible = selectedIntervalType == intervalType
+            root.setOnClickListener { onItemClicked(intervalType) }
         }
     }
 
     override fun getItemCount() = SyncSettings.IntervalType.values().size
+
+    class SelectIntervalTypeViewHolder(val binding: ItemSelectBottomSheetBinding) : ViewHolder(binding.root)
 }

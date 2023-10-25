@@ -21,26 +21,28 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
+import com.infomaniak.drive.ui.menu.settings.SelectSaveDateBottomSheetAdapter.SelectSaveDateViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectActiveIcon
-import kotlinx.android.synthetic.main.item_select_bottom_sheet.view.itemSelectText
 
 class SelectSaveDateBottomSheetAdapter(
     private val selectedSaveDate: SyncSettings.SavePicturesDate,
     private val onItemClicked: (saveDate: SyncSettings.SavePicturesDate) -> Unit,
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<SelectSaveDateViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_select_bottom_sheet, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaveDateViewHolder {
+        return SelectSaveDateViewHolder(ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
 
     override fun getItemCount() = SyncSettings.SavePicturesDate.values().size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView) {
+    override fun onBindViewHolder(holder: SelectSaveDateViewHolder, position: Int) = with(holder.binding) {
         val saveDate = SyncSettings.SavePicturesDate.values()[position]
         itemSelectText.setText(saveDate.title)
         itemSelectActiveIcon.isVisible = selectedSaveDate == saveDate
-        setOnClickListener { onItemClicked(saveDate) }
+        root.setOnClickListener { onItemClicked(saveDate) }
     }
+
+    class SelectSaveDateViewHolder(val binding: ItemSelectBottomSheetBinding) : ViewHolder(binding.root)
 }
