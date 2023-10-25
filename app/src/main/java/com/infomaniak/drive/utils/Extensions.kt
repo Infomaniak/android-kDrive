@@ -72,8 +72,6 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.login.InfomaniakLogin
 import io.realm.RealmList
-import kotlinx.android.synthetic.main.activity_main.bottomNavigation
-import kotlinx.android.synthetic.main.activity_main.mainFab
 import kotlinx.android.synthetic.main.item_file.view.fileName
 import kotlinx.android.synthetic.main.item_file.view.filePreview
 import kotlinx.android.synthetic.main.item_file.view.fileProgression
@@ -251,7 +249,9 @@ fun Fragment.showSnackbar(
     actionButtonTitle: Int = R.string.buttonCancel,
     onActionClicked: (() -> Unit)? = null
 ) {
-    activity?.let { it.showSnackbar(title, if (showAboveFab) it.mainFab else null, actionButtonTitle, onActionClicked) }
+    (activity as? MainActivity)?.let {
+        it.showSnackbar(title, if (showAboveFab) it.getMainFab() else null, actionButtonTitle, onActionClicked)
+    }
 }
 
 fun Fragment.openOnlyOfficeDocument(file: File) {
@@ -275,7 +275,7 @@ fun Context.openOnlyOfficeActivity(file: File) {
 fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
-        (requireActivity() as MainActivity).bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
+        (requireActivity() as MainActivity).getBottomNavigation().findViewById<View>(R.id.fileListFragment).performClick()
         mainViewModel.navigateFileListTo(this, folderId)
     }
 }
