@@ -21,7 +21,6 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.View
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveDataScope
@@ -36,33 +35,31 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
-import kotlinx.android.synthetic.main.dialog_download_progress.*
-import kotlinx.android.synthetic.main.dialog_download_progress.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import okhttp3.Response
 
 class DownloadProgressDialog : DialogFragment() {
 
+    private val binding: DialogDownloadProgressBinding by lazy { DialogDownloadProgressBinding.inflate(layoutInflater) }
     private val navigationArgs: DownloadProgressDialogArgs by navArgs()
     private val downloadViewModel: DownloadViewModel by viewModels()
-
-    private val dialogView: View by lazy { View.inflate(context, R.layout.dialog_download_progress, null) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = with(navigationArgs) {
         isCancelable = false
 
         FileController.getFileById(fileId, userDrive)?.let { file ->
-            dialogView.icon.setImageResource(file.getFileType().icon)
+            binding.icon.setImageResource(file.getFileType().icon)
             observeDownloadedFile(file)
         }
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setTitle(fileName)
-            .setView(dialogView)
+            .setView(binding.root)
             .setOnKeyListener { _, keyCode, event ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
                     findNavController().popBackStack()
@@ -78,7 +75,7 @@ class DownloadProgressDialog : DialogFragment() {
                 if (isComplete) {
                     setBackNavigationResult(if (isOpenBookmark) OPEN_BOOKMARK else OPEN_WITH, fileId)
                 } else {
-                    downloadProgress.progress = progress
+                    binding.downloadProgress.progress = progress
                 }
             } ?: run {
                 showSnackbar(R.string.anErrorHasOccurred)
@@ -86,8 +83,6 @@ class DownloadProgressDialog : DialogFragment() {
             }
         }
     }
-
-    override fun getView() = dialogView
 
     class DownloadViewModel : ViewModel() {
 
