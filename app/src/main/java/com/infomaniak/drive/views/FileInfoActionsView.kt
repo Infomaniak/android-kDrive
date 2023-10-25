@@ -20,6 +20,7 @@ package com.infomaniak.drive.views
 import android.content.Context
 import android.content.Intent
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
@@ -46,6 +47,7 @@ import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.*
@@ -55,7 +57,6 @@ import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.safeNavigate
 import io.sentry.Sentry
-import kotlinx.android.synthetic.main.view_file_info_actions.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,6 +67,8 @@ class FileInfoActionsView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    private val binding by lazy { ViewFileInfoActionsBinding.inflate(LayoutInflater.from(context), this, true) }
+
     private var observeDownloadOffline: LiveData<MutableList<WorkInfo>>? = null
     private lateinit var currentFile: File
     private lateinit var mainViewModel: MainViewModel
@@ -74,10 +77,6 @@ class FileInfoActionsView @JvmOverloads constructor(
     private lateinit var onItemClickListener: OnItemClickListener
     private lateinit var selectFolderResultLauncher: ActivityResultLauncher<Intent>
     private var isSharedWithMe = false
-
-    init {
-        inflate(context, R.layout.view_file_info_actions, this)
-    }
 
     fun init(
         ownerFragment: Fragment,
@@ -94,7 +93,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         initOnClickListeners()
     }
 
-    fun updateCurrentFile(file: File) {
+    fun updateCurrentFile(file: File) = with(binding) {
         currentFile = file
         refreshBottomSheetUi(currentFile)
         manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutCategoryOnFile
@@ -176,7 +175,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun scrollToTop() {
-        scrollView.fullScroll(View.FOCUS_UP)
+        binding.scrollView.fullScroll(View.FOCUS_UP)
     }
 
     private fun shareFile() {
@@ -202,7 +201,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         ownerFragment.safeNavigate(R.id.addFileBottomSheetDialog)
     }
 
-    private fun initOnClickListeners() {
+    private fun initOnClickListeners() = with(binding) {
         editDocument.setOnClickListener { onItemClickListener.editDocumentClicked() }
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
@@ -221,7 +220,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         // Use OnClickListener instead of OnCheckedChangeListener because the latter is unnecessarily called on every
         // refreshBottomSheetUI calls
         availableOfflineSwitch.setOnClickListener { view ->
-            val downloadError = !onItemClickListener.availableOfflineSwitched(this, (view as SwitchMaterial).isChecked)
+            val downloadError = !onItemClickListener.availableOfflineSwitched(
+                fileInfoActionsView = this@FileInfoActionsView,
+                isChecked = (view as SwitchMaterial).isChecked
+            )
+
             with(ownerFragment) {
                 val isBottomSheetFragmentView =
                     findNavController().currentBackStackEntry?.destination?.id == R.id.fileInfoActionsBottomSheetDialog
@@ -318,7 +321,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         refreshBottomSheetUi(currentFile)
     }
 
-    private fun showCopyPublicLinkLoader(show: Boolean) {
+    private fun showCopyPublicLinkLoader(show: Boolean) = with(binding) {
         sharePublicLinkLayout.isGone = show
         copyPublicLinkLoader.isVisible = show
     }
@@ -328,13 +331,13 @@ class FileInfoActionsView @JvmOverloads constructor(
      * To be called only in the [Lifecycle.Event.ON_RESUME].
      */
     fun updateAvailableOfflineItem() {
-        if (!availableOffline.isEnabled && !currentFile.isPendingOffline(context)) {
+        if (!binding.availableOffline.isEnabled && !currentFile.isPendingOffline(context)) {
             currentFile.isOffline = true
             refreshBottomSheetUi(currentFile)
         }
     }
 
-    private fun enableAvailableOffline(isEnabled: Boolean) {
+    private fun enableAvailableOffline(isEnabled: Boolean) = with(binding) {
         availableOfflineSwitch.isEnabled = isEnabled
         availableOffline.isEnabled = isEnabled
     }
@@ -377,11 +380,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         observeDownloadOffline?.removeObservers(lifecycleOwner)
     }
 
-    fun refreshBottomSheetUi(file: File, isOfflineProgress: Boolean = false) {
+    fun refreshBottomSheetUi(file: File, isOfflineProgress: Boolean = false): Unit = with(binding) {
         val isPendingOffline = file.isPendingOffline(context)
         val isOfflineFile = file.isOfflineFile(context)
         enableAvailableOffline(!isPendingOffline || file.currentProgress == 100)
-        if (isOfflineProgress) setupFileProgress(file) else fileView.setFileItem(file)
+        if (isOfflineProgress) setupFileProgress(file) else fileView.root.setFileItem(file)
         if (availableOfflineSwitch.isEnabled && availableOffline.isVisible) {
             availableOfflineSwitch.isChecked = isOfflineFile
         }
