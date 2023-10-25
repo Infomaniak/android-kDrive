@@ -27,23 +27,24 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
+import com.infomaniak.drive.databinding.FragmentFileDetailsCommentsBinding
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.NoItemsLayoutView
-import kotlinx.android.synthetic.main.fragment_file_details.addCommentButton
-import kotlinx.android.synthetic.main.fragment_file_details_comments.fileCommentsRecyclerView
-import kotlinx.android.synthetic.main.fragment_file_details_comments.noCommentsLayout
+import com.infomaniak.lib.core.utils.safeBinding
 
 class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.INoItemsLayoutView {
+
+    private var binding: FragmentFileDetailsCommentsBinding by safeBinding()
 
     private lateinit var commentsAdapter: FileCommentsAdapter
     private lateinit var currentFile: File
 
     override val noItemsIcon = R.drawable.ic_comment
     override var noItemsTitle = R.string.fileDetailsCommentsUnavailable
-    override val noItemsInitialListView: View by lazy { fileCommentsRecyclerView }
+    override val noItemsInitialListView: View by lazy { binding.fileCommentsRecyclerView }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_file_details_comments, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentFileDetailsCommentsBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,9 +56,9 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
         }
     }
 
-    private fun setupView() {
+    private fun setupView() = with(binding) {
         val onClickAddCommentButton: (view: View) -> Unit
-        noCommentsLayout.iNoItemsLayoutView = this
+        noCommentsLayout.iNoItemsLayoutView = this@FileDetailsCommentsFragment
         if (currentFile.isOnlyOfficePreview()) {
             noCommentsLayout.toggleVisibility(isVisible = true)
             onClickAddCommentButton = { openOnlyOfficeDocument(currentFile) }
@@ -90,10 +91,10 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
         }
 
         noCommentsLayout.enableSecondaryBackground()
-        requireParentFragment().addCommentButton.setOnClickListener(onClickAddCommentButton)
+        commentButton.setOnClickListener(onClickAddCommentButton)
     }
 
-    private fun setCommentsAdapter() {
+    private fun setCommentsAdapter() = with(binding) {
         commentsAdapter = FileCommentsAdapter { currentComment ->
             toggleLike(currentComment)
         }
@@ -187,7 +188,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
 
     override fun onResume() {
         super.onResume()
-        requireParentFragment().addCommentButton.isVisible = true
+        commentButton.isVisible = true
     }
 
     private fun trackCommentEvent(name: String) {
