@@ -176,8 +176,9 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         }
     }
 
-    abstract class AppBarStateChangeListener(private val toolbarLayout: CollapsingToolbarLayout) :
-        AppBarLayout.OnOffsetChangedListener {
+    abstract class AppBarStateChangeListener(
+        private val toolbarLayout: CollapsingToolbarLayout,
+    ) : AppBarLayout.OnOffsetChangedListener {
 
         private var currentState = State.EXPANDED
 
