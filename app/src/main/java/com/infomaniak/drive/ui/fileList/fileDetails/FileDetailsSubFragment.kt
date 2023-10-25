@@ -28,5 +28,5 @@ open class FileDetailsSubFragment : Fragment() {
     val fileDetailsViewModel: FileDetailsViewModel by navGraphViewModels(R.id.fileDetailsFragment)
     val mainViewModel: MainViewModel by activityViewModels()
 
-    open val commentButton: MaterialButton get() = (requireParentFragment() as FileDetailsFragment).commentButton
+    open val addCommentButton: MaterialButton get() = (requireParentFragment() as FileDetailsFragment).addCommentButton
 }

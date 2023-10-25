@@ -91,7 +91,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
         }
 
         noCommentsLayout.enableSecondaryBackground()
-        commentButton.setOnClickListener(onClickAddCommentButton)
+        addCommentButton.setOnClickListener(onClickAddCommentButton)
     }
 
     private fun setCommentsAdapter() = with(binding) {
@@ -188,7 +188,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
 
     override fun onResume() {
         super.onResume()
-        commentButton.isVisible = true
+        addCommentButton.isVisible = true
     }
 
     private fun trackCommentEvent(name: String) {

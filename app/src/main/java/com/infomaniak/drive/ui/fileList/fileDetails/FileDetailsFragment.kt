@@ -51,7 +51,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     private var binding: FragmentFileDetailsBinding by safeBinding()
     private val navigationArgs: FileDetailsFragmentArgs by navArgs()
 
-    override val commentButton: MaterialButton get() = binding.addCommentButton
+    override val addCommentButton: MaterialButton get() = binding.addCommentButton
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentFileDetailsBinding.inflate(inflater, container, false).also { binding = it }.root

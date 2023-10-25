@@ -57,6 +57,6 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
 
     override fun onResume() {
         super.onResume()
-        commentButton.isGone = true
+        addCommentButton.isGone = true
     }
 }
