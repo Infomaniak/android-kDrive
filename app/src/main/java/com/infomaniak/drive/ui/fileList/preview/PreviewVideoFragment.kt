@@ -41,40 +41,41 @@ import com.google.android.exoplayer2.util.Util
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
-import kotlinx.android.synthetic.main.fragment_preview_others.bigOpenWithButton
-import kotlinx.android.synthetic.main.fragment_preview_others.fileIcon
-import kotlinx.android.synthetic.main.fragment_preview_others.fileName
-import kotlinx.android.synthetic.main.fragment_preview_others.previewDescription
-import kotlinx.android.synthetic.main.fragment_preview_video.container
-import kotlinx.android.synthetic.main.fragment_preview_video.errorLayout
-import kotlinx.android.synthetic.main.fragment_preview_video.playerView
+import com.infomaniak.lib.core.utils.safeBinding
 import java.io.File
 
 open class PreviewVideoFragment : PreviewFragment() {
 
+    private var binding: FragmentPreviewVideoBinding by safeBinding()
+
     private var exoPlayer: ExoPlayer? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_preview_video, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentPreviewVideoBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         if (noCurrentFile()) return
 
-        bigOpenWithButton.apply {
+        errorLayout.bigOpenWithButton.apply {
             isGone = true
             setOnClickListener { openWithClicked() }
         }
 
-        fileIcon.setImageResource(file.getFileType().icon)
-        container?.layoutTransition?.setAnimateParentHierarchy(false)
-        fileName.text = file.name
+        container.layoutTransition?.setAnimateParentHierarchy(false)
+
+        errorLayout.apply {
+            fileIcon.setImageResource(file.getFileType().icon)
+            fileName.text = file.name
+            root.setOnClickListener { toggleFullscreen() }
+        }
 
         playerView.setOnClickListener {
             if (playerView.isControllerFullyVisible) {
@@ -82,7 +83,6 @@ open class PreviewVideoFragment : PreviewFragment() {
                 toggleFullscreen()
             }
         }
-        errorLayout.setOnClickListener { toggleFullscreen() }
     }
 
     override fun onResume() {
@@ -109,7 +109,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         addPlayerListeners()
     }
 
-    private fun createPlayer() {
+    private fun createPlayer() = with(binding) {
         val context = requireContext()
 
         val offlineFile = if (file.isOffline) {
@@ -142,7 +142,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         }
     }
 
-    private fun addPlayerListeners() {
+    private fun addPlayerListeners() = with(binding) {
         exoPlayer?.addListener(object : Player.Listener {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -161,13 +161,15 @@ open class PreviewVideoFragment : PreviewFragment() {
                 super.onPlayerError(error)
                 error.printStackTrace()
                 when (error.message) {
-                    "Source error" -> previewDescription?.setText(R.string.previewVideoSourceError)
-                    else -> previewDescription?.setText(R.string.previewLoadError)
+                    "Source error" -> errorLayout.previewDescription.setText(R.string.previewVideoSourceError)
+                    else -> errorLayout.previewDescription.setText(R.string.previewLoadError)
                 }
-                bigOpenWithButton?.isVisible = true
-                errorLayout?.isVisible = true
-                playerView?.isGone = true
-                previewDescription?.isVisible = true
+                errorLayout.apply {
+                    bigOpenWithButton.isVisible = true
+                    root.isVisible = true
+                    previewDescription.isVisible = true
+                }
+                playerView.isGone = true
             }
         })
     }
