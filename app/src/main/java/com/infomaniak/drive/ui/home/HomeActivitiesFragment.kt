@@ -126,9 +126,9 @@ class HomeActivitiesFragment : Fragment() {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 
                 it?.let { lastActivityResult ->
-                    if (lastActivityResult.isFirstPage && lastActivitiesAdapter.itemCount > 0) lastActivitiesAdapter.clean()
-                    lastActivitiesAdapter.addAll(lastActivityResult.mergedActivities)
-                    lastActivitiesAdapter.isComplete = lastActivityResult.isComplete
+                    if (lastActivityResult.isFirstPage && itemCount > 0) clean()
+                    addAll(lastActivityResult.mergedActivities)
+                    isComplete = lastActivityResult.isComplete
                 } ?: also {
                     isComplete = true
                     addAll(arrayListOf())
