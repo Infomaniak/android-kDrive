@@ -33,6 +33,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -49,6 +50,8 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
     private var binding: FragmentFileDetailsBinding by safeBinding()
     private val navigationArgs: FileDetailsFragmentArgs by navArgs()
+
+    override val commentButton: MaterialButton get() = binding.addCommentButton
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentFileDetailsBinding.inflate(inflater, container, false).also { binding = it }.root
