@@ -106,7 +106,7 @@ class HomeActivitiesFragment : Fragment() {
     }
 
     fun getLastActivities(driveId: Int, forceDownload: Boolean = false) {
-        if (_binding == null) return
+        if (_binding == null || isDownloadingActivities) return
 
         (binding.homeTabsRecyclerView.adapter as? LastActivitiesAdapter)?.apply {
             if (forceDownload) {
