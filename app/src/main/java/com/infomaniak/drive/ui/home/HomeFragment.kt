@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
+import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
@@ -42,14 +43,13 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.FragmentTab
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.activity_main.bottomNavigation
-import kotlinx.android.synthetic.main.fragment_home.*
-import kotlinx.android.synthetic.main.item_search_view.searchView
-import kotlinx.android.synthetic.main.item_search_view.searchViewText
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+
+    private var binding: FragmentHomeBinding by safeBinding()
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private var mustRefreshUi: Boolean = false
@@ -66,17 +66,17 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         FragmentTab(galleryFragment, R.id.homeGalleryButton),
     )
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentHomeBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         AccountUtils.getCurrentDrive()?.let { currentDrive -> setDriveHeader(currentDrive) }
 
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-            noNetworkCard.isGone = isInternetAvailable
+            noNetworkCard.root.isGone = isInternetAvailable
         }
         switchDriveButton.apply {
             if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
@@ -87,24 +87,24 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        searchView.isGone = true
-        searchViewText.isVisible = true
+        searchViewCard.searchView.isGone = true
+        searchViewCard.searchViewText.isVisible = true
         ViewCompat.requestApplyInsets(homeCoordinator)
 
-        searchViewCard.setOnClickListener {
+        searchViewCard.root.setOnClickListener {
             safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
         }
 
         mainViewModel.deleteFileFromHome.observe(viewLifecycleOwner) { fileDeleted -> mustRefreshUi = fileDeleted }
 
-        homeSwipeRefreshLayout?.apply {
+        homeSwipeRefreshLayout.apply {
             setOnRefreshListener(this@HomeFragment)
             appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
                 isEnabled = verticalOffset == 0
             })
         }
 
-        homeUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
+        homeUploadFileInProgress.root.setUploadFileInProgress(R.string.uploadInProgressTitle) {
             navigateToUploadView(Utils.OTHER_ROOT_ID)
         }
 
@@ -120,13 +120,13 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             homeViewPager.setCurrentItem(UiSettings(requireContext()).lastHomeSelectedTab, false)
         }
 
+        val bottomNavigationOffset = with((activity as MainActivity).getBottomNavigation()) {
+            layoutParams.height + marginBottom + marginTop + 10.toPx()
+        }
+
         appBarLayout.addOnOffsetChangedListener { _, verticalOffset ->
-            (activity as? MainActivity)?.bottomNavigation?.apply {
-                val bottomNavigationOffset = layoutParams.height + marginBottom + marginTop + 10.toPx()
-                galleryFragment.setScrollbarTrackOffset(
-                    appBarLayout?.totalScrollRange ?: (0 + verticalOffset + bottomNavigationOffset)
-                )
-            }
+            val margin = appBarLayout.totalScrollRange + verticalOffset + bottomNavigationOffset
+            galleryFragment.setScrollbarTrackOffset(margin)
         }
     }
 
@@ -137,10 +137,10 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun showPendingFiles() {
-        homeUploadFileInProgress.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
+        binding.homeUploadFileInProgress.root.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
     }
 
-    private fun updateUi(forceDownload: Boolean = false) {
+    private fun updateUi(forceDownload: Boolean = false) = with(binding) {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             val downloadRequired = forceDownload || mustRefreshUi
             (homeViewPager.getFragment(0) as? HomeActivitiesFragment)?.getLastActivities(currentDrive.id, downloadRequired)
@@ -154,12 +154,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun setDriveHeader(currentDrive: Drive) {
-        switchDriveButton.text = currentDrive.name
+        binding.switchDriveButton.text = currentDrive.name
     }
 
     override fun onRefresh() {
         updateUi(forceDownload = true)
-        homeSwipeRefreshLayout.isRefreshing = false
+        binding.homeSwipeRefreshLayout.isRefreshing = false
     }
 
     companion object {

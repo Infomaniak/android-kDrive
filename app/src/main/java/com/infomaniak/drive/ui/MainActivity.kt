@@ -49,7 +49,6 @@ import androidx.navigation.fragment.NavHostFragment
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackScreen
@@ -451,7 +450,9 @@ class MainActivity : BaseActivity() {
         return bitmap
     }
 
-    fun getMainFab(): FloatingActionButton = binding.mainFab
+    fun getMainFab() = binding.mainFab
+
+    fun getBottomNavigation() = binding.bottomNavigation
 
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
