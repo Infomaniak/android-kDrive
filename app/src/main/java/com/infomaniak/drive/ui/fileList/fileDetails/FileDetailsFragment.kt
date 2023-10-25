@@ -32,33 +32,32 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.databinding.FragmentFileDetailsBinding
 import com.infomaniak.drive.utils.TabViewPagerUtils
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.utils.getFolderIcon
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
 import com.infomaniak.lib.core.utils.*
-import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
-import kotlinx.android.synthetic.main.fragment_file_details.*
-import kotlinx.android.synthetic.main.fragment_file_details.view.fileDetailsCollapsingToolbar
-import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.subTitle
-import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.title
 import kotlin.math.abs
 
 class FileDetailsFragment : FileDetailsSubFragment() {
+
+    private var binding: FragmentFileDetailsBinding by safeBinding()
     private val navigationArgs: FileDetailsFragmentArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_file_details, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentFileDetailsBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         FileController.getFileById(fileId, userDrive)?.let(::setFile)
 
@@ -80,7 +79,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             // Corrects the layout so it still takes into account system bars in edge-to-edge mode
             ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
                 with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                    toolbar.setMargins(top = top)
+                    binding.toolbar.setMargins(top = top)
                     view.setMargins(bottom = bottom)
                 }
 
@@ -93,7 +92,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     override fun onPause() {
         super.onPause()
         // TODO Understand why we need to do this
-        toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
+        binding.toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
     }
 
     override fun onStop() {
@@ -104,17 +103,19 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     private fun setFile(file: File) {
         fileDetailsViewModel.currentFile.value = file
         requireActivity().window.lightStatusBar(context?.isNightModeEnabled() == false && !file.hasThumbnail)
-        subtitleToolbar.title.text = file.name
-        subtitleToolbar.subTitle.text = file.getLastModifiedAt().format(getString(R.string.allLastModifiedFilePattern))
+        binding.subtitleToolbar.apply {
+            title.text = file.name
+            subTitle.text = file.getLastModifiedAt().format(getString(R.string.allLastModifiedFilePattern))
+        }
         setBannerThumbnail(file)
         setupTabLayout(file.isFolder())
     }
 
-    private fun setBannerThumbnail(file: File) {
-        val params = subtitleToolbar.layoutParams as CoordinatorLayout.LayoutParams
+    private fun setBannerThumbnail(file: File) = with(binding) {
+        val params = subtitleToolbar.root.layoutParams as CoordinatorLayout.LayoutParams
         val collapsingToolbarBehavior = params.behavior as? CollapsingSubTitleToolbarBehavior
 
-        appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener() {
+        appBar.addOnOffsetChangedListener(object : AppBarStateChangeListener(binding.fileDetailsCollapsingToolbar) {
             override fun onStateChanged(state: State) {
                 collapsingToolbarBehavior?.apply {
                     isNewState = true
@@ -122,7 +123,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
 
                     // If in Light mode, change the status icons color to match the background.
                     // If in Dark mode, the icons stay white all along, no need to check.
-                    if (context?.isNightModeEnabled() == false && file.hasThumbnail) activity?.window?.lightStatusBar(!isExpanded)
+                    if (!context.isNightModeEnabled() && file.hasThumbnail) activity?.window?.lightStatusBar(!isExpanded)
                 }
             }
         })
@@ -139,13 +140,13 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             toolbar.setNavigationIconTint(titleColor)
             collapsingBackground.isGone = true
             collapsingBackgroundShadow.isGone = true
-            noPreviewLayout.isVisible = true
+            noPreviewLayout.root.isVisible = true
             setNoPreviewIcon(file)
         }
     }
 
     private fun setNoPreviewIcon(file: File) {
-        noPreviewLayout.icon.apply {
+        binding.noPreviewLayout.icon.apply {
             if (file.isFolder()) {
                 val (icon, tint) = file.getFolderIcon()
                 if (tint != null) imageTintList = ColorStateList.valueOf(Color.parseColor(tint))
@@ -156,7 +157,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun setupTabLayout(isFolder: Boolean) {
+    private fun setupTabLayout(isFolder: Boolean) = with(binding) {
         if (tabsViewPager.adapter == null) {
             val tabs = arrayListOf(
                 TabViewPagerUtils.FragmentTab(FileDetailsInfoFragment(), R.id.fileInfo),
@@ -172,14 +173,14 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         }
     }
 
-    abstract class AppBarStateChangeListener : AppBarLayout.OnOffsetChangedListener {
+    abstract class AppBarStateChangeListener(private val toolbarLayout: CollapsingToolbarLayout) :
+        AppBarLayout.OnOffsetChangedListener {
 
         private var currentState = State.EXPANDED
 
         override fun onOffsetChanged(appBarLayout: AppBarLayout, yOffset: Int) {
             // ScrimVisibleHeightTrigger starts from the top of the appbar and stops at the collapsing threshold
-            val appBarCollapsingThreshold =
-                appBarLayout.height - appBarLayout.fileDetailsCollapsingToolbar.scrimVisibleHeightTrigger
+            val appBarCollapsingThreshold = appBarLayout.height - toolbarLayout.scrimVisibleHeightTrigger
 
             currentState = callStateChangeListener(
                 if (abs(yOffset) <= appBarCollapsingThreshold) State.EXPANDED else State.COLLAPSED
