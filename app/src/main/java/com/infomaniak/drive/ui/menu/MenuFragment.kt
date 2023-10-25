@@ -35,22 +35,25 @@ import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.loadAvatar
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MenuFragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_menu, container, false)
+    private var binding: FragmentMenuBinding by safeBinding()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentMenuBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         AccountUtils.currentUser?.let { currentUser ->
@@ -145,7 +148,7 @@ class MenuFragment : Fragment() {
             }
         }
 
-        menuUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
+        menuUploadFileInProgress.root.setUploadFileInProgress(R.string.uploadInProgressTitle) {
             navigateToUploadView(Utils.OTHER_ROOT_ID)
         }
     }
@@ -156,6 +159,6 @@ class MenuFragment : Fragment() {
     }
 
     private fun showPendingFiles() {
-        menuUploadFileInProgress.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
+        binding.menuUploadFileInProgress.root.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
     }
 }
