@@ -22,17 +22,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
-import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.FragmentFileDetailsActivitiesBinding
 import com.infomaniak.drive.utils.isLastPage
-import kotlinx.android.synthetic.main.fragment_file_details.addCommentButton
-import kotlinx.android.synthetic.main.fragment_file_details_activities.fileActivitiesRecyclerView
+import com.infomaniak.lib.core.utils.safeBinding
 
 class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
 
+    private var binding: FragmentFileDetailsActivitiesBinding by safeBinding()
     private lateinit var activitiesAdapter: FileActivitiesAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_file_details_activities, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentFileDetailsActivitiesBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -51,12 +51,12 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
                     }
                 }
             }
-            fileActivitiesRecyclerView.adapter = activitiesAdapter
+            binding.fileActivitiesRecyclerView.adapter = activitiesAdapter
         }
     }
 
     override fun onResume() {
         super.onResume()
-        requireParentFragment().addCommentButton.isGone = true
+        commentButton.isGone = true
     }
 }
