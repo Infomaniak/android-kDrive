@@ -54,6 +54,7 @@ class HomeActivitiesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initAdapter()
         AccountUtils.getCurrentDrive()?.let { currentDrive -> getLastActivities(currentDrive.id) }
+        observeLastActivities()
     }
 
     override fun onDestroyView() {
@@ -120,18 +121,26 @@ class HomeActivitiesFragment : Fragment() {
             showLoading()
             isComplete = false
             isDownloadingActivities = true
-            homeViewModel.getLastActivities(driveId, forceDownload).observe(viewLifecycleOwner) {
+            homeViewModel.loadLastActivities(driveId, forceDownload)
+        }
+    }
+
+    private fun observeLastActivities() {
+        val lastActivitiesAdapter = binding.homeTabsRecyclerView.adapter as? LastActivitiesAdapter ?: return
+        homeViewModel.lastActivitiesResult.observe(viewLifecycleOwner) {
+            with(lastActivitiesAdapter) {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-                it?.let { (apiResponse, mergedActivities) ->
-                    if (apiResponse.page == 1 && itemCount > 0) clean()
-                    addAll(mergedActivities)
-                    isComplete = apiResponse.isLastPage()
+
+                it?.let { lastActivityResult ->
+                    if (lastActivityResult.isFirstPage && lastActivitiesAdapter.itemCount > 0) lastActivitiesAdapter.clean()
+                    lastActivitiesAdapter.addAll(lastActivityResult.mergedActivities)
+                    lastActivitiesAdapter.isComplete = lastActivityResult.isComplete
                 } ?: also {
                     isComplete = true
                     addAll(arrayListOf())
                 }
-                isDownloadingActivities = false
             }
+            isDownloadingActivities = false
         }
     }
 

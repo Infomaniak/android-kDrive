@@ -18,9 +18,9 @@
 package com.infomaniak.drive.ui.home
 
 import androidx.collection.arrayMapOf
-import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.FileActivity
@@ -28,68 +28,84 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus.SUCCESS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import java.util.Date
 
 class HomeViewModel : ViewModel() {
-    private var lastActivityJob = Job()
+    private var lastActivityJob: Job? = null
 
     var lastActivityPage = 1
 
     var lastActivityLastPage = 1
+    var lastActivitiesResult = MutableLiveData<LastActivityResult?>()
+
     private var lastActivitiesTime: Long = 0
     private var lastActivities = arrayListOf<FileActivity>()
     private var lastMergedActivities = arrayListOf<FileActivity>()
 
-    fun getLastActivities(
+    fun loadLastActivities(driveId: Int, forceDownload: Boolean = false) {
+        lastActivityJob?.cancel()
+        lastActivityJob = viewModelScope.launch(Dispatchers.IO) {
+            lastActivitiesResult.postValue(getLastActivities(driveId, forceDownload, isFirstPage = true))
+        }
+    }
+
+    private fun getLastActivities(
         driveId: Int,
-        forceDownload: Boolean = false
-    ): LiveData<Pair<ApiResponse<ArrayList<FileActivity>>, ArrayList<FileActivity>>?> {
-        lastActivityJob.cancel()
-        lastActivityJob = Job()
+        forceDownload: Boolean = false,
+        isFirstPage: Boolean = false,
+    ): LastActivityResult? {
 
         val ignoreDownload =
-            lastActivityPage == 1 && lastActivitiesTime != 0L && (Date().time - lastActivitiesTime) < DOWNLOAD_INTERVAL && !forceDownload
-        return liveData(Dispatchers.IO + lastActivityJob) {
-            if (ignoreDownload) {
-                lastActivityPage = lastActivityLastPage
-                emit(ApiResponse(SUCCESS, lastActivities, page = 1) to lastMergedActivities)
-                return@liveData
-            }
-            lastActivitiesTime = Date().time
+            isFirstPage && lastActivitiesTime != 0L && (Date().time - lastActivitiesTime) < DOWNLOAD_INTERVAL && !forceDownload
 
-            val apiRepository = ApiRepository.getLastActivities(driveId, lastActivityPage)
-            val data = apiRepository.data
-            if (apiRepository.isSuccess() || (lastActivityPage == 1 && data != null)) {
-                if (lastActivityPage == 1) {
-                    FileController.removeOrphanAndActivityFiles()
-                    lastActivities = arrayListOf()
-                    lastMergedActivities = arrayListOf()
-                }
+        if (ignoreDownload) {
+            lastActivityPage = lastActivityLastPage
+            return LastActivityResult(
+                mergedActivities = lastMergedActivities,
+                isComplete = false,
+                isFirstPage = true,
+            )
+        }
 
-                when {
-                    data.isNullOrEmpty() -> emit(null)
-                    else -> {
-                        val mergeAndCleanActivities = mergeAndCleanActivities(data)
-                        lastActivities.addAll(data)
-                        lastMergedActivities.addAll(mergeAndCleanActivities)
-                        FileController.storeFileActivities(data)
-                        emit(apiRepository to mergeAndCleanActivities)
-                    }
-                }
-            } else if (lastActivityPage == 1) {
-                val localActivities = FileController.getActivities()
-                val mergeAndCleanActivities = mergeAndCleanActivities(localActivities)
-                lastActivities = localActivities
-                lastMergedActivities = mergeAndCleanActivities
-                emit(
-                    ApiResponse(
-                        data = localActivities,
-                        page = 1,
-                        itemsPerPage = localActivities.size + 1,
-                        result = SUCCESS
-                    ) to mergeAndCleanActivities
-                )
+        lastActivitiesTime = Date().time
+
+        val apiResponse = ApiRepository.getLastActivities(driveId, lastActivityPage)
+        val data = apiResponse.data
+
+        return if (apiResponse.isSuccess() || (isFirstPage && data != null)) {
+            if (isFirstPage) {
+                FileController.removeOrphanAndActivityFiles()
+                lastActivities = arrayListOf()
+                lastMergedActivities = arrayListOf()
             }
+
+            when {
+                data.isNullOrEmpty() -> null
+                else -> {
+                    val mergeAndCleanActivities = mergeAndCleanActivities(data)
+                    lastActivities.addAll(data)
+                    lastMergedActivities.addAll(mergeAndCleanActivities)
+                    FileController.storeFileActivities(data)
+                    LastActivityResult(
+                        mergedActivities = mergeAndCleanActivities,
+                        isComplete = apiResponse.cursor == null,
+                        isFirstPage = isFirstPage,
+                    )
+                }
+            }
+        } else if (isFirstPage) {
+            val localActivities = FileController.getActivities()
+            val mergeAndCleanActivities = mergeAndCleanActivities(localActivities)
+            lastActivities = localActivities
+            lastMergedActivities = mergeAndCleanActivities
+            LastActivityResult(
+                mergedActivities = mergeAndCleanActivities,
+                isComplete = true,
+                isFirstPage = true,
+            )
+        } else {
+            null
         }
     }
 
@@ -129,9 +145,15 @@ class HomeViewModel : ViewModel() {
     }
 
     override fun onCleared() {
-        lastActivityJob.cancel()
+        lastActivityJob?.cancel()
         super.onCleared()
     }
+
+    data class LastActivityResult(
+        val mergedActivities: ArrayList<FileActivity>,
+        val isComplete: Boolean,
+        val isFirstPage: Boolean,
+    )
 
     companion object {
         const val DOWNLOAD_INTERVAL: Long = 1 * 60 * 1000 // 1min (ms)
