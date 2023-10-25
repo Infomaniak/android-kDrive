@@ -78,6 +78,8 @@ class FileInfoActionsView @JvmOverloads constructor(
     private lateinit var selectFolderResultLauncher: ActivityResultLauncher<Intent>
     private var isSharedWithMe = false
 
+    val openWith get() = binding.openWith
+
     fun init(
         ownerFragment: Fragment,
         mainViewModel: MainViewModel,
