@@ -26,20 +26,23 @@ import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.drive.data.models.SearchFilter.FilterKey
+import com.infomaniak.drive.databinding.ItemSearchFilterChipBinding
+import com.infomaniak.drive.ui.fileList.SearchFiltersAdapter.SearchFiltersViewHolder
 import com.infomaniak.lib.core.views.ViewHolder
 
 class SearchFiltersAdapter(
     private val onFilterRemoved: (key: FilterKey, categoryId: Int?) -> Unit
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<SearchFiltersViewHolder>() {
 
     var filters = arrayListOf<SearchFilter>()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.item_search_filter_chip, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchFiltersViewHolder {
+        return SearchFiltersViewHolder(ItemSearchFilterChipBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    }
 
     override fun getItemCount() = filters.size
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder.itemView as Chip) {
+    override fun onBindViewHolder(holder: SearchFiltersViewHolder, position: Int) = with(holder.binding.root) {
         val filter = this@SearchFiltersAdapter.filters[position]
         setEndMargin(position)
         setIcon(filter)
@@ -86,4 +89,6 @@ class SearchFiltersAdapter(
         filters = newFilters
         notifyItemRangeChanged(0, itemCount)
     }
+
+    class SearchFiltersViewHolder(val binding: ItemSearchFilterChipBinding) : ViewHolder(binding.root)
 }
