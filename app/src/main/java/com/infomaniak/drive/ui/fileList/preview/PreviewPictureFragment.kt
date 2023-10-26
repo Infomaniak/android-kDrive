@@ -30,12 +30,11 @@ import coil.Coil
 import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import kotlinx.android.synthetic.main.fragment_preview_others.*
-import kotlinx.android.synthetic.main.fragment_preview_picture.*
-import kotlinx.android.synthetic.main.fragment_preview_picture.container
+import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,58 +42,70 @@ import java.io.File
 
 class PreviewPictureFragment : PreviewFragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_preview_picture, container, false)
+    private var binding: FragmentPreviewPictureBinding by safeBinding()
+    private val loadTimer by lazy {
+        createRefreshTimer(milliseconds = 400) { binding.noThumbnailLayout.root.isVisible = true }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentPreviewPictureBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         if (noCurrentFile()) return
 
-        previewDescription.isGone = true
-        fileIcon.setImageResource(file.getFileType().icon)
+        noThumbnailLayout.apply {
+            previewDescription.isGone = true
+            fileIcon.setImageResource(file.getFileType().icon)
 
-        bigOpenWithButton.apply {
-            isGone = true
-            setOnClickListener { openWithClicked() }
+            bigOpenWithButton.isGone = true
+            bigOpenWithButton.setOnClickListener { openWithClicked() }
         }
 
         loadImage()
 
-        container?.layoutTransition?.setAnimateParentHierarchy(false)
+        container.layoutTransition?.setAnimateParentHierarchy(false)
         setupImageListeners()
     }
 
-    private fun loadImage() {
+    override fun onDestroyView() {
+        loadTimer.cancel()
+        super.onDestroyView()
+    }
+
+    private fun loadImage() = with(binding) {
         val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
         val imageLoader = Coil.imageLoader(requireContext())
         val previewRequest = buildPreviewRequest()
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             imageLoader.execute(previewRequest).drawable?.let { drawable ->
                 if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-                withContext(Dispatchers.Main) { imageView?.load(drawable) { crossfade(false) } }
+                withContext(Dispatchers.Main) { imageView.load(drawable) { crossfade(false) } }
             }
         }
     }
 
-    private fun buildPreviewRequest(): ImageRequest {
-        val timer = createRefreshTimer(milliseconds = 400) { noThumbnailLayout?.isVisible = true }.start()
+    private fun buildPreviewRequest(): ImageRequest = with(binding) {
+        loadTimer.start()
         val offlineFile = if (file.isOffline) getOfflineFile() else null
 
         return ImageRequest.Builder(requireContext())
             .data(offlineFile ?: file.imagePreview())
             .listener(
                 onError = { _, _ ->
-                    fileName?.text = file.name
-                    previewDescription?.isVisible = true
-                    bigOpenWithButton?.isVisible = true
-                    imageView?.isGone = true
+                    noThumbnailLayout.apply {
+                        fileName.text = file.name
+                        previewDescription.isVisible = true
+                        bigOpenWithButton.isVisible = true
+                    }
+                    imageView.isGone = true
                 },
                 onSuccess = { _, _ ->
-                    timer.cancel()
-                    noThumbnailLayout?.isGone = true
+                    loadTimer.cancel()
+                    noThumbnailLayout.root.isGone = true
                 },
             )
             .build()
@@ -107,7 +118,7 @@ class PreviewPictureFragment : PreviewFragment() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun setupImageListeners() {
+    private fun setupImageListeners(): Unit = with(binding) {
         imageView.apply {
 
             setOnTouchListener { view, event ->
