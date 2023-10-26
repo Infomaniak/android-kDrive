@@ -24,17 +24,19 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.FragmentSettingsAboutBinding
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import kotlinx.android.synthetic.main.fragment_settings_about.*
+import com.infomaniak.lib.core.utils.safeBinding
 
 class AboutSettingsFragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_settings_about, container, false)
+    private var binding: FragmentSettingsAboutBinding by safeBinding()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentSettingsAboutBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         toolbar.setNavigationOnClickListener {
