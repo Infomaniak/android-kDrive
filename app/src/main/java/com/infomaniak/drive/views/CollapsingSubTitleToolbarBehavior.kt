@@ -29,11 +29,9 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.MaterialToolbar
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.fragment_file_details.view.toolbar
-import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.subTitle
-import kotlinx.android.synthetic.main.view_subtitle_toolbar.view.title
 import kotlin.math.abs
 
 class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
@@ -73,6 +71,10 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
         val appBarLayoutYPosition = abs(appBarLayout.getY())
         val percentage = appBarLayoutYPosition / maxScroll.toFloat()
 
+        val toolbar = appBarLayout.findViewById<MaterialToolbar>(R.id.toolbar)
+        val toolbarTitle = subtitleToolbarView.findViewById<TextView>(R.id.title)
+        val toolbarSubTitle = subtitleToolbarView.findViewById<TextView>(R.id.subTitle)
+
         var childPosition = ((appBarLayout.getHeight() + appBarLayout.getY())
                 - subtitleToolbarView.height
                 - (getToolbarHeight(context) - subtitleToolbarView.height)
@@ -86,7 +88,7 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
             val layoutPercentage = (appBarLayoutYPosition - halfMaxScroll) / abs(halfMaxScroll)
             layoutParams.leftMargin = (layoutPercentage * collapsedTitleMarginStart).toInt() + expandedTitleMarginStart
 
-            subtitleToolbarView.title.setTextSize(
+            toolbarTitle.setTextSize(
                 TypedValue.COMPLEX_UNIT_PX,
                 getTranslationOffset(layoutPercentage)
             )
@@ -98,18 +100,18 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
         subtitleToolbarView.y = childPosition
         if (isNewState) {
             if (isExpanded) {
-                textColorAnimation(subtitleToolbarView.title, collapsedTitleColor, expandedTitleColor)
-                textColorAnimation(subtitleToolbarView.subTitle, collapsedSubTitleColor, expandedSubTitleColor)
+                textColorAnimation(toolbarTitle, collapsedTitleColor, expandedTitleColor)
+                textColorAnimation(toolbarSubTitle, collapsedSubTitleColor, expandedSubTitleColor)
             } else {
-                textColorAnimation(subtitleToolbarView.title, expandedTitleColor, collapsedTitleColor)
-                textColorAnimation(subtitleToolbarView.subTitle, expandedSubTitleColor, collapsedSubTitleColor)
+                textColorAnimation(toolbarTitle, expandedTitleColor, collapsedTitleColor)
+                textColorAnimation(toolbarSubTitle, expandedSubTitleColor, collapsedSubTitleColor)
             }
 
-            appBarLayout.toolbar.setNavigationIconTint(if (isExpanded) expandedTitleColor else collapsedTitleColor)
+            toolbar.setNavigationIconTint(if (isExpanded) expandedTitleColor else collapsedTitleColor)
             isNewState = false
         }
 
-        subtitleToolbarView.title.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
+        toolbarTitle.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
 
         return true
     }
