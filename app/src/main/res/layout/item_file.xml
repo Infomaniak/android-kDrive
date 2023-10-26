@@ -118,31 +118,16 @@
         app:layout_constraintTop_toTopOf="@id/fileNameLayout"
         tools:visibility="visible" />
 
-    <FrameLayout
+
+    <include
         android:id="@+id/progressLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/fileSize"
         app:layout_constraintStart_toEndOf="@id/iconLayout"
         app:layout_constraintTop_toTopOf="@id/fileSize"
-        tools:visibility="visible">
-
-        <ImageView
-            android:id="@+id/fileOffline"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:contentDescription="@string/buttonAvailableOffline"
-            android:src="@drawable/ic_check" />
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/fileOfflineProgression"
-            style="@style/CircularIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:indicatorSize="14dp" />
-    </FrameLayout>
+        android:layout_marginStart="10dp"
+        layout="@layout/view_progress_layout"/>
 
     <TextView
         android:id="@+id/fileSize"

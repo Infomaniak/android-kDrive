@@ -51,4 +51,9 @@
 
         <attr name="disableTrackTouch" format="boolean" />
     </declare-styleable>
+
+    <declare-styleable name="ProgressLayoutView">
+        <attr name="progressIndicatorSize" format="dimension" />
+        <attr name="progressLayoutMarginStart" format="dimension" />
+    </declare-styleable>
 </resources>
