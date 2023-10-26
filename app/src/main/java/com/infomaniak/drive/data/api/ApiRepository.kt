@@ -81,7 +81,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFavoriteFiles(driveId: Int, order: File.SortType, cursor: String?): ApiResponse<ArrayList<File>> {
+    fun getFavoriteFiles(driveId: Int, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
         val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${loadCursor(cursor)}"
         return callApi(url, GET)
     }
@@ -96,7 +96,7 @@ object ApiRepository : ApiRepositoryCore() {
         parentId: Int,
         cursor: String? = null,
         order: File.SortType
-    ): ApiResponse<List<File>> {
+    ): CursorApiResponse<List<File>> {
         val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
@@ -403,7 +403,7 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         sortType: File.SortType,
         cursor: String?
-    ): ApiResponse<ArrayList<File>> {
+    ): CursorApiResponse<ArrayList<File>> {
         return callApi("${ApiRoutes.getMySharedFiles(driveId, sortType)}&${loadCursor(cursor)}", GET, okHttpClient = okHttpClient)
     }
 
