@@ -19,17 +19,14 @@ package com.infomaniak.drive.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
-import kotlinx.android.synthetic.main.empty_icon_layout.view.icon
-import kotlinx.android.synthetic.main.view_no_items.view.noItemsDescription
-import kotlinx.android.synthetic.main.view_no_items.view.noItemsIconLayout
-import kotlinx.android.synthetic.main.view_no_items.view.noItemsRefreshButton
-import kotlinx.android.synthetic.main.view_no_items.view.noItemsTitle
+import com.infomaniak.drive.databinding.ViewNoItemsBinding
 
 class NoItemsLayoutView @JvmOverloads constructor(
     context: Context,
@@ -43,18 +40,16 @@ class NoItemsLayoutView @JvmOverloads constructor(
     var viewsToDisable: List<View>? = null
     var onNetworkUnavailableRefresh: (() -> Unit)? = null
 
-    init {
-        inflate(context, R.layout.view_no_items, this)
-    }
+    private val binding by lazy { ViewNoItemsBinding.inflate(LayoutInflater.from(context), this, true) }
 
     fun enableSecondaryBackground() {
-        noItemsIconLayout.setBackgroundResource(R.drawable.round_empty_secondary)
+        binding.noItemsIconLayout.root.setBackgroundResource(R.drawable.round_empty_secondary)
     }
 
-    fun toggleVisibility(isVisible: Boolean, noNetwork: Boolean = false, showRefreshButton: Boolean = true) {
+    fun toggleVisibility(isVisible: Boolean, noNetwork: Boolean = false, showRefreshButton: Boolean = true) = with(binding) {
 
         if (isVisible) {
-            this.isVisible = true
+            root.isVisible = true
             viewsToDisable?.forEach { it.isEnabled = false }
             iNoItemsLayoutView.noItemsInitialListView.isGone = true
 
@@ -78,7 +73,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
                 noItemsDescription.isGone = true
             }
         } else {
-            this.isGone = true
+            root.isGone = true
             viewsToDisable?.forEach { it.isEnabled = true }
             iNoItemsLayoutView.noItemsInitialListView.isVisible = true
         }
