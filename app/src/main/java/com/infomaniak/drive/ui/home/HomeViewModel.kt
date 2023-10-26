@@ -171,11 +171,6 @@ class HomeViewModel : ViewModel() {
                 previousActivity.fileId == currentActivity.fileId
     }
 
-    override fun onCleared() {
-        lastActivityJob?.cancel()
-        super.onCleared()
-    }
-
     data class LastActivityResult(
         val mergedActivities: ArrayList<FileActivity>,
         val isComplete: Boolean,
