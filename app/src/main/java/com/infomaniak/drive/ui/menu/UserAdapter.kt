@@ -20,7 +20,10 @@ package com.infomaniak.drive.ui.menu
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.infomaniak.drive.R
+import androidx.viewbinding.ViewBinding
+import com.infomaniak.drive.databinding.CardviewUserBinding
+import com.infomaniak.drive.databinding.ItemUserBinding
+import com.infomaniak.drive.ui.menu.UserAdapter.UserViewHolder
 import com.infomaniak.drive.utils.setUserView
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.views.ViewHolder
@@ -29,21 +32,34 @@ class UserAdapter(
     private val users: ArrayList<User>,
     private val isCardview: Boolean = true,
     private val onItemClicked: (user: User) -> Unit
-) : RecyclerView.Adapter<ViewHolder>() {
+) : RecyclerView.Adapter<UserViewHolder>() {
 
     override fun getItemViewType(position: Int): Int {
         return if (isCardview) VIEW_TYPE_CARDVIEW
         else VIEW_TYPE_NORMAL
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val layoutId = if (viewType == VIEW_TYPE_CARDVIEW) R.layout.cardview_user else R.layout.item_user
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(layoutId, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
+        val layoutInflater = LayoutInflater.from(parent.context)
+        val binding = if (viewType == VIEW_TYPE_CARDVIEW) {
+            CardviewUserBinding.inflate(layoutInflater, parent, false)
+        } else {
+            ItemUserBinding.inflate(layoutInflater, parent, false)
+        }
+
+        return UserViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: UserViewHolder, position: Int) = with(holder.binding) {
         val user = users[position]
-        holder.itemView.setUserView(user, isCardview, onItemClicked)
+
+        val itemUserBinding = if (getItemViewType(position) == VIEW_TYPE_CARDVIEW) {
+            (this as CardviewUserBinding).itemviewUser
+        } else {
+            this as ItemUserBinding
+        }
+
+        itemUserBinding.root.setUserView(user, isCardview, onItemClicked)
     }
 
     override fun getItemCount() = users.size
@@ -52,4 +68,6 @@ class UserAdapter(
         const val VIEW_TYPE_CARDVIEW = 1
         const val VIEW_TYPE_NORMAL = 2
     }
+
+    class UserViewHolder(val binding: ViewBinding) : ViewHolder(binding.root)
 }
