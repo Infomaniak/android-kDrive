@@ -54,12 +54,12 @@ class UserAdapter(
         val user = users[position]
 
         val itemUserBinding = if (getItemViewType(position) == VIEW_TYPE_CARDVIEW) {
-            (this as CardviewUserBinding).itemviewUser
+            (this as CardviewUserBinding).itemViewUser
         } else {
             this as ItemUserBinding
         }
 
-        itemUserBinding.root.setUserView(user, isCardview, onItemClicked)
+        itemUserBinding.setUserView(user, isCardview, onItemClicked)
     }
 
     override fun getItemCount() = users.size

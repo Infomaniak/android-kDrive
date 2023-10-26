@@ -62,6 +62,7 @@ import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.CardviewFileListBinding
+import com.infomaniak.drive.databinding.ItemUserBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -74,10 +75,6 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.login.InfomaniakLogin
 import io.realm.RealmList
-import kotlinx.android.synthetic.main.item_user.view.chevron
-import kotlinx.android.synthetic.main.item_user.view.userAvatar
-import kotlinx.android.synthetic.main.item_user.view.userEmail
-import kotlinx.android.synthetic.main.item_user.view.userName
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -141,12 +138,12 @@ fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
 
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
-fun View.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
+fun ItemUserBinding.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
     userName.text = user.displayName
     userEmail.text = user.email
     userAvatar.loadAvatar(user)
     chevron.isVisible = showChevron
-    setOnClickListener { onItemClicked(user) }
+    root.setOnClickListener { onItemClicked(user) }
 }
 
 fun ImageView.animateRotation(isDeployed: Boolean = false) {
