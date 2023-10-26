@@ -76,7 +76,11 @@ class PreviewPDFFragment : PreviewFragment() {
             isVisible = true
         }
 
-        root.isVisible = true
+        root.apply {
+            isVisible = true
+            setOnClickListener { toggleFullscreen() }
+        }
+
         binding.pdfViewRecycler.apply {
             isGone = true
             onClicked = { toggleFullscreen() }
@@ -91,8 +95,6 @@ class PreviewPDFFragment : PreviewFragment() {
             if (progress >= 100 && previewPDFViewModel.pdfJob.isCancelled) downloadPdf()
             downloadProgress.progress = progress
         }
-
-        root.setOnClickListener { toggleFullscreen() }
     }
 
     override fun setMenuVisibility(menuVisible: Boolean) {

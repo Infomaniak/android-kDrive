@@ -64,14 +64,13 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         if (noCurrentFile()) return
 
-        errorLayout.bigOpenWithButton.apply {
-            isGone = true
-            setOnClickListener { openWithClicked() }
-        }
-
         container.layoutTransition?.setAnimateParentHierarchy(false)
 
         errorLayout.apply {
+            bigOpenWithButton.apply {
+                isGone = true
+                setOnClickListener { openWithClicked() }
+            }
             fileIcon.setImageResource(file.getFileType().icon)
             fileName.text = file.name
             root.setOnClickListener { toggleFullscreen() }
@@ -142,7 +141,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         }
     }
 
-    private fun addPlayerListeners() = with(binding) {
+    private fun addPlayerListeners() {
         exoPlayer?.addListener(object : Player.Listener {
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -157,19 +156,17 @@ open class PreviewVideoFragment : PreviewFragment() {
                 }
             }
 
-            override fun onPlayerError(error: PlaybackException) {
+            override fun onPlayerError(error: PlaybackException) = with(binding.errorLayout) {
                 super.onPlayerError(error)
                 error.printStackTrace()
                 when (error.message) {
-                    "Source error" -> errorLayout.previewDescription.setText(R.string.previewVideoSourceError)
-                    else -> errorLayout.previewDescription.setText(R.string.previewLoadError)
+                    "Source error" -> previewDescription.setText(R.string.previewVideoSourceError)
+                    else -> previewDescription.setText(R.string.previewLoadError)
                 }
-                errorLayout.apply {
-                    bigOpenWithButton.isVisible = true
-                    root.isVisible = true
-                    previewDescription.isVisible = true
-                }
-                playerView.isGone = true
+                bigOpenWithButton.isVisible = true
+                root.isVisible = true
+                previewDescription.isVisible = true
+                binding.playerView.isGone = true
             }
         })
     }
