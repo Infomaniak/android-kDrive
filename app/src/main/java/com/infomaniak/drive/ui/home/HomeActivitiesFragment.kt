@@ -53,7 +53,10 @@ class HomeActivitiesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initAdapter()
-        AccountUtils.getCurrentDrive()?.let { currentDrive -> getLastActivities(currentDrive.id) }
+        AccountUtils.getCurrentDrive()?.let { currentDrive ->
+            homeViewModel.restoreActivitiesIfNeeded()
+            getLastActivities(currentDrive.id)
+        }
         observeLastActivities()
     }
 

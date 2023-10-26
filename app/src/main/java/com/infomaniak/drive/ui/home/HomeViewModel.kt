@@ -51,6 +51,16 @@ class HomeViewModel : ViewModel() {
         loadLastActivities(driveId, forceDownload = false, cursor = currentCursor)
     }
 
+    fun restoreActivitiesIfNeeded() {
+        if (lastMergedActivities.isNotEmpty()) {
+            lastActivitiesResult.value = LastActivityResult(
+                mergedActivities = lastMergedActivities,
+                isComplete = currentCursor != null,
+                isFirstPage = true,
+            )
+        }
+    }
+
     private fun loadLastActivities(
         driveId: Int,
         forceDownload: Boolean = false,
