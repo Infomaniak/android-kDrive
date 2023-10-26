@@ -19,17 +19,15 @@ package com.infomaniak.drive.data.api
 
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.lib.core.models.ApiError
+import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.models.IApiResponse
 
-data class CursorApiResponse<T>(
-    override val result: ApiResponseStatus = ApiResponseStatus.UNKNOWN,
-    override val data: T? = null,
-    override val error: ApiError? = null,
-    @SerializedName("response_at")
-    override val responseAt: Long = 0,
+class CursorApiResponse<T>(
+    result: ApiResponseStatus = ApiResponseStatus.UNKNOWN,
+    data: T? = null,
+    error: ApiError? = null,
+    responseAt: Long = 0,
     val cursor: String? = null, // TODO: It's only temporarily nullable, pending a change on the API side.
     @SerializedName("has_more")
     val hasMore: String? = null,
-    override var translatedError: Int = 0,
-) : IApiResponse<T>
+) : ApiResponse<T>()
