@@ -144,7 +144,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileActivities(driveId, formattedFileIds, fromDate), GET, okHttpClient = okHttpClient)
     }
 
-    fun getLastModifiedFiles(driveId: Int, cursor: String? = null): ApiResponse<ArrayList<File>> {
+    fun getLastModifiedFiles(driveId: Int, cursor: String? = null): CursorApiResponse<ArrayList<File>> {
         val url = "${ApiRoutes.getLastModifiedFiles(driveId)}&${loadCursor(cursor)}"
         return callApi(url, GET)
     }
