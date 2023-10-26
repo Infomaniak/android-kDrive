@@ -27,11 +27,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.android.synthetic.main.activity_main.mainFab
 import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -67,7 +67,10 @@ object FilePresenter {
 
             if (url.isValidUrl()) requireContext().openUrl(url) else Exception("It's not a valid url")
         }.onFailure {
-            requireActivity().showSnackbar(requireContext().getString(R.string.errorGetBookmarkURL), requireActivity().mainFab)
+            requireActivity().showSnackbar(
+                requireContext().getString(R.string.errorGetBookmarkURL),
+                (requireActivity() as MainActivity).getMainFab()
+            )
         }
     }
 
