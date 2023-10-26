@@ -20,16 +20,17 @@ package com.infomaniak.drive.views
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import kotlinx.android.synthetic.main.view_not_enough_storage.view.*
 
 class NotEnoughStorageView @JvmOverloads constructor(
     context: Context,
@@ -37,12 +38,10 @@ class NotEnoughStorageView @JvmOverloads constructor(
     defStyleAttr: Int = 0,
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    init {
-        inflate(context, R.layout.view_not_enough_storage, this)
-    }
+    private val binding by lazy { ViewNotEnoughStorageBinding.inflate(LayoutInflater.from(context), this, true) }
 
     @SuppressLint("SetTextI18n")
-    fun setup(currentDrive: Drive) {
+    fun setup(currentDrive: Drive) = with(binding) {
         currentDrive.apply {
             val storagePercentage = if (size > 0) (usedSize.toFloat() / size) * 100 else 0F
             if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
