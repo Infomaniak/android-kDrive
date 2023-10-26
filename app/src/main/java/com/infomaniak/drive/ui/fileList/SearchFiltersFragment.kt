@@ -33,18 +33,20 @@ import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
+import com.infomaniak.drive.databinding.FragmentSearchFiltersBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
-import kotlinx.android.synthetic.main.fragment_search_filters.*
 
 class SearchFiltersFragment : Fragment() {
 
+    private var binding: FragmentSearchFiltersBinding by safeBinding()
     private val searchViewModel: SearchViewModel by navGraphViewModels(R.id.searchFragment)
     private val searchFiltersViewModel: SearchFiltersViewModel by navGraphViewModels(R.id.searchFiltersFragment)
 
@@ -56,8 +58,9 @@ class SearchFiltersFragment : Fragment() {
             ?.apply { setTint(ResourcesCompat.getColor(resources, R.color.iconColor, null)) }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_search_filters, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentSearchFiltersBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -82,25 +85,25 @@ class SearchFiltersFragment : Fragment() {
         updateAllFiltersUi()
     }
 
-    private fun handleCategoryRights() = with(categoryRights.canReadCategoryOnFile) {
-        categoriesTitle.isVisible = this
-        chooseCategoriesFilter.isVisible = this
+    private fun handleCategoryRights() = with(binding) {
+        categoriesTitle.isVisible = categoryRights.canReadCategoryOnFile
+        chooseCategoriesFilter.isVisible = categoryRights.canReadCategoryOnFile
     }
 
     private fun setToolbar() {
-        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
     }
 
     private fun setDateAndTypeFilters() = with(searchFiltersViewModel) {
-        dateFilter.setOnClickListener {
+        binding.dateFilter.setOnClickListener {
             safeNavigate(R.id.searchFilterDateDialog, SearchFilterDateBottomSheetDialogArgs(date = date.value).toBundle())
         }
-        typeFilter.setOnClickListener {
+        binding.typeFilter.setOnClickListener {
             safeNavigate(R.id.searchFilterTypeDialog, SearchFilterTypeBottomSheetDialogArgs(type = type.value).toBundle())
         }
     }
 
-    private fun setCategoriesOwnershipFilters() {
+    private fun setCategoriesOwnershipFilters() = with(binding) {
         fun update(categoriesOwnershipFilter: SearchCategoriesOwnershipFilter) {
             searchFiltersViewModel.categoriesOwnership = categoriesOwnershipFilter
             updateCategoriesOwnershipUi()
@@ -110,14 +113,14 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun setClearButton() {
-        clearButton.setOnClickListener {
+        binding.clearButton.setOnClickListener {
             searchFiltersViewModel.clearFilters()
             updateAllFiltersUi()
         }
     }
 
     private fun setSaveButton() = with(searchFiltersViewModel) {
-        saveButton.setOnClickListener {
+        binding.saveButton.setOnClickListener {
             date.value?.let { trackSearchEvent("filterDate") }
             type.value?.let { trackSearchEvent("filterFileType") }
             categories?.let { trackSearchEvent("filterCategory") }
@@ -154,12 +157,13 @@ class SearchFiltersFragment : Fragment() {
         updateCategoriesOwnershipUi()
     }
 
-    private fun updateDateUi() = with(dateFilterText) {
-        searchFiltersViewModel.date.value?.let { text = it.text }
+    private fun updateDateUi() = with(binding.dateFilterText) {
+        searchFiltersViewModel.date.value
+            ?.let { text = it.text }
             ?: run { setText(R.string.searchFiltersSelectDate) }
     }
 
-    private fun updateTypeUi() {
+    private fun updateTypeUi() = with(binding) {
         searchFiltersViewModel.type.value?.let {
             typeFilterStartIcon.setImageResource(it.icon)
             typeFilterText.setText(it.searchFilterName)
@@ -171,7 +175,7 @@ class SearchFiltersFragment : Fragment() {
 
     private fun updateCategoriesUi() {
         val categories = searchFiltersViewModel.categories ?: emptyList()
-        categoriesContainer.setup(
+        binding.categoriesContainer.setup(
             categories = categories,
             canPutCategoryOnFile = categoryRights.canPutCategoryOnFile,
             layoutInflater = layoutInflater,
@@ -186,13 +190,14 @@ class SearchFiltersFragment : Fragment() {
         )
     }
 
-    private fun updateCategoriesOwnershipUi() = with(searchFiltersViewModel) {
-        val isVisible = categories?.isNotEmpty() == true
+    private fun updateCategoriesOwnershipUi() = with(binding) {
+        val isVisible = searchFiltersViewModel.categories?.isNotEmpty() == true
         belongToAllCategoriesFilter.isVisible = isVisible
         belongToOneCategoryFilter.isVisible = isVisible
 
         if (isVisible) {
-            val belongToOne = categoriesOwnership == SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
+            val belongToOne =
+                searchFiltersViewModel.categoriesOwnership == SearchCategoriesOwnershipFilter.BELONG_TO_ONE_CATEGORY
             belongToAllCategoriesFilter.setupSelection(!belongToOne)
             belongToOneCategoryFilter.setupSelection(belongToOne)
         }
