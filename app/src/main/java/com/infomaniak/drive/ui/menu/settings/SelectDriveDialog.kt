@@ -63,7 +63,7 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
         AccountUtils.getAllUsers().observe(viewLifecycleOwner) { users ->
             if (users.size > 1) {
                 val selectedUser = users.find { it.id == selectedUserId.value } ?: users.first()
-                binding.userCardview.root.setUserView(selectedUser) {
+                binding.userCardview.itemViewUser.setUserView(selectedUser) {
                     popupWindow = PopupWindow(
                         popupLayoutBinding.root,
                         binding.userCardview.root.width,
@@ -81,7 +81,7 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                     selectedUserId.value = user.id
                     driveListAdapter.setDrives(getDriveList())
 
-                    binding.userCardview.root.setUserView(user) { popupWindow.showAsDropDown(binding.userCardview.root) }
+                    binding.userCardview.itemViewUser.setUserView(user) { popupWindow.showAsDropDown(binding.userCardview.root) }
 
                     popupWindow.dismiss()
                 }
