@@ -22,7 +22,7 @@
     android:layout_marginVertical="@dimen/marginStandardSmall">
 
     <include
-        android:id="@+id/itemviewUser"
+        android:id="@+id/itemViewUser"
         layout="@layout/item_user" />
 
 </com.google.android.material.card.MaterialCardView>
