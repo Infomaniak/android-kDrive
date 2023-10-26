@@ -75,7 +75,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         currentTrashedFile = trashViewModel.selectedFile.value ?: File()
 
-        currentFile.root.setFileItem(currentTrashedFile)
+        currentFile.setFileItem(currentTrashedFile)
         restoreFileIn.setOnClickListener {
             trackTrashEvent("restoreGivenFolder")
             Intent(requireContext(), SelectFolderActivity::class.java).apply {

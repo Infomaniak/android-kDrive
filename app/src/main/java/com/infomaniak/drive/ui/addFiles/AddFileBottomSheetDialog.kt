@@ -102,7 +102,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
-        currentFolder.root.setFileItem(currentFolderFile)
+        currentFolder.setFileItem(currentFolderFile)
 
         openCameraWritePermissions = DrivePermissions().apply {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }

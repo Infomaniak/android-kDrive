@@ -28,9 +28,8 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Size
-import android.view.View
 import android.widget.ImageView
-import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toFile
@@ -39,141 +38,168 @@ import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.viewbinding.ViewBinding
 import coil.load
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
+import com.infomaniak.drive.databinding.*
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.lib.core.utils.FormatterFileSize
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
-import kotlinx.android.synthetic.main.cardview_file_grid.view.filePreview2
-import kotlinx.android.synthetic.main.item_file.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-fun View.setFileItem(file: File, isGrid: Boolean = false) {
+fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
     fileName.text = file.name
     fileFavorite.isVisible = file.isFavorite
-    progressLayout.isGone = true
+    progressLayout.root.isGone = true
     displayDate(file)
     displaySize(file)
-    displayIcon(file, isGrid)
-    displayCategories(file)
-    displayExternalImport(file)
+    filePreview.displayIcon(file, isGrid, progressLayout)
+    categoriesLayout.displayCategories(file)
+    displayExternalImport(file, filePreview, fileProgression, fileDate)
 }
 
-private fun View.displayDate(file: File) {
-    fileDate?.apply {
-        isVisible = file.id != ROOT_ID
-        text = if (file.deletedAt.isPositive()) {
-            file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
-        } else {
-            file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
-        }
+fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
+    fileName.text = file.name
+    fileFavorite.isVisible = file.isFavorite
+    progressLayout.root.isGone = true
+    filePreview.displayIcon(file, isGrid, progressLayout)
+    categoriesLayout.displayCategories(file)
+    displayExternalImport(file, filePreview, fileProgression)
+}
+
+fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
+    fileName.text = file.name
+    fileFavorite.isVisible = file.isFavorite
+    progressLayout.root.isGone = true
+    filePreview.displayIcon(file, isGrid, progressLayout, filePreview2)
+    categoriesLayout.displayCategories(file)
+}
+
+
+private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
+    isVisible = file.id != ROOT_ID
+    text = if (file.deletedAt.isPositive()) {
+        file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
+    } else {
+        file.getLastModifiedAt().format(context.getString(R.string.allLastModifiedFilePattern))
     }
 }
 
-private fun View.displaySize(file: File) {
+private fun ItemFileBinding.displaySize(file: File) {
     file.size?.let {
-        fileSize?.text = FormatterFileSize.formatShortFileSize(context, it)
-        fileSeparator?.isVisible = true
+        fileSize.text = FormatterFileSize.formatShortFileSize(context, it)
+        fileSeparator.isVisible = true
     } ?: run {
-        fileSize?.text = ""
-        fileSeparator?.isGone = true
+        fileSize.text = ""
+        fileSeparator.isGone = true
     }
 }
 
-private fun View.displayIcon(file: File, isGrid: Boolean) {
-    filePreview.scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
+private fun ImageView.displayIcon(
+    file: File,
+    isGrid: Boolean,
+    progressLayout: ViewProgressLayoutBinding,
+    filePreview2: ImageView? = null,
+) {
+    scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
     when {
         file.isFolder() -> displayFolderIcon(file)
         file.isDrive() -> displayDriveIcon(file)
-        else -> displayFileIcon(file, isGrid)
+        else -> displayFileIcon(file, isGrid, progressLayout, filePreview2)
     }
 }
 
-private fun View.displayFolderIcon(file: File) {
+private fun ImageView.displayFolderIcon(file: File) {
     val (icon, tint) = file.getFolderIcon()
-    if (tint == null) filePreview.load(icon) else filePreview.load(getTintedDrawable(context, icon, tint))
+    if (tint == null) load(icon) else load(getTintedDrawable(context, icon, tint))
 }
 
-private fun View.displayDriveIcon(file: File) {
-    filePreview.load(getTintedDrawable(context, R.drawable.ic_drive, file.driveColor))
+private fun ImageView.displayDriveIcon(file: File) {
+    load(getTintedDrawable(context, R.drawable.ic_drive, file.driveColor))
 }
 
-private fun View.displayFileIcon(file: File, isGrid: Boolean) {
+private fun ImageView.displayFileIcon(
+    file: File,
+    isGrid: Boolean,
+    progressLayout: ViewProgressLayoutBinding,
+    filePreview2: ImageView? = null,
+) {
     val fileType = file.getFileType()
     val isGraphic = fileType == ExtensionType.IMAGE || fileType == ExtensionType.VIDEO
 
     when {
         file.hasThumbnail && (isGrid || isGraphic) -> {
-            filePreview.apply {
-                scaleType = ImageView.ScaleType.CENTER_CROP
-                loadAny(file.thumbnail(), fileType.icon)
-            }
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            loadAny(file.thumbnail(), fileType.icon)
         }
         file.isFromUploads && isGraphic -> {
-            filePreview.scaleType = ImageView.ScaleType.CENTER_CROP
+            scaleType = ImageView.ScaleType.CENTER_CROP
             CoroutineScope(Dispatchers.IO).launch {
                 val bitmap = context.getLocalThumbnail(file)
                 withContext(Dispatchers.Main) {
-                    if (filePreview?.isVisible == true && context != null) filePreview.loadAny(bitmap, fileType.icon)
+                    if (isVisible && context != null) loadAny(bitmap, fileType.icon)
                 }
             }
         }
         else -> {
-            filePreview.apply {
-                scaleType = ImageView.ScaleType.CENTER
-                load(fileType.icon)
-            }
+            scaleType = ImageView.ScaleType.CENTER
+            load(fileType.icon)
         }
     }
 
     filePreview2?.load(fileType.icon)
-    setupFileProgress(file)
+    progressLayout.setupFileProgress(file)
 }
 
 fun getTintedDrawable(context: Context, icon: Int, tint: String): Drawable {
     return ContextCompat.getDrawable(context, icon)!!.mutate().apply { setTint(tint.toColorInt()) }
 }
 
-private fun View.displayCategories(file: File) {
+private fun ItemCategoriesLayoutBinding.displayCategories(file: File) = with(root) {
     val canReadCategoryOnFile = DriveInfosController.getCategoryRights(file.driveId).canReadCategoryOnFile
     val categories = file.getCategories()
 
-    (categoriesLayout as LinearLayout).apply {
-        if (!canReadCategoryOnFile || categories.isEmpty()) {
-            isGone = true
-        } else {
-            forEachIndexed { index, view ->
-                with(view as CategoryIconView) {
-                    val category = categories.getOrNull(index)
-                    if (index < MAX_DISPLAYED_CATEGORIES - 1) {
-                        setCategoryIconOrHide(category)
-                    } else {
-                        setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES)
-                    }
+    if (!canReadCategoryOnFile || categories.isEmpty()) {
+        isGone = true
+    } else {
+        forEachIndexed { index, view ->
+            with(view as CategoryIconView) {
+                val category = categories.getOrNull(index)
+                if (index < MAX_DISPLAYED_CATEGORIES - 1) {
+                    setCategoryIconOrHide(category)
+                } else {
+                    setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES)
                 }
             }
-            isVisible = true
         }
+        isVisible = true
     }
 }
 
-private fun View.displayExternalImport(file: File) {
+private fun ViewBinding.displayExternalImport(
+    file: File,
+    filePreview: ImageView,
+    fileProgression: CircularProgressIndicator? = null,
+    fileDate: TextView? = null,
+) {
     val isImporting = file.isImporting()
     fileProgression?.isVisible = isImporting
     filePreview.isInvisible = isImporting
     if (isImporting) {
         val importStatus = if (file.isCancelingImport()) R.string.allCancellationInProgress else R.string.uploadInProgressTitle
-        fileDate?.text = resources.getString(importStatus)
+        fileDate?.text = context.resources.getString(importStatus)
     }
 }
 
@@ -293,7 +319,7 @@ private fun Context.getBitmapFromFileId(fileUri: Uri, thumbnailSize: Int): Bitma
     }
 }
 
-fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
+fun ViewProgressLayoutBinding.setupFileProgress(file: File, containsProgress: Boolean = false) {
     when {
         !containsProgress && file.currentProgress == Utils.INDETERMINATE_PROGRESS && file.isPendingOffline(context) -> {
             fileOffline.isGone = true
@@ -302,7 +328,7 @@ fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
                 isIndeterminate = true
                 isVisible = true
             }
-            progressLayout.isVisible = true
+            root.isVisible = true
         }
         containsProgress && file.currentProgress in 0..99 -> {
             fileOffline.isGone = true
@@ -314,13 +340,13 @@ fun View.setupFileProgress(file: File, containsProgress: Boolean = false) {
                 isVisible = true
                 progress = file.currentProgress
             }
-            progressLayout.isVisible = true
+            root.isVisible = true
         }
         file.isOfflineFile(context, checkLocalFile = false) -> {
             fileOffline.isVisible = true
             fileOfflineProgression.isGone = true
-            progressLayout.isVisible = true
+            root.isVisible = true
         }
-        else -> progressLayout.isGone = true
+        else -> root.isGone = true
     }
 }
