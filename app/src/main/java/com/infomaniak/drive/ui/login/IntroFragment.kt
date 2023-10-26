@@ -23,18 +23,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.infomaniak.drive.R
-import kotlinx.android.synthetic.main.fragment_intro.description
-import kotlinx.android.synthetic.main.fragment_intro.icon
-import kotlinx.android.synthetic.main.fragment_intro.title
-import kotlinx.android.synthetic.main.fragment_intro.waveBackground
+import com.infomaniak.drive.databinding.FragmentIntroBinding
+import com.infomaniak.lib.core.utils.safeBinding
 
 class IntroFragment : Fragment() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_intro, container, false)
+    private var binding: FragmentIntroBinding by safeBinding()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentIntroBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
         when (arguments?.getInt(POSITION_KEY)) {
             1 -> {
