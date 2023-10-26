@@ -19,6 +19,7 @@ package com.infomaniak.drive.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
@@ -26,10 +27,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.databinding.ItemUserAvatarBinding
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.drive.utils.loadAvatar
-import kotlinx.android.synthetic.main.item_user_avatar.view.avatarImageView
-import kotlinx.android.synthetic.main.item_user_avatar.view.remainingText
 
 class UserAvatarView @JvmOverloads constructor(
     context: Context,
@@ -37,13 +37,11 @@ class UserAvatarView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    init {
-        inflate(context, R.layout.item_user_avatar, this)
-    }
+    private val binding by lazy { ItemUserAvatarBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    fun setUserAvatarOrHide(user: DriveUser? = null) {
+    fun setUserAvatarOrHide(user: DriveUser? = null) = with(binding) {
         user?.let {
-            this.isVisible = true
+            root.isVisible = true
             remainingText.isGone = true
             avatarImageView.setBackgroundColor(
                 ContextCompat.getColor(
@@ -52,20 +50,20 @@ class UserAvatarView @JvmOverloads constructor(
                 )
             ) // in case of transparent pics
             avatarImageView.loadAvatar(user)
-            TooltipCompat.setTooltipText(this, user.displayName)
+            TooltipCompat.setTooltipText(root, user.displayName)
         } ?: run {
-            this.isGone = true
+            root.isGone = true
         }
     }
 
-    fun setUsersNumber(number: Int) {
+    fun setUsersNumber(number: Int) = with(binding) {
         if (number.isPositive()) {
-            this.isVisible = true
+            root.isVisible = true
             avatarImageView.setBackgroundColor(ContextCompat.getColor(context, R.color.primaryText))
             remainingText.text = "+$number"
             remainingText.isVisible = true
         } else {
-            this.isGone = true
+            root.isGone = true
         }
     }
 }

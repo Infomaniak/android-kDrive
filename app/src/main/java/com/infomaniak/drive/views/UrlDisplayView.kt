@@ -19,12 +19,10 @@ package com.infomaniak.drive.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.FrameLayout
-import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ViewUrlDisplayBinding
 import com.infomaniak.drive.utils.shareText
-import kotlinx.android.synthetic.main.view_url_display.view.cardViewUrlValue
-import kotlinx.android.synthetic.main.view_url_display.view.shareUrlButton
-import kotlinx.android.synthetic.main.view_url_display.view.urlValue
 
 class UrlDisplayView @JvmOverloads constructor(
     context: Context,
@@ -32,8 +30,10 @@ class UrlDisplayView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
+    private val binding by lazy { ViewUrlDisplayBinding.inflate(LayoutInflater.from(context), this, true) }
+
     init {
-        inflate(context, R.layout.view_url_display, this).apply {
+        binding.apply {
             shareUrlButton.setOnClickListener { copyButton ->
                 copyButton.requestFocus()
                 shareUrl(context)
@@ -45,10 +45,10 @@ class UrlDisplayView @JvmOverloads constructor(
     }
 
     private fun shareUrl(context: Context) {
-        context.shareText(urlValue.text.toString())
+        context.shareText(binding.urlValue.text.toString())
     }
 
     fun setUrl(url: String) {
-        urlValue.text = url
+        binding.urlValue.text = url
     }
 }
