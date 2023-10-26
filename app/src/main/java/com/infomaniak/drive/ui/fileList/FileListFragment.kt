@@ -392,7 +392,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         setupToggleDisplayButton()
         setupListMode()
         setupSortButton()
-        binding.uploadFileInProgress.root.setUploadFileInProgress(R.string.uploadInThisFolderTitle) {
+        binding.uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) {
             goToUploadInProgress(folderId)
         }
     }
@@ -485,7 +485,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected open fun homeClassName(): String? = null
 
     protected fun setToolbarTitle(@StringRes rootTitleRes: Int? = null) {
-        binding.collapsingToolbarLayout.title = if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
+        binding.collapsingToolbarLayout.title =
+            if (isCurrentFolderRoot() && rootTitleRes != null) getString(rootTitleRes) else folderName
     }
 
     private fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
@@ -584,11 +585,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         downloadFiles(true, false)
     }
 
-    private fun showPendingFiles() {
+    private fun showPendingFiles() = with(binding) {
         val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
         if (!showPendingFiles || isNotCurrentDriveRoot) return
         fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
-            binding.uploadFileInProgress.root.updateUploadFileInProgress(pendingFilesCount)
+            uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount, uploadFileInProgressLayout)
         }
     }
 

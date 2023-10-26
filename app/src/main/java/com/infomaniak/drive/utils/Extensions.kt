@@ -31,6 +31,7 @@ import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.view.inputmethod.EditorInfo
@@ -60,6 +61,7 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -72,12 +74,6 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.login.InfomaniakLogin
 import io.realm.RealmList
-import kotlinx.android.synthetic.main.activity_main.bottomNavigation
-import kotlinx.android.synthetic.main.activity_main.mainFab
-import kotlinx.android.synthetic.main.item_file.view.fileName
-import kotlinx.android.synthetic.main.item_file.view.filePreview
-import kotlinx.android.synthetic.main.item_file.view.fileProgression
-import kotlinx.android.synthetic.main.item_file.view.fileSize
 import kotlinx.android.synthetic.main.item_user.view.chevron
 import kotlinx.android.synthetic.main.item_user.view.userAvatar
 import kotlinx.android.synthetic.main.item_user.view.userEmail
@@ -251,7 +247,9 @@ fun Fragment.showSnackbar(
     actionButtonTitle: Int = R.string.buttonCancel,
     onActionClicked: (() -> Unit)? = null
 ) {
-    activity?.let { it.showSnackbar(title, if (showAboveFab) it.mainFab else null, actionButtonTitle, onActionClicked) }
+    (activity as? MainActivity)?.let {
+        it.showSnackbar(title, if (showAboveFab) it.getMainFab() else null, actionButtonTitle, onActionClicked)
+    }
 }
 
 fun Fragment.openOnlyOfficeDocument(file: File) {
@@ -275,7 +273,7 @@ fun Context.openOnlyOfficeActivity(file: File) {
 fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
-        (requireActivity() as MainActivity).bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
+        (requireActivity() as MainActivity).getBottomNavigation().findViewById<View>(R.id.fileListFragment).performClick()
         mainViewModel.navigateFileListTo(this, folderId)
     }
 }
@@ -294,32 +292,32 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
 
-fun View.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {
-    val radius = resources.getDimension(R.dimen.cardViewRadius)
-    (this as MaterialCardView).shapeAppearanceModel = shapeAppearanceModel.toBuilder()
+fun CardviewFileListBinding.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {
+    val radius = context.resources.getDimension(R.dimen.cardViewRadius)
+    root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
         .setTopLeftCorner(CornerFamily.ROUNDED, radius)
         .setTopRightCorner(CornerFamily.ROUNDED, radius)
         .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
         .setBottomRightCorner(CornerFamily.ROUNDED, radius)
         .build()
 
-    fileName.setText(title)
+    itemViewFile.fileName.setText(title)
 
-    setOnClickListener { onClickListener() }
+    root.setOnClickListener { onClickListener() }
 }
 
-fun View.updateUploadFileInProgress(pendingFilesCount: Int) {
+fun CardviewFileListBinding.updateUploadFileInProgress(pendingFilesCount: Int, parentLayout: ViewGroup) = with(itemViewFile) {
     if (pendingFilesCount > 0) {
-        fileSize.text = resources.getQuantityString(
+        fileSize.text = context.resources.getQuantityString(
             R.plurals.uploadInProgressNumberFile,
             pendingFilesCount,
             pendingFilesCount
         )
         filePreview.isGone = true
         fileProgression.isVisible = true
-        isVisible = true
+        parentLayout.isVisible = true
     } else {
-        isGone = true
+        parentLayout.isGone = true
     }
 }
 

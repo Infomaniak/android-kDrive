@@ -104,7 +104,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             })
         }
 
-        homeUploadFileInProgress.root.setUploadFileInProgress(R.string.uploadInProgressTitle) {
+        homeUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
             navigateToUploadView(Utils.OTHER_ROOT_ID)
         }
 
@@ -136,8 +136,11 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         showPendingFiles()
     }
 
-    private fun showPendingFiles() {
-        binding.homeUploadFileInProgress.root.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
+    private fun showPendingFiles() = with(binding) {
+        homeUploadFileInProgress.updateUploadFileInProgress(
+            UploadFile.getCurrentUserPendingUploadsCount(),
+            homeUploadFileInProgressLayout,
+        )
     }
 
     private fun updateUi(forceDownload: Boolean = false) = with(binding) {
