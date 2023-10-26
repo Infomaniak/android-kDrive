@@ -24,15 +24,15 @@ import android.content.DialogInterface.OnDismissListener
 import android.text.SpannableStringBuilder
 import android.text.format.DateFormat.is24HourFormat
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
-import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ViewTimeInputBinding
 import com.infomaniak.lib.core.utils.*
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener
 import com.wdullaer.materialdatetimepicker.time.Timepoint
-import kotlinx.android.synthetic.main.view_time_input.view.timeValueInput
 import java.util.Calendar
 import java.util.Date
 
@@ -42,13 +42,11 @@ class TimeInputView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr), OnTimeSetListener, OnDismissListener, OnCancelListener {
 
+    private val binding by lazy { ViewTimeInputBinding.inflate(LayoutInflater.from(context), this, true) }
+
     private lateinit var mOnDatePicked: (hours: Int, minutes: Int) -> Unit
     private var hours: Int = 0
     private var minutes: Int = 0
-
-    init {
-        inflate(context, R.layout.view_time_input, this)
-    }
 
     fun init(
         fragmentManager: FragmentManager,
@@ -59,7 +57,7 @@ class TimeInputView @JvmOverloads constructor(
         hours = defaultDate.hours()
         minutes = defaultDate.minutes()
 
-        timeValueInput.apply {
+        binding.timeValueInput.apply {
             text = SpannableStringBuilder(defaultDate.format(FORMAT_DATE_HOUR_MINUTE))
             keyListener = null
             setOnTouchListener { _, event ->
