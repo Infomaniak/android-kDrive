@@ -21,10 +21,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.IsComplete
-import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -79,7 +79,7 @@ class GalleryViewModel : ViewModel() {
     }
 
     private fun emitApiGallery(
-        apiResponse: ApiResponse<ArrayList<File>>,
+        apiResponse: CursorApiResponse<ArrayList<File>>,
         isFirstPage: Boolean,
     ): Pair<ArrayList<File>, Boolean>? {
         val data = apiResponse.data
