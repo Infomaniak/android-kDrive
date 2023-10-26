@@ -20,6 +20,7 @@ package com.infomaniak.drive.views
 import android.content.Context
 import android.text.SpannableStringBuilder
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
@@ -27,8 +28,8 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.drive.R
+import com.infomaniak.drive.databinding.ViewDateInputBinding
 import com.infomaniak.lib.core.utils.format
-import kotlinx.android.synthetic.main.view_date_input.view.dateValueInput
 import java.util.Calendar
 import java.util.Date
 
@@ -38,11 +39,9 @@ class DateInputView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private lateinit var currentCalendarDate: Date
+    private val binding by lazy { ViewDateInputBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    init {
-        inflate(context, R.layout.view_date_input, this)
-    }
+    private lateinit var currentCalendarDate: Date
 
     fun init(
         fragmentManager: FragmentManager,
@@ -51,7 +50,7 @@ class DateInputView @JvmOverloads constructor(
     ) {
         currentCalendarDate = defaultDate
 
-        dateValueInput.apply {
+        binding.dateValueInput.apply {
             text = SpannableStringBuilder(currentCalendarDate.format())
             keyListener = null
             setOnTouchListener { _, event ->
