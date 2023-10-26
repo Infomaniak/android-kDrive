@@ -26,7 +26,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
-import android.view.View
+import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -48,6 +48,8 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
+import com.infomaniak.drive.databinding.DialogNamePromptBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
@@ -57,10 +59,6 @@ import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.showKeyboard
 import com.infomaniak.lib.core.utils.showToast
-import kotlinx.android.synthetic.main.dialog_download_progress.view.downloadProgress
-import kotlinx.android.synthetic.main.dialog_name_prompt.view.icon
-import kotlinx.android.synthetic.main.dialog_name_prompt.view.nameEditText
-import kotlinx.android.synthetic.main.dialog_name_prompt.view.nameLayout
 import java.util.Date
 import kotlin.math.min
 import kotlin.math.pow
@@ -142,12 +140,12 @@ object Utils {
         selectedRange: Int? = null,
         onPositiveButtonClicked: (dialog: Dialog, body: String) -> Unit
     ) {
-        val promptLayoutView = View.inflate(context, R.layout.dialog_name_prompt, null)
-        val nameEditText = promptLayoutView.nameEditText
-        promptLayoutView.nameLayout.setHint(fieldName)
+        val promptLayoutBinding = DialogNamePromptBinding.inflate(LayoutInflater.from(context))
+        val nameEditText = promptLayoutBinding.nameEditText
+        promptLayoutBinding.nameLayout.setHint(fieldName)
 
         iconRes?.let {
-            promptLayoutView.icon.apply {
+            promptLayoutBinding.icon.apply {
                 setImageDrawable(ContextCompat.getDrawable(context, it))
                 isVisible = true
             }
@@ -155,7 +153,7 @@ object Utils {
 
         val dialog = MaterialAlertDialogBuilder(context, R.style.DialogStyle)
             .setTitle(title)
-            .setView(promptLayoutView)
+            .setView(promptLayoutBinding.root)
             .setPositiveButton(positiveButton) { _, _ -> }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false)
@@ -342,10 +340,10 @@ object Utils {
         return MaterialAlertDialogBuilder(context, R.style.DialogStyle).apply {
             setTitle(title)
             setCancelable(false)
-            View.inflate(context, R.layout.dialog_download_progress, null).apply {
+            DialogDownloadProgressBinding.inflate(LayoutInflater.from(context)).apply {
                 icon.isGone = true
                 downloadProgress.isIndeterminate = true
-                setView(this)
+                setView(root)
             }
         }.show()
     }
