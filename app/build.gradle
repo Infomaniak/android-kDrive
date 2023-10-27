@@ -32,7 +32,7 @@ android {
         buildConfigField 'String', 'DRIVE_API_V1', '"https://api.kdrive.infomaniak.com/drive/"'
         buildConfigField 'String', 'DRIVE_API_V2', '"https://api.kdrive.infomaniak.com/2/drive/"'
         buildConfigField 'String', 'DRIVE_API_V3', '"https://api.kdrive.infomaniak.com/3/drive/"'
-        buildConfigField 'String', 'MANAGER_URL', '"https://manager.preprod.dev.infomaniak.ch/v3/"'
+        buildConfigField 'String', 'MANAGER_URL', '"https://manager.infomaniak.com/v3/"'
         buildConfigField 'String', 'OFFICE_URL', '"https://kdrive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
@@ -81,6 +81,7 @@ android {
             dimension 'distribution'
             buildConfigField 'String', 'DRIVE_API_V1', '"https://drive.preprod.dev.infomaniak.ch/drive/"'
             buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.preprod.dev.infomaniak.ch/2/drive/"'
+            buildConfigField 'String', 'DRIVE_API_V3', '"https://drive.preprod.dev.infomaniak.ch/3/drive/"'
             matchingFallbacks = ['standard']
         }
     }
