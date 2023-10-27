@@ -125,12 +125,12 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String?,
         forFileList: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
-    ): ApiResponse<ArrayList<FileActivity>> {
+    ): CursorApiResponse<ArrayList<FileActivity>> {
         val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithExtraQuery" else "&with=user"
         val url = "${ApiRoutes.getFileActivities(file)}?${loadCursor(cursor)}$queries$ACTIONS" +
                 if (forFileList) "" else ADDITIONAL_ACTIONS
 
-        return callApi(url, GET, okHttpClient = okHttpClient)
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
     // For sync offline service
@@ -258,9 +258,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileCount(file), GET)
     }
 
-    fun getFileComments(file: File, cursor: String?): ApiResponse<ArrayList<FileComment>> {
+    fun getFileComments(file: File, cursor: String?): CursorApiResponse<ArrayList<FileComment>> {
         val url = "${ApiRoutes.fileComments(file)}&${loadCursor(cursor)}"
-        return callApi(url, GET)
+        return callApiWithCursor(url, GET)
     }
 
     fun postFileComment(file: File, body: String): ApiResponse<FileComment> {
