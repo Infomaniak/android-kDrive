@@ -155,7 +155,7 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     @DisplayName("Retrieve recent activities from remote")
     fun getLastActivity() {
-        with(getLastActivities(userDrive.driveId, 1)) {
+        with(getLastActivities(userDrive.driveId, null)) {
             assertApiResponseData(this)
             assertTrue(data!!.isNotEmpty(), "Last activities shouldn't be empty or null")
         }
