@@ -19,8 +19,8 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
@@ -32,7 +32,7 @@ class FileDetailsViewModel : ViewModel() {
     private var getFileCommentsJob = Job()
     private var getFileActivitiesJob = Job()
 
-    fun getFileActivities(file: File): LiveData<ApiResponse<ArrayList<FileActivity>>?> {
+    fun getFileActivities(file: File): LiveData<CursorApiResponse<ArrayList<FileActivity>>?> {
         getFileActivitiesJob.cancel()
         getFileActivitiesJob = Job()
 
@@ -41,7 +41,7 @@ class FileDetailsViewModel : ViewModel() {
         }
     }
 
-    fun getFileComments(file: File): LiveData<ApiResponse<ArrayList<FileComment>>?> {
+    fun getFileComments(file: File): LiveData<CursorApiResponse<ArrayList<FileComment>>?> {
         getFileCommentsJob.cancel()
         getFileCommentsJob = Job()
 
@@ -74,9 +74,9 @@ class FileDetailsViewModel : ViewModel() {
         emit(ApiRepository.postUnlikeComment(file, fileComment.id))
     }
 
-    private suspend fun <T> LiveDataScope<ApiResponse<ArrayList<T>>?>.manageRecursiveApiResponse(
+    private suspend fun <T> LiveDataScope<CursorApiResponse<ArrayList<T>>?>.manageRecursiveApiResponse(
         file: File,
-        apiResponseCallback: (file: File, cursor: String?) -> ApiResponse<ArrayList<T>>
+        apiResponseCallback: (file: File, cursor: String?) -> CursorApiResponse<ArrayList<T>>
     ) {
         suspend fun recursive(cursor: String?) {
             with(apiResponseCallback(file, cursor)) {
