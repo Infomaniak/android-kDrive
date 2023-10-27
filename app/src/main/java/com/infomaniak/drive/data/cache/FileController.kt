@@ -787,7 +787,7 @@ object FileController {
 
     fun getFolderActivities(folder: File, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
         return getRealmInstance(userDrive).use { realm ->
-            getFolderActivitiesRec(realm, folder, userDrive, folder.cursor)
+            getFolderActivitiesRec(realm, folder, userDrive)
         }
     }
 
