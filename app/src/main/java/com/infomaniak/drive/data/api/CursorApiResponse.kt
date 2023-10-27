@@ -30,4 +30,9 @@ class CursorApiResponse<T>(
     val cursor: String? = null, // TODO: It's only temporarily nullable, pending a change on the API side.
     @SerializedName("has_more")
     val hasMore: String? = null,
-) : ApiResponse<T>()
+) : ApiResponse<T>(
+    result = result,
+    data = data,
+    error = error,
+    responseAt = responseAt,
+)
