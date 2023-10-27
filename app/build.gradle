@@ -79,9 +79,9 @@ android {
         fdroid { dimension 'distribution' }
         preprod {
             dimension 'distribution'
-            buildConfigField 'String', 'DRIVE_API_V1', '"https://drive.preprod.dev.infomaniak.ch/drive/"'
-            buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.preprod.dev.infomaniak.ch/2/drive/"'
-            buildConfigField 'String', 'DRIVE_API_V3', '"https://drive.preprod.dev.infomaniak.ch/3/drive/"'
+            buildConfigField 'String', 'DRIVE_API_V1', '"https://kdrive.preprod.dev.infomaniak.ch/drive/"'
+            buildConfigField 'String', 'DRIVE_API_V2', '"https://kdrive.preprod.dev.infomaniak.ch/2/drive/"'
+            buildConfigField 'String', 'DRIVE_API_V3', '"https://kdrive.preprod.dev.infomaniak.ch/3/drive/"'
             matchingFallbacks = ['standard']
         }
     }
