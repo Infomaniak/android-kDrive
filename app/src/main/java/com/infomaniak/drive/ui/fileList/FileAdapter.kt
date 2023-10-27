@@ -282,11 +282,11 @@ open class FileAdapter(
             val isChecked = payloads.first() as Boolean
             val isGrid = viewHolderType == DisplayType.GRID
             when (viewType) {
-                DisplayType.LIST.layout -> (this as ItemFileBinding).apply {
+                DisplayType.LIST.layout -> (this as CardviewFileListBinding).apply {
                     // TODO: Factorize
-                    fileChecked.isChecked = isChecked
-                    fileChecked.isVisible = isGrid || isChecked
-                    filePreview.isInvisible = (isChecked && !isGrid) || getFile(position).isImporting()
+                    itemViewFile.fileChecked.isChecked = isChecked
+                    itemViewFile.fileChecked.isVisible = isGrid || isChecked
+                    itemViewFile.filePreview.isInvisible = (isChecked && !isGrid) || getFile(position).isImporting()
                 }
                 DisplayType.GRID.layout -> (this as CardviewFileGridBinding).apply {
                     fileChecked.isChecked = isChecked
