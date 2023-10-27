@@ -22,6 +22,7 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
@@ -29,7 +30,9 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
@@ -52,10 +55,6 @@ import io.realm.OrderedRealmCollection
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmRecyclerViewAdapter
-import kotlinx.android.synthetic.main.item_file.view.fileChecked
-import kotlinx.android.synthetic.main.item_file.view.filePreview
-import kotlinx.android.synthetic.main.item_file.view.menuButton
-import kotlinx.android.synthetic.main.item_file.view.stopUploadButton
 import java.util.UUID
 
 open class FileAdapter(
@@ -307,84 +306,133 @@ open class FileAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with((holder as FileViewHolder).binding) {
         val viewType = getItemViewType(position)
-        if (viewType != VIEW_TYPE_LOADING) {
-            val cardView = when (viewType) {
-                DisplayType.LIST.layout -> root as MaterialCardView
-                DisplayType.GRID.layout -> (this as CardviewFileGridBinding).fileCardView
-                DisplayType.GRID_FOLDER.layout -> (this as CardviewFolderGridBinding).fileCardView
-                else -> throw IllegalStateException("View type must be LIST, GRID or GRID_FOLDER")
+        if (viewType == VIEW_TYPE_LOADING) return@with
+
+        val file = getFile(position)
+        val isGrid = viewHolderType == DisplayType.GRID
+
+        when (viewType) {
+            DisplayType.LIST.layout -> with(this as CardviewFileListBinding) {
+                root.setCorners(position, itemCount)
+                itemViewFile.setFileItem(file, isGrid)
+                file.checkIfEnableFile(context, disabled, root, itemViewFile.fileDate)
+
+                when {
+                    uploadInProgress && !file.isPendingUploadFolder() -> {
+                        itemViewFile.stopUploadButton.displayStopUploadButton(position, file)
+                    }
+                    multiSelectManager.isMultiSelectOn -> {
+                        itemViewFile.fileChecked.displayFileChecked(file, itemViewFile.filePreview, isGrid)
+                    }
+                    else -> itemViewFile.fileChecked.isGone = true
+                }
+
+                itemViewFile.menuButton.setupMenuButton(file)
+                root.setupCardClicksListeners(file, position, itemViewFile.fileChecked)
             }
-
-            val file = getFile(position)
-            val isGrid = viewHolderType == DisplayType.GRID
-
-            if (isGrid) {
+            DisplayType.GRID.layout -> with(this as CardviewFileGridBinding) {
                 if (isHomeOffline) {
-                    (cardView.layoutParams as ConstraintLayout.LayoutParams).apply {
+                    (fileCardView.layoutParams as ConstraintLayout.LayoutParams).apply {
                         dimensionRatio = null
                         height = 150.toPx()
                     }
                 }
-            } else {
-                cardView.setCorners(position, itemCount)
-            }
+                setFileItem(file, isGrid)
+                file.checkIfEnableFile(context, disabled, fileCardView)
 
-            when (viewType) {
-                DisplayType.LIST.layout -> with(this as CardviewFileListBinding) {
-                    itemViewFile.setFileItem(file, isGrid)
-                    file.checkIfEnableFile(context, disabled, root, itemViewFile.fileDate)
+                when {
+                    // TODO: Simplify this
+                    uploadInProgress && !file.isPendingUploadFolder() -> Unit
+                    multiSelectManager.isMultiSelectOn -> fileChecked.displayFileChecked(file, filePreview, isGrid)
+                    else -> fileChecked.isGone = true
                 }
-                DisplayType.GRID.layout -> with(this as CardviewFileGridBinding) {
-                    setFileItem(file, isGrid)
-                    file.checkIfEnableFile(context, disabled, fileCardView)
-                }
-                DisplayType.GRID_FOLDER.layout -> with(this as CardviewFolderGridBinding) {
-                    setFileItem(file, isGrid)
-                    file.checkIfEnableFile(context, disabled, fileCardView)
-                }
-            }
 
-            when {
-                uploadInProgress && !file.isPendingUploadFolder() -> cardView.displayStopUploadButton(position, file)
-                multiSelectManager.isMultiSelectOn -> cardView.displayFileChecked(file, isGrid)
-                else -> cardView.fileChecked.isGone = true
+                menuButton.setupMenuButton(file)
+                fileCardView.setupCardClicksListeners(file, position, fileChecked)
             }
+            DisplayType.GRID_FOLDER.layout -> with(this as CardviewFolderGridBinding) {
+                fileCardView.setCorners(position, itemCount)
+                setFileItem(file, isGrid)
+                file.checkIfEnableFile(context, disabled, fileCardView)
 
-            cardView.apply {
-                setupMenuButton(file)
-                setupCardClicksListeners(file, position)
+                when {
+                    uploadInProgress && !file.isPendingUploadFolder() -> Unit
+                    multiSelectManager.isMultiSelectOn -> fileChecked.displayFileChecked(file, filePreview, isGrid)
+                    else -> fileChecked.isGone = true
+                }
+
+                menuButton.setupMenuButton(file)
+                fileCardView.setupCardClicksListeners(file, position, fileChecked)
             }
+            else -> throw IllegalStateException("View type must be LIST, GRID or GRID_FOLDER")
         }
+
+//        if (isGrid) {
+//            if (isHomeOffline) {
+//                (cardView.layoutParams as ConstraintLayout.LayoutParams).apply {
+//                    dimensionRatio = null
+//                    height = 150.toPx()
+//                }
+//            }
+//        } else {
+//            cardView.setCorners(position, itemCount)
+//        }
+
+//        when (viewType) {
+//            DisplayType.LIST.layout -> with(this as CardviewFileListBinding) {
+//                itemViewFile.setFileItem(file, isGrid)
+//                file.checkIfEnableFile(context, disabled, root, itemViewFile.fileDate)
+//            }
+//            DisplayType.GRID.layout -> with(this as CardviewFileGridBinding) {
+//                setFileItem(file, isGrid)
+//                file.checkIfEnableFile(context, disabled, fileCardView)
+//            }
+//            DisplayType.GRID_FOLDER.layout -> with(this as CardviewFolderGridBinding) {
+//                setFileItem(file, isGrid)
+//                file.checkIfEnableFile(context, disabled, fileCardView)
+//            }
+//        }
+//
+//        when {
+//            uploadInProgress && !file.isPendingUploadFolder() -> cardView.displayStopUploadButton(position, file)
+//            multiSelectManager.isMultiSelectOn -> cardView.displayFileChecked(file, isGrid)
+//            else -> cardView.fileChecked.isGone = true
+//        }
+//
+//        cardView.apply {
+//            setupMenuButton(file)
+//            setupCardClicksListeners(file, position)
+//        }
     }
 
-    private fun MaterialCardView.displayStopUploadButton(position: Int, file: File) {
-        stopUploadButton?.apply {
-            setOnClickListener { onStopUploadButtonClicked?.invoke(position, file.name) }
-            isVisible = true
-        }
+    private fun MaterialButton.displayStopUploadButton(position: Int, file: File) {
+        setOnClickListener { onStopUploadButtonClicked?.invoke(position, file.name) }
+        isVisible = true
     }
 
-    private fun MaterialCardView.displayFileChecked(file: File, isGrid: Boolean) = with(multiSelectManager) {
-        fileChecked.apply {
+    private fun MaterialCheckBox.displayFileChecked(file: File, filePreview: ImageView, isGrid: Boolean) {
+        with(multiSelectManager) {
             isChecked = isSelectedFile(file)
             isVisible = isGrid || isSelectedFile(file)
-        }
-        filePreview.isInvisible = file.isImporting() || (isSelectedFile(file) && !isGrid)
-    }
-
-    private fun MaterialCardView.setupMenuButton(file: File) {
-        menuButton?.apply {
-            isGone = uploadInProgress
-                    || selectFolder
-                    || file.isDrive()
-                    || file.isFromActivities
-                    || file.isFromSearch
-                    || (offlineMode && !file.isOffline)
-            setOnClickListener { onMenuClicked?.invoke(file) }
+            filePreview.isInvisible = file.isImporting() || (isSelectedFile(file) && !isGrid)
         }
     }
 
-    private fun MaterialCardView.setupCardClicksListeners(file: File, position: Int) = with(multiSelectManager) {
+    private fun MaterialButton.setupMenuButton(file: File) {
+        isGone = uploadInProgress
+                || selectFolder
+                || file.isDrive()
+                || file.isFromActivities
+                || file.isFromSearch
+                || (offlineMode && !file.isOffline)
+        setOnClickListener { onMenuClicked?.invoke(file) }
+    }
+
+    private fun MaterialCardView.setupCardClicksListeners(
+        file: File,
+        position: Int,
+        fileChecked: MaterialCheckBox,
+    ) = with(multiSelectManager) {
 
         fun selectFile() {
             onFileSelected(file, !isSelectedFile(file))
