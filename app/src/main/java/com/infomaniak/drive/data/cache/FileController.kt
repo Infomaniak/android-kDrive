@@ -809,7 +809,10 @@ object FileController {
                 fileActivity.applyFileActivity(realm, returnResponse, folder)
             }
 
-            if ((apiResponse.data?.size ?: 0) < ApiRepository.PER_PAGE) {
+            if (apiResponse.hasMore) {
+                // Loading the next page, then the cursor is required
+                getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor!!, returnResponse)
+            } else {
                 if (apiResponse.responseAt > 0L) {
                     updateFile(folder.id, realm) { file ->
                         file.responseAt = apiResponse.responseAt
@@ -823,7 +826,7 @@ object FileController {
                 }
                 returnResponse
 
-            } else getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor, returnResponse)
+            }
         } else {
             if (apiResponse.responseAt > 0L) {
                 updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
