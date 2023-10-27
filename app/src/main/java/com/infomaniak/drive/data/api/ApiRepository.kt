@@ -146,7 +146,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun getLastModifiedFiles(driveId: Int, cursor: String? = null): CursorApiResponse<ArrayList<File>> {
         val url = "${ApiRoutes.getLastModifiedFiles(driveId)}&${loadCursor(cursor)}"
-        return callApi(url, GET)
+        return callApiWithCursor(url, GET)
     }
 
     fun getLastGallery(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
