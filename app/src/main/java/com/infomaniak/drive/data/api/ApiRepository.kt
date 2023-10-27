@@ -152,7 +152,7 @@ object ApiRepository : ApiRepositoryCore() {
     fun getLastGallery(driveId: Int, cursor: String?): CursorApiResponse<ArrayList<File>> {
         val types = "&types[]=${ExtensionType.IMAGE.value}&types[]=${ExtensionType.VIDEO.value}"
         val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}$types&${loadCursor(cursor)}"
-        return callApi(url, GET)
+        return callApiWithCursor(url, GET)
     }
 
     fun getValidChunks(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<ValidChunks> {
