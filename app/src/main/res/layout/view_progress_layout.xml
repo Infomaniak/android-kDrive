@@ -20,14 +20,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/progressLayout"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:visibility="gone"
-    tools:visibility="visible">
+    android:layout_height="wrap_content">
 
     <ImageView
         android:id="@+id/fileOffline"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:contentDescription="@string/buttonAvailableOffline"
         android:src="@drawable/ic_check"
         tools:layout_height="12dp"
@@ -38,6 +36,5 @@
         style="@style/CircularIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:indicatorSize="12dp"
-        tools:indicatorSize="12dp" />
+        app:indicatorSize="12dp" />
 </FrameLayout>

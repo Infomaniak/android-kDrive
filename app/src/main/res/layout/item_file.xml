@@ -119,15 +119,17 @@
         tools:visibility="visible" />
 
 
-    <include
+    <com.infomaniak.drive.views.ProgressLayoutView
         android:id="@+id/progressLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/fileSize"
         app:layout_constraintStart_toEndOf="@id/iconLayout"
         app:layout_constraintTop_toTopOf="@id/fileSize"
-        android:layout_marginStart="10dp"
-        layout="@layout/view_progress_layout"/>
+        app:progressLayoutIndicatorSize="14dp"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/fileSize"

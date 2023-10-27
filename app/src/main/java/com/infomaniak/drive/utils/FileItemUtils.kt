@@ -46,10 +46,14 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
-import com.infomaniak.drive.databinding.*
+import com.infomaniak.drive.databinding.CardviewFileGridBinding
+import com.infomaniak.drive.databinding.CardviewFolderGridBinding
+import com.infomaniak.drive.databinding.ItemCategoriesLayoutBinding
+import com.infomaniak.drive.databinding.ItemFileBinding
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
+import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.format
@@ -62,7 +66,7 @@ import kotlinx.coroutines.withContext
 fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
     fileName.text = file.name
     fileFavorite.isVisible = file.isFavorite
-    progressLayout.root.isGone = true
+    progressLayout.isGone = true
     displayDate(file)
     displaySize(file)
     filePreview.displayIcon(file, isGrid, progressLayout)
@@ -73,7 +77,7 @@ fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
 fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
     fileName.text = file.name
     fileFavorite.isVisible = file.isFavorite
-    progressLayout.root.isGone = true
+    progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout)
     categoriesLayout.displayCategories(file)
     displayExternalImport(file, filePreview, fileProgression)
@@ -82,7 +86,7 @@ fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
 fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
     fileName.text = file.name
     fileFavorite.isVisible = file.isFavorite
-    progressLayout.root.isGone = true
+    progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout, filePreview2)
     categoriesLayout.displayCategories(file)
 }
@@ -110,7 +114,7 @@ private fun ItemFileBinding.displaySize(file: File) {
 private fun ImageView.displayIcon(
     file: File,
     isGrid: Boolean,
-    progressLayout: ViewProgressLayoutBinding,
+    progressLayout: ProgressLayoutView,
     filePreview2: ImageView? = null,
 ) {
     scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
@@ -133,7 +137,7 @@ private fun ImageView.displayDriveIcon(file: File) {
 private fun ImageView.displayFileIcon(
     file: File,
     isGrid: Boolean,
-    progressLayout: ViewProgressLayoutBinding,
+    progressLayout: ProgressLayoutView,
     filePreview2: ImageView? = null,
 ) {
     val fileType = file.getFileType()
@@ -319,34 +323,20 @@ private fun Context.getBitmapFromFileId(fileUri: Uri, thumbnailSize: Int): Bitma
     }
 }
 
-fun ViewProgressLayoutBinding.setupFileProgress(file: File, containsProgress: Boolean = false) {
+fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean = false) {
     when {
         !containsProgress && file.currentProgress == Utils.INDETERMINATE_PROGRESS && file.isPendingOffline(context) -> {
-            fileOffline.isGone = true
-            fileOfflineProgression.apply {
-                isGone = true // We need to hide the view before updating its `isIndeterminate`
-                isIndeterminate = true
-                isVisible = true
-            }
-            root.isVisible = true
+            setIndeterminateProgress()
+            isVisible = true
         }
         containsProgress && file.currentProgress in 0..99 -> {
-            fileOffline.isGone = true
-            fileOfflineProgression.apply {
-                if (isIndeterminate) {
-                    isGone = true // We need to hide the view before updating its `isIndeterminate`
-                    isIndeterminate = false
-                }
-                isVisible = true
-                progress = file.currentProgress
-            }
-            root.isVisible = true
+            setProgress(file)
+            isVisible = true
         }
         file.isOfflineFile(context, checkLocalFile = false) -> {
-            fileOffline.isVisible = true
-            fileOfflineProgression.isGone = true
-            root.isVisible = true
+            hideProgress()
+            isVisible = true
         }
-        else -> root.isGone = true
+        else -> isGone = true
     }
 }

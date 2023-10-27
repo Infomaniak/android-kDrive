@@ -103,46 +103,19 @@
                 app:layout_constraintTop_toTopOf="@id/filePreview"
                 tools:visibility="visible" />
 
-            <include
+            <com.infomaniak.drive.views.ProgressLayoutView
                 android:id="@+id/progressLayout"
-                layout="@layout/view_progress_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/marginStandardSmall"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"
                 app:layout_constraintEnd_toStartOf="@id/fileNameLayout"
                 app:layout_constraintHorizontal_chainStyle="packed"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/fileNameLayout" />
-
-            <!--            <FrameLayout-->
-            <!--                android:id="@+id/progressLayout"-->
-            <!--                android:layout_width="wrap_content"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_marginStart="@dimen/marginStandardSmall"-->
-            <!--                android:visibility="gone"-->
-            <!--                app:layout_constraintBottom_toBottomOf="@id/fileNameLayout"-->
-            <!--                app:layout_constraintEnd_toStartOf="@id/fileNameLayout"-->
-            <!--                app:layout_constraintHorizontal_chainStyle="packed"-->
-            <!--                app:layout_constraintStart_toStartOf="parent"-->
-            <!--                app:layout_constraintTop_toTopOf="@id/fileNameLayout"-->
-            <!--                tools:visibility="visible">-->
-
-            <!--                <ImageView-->
-            <!--                    android:id="@+id/fileOffline"-->
-            <!--                    android:layout_width="12dp"-->
-            <!--                    android:layout_height="12dp"-->
-            <!--                    android:contentDescription="@string/offlineFileTitle"-->
-            <!--                    android:src="@drawable/ic_check" />-->
-
-            <!--                <com.google.android.material.progressindicator.CircularProgressIndicator-->
-            <!--                    android:id="@+id/fileOfflineProgression"-->
-            <!--                    style="@style/CircularIndicator"-->
-            <!--                    android:layout_width="wrap_content"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    app:indicatorSize="12dp" />-->
-            <!--            </FrameLayout>-->
-
+                app:layout_constraintTop_toTopOf="@id/fileNameLayout"
+                app:progressLayoutIndicatorSize="12dp"
+                tools:visibility="visible" />
 
             <FrameLayout
                 android:id="@+id/fileNameLayout"
