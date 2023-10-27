@@ -29,7 +29,7 @@ class CursorApiResponse<T>(
     responseAt: Long = 0,
     val cursor: String? = null, // TODO: It's only temporarily nullable, pending a change on the API side.
     @SerializedName("has_more")
-    val hasMore: String? = null,
+    val hasMore: Boolean = false,
 ) : ApiResponse<T>(
     result = result,
     data = data,
