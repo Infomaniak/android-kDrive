@@ -49,7 +49,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
     fun toggleVisibility(isVisible: Boolean, noNetwork: Boolean = false, showRefreshButton: Boolean = true) = with(binding) {
 
         if (isVisible) {
-            root.isVisible = true
+            this@NoItemsLayoutView.isVisible = true
             viewsToDisable?.forEach { it.isEnabled = false }
             iNoItemsLayoutView.noItemsInitialListView.isGone = true
 
@@ -73,7 +73,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
                 noItemsDescription.isGone = true
             }
         } else {
-            root.isGone = true
+            this@NoItemsLayoutView.isGone = true
             viewsToDisable?.forEach { it.isEnabled = true }
             iNoItemsLayoutView.noItemsInitialListView.isVisible = true
         }
