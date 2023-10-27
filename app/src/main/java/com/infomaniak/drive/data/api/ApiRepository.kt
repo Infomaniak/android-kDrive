@@ -398,7 +398,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getDriveTrash(driveId: Int, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
+        return callApiWithCursor("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
     }
 
     fun getTrashedFile(file: File): ApiResponse<File> {
