@@ -22,6 +22,7 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
@@ -43,6 +44,7 @@ import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
 import com.infomaniak.lib.core.databinding.ItemLoadingBinding
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.toPx
 import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
 import com.infomaniak.lib.core.views.ViewHolder
@@ -50,9 +52,10 @@ import io.realm.OrderedRealmCollection
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmRecyclerViewAdapter
-import kotlinx.android.synthetic.main.cardview_file_list.view.disabled
-import kotlinx.android.synthetic.main.cardview_file_list.view.fileCardView
-import kotlinx.android.synthetic.main.item_file.view.*
+import kotlinx.android.synthetic.main.item_file.view.fileChecked
+import kotlinx.android.synthetic.main.item_file.view.filePreview
+import kotlinx.android.synthetic.main.item_file.view.menuButton
+import kotlinx.android.synthetic.main.item_file.view.stopUploadButton
 import java.util.UUID
 
 open class FileAdapter(
@@ -305,7 +308,7 @@ open class FileAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = with((holder as FileViewHolder).binding) {
         val viewType = getItemViewType(position)
         if (viewType != VIEW_TYPE_LOADING) {
-            val cardView = when(viewType) {
+            val cardView = when (viewType) {
                 DisplayType.LIST.layout -> root as MaterialCardView
                 DisplayType.GRID.layout -> (this as CardviewFileGridBinding).fileCardView
                 DisplayType.GRID_FOLDER.layout -> (this as CardviewFolderGridBinding).fileCardView
@@ -327,11 +330,19 @@ open class FileAdapter(
             }
 
             when (viewType) {
-                DisplayType.LIST.layout -> (this as CardviewFileListBinding).itemViewFile.setFileItem(file, isGrid)
-                DisplayType.GRID.layout -> (this as CardviewFileGridBinding).setFileItem(file, isGrid)
-                DisplayType.GRID_FOLDER.layout -> (this as CardviewFolderGridBinding).setFileItem(file, isGrid)
+                DisplayType.LIST.layout -> with(this as CardviewFileListBinding) {
+                    itemViewFile.setFileItem(file, isGrid)
+                    file.checkIfEnableFile(context, disabled, root, itemViewFile.fileDate)
+                }
+                DisplayType.GRID.layout -> with(this as CardviewFileGridBinding) {
+                    setFileItem(file, isGrid)
+                    file.checkIfEnableFile(context, disabled, fileCardView)
+                }
+                DisplayType.GRID_FOLDER.layout -> with(this as CardviewFolderGridBinding) {
+                    setFileItem(file, isGrid)
+                    file.checkIfEnableFile(context, disabled, fileCardView)
+                }
             }
-            cardView.checkIfEnableFile(file)
 
             when {
                 uploadInProgress && !file.isPendingUploadFolder() -> cardView.displayStopUploadButton(position, file)
@@ -404,12 +415,17 @@ open class FileAdapter(
 
     fun contains(fileName: String) = fileList.any { it.name == fileName }
 
-    private fun View.checkIfEnableFile(file: File) = when {
+    private fun File.checkIfEnableFile(
+        context: Context,
+        disabledView: View,
+        fileCardView: MaterialCardView,
+        fileDate: TextView? = null,
+    ) = when {
         uploadInProgress -> {
-            if (file.isPendingUploadFolder()) {
-                fileDate?.text = file.path
+            if (isPendingUploadFolder()) {
+                fileDate?.text = path
             } else {
-                val enable = file.currentProgress > 0 && context.isSyncActive()
+                val enable = currentProgress > 0 && context.isSyncActive()
                 val title = when {
                     enable -> R.string.uploadInProgressTitle
                     pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
@@ -419,13 +435,16 @@ open class FileAdapter(
             }
         }
         else -> {
-            if (selectFolder || offlineMode) enabledFile(file.isFolder() || file.isDrive() || (offlineMode && file.isOffline))
-            else enabledFile()
+            if (selectFolder || offlineMode) {
+                enabledFile(disabledView, fileCardView, isFolder() || isDrive() || (offlineMode && isOffline))
+            } else {
+                enabledFile(disabledView, fileCardView)
+            }
         }
     }
 
-    private fun View.enabledFile(enable: Boolean = true) {
-        disabled.isGone = enable
+    private fun enabledFile(disabledView: View, fileCardView: MaterialCardView, enable: Boolean = true) {
+        disabledView.isGone = enable
         fileCardView.isEnabled = enable
     }
 
