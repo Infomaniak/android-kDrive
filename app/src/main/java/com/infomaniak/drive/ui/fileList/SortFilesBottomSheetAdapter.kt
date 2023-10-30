@@ -20,18 +20,18 @@ package com.infomaniak.drive.ui.fileList
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
 import com.infomaniak.drive.ui.fileList.SortFilesBottomSheetAdapter.SortFilesViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 
 class SortFilesBottomSheetAdapter(
     private val selectedType: SortType,
     private val usage: SortTypeUsage,
-    private val onItemClicked: (sortType: SortType) -> Unit
-) : RecyclerView.Adapter<SortFilesViewHolder>() {
+    private val onItemClicked: (sortType: SortType) -> Unit,
+) : Adapter<SortFilesViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SortFilesViewHolder {
         return SortFilesViewHolder(ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false))

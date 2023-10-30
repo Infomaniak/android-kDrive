@@ -19,20 +19,20 @@ package com.infomaniak.drive.ui.menu
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
 import com.infomaniak.drive.databinding.CardviewUserBinding
 import com.infomaniak.drive.databinding.ItemUserBinding
 import com.infomaniak.drive.ui.menu.UserAdapter.UserViewHolder
 import com.infomaniak.drive.utils.setUserView
 import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.views.ViewHolder
 
 class UserAdapter(
     private val users: ArrayList<User>,
     private val isCardview: Boolean = true,
-    private val onItemClicked: (user: User) -> Unit
-) : RecyclerView.Adapter<UserViewHolder>() {
+    private val onItemClicked: (user: User) -> Unit,
+) : Adapter<UserViewHolder>() {
 
     override fun getItemViewType(position: Int): Int {
         return if (isCardview) VIEW_TYPE_CARDVIEW

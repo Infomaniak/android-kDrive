@@ -22,17 +22,17 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.CardviewDriveBinding
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.views.ViewHolder
 
 class DriveListAdapter(
     private var driveList: ArrayList<Drive>,
     private val hideCurrentDriveChevron: Boolean = true,
-    private val onItemClicked: (drive: Drive) -> Unit
-) : RecyclerView.Adapter<DriveListAdapter.DriveListViewHolder>() {
+    private val onItemClicked: (drive: Drive) -> Unit,
+) : Adapter<DriveListAdapter.DriveListViewHolder>() {
 
     fun setDrives(driveList: ArrayList<Drive>) {
         val max = this.driveList.size
