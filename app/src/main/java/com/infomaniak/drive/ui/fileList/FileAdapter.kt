@@ -39,6 +39,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.CardviewFileGridBinding
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.CardviewFolderGridBinding
+import com.infomaniak.drive.ui.fileList.FileAdapter.FileViewHolder
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils
@@ -60,7 +61,7 @@ import java.util.UUID
 open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
     var fileList: OrderedRealmCollection<File> = RealmList(),
-) : RealmRecyclerViewAdapter<File, ViewHolder>(fileList, true, true) {
+) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true) {
 
     var onEmptyList: (() -> Unit)? = null
     var onFileClicked: ((file: File) -> Unit)? = null
@@ -248,7 +249,7 @@ open class FileAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FileViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
 
         val (binding, fileItemView) = when (viewType) {
@@ -292,14 +293,8 @@ open class FileAdapter(
         return FileViewHolder(binding, fileItemView)
     }
 
-    override fun onBindViewHolder(
-        holder: ViewHolder,
-        position: Int,
-        payloads: List<Any>,
-    ): Unit = with(holder as FileViewHolder) {
-        val viewType = getItemViewType(position)
-
-        if (payloads.firstOrNull() is Int && viewType != VIEW_TYPE_LOADING) {
+    override fun onBindViewHolder(holder: FileViewHolder, position: Int, payloads: List<Any>): Unit = with(holder) {
+        if (payloads.firstOrNull() is Int && getItemViewType(position) != VIEW_TYPE_LOADING) {
             val progress = payloads.first() as Int
             val file = getFile(position).apply { currentProgress = progress }
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(binding.context)) {
@@ -325,22 +320,23 @@ open class FileAdapter(
         filePreview.isInvisible = (isFileChecked && !isGrid) || getFile(position).isImporting()
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) = with(holder as FileViewHolder) {
+    override fun onBindViewHolder(holder: FileViewHolder, position: Int) = with(holder) {
         val viewType = getItemViewType(position)
         if (viewType == VIEW_TYPE_LOADING) return@with
 
         val file = getFile(position)
         val isGrid = viewHolderType == DisplayType.GRID
+        val fileCardView = fileItemViews!!.cardView
 
         if (isGrid) {
             if (isHomeOffline) {
-                (fileItemViews!!.cardView.layoutParams as ConstraintLayout.LayoutParams).apply {
+                (fileCardView.layoutParams as ConstraintLayout.LayoutParams).apply {
                     dimensionRatio = null
                     height = 150.toPx()
                 }
             }
         } else {
-            fileItemViews!!.cardView.setCorners(position, itemCount)
+            fileCardView.setCorners(position, itemCount)
         }
 
         when (viewType) {
@@ -349,15 +345,15 @@ open class FileAdapter(
             DisplayType.GRID_FOLDER.layout -> (binding as CardviewFolderGridBinding).setFileItem(file, isGrid)
         }
 
-        fileItemViews!!.checkIfEnableFile(file, binding.context)
-
-        when {
-            uploadInProgress && !file.isPendingUploadFolder() -> fileItemViews.displayStopUploadButton(position, file)
-            multiSelectManager.isMultiSelectOn -> fileItemViews.displayFileChecked(file, isGrid)
-            else -> fileItemViews.fileChecked.isGone = true
-        }
-
         fileItemViews.apply {
+            checkIfEnableFile(file, binding.context)
+
+            when {
+                uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
+                multiSelectManager.isMultiSelectOn -> displayFileChecked(file, isGrid)
+                else -> fileChecked.isGone = true
+            }
+
             setupMenuButton(file)
             setupCardClicksListeners(file, position)
         }
@@ -416,27 +412,25 @@ open class FileAdapter(
 
     fun contains(fileName: String) = fileList.any { it.name == fileName }
 
-    private fun FileItemViews.checkIfEnableFile(file: File, context: Context) {
-        when {
-            uploadInProgress -> {
-                if (file.isPendingUploadFolder()) {
-                    fileDate?.text = file.path
-                } else {
-                    val enable = file.currentProgress > 0 && context.isSyncActive()
-                    val title = when {
-                        enable -> R.string.uploadInProgressTitle
-                        pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
-                        else -> R.string.uploadInProgressPending
-                    }
-                    fileDate?.setText(title)
+    private fun FileItemViews.checkIfEnableFile(file: File, context: Context) = when {
+        uploadInProgress -> {
+            if (file.isPendingUploadFolder()) {
+                fileDate?.text = file.path
+            } else {
+                val enable = file.currentProgress > 0 && context.isSyncActive()
+                val title = when {
+                    enable -> R.string.uploadInProgressTitle
+                    pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired
+                    else -> R.string.uploadInProgressPending
                 }
+                fileDate?.setText(title)
             }
-            else -> {
-                if (selectFolder || offlineMode) {
-                    enabledFile(file.isFolder() || file.isDrive() || (offlineMode && file.isOffline))
-                } else {
-                    enabledFile()
-                }
+        }
+        else -> {
+            if (selectFolder || offlineMode) {
+                enabledFile(file.isFolder() || file.isDrive() || (offlineMode && file.isOffline))
+            } else {
+                enabledFile()
             }
         }
     }

@@ -118,7 +118,6 @@
         app:layout_constraintTop_toTopOf="@id/fileNameLayout"
         tools:visibility="visible" />
 
-
     <com.infomaniak.drive.views.ProgressLayoutView
         android:id="@+id/progressLayout"
         android:layout_width="wrap_content"
