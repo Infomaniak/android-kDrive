@@ -287,11 +287,11 @@ class FileControllerTest : KDriveTest() {
 
     private fun getLocalRootFiles() =
         getFilesFromCacheOrDownload(
-            Utils.ROOT_ID,
+            parentId = Utils.ROOT_ID,
             loadNextPage = false,
             ignoreCache = false,
             userDrive = userDrive,
-            customRealm = realm
+            customRealm = realm,
         )
 
     private fun createAndStoreOfficeFile(transaction: ((remoteFile: File) -> Unit)? = null): File {
