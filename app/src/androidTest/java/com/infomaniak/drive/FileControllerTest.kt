@@ -275,11 +275,11 @@ class FileControllerTest : KDriveTest() {
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
         // Get and save remote root files in realm db test
         return getFilesFromCacheOrDownload(
-            Utils.ROOT_ID,
+            parentId = Utils.ROOT_ID,
             loadNextPage = false,
             ignoreCache = true,
             userDrive = userDrive,
-            customRealm = realm
+            customRealm = realm,
         ).also {
             assertNotNull(it, "remote root files cannot be null")
         }
