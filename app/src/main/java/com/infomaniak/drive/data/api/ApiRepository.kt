@@ -422,11 +422,10 @@ object ApiRepository : ApiRepositoryCore() {
         sortType: File.SortType,
         cursor: String?
     ): CursorApiResponse<ArrayList<File>> {
-         return callApiWithCursor(
+        return callApiWithCursor(
             url = "${ApiRoutes.getMySharedFiles(driveId, sortType)}&${loadCursor(cursor)}",
             method = GET,
             okHttpClient = okHttpClient,
-        )
         )
     }
 
