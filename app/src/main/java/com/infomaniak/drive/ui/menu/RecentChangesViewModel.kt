@@ -61,7 +61,7 @@ class RecentChangesViewModel : ViewModel() {
                 FileListFragment.FolderFilesResult(
                     files = data,
                     isComplete = currentCursor == null,
-                    isFirstPage = isFirstPage
+                    isFirstPage = isFirstPage,
                 )
             }
         } else {
