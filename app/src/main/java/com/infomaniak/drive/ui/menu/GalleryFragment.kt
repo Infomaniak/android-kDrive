@@ -133,16 +133,33 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
         if (!isGalleryAdapterInitialized) {
             if (isCurrentlyInGallery) refreshTimer.start()
-            loadGallery(AccountUtils.currentDriveId, isRefresh = true)
+            if (!galleryViewModel.needToRestoreFiles) {
+                loadGallery(AccountUtils.currentDriveId, isRefresh = true)
+            }
         }
 
         observeApiResultPagination()
     }
 
     private fun observeApiResultPagination() = with(galleryAdapter) {
+        var dataAlreadyLoaded = galleryViewModel.needToRestoreFiles
+
+        if (galleryViewModel.needToRestoreFiles && galleryList.isEmpty()) {
+            // When the activity is recreated, the old data needs to be restored.
+            // The livedata will return the last page, which is not what is needed.
+            // TODO: (Realm kotlin) - Should be improved with realm kotlin, the current problem will no longer exist
+            galleryViewModel.restoreGalleryFiles()
+            dataAlreadyLoaded = false
+        }
+
         galleryViewModel.galleryApiResult.observe(viewLifecycleOwner) {
             it?.let { (galleryFiles, isComplete) ->
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                if (dataAlreadyLoaded) {
+                    // When the data is still available after fragment recreated, there's no need to reload again.
+                    dataAlreadyLoaded = false
+                    return@observe
+                }
                 val galleryList = formatList(galleryFiles)
                 binding.galleryRecyclerView.post { addAll(galleryList) }
                 this.isComplete = isComplete

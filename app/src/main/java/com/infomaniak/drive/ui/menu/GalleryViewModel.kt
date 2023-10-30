@@ -36,28 +36,46 @@ class GalleryViewModel : ViewModel() {
     private var currentCursor: String? = null
 
     val galleryApiResult = MutableLiveData<Pair<ArrayList<File>, IsComplete>?>()
+    private var lastGalleryFiles = ArrayList<File>()
+
+    val needToRestoreFiles get() = galleryApiResult.isInitialized
 
     fun loadLastGallery(driveId: Int, ignoreCloud: Boolean) {
-        getGalleryJob?.cancel()
-        getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
-            galleryApiResult.postValue(getLastGallery(driveId, isFirstPage = true, ignoreCloud))
-        }
+        lastGalleryFiles = arrayListOf()
+        loadLastGallery(driveId, ignoreCloud, isFirstPage = true)
     }
 
     fun loadMoreGallery(driveId: Int, ignoreCloud: Boolean) {
         currentCursor?.let {
-            getGalleryJob?.cancel()
-            getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
-                galleryApiResult.postValue(getLastGallery(driveId, isFirstPage = false, ignoreCloud, currentCursor))
-            }
+            loadLastGallery(driveId, ignoreCloud, isFirstPage = false, currentCursor)
+        }
+    }
+
+    fun restoreGalleryFiles() {
+        if (needToRestoreFiles) {
+            galleryApiResult.value = lastGalleryFiles to galleryApiResult.value!!.second
+        }
+    }
+
+    private fun loadLastGallery(
+        driveId: Int,
+        ignoreCloud: Boolean,
+        isFirstPage: Boolean,
+        cursor: String? = null,
+    ) {
+        getGalleryJob?.cancel()
+        getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
+            val result = getLastGallery(driveId, ignoreCloud, isFirstPage, cursor)
+            galleryApiResult.postValue(result)
+            result?.let { lastGalleryFiles.addAll(result.first) }
         }
     }
 
     private fun getLastGallery(
         driveId: Int,
+        ignoreCloud: Boolean,
         isFirstPage: Boolean,
-        ignoreCloud: Boolean = false,
-        cursor: String? = null,
+        cursor: String?,
     ): Pair<ArrayList<File>, IsComplete>? {
         getGalleryJob?.cancel()
         getGalleryJob = Job()
