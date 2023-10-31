@@ -113,9 +113,8 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            tailrec suspend fun recursive(isFirstPage: Boolean, cursor: String? = null) {
+            tailrec suspend fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
                 getFilesJob.ensureActive()
-                val isAlwaysNewSort = isFirstPage && isNewSort
                 val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, cursor)
                 if (apiResponse.isSuccess()) {
                     when {
@@ -127,7 +126,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                                     files = apiResponse.data!!,
                                     isComplete = true,
                                     isFirstPage = isFirstPage,
-                                    isNewSort = isAlwaysNewSort,
+                                    isNewSort = isNewSort,
                                 )
                             )
                         }
@@ -138,10 +137,10 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                                     files = apiResponse.data!!,
                                     isComplete = false,
                                     isFirstPage = isFirstPage,
-                                    isNewSort = isAlwaysNewSort,
+                                    isNewSort = isNewSort,
                                 )
                             )
-                            recursive(isFirstPage = false, cursor = apiResponse.cursor)
+                            recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                         }
                     }
                 } else emit(
@@ -149,11 +148,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                         files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
                         isComplete = true,
                         isFirstPage = true,
-                        isNewSort = isAlwaysNewSort,
+                        isNewSort = isNewSort,
                     )
                 )
             }
-            recursive(isFirstPage = true)
+            recursive(isFirstPage = true, isNewSort = isNewSort)
         }
     }
 

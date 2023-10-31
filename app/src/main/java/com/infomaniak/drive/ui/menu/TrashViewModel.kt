@@ -23,7 +23,7 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,8 +33,8 @@ class TrashViewModel : ViewModel() {
 
     val selectedFile = MutableLiveData<File>()
     val removeFileId = SingleLiveEvent<Int>()
-    var driveTrashResults = MutableLiveData<FileListFragment.FolderFilesResult?>()
-    var trashedFolderFilesResults = MutableLiveData<FileListFragment.FolderFilesResult?>()
+    var driveTrashResults = MutableLiveData<FolderFilesResult?>()
+    var trashedFolderFilesResults = MutableLiveData<FolderFilesResult?>()
 
     private var getDeletedFilesJob: Job? = null
 
@@ -52,15 +52,14 @@ class TrashViewModel : ViewModel() {
         }
     }
 
-    private fun getTrashedFolderFiles(file: File, order: File.SortType, isNewSort: Boolean): FileListFragment.FolderFilesResult? {
+    private fun getTrashedFolderFiles(file: File, order: File.SortType, isNewSort: Boolean): FolderFilesResult? {
 
-        tailrec fun recursive(page: Int): FileListFragment.FolderFilesResult? {
-            val apiResponse = ApiRepository.getTrashedFolderFiles(file, order, page)
-            val data = apiResponse.data
+        tailrec fun recursive(page: Int): FolderFilesResult? {
+            val data = ApiRepository.getTrashedFolderFiles(file, order, page).data
             return when {
                 data == null -> null
                 data.size < ApiRepository.PER_PAGE ->
-                    FileListFragment.FolderFilesResult(
+                    FolderFilesResult(
                         parentFolder = file,
                         files = ArrayList(data),
                         isComplete = true,
@@ -68,7 +67,7 @@ class TrashViewModel : ViewModel() {
                         isNewSort = isNewSort,
                     )
                 else -> {
-                    FileListFragment.FolderFilesResult(
+                    FolderFilesResult(
                         parentFolder = file,
                         files = ArrayList(data),
                         isComplete = false,
@@ -83,21 +82,21 @@ class TrashViewModel : ViewModel() {
         return recursive(1)
     }
 
-    private fun getDriveTrash(driveId: Int, order: File.SortType, isNewSort: Boolean): FileListFragment.FolderFilesResult? {
+    private fun getDriveTrash(driveId: Int, order: File.SortType, isNewSort: Boolean): FolderFilesResult? {
 
-        fun recursive(page: Int): FileListFragment.FolderFilesResult? {
+        fun recursive(page: Int): FolderFilesResult? {
             val apiResponse = ApiRepository.getDriveTrash(driveId, order, page)
             return when {
                 apiResponse.data.isNullOrEmpty() -> null
                 apiResponse.data!!.size < ApiRepository.PER_PAGE ->
-                    FileListFragment.FolderFilesResult(
+                    FolderFilesResult(
                         files = apiResponse.data!!,
                         isComplete = true,
                         isFirstPage = page == 1,
                         isNewSort = isNewSort,
                     )
                 else -> {
-                    FileListFragment.FolderFilesResult(
+                    FolderFilesResult(
                         files = apiResponse.data!!,
                         isComplete = false,
                         isFirstPage = page == 1,
