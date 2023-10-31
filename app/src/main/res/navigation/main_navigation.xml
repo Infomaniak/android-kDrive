@@ -80,9 +80,6 @@
             android:id="@+id/action_fileListFragment_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />
         <action
-            android:id="@+id/action_fileListFragment_to_uploadInProgress"
-            app:destination="@id/uploadInProgressFragment" />
-        <action
             android:id="@+id/action_fileListFragment_to_fileInfoActionsBottomSheetDialog"
             app:destination="@id/fileInfoActionsBottomSheetDialog" />
         <action
@@ -764,16 +761,7 @@
         android:id="@+id/uploadInProgressFragment"
         android:name="com.infomaniak.drive.ui.fileList.UploadInProgressFragment"
         android:label="UploadInProgress"
-        tools:layout="@layout/fragment_file_list">
-        <argument
-            android:name="folderId"
-            android:defaultValue="1"
-            app:argType="integer" />
-        <argument
-            android:name="folderName"
-            android:defaultValue="/"
-            app:argType="string" />
-    </fragment>
+        tools:layout="@layout/fragment_file_list" />
 
     <dialog
         android:id="@+id/dropBoxResultBottomSheetDialog"

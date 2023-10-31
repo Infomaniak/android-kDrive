@@ -67,7 +67,7 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
-import com.infomaniak.drive.ui.fileList.UploadInProgressFragmentArgs
+import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
@@ -278,7 +278,7 @@ fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel)
 fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
     safeNavigate(
         R.id.uploadInProgressFragment,
-        UploadInProgressFragmentArgs(
+        FileListFragmentArgs(
             folderId = folderId,
             folderName = folderName ?: getString(R.string.uploadInProgressTitle),
         ).toBundle(),

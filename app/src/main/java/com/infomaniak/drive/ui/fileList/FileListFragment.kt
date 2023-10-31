@@ -596,7 +596,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun goToUploadInProgress(folderId: Int) {
         safeNavigate(
             R.id.uploadInProgressFragment,
-            UploadInProgressFragmentArgs(folderId = folderId, folderName = getString(R.string.uploadInProgressTitle)).toBundle(),
+            FileListFragmentArgs(folderId = folderId, folderName = getString(R.string.uploadInProgressTitle)).toBundle(),
         )
     }
 
