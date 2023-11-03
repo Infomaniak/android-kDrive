@@ -48,38 +48,43 @@ class TrashViewModel : ViewModel() {
     fun loadTrashedFolderFiles(file: File, order: File.SortType, isNewSort: Boolean) {
         getDeletedFilesJob?.cancel()
         getDeletedFilesJob = viewModelScope.launch(Dispatchers.IO) {
-            trashedFolderFilesResults.postValue(getTrashedFolderFiles(file, order, isNewSort))
+            getTrashedFolderFiles(file, order, isNewSort)
         }
     }
 
-    private fun getTrashedFolderFiles(file: File, order: File.SortType, isNewSort: Boolean): FolderFilesResult? {
+    private fun getTrashedFolderFiles(file: File, order: File.SortType, isNewSort: Boolean) {
 
-        tailrec fun recursive(page: Int): FolderFilesResult? {
-            val data = ApiRepository.getTrashedFolderFiles(file, order, page).data
-            return when {
-                data == null -> null
-                data.size < ApiRepository.PER_PAGE ->
-                    FolderFilesResult(
-                        parentFolder = file,
-                        files = ArrayList(data),
-                        isComplete = true,
-                        isFirstPage = page == 1,
-                        isNewSort = isNewSort,
+        tailrec fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
+            val apiResponse = ApiRepository.getTrashedFolderFiles(file, order, cursor)
+            when {
+                apiResponse.data.isNullOrEmpty() -> trashedFolderFilesResults.postValue(null)
+                apiResponse.hasMore -> {
+                    trashedFolderFilesResults.postValue(
+                        FolderFilesResult(
+                            parentFolder = file,
+                            files = apiResponse.data!!,
+                            isComplete = false,
+                            isFirstPage = isFirstPage,
+                            isNewSort = isNewSort,
+                        )
                     )
+                    recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor!!)
+                }
                 else -> {
-                    FolderFilesResult(
-                        parentFolder = file,
-                        files = ArrayList(data),
-                        isComplete = false,
-                        isFirstPage = page == 1,
-                        isNewSort = isNewSort,
+                    trashedFolderFilesResults.postValue(
+                        FolderFilesResult(
+                            parentFolder = file,
+                            files = apiResponse.data!!,
+                            isComplete = true,
+                            isFirstPage = isFirstPage,
+                            isNewSort = isNewSort,
+                        )
                     )
-                    recursive(page + 1)
                 }
             }
         }
 
-        return recursive(1)
+        recursive(isFirstPage = true, isNewSort = isNewSort)
     }
 
     private fun getDriveTrash(driveId: Int, order: File.SortType, isNewSort: Boolean) {

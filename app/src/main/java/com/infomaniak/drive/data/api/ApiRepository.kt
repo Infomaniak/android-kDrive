@@ -405,8 +405,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.trashedFile(file), GET)
     }
 
-    fun getTrashedFolderFiles(file: File, order: File.SortType, page: Int): ApiResponse<List<File>> {
-        return callApi("${ApiRoutes.trashedFolderFiles(file, order)}&${pagination(page)}", GET)
+    fun getTrashedFolderFiles(file: File, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+        return callApiWithCursor("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
     }
 
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
