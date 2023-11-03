@@ -44,7 +44,7 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
                 fileDetailsViewModel.getFileActivities(file).observe(viewLifecycleOwner) { apiResponse ->
                     apiResponse?.data?.let { activities ->
                         addAll(activities)
-                        isComplete = apiResponse.cursor == null
+                        isComplete = !apiResponse.hasMore
                     } ?: also {
                         isComplete = true
                     }
