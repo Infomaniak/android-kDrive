@@ -32,26 +32,29 @@ class RecentChangesViewModel : ViewModel() {
 
     private var getRecentChangesJob: Job? = null
 
-    var currentPage = 1
-    var currentCursor: String? = null
+    private var currentCursor: String? = null
 
     var recentChangesResults = MutableLiveData<FileListFragment.FolderFilesResult?>()
     var isNewSort = false
 
-    fun loadRecentChanges() {
+    fun loadRecentChanges(isNewSort: Boolean) {
         getRecentChangesJob?.cancel()
         getRecentChangesJob = viewModelScope.launch(Dispatchers.IO) {
-            recentChangesResults.postValue(getRecentChanges(cursor = null, isFirstPage = true))
+            recentChangesResults.postValue(getRecentChanges(cursor = null, isFirstPage = true, isNewSort = isNewSort))
         }
     }
 
     fun loadNextPage() = viewModelScope.launch(Dispatchers.IO) {
         currentCursor?.let {
-            recentChangesResults.postValue(getRecentChanges(cursor = it, isFirstPage = false))
+            recentChangesResults.postValue(getRecentChanges(cursor = it, isFirstPage = false, isNewSort = false))
         }
     }
 
-    private fun getRecentChanges(cursor: String?, isFirstPage: Boolean): FileListFragment.FolderFilesResult? {
+    private fun getRecentChanges(
+        cursor: String?,
+        isFirstPage: Boolean,
+        isNewSort: Boolean = false,
+    ): FileListFragment.FolderFilesResult? {
 
         val apiResponse = ApiRepository.getLastModifiedFiles(AccountUtils.currentDriveId, cursor)
         return if (apiResponse.isSuccess()) {
@@ -62,6 +65,7 @@ class RecentChangesViewModel : ViewModel() {
                     files = data,
                     isComplete = currentCursor == null,
                     isFirstPage = isFirstPage,
+                    isNewSort = isNewSort,
                 )
             }
         } else {
@@ -69,6 +73,7 @@ class RecentChangesViewModel : ViewModel() {
                 files = FileController.getRecentChanges(),
                 isComplete = true,
                 isFirstPage = true,
+                isNewSort = isNewSort,
             )
         }
     }

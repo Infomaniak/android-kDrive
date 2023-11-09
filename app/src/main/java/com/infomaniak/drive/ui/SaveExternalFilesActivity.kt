@@ -280,7 +280,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                             finish()
                         } else {
                             withContext(Dispatchers.Main) {
-                                binding.saveButton?.hideProgress(R.string.buttonSave)
+                                binding.saveButton.hideProgress(R.string.buttonSave)
                                 showSnackbar(R.string.errorSave)
                             }
                         }

@@ -17,90 +17,97 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class TrashViewModel : ViewModel() {
 
     val selectedFile = MutableLiveData<File>()
     val removeFileId = SingleLiveEvent<Int>()
-    private var getDeletedFilesJob: Job = Job()
+    var driveTrashResults = MutableLiveData<FolderFilesResult?>()
+    var trashedFolderFilesResults = MutableLiveData<FolderFilesResult?>()
 
-    fun getTrashedFolderFiles(file: File, order: File.SortType): LiveData<FileListFragment.FolderFilesResult?> {
-        getDeletedFilesJob.cancel()
-        getDeletedFilesJob = Job()
-        return liveData(Dispatchers.IO + getDeletedFilesJob) {
-            suspend fun recursive(page: Int) {
-                val apiResponse = ApiRepository.getTrashedFolderFiles(file, order, page)
-                if (apiResponse.isSuccess()) {
-                    val data = apiResponse.data
-                    when {
-                        data == null -> Unit
-                        data.size < ApiRepository.PER_PAGE -> emit(
-                            FileListFragment.FolderFilesResult(
-                                parentFolder = file,
-                                files = ArrayList(data),
-                                isComplete = true,
-                                isFirstPage = page == 1,
-                            )
-                        )
-                        else -> {
-                            emit(
-                                FileListFragment.FolderFilesResult(
-                                    parentFolder = file,
-                                    files = ArrayList(data),
-                                    isComplete = false,
-                                    isFirstPage = page == 1
-                                )
-                            )
-                            recursive(page + 1)
-                        }
-                    }
-                } else emit(null)
-            }
-            recursive(1)
+    private var getDeletedFilesJob: Job? = null
+
+    fun loadDriveTrash(driveId: Int, order: File.SortType, isNewSort: Boolean) {
+        getDeletedFilesJob?.cancel()
+        getDeletedFilesJob = viewModelScope.launch(Dispatchers.IO) {
+            driveTrashResults.postValue(getDriveTrash(driveId, order, isNewSort))
         }
     }
 
-    fun getDriveTrash(driveId: Int, order: File.SortType): LiveData<FileListFragment.FolderFilesResult?> {
-        getDeletedFilesJob.cancel()
-        getDeletedFilesJob = Job()
-        return liveData(Dispatchers.IO + getDeletedFilesJob) {
-            suspend fun recursive(page: Int) {
-                val apiResponse = ApiRepository.getDriveTrash(driveId, order, page)
-                if (apiResponse.isSuccess()) {
-                    when {
-                        apiResponse.data.isNullOrEmpty() -> emit(null)
-                        apiResponse.data!!.size < ApiRepository.PER_PAGE -> emit(
-                            FileListFragment.FolderFilesResult(
-                                files = apiResponse.data!!,
-                                isComplete = true,
-                                isFirstPage = page == 1,
-                            )
-                        )
-                        else -> {
-                            emit(
-                                FileListFragment.FolderFilesResult(
-                                    files = apiResponse.data!!,
-                                    isComplete = false,
-                                    isFirstPage = page == 1,
-                                )
-                            )
-                            recursive(page + 1)
-                        }
-                    }
-                } else emit(null)
-            }
-            recursive(1)
+    fun loadTrashedFolderFiles(file: File, order: File.SortType, isNewSort: Boolean) {
+        getDeletedFilesJob?.cancel()
+        getDeletedFilesJob = viewModelScope.launch(Dispatchers.IO) {
+            trashedFolderFilesResults.postValue(getTrashedFolderFiles(file, order, isNewSort))
         }
+    }
+
+    private fun getTrashedFolderFiles(file: File, order: File.SortType, isNewSort: Boolean): FolderFilesResult? {
+
+        tailrec fun recursive(page: Int): FolderFilesResult? {
+            val data = ApiRepository.getTrashedFolderFiles(file, order, page).data
+            return when {
+                data == null -> null
+                data.size < ApiRepository.PER_PAGE ->
+                    FolderFilesResult(
+                        parentFolder = file,
+                        files = ArrayList(data),
+                        isComplete = true,
+                        isFirstPage = page == 1,
+                        isNewSort = isNewSort,
+                    )
+                else -> {
+                    FolderFilesResult(
+                        parentFolder = file,
+                        files = ArrayList(data),
+                        isComplete = false,
+                        isFirstPage = page == 1,
+                        isNewSort = isNewSort,
+                    )
+                    recursive(page + 1)
+                }
+            }
+        }
+
+        return recursive(1)
+    }
+
+    private fun getDriveTrash(driveId: Int, order: File.SortType, isNewSort: Boolean): FolderFilesResult? {
+
+        fun recursive(page: Int): FolderFilesResult? {
+            val apiResponse = ApiRepository.getDriveTrash(driveId, order, page)
+            return when {
+                apiResponse.data.isNullOrEmpty() -> null
+                apiResponse.data!!.size < ApiRepository.PER_PAGE ->
+                    FolderFilesResult(
+                        files = apiResponse.data!!,
+                        isComplete = true,
+                        isFirstPage = page == 1,
+                        isNewSort = isNewSort,
+                    )
+                else -> {
+                    FolderFilesResult(
+                        files = apiResponse.data!!,
+                        isComplete = false,
+                        isFirstPage = page == 1,
+                        isNewSort = isNewSort,
+                    )
+                    recursive(page + 1)
+                }
+            }
+        }
+
+        return recursive(1)
     }
 
     fun emptyTrash(driveId: Int) = liveData(Dispatchers.IO) {
@@ -108,6 +115,6 @@ class TrashViewModel : ViewModel() {
     }
 
     fun cancelTrashFileJob() {
-        getDeletedFilesJob.cancel()
+        getDeletedFilesJob?.cancel()
     }
 }

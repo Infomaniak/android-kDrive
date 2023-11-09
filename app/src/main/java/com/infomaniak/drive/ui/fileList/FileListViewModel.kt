@@ -57,7 +57,8 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         ignoreCache: Boolean,
         order: SortType,
         ignoreCloud: Boolean = false,
-        userDrive: UserDrive? = null
+        userDrive: UserDrive? = null,
+        isNewSort: Boolean,
     ): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFolderActivitiesJob.cancel()
@@ -78,11 +79,27 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 when {
                     resultList == null -> emit(null)
                     resultList.second.size < ApiRepository.PER_PAGE -> {
-                        emit(FolderFilesResult(resultList.first, resultList.second, true, !nextPage))
+                        emit(
+                            FolderFilesResult(
+                                parentFolder = resultList.first,
+                                files = resultList.second,
+                                isComplete = true,
+                                isFirstPage = !nextPage,
+                                isNewSort = isNewSort,
+                            )
+                        )
                     }
                     else -> {
                         if (!nextPage) {
-                            emit(FolderFilesResult(resultList.first, resultList.second, isComplete = true, isFirstPage = true))
+                            emit(
+                                FolderFilesResult(
+                                    parentFolder = resultList.first,
+                                    files = resultList.second,
+                                    isComplete = true,
+                                    isFirstPage = true,
+                                    isNewSort = isNewSort,
+                                )
+                            )
                         }
                         recursiveDownload(parentId, true)
                     }
@@ -92,11 +109,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getFavoriteFiles(order: SortType): LiveData<FolderFilesResult?> {
+    fun getFavoriteFiles(order: SortType, isNewSort: Boolean): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            tailrec suspend fun recursive(isFirstPage: Boolean, cursor: String? = null) {
+            tailrec suspend fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
                 getFilesJob.ensureActive()
                 val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, cursor)
                 if (apiResponse.isSuccess()) {
@@ -109,6 +126,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                                     files = apiResponse.data!!,
                                     isComplete = true,
                                     isFirstPage = isFirstPage,
+                                    isNewSort = isNewSort,
                                 )
                             )
                         }
@@ -119,9 +137,10 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                                     files = apiResponse.data!!,
                                     isComplete = false,
                                     isFirstPage = isFirstPage,
+                                    isNewSort = isNewSort,
                                 )
                             )
-                            recursive(isFirstPage = false, cursor = apiResponse.cursor)
+                            recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                         }
                     }
                 } else emit(
@@ -129,10 +148,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                         files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
                         isComplete = true,
                         isFirstPage = true,
+                        isNewSort = isNewSort,
                     )
                 )
             }
-            recursive(isFirstPage = true)
+            recursive(isFirstPage = true, isNewSort = isNewSort)
         }
     }
 
