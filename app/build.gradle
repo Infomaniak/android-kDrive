@@ -29,11 +29,11 @@ android {
         buildConfigField 'String', 'CREATE_ACCOUNT_URL', '"https://welcome.infomaniak.com/signup/ikdrive/steps"'
         buildConfigField 'String', 'CREATE_ACCOUNT_SUCCESS_HOST', '"drive.infomaniak.com"'
         buildConfigField 'String', 'CREATE_ACCOUNT_CANCEL_HOST', '"welcome.infomaniak.com"'
-        buildConfigField 'String', 'DRIVE_API_V1', '"https://epic157.drive.kdrive.preprod.dev.infomaniak.ch/drive/"'
-        buildConfigField 'String', 'DRIVE_API_V2', '"https://epic157.drive.kdrive.preprod.dev.infomaniak.ch/2/drive/"'
-        buildConfigField 'String', 'DRIVE_API_V3', '"https://epic157.drive.kdrive.preprod.dev.infomaniak.ch/3/drive/"'
-        buildConfigField 'String', 'MANAGER_URL', '"https://manager.preprod.dev.infomaniak.ch/v3/"'
-        buildConfigField 'String', 'OFFICE_URL', '"https://epic157.drive.kdrive.preprod.dev.infomaniak.ch/app/office/"'
+        buildConfigField 'String', 'DRIVE_API_V1', '"https://api.kdrive.infomaniak.com/drive/"'
+        buildConfigField 'String', 'DRIVE_API_V2', '"https://api.kdrive.infomaniak.com/2/drive/"'
+        buildConfigField 'String', 'DRIVE_API_V3', '"https://api.kdrive.infomaniak.com/3/drive/"'
+        buildConfigField 'String', 'MANAGER_URL', '"https://manager.infomaniak.com/v3/"'
+        buildConfigField 'String', 'OFFICE_URL', '"https://kdrive.infomaniak.com/app/office/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
 
@@ -79,8 +79,9 @@ android {
         fdroid { dimension 'distribution' }
         preprod {
             dimension 'distribution'
-            buildConfigField 'String', 'DRIVE_API_V1', '"https://drive.preprod.dev.infomaniak.ch/drive/"'
-            buildConfigField 'String', 'DRIVE_API_V2', '"https://drive.preprod.dev.infomaniak.ch/2/drive/"'
+            buildConfigField 'String', 'DRIVE_API_V1', '"https://kdrive.preprod.dev.infomaniak.ch/drive/"'
+            buildConfigField 'String', 'DRIVE_API_V2', '"https://kdrive.preprod.dev.infomaniak.ch/2/drive/"'
+            buildConfigField 'String', 'DRIVE_API_V3', '"https://kdrive.preprod.dev.infomaniak.ch/3/drive/"'
             matchingFallbacks = ['standard']
         }
     }
