@@ -31,7 +31,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.animateRotation
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +102,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
                     mainViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)
                         .observe(viewLifecycleOwner) { apiResponse ->
                             when (apiResponse?.result) {
-                                ApiResponse.Status.SUCCESS -> apiResponse.data?.let { dropBox ->
+                                ApiResponseStatus.SUCCESS -> apiResponse.data?.let { dropBox ->
                                     file.dropbox = dropBox
                                     onDropBoxCreated(file)
                                 }

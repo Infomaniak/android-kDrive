@@ -22,6 +22,7 @@ import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
@@ -708,7 +709,7 @@ object FileController {
     private fun Realm.saveRemoteFiles(
         localFolderProxy: File?,
         remoteFolder: File?,
-        apiResponse: ApiResponse<List<File>>,
+        apiResponse: CursorApiResponse<List<File>>,
         isFirstPage: Boolean,
     ) {
         val remoteFiles = apiResponse.data!!

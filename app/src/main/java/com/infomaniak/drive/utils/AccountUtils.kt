@@ -36,7 +36,7 @@ import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.CredentialManager
 import com.infomaniak.lib.core.auth.TokenAuthenticator
-import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
@@ -113,9 +113,9 @@ object AccountUtils : CredentialManager() {
             result to (data ?: return@withContext)
         }
 
-        if (userResult != ApiResponse.Status.ERROR) {
+        if (userResult != ApiResponseStatus.ERROR) {
             ApiRepository.getAllDrivesData(okHttpClient).apply {
-                if (result != ApiResponse.Status.ERROR) {
+                if (result != ApiResponseStatus.ERROR) {
                     handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
                 } else if (error?.code == ErrorCode.NO_DRIVE) {
                     removeUserAndDeleteToken(context, user)

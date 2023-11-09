@@ -30,10 +30,12 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.*
 import com.infomaniak.lib.core.api.ApiController.callApi
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
 import okhttp3.OkHttpClient
 
@@ -74,6 +76,22 @@ object ApiRepository : ApiRepositoryCore() {
             "&actions[]=comment_resolve" +
             "&actions[]=share_link_show"
 
+    private inline fun <reified T> callApiWithCursor(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+    ): T {
+        return callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
+            CursorApiResponse<Any>(
+                result = ApiResponseStatus.ERROR,
+                error = apiError
+            ).apply {
+                translatedError = translatedErrorRes
+            } as T
+        })
+    }
+
     fun getAllDrivesData(
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
@@ -81,9 +99,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFavoriteFiles(driveId: Int, order: File.SortType, cursor: String?): ApiResponse<ArrayList<File>> {
+    fun getFavoriteFiles(driveId: Int, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
         val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${loadCursor(cursor)}"
-        return callApi(url, GET)
+        return callApiWithCursor(url, GET)
     }
 
     fun postFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), POST)
@@ -96,9 +114,9 @@ object ApiRepository : ApiRepositoryCore() {
         parentId: Int,
         cursor: String? = null,
         order: File.SortType
-    ): ApiResponse<List<File>> {
+    ): CursorApiResponse<List<File>> {
         val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
-        return callApi(url, GET, okHttpClient = okHttpClient)
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
     // Increase timeout for this api call because it can take more than 10s to process data
@@ -403,8 +421,12 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         sortType: File.SortType,
         cursor: String?
-    ): ApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.getMySharedFiles(driveId, sortType)}&${loadCursor(cursor)}", GET, okHttpClient = okHttpClient)
+    ): CursorApiResponse<ArrayList<File>> {
+        return callApiWithCursor(
+            url = "${ApiRoutes.getMySharedFiles(driveId, sortType)}&${loadCursor(cursor)}",
+            method = GET,
+            okHttpClient = okHttpClient,
+        )
     }
 
     fun undoAction(action: CancellableAction): ApiResponse<Boolean> {
