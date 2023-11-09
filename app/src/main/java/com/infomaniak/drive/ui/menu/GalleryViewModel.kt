@@ -40,7 +40,7 @@ class GalleryViewModel : ViewModel() {
     fun loadLastGallery(driveId: Int, ignoreCloud: Boolean) {
         getGalleryJob?.cancel()
         getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
-            galleryApiResult.postValue(getLastGallery(driveId, ignoreCloud, isFirstPage = true))
+            galleryApiResult.postValue(getLastGallery(driveId, isFirstPage = true, ignoreCloud))
         }
     }
 
@@ -48,15 +48,15 @@ class GalleryViewModel : ViewModel() {
         currentCursor?.let {
             getGalleryJob?.cancel()
             getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
-                galleryApiResult.postValue(getLastGallery(driveId, ignoreCloud, isFirstPage = false, currentCursor))
+                galleryApiResult.postValue(getLastGallery(driveId, isFirstPage = false, ignoreCloud, currentCursor))
             }
         }
     }
 
     private fun getLastGallery(
         driveId: Int,
+        isFirstPage: Boolean,
         ignoreCloud: Boolean = false,
-        isFirstPage: Boolean = true,
         cursor: String? = null,
     ): Pair<ArrayList<File>, IsComplete>? {
         getGalleryJob?.cancel()
@@ -70,12 +70,14 @@ class GalleryViewModel : ViewModel() {
         return FileController.getGalleryDrive() to true
     }
 
-    private fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<java.util.ArrayList<File>, Boolean>? {
+    private fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<ArrayList<File>, Boolean>? {
         val apiResponse = ApiRepository.getLastGallery(driveId = driveId, cursor = cursor)
         return if (apiResponse.isSuccess()) {
             currentCursor = apiResponse.cursor
             emitApiGallery(apiResponse, isFirstPage)
-        } else emitRealmGallery()
+        } else {
+            emitRealmGallery()
+        }
     }
 
     private fun emitApiGallery(

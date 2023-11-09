@@ -212,8 +212,8 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             isDownloadingGallery = true
 
             val networkAvailable = mainViewModel.isInternetAvailable.value == true
-            if (isRefresh) galleryViewModel.loadLastGallery(driveId, !networkAvailable)
-            else if (networkAvailable) galleryViewModel.loadMoreGallery(driveId, !networkAvailable)
+            if (isRefresh) galleryViewModel.loadLastGallery(driveId, ignoreCloud = !networkAvailable)
+            else if (networkAvailable) galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
         }
     }
 
