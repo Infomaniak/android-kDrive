@@ -144,9 +144,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileActivities(driveId, formattedFileIds, fromDate), GET, okHttpClient = okHttpClient)
     }
 
-    fun getLastModifiedFiles(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
-        val url = "${ApiRoutes.getLastModifiedFiles(driveId)}&${pagination(page)}"
-        return callApi(url, GET)
+    fun getLastModifiedFiles(driveId: Int, cursor: String? = null): CursorApiResponse<ArrayList<File>> {
+        val url = "${ApiRoutes.getLastModifiedFiles(driveId)}&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
     fun getLastGallery(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
@@ -446,6 +446,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"
+
     private fun loadCursor(cursor: String?, perPage: Int = PER_PAGE): String {
         return "limit=$perPage${if (cursor == null) "" else "&cursor=$cursor"}"
     }
