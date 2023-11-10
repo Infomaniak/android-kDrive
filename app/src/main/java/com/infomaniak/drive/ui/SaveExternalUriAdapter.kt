@@ -50,8 +50,8 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Recycle
             isFromUploads = true,
         )
 
+        itemViewFile.setFileItem(file)
         root.apply {
-            setFileItem(file)
             initView(position)
             setOnClickListener { onItemClicked(file, position) }
         }
