@@ -256,7 +256,7 @@ open class FileAdapter(
             val file = getFile(position).apply { currentProgress = progress }
             if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(binding.context)) {
                 progressLayoutView.setupFileProgress(file, true)
-                checkIfEnableFile(file, binding.context)
+                checkIfEnableFile(file)
             }
         } else if (payloads.firstOrNull() is Boolean) {
             toggleFileCheckedState(isFileChecked = payloads.first() as Boolean, position)
@@ -276,7 +276,6 @@ open class FileAdapter(
     }
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) = with(holder) {
-        val viewType = getItemViewType(position)
         if (this !is FileItemViewHolder) return@with
 
         val file = getFile(position)
@@ -293,13 +292,13 @@ open class FileAdapter(
             cardView.setCorners(position, itemCount)
         }
 
-        when (viewType) {
-            DisplayType.LIST.layout -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(file, isGrid)
-            DisplayType.GRID.layout -> (binding as CardviewFileGridBinding).setFileItem(file, isGrid)
-            DisplayType.GRID_FOLDER.layout -> (binding as CardviewFolderGridBinding).setFileItem(file, isGrid)
+        when (binding) {
+            is CardviewFileListBinding -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(file, isGrid)
+            is CardviewFileGridBinding -> (binding as CardviewFileGridBinding).setFileItem(file, isGrid)
+            is CardviewFolderGridBinding -> (binding as CardviewFolderGridBinding).setFileItem(file, isGrid)
         }
 
-        checkIfEnableFile(file, binding.context)
+        checkIfEnableFile(file)
 
         when {
             uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
@@ -364,12 +363,12 @@ open class FileAdapter(
 
     fun contains(fileName: String) = fileList.any { it.name == fileName }
 
-    private fun FileItemViewHolder.checkIfEnableFile(file: File, context: Context) = when {
+    private fun FileItemViewHolder.checkIfEnableFile(file: File) = when {
         uploadInProgress -> {
             if (file.isPendingUploadFolder()) {
                 fileDate?.text = file.path
             } else {
-                val enable = file.currentProgress > 0 && context.isSyncActive()
+                val enable = file.currentProgress > 0 && binding.context.isSyncActive()
                 val title = when {
                     enable -> R.string.uploadInProgressTitle
                     pendingWifiConnection -> R.string.uploadNetworkErrorWifiRequired

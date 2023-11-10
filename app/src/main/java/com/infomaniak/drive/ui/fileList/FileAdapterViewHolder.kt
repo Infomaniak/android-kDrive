@@ -32,11 +32,11 @@ import com.infomaniak.drive.databinding.CardviewFolderGridBinding
 import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.views.ViewHolder
 
-sealed class FileViewHolder(itemView: View) : ViewHolder(itemView)
+sealed class FileViewHolder(open val binding: ViewBinding) : ViewHolder(binding.root)
 
-class FileLoaderViewHolder(val binding: ViewBinding) : FileViewHolder(binding.root)
+class FileLoaderViewHolder(override val binding: ViewBinding) : FileViewHolder(binding)
 
-sealed class FileItemViewHolder(open val binding: ViewBinding) : FileViewHolder(binding.root) {
+sealed class FileItemViewHolder(override val binding: ViewBinding) : FileViewHolder(binding) {
 
     abstract val cardView: MaterialCardView
     abstract val disabledView: View
@@ -47,7 +47,27 @@ sealed class FileItemViewHolder(open val binding: ViewBinding) : FileViewHolder(
     open val fileDate: TextView? = null
     open val stopUploadButton: MaterialButton? = null
 
-    class FileGridViewHolder private constructor(override val binding: CardviewFileGridBinding) : FileItemViewHolder(binding) {
+    class FileListViewHolder private constructor(
+        override val binding: CardviewFileListBinding,
+    ) : FileItemViewHolder(binding) {
+
+        override val cardView = binding.fileCardView
+        override val disabledView = binding.disabled
+        override val progressLayoutView = binding.itemViewFile.progressLayout
+        override val fileChecked = binding.itemViewFile.fileChecked
+        override val filePreview = binding.itemViewFile.filePreview
+        override val menuButton = binding.itemViewFile.menuButton
+        override val fileDate = binding.itemViewFile.fileDate
+        override val stopUploadButton = binding.itemViewFile.stopUploadButton
+
+        constructor(parent: ViewGroup) : this(
+            CardviewFileListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        )
+    }
+
+    class FileGridViewHolder private constructor(
+        override val binding: CardviewFileGridBinding,
+    ) : FileItemViewHolder(binding) {
 
         override val cardView = binding.fileCardView
         override val disabledView = binding.disabled
@@ -61,7 +81,9 @@ sealed class FileItemViewHolder(open val binding: ViewBinding) : FileViewHolder(
         )
     }
 
-    class FolderGridViewHolder(override val binding: CardviewFolderGridBinding) : FileItemViewHolder(binding) {
+    class FolderGridViewHolder private constructor(
+        override val binding: CardviewFolderGridBinding,
+    ) : FileItemViewHolder(binding) {
 
         override val cardView = binding.fileCardView
         override val disabledView = binding.disabled
@@ -72,22 +94,6 @@ sealed class FileItemViewHolder(open val binding: ViewBinding) : FileViewHolder(
 
         constructor(parent: ViewGroup) : this(
             CardviewFolderGridBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
-    }
-
-    class FileListViewHolder(override val binding: CardviewFileListBinding) : FileItemViewHolder(binding) {
-
-        override val cardView = binding.fileCardView
-        override val disabledView = binding.disabled
-        override val progressLayoutView = binding.itemViewFile.progressLayout
-        override val fileChecked = binding.itemViewFile.fileChecked
-        override val filePreview = binding.itemViewFile.filePreview
-        override val menuButton = binding.itemViewFile.menuButton
-        override val fileDate = binding.itemViewFile.fileDate
-        override val stopUploadButton = binding.itemViewFile.stopUploadButton
-
-        constructor(parent: ViewGroup) : this(
-            CardviewFileListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
     }
 }
