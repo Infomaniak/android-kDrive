@@ -129,7 +129,6 @@
     <string name="buttonLogout">Desconectarse</string>
     <string name="buttonManageDropBox">Gestionar el buzón de depósito</string>
     <string name="buttonMenu">Menú</string>
-    <string name="buttonMigrationDone">¡Aquí vamos!</string>
     <string name="buttonMove">Mover</string>
     <string name="buttonMoveTo">Mover a</string>
     <string name="buttonNewPassword">Definir una nueva contraseña</string>
@@ -465,14 +464,6 @@
         <item quantity="other">%d carpetas seleccionadas</item>
     </plurals>
     <string name="menuTitle">Menú</string>
-    <string name="migrateNotificationDescription">Lanza la app kDrive para completar la actualización</string>
-    <string name="migrateNotificationTitle">Importante: Se precisa una acción</string>
-    <string name="migratePhotoSyncSettingsDescription">Tras la migración, vuelve a configurar la copia de seguridad de las fotos.</string>
-    <string name="migratePhotoSyncSettingsTitle">Vuelve a configurar la copia de seguridad automática de tus fotos</string>
-    <string name="migrationDescription">Descubre ya una aplicación rediseñada para ofrecerte una experiencia de usuario más intuitiva y agradable.</string>
-    <string name="migrationFailed">No se ha podido realizar la migración.</string>
-    <string name="migrationInProgress">Migración en curso, espera…</string>
-    <string name="migrationTitle">Bienvenido a la nueva aplicación kDrive 100% Infomaniak</string>
     <string name="modalCommentAddTitle">Modificar un comentario</string>
     <string name="modalCommentDeleteDescription">¿Estás seguro de que deseas eliminar este comentario?</string>
     <string name="modalCreateFileSucces">%s creado correctamente</string>
@@ -541,7 +532,7 @@
         <item quantity="other">Preparando la importación de %d archivos</item>
     </plurals>
     <string name="previewDownloadIndication">Cambio en curso, espera…</string>
-    <string name="previewFileProtectedError">No hay vista previa disponible, este archivo está protegido por contraseña.</string>
+    <string name="previewFileProtectedError">No hay vista previa disponible, este archivo está protegido por contraseña</string>
     <string name="previewLoadError">No se puede cargar la vista previa</string>
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>
     <string name="previewPdfPages">%1$d de %2$d</string>

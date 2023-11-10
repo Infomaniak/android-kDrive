@@ -383,7 +383,7 @@ class MainActivity : BaseActivity() {
                 val destinationId = when {
                     !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
                         hasDisplayedSyncDialog = true
-                        if (AppSettings.migrated) R.id.syncAfterMigrationBottomSheetDialog else R.id.syncConfigureBottomSheetDialog
+                        R.id.syncConfigureBottomSheetDialog
                     }
                     else -> null
                 }

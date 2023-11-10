@@ -129,7 +129,6 @@
     <string name="buttonLogout">Disconnettiti</string>
     <string name="buttonManageDropBox">Gestisci il deposito file</string>
     <string name="buttonMenu">Menu</string>
-    <string name="buttonMigrationDone">Ci siamo!</string>
     <string name="buttonMove">Sposta</string>
     <string name="buttonMoveTo">Sposta in</string>
     <string name="buttonNewPassword">Definire una nuova password</string>
@@ -465,14 +464,6 @@
         <item quantity="other">%d cartelle selezionate</item>
     </plurals>
     <string name="menuTitle">Menu</string>
-    <string name="migrateNotificationDescription">Lancia l’app kDrive per concludere l’aggiornamento</string>
-    <string name="migrateNotificationTitle">Importante: non è richiesta nessuna azione</string>
-    <string name="migratePhotoSyncSettingsDescription">Dopo la migrazione, configura di nuovo il backup delle foto.</string>
-    <string name="migratePhotoSyncSettingsTitle">Configura il backup automatico delle foto</string>
-    <string name="migrationDescription">Scopri subito un’applicazione appositamente ridisegnata per offrirti un’esperienza utente più intuitiva e piacevole.</string>
-    <string name="migrationFailed">La migrazione non è riuscita.</string>
-    <string name="migrationInProgress">Migrazione in corso, attendere prego…</string>
-    <string name="migrationTitle">Benvenuta/o nella nuova applicazione kDrive 100% Infomaniak</string>
     <string name="modalCommentAddTitle">Modifica un commento</string>
     <string name="modalCommentDeleteDescription">Rimuovere veramente questo commento?</string>
     <string name="modalCreateFileSucces">%s creato con successo</string>
@@ -541,7 +532,7 @@
         <item quantity="other">Preparazione all’importazione di %d file</item>
     </plurals>
     <string name="previewDownloadIndication">Modifica in corso, attendere prego…</string>
-    <string name="previewFileProtectedError">Non è disponibile un’anteprima, questo file è protetto da password.</string>
+    <string name="previewFileProtectedError">Non è disponibile un’anteprima, questo file è protetto da password</string>
     <string name="previewLoadError">Impossibile caricare l’anteprima</string>
     <string name="previewNoPreview">Sembra che il file non abbia anteprima.</string>
     <string name="previewPdfPages">%1$d di %2$d</string>

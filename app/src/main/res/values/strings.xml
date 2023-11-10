@@ -140,7 +140,6 @@
     <string name="buttonLogout">Log off</string>
     <string name="buttonManageDropBox">Manage the drop box</string>
     <string name="buttonMenu">Menu</string>
-    <string name="buttonMigrationDone">Let’s get started!</string>
     <string name="buttonMove">Move</string>
     <string name="buttonMoveTo">Move to</string>
     <string name="buttonNewPassword">Set a new password</string>
@@ -476,14 +475,6 @@
         <item quantity="other">%d folders selected</item>
     </plurals>
     <string name="menuTitle">Menu</string>
-    <string name="migrateNotificationDescription">Please launch the kDrive app to complete the update</string>
-    <string name="migrateNotificationTitle">Important: action is required</string>
-    <string name="migratePhotoSyncSettingsDescription">After the migration, please reconfigure the photo backup.</string>
-    <string name="migratePhotoSyncSettingsTitle">Please reconfigure the automatic photo backup</string>
-    <string name="migrationDescription">Discover an application that’s been redesigned to offer you a better, more intuitive user experience.</string>
-    <string name="migrationFailed">Migration failed.</string>
-    <string name="migrationInProgress">Migration in progress, please wait…</string>
-    <string name="migrationTitle">Welcome to the new kDrive application that’s 100% Infomaniak</string>
     <string name="modalCommentAddTitle">Edit a comment</string>
     <string name="modalCommentDeleteDescription">Do you really want to delete your comment?</string>
     <string name="modalCreateFileSucces">%s created successfully</string>
@@ -552,7 +543,7 @@
         <item quantity="other">Preparing to upload %d files</item>
     </plurals>
     <string name="previewDownloadIndication">Loading in progress, please wait…</string>
-    <string name="previewFileProtectedError">No preview available, this file is password protected.</string>
+    <string name="previewFileProtectedError">No preview available, this file is password protected</string>
     <string name="previewLoadError">Unable to load preview</string>
     <string name="previewNoPreview">This file appears to have no preview.</string>
     <string name="previewPdfPages">%1$d out of %2$d</string>
