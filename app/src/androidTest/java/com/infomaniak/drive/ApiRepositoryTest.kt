@@ -179,7 +179,7 @@ class ApiRepositoryTest : KDriveTest() {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
         // Get all trash Files
-        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
+        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, null)) {
             assertApiResponseData(this)
             assertTrue(data!!.isNotEmpty(), "Trash should not be empty")
             assertEquals(fileToDelete.id, data?.first()?.id, "First trash testFile's id should be ${fileToDelete.id}")
@@ -194,7 +194,7 @@ class ApiRepositoryTest : KDriveTest() {
         // Restore file from trash
         assertApiResponseData(postRestoreTrashFile(file, mapOf("destination_folder_id" to ROOT_ID)))
         // Get the trash files, the file restored should not be here
-        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
+        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, null)) {
             assertApiResponseData(this)
             if (data!!.isNotEmpty()) {
                 assertNotEquals(file.id, data?.first()?.id, "Last trash file's id should not be ${file.id}")
@@ -209,7 +209,7 @@ class ApiRepositoryTest : KDriveTest() {
     fun permanentlyDeleteFiles() {
         // Clean the trash to make sure nothing is left in
         assertApiResponseData(emptyTrash(userDrive.driveId))
-        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1)) {
+        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, null)) {
             assertApiResponseData(this)
             assertTrue(data!!.isEmpty(), "Trash should be empty")
         }
@@ -218,7 +218,7 @@ class ApiRepositoryTest : KDriveTest() {
         deleteTrashFile(putNewFileInTrash())
 
         // Trash should still be empty because new file has been deleted from trash
-        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1)) {
+        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, null)) {
             assertApiResponseData(this)
             assertTrue(data!!.isEmpty(), "Trash should be empty")
         }

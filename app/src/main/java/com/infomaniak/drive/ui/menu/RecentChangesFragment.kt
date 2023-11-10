@@ -49,7 +49,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         fileRecyclerView.apply {
             setPagination({
                 if (!fileAdapter.isComplete && !isDownloadingChanges) {
-                    startLoading()
+                    startLoading(isNewSort = false)
                     recentChangesViewModel.loadNextPage()
                 }
             })
@@ -76,9 +76,10 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         )
     }
 
-    private fun startLoading() {
+    private fun startLoading(isNewSort: Boolean) {
         showLoadingTimer.start()
         isDownloadingChanges = true
+        recentChangesViewModel.isNewSort = isNewSort
     }
 
     private fun observeRecentChanges() {
@@ -102,7 +103,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
 
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
-            startLoading()
+            startLoading(isNewSort)
             fileAdapter.isComplete = false
 
             recentChangesViewModel.loadRecentChanges(isNewSort)
