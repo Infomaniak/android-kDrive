@@ -22,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
@@ -30,9 +31,8 @@ import com.infomaniak.drive.databinding.CardviewFileGridBinding
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.CardviewFolderGridBinding
 import com.infomaniak.drive.views.ProgressLayoutView
-import com.infomaniak.lib.core.views.ViewHolder
 
-sealed class FileViewHolder(open val binding: ViewBinding) : ViewHolder(binding.root)
+sealed class FileViewHolder(open val binding: ViewBinding) : RecyclerView.ViewHolder(binding.root)
 
 class FileLoaderViewHolder(override val binding: ViewBinding) : FileViewHolder(binding)
 

@@ -22,13 +22,13 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.databinding.ItemPdfViewBinding
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFAdapter.PreviewPDFViewHolder
 import com.infomaniak.drive.utils.PdfCore
-import com.infomaniak.lib.core.views.ViewHolder
 
-class PreviewPDFAdapter(private val pdfCore: PdfCore) : RecyclerView.Adapter<PreviewPDFViewHolder>() {
+class PreviewPDFAdapter(private val pdfCore: PdfCore) : Adapter<PreviewPDFViewHolder>() {
 
     private var whiteBitmap: Bitmap
 

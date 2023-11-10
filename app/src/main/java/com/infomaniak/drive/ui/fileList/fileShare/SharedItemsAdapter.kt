@@ -23,7 +23,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
@@ -33,12 +34,11 @@ import com.infomaniak.drive.ui.fileList.fileShare.SharedItemsAdapter.SharedItems
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.views.ViewHolder
 
 class SharedItemsAdapter(
     private val file: File,
-    private val onItemClicked: (item: Shareable) -> Unit
-) : RecyclerView.Adapter<SharedItemsViewHolder>() {
+    private val onItemClicked: (item: Shareable) -> Unit,
+) : Adapter<SharedItemsViewHolder>() {
 
     private var itemList: ArrayList<Shareable> = ArrayList()
 

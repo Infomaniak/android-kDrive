@@ -21,18 +21,18 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.drive.data.models.SearchFilter.FilterKey
 import com.infomaniak.drive.databinding.ItemSearchFilterChipBinding
 import com.infomaniak.drive.ui.fileList.SearchFiltersAdapter.SearchFiltersViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 
 class SearchFiltersAdapter(
-    private val onFilterRemoved: (key: FilterKey, categoryId: Int?) -> Unit
-) : RecyclerView.Adapter<SearchFiltersViewHolder>() {
+    private val onFilterRemoved: (key: FilterKey, categoryId: Int?) -> Unit,
+) : Adapter<SearchFiltersViewHolder>() {
 
     var filters = arrayListOf<SearchFilter>()
 

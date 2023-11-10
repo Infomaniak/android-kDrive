@@ -23,18 +23,16 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.CardviewCategoryBinding
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesAdapter.CategoriesViewHolder
 import com.infomaniak.drive.utils.setCornersRadius
-import com.infomaniak.lib.core.views.ViewHolder
 import java.util.Date
 
-class CategoriesAdapter(
-    private val onCategoryChanged: (id: Int, isSelected: Boolean) -> Unit
-) : RecyclerView.Adapter<CategoriesViewHolder>() {
+class CategoriesAdapter(private val onCategoryChanged: (id: Int, isSelected: Boolean) -> Unit) : Adapter<CategoriesViewHolder>() {
 
     var canEditCategory: Boolean = false
     var canDeleteCategory: Boolean = false

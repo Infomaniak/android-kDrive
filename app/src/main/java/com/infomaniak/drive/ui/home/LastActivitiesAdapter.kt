@@ -25,6 +25,7 @@ import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
@@ -37,7 +38,6 @@ import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.views.LoaderAdapter
-import com.infomaniak.lib.core.views.ViewHolder
 
 class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 

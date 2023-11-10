@@ -22,18 +22,18 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
 import com.infomaniak.drive.ui.SwitchDriveBottomSheetAdapter.SwitchDriveViewHolder
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.views.ViewHolder
 
 class SwitchDriveBottomSheetAdapter(
     private var driveList: ArrayList<Drive>,
     private val onItemClicked: (drive: Drive) -> Unit,
-) : RecyclerView.Adapter<SwitchDriveViewHolder>() {
+) : Adapter<SwitchDriveViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SwitchDriveViewHolder {
         return SwitchDriveViewHolder(ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false))

@@ -21,13 +21,13 @@ import android.text.format.DateUtils.*
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.TooltipCompat
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileComment
 import com.infomaniak.drive.databinding.ItemFileCommentBinding
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.views.LoaderAdapter
-import com.infomaniak.lib.core.views.ViewHolder
 
 class FileCommentsAdapter(val onLikeButtonClicked: (currentComment: FileComment) -> Unit) : LoaderAdapter<FileComment>() {
 

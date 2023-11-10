@@ -20,15 +20,15 @@ package com.infomaniak.drive.ui.menu.settings
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.databinding.ItemMediaFolderBinding
 import com.infomaniak.drive.ui.menu.settings.MediaFoldersAdapter.MediaFoldersViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 
 class MediaFoldersAdapter(
     private val onSwitchChanged: (mediaFolder: MediaFolder, isChecked: Boolean) -> Unit,
-) : RecyclerView.Adapter<MediaFoldersViewHolder>() {
+) : Adapter<MediaFoldersViewHolder>() {
 
     private var itemList: ArrayList<MediaFolder> = arrayListOf()
 

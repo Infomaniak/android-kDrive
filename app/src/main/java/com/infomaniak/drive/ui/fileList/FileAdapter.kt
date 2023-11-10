@@ -26,6 +26,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -72,9 +73,9 @@ open class FileAdapter(
 
     private var pendingWifiConnection = false
     private var showLoading = false
-    private var fileAdapterObserver: RecyclerView.AdapterDataObserver? = null
+    private var fileAdapterObserver: AdapterDataObserver? = null
 
-    private fun createFileAdapterObserver(recyclerView: RecyclerView) = object : RecyclerView.AdapterDataObserver() {
+    private fun createFileAdapterObserver(recyclerView: RecyclerView) = object : AdapterDataObserver() {
 
         private fun notifyChanged(position: Int) {
             recyclerView.post { if (fileList.isNotEmpty() && position < fileList.count()) notifyItemChanged(position) }

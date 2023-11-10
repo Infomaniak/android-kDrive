@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.FileActivity
@@ -30,7 +31,6 @@ import com.infomaniak.drive.databinding.ItemFileActivityBinding
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.views.LoaderAdapter
-import com.infomaniak.lib.core.views.ViewHolder
 import java.text.SimpleDateFormat
 import java.util.*
 

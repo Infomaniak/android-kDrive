@@ -22,13 +22,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewColorRoundButtonBinding
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.CategoriesBulletViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 
-class CreateOrEditCategoryAdapter : RecyclerView.Adapter<CategoriesBulletViewHolder>() {
+class CreateOrEditCategoryAdapter : Adapter<CategoriesBulletViewHolder>() {
 
     var selectedPosition = 0
 

@@ -22,7 +22,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.CardviewFileListBinding
@@ -32,9 +33,8 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.views.ViewHolder
 
-class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : RecyclerView.Adapter<SaveExternalUriViewHolder>() {
+class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Adapter<SaveExternalUriViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SaveExternalUriViewHolder {
         return SaveExternalUriViewHolder(CardviewFileListBinding.inflate(LayoutInflater.from(parent.context), parent, false))
