@@ -25,6 +25,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import okhttp3.Request
@@ -55,7 +56,7 @@ object PreviewPDFUtils {
                 outputFile.setLastModified(file.getLastModifiedInMilliSecond())
             }
 
-            ApiResponse(ApiResponse.Status.SUCCESS, PdfCore(context, outputFile))
+            ApiResponse(ApiResponseStatus.SUCCESS, PdfCore(context, outputFile))
         }.getOrElse { exception ->
             exception.printStackTrace()
             val error = when (exception) {
@@ -63,7 +64,7 @@ object PreviewPDFUtils {
                 else -> R.string.previewNoPreview
             }
             ApiResponse(
-                result = ApiResponse.Status.ERROR,
+                result = ApiResponseStatus.ERROR,
                 data = null,
                 translatedError = error,
             )

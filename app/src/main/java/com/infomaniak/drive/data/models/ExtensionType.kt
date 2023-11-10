@@ -21,7 +21,7 @@ import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.infomaniak.drive.R
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 enum class ExtensionType(val value: String, @DrawableRes val icon: Int, @StringRes val searchFilterName: Int) : Parcelable {

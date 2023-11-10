@@ -56,7 +56,7 @@ class LaunchActivity : AppCompatActivity() {
             handleDeeplink()
 
             val destinationClass = if (AccountUtils.requestCurrentUser() == null) {
-                if (getOldkDriveUser().isEmpty) LoginActivity::class.java else MigrationActivity::class.java
+                if (getOldkDriveUser().isEmpty()) LoginActivity::class.java else MigrationActivity::class.java
             } else {
                 trackUserId(AccountUtils.currentUserId)
 

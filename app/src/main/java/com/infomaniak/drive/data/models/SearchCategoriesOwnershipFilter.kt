@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 enum class SearchCategoriesOwnershipFilter(val apiSeparator: CharSequence) : Parcelable {

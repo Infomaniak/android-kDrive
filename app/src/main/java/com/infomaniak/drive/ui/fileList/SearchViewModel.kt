@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.SearchFragment.VisibilityMode
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -74,7 +75,7 @@ class SearchViewModel : ViewModel() {
 
             when {
                 apiResponse.isSuccess() -> emit(apiResponse)
-                page == 1 -> emit(ApiResponse(ApiResponse.Status.SUCCESS, FileController.searchFiles(query, order)))
+                page == 1 -> emit(ApiResponse(ApiResponseStatus.SUCCESS, FileController.searchFiles(query, order)))
                 else -> emit(apiResponse)
             }
         }
