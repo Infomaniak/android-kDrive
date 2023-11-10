@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,8 @@ import java.util.Date
 
 class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private var binding: FragmentBottomSheetAddFileBinding by safeBinding()
+    private var _binding: FragmentBottomSheetAddFileBinding? = null
+    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     private lateinit var currentFolderFile: File
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -92,7 +93,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let { file ->
             currentFolderFile = file
-            FragmentBottomSheetAddFileBinding.inflate(inflater, container, false).also { binding = it }.root
+            FragmentBottomSheetAddFileBinding.inflate(inflater, container, false).also { _binding = it }.root
         } ?: run {
             findNavController().popBackStack()
             null
@@ -115,7 +116,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             parentFolder = currentFolderFile,
             onOpeningPicker = {
                 trackNewElement("uploadFile")
-                binding.documentUpload.isEnabled = false
+                _binding?.documentUpload?.isEnabled = false
             },
             onResult = { findNavController().popBackStack() },
         )
@@ -131,11 +132,26 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         noteCreate.setOnClickListener { createFile(Office.TXT) }
 
         documentScanning.isVisible = (context.applicationContext as MainApplication).geniusScanIsReady
+
+        with(requireActivity().intent) {
+            if (action == Intent.ACTION_ATTACH_DATA && mainViewModel.mustOpenShortcut) {
+                mainViewModel.mustOpenShortcut = false
+                when (extras?.getString("shortcut_tag")) {
+                    "upload" -> uploadFileHelper.uploadFiles()
+                    "scan" -> scanDocuments()
+                }
+            }
+        }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         mainViewModel.currentFolderOpenAddFileBottom.value = null
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun openCamera() {

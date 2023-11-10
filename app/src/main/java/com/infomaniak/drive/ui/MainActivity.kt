@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -241,6 +242,10 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         handleDeletionOfUploadedPhotos()
+
+        if (intent.action == Intent.ACTION_ATTACH_DATA && mainViewModel.mustOpenShortcut) {
+            findNavController(R.id.hostFragment).navigate(R.id.addFileBottomSheetDialog)
+        }
     }
 
     override fun onPause() {
