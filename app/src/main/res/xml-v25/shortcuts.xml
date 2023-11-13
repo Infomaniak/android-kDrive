@@ -23,11 +23,11 @@
         <!--        android:shortcutLongLabel="Upload files to kDrive">-->
         <intent
             android:action="android.intent.action.ATTACH_DATA"
-            android:targetClass="com.infomaniak.drive.ui.MainActivity"
+            android:targetClass="com.infomaniak.drive.ui.LaunchActivity"
             android:targetPackage="com.infomaniak.drive">
 
             <extra
-                android:name="shortcut_tag"
+                android:name="shortcuts_tag"
                 android:value="upload" />
         </intent>
     </shortcut>
@@ -38,11 +38,11 @@
         android:shortcutShortLabel="@string/buttonDocumentScanning">
         <intent
             android:action="android.intent.action.ATTACH_DATA"
-            android:targetClass="com.infomaniak.drive.ui.MainActivity"
+            android:targetClass="com.infomaniak.drive.ui.LaunchActivity"
             android:targetPackage="com.infomaniak.drive">
 
             <extra
-                android:name="shortcut_tag"
+                android:name="shortcuts_tag"
                 android:value="scan" />
         </intent>
     </shortcut>

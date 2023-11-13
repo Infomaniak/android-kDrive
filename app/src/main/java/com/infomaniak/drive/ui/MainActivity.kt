@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -33,6 +32,7 @@ import android.os.Bundle
 import android.os.FileObserver
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
@@ -60,6 +60,8 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
+import com.infomaniak.drive.ui.LaunchActivity.*
+import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
@@ -141,9 +143,21 @@ class MainActivity : BaseActivity() {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
-        if (intent.action == Intent.ACTION_ATTACH_DATA && intent.hasExtra("shortcut_tag")) {
-            mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
-                currentFolder?.let { if (mainViewModel.mustOpenShortcut) navController.navigate(R.id.addFileBottomSheetDialog) }
+        navigationArgs?.shortcutId?.let { shortcutId ->
+            when (shortcutId) {
+                Shortcuts.SEARCH.name -> Unit
+                Shortcuts.UPLOAD.name, Shortcuts.SCAN.name -> {
+                    mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
+                        currentFolder?.let {
+                            if (mainViewModel.mustOpenShortcut) {
+                                navController.navigate(
+                                    R.id.addFileBottomSheetDialog,
+                                    AddFileBottomSheetDialogArgs(shortcutId).toBundle(),
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

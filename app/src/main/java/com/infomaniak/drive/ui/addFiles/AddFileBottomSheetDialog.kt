@@ -22,6 +22,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +32,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
@@ -43,6 +45,7 @@ import com.infomaniak.drive.data.models.File.Office
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetAddFileBinding
+import com.infomaniak.drive.ui.LaunchActivity.*
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
@@ -61,8 +64,13 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private var _binding: FragmentBottomSheetAddFileBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
-    private lateinit var currentFolderFile: File
+    private var _currentFolderFile: File? = null
+
+    // This property is only valid after onCreateView
+    private val currentFolderFile get() = _currentFolderFile!!
+
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val navigationArgs: AddFileBottomSheetDialogArgs by navArgs()
 
     private lateinit var openCameraWritePermissions: DrivePermissions
     private lateinit var openCameraPermissions: CameraPermissions
@@ -92,7 +100,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let { file ->
-            currentFolderFile = file
+            _currentFolderFile = file
             FragmentBottomSheetAddFileBinding.inflate(inflater, container, false).also { _binding = it }.root
         } ?: run {
             findNavController().popBackStack()

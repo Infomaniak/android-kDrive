@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -52,6 +53,7 @@ class LaunchActivity : AppCompatActivity() {
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
             handleNotificationDestinationIntent()
             handleDeeplink()
+            handleShortcuts()
 
             val destinationClass = if (AccountUtils.requestCurrentUser() == null) {
                 LoginActivity::class.java
@@ -146,5 +148,20 @@ class LaunchActivity : AppCompatActivity() {
                 AccountUtils.currentUser?.let { AccountUtils.removeUserAndDeleteToken(this@LaunchActivity, it) }
             }
         }
+    }
+
+    private fun handleShortcuts() {
+        Log.e("TOTO", "${intent.extras?.getString(SHORTCUTS_TAG)}")
+        val shortcut = intent.extras?.getString(SHORTCUTS_TAG)?.uppercase()?.let(Shortcuts::valueOf)
+        Log.e("TOTO", "$shortcut")
+        shortcut?.let { extrasOpenSpecificFile = MainActivityArgs(shortcutId = it.name).toBundle() }
+    }
+
+    enum class Shortcuts {
+        UPLOAD, SCAN, SEARCH
+    }
+
+    private companion object {
+        const val SHORTCUTS_TAG = "shortcuts_tag"
     }
 }
