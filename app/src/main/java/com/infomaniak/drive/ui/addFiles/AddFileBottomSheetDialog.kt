@@ -141,8 +141,9 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
         documentScanning.isVisible = (context.applicationContext as MainApplication).geniusScanIsReady
 
-        if (navigationArgs.shortcutId != null && mainViewModel.mustOpenShortcut) {
+        if (navigationArgs.shortcutId.isNotEmpty() && mainViewModel.mustOpenShortcut) {
             mainViewModel.mustOpenShortcut = false
+
             when (navigationArgs.shortcutId) {
                 Shortcuts.UPLOAD.name -> uploadFileHelper.uploadFiles()
                 Shortcuts.SCAN.name -> scanDocuments()
