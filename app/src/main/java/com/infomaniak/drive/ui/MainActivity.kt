@@ -140,6 +140,12 @@ class MainActivity : BaseActivity() {
         handleUpdates(navController)
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
+
+        if (intent.action == Intent.ACTION_ATTACH_DATA && intent.hasExtra("shortcut_tag")) {
+            mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
+                currentFolder?.let { if (mainViewModel.mustOpenShortcut) navController.navigate(R.id.addFileBottomSheetDialog) }
+            }
+        }
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -242,10 +248,6 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         handleDeletionOfUploadedPhotos()
-
-        if (intent.action == Intent.ACTION_ATTACH_DATA && mainViewModel.mustOpenShortcut) {
-            findNavController(R.id.hostFragment).navigate(R.id.addFileBottomSheetDialog)
-        }
     }
 
     override fun onPause() {
