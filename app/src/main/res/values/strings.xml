@@ -609,6 +609,8 @@
     <string name="sharedConflictTitle">Permissions conflict</string>
     <string name="sharedWithMeNoFile">No files shared with me</string>
     <string name="sharedWithMeTitle">Shared with me</string>
+    <string name="shortcutScanShortDescription">Scan</string>
+    <string name="shortcutUploadShortDescription">Upload</string>
     <string name="snackBarCategoryDeleted">Category successfully deleted</string>
     <string name="snackBarInvalidFileNameError">Character \"%1$s\" of file %2$s not supported for offline availability</string>
     <plurals name="snackBarUploadError">

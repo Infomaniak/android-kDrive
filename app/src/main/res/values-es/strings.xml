@@ -598,6 +598,8 @@
     <string name="sharedConflictTitle">Conflicto de permisos</string>
     <string name="sharedWithMeNoFile">No hay archivos compartidos conmigo</string>
     <string name="sharedWithMeTitle">Usos compartidos conmigo</string>
+    <string name="shortcutScanShortDescription">Escanear</string>
+    <string name="shortcutUploadShortDescription">Importar</string>
     <string name="snackBarCategoryDeleted">Categoría eliminada correctamente</string>
     <string name="snackBarInvalidFileNameError">El carácter \"%1$s\" del archivo %2$s no es compatible con el uso fuera de línea</string>
     <plurals name="snackBarUploadError">

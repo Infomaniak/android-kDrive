@@ -19,8 +19,8 @@
     <shortcut
         android:icon="@drawable/ic_upload"
         android:shortcutId="upload"
-        android:shortcutShortLabel="@string/buttonUpload">
-        <!--        android:shortcutLongLabel="Upload files to kDrive">-->
+        android:shortcutLongLabel="@string/buttonUpload"
+        android:shortcutShortLabel="@string/shortcutUploadShortDescription">
         <intent
             android:action="android.intent.action.ATTACH_DATA"
             android:targetClass="com.infomaniak.drive.ui.LaunchActivity"
@@ -35,7 +35,7 @@
         android:icon="@drawable/ic_scan"
         android:shortcutId="scan"
         android:shortcutLongLabel="@string/buttonDocumentScanning"
-        android:shortcutShortLabel="@string/buttonDocumentScanning">
+        android:shortcutShortLabel="@string/shortcutScanShortDescription">
         <intent
             android:action="android.intent.action.ATTACH_DATA"
             android:targetClass="com.infomaniak.drive.ui.LaunchActivity"
