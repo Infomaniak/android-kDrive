@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -151,14 +150,9 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun handleShortcuts() {
-        Log.e("TOTO", "${intent.extras?.getString(SHORTCUTS_TAG)}")
-        val shortcut = intent.extras?.getString(SHORTCUTS_TAG)?.uppercase()?.let(Shortcuts::valueOf)
-        Log.e("TOTO", "$shortcut")
-        shortcut?.let { extrasOpenSpecificFile = MainActivityArgs(shortcutId = it.name).toBundle() }
-    }
-
-    enum class Shortcuts {
-        UPLOAD, SCAN, SEARCH
+        intent.extras?.getString(SHORTCUTS_TAG)?.let { shortcutId ->
+            extrasOpenSpecificFile = MainActivityArgs(shortcutId = shortcutId).toBundle()
+        }
     }
 
     private companion object {

@@ -22,7 +22,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,6 +52,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -141,13 +141,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
         documentScanning.isVisible = (context.applicationContext as MainApplication).geniusScanIsReady
 
-        with(requireActivity().intent) {
-            if (action == Intent.ACTION_ATTACH_DATA && mainViewModel.mustOpenShortcut) {
-                mainViewModel.mustOpenShortcut = false
-                when (extras?.getString("shortcut_tag")) {
-                    "upload" -> uploadFileHelper.uploadFiles()
-                    "scan" -> scanDocuments()
-                }
+        if (navigationArgs.shortcutId != null && mainViewModel.mustOpenShortcut) {
+            mainViewModel.mustOpenShortcut = false
+            when (navigationArgs.shortcutId) {
+                Shortcuts.UPLOAD.name -> uploadFileHelper.uploadFiles()
+                Shortcuts.SCAN.name -> scanDocuments()
+                else -> Unit
             }
         }
     }

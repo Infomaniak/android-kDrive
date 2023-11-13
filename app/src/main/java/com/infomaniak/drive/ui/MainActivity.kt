@@ -32,7 +32,6 @@ import android.os.Bundle
 import android.os.FileObserver
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.util.Log
 import android.view.View
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
@@ -67,6 +66,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
@@ -145,7 +145,7 @@ class MainActivity : BaseActivity() {
 
         navigationArgs?.shortcutId?.let { shortcutId ->
             when (shortcutId) {
-                Shortcuts.SEARCH.name -> Unit
+                Shortcuts.SEARCH.name -> Unit // TODO
                 Shortcuts.UPLOAD.name, Shortcuts.SCAN.name -> {
                     mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
                         currentFolder?.let {

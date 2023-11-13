@@ -347,4 +347,8 @@ object Utils {
             }
         }.show()
     }
+
+    enum class Shortcuts {
+        UPLOAD, SCAN, SEARCH
+    }
 }

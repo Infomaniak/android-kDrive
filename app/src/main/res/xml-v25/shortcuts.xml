@@ -28,7 +28,7 @@
 
             <extra
                 android:name="shortcuts_tag"
-                android:value="upload" />
+                android:value="UPLOAD" />
         </intent>
     </shortcut>
     <shortcut
@@ -43,7 +43,7 @@
 
             <extra
                 android:name="shortcuts_tag"
-                android:value="scan" />
+                android:value="SCAN" />
         </intent>
     </shortcut>
 </shortcuts>
