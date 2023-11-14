@@ -36,7 +36,7 @@ class GalleryViewModel : ViewModel() {
     private var currentCursor: String? = null
 
     val galleryApiResult = MutableLiveData<Pair<ArrayList<File>, IsComplete>?>()
-    private var lastGalleryFiles = ArrayList<File>()
+    private var lastGalleryFiles = arrayListOf<File>()
 
     val needToRestoreFiles get() = galleryApiResult.isInitialized
 
