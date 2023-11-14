@@ -37,6 +37,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
@@ -51,6 +52,7 @@ import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -362,8 +364,13 @@ class MainActivity : BaseActivity() {
 
     private fun handleShortcuts(navController: NavController) {
         navigationArgs?.shortcutId?.let { shortcutId ->
+            trackEvent("shortcuts", shortcutId.lowercase())
+
             when (shortcutId) {
-                Shortcuts.SEARCH.name -> navController.navigate(R.id.searchFragment)
+                Shortcuts.SEARCH.name -> {
+                    ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.SEARCH.name)
+                    navController.navigate(R.id.searchFragment)
+                }
                 Shortcuts.UPLOAD.name, Shortcuts.SCAN.name -> handleAddFileShortcuts(navController, shortcutId)
             }
         }

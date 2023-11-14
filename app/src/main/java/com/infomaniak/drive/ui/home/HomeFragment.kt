@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -43,6 +44,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.TabViewPagerUtils.FragmentTab
 import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.toPx
@@ -92,6 +94,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         ViewCompat.requestApplyInsets(homeCoordinator)
 
         searchViewCard.root.setOnClickListener {
+            ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.name)
             safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
         }
 

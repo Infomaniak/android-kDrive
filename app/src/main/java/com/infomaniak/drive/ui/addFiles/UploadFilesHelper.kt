@@ -17,8 +17,10 @@
  */
 package com.infomaniak.drive.ui.addFiles
 
+import android.content.Context
 import android.net.Uri
 import androidx.annotation.IdRes
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
@@ -27,9 +29,11 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.utils.FilePicker
 
 class UploadFilesHelper private constructor(
+    private val context: Context,
     private val parentFolder: File,
     private val navController: NavController,
     private val filePicker: FilePicker,
@@ -44,7 +48,7 @@ class UploadFilesHelper private constructor(
         parentFolder: File,
         onOpeningPicker: () -> Unit,
         onResult: (() -> Unit)? = null,
-    ) : this(parentFolder, fragment.findNavController(), FilePicker(fragment), onOpeningPicker, onResult) {
+    ) : this(fragment.requireContext(), parentFolder, fragment.findNavController(), FilePicker(fragment), onOpeningPicker, onResult) {
         uploadFilesPermissions = DrivePermissions().apply {
             registerPermissions(fragment) { authorized -> if (authorized) uploadFiles() }
         }
@@ -56,13 +60,14 @@ class UploadFilesHelper private constructor(
         @IdRes hostFragmentId: Int,
         onOpeningPicker: () -> Unit,
         onResult: (() -> Unit)? = null,
-    ) : this(parentFolder, activity.findNavController(hostFragmentId), FilePicker(activity), onOpeningPicker, onResult) {
+    ) : this(activity, parentFolder, activity.findNavController(hostFragmentId), FilePicker(activity), onOpeningPicker, onResult) {
         uploadFilesPermissions = DrivePermissions().apply {
             registerPermissions(activity) { authorized -> if (authorized) uploadFiles() }
         }
     }
 
     fun uploadFiles() {
+        ShortcutManagerCompat.reportShortcutUsed(context, Shortcuts.UPLOAD.name)
         if (uploadFilesPermissions.checkSyncPermissions()) {
             onOpeningPicker()
             filePicker.open { uris ->

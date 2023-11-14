@@ -27,6 +27,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -145,7 +146,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             mainViewModel.mustOpenShortcut = false
 
             when (navigationArgs.shortcutId) {
-                Shortcuts.UPLOAD.name -> uploadFileHelper.uploadFiles()
+                Shortcuts.UPLOAD.name -> uploadFilesHelper.uploadFiles()
                 Shortcuts.SCAN.name -> scanDocuments()
                 else -> Unit
             }
@@ -184,6 +185,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun scanDocuments() {
+        ShortcutManagerCompat.reportShortcutUsed(requireContext(), navigationArgs.shortcutId)
         trackNewElement("scan")
         context?.startScanFlow(scanFlowResultLauncher)
     }
