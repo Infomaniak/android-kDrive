@@ -66,6 +66,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
+import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.applock.LockActivity
@@ -143,23 +144,7 @@ class MainActivity : BaseActivity() {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
-        navigationArgs?.shortcutId?.let { shortcutId ->
-            when (shortcutId) {
-                Shortcuts.SEARCH.name -> Unit // TODO
-                Shortcuts.UPLOAD.name, Shortcuts.SCAN.name -> {
-                    mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
-                        currentFolder?.let {
-                            if (mainViewModel.mustOpenShortcut) {
-                                navController.navigate(
-                                    R.id.addFileBottomSheetDialog,
-                                    AddFileBottomSheetDialogArgs(shortcutId).toBundle(),
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        handleShortcuts()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -373,6 +358,26 @@ class MainActivity : BaseActivity() {
         mainFab.isVisible = isVisible
         bottomNavigation.isVisible = isVisible
         bottomNavigationBackgroundView.isVisible = isVisible
+    }
+
+    private fun handleShortcuts() {
+        navigationArgs?.shortcutId?.let { shortcutId ->
+            when (shortcutId) {
+                Shortcuts.SEARCH.name -> Unit // TODO
+                Shortcuts.UPLOAD.name, Shortcuts.SCAN.name -> handleAddFileShortcuts(shortcutId)
+            }
+        }
+    }
+
+    private fun handleAddFileShortcuts(shortcutId: String) {
+        mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
+            if (currentFolder?.id == ROOT_ID && mainViewModel.mustOpenShortcut) {
+                findNavController(R.id.hostFragment).navigate(
+                    R.id.addFileBottomSheetDialog,
+                    AddFileBottomSheetDialogArgs(shortcutId).toBundle(),
+                )
+            }
+        }
     }
 
     private fun launchSyncOffline() {
