@@ -25,7 +25,6 @@
             android:action="android.intent.action.ATTACH_DATA"
             android:targetClass="com.infomaniak.drive.ui.LaunchActivity"
             android:targetPackage="com.infomaniak.drive">
-
             <extra
                 android:name="shortcuts_tag"
                 android:value="UPLOAD" />
@@ -40,10 +39,23 @@
             android:action="android.intent.action.ATTACH_DATA"
             android:targetClass="com.infomaniak.drive.ui.LaunchActivity"
             android:targetPackage="com.infomaniak.drive">
-
             <extra
                 android:name="shortcuts_tag"
                 android:value="SCAN" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:icon="@drawable/ic_search_grey"
+        android:shortcutId="search"
+        android:shortcutLongLabel="@string/searchViewHint"
+        android:shortcutShortLabel="@string/searchTitle">
+        <intent
+            android:action="android.intent.action.ATTACH_DATA"
+            android:targetClass="com.infomaniak.drive.ui.LaunchActivity"
+            android:targetPackage="com.infomaniak.drive">
+            <extra
+                android:name="shortcuts_tag"
+                android:value="SEARCH" />
         </intent>
     </shortcut>
 </shortcuts>

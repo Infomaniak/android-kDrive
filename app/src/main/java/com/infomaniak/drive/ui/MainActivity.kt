@@ -144,7 +144,7 @@ class MainActivity : BaseActivity() {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
-        handleShortcuts()
+        handleShortcuts(navController)
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -360,19 +360,19 @@ class MainActivity : BaseActivity() {
         bottomNavigationBackgroundView.isVisible = isVisible
     }
 
-    private fun handleShortcuts() {
+    private fun handleShortcuts(navController: NavController) {
         navigationArgs?.shortcutId?.let { shortcutId ->
             when (shortcutId) {
-                Shortcuts.SEARCH.name -> Unit // TODO
-                Shortcuts.UPLOAD.name, Shortcuts.SCAN.name -> handleAddFileShortcuts(shortcutId)
+                Shortcuts.SEARCH.name -> navController.navigate(R.id.searchFragment)
+                Shortcuts.UPLOAD.name, Shortcuts.SCAN.name -> handleAddFileShortcuts(navController, shortcutId)
             }
         }
     }
 
-    private fun handleAddFileShortcuts(shortcutId: String) {
+    private fun handleAddFileShortcuts(navController: NavController, shortcutId: String) {
         mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
             if (currentFolder?.id == ROOT_ID && mainViewModel.mustOpenShortcut) {
-                findNavController(R.id.hostFragment).navigate(
+                navController.navigate(
                     R.id.addFileBottomSheetDialog,
                     AddFileBottomSheetDialogArgs(shortcutId).toBundle(),
                 )
