@@ -92,6 +92,6 @@ class FileDetailsViewModel : ViewModel() {
                 }
             }
         }
-        recursive(null)
+        recursive(cursor = null)
     }
 }
