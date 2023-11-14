@@ -23,7 +23,7 @@ import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.util.*
 
 @Parcelize

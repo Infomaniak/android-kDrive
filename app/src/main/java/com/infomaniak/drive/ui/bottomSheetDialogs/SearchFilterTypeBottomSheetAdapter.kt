@@ -20,17 +20,17 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetAdapter.SearchFilterTypeViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 
 class SearchFilterTypeBottomSheetAdapter(
     private val types: List<ExtensionType>,
     private val selectedType: ExtensionType?,
-    private val onTypeClicked: (type: ExtensionType) -> Unit
-) : RecyclerView.Adapter<SearchFilterTypeViewHolder>() {
+    private val onTypeClicked: (type: ExtensionType) -> Unit,
+) : Adapter<SearchFilterTypeViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchFilterTypeViewHolder {
         return SearchFilterTypeViewHolder(

@@ -20,15 +20,16 @@ package com.infomaniak.drive.ui.fileList
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.databinding.ItemSearchResultBinding
 import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
-import com.infomaniak.lib.core.views.ViewHolder
+import com.infomaniak.drive.ui.fileList.RecentSearchesAdapter.RecentSearchesViewHolder
 
 class RecentSearchesAdapter(
     var searches: ArrayList<String>,
     private val onSearchClicked: (search: String) -> Unit,
-) : RecyclerView.Adapter<RecentSearchesAdapter.RecentSearchesViewHolder>() {
+) : Adapter<RecentSearchesViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentSearchesViewHolder =
         RecentSearchesViewHolder(ItemSearchResultBinding.inflate(LayoutInflater.from(parent.context), parent, false))

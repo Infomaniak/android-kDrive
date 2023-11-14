@@ -22,15 +22,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewColorRoundButtonBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderAdapter.ColorFolderViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 
-class ColorFolderAdapter(
-    private val onColorSelected: (color: String) -> Unit
-) : RecyclerView.Adapter<ColorFolderViewHolder>() {
+class ColorFolderAdapter(private val onColorSelected: (color: String) -> Unit) : Adapter<ColorFolderViewHolder>() {
 
     var selectedPosition = -1
 

@@ -20,16 +20,16 @@ package com.infomaniak.drive.ui.menu.settings
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
 import com.infomaniak.drive.ui.menu.settings.SelectIntervalTypeBottomSheetAdapter.SelectIntervalTypeViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 
 class SelectIntervalTypeBottomSheetAdapter(
     private val selectedIntervalType: SyncSettings.IntervalType,
     private val onItemClicked: (intervalType: SyncSettings.IntervalType) -> Unit,
-) : RecyclerView.Adapter<SelectIntervalTypeViewHolder>() {
+) : Adapter<SelectIntervalTypeViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectIntervalTypeViewHolder {
         return SelectIntervalTypeViewHolder(

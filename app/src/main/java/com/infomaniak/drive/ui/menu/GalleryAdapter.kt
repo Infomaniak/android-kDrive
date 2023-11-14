@@ -21,6 +21,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
@@ -33,7 +34,6 @@ import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
-import com.infomaniak.lib.core.views.ViewHolder
 
 class GalleryAdapter(
     private val multiSelectManager: MultiSelectManager,

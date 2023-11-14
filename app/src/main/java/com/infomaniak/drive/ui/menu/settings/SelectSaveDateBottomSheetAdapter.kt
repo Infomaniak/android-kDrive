@@ -20,16 +20,16 @@ package com.infomaniak.drive.ui.menu.settings
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
 import com.infomaniak.drive.ui.menu.settings.SelectSaveDateBottomSheetAdapter.SelectSaveDateViewHolder
-import com.infomaniak.lib.core.views.ViewHolder
 
 class SelectSaveDateBottomSheetAdapter(
     private val selectedSaveDate: SyncSettings.SavePicturesDate,
     private val onItemClicked: (saveDate: SyncSettings.SavePicturesDate) -> Unit,
-) : RecyclerView.Adapter<SelectSaveDateViewHolder>() {
+) : Adapter<SelectSaveDateViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaveDateViewHolder {
         return SelectSaveDateViewHolder(ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false))

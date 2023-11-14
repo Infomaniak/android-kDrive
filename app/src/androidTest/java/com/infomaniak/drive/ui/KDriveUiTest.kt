@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.NoMatchingViewException
@@ -39,7 +40,6 @@ import com.infomaniak.drive.KDriveTest
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.views.ViewHolder
 import de.mannodermaus.junit5.ActivityScenarioExtension
 import org.hamcrest.Description
 import org.hamcrest.Matcher
@@ -49,7 +49,6 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.util.concurrent.TimeoutException
-
 
 open class KDriveUiTest : KDriveTest() {
 
@@ -115,7 +114,7 @@ open class KDriveUiTest : KDriveTest() {
         if (mustBeInList) {
             // Try to scroll to the file
             onView(withResourceName("fileRecyclerView")).perform(
-                RecyclerViewActions.scrollTo<ViewHolder>(hasDescendant(withText(fileName)))
+                RecyclerViewActions.scrollTo<RecyclerView.ViewHolder>(hasDescendant(withText(fileName)))
             )
             onView(isRoot()).perform(waitUntilShown(withText(fileName), SHORT_TIMEOUT))
             // Assert the file is displayed

@@ -23,7 +23,7 @@ import com.infomaniak.drive.data.models.TeamDetails
 import io.realm.RealmList
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.android.parcel.Parceler
+import kotlinx.parcelize.Parceler
 
 interface RealmListParceler<T> : Parceler<RealmList<T>?> {
 

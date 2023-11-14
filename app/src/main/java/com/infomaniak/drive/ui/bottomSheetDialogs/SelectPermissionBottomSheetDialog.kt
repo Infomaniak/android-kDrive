@@ -44,8 +44,8 @@ import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
-import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
+import kotlinx.parcelize.Parcelize
 
 class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 

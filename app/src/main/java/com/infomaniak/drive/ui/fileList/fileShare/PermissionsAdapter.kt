@@ -21,7 +21,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.RelativeCornerSize
@@ -38,7 +39,6 @@ import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.toPx
-import com.infomaniak.lib.core.views.ViewHolder
 
 class PermissionsAdapter(
     var selectionPosition: Int? = null,
@@ -46,7 +46,7 @@ class PermissionsAdapter(
     private var isExternalUser: Boolean = false,
     private var sharedUsers: ArrayList<UserFileAccess> = ArrayList(),
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
-) : RecyclerView.Adapter<PermissionsViewHolder>() {
+) : Adapter<PermissionsViewHolder>() {
 
     var permissionList: ArrayList<Permission> = ArrayList()
 
