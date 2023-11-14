@@ -124,7 +124,7 @@ class HomeActivitiesFragment : Fragment() {
 
     private fun observeLastActivities() {
         val lastActivitiesAdapter = binding.homeTabsRecyclerView.adapter as? LastActivitiesAdapter ?: return
-        homeViewModel.lastActivitiesResult.observe(viewLifecycleOwner) {
+        homeViewModel.lastActivitiesResult.observe(viewLifecycleOwner) { lastActivityResult ->
             with(lastActivitiesAdapter) {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 
