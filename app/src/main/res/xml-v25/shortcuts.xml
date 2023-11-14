@@ -45,7 +45,7 @@
         </intent>
     </shortcut>
     <shortcut
-        android:icon="@drawable/ic_search_grey"
+        android:icon="@drawable/ic_shortcut_search"
         android:shortcutId="search"
         android:shortcutLongLabel="@string/searchViewHint"
         android:shortcutShortLabel="@string/searchTitle">
