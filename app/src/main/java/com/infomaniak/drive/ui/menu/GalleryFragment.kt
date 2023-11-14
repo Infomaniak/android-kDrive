@@ -133,7 +133,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
         if (!isGalleryAdapterInitialized) {
             if (isCurrentlyInGallery) refreshTimer.start()
-            loadGallery(AccountUtils.currentDriveId, true)
+            loadGallery(AccountUtils.currentDriveId, isRefresh = true)
         }
 
         observeApiResultPagination()
