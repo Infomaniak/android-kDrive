@@ -24,8 +24,6 @@ import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.FileActivity
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.models.ApiResponseStatus.SUCCESS
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
@@ -81,58 +79,53 @@ class HomeViewModel : ViewModel() {
         cursor: String?,
     ): LastActivityResult? {
 
-        val ignoreDownload =
-            isFirstPage && lastActivitiesTime != 0L && (Date().time - lastActivitiesTime) < DOWNLOAD_INTERVAL && !forceDownload
+        fun isDownloadIntervalShort(): Boolean = (Date().time - lastActivitiesTime) < DOWNLOAD_INTERVAL
+
+        fun lastActivityResultFromRemote(data: ArrayList<FileActivity>, isComplete: Boolean): LastActivityResult {
+            val mergeAndCleanActivities = mergeAndCleanActivities(data)
+            lastActivities.addAll(data)
+            lastMergedActivities.addAll(mergeAndCleanActivities)
+            FileController.storeFileActivities(data)
+
+            return LastActivityResult(
+                mergedActivities = mergeAndCleanActivities,
+                isComplete = isComplete,
+                isFirstPage = isFirstPage
+            )
+        }
+
+        fun lastActivityResultFromLocal(): LastActivityResult {
+            val localActivities = FileController.getActivities()
+            val mergeAndCleanActivities = mergeAndCleanActivities(localActivities)
+            lastActivities = localActivities
+            lastMergedActivities = mergeAndCleanActivities
+
+            return LastActivityResult(mergedActivities = mergeAndCleanActivities, isComplete = true, isFirstPage = true)
+        }
+
+        val ignoreDownload = isFirstPage && lastActivitiesTime != 0L && isDownloadIntervalShort() && !forceDownload
 
         if (ignoreDownload) {
-            return LastActivityResult(
-                mergedActivities = lastMergedActivities,
-                isComplete = false,
-                isFirstPage = true,
-            )
+            return LastActivityResult(mergedActivities = lastMergedActivities, isComplete = false, isFirstPage = true)
         }
 
         lastActivitiesTime = Date().time
 
         val apiResponse = ApiRepository.getLastActivities(driveId, cursor)
         lastActivityJob?.ensureActive()
-        val data = apiResponse.data
+        val apiResponseData = apiResponse.data
+        currentCursor = apiResponse.cursor
 
-        return if (apiResponse.isSuccess() || (isFirstPage && data != null)) {
-            if (isFirstPage) {
-                FileController.removeOrphanAndActivityFiles()
-                lastActivities = arrayListOf()
-                lastMergedActivities = arrayListOf()
-            }
+        if (apiResponse.isSuccess() && isFirstPage) {
+            FileController.removeOrphanAndActivityFiles()
+            lastActivities = arrayListOf()
+            lastMergedActivities = arrayListOf()
+        }
 
-            currentCursor = apiResponse.cursor
-
-            when {
-                data.isNullOrEmpty() -> null
-                else -> {
-                    val mergeAndCleanActivities = mergeAndCleanActivities(data)
-                    lastActivities.addAll(data)
-                    lastMergedActivities.addAll(mergeAndCleanActivities)
-                    FileController.storeFileActivities(data)
-                    LastActivityResult(
-                        mergedActivities = mergeAndCleanActivities,
-                        isComplete = apiResponse.cursor == null,
-                        isFirstPage = isFirstPage,
-                    )
-                }
-            }
-        } else if (isFirstPage) {
-            val localActivities = FileController.getActivities()
-            val mergeAndCleanActivities = mergeAndCleanActivities(localActivities)
-            lastActivities = localActivities
-            lastMergedActivities = mergeAndCleanActivities
-            LastActivityResult(
-                mergedActivities = mergeAndCleanActivities,
-                isComplete = true,
-                isFirstPage = true,
-            )
-        } else {
-            null
+        return when {
+            apiResponseData != null -> lastActivityResultFromRemote(apiResponseData, isComplete = apiResponse.cursor == null)
+            !apiResponse.isSuccess() && isFirstPage -> lastActivityResultFromLocal()
+            else -> null
         }
     }
 
