@@ -227,7 +227,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
     fun onRefreshGallery() {
         if (isResumed) {
             galleryAdapter.clearGallery()
-            loadGallery(AccountUtils.currentDriveId, true)
+            loadGallery(AccountUtils.currentDriveId, isRefresh = true)
         }
     }
 
