@@ -45,7 +45,7 @@ class RebootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         with(context) {
 
-            if (!getOldkDriveUser().isEmpty) {
+            if (!getOldkDriveUser().isEmpty()) {
                 val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
                 val hashCode = UUID.randomUUID().hashCode()
                 val pendingIntent = PendingIntent.getActivity(

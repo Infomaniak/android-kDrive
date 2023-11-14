@@ -25,8 +25,8 @@ import com.infomaniak.drive.utils.RealmListParceler.TeamDetailsRealmListParceler
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.WriteWith
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.WriteWith
 
 @Parcelize
 open class Team(

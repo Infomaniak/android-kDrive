@@ -20,7 +20,7 @@ package com.infomaniak.drive.data.models
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 open class TeamDetails(

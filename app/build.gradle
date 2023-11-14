@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'realm-android'
 apply plugin: 'de.mannodermaus.android-junit5'
@@ -152,7 +152,7 @@ dependencies {
 
     implementation 'io.realm:android-adapters:4.0.0'
 
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.2.1'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.3.1'
 
     implementation 'com.googlecode.plist:dd-plist:1.27'
 

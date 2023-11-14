@@ -44,6 +44,7 @@ import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.*
@@ -205,7 +206,7 @@ class LoginActivity : AppCompatActivity() {
             } ?: run {
                 InfomaniakCore.bearerToken = apiToken.accessToken
                 val userProfileResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoTokenInterceptor)
-                if (userProfileResponse.result == ApiResponse.Status.ERROR) {
+                if (userProfileResponse.result == ApiResponseStatus.ERROR) {
                     return userProfileResponse
                 } else {
                     val user: User? = userProfileResponse.data?.apply {
@@ -217,12 +218,12 @@ class LoginActivity : AppCompatActivity() {
                         val allDrivesDataResponse = ApiRepository.getAllDrivesData(HttpClient.okHttpClientNoTokenInterceptor)
 
                         when {
-                            allDrivesDataResponse.result == ApiResponse.Status.ERROR -> {
+                            allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {
                                 return allDrivesDataResponse
                             }
                             allDrivesDataResponse.data?.drives?.main?.isEmpty() == true -> {
                                 return ApiResponse<DriveInfo>(
-                                    result = ApiResponse.Status.ERROR,
+                                    result = ApiResponseStatus.ERROR,
                                     error = ApiError(code = ErrorCode.NO_DRIVE)
                                 )
                             }
@@ -246,7 +247,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         private fun getErrorResponse(@StringRes text: Int): ApiResponse<Any> {
-            return ApiResponse(result = ApiResponse.Status.ERROR, translatedError = text)
+            return ApiResponse(result = ApiResponseStatus.ERROR, translatedError = text)
         }
 
         fun getLoginErrorDescription(context: Context, error: InfomaniakLogin.ErrorStatus): String {

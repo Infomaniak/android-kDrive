@@ -19,7 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.infomaniak.drive.utils.AccountUtils
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class UserDrive(

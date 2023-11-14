@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SnackbarUtils
 import com.infomaniak.lib.core.utils.safeBinding
@@ -116,7 +117,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                         DriveInfosController.updateDrive { localDrive ->
                             localDrive.categories.find(categoryId)?.deleteFromRealm()
                         }
-                        ApiResponse(result = ApiResponse.Status.SUCCESS)
+                        ApiResponse(result = ApiResponseStatus.SUCCESS)
                     } else this
                     emit(response)
                 }
@@ -124,7 +125,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         private fun isAlreadyDeleted(apiResponse: ApiResponse<Boolean>): Boolean {
-            return apiResponse.result == ApiResponse.Status.ERROR &&
+            return apiResponse.result == ApiResponseStatus.ERROR &&
                     apiResponse.error?.code?.equals("object_not_found", true) == true
         }
     }

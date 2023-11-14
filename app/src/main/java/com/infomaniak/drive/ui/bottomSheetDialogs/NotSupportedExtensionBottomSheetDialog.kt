@@ -26,7 +26,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.openOnlyOfficeActivity
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgress
@@ -66,7 +66,7 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
                     showProgress()
                     mainViewModel.convertFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
                         when (apiResponse?.result) {
-                            ApiResponse.Status.SUCCESS -> apiResponse.data?.let { newFile ->
+                            ApiResponseStatus.SUCCESS -> apiResponse.data?.let { newFile ->
                                 requireContext().openOnlyOfficeActivity(newFile)
                             }
                             else -> showSnackbar(apiResponse.translateError())

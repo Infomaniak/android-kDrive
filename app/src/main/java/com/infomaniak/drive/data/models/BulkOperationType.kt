@@ -26,7 +26,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.NotificationUtils.copyOperationProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.moveOperationProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.trashOperationProgressNotification
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int) : Parcelable {

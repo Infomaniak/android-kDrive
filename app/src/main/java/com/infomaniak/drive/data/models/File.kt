@@ -50,9 +50,9 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import io.sentry.Sentry
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.RawValue
-import kotlinx.android.parcel.WriteWith
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
+import kotlinx.parcelize.WriteWith
 import java.util.*
 
 @Parcelize
