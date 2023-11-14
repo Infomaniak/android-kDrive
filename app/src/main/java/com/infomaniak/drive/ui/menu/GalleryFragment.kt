@@ -156,7 +156,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             it?.let { (galleryFiles, isComplete) ->
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
                 if (dataAlreadyLoaded) {
-                    // When the data is still available after fragment recreated, there's no need to reload again.
+                    // When the data is still available after the fragment is recreated, there's no need to reload it again.
                     dataAlreadyLoaded = false
                     return@observe
                 }
