@@ -809,9 +809,9 @@ object FileController {
                 fileActivity.applyFileActivity(realm, returnResponse, folder)
             }
 
-            if (apiResponse.hasMore) {
+            if (apiResponse.hasMore && apiResponse.cursor != null) {
                 // Loading the next page, then the cursor is required
-                getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor!!, returnResponse)
+                getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor, returnResponse)
             } else {
                 if (apiResponse.responseAt > 0L) {
                     updateFile(folder.id, realm) { file ->
