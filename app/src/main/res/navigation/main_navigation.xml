@@ -424,8 +424,8 @@
         tools:layout="@layout/fragment_bottom_sheet_add_file">
         <argument
             android:name="shortcutId"
-            app:argType="string"
-            android:defaultValue="" />
+            android:defaultValue=""
+            app:argType="string" />
 
         <action
             android:id="@+id/action_addFileBottomSheetDialog_to_newFolderFragment"
