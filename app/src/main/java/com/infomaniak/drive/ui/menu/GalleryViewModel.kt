@@ -35,9 +35,9 @@ class GalleryViewModel : ViewModel() {
 
     private var currentCursor: String? = null
 
-    val galleryApiResult = MutableLiveData<Pair<ArrayList<File>, IsComplete>?>()
     private var lastGalleryFiles = arrayListOf<File>()
 
+    val galleryApiResult = MutableLiveData<Pair<ArrayList<File>, IsComplete>>()
     val needToRestoreFiles get() = galleryApiResult.isInitialized
 
     fun loadLastGallery(driveId: Int, ignoreCloud: Boolean) {
@@ -53,7 +53,8 @@ class GalleryViewModel : ViewModel() {
 
     fun restoreGalleryFiles() {
         if (needToRestoreFiles) {
-            galleryApiResult.value = lastGalleryFiles to galleryApiResult.value!!.second
+            val isComplete = galleryApiResult.value?.second ?: true
+            galleryApiResult.value = lastGalleryFiles to isComplete
         }
     }
 
@@ -67,7 +68,7 @@ class GalleryViewModel : ViewModel() {
         getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
             val result = getLastGallery(driveId, ignoreCloud, isFirstPage, cursor)
             galleryApiResult.postValue(result)
-            result?.let { lastGalleryFiles.addAll(result.first) }
+            lastGalleryFiles.addAll(result.first)
         }
     }
 
@@ -76,7 +77,7 @@ class GalleryViewModel : ViewModel() {
         ignoreCloud: Boolean,
         isFirstPage: Boolean,
         cursor: String?,
-    ): Pair<ArrayList<File>, IsComplete>? {
+    ): Pair<ArrayList<File>, IsComplete> {
         getGalleryJob?.cancel()
         getGalleryJob = Job()
 
@@ -88,7 +89,7 @@ class GalleryViewModel : ViewModel() {
         return FileController.getGalleryDrive() to true
     }
 
-    private fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<ArrayList<File>, Boolean>? {
+    private fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<ArrayList<File>, Boolean> {
         val apiResponse = ApiRepository.getLastGallery(driveId = driveId, cursor = cursor)
         return if (apiResponse.isSuccess()) {
             currentCursor = apiResponse.cursor
@@ -101,11 +102,11 @@ class GalleryViewModel : ViewModel() {
     private fun emitApiGallery(
         apiResponse: CursorApiResponse<ArrayList<File>>,
         isFirstPage: Boolean,
-    ): Pair<ArrayList<File>, Boolean>? {
+    ): Pair<ArrayList<File>, Boolean> {
         val data = apiResponse.data
 
         val results = if (data.isNullOrEmpty()) {
-            null
+            arrayListOf<File>() to true
         } else {
             FileController.storeGalleryDrive(data, isFirstPage)
             val isComplete = apiResponse.cursor == null
