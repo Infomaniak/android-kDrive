@@ -24,10 +24,11 @@
     tools:background="@color/previewBackground"
     tools:context=".ui.fileList.preview.PreviewPDFFragment">
 
-    <com.infomaniak.drive.utils.PinchToZoomRecyclerView
-        android:id="@+id/pdfViewRecycler"
+    <com.infomaniak.lib.pdfview.PDFView
+        android:id="@+id/pdfView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/previewBackground"
         android:clipToPadding="false"
         android:orientation="vertical"
         android:paddingHorizontal="@dimen/marginStandardMedium"

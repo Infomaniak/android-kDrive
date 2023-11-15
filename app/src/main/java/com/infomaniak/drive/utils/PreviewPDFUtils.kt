@@ -40,7 +40,7 @@ object PreviewPDFUtils {
         file: File,
         userDrive: UserDrive,
         onProgress: (progress: Int) -> Unit
-    ): ApiResponse<PdfCore> {
+    ): ApiResponse<java.io.File> {
         return runCatching {
             val outputFile = when {
                 file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
@@ -56,7 +56,7 @@ object PreviewPDFUtils {
                 outputFile.setLastModified(file.getLastModifiedInMilliSecond())
             }
 
-            ApiResponse(ApiResponseStatus.SUCCESS, PdfCore(context, outputFile))
+            ApiResponse(ApiResponseStatus.SUCCESS, outputFile)
         }.getOrElse { exception ->
             exception.printStackTrace()
             val error = when (exception) {
