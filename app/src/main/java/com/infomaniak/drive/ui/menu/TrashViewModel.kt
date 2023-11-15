@@ -56,25 +56,26 @@ class TrashViewModel : ViewModel() {
 
         tailrec fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
             val apiResponse = ApiRepository.getTrashedFolderFiles(file, order, cursor)
+            val apiResponseData = apiResponse.data
             when {
-                apiResponse.data.isNullOrEmpty() -> trashedFolderFilesResults.postValue(null)
-                apiResponse.hasMore -> {
+                apiResponseData.isNullOrEmpty() -> trashedFolderFilesResults.postValue(null)
+                apiResponse.hasMore  && apiResponse.cursor != null -> {
                     trashedFolderFilesResults.postValue(
                         FolderFilesResult(
                             parentFolder = file,
-                            files = apiResponse.data!!,
+                            files = apiResponseData,
                             isComplete = false,
                             isFirstPage = isFirstPage,
                             isNewSort = isNewSort,
                         )
                     )
-                    recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor!!)
+                    recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                 }
                 else -> {
                     trashedFolderFilesResults.postValue(
                         FolderFilesResult(
                             parentFolder = file,
-                            files = apiResponse.data!!,
+                            files = apiResponseData,
                             isComplete = true,
                             isFirstPage = isFirstPage,
                             isNewSort = isNewSort,
