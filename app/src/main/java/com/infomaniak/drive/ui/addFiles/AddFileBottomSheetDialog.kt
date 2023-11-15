@@ -66,9 +66,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     private var _currentFolderFile: File? = null
-
-    // This property is only valid after onCreateView
-    private val currentFolderFile get() = _currentFolderFile!!
+    private val currentFolderFile get() = _currentFolderFile!! // This property is only valid after onCreateView
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: AddFileBottomSheetDialogArgs by navArgs()

@@ -143,10 +143,9 @@ class MainActivity : BaseActivity() {
         setupDrivePermissions()
         handleInAppReview()
         handleUpdates(navController)
+        handleShortcuts(navController)
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
-
-        handleShortcuts(navController)
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -378,7 +377,7 @@ class MainActivity : BaseActivity() {
 
     private fun handleAddFileShortcuts(navController: NavController, shortcutId: String) {
         mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
-            if (currentFolder?.id == ROOT_ID && mainViewModel.mustOpenShortcut) {
+            if (mainViewModel.mustOpenShortcut && currentFolder?.id == ROOT_ID) {
                 navController.navigate(
                     R.id.addFileBottomSheetDialog,
                     AddFileBottomSheetDialogArgs(shortcutId).toBundle(),
