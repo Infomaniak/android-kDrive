@@ -94,7 +94,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         ViewCompat.requestApplyInsets(homeCoordinator)
 
         searchViewCard.root.setOnClickListener {
-            ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.name)
+            ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
             safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
         }
 

@@ -348,7 +348,9 @@ object Utils {
         }.show()
     }
 
-    enum class Shortcuts {
-        UPLOAD, SCAN, SEARCH
+    enum class Shortcuts(val id: String) {
+        UPLOAD("upload"),
+        SCAN("scan"),
+        SEARCH("search"),
     }
 }

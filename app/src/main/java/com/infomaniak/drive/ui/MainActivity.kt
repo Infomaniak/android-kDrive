@@ -363,14 +363,14 @@ class MainActivity : BaseActivity() {
 
     private fun handleShortcuts(navController: NavController) {
         navigationArgs?.shortcutId?.let { shortcutId ->
-            trackEvent("shortcuts", shortcutId.lowercase())
+            trackEvent("shortcuts", shortcutId)
 
             when (shortcutId) {
-                Shortcuts.SEARCH.name -> {
-                    ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.SEARCH.name)
+                Shortcuts.SEARCH.id -> {
+                    ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.SEARCH.id)
                     navController.navigate(R.id.searchFragment)
                 }
-                Shortcuts.UPLOAD.name, Shortcuts.SCAN.name -> handleAddFileShortcuts(navController, shortcutId)
+                Shortcuts.UPLOAD.id, Shortcuts.SCAN.id -> handleAddFileShortcuts(navController, shortcutId)
             }
         }
     }

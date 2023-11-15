@@ -144,8 +144,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             mainViewModel.mustOpenShortcut = false
 
             when (navigationArgs.shortcutId) {
-                Shortcuts.UPLOAD.name -> uploadFilesHelper.uploadFiles()
-                Shortcuts.SCAN.name -> scanDocuments()
+                Shortcuts.UPLOAD.id -> uploadFilesHelper.uploadFiles()
+                Shortcuts.SCAN.id -> scanDocuments()
                 else -> Unit
             }
         }

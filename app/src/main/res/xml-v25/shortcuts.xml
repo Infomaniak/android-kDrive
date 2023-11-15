@@ -27,7 +27,7 @@
             android:targetPackage="com.infomaniak.drive">
             <extra
                 android:name="shortcuts_tag"
-                android:value="UPLOAD" />
+                android:value="upload" />
         </intent>
     </shortcut>
     <shortcut
@@ -41,7 +41,7 @@
             android:targetPackage="com.infomaniak.drive">
             <extra
                 android:name="shortcuts_tag"
-                android:value="SCAN" />
+                android:value="scan" />
         </intent>
     </shortcut>
     <shortcut
@@ -55,7 +55,7 @@
             android:targetPackage="com.infomaniak.drive">
             <extra
                 android:name="shortcuts_tag"
-                android:value="SEARCH" />
+                android:value="search" />
         </intent>
     </shortcut>
 </shortcuts>

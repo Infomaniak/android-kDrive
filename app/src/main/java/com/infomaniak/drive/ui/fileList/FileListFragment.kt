@@ -191,7 +191,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.searchItem -> {
-                        ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.name)
+                        ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
                         safeNavigate(FileListFragmentDirections.actionFileListFragmentToSearchFragment())
                     }
                     R.id.restartItem -> onRestartItemsClicked()
