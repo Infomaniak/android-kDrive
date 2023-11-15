@@ -119,7 +119,7 @@ class FileControllerTest : KDriveTest() {
         val localFavoriteFiles =
             getFilesFromCacheOrDownload(
                 parentId = FAVORITES_FILE_ID,
-                loadNextPage = false,
+                isFirstPage = true,
                 ignoreCache = false,
                 userDrive = userDrive,
                 customRealm = realm,
@@ -276,7 +276,7 @@ class FileControllerTest : KDriveTest() {
         // Get and save remote root files in realm db test
         return getFilesFromCacheOrDownload(
             parentId = Utils.ROOT_ID,
-            loadNextPage = false,
+            isFirstPage = true,
             ignoreCache = true,
             userDrive = userDrive,
             customRealm = realm,
@@ -288,7 +288,7 @@ class FileControllerTest : KDriveTest() {
     private fun getLocalRootFiles() =
         getFilesFromCacheOrDownload(
             parentId = Utils.ROOT_ID,
-            loadNextPage = false,
+            isFirstPage = true,
             ignoreCache = false,
             userDrive = userDrive,
             customRealm = realm,

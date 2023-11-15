@@ -419,7 +419,7 @@ object FileController {
     ) {
         val filesFromCacheOrDownload = getFilesFromCacheOrDownload(
             parentId = parentId,
-            loadNextPage = loadNextPage,
+            isFirstPage = true,
             ignoreCache = true,
             order = sortType,
             userDrive = userDrive
@@ -614,7 +614,7 @@ object FileController {
 
     fun getFilesFromCacheOrDownload(
         parentId: Int,
-        loadNextPage: Boolean,
+        isFirstPage: Boolean,
         ignoreCache: Boolean = false,
         ignoreCloud: Boolean = false,
         order: SortType = SortType.NAME_AZ,
@@ -632,7 +632,7 @@ object FileController {
             var folderProxy = getFileById(realm, parentId)
             val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) }
             val hasDuplicatesFiles = folderProxy?.children?.where()?.let(::hasDuplicatesFiles) ?: false
-            if (loadNextPage && folderProxy?.cursor == null) return@operation null
+            if (!isFirstPage && folderProxy?.cursor == null) return@operation null
 
             val needToDownload = ignoreCache
                     || folderProxy == null
@@ -656,13 +656,13 @@ object FileController {
                 result = realm.downloadAndSaveFiles(
                     localFolderProxy = folderProxy,
                     order = order,
-                    isFirstPage = !loadNextPage,
+                    isFirstPage = isFirstPage,
                     parentId = parentId,
                     driveId = driveId,
                     okHttpClient = okHttpClient,
                     withChildren = withChildren
                 )
-            } else if (!loadNextPage && localFolderWithoutChildren != null) {
+            } else if (isFirstPage && localFolderWithoutChildren != null) {
                 val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(folderProxy, order) else arrayListOf()
                 result = (localFolderWithoutChildren to localSortedFolderFiles)
             }

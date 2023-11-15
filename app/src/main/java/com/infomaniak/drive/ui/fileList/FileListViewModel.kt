@@ -68,7 +68,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 getFilesJob.ensureActive()
                 val resultList = FileController.getFilesFromCacheOrDownload(
                     parentId = parentId,
-                    loadNextPage = nextPage,
+                    isFirstPage = true,
                     ignoreCache = ignoreCache,
                     ignoreCloud = ignoreCloud,
                     order = order,
