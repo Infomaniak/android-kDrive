@@ -129,7 +129,6 @@
     <string name="buttonLogout">Abmelden</string>
     <string name="buttonManageDropBox">Briefkasten verwalten</string>
     <string name="buttonMenu">Menü</string>
-    <string name="buttonMigrationDone">Es geht los!</string>
     <string name="buttonMove">Verschieben</string>
     <string name="buttonMoveTo">Verschieben zu</string>
     <string name="buttonNewPassword">Neues Passwort festlegen</string>
@@ -465,14 +464,6 @@
         <item quantity="other">%d Ordner ausgewählt</item>
     </plurals>
     <string name="menuTitle">Menü</string>
-    <string name="migrateNotificationDescription">Bitte starten Sie die App kDrive, um die Aktualisierung abzuschliessen</string>
-    <string name="migrateNotificationTitle">Wichtiger Hinweis: Es ist eine Aktion erforderlich</string>
-    <string name="migratePhotoSyncSettingsDescription">Bitte richten Sie nach der Migration erneut die Sicherung der Fotos ein.</string>
-    <string name="migratePhotoSyncSettingsTitle">Bitte richten Sie erneut die automatische Sicherung Ihrer Fotos ein</string>
-    <string name="migrationDescription">Entdecken Sie schnell eine überarbeitete Anwendung, die Ihnen ein intuitiveres und angenehmeres Benutzererlebnis bietet.</string>
-    <string name="migrationFailed">Die Migration ist fehlgeschlagen.</string>
-    <string name="migrationInProgress">Migration läuft, bitte warten…</string>
-    <string name="migrationTitle">Willkommen bei der neuen, reinen Infomaniak-Anwendung kDrive</string>
     <string name="modalCommentAddTitle">Kommentar ändern</string>
     <string name="modalCommentDeleteDescription">Wollen Sie Ihren Kommentar wirklich löschen?</string>
     <string name="modalCreateFileSucces">%s erfolgreich angelegt</string>
@@ -541,7 +532,7 @@
         <item quantity="other">Vorbereitung auf den Import von %d Dateien</item>
     </plurals>
     <string name="previewDownloadIndication">Wird geladen, bitte warten…</string>
-    <string name="previewFileProtectedError">Keine Vorschau verfügbar, diese Datei ist passwortgeschützt.</string>
+    <string name="previewFileProtectedError">Keine Vorschau verfügbar, diese Datei ist passwortgeschützt</string>
     <string name="previewLoadError">Vorschau kann nicht geladen werden</string>
     <string name="previewNoPreview">Es scheint, als ob diese Datei keine Vorschau hat.</string>
     <string name="previewPdfPages">%1$d von %2$d</string>

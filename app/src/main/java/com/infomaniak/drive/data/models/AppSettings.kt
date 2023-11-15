@@ -18,9 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import com.infomaniak.drive.utils.RealmModules
-import io.realm.Realm
-import io.realm.RealmConfiguration
-import io.realm.RealmObject
+import io.realm.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -30,14 +28,15 @@ open class AppSettings(
     var _appSecurityEnabled: Boolean = false,
     var _currentDriveId: Int = -1,
     var _currentUserId: Int = -1,
-    var _migrated: Boolean = false,
     var _onlyWifiSync: Boolean = false,
 ) : RealmObject() {
 
     companion object {
         private const val DB_NAME = "AppSettings.realm"
         private val realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
+            .schemaVersion(AppSettingsMigration.dbVersion)
             .modules(RealmModules.AppSettingsModule())
+            .migration(AppSettingsMigration())
             .build()
 
         private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
@@ -89,14 +88,6 @@ open class AppSettings(
                 }
             }
 
-        var migrated: Boolean = getAppSettings()._migrated
-            set(value) {
-                field = value
-                GlobalScope.launch(Dispatchers.IO) {
-                    updateAppSettings { appSettings -> appSettings._migrated = value }
-                }
-            }
-
         var onlyWifiSync: Boolean = getAppSettings()._onlyWifiSync
             set(value) {
                 field = value
@@ -104,5 +95,28 @@ open class AppSettings(
                     updateAppSettings { appSettings -> appSettings._onlyWifiSync = value }
                 }
             }
+    }
+
+    class AppSettingsMigration : RealmMigration {
+
+        override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
+            var oldVersionTemp = oldVersion
+
+            // DynamicRealm exposes an editable schema
+            val schema = realm.schema
+
+            //region Migrate to version 1: Remove migrated
+            if (oldVersionTemp == 0L) {
+                // Remove some fields in SyncSettings
+                schema.get(AppSettings::class.java.simpleName)!!.removeField("_migrated")
+
+                oldVersionTemp++
+            }
+            //endregion
+        }
+
+        companion object {
+            const val dbVersion = 1L // Must be bumped when the schema changes
+        }
     }
 }

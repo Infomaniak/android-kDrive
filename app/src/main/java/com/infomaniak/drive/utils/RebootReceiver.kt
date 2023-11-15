@@ -18,66 +18,35 @@
 package com.infomaniak.drive.utils
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.NotificationManagerCompat
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.MediaFolder
-import com.infomaniak.drive.ui.LaunchActivity
-import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
-import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.activateSyncIfNeeded
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.lib.core.utils.NotificationUtilsCore
-import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.core.utils.hasPermissions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 class RebootReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent?) {
-        with(context) {
-
-            if (!getOldkDriveUser().isEmpty()) {
-                val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-                val hashCode = UUID.randomUUID().hashCode()
-                val pendingIntent = PendingIntent.getActivity(
-                    /* context = */ this,
-                    /* requestCode = */hashCode,
-                    /* intent = */openAppIntent,
-                    /* flags = */NotificationUtilsCore.pendingIntentFlags
-                )
-                val notificationManagerCompat = NotificationManagerCompat.from(context)
-
-                buildGeneralNotification(getString(R.string.migrateNotificationTitle)).apply {
-                    setContentText(getString(R.string.migrateNotificationDescription))
-                    setContentIntent(pendingIntent)
-                    notificationManagerCompat.notifyCompat(context, hashCode, build())
+    override fun onReceive(context: Context, intent: Intent?) = with(context) {
+        CoroutineScope(Dispatchers.IO).launch {
+            MediaFolder.getRealmInstance().use { realm ->
+                if (context.hasPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+                    MediaFolder.getAllCount(realm) == 0L
+                ) {
+                    // Sync local media folders with Realm
+                    MediaFoldersProvider.getAllMediaFolders(realm, contentResolver)
                 }
             }
-
-            CoroutineScope(Dispatchers.IO).launch {
-                MediaFolder.getRealmInstance().use { realm ->
-                    if (context.hasPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
-                        MediaFolder.getAllCount(realm) == 0L
-                    ) {
-                        // Sync local media folders with Realm
-                        MediaFoldersProvider.getAllMediaFolders(realm, contentResolver)
-                    }
-                }
-            }
-
-            activateSyncIfNeeded()
-
-            startContentObserverService()
-            if (intent?.action == Intent.ACTION_BOOT_COMPLETED && AccountUtils.isEnableAppSync()) syncImmediately()
         }
+
+        activateSyncIfNeeded()
+
+        startContentObserverService()
+        if (intent?.action == Intent.ACTION_BOOT_COMPLETED && AccountUtils.isEnableAppSync()) syncImmediately()
     }
 }
