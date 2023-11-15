@@ -36,10 +36,12 @@ import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.getPageNumberChip
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PdfCore
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -52,7 +54,7 @@ class PreviewPDFFragment : PreviewFragment() {
     private var previewPDFAdapter: PreviewPDFAdapter? = null
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
-    private var pdfCore: PdfCore? = null
+    private var pdfFile: java.io.File? = null
     private var isDownloading = false
 
 
@@ -81,11 +83,6 @@ class PreviewPDFFragment : PreviewFragment() {
             setOnClickListener { toggleFullscreen() }
         }
 
-        binding.pdfViewRecycler.apply {
-            isGone = true
-            onClicked = { toggleFullscreen() }
-        }
-
         bigOpenWithButton.apply {
             isGone = true
             setOnClickListener { openWithClicked() }
@@ -109,30 +106,30 @@ class PreviewPDFFragment : PreviewFragment() {
         super.onPause()
     }
 
-    override fun onDestroy() {
-        pdfCore?.clear()
-        super.onDestroy()
-    }
-
-    private fun showPdf(pdfCore: PdfCore) = with(binding) {
+    private fun showPdf(file: IOFile) = with(binding) {
         lifecycleScope.launchWhenResumed {
             withContext(Dispatchers.Main) {
                 downloadLayout.root.isGone = true
-                pdfViewRecycler.isVisible = true
-                getPageNumberChip()?.isVisible = true
-                previewPDFAdapter = PreviewPDFAdapter(pdfCore)
-                pdfViewRecycler.adapter = previewPDFAdapter
-                previewPDFAdapter?.itemCount?.let { updatePageNumber(totalPage = it) }
-
-                pdfViewRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                    override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                        super.onScrolled(recyclerView, dx, dy)
-                        val currentPage =
-                            (pdfViewRecycler.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() + 1
-                        previewPDFAdapter?.itemCount?.let { updatePageNumber(currentPage = currentPage, totalPage = it) }
+                pdfView.fromFile(file)
+                binding.pdfView.fromFile(pdfFile)
+                    .enableAnnotationRendering(true)
+                    .enableDoubletap(true)
+                    .swipeHorizontal(false)
+                    .scrollHandle(DefaultScrollHandle(requireContext()))
+                    .disableLongpress()
+                    .pageFling(false)
+                    .pageSnap(false)
+                    .spacing(16)
+                    .touchPriority(true)
+                    .onLoad { pageCount -> updatePageNumber(totalPage = pageCount) }
+                    .onPageChange { currentPage, pageCount ->
+                        updatePageNumber(currentPage = currentPage, totalPage = pageCount)
                     }
-                })
-            }
+                    .load()
+
+
+                getPageNumberChip()?.isVisible = true            }
+
         }
     }
 
@@ -143,14 +140,14 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {
-        if (previewPDFAdapter == null || previewPDFAdapter?.itemCount == 0) {
+        if (pdfFile == null && (previewPDFAdapter == null || previewPDFAdapter?.itemCount == 0)) {
             previewSliderViewModel.pdfIsDownloading.value = true
             isDownloading = true
             previewPDFViewModel.downloadPdfFile(requireContext(), file, previewSliderViewModel.userDrive)
                 .observe(viewLifecycleOwner) { apiResponse ->
-                    apiResponse.data?.let { pdfCore ->
-                        this@PreviewPDFFragment.pdfCore = pdfCore
-                        showPdf(pdfCore)
+                    apiResponse.data?.let { pdfFile ->
+                        this@PreviewPDFFragment.pdfFile = pdfFile
+                        showPdf(pdfFile)
                     } ?: run {
                         downloadProgress.isGone = true
                         previewDescription.setText(apiResponse.translatedError)
@@ -166,7 +163,7 @@ class PreviewPDFFragment : PreviewFragment() {
         var pdfJob = Job()
         val downloadProgress = MutableLiveData<Int>()
 
-        fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<PdfCore>> {
+        fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<java.io.File>> {
             pdfJob.cancel()
             pdfJob = Job()
             return liveData(Dispatchers.IO + pdfJob) {
