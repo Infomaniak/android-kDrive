@@ -22,6 +22,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -30,8 +31,10 @@ interface IGeniusScanUtils {
 
     fun Context.initGeniusScanSdk() = true
 
-    fun Context.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
-        MaterialAlertDialogBuilder(this, R.style.DialogStyle)
+    fun Fragment.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
+        findNavController().popBackStack()
+
+        MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setTitle(R.string.allErrorFeatureNotAvailableInFdroid)
             .setPositiveButton("Ok") { _: DialogInterface?, _: Int -> }
             .show()

@@ -108,12 +108,12 @@ object GeniusScanUtils : IGeniusScanUtils {
         false
     }
 
-    override fun Context.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
+    override fun Fragment.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) = with(requireContext()) {
         removeOldScanFiles()
         val scanConfiguration = ScanConfiguration().apply {
-            backgroundColor = ContextCompat.getColor(this@startScanFlow, R.color.previewBackground)
-            foregroundColor = ContextCompat.getColor(this@startScanFlow, R.color.white)
-            highlightColor = ContextCompat.getColor(this@startScanFlow, R.color.accent)
+            backgroundColor = ContextCompat.getColor(this@with, R.color.previewBackground)
+            foregroundColor = ContextCompat.getColor(this@with, R.color.white)
+            highlightColor = ContextCompat.getColor(this@with, R.color.accent)
             ocrConfiguration = getOcrConfiguration()
         }
         scanWithConfiguration(scanConfiguration, resultLauncher)

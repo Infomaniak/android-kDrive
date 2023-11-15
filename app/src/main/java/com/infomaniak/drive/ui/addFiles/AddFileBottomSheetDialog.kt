@@ -185,7 +185,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun scanDocuments() {
         ShortcutManagerCompat.reportShortcutUsed(requireContext(), navigationArgs.shortcutId)
         trackNewElement("scan")
-        context?.startScanFlow(scanFlowResultLauncher)
+        startScanFlow(scanFlowResultLauncher)
     }
 
     private fun createFolder() {
