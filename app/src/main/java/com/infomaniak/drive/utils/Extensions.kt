@@ -28,6 +28,7 @@ import android.graphics.Point
 import android.net.Uri
 import android.os.Build.*
 import android.provider.MediaStore
+import android.text.format.Formatter
 import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.View
@@ -379,3 +380,40 @@ fun OneTimeWorkRequest.Builder.setExpeditedIfAvailable() = apply {
     if (VERSION.SDK_INT >= VERSION_CODES.S) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
 }
 //endregion
+
+fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): String {
+
+    fun Long.binaryToDecimal(): Long {
+
+        val binaryUnit = 1_024.0f
+        val decimalUnit = 1_000.0f
+        var units = 0 // BYTE
+        val maxUnits = 5 // KILOBYTE, MEGABYTE, GIGABYTE, TERABYTE, PETABYTE
+        var result = abs(this).toFloat()
+
+        while (result > 900 && units < maxUnits) {
+            units++
+            result /= binaryUnit
+        }
+
+        if (valueOnly) return result.toLong()
+
+        repeat(units) {
+            result *= decimalUnit
+        }
+
+        return result.toLong()
+    }
+
+    val decimalSize = when {
+        VERSION.SDK_INT >= VERSION_CODES.O -> size.binaryToDecimal()
+        valueOnly -> size.binaryToDecimal()
+        else -> size
+    }
+
+    return if (valueOnly) {
+        "$decimalSize"
+    } else {
+        Formatter.formatShortFileSize(this, decimalSize)
+    }
+}

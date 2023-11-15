@@ -29,7 +29,7 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.utils.FormatterFileSize
+import com.infomaniak.drive.utils.formatShortBinarySize
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 
 class NotEnoughStorageView @JvmOverloads constructor(
@@ -47,8 +47,8 @@ class NotEnoughStorageView @JvmOverloads constructor(
             if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
                 this@NotEnoughStorageView.isVisible = true
 
-                val usedStorage = FormatterFileSize.formatShortFileSize(context, usedSize, justValue = true)
-                val totalStorage = FormatterFileSize.formatShortFileSize(context, size)
+                val usedStorage = context.formatShortBinarySize(usedSize, valueOnly = true)
+                val totalStorage = context.formatShortBinarySize(size)
                 progressIndicator.progress = (storagePercentage).toInt()
                 title.text = "$usedStorage / $totalStorage"
 
