@@ -112,14 +112,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
         uploadFileHelper = UploadFileHelper(
             fragment = this@AddFileBottomSheetDialog,
+            parentFolder = currentFolderFile,
             onOpeningPicker = {
                 trackNewElement("uploadFile")
                 binding.documentUpload.isEnabled = false
             },
-            onResult = { uris ->
-                findNavController().popBackStack()
-                onSelectFilesResult(uris)
-            }
+            onResult = { findNavController().popBackStack() },
         )
 
         openCamera.setOnClickListener { openCamera() }
@@ -159,17 +157,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 e.printStackTrace()
             }
         }
-    }
-
-    private fun onSelectFilesResult(uris: List<Uri>) {
-        findNavController().navigate(
-            R.id.importFileDialog,
-            ImportFilesDialogArgs(
-                folderId = currentFolderFile.id,
-                driveId = currentFolderFile.driveId,
-                uris = uris.toTypedArray()
-            ).toBundle()
-        )
     }
 
     private fun scanDocuments() {
