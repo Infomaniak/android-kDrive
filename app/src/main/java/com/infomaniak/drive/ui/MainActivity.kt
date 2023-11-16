@@ -65,7 +65,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.ui.LaunchActivity.*
-import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
+import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
@@ -127,6 +127,8 @@ class MainActivity : BaseActivity() {
             }
         }
     }
+
+    private var uploadFilesHelper: UploadFilesHelper? = null
 
     private val scanFlowResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
@@ -371,21 +373,25 @@ class MainActivity : BaseActivity() {
         bottomNavigationBackgroundView.isVisible = isVisible
     }
 
-    private fun handleShortcuts(navController: NavController) {
+    private fun handleShortcuts(navController: NavController) = with(mainViewModel) {
         navigationArgs?.shortcutId?.let { shortcutId ->
             trackEvent("shortcuts", shortcutId)
 
             when (shortcutId) {
                 Shortcuts.SEARCH.id -> {
-                    ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.SEARCH.id)
+                    ShortcutManagerCompat.reportShortcutUsed(this@MainActivity, Shortcuts.SEARCH.id)
                     navController.navigate(R.id.searchFragment)
                 }
-                Shortcuts.UPLOAD.id -> mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
-                    if (mainViewModel.mustOpenShortcut && currentFolder?.id == ROOT_ID) {
-                        navController.navigate(
-                            R.id.addFileBottomSheetDialog,
-                            AddFileBottomSheetDialogArgs(shortcutId).toBundle(),
-                        )
+                Shortcuts.UPLOAD.id -> {
+                    uploadFilesHelper = UploadFilesHelper(this@MainActivity, navController)
+                    currentFolder.observe(this@MainActivity) { parentFolder ->
+                        if (mustOpenShortcut && parentFolder?.id == ROOT_ID) {
+                            mustOpenShortcut = false
+                            uploadFilesHelper?.apply {
+                                initParentFolder(parentFolder)
+                                uploadFiles()
+                            }
+                        }
                     }
                 }
                 Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)

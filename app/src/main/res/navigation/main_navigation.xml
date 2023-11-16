@@ -422,11 +422,6 @@
         android:name="com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialog"
         android:label="AddFileBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_add_file">
-        <argument
-            android:name="shortcutId"
-            android:defaultValue=""
-            app:argType="string" />
-
         <action
             android:id="@+id/action_addFileBottomSheetDialog_to_newFolderFragment"
             app:destination="@id/newFolderFragment"

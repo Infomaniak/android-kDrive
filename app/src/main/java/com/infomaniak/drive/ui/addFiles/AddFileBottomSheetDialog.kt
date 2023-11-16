@@ -27,12 +27,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
-import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
@@ -53,7 +51,6 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,14 +59,11 @@ import java.util.Date
 
 class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private var _binding: FragmentBottomSheetAddFileBinding? = null
-    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
+    private var binding: FragmentBottomSheetAddFileBinding by safeBinding()
 
-    private var _currentFolderFile: File? = null
-    private val currentFolderFile get() = _currentFolderFile!! // This property is only valid after onCreateView
+    private lateinit var currentFolderFile: File
 
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val navigationArgs: AddFileBottomSheetDialogArgs by navArgs()
 
     private lateinit var openCameraWritePermissions: DrivePermissions
     private lateinit var openCameraPermissions: CameraPermissions
@@ -100,8 +94,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let { file ->
-            _currentFolderFile = file
-            FragmentBottomSheetAddFileBinding.inflate(inflater, container, false).also { _binding = it }.root
+            currentFolderFile = file
+            FragmentBottomSheetAddFileBinding.inflate(inflater, container, false).also { binding = it }.root
         } ?: run {
             findNavController().popBackStack()
             null
@@ -121,13 +115,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
         uploadFilesHelper = UploadFilesHelper(
             fragment = this@AddFileBottomSheetDialog,
-            parentFolder = currentFolderFile,
             onOpeningPicker = {
                 trackNewElement("uploadFile")
-                _binding?.documentUpload?.isEnabled = false
+                binding.documentUpload.isEnabled = false
             },
             onResult = { findNavController().popBackStack() },
-        )
+        ).apply { initParentFolder(currentFolderFile) }
 
         openCamera.setOnClickListener { openCamera() }
         documentUpload.setOnClickListener { uploadFilesHelper.uploadFiles() }
@@ -140,26 +133,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         noteCreate.setOnClickListener { createFile(Office.TXT) }
 
         documentScanning.isVisible = (context.applicationContext as MainApplication).geniusScanIsReady
-
-        if (navigationArgs.shortcutId.isNotEmpty() && mainViewModel.mustOpenShortcut) {
-            mainViewModel.mustOpenShortcut = false
-
-            when (navigationArgs.shortcutId) {
-                Shortcuts.UPLOAD.id -> uploadFilesHelper.uploadFiles()
-                Shortcuts.SCAN.id -> scanDocuments()
-                else -> Unit
-            }
-        }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
         mainViewModel.currentFolderOpenAddFileBottom.value = null
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun openCamera() {
@@ -184,7 +162,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun scanDocuments() {
-        ShortcutManagerCompat.reportShortcutUsed(requireContext(), navigationArgs.shortcutId)
         trackNewElement("scan")
         activity?.startScanFlow(scanFlowResultLauncher)
     }
