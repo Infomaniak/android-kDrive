@@ -163,6 +163,7 @@ class HomeViewModel : ViewModel() {
                 previousActivity.action == currentActivity.action &&
                 previousActivity.fileId == currentActivity.fileId
     }
+
     data class LastActivityResult(
         val mergedActivities: ArrayList<FileActivity>,
         val isComplete: Boolean,
