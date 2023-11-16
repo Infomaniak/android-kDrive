@@ -17,12 +17,13 @@
  */
 package com.infomaniak.drive
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.fragment.app.Fragment
+import androidx.core.content.pm.ShortcutManagerCompat
 import com.geniusscansdk.core.GeniusScanSDK
 import com.geniusscansdk.core.LicenseException
 import com.geniusscansdk.scanflow.ScanActivity
@@ -35,6 +36,7 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IGeniusScanUtils
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
@@ -108,27 +110,29 @@ object GeniusScanUtils : IGeniusScanUtils {
         false
     }
 
-    override fun Fragment.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) = with(requireContext()) {
+    override fun Activity.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
+        ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.SCAN.id)
+
         removeOldScanFiles()
         val scanConfiguration = ScanConfiguration().apply {
-            backgroundColor = ContextCompat.getColor(this@with, R.color.previewBackground)
-            foregroundColor = ContextCompat.getColor(this@with, R.color.white)
-            highlightColor = ContextCompat.getColor(this@with, R.color.accent)
+            backgroundColor = ContextCompat.getColor(this@startScanFlow, R.color.previewBackground)
+            foregroundColor = ContextCompat.getColor(this@startScanFlow, R.color.white)
+            highlightColor = ContextCompat.getColor(this@startScanFlow, R.color.accent)
             ocrConfiguration = getOcrConfiguration()
         }
         scanWithConfiguration(scanConfiguration, resultLauncher)
     }
 
-    override fun Fragment.scanResultProcessing(intent: Intent, folder: File?) {
+    override fun Activity.scanResultProcessing(intent: Intent, folder: File?) {
         try {
             val geniusScanFile = intent.getScanResult().multiPageDocument!!
             val newName = "scan_${Date().format(FORMAT_NEW_FILE)}.${geniusScanFile.extension}"
             val scanFile = IOFile(geniusScanFile.parent, newName)
             geniusScanFile.renameTo(scanFile)
 
-            val uri = FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), scanFile)
+            val uri = FileProvider.getUriForFile(this, getString(R.string.FILE_AUTHORITY), scanFile)
 
-            Intent(requireContext(), SaveExternalFilesActivity::class.java).apply {
+            Intent(this@scanResultProcessing, SaveExternalFilesActivity::class.java).apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_STREAM, uri)
                 putExtras(

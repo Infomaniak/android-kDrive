@@ -91,7 +91,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     FileListFragment::class.java, SharedWithMeFragment::class.java -> currentFolderFile
                     else -> null
                 }
-                scanResultProcessing(data, folder)
+
+                requireActivity().scanResultProcessing(data, folder)
             }
         }
         dismiss()
@@ -185,7 +186,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun scanDocuments() {
         ShortcutManagerCompat.reportShortcutUsed(requireContext(), navigationArgs.shortcutId)
         trackNewElement("scan")
-        startScanFlow(scanFlowResultLauncher)
+        activity?.startScanFlow(scanFlowResultLauncher)
     }
 
     private fun createFolder() {

@@ -34,6 +34,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.view.View
 import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
@@ -52,6 +53,8 @@ import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
+import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
@@ -124,6 +127,13 @@ class MainActivity : BaseActivity() {
             }
         }
     }
+
+    private val scanFlowResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
+            activityResult.whenResultIsOk {
+                it?.let { data -> scanResultProcessing(data, folder = null) }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -370,18 +380,15 @@ class MainActivity : BaseActivity() {
                     ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.SEARCH.id)
                     navController.navigate(R.id.searchFragment)
                 }
-                Shortcuts.UPLOAD.id, Shortcuts.SCAN.id -> handleAddFileShortcuts(navController, shortcutId)
-            }
-        }
-    }
-
-    private fun handleAddFileShortcuts(navController: NavController, shortcutId: String) {
-        mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
-            if (mainViewModel.mustOpenShortcut && currentFolder?.id == ROOT_ID) {
-                navController.navigate(
-                    R.id.addFileBottomSheetDialog,
-                    AddFileBottomSheetDialogArgs(shortcutId).toBundle(),
-                )
+                Shortcuts.UPLOAD.id -> mainViewModel.currentFolder.observe(this@MainActivity) { currentFolder ->
+                    if (mainViewModel.mustOpenShortcut && currentFolder?.id == ROOT_ID) {
+                        navController.navigate(
+                            R.id.addFileBottomSheetDialog,
+                            AddFileBottomSheetDialogArgs(shortcutId).toBundle(),
+                        )
+                    }
+                }
+                Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
             }
         }
     }
