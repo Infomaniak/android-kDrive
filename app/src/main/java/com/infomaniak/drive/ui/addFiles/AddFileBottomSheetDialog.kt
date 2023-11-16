@@ -65,7 +65,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private lateinit var openCameraWritePermissions: DrivePermissions
     private lateinit var openCameraPermissions: CameraPermissions
-    private lateinit var uploadFilesPermissions: DrivePermissions
+
+    private lateinit var uploadFileHelper: UploadFileHelper
 
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
@@ -88,8 +89,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         dismiss()
     }
 
-    private val filePicker = FilePicker(this)
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return (mainViewModel.currentFolderOpenAddFileBottom.value ?: mainViewModel.currentFolder.value)?.let { file ->
             currentFolderFile = file
@@ -110,12 +109,21 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         openCameraPermissions = CameraPermissions().apply {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
         }
-        uploadFilesPermissions = DrivePermissions().apply {
-            registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) uploadFiles() }
-        }
+
+        uploadFileHelper = UploadFileHelper(
+            fragment = this@AddFileBottomSheetDialog,
+            onOpeningPicker = {
+                trackNewElement("uploadFile")
+                binding.documentUpload.isEnabled = false
+            },
+            onResult = { uris ->
+                findNavController().popBackStack()
+                onSelectFilesResult(uris)
+            }
+        )
 
         openCamera.setOnClickListener { openCamera() }
-        documentUpload.setOnClickListener { uploadFiles() }
+        documentUpload.setOnClickListener { uploadFileHelper.uploadFiles() }
         documentScanning.setOnClickListener { scanDocuments() }
         folderCreate.setOnClickListener { createFolder() }
         docsCreate.setOnClickListener { createFile(Office.DOCS) }
@@ -149,17 +157,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 captureMediaResultLauncher.launch(chooserIntent)
             } catch (e: IOException) {
                 e.printStackTrace()
-            }
-        }
-    }
-
-    private fun uploadFiles() {
-        if (uploadFilesPermissions.checkSyncPermissions()) {
-            trackNewElement("uploadFile")
-            binding.documentUpload.isEnabled = false
-            filePicker.open { uris ->
-                findNavController().popBackStack()
-                onSelectFilesResult(uris)
             }
         }
     }
