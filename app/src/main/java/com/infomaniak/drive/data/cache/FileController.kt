@@ -419,7 +419,7 @@ object FileController {
     ) {
         val filesFromCacheOrDownload = getFilesFromCacheOrDownload(
             parentId = parentId,
-            loadNextPage = loadNextPage,
+            isFirstPage = true,
             ignoreCache = true,
             order = sortType,
             userDrive = userDrive
@@ -614,7 +614,7 @@ object FileController {
 
     fun getFilesFromCacheOrDownload(
         parentId: Int,
-        loadNextPage: Boolean,
+        isFirstPage: Boolean,
         ignoreCache: Boolean = false,
         ignoreCloud: Boolean = false,
         order: SortType = SortType.NAME_AZ,
@@ -632,7 +632,7 @@ object FileController {
             var folderProxy = getFileById(realm, parentId)
             val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) }
             val hasDuplicatesFiles = folderProxy?.children?.where()?.let(::hasDuplicatesFiles) ?: false
-            if (loadNextPage && folderProxy?.cursor == null) return@operation null
+            if (!isFirstPage && folderProxy?.cursor == null) return@operation null
 
             val needToDownload = ignoreCache
                     || folderProxy == null
@@ -656,13 +656,13 @@ object FileController {
                 result = realm.downloadAndSaveFiles(
                     localFolderProxy = folderProxy,
                     order = order,
-                    loadNextPage = loadNextPage,
+                    isFirstPage = isFirstPage,
                     parentId = parentId,
                     driveId = driveId,
                     okHttpClient = okHttpClient,
                     withChildren = withChildren
                 )
-            } else if (!loadNextPage && localFolderWithoutChildren != null) {
+            } else if (isFirstPage && localFolderWithoutChildren != null) {
                 val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(folderProxy, order) else arrayListOf()
                 result = (localFolderWithoutChildren to localSortedFolderFiles)
             }
@@ -681,7 +681,7 @@ object FileController {
     private fun Realm.downloadAndSaveFiles(
         localFolderProxy: File?,
         order: SortType,
-        loadNextPage: Boolean,
+        isFirstPage: Boolean,
         parentId: Int,
         driveId: Int,
         okHttpClient: OkHttpClient,
@@ -696,10 +696,10 @@ object FileController {
         if (apiResponse.isSuccess()) {
             val remoteFiles = apiResponse.data
             if (remoteFiles != null && localFolder != null) {
-                saveRemoteFiles(localFolderProxy, localFolder, apiResponse, loadNextPage)
+                saveRemoteFiles(localFolderProxy, localFolder, apiResponse, isFirstPage)
                 result = (localFolder to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
             }
-        } else if (loadNextPage && localFolderProxy != null) {
+        } else if (isFirstPage && localFolderProxy != null) {
             val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolderProxy, order) else arrayListOf()
             result = (localFolder!! to localSortedFolderFiles)
         }
@@ -785,23 +785,23 @@ object FileController {
         return files?.let { ArrayList(it) } ?: arrayListOf()
     }
 
-    fun getFolderActivities(folder: File, page: Int, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
+    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
         return getRealmInstance(userDrive).use { realm ->
-            getFolderActivitiesRec(realm, folder, page, userDrive)
+            getFolderActivitiesRec(realm, folder, userDrive)
         }
     }
 
-    private fun getFolderActivitiesRec(
+    private tailrec fun getFolderActivitiesRec(
         realm: Realm,
         folder: File,
-        page: Int,
-        userDrive: UserDrive? = null
+        userDrive: UserDrive? = null,
+        cursor: String? = null,
+        returnResponse: ArrayMap<Int, FileActivity> = arrayMapOf(),
     ): Map<out Int, FileActivity> {
         val okHttpClient = runBlocking {
             userDrive?.userId?.let { AccountUtils.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
         }
-        val returnResponse = arrayMapOf<Int, FileActivity>()
-        val apiResponse = ApiRepository.getFileActivities(folder, page, true, okHttpClient)
+        val apiResponse = ApiRepository.getFileActivities(folder, cursor, true, okHttpClient)
         if (!apiResponse.isSuccess()) return returnResponse
 
         return if (apiResponse.data?.isNotEmpty() == true) {
@@ -809,9 +809,15 @@ object FileController {
                 fileActivity.applyFileActivity(realm, returnResponse, folder)
             }
 
-            if ((apiResponse.data?.size ?: 0) < ApiRepository.PER_PAGE) {
+            if (apiResponse.hasMore) {
+                // Loading the next page, then the cursor is required
+                getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor!!, returnResponse)
+            } else {
                 if (apiResponse.responseAt > 0L) {
-                    updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+                    updateFile(folder.id, realm) { file ->
+                        file.responseAt = apiResponse.responseAt
+                        apiResponse.cursor?.let { file.cursor = it }
+                    }
                 } else {
                     Sentry.withScope { scope ->
                         scope.setExtra("data", apiResponse.toString())
@@ -820,7 +826,7 @@ object FileController {
                 }
                 returnResponse
 
-            } else returnResponse.apply { putAll(getFolderActivitiesRec(realm, folder, page + 1, userDrive)) }
+            }
         } else {
             if (apiResponse.responseAt > 0L) {
                 updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }

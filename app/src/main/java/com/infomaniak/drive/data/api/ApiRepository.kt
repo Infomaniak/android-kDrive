@@ -122,15 +122,15 @@ object ApiRepository : ApiRepositoryCore() {
     // Increase timeout for this api call because it can take more than 10s to process data
     fun getFileActivities(
         file: File,
-        page: Int,
+        cursor: String?,
         forFileList: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
-    ): ApiResponse<ArrayList<FileActivity>> {
+    ): CursorApiResponse<ArrayList<FileActivity>> {
         val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithExtraQuery" else "&with=user"
-        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
+        val url = "${ApiRoutes.getFileActivities(file)}?${loadCursor(cursor)}$queries$ACTIONS" +
                 if (forFileList) "" else ADDITIONAL_ACTIONS
 
-        return callApi(url, GET, okHttpClient = okHttpClient)
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
     // For sync offline service
@@ -258,9 +258,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileCount(file), GET)
     }
 
-    fun getFileComments(file: File, page: Int): ApiResponse<ArrayList<FileComment>> {
-        val url = "${ApiRoutes.fileComments(file)}&${pagination(page)}"
-        return callApi(url, GET)
+    fun getFileComments(file: File, cursor: String?): CursorApiResponse<ArrayList<FileComment>> {
+        val url = "${ApiRoutes.fileComments(file)}&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
     fun postFileComment(file: File, body: String): ApiResponse<FileComment> {

@@ -68,7 +68,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 getFilesJob.ensureActive()
                 val resultList = FileController.getFilesFromCacheOrDownload(
                     parentId = parentId,
-                    loadNextPage = nextPage,
+                    isFirstPage = true,
                     ignoreCache = ignoreCache,
                     ignoreCloud = ignoreCloud,
                     order = order,
@@ -205,7 +205,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         return liveData(Dispatchers.IO + getFolderActivitiesJob) {
             mutex.withLock {
                 getFolderActivitiesJob.ensureActive()
-                val activities = FileController.getFolderActivities(folder, 1, userDrive)
+                val activities = FileController.getFolderActivities(folder, userDrive)
                 emit(activities.isNotEmpty())
             }
         }
