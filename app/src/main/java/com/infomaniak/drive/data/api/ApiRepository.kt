@@ -368,9 +368,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }))
     }
 
-    fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {
-        val url = ApiRoutes.getLastActivities(driveId) + "&${pagination(page)}"
-        return callApi(url, GET)
+    fun getLastActivities(driveId: Int, cursor: String?): CursorApiResponse<ArrayList<FileActivity>> {
+        val url = ApiRoutes.getLastActivities(driveId) + "&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
     fun forceFolderAccess(file: File): ApiResponse<Boolean> {
