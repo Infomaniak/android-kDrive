@@ -66,6 +66,11 @@ class PreviewPDFFragment : PreviewFragment() {
         }
     }
 
+    private val onPdfLoadError: OnErrorListener = OnErrorListener {
+        PasswordDialogFragment { password ->
+            showPdf(password)
+        }.show(parentFragmentManager, this.javaClass::class.toString())
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPdfBinding.inflate(inflater, container, false).also { binding = it }.root
