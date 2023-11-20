@@ -39,6 +39,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -62,6 +63,12 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private var pdfFile: IOFile? = null
     private var isDownloading = false
+
+    private val onPdfLoadError: OnErrorListener = OnErrorListener {
+        PasswordDialogFragment { password ->
+            showPdf(password)
+        }.show(parentFragmentManager, this.javaClass::class.toString())
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPdfBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -129,6 +136,7 @@ class PreviewPDFFragment : PreviewFragment() {
                     onPageChange { currentPage, pageCount ->
                         updatePageNumber(currentPage = currentPage, totalPage = pageCount)
                     }
+					onError(onPdfLoadError)
                     load()
                 }
 
