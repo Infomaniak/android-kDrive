@@ -75,7 +75,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
         }
     }
 
-    private companion object {
-        const val STORAGE_ALERT_MIN_PERCENTAGE = 90.0f
+    companion object {
+        private const val STORAGE_ALERT_MIN_PERCENTAGE = 90.0f
     }
 }
