@@ -17,7 +17,7 @@
   -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
-        android:icon="@drawable/ic_upload"
+        android:icon="@mipmap/ic_shortcut_upload"
         android:shortcutId="upload"
         android:shortcutLongLabel="@string/buttonUpload"
         android:shortcutShortLabel="@string/shortcutUploadShortDescription">
@@ -31,7 +31,7 @@
         </intent>
     </shortcut>
     <shortcut
-        android:icon="@drawable/ic_scan"
+        android:icon="@mipmap/ic_shortcut_scan"
         android:shortcutId="scan"
         android:shortcutLongLabel="@string/buttonDocumentScanning"
         android:shortcutShortLabel="@string/shortcutScanShortDescription">
@@ -45,7 +45,7 @@
         </intent>
     </shortcut>
     <shortcut
-        android:icon="@drawable/ic_shortcut_search"
+        android:icon="@mipmap/ic_shortcut_search"
         android:shortcutId="search"
         android:shortcutLongLabel="@string/searchViewHint"
         android:shortcutShortLabel="@string/searchTitle">
