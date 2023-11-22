@@ -35,30 +35,49 @@ class GalleryViewModel : ViewModel() {
 
     private var currentCursor: String? = null
 
-    val galleryApiResult = MutableLiveData<Pair<ArrayList<File>, IsComplete>?>()
+    private var lastGalleryFiles = arrayListOf<File>()
+
+    val galleryApiResult = MutableLiveData<Pair<ArrayList<File>, IsComplete>>()
+    val needToRestoreFiles get() = galleryApiResult.isInitialized
 
     fun loadLastGallery(driveId: Int, ignoreCloud: Boolean) {
-        getGalleryJob?.cancel()
-        getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
-            galleryApiResult.postValue(getLastGallery(driveId, isFirstPage = true, ignoreCloud))
-        }
+        lastGalleryFiles = arrayListOf()
+        loadLastGallery(driveId, ignoreCloud, isFirstPage = true)
     }
 
     fun loadMoreGallery(driveId: Int, ignoreCloud: Boolean) {
         currentCursor?.let {
-            getGalleryJob?.cancel()
-            getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
-                galleryApiResult.postValue(getLastGallery(driveId, isFirstPage = false, ignoreCloud, currentCursor))
-            }
+            loadLastGallery(driveId, ignoreCloud, isFirstPage = false, currentCursor)
+        }
+    }
+
+    fun restoreGalleryFiles() {
+        if (needToRestoreFiles) {
+            val isComplete = galleryApiResult.value?.second ?: true
+            galleryApiResult.value = lastGalleryFiles to isComplete
+        }
+    }
+
+    private fun loadLastGallery(
+        driveId: Int,
+        ignoreCloud: Boolean,
+        isFirstPage: Boolean,
+        cursor: String? = null,
+    ) {
+        getGalleryJob?.cancel()
+        getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
+            val result = getLastGallery(driveId, ignoreCloud, isFirstPage, cursor)
+            galleryApiResult.postValue(result)
+            lastGalleryFiles.addAll(result.first)
         }
     }
 
     private fun getLastGallery(
         driveId: Int,
+        ignoreCloud: Boolean,
         isFirstPage: Boolean,
-        ignoreCloud: Boolean = false,
-        cursor: String? = null,
-    ): Pair<ArrayList<File>, IsComplete>? {
+        cursor: String?,
+    ): Pair<ArrayList<File>, IsComplete> {
         getGalleryJob?.cancel()
         getGalleryJob = Job()
 
@@ -70,7 +89,7 @@ class GalleryViewModel : ViewModel() {
         return FileController.getGalleryDrive() to true
     }
 
-    private fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<ArrayList<File>, Boolean>? {
+    private fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<ArrayList<File>, Boolean> {
         val apiResponse = ApiRepository.getLastGallery(driveId = driveId, cursor = cursor)
         return if (apiResponse.isSuccess()) {
             currentCursor = apiResponse.cursor
@@ -83,11 +102,11 @@ class GalleryViewModel : ViewModel() {
     private fun emitApiGallery(
         apiResponse: CursorApiResponse<ArrayList<File>>,
         isFirstPage: Boolean,
-    ): Pair<ArrayList<File>, Boolean>? {
+    ): Pair<ArrayList<File>, Boolean> {
         val data = apiResponse.data
 
         val results = if (data.isNullOrEmpty()) {
-            null
+            arrayListOf<File>() to true
         } else {
             FileController.storeGalleryDrive(data, isFirstPage)
             val isComplete = apiResponse.cursor == null
