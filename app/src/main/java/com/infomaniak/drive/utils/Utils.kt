@@ -352,5 +352,6 @@ object Utils {
         UPLOAD("upload"),
         SCAN("scan"),
         SEARCH("search"),
+        FEEDBACK("feedback"),
     }
 }

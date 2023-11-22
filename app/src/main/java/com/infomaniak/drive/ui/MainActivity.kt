@@ -395,6 +395,7 @@ class MainActivity : BaseActivity() {
                     }
                 }
                 Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
+                Shortcuts.FEEDBACK.id -> openSupport()
             }
         }
     }
