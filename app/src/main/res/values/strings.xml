@@ -609,6 +609,7 @@
     <string name="sharedConflictTitle">Permissions conflict</string>
     <string name="sharedWithMeNoFile">No files shared with me</string>
     <string name="sharedWithMeTitle">Shared with me</string>
+    <string name="shortcutFeedbackShortDescription">Support</string>
     <string name="shortcutScanShortDescription">Scan</string>
     <string name="shortcutUploadShortDescription">Upload</string>
     <string name="snackBarCategoryDeleted">Category successfully deleted</string>

@@ -30,6 +30,7 @@
                 android:value="upload" />
         </intent>
     </shortcut>
+
     <shortcut
         android:icon="@mipmap/ic_shortcut_scan"
         android:shortcutId="scan"
@@ -44,6 +45,7 @@
                 android:value="scan" />
         </intent>
     </shortcut>
+
     <shortcut
         android:icon="@mipmap/ic_shortcut_search"
         android:shortcutId="search"
@@ -56,6 +58,21 @@
             <extra
                 android:name="shortcuts_tag"
                 android:value="search" />
+        </intent>
+    </shortcut>
+
+    <shortcut
+        android:icon="@mipmap/ic_shortcut_feedback"
+        android:shortcutId="feedback"
+        android:shortcutLongLabel="@string/supportTitle"
+        android:shortcutShortLabel="@string/shortcutFeedbackShortDescription">
+        <intent
+            android:action="android.intent.action.ATTACH_DATA"
+            android:targetClass="com.infomaniak.drive.ui.LaunchActivity"
+            android:targetPackage="com.infomaniak.drive">
+            <extra
+                android:name="shortcuts_tag"
+                android:value="feedback" />
         </intent>
     </shortcut>
 </shortcuts>
