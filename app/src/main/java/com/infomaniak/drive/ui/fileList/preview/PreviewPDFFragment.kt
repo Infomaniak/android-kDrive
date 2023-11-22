@@ -23,6 +23,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RelativeLayout
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -39,6 +42,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import kotlinx.coroutines.Dispatchers
@@ -130,6 +134,12 @@ class PreviewPDFFragment : PreviewFragment() {
         lifecycleScope.launch {
             withResumed {
                 downloadLayout.root.isGone = true
+				val defaultScrollHandle = DefaultScrollHandle(requireContext()).apply {
+                    setPageHandleBackground(ResourcesCompat.getDrawable(resources, R.drawable.handle_pdf_background, null))
+                    setHandleWidth(65)
+                    setHandleHeight(40)
+                    setTextColor(ContextCompat.getColor(context, R.color.white))
+                }
                 with(pdfView.fromFile(pdfFile)) {
                     password(password)
                     disableLongpress()
