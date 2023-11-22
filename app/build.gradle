@@ -150,7 +150,7 @@ dependencies {
     implementation 'com.tbuonomo:dotsindicator:5.0'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
-    implementation 'com.github.infomaniak:android-pdf-viewer:3.2.2-snapshot-5'
+    implementation 'com.github.infomaniak:android-pdf-viewer:3.2.2'
 
     implementation 'io.realm:android-adapters:4.0.0'
 
