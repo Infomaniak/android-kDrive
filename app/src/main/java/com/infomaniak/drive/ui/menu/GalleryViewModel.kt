@@ -109,7 +109,7 @@ class GalleryViewModel : ViewModel() {
             arrayListOf<File>() to true
         } else {
             FileController.storeGalleryDrive(data, isFirstPage)
-            val isComplete = apiResponse.cursor == null
+            val isComplete = !apiResponse.hasMore
             data to isComplete
         }
 

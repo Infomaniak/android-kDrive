@@ -79,7 +79,7 @@ object ApiRoutes {
 
     /** Action */
     //region Action
-    fun undoAction(driveId: Int) = "${driveURL(driveId)}/cancel"
+    fun undoAction(driveId: Int) = "${driveURLV2(driveId)}/cancel"
     //endregion
 
     /** Activities */

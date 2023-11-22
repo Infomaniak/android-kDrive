@@ -83,11 +83,11 @@ class FileDetailsViewModel : ViewModel() {
                 if (isSuccess()) {
                     when {
                         data.isNullOrEmpty() -> emit(null)
-                        this.cursor == null -> emit(this)
-                        else -> {
+                        hasMore -> {
                             emit(this)
                             recursive(this.cursor)
                         }
+                        else -> emit(this)
                     }
                 }
             }

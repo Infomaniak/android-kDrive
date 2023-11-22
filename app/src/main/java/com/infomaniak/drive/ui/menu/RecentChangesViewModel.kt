@@ -63,7 +63,7 @@ class RecentChangesViewModel : ViewModel() {
                 FileController.storeRecentChanges(data, isFirstPage)
                 FileListFragment.FolderFilesResult(
                     files = data,
-                    isComplete = currentCursor == null,
+                    isComplete = !apiResponse.hasMore,
                     isFirstPage = isFirstPage,
                     isNewSort = isNewSort,
                 )
