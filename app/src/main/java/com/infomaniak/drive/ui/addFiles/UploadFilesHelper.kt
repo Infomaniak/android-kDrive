@@ -29,14 +29,14 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.lib.core.utils.FilePicker
 
-class UploadFileHelper private constructor(
+class UploadFilesHelper private constructor(
     private val parentFolder: File,
     private val navController: NavController,
+    private val filePicker: FilePicker,
     private val onOpeningPicker: () -> Unit,
     private val onResult: (() -> Unit)?,
 ) {
 
-    private lateinit var filePicker: FilePicker
     private lateinit var uploadFilesPermissions: DrivePermissions
 
     constructor(
@@ -44,8 +44,7 @@ class UploadFileHelper private constructor(
         parentFolder: File,
         onOpeningPicker: () -> Unit,
         onResult: (() -> Unit)? = null,
-    ) : this(parentFolder, fragment.findNavController(), onOpeningPicker, onResult) {
-        filePicker = FilePicker(fragment)
+    ) : this(parentFolder, fragment.findNavController(), FilePicker(fragment), onOpeningPicker, onResult) {
         uploadFilesPermissions = DrivePermissions().apply {
             registerPermissions(fragment) { authorized -> if (authorized) uploadFiles() }
         }
@@ -57,8 +56,7 @@ class UploadFileHelper private constructor(
         @IdRes hostFragmentId: Int,
         onOpeningPicker: () -> Unit,
         onResult: (() -> Unit)? = null,
-    ) : this(parentFolder, activity.findNavController(hostFragmentId), onOpeningPicker, onResult) {
-        filePicker = FilePicker(activity)
+    ) : this(parentFolder, activity.findNavController(hostFragmentId), FilePicker(activity), onOpeningPicker, onResult) {
         uploadFilesPermissions = DrivePermissions().apply {
             registerPermissions(activity) { authorized -> if (authorized) uploadFiles() }
         }
