@@ -68,7 +68,7 @@ android {
             getIsDefault().set(true)
 
             dependencies {
-                def geniusscansdk_version = '4.14.0'
+                def geniusscansdk_version = '4.18.0'
                 implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
