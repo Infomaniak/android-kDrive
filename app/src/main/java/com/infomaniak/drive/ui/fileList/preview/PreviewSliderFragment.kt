@@ -462,7 +462,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.openWithClicked()
         val packageManager = requireContext().packageManager
         if (requireContext().openWithIntent(currentFile, userDrive).resolveActivity(packageManager) == null) {
-            showSnackbar(R.string.allActivityNotFoundError)
+            showSnackbar(R.string.errorNoSupportingAppFound)
         } else {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
