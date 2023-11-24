@@ -54,7 +54,6 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.drive.views.ProgressLayoutView
-import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
@@ -103,7 +102,7 @@ private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
 
 private fun ItemFileBinding.displaySize(file: File) {
     file.size?.let {
-        fileSize.text = FormatterFileSize.formatShortFileSize(context, it)
+        fileSize.text = context.formatShortBinarySize(it)
         fileSeparator.isVisible = true
     } ?: run {
         fileSize.text = ""

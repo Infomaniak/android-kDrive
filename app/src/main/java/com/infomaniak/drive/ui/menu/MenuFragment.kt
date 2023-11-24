@@ -37,7 +37,6 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.utils.*
-import com.infomaniak.lib.core.utils.FormatterFileSize
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeBinding
@@ -76,8 +75,8 @@ class MenuFragment : Fragment() {
                     val progress = (currentDrive.usedSize.toDouble() / currentDrive.size) * 1_000.0
                     progressDriveQuota.progress = progress.toInt()
 
-                    val usedSize = FormatterFileSize.formatShortFileSize(requireContext(), currentDrive.usedSize)
-                    val totalSize = FormatterFileSize.formatShortFileSize(requireContext(), currentDrive.size)
+                    val usedSize = requireContext().formatShortBinarySize(currentDrive.usedSize)
+                    val totalSize = requireContext().formatShortBinarySize(currentDrive.size)
                     textDriveQuota.text = "$usedSize / $totalSize"
                 }
             }
