@@ -49,7 +49,6 @@
     <shortcut
         android:icon="@mipmap/ic_shortcut_search"
         android:shortcutId="search"
-        android:shortcutLongLabel="@string/searchViewHint"
         android:shortcutShortLabel="@string/searchTitle">
         <intent
             android:action="android.intent.action.ATTACH_DATA"

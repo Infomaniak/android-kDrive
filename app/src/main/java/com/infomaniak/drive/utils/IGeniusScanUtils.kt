@@ -33,10 +33,9 @@ interface IGeniusScanUtils {
     fun Activity.startScanFlow(resultLauncher: ActivityResultLauncher<Intent>) {
         MaterialAlertDialogBuilder(this, R.style.DialogStyle)
             .setTitle(R.string.allErrorFeatureNotAvailableInFdroid)
-            .setPositiveButton("Ok") { _: DialogInterface?, _: Int -> }
+            .setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int -> }
             .show()
     }
 
     fun Activity.scanResultProcessing(intent: Intent, folder: File?) = Unit
-
 }

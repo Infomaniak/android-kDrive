@@ -153,7 +153,7 @@ class LaunchActivity : AppCompatActivity() {
         intent.extras?.getString(SHORTCUTS_TAG)?.let { extrasMainActivity = MainActivityArgs(shortcutId = it).toBundle() }
     }
 
-    private companion object {
-        const val SHORTCUTS_TAG = "shortcuts_tag"
+    companion object {
+        private const val SHORTCUTS_TAG = "shortcuts_tag"
     }
 }
