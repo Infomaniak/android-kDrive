@@ -72,13 +72,13 @@ class MenuFragment : Fragment() {
                     driveStorageProgress.isInvisible = true
                 } else {
                     driveStorageProgress.isVisible = true
-                    progressDriveQuota.max = 1000
-                    val progress = (currentDrive.usedSize.toDouble() / currentDrive.size) * 1000
+                    progressDriveQuota.max = 1_000
+                    val progress = (currentDrive.usedSize.toDouble() / currentDrive.size) * 1_000.0
                     progressDriveQuota.progress = progress.toInt()
 
                     val usedSize = FormatterFileSize.formatShortFileSize(requireContext(), currentDrive.usedSize)
-                    val size = FormatterFileSize.formatShortFileSize(requireContext(), currentDrive.size)
-                    textDriveQuota.text = "$usedSize / $size"
+                    val totalSize = FormatterFileSize.formatShortFileSize(requireContext(), currentDrive.size)
+                    textDriveQuota.text = "$usedSize / $totalSize"
                 }
             }
 

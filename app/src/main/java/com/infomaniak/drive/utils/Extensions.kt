@@ -26,7 +26,7 @@ import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
 import android.net.Uri
-import android.os.Build
+import android.os.Build.*
 import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Patterns
@@ -117,7 +117,7 @@ fun Cursor.uri(contentUri: Uri): Uri {
 fun Number.isPositive(): Boolean = toLong() > 0
 
 fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    if (VERSION.SDK_INT >= VERSION_CODES.M) {
         statusBarColor = ContextCompat.getColor(this@setColorStatusBar, if (appBar) R.color.appBar else R.color.background)
         lightStatusBar(!isNightModeEnabled())
     } else {
@@ -127,7 +127,7 @@ fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
 
 fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
     val nightModeEnabled = isNightModeEnabled()
-    if (nightModeEnabled || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    if (nightModeEnabled || VERSION.SDK_INT >= VERSION_CODES.O) {
         val color = if (appBar) R.color.appBar else R.color.background
         navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
         lightNavigationBar(!nightModeEnabled)
@@ -163,7 +163,7 @@ fun ImageView.animateRotation(isDeployed: Boolean = false) {
  */
 fun Activity.getScreenSizeInDp(): Point {
     val displayMetrics = DisplayMetrics()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    if (VERSION.SDK_INT >= VERSION_CODES.R) {
         display?.apply {
             getRealMetrics(displayMetrics)
         }
@@ -376,6 +376,6 @@ fun Context.getInfomaniakLogin(): InfomaniakLogin {
 
 //region Worker
 fun OneTimeWorkRequest.Builder.setExpeditedIfAvailable() = apply {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+    if (VERSION.SDK_INT >= VERSION_CODES.S) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
 }
 //endregion

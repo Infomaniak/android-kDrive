@@ -43,7 +43,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
     @SuppressLint("SetTextI18n")
     fun setup(currentDrive: Drive) = with(binding) {
         currentDrive.apply {
-            val storagePercentage = if (size > 0) (usedSize.toFloat() / size) * 100 else 0F
+            val storagePercentage = if (size > 0L) (usedSize.toFloat() / size) * 100.0f else 0.0f
             if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
                 this@NotEnoughStorageView.isVisible = true
 
@@ -76,6 +76,6 @@ class NotEnoughStorageView @JvmOverloads constructor(
     }
 
     companion object {
-        const val STORAGE_ALERT_MIN_PERCENTAGE = 90
+        private const val STORAGE_ALERT_MIN_PERCENTAGE = 90.0f
     }
 }
