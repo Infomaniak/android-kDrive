@@ -23,9 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -42,19 +40,39 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
+
 class PreviewPDFFragment : PreviewFragment() {
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
     private val navController by lazy { findNavController() }
 
+    companion object {
+        private const val WIDTH_HANDLE_DP = 65
+        private const val HEIGHT_HANDLE_DP = 40
+        private const val HANDLE_PAGE_PDF_PADDING_TOP = 100
+        private const val HANDLE_PAGE_PDF_PADDING_BOTTOM = 150
+        private const val HANDLE_VERTICAL_MARGIN_DP = 16
+    }
+
     private var binding: FragmentPreviewPdfBinding by safeBinding()
+
+    private var previewPDFAdapter: PreviewPDFAdapter? = null
+    private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
+
+    private val scrollHandle by lazy {
+        DefaultScrollHandle(requireContext()).apply {
+            setPageHandleView(layoutInflater.inflate(R.layout.pdf_handle_view, null))
+            setHandleSize(WIDTH_HANDLE_DP, HEIGHT_HANDLE_DP)
+            setHandlePaddings(0, HANDLE_PAGE_PDF_PADDING_TOP, 0, HANDLE_PAGE_PDF_PADDING_BOTTOM)
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+        }
+    }
 
     private var pdfFile: IOFile? = null
     private var isDownloading = false
@@ -134,12 +152,6 @@ class PreviewPDFFragment : PreviewFragment() {
         lifecycleScope.launch {
             withResumed {
                 downloadLayout.root.isGone = true
-				val defaultScrollHandle = DefaultScrollHandle(requireContext()).apply {
-                    setPageHandleBackground(ResourcesCompat.getDrawable(resources, R.drawable.handle_pdf_background, null))
-                    setHandleWidth(65)
-                    setHandleHeight(40)
-                    setTextColor(ContextCompat.getColor(context, R.color.white))
-                }
                 with(pdfView.fromFile(pdfFile)) {
                     password(password)
                     disableLongpress()
@@ -147,7 +159,7 @@ class PreviewPDFFragment : PreviewFragment() {
                     enableDoubletap(true)
                     pageFling(false)
                     pageSnap(false)
-                    scrollHandle(DefaultScrollHandle(requireContext()))
+                    scrollHandle(scrollHandle)
                     spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
                     swipeHorizontal(false)
                     touchPriority(true)
