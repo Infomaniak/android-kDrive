@@ -27,8 +27,6 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -37,7 +35,6 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.PdfCore
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
@@ -128,7 +125,8 @@ class PreviewPDFFragment : PreviewFragment() {
                     .load()
 
 
-                getPageNumberChip()?.isVisible = true            }
+                getPageNumberChip()?.isVisible = true
+            }
 
         }
     }
