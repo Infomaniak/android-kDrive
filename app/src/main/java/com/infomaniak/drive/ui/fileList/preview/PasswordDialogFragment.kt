@@ -29,9 +29,7 @@ class PasswordDialogFragment(
     private val onCancel: () -> Unit
 ) : DialogFragment() {
 
-    private val binding by lazy {
-        DialogFragmentPasswordBinding.inflate(layoutInflater)
-    }
+    private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding.validate.setOnClickListener {
