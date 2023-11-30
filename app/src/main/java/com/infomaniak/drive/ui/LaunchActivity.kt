@@ -29,8 +29,6 @@ import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
-import com.infomaniak.drive.ui.login.MigrationActivity
-import com.infomaniak.drive.ui.login.MigrationActivity.Companion.getOldkDriveUser
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.applock.LockActivity
@@ -56,7 +54,7 @@ class LaunchActivity : AppCompatActivity() {
             handleDeeplink()
 
             val destinationClass = if (AccountUtils.requestCurrentUser() == null) {
-                if (getOldkDriveUser().isEmpty()) LoginActivity::class.java else MigrationActivity::class.java
+                LoginActivity::class.java
             } else {
                 trackUserId(AccountUtils.currentUserId)
 

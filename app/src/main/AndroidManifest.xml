@@ -18,17 +18,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Only for migration from kDrive v3 -->
-    <uses-permission
-        android:name="android.permission.AUTHENTICATE_ACCOUNTS"
-        android:maxSdkVersion="22" />
-    <uses-permission
-        android:name="android.permission.GET_ACCOUNTS"
-        android:maxSdkVersion="22" />
-    <uses-permission
-        android:name="android.permission.MANAGE_ACCOUNTS"
-        android:maxSdkVersion="22" />
-
     <!-- For upload and sync -->
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
@@ -190,12 +179,6 @@
         <activity
             android:name="com.infomaniak.lib.applock.LockActivity"
             android:theme="@style/AppTheme.Lock" />
-
-        <activity
-            android:name=".ui.login.MigrationActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.Login"
-            tools:ignore="LockedOrientationActivity" />
 
         <service android:name=".data.sync.MediaObserverService" />
 

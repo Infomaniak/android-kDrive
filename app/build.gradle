@@ -19,8 +19,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 4_02_031_01
-        versionName '4.2.31'
+        versionCode 4_03_001_01
+        versionName '4.3.0'
 
         setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
@@ -37,7 +37,6 @@ android {
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
 
-        resValue 'string', 'ACCOUNT_TYPE', 'com.infomaniak.drive'
         resValue 'string', 'CLOUD_STORAGE_AUTHORITY', 'com.infomaniak.drive.documents'
         resValue 'string', 'FILE_AUTHORITY', 'com.infomaniak.drive.files'
 
@@ -70,7 +69,7 @@ android {
             getIsDefault().set(true)
 
             dependencies {
-                def geniusscansdk_version = '4.14.0'
+                def geniusscansdk_version = '4.18.0'
                 implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
@@ -146,7 +145,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:6.1.0'
+    implementation 'com.airbnb.android:lottie:6.2.0'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.5'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
     implementation 'com.tbuonomo:dotsindicator:5.0'
@@ -160,7 +159,7 @@ dependencies {
 
     implementation 'com.github.hannesa2:paho.mqtt.android:4.0'
 
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.11.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
     testImplementation 'io.github.serpro69:kotlin-faker:1.15.0'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
@@ -176,11 +175,11 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidx_test_version"
     androidTestImplementation "androidx.test:runner:1.5.2"
 
-    def jupiter_version = '5.10.0'
+    def jupiter_version = '5.10.1'
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter_version"
 
-    def junit_version = '1.3.0'
+    def junit_version = '1.4.0'
     androidTestImplementation "de.mannodermaus.junit5:android-test-core:$junit_version"
     androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:$junit_version"
 }

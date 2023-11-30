@@ -129,7 +129,6 @@
     <string name="buttonLogout">Se déconnecter</string>
     <string name="buttonManageDropBox">Gérer la boîte de dépôt</string>
     <string name="buttonMenu">Menu</string>
-    <string name="buttonMigrationDone">C’est parti !</string>
     <string name="buttonMove">Déplacer</string>
     <string name="buttonMoveTo">Déplacer vers</string>
     <string name="buttonNewPassword">Définir un nouveau mot de passe</string>
@@ -465,14 +464,6 @@
         <item quantity="other">%d dossiers sélectionnés</item>
     </plurals>
     <string name="menuTitle">Menu</string>
-    <string name="migrateNotificationDescription">Veuillez lancer l’app kDrive pour terminer la mise à jour</string>
-    <string name="migrateNotificationTitle">Important : Une action est requise</string>
-    <string name="migratePhotoSyncSettingsDescription">Suite à la migration, veuillez configurer à nouveau la sauvegarde des photos.</string>
-    <string name="migratePhotoSyncSettingsTitle">Veuillez reconfigurer la sauvegarde automatique de vos photos</string>
-    <string name="migrationDescription">Découvrez sans tarder une application repensée pour vous offrir une expérience utilisateur plus intuitive et agréable.</string>
-    <string name="migrationFailed">La migration a échoué.</string>
-    <string name="migrationInProgress">Migration en cours, veuillez patienter…</string>
-    <string name="migrationTitle">Bienvenue sur la nouvelle application kDrive 100% Infomaniak</string>
     <string name="modalCommentAddTitle">Modifier un commentaire</string>
     <string name="modalCommentDeleteDescription">Souhaitez-vous vraiment supprimer votre commentaire ?</string>
     <string name="modalCreateFileSucces">%s créé avec succès</string>
@@ -541,7 +532,7 @@
         <item quantity="other">Préparation de l’importation de %d fichiers</item>
     </plurals>
     <string name="previewDownloadIndication">Chargement en cours, merci de patienter…</string>
-    <string name="previewFileProtectedError">Pas d’aperçu disponible, ce fichier est protégé par un mot de passe.</string>
+    <string name="previewFileProtectedError">Pas d’aperçu disponible, ce fichier est protégé par un mot de passe</string>
     <string name="previewLoadError">Impossible de charger l’aperçu</string>
     <string name="previewNoPreview">Il semblerait que ce fichier n’ait pas d’aperçu.</string>
     <string name="previewPdfPages">%1$d sur %2$d</string>
