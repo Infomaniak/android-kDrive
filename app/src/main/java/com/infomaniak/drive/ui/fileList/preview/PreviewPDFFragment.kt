@@ -27,6 +27,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
+import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -49,15 +50,30 @@ class PreviewPDFFragment : PreviewFragment() {
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
+    private val passwordDialog: PasswordDialogFragment by lazy {
+        PasswordDialogFragment(
+            onPasswordEntered = { password ->
+                showPdf(password)
+            },
+            onCancel = {
+                findNavController().popBackStack()
+            }
+        )
+    }
 
     private var pdfFile: IOFile? = null
     private var isDownloading = false
 
     private val onPdfLoadError: OnErrorListener = OnErrorListener {
-        PasswordDialogFragment { password ->
-            showPdf(password)
-        }.show(parentFragmentManager, this.javaClass::class.toString())
+        passwordDialog.dialog?.let {
+            if (it.isShowing.not()) {
+                passwordDialog.show(parentFragmentManager, this.javaClass::class.toString())
+            } else {
+                passwordDialog.onWrongPasswordEntered()
+            }
+        } ?: passwordDialog.show(parentFragmentManager, this.javaClass::class.toString())
     }
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPdfBinding.inflate(inflater, container, false).also { binding = it }.root

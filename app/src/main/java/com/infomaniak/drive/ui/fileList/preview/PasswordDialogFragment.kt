@@ -19,23 +19,42 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.app.Dialog
 import android.os.Bundle
-import android.view.LayoutInflater
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.databinding.DialogFragmentPasswordBinding
 
-class PasswordDialogFragment(private val onPasswordEntered: (String) -> Unit) : DialogFragment() {
+class PasswordDialogFragment(
+    private val onPasswordEntered: (String) -> Unit,
+    private val onCancel: () -> Unit
+) : DialogFragment() {
+
     private val binding by lazy {
-        DialogFragmentPasswordBinding.inflate(LayoutInflater.from(context))
+        DialogFragmentPasswordBinding.inflate(layoutInflater)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding.validate.setOnClickListener {
             onPasswordEntered.invoke(binding.passwordEditText.text.toString())
-            dismiss()
         }
-        return MaterialAlertDialogBuilder(requireContext())
+        binding.cancel.setOnClickListener {
+            onCancel.invoke()
+        }
+        binding.passwordEditText.addTextChangedListener {
+            binding.passwordTextLayout.error = ""
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
             .setView(binding.root)
-            .create()
+            .setCancelable(false)
+            .create().apply {
+                setCanceledOnTouchOutside(false)
+                return this
+            }
+    }
+
+    fun onWrongPasswordEntered() {
+        binding.passwordEditText.text?.clear()
+        binding.passwordTextLayout.error = "Wrong password"
     }
 }
