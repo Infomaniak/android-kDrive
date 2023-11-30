@@ -206,12 +206,8 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleInAppReview() {
-        with(AppSettings) {
-            if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) {
-                launchInAppReview()
-            }
-        }
+    private fun handleInAppReview() = with(AppSettings) {
+        if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
     }
 
     private fun handleUpdates(navController: NavController) {

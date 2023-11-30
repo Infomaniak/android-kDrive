@@ -30,7 +30,6 @@
     <string name="alertRemoveUserDescription">Êtes vous sûr(e) de vouloir retirer l’utilisateur “%s” de cette application ?</string>
     <string name="alertRemoveUserTitle">Retirer l’utilisateur</string>
     <string name="allActivated">Activé</string>
-    <string name="allActivityNotFoundError">Aucune application installée ne prend en charge ce fichier</string>
     <string name="allAddExpirationDateTitle">Ajouter une date d’expiration</string>
     <string name="allAllDriveUsers">Tous les utilisateurs du kDrive</string>
     <string name="allArchive">Archives</string>

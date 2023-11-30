@@ -312,7 +312,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun openWithClicked() {
         super.openWithClicked()
         if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
-            showSnackbar(R.string.allActivityNotFoundError, true)
+            showSnackbar(R.string.errorNoSupportingAppFound, true)
             findNavController().popBackStack()
         } else {
             safeNavigate(

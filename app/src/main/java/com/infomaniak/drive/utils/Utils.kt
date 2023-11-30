@@ -239,7 +239,7 @@ object Utils {
         try {
             startActivity(openWithIntent(file, userDrive))
         } catch (e: ActivityNotFoundException) {
-            showToast(R.string.allActivityNotFoundError)
+            showToast(R.string.errorNoSupportingAppFound)
         }
     }
 
