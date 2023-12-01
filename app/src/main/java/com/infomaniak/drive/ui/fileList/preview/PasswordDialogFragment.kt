@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.app.Dialog
 import android.os.Bundle
+import android.view.inputmethod.EditorInfo
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
@@ -39,12 +40,7 @@ class PasswordDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding.validate.setOnClickListener {
-            findNavController().apply {
-                previousBackStackEntry?.savedStateHandle?.set(
-                    NAVIGATION_ARG_PASSWORD_KEY,
-                    binding.passwordEditText.text.toString()
-                )
-            }
+            sendPassword()
         }
         binding.cancel.setOnClickListener {
             findNavController().apply {
@@ -52,9 +48,20 @@ class PasswordDialogFragment : DialogFragment() {
                 navigateUp()
             }
         }
-        binding.passwordEditText.addTextChangedListener {
-            binding.passwordTextLayout.isErrorEnabled = false
-            binding.passwordTextLayout.error = null
+        binding.passwordEditText.apply {
+            addTextChangedListener {
+                binding.passwordTextLayout.isErrorEnabled = false
+                binding.passwordTextLayout.error = null
+            }
+            setOnEditorActionListener { _, actionId, _ ->
+                when (actionId) {
+                    EditorInfo.IME_ACTION_DONE -> {
+                        sendPassword()
+                        true
+                    }
+                    else -> false
+                }
+            }
         }
 
         if (navigationArgs.isWrongPassword) {
@@ -73,6 +80,16 @@ class PasswordDialogFragment : DialogFragment() {
         super.onStart()
         isCancelable = false
     }
+
+    private fun sendPassword() {
+        findNavController().apply {
+            previousBackStackEntry?.savedStateHandle?.set(
+                NAVIGATION_ARG_PASSWORD_KEY,
+                binding.passwordEditText.text.toString()
+            )
+        }
+    }
+
     private fun onWrongPasswordEntered() {
         binding.passwordEditText.text?.clear()
         binding.passwordTextLayout.isErrorEnabled = true
