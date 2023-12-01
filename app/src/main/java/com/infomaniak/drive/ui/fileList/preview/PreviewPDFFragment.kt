@@ -51,16 +51,6 @@ class PreviewPDFFragment : PreviewFragment() {
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
-    private val passwordDialog: PasswordDialogFragment by lazy {
-        PasswordDialogFragment(
-            onPasswordEntered = { password ->
-                showPdf(password)
-            },
-            onCancel = {
-                findNavController().popBackStack()
-            }
-        )
-    }
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
@@ -76,13 +66,17 @@ class PreviewPDFFragment : PreviewFragment() {
     private var isDownloading = false
 
     private val onPdfLoadError: OnErrorListener = OnErrorListener {
-        passwordDialog.dialog?.let {
-            if (it.isShowing.not()) {
-                passwordDialog.show(parentFragmentManager, this.javaClass::class.toString())
+        findNavController().apply {
+            if (currentDestination?.id == R.id.pdfPasswordDialog) {
+                popBackStack(R.id.pdfPasswordDialog, true)
+                navigate(
+                    R.id.action_previewSliderFragment_to_pdfPasswordDialog,
+                    PasswordDialogFragmentArgs(isWrongPassword = true).toBundle()
+                )
             } else {
-                passwordDialog.onWrongPasswordEntered()
+                navigate(R.id.action_previewSliderFragment_to_pdfPasswordDialog)
             }
-        } ?: passwordDialog.show(parentFragmentManager, this.javaClass::class.toString())
+        }
     }
 
 
@@ -119,6 +113,15 @@ class PreviewPDFFragment : PreviewFragment() {
         previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
             if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
             downloadProgress.progress = progress
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.apply {
+            getLiveData<String>("password").observe(viewLifecycleOwner) {
+                showPdf(it)
+            }
+            getLiveData<Boolean>("isCanceled").observe(viewLifecycleOwner) {
+                findNavController().popBackStack()
+            }
         }
     }
 
