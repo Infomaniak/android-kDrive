@@ -463,11 +463,6 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_fileListFragment_to_uploadInProgress">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
                             <entry key="fileListFragmentToFileListFragment">
                               <value>
                                 <LayoutPositions />
@@ -781,6 +776,18 @@
                       </LayoutPositions>
                     </value>
                   </entry>
+                  <entry key="pdfPasswordDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="955" />
+                            <option name="y" value="5489" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="previewFragment">
                     <value>
                       <LayoutPositions>
@@ -824,6 +831,11 @@
                               </value>
                             </entry>
                             <entry key="action_previewSliderFragment_to_fileShareDetailsFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                            <entry key="action_previewSliderFragment_to_pdfPasswordDialog">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -884,8 +896,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="2208" />
-                            <option name="y" value="12" />
+                            <option name="x" value="7" />
+                            <option name="y" value="320" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -1073,18 +1085,6 @@
                           <Point>
                             <option name="x" value="500" />
                             <option name="y" value="4798" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="syncAfterMigrationBottomSheetDialog">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="3184" />
-                            <option name="y" value="12" />
                           </Point>
                         </option>
                       </LayoutPositions>
