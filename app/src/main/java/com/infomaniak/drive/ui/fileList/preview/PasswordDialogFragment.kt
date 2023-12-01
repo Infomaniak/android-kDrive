@@ -63,14 +63,16 @@ class PasswordDialogFragment : DialogFragment() {
 
         MaterialAlertDialogBuilder(requireContext())
             .setView(binding.root)
-            .setCancelable(false)
             .create().apply {
                 setCanceledOnTouchOutside(false)
-                setCancelable(false)
                 return this
             }
     }
 
+    override fun onStart() {
+        super.onStart()
+        isCancelable = false
+    }
     private fun onWrongPasswordEntered() {
         binding.passwordEditText.text?.clear()
         binding.passwordTextLayout.isErrorEnabled = true
