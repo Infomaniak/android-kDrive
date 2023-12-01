@@ -21,25 +21,44 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogFragmentPasswordBinding
 
-class PasswordDialogFragment(
-    private val onPasswordEntered: (String) -> Unit,
-    private val onCancel: () -> Unit
-) : DialogFragment() {
+class PasswordDialogFragment : DialogFragment() {
+
+    companion object {
+        private const val NAVIGATION_ARG_PASSWORD_KEY = "password"
+        private const val NAVIGATION_ARG_IS_CANCELED_KEY = "isCanceled"
+    }
 
     private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
+    private val navigationArgs: PasswordDialogFragmentArgs by navArgs()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding.validate.setOnClickListener {
-            onPasswordEntered.invoke(binding.passwordEditText.text.toString())
+            findNavController().apply {
+                previousBackStackEntry?.savedStateHandle?.set(
+                    NAVIGATION_ARG_PASSWORD_KEY,
+                    binding.passwordEditText.text.toString()
+                )
+            }
         }
         binding.cancel.setOnClickListener {
-            onCancel.invoke()
+            findNavController().apply {
+                previousBackStackEntry?.savedStateHandle?.set(NAVIGATION_ARG_IS_CANCELED_KEY, true)
+                navigateUp()
+            }
         }
         binding.passwordEditText.addTextChangedListener {
-            binding.passwordTextLayout.error = ""
+            binding.passwordTextLayout.isErrorEnabled = false
+            binding.passwordTextLayout.error = null
+        }
+
+        if (navigationArgs.isWrongPassword) {
+            onWrongPasswordEntered()
         }
 
         MaterialAlertDialogBuilder(requireContext())
@@ -47,12 +66,14 @@ class PasswordDialogFragment(
             .setCancelable(false)
             .create().apply {
                 setCanceledOnTouchOutside(false)
+                setCancelable(false)
                 return this
             }
     }
 
-    fun onWrongPasswordEntered() {
+    private fun onWrongPasswordEntered() {
         binding.passwordEditText.text?.clear()
-        binding.passwordTextLayout.error = "Wrong password"
+        binding.passwordTextLayout.isErrorEnabled = true
+        binding.passwordTextLayout.error = getString(R.string.wrongPdfPassword)
     }
 }

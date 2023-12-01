@@ -93,6 +93,9 @@
         android:label="PreviewSliderFragment"
         tools:layout="@layout/fragment_preview_slider">
         <action
+            android:id="@+id/action_previewSliderFragment_to_pdfPasswordDialog"
+            app:destination="@id/pdfPasswordDialog" />
+        <action
             android:id="@+id/action_previewSliderFragment_to_previewFragment"
             app:destination="@id/previewFragment" />
         <action
@@ -633,6 +636,26 @@
             android:name="date"
             app:argType="com.infomaniak.drive.data.models.SearchDateFilter"
             app:nullable="true" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/pdfPasswordDialog"
+        android:name="com.infomaniak.drive.ui.fileList.preview.PasswordDialogFragment"
+        android:label="PasswordDialogFragment"
+        tools:layout="@layout/dialog_fragment_password">
+        <argument
+            android:name="password"
+            android:defaultValue="@null"
+            app:nullable="true"
+            app:argType="string" />
+        <argument
+            android:name="isCanceled"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="isWrongPassword"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <dialog
