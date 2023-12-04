@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -338,7 +339,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             BulkOperationType.TRASH -> {
                 mediator.addSource(
                     deleteFile(file, onSuccess = { onIndividualActionSuccess(type, it) }),
-                    updateMultiSelectMediator(mediator),
+                    updateMultiSelectMediatorForRequest(mediator),
                 )
             }
             BulkOperationType.MOVE -> {
@@ -348,7 +349,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         newParent = destinationFolder!!,
                         onSuccess = { onIndividualActionSuccess(type, it) },
                     ),
-                    updateMultiSelectMediator(mediator),
+                    updateMultiSelectMediatorForRequest(mediator),
                 )
             }
             BulkOperationType.COPY -> {
@@ -359,7 +360,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         copyName = file.name,
                         onSuccess = { it.data?.let { file -> onIndividualActionSuccess(type, file) } },
                     ),
-                    updateMultiSelectMediator(mediator),
+                    updateMultiSelectMediatorForRequest(mediator),
                 )
             }
             BulkOperationType.MANAGE_CATEGORIES -> Unit
@@ -367,7 +368,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 if (color != null && file.isAllowedToBeColored()) {
                     mediator.addSource(
                         updateFolderColor(file, color),
-                        updateMultiSelectMediator(mediator),
+                        updateMultiSelectMediatorForRequest(mediator),
                     )
                 } else {
                     mediator.apply {
@@ -377,13 +378,19 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     }
                 }
             }
-            BulkOperationType.ADD_OFFLINE, BulkOperationType.REMOVE_OFFLINE -> addOrRemoveSelectedFilesToOffline(file, type)
+            BulkOperationType.ADD_OFFLINE,
+            BulkOperationType.REMOVE_OFFLINE -> {
+                mediator.addSource(
+                    addOrRemoveSelectedFilesToOffline(file, type),
+                    updateMultiSelectMediator(mediator)
+                )
+            }
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     addFileToFavorites(
                         file = file,
                         onSuccess = { onIndividualActionSuccess(type, file.id) }),
-                    updateMultiSelectMediator(mediator),
+                    updateMultiSelectMediatorForRequest(mediator),
                 )
             }
             BulkOperationType.REMOVE_FAVORITES -> {
@@ -392,7 +399,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         file = file,
                         onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
-                    updateMultiSelectMediator(mediator),
+                    updateMultiSelectMediatorForRequest(mediator),
                 )
             }
             BulkOperationType.RESTORE_IN -> {
@@ -402,7 +409,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         newFolderId = destinationFolder!!.id,
                         onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
-                    updateMultiSelectMediator(mediator),
+                    updateMultiSelectMediatorForRequest(mediator),
                 )
             }
             BulkOperationType.RESTORE_TO_ORIGIN -> {
@@ -411,7 +418,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         file = file,
                         onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
-                    updateMultiSelectMediator(mediator),
+                    updateMultiSelectMediatorForRequest(mediator),
                 )
             }
             BulkOperationType.DELETE_PERMANENTLY -> {
@@ -420,7 +427,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         file = file,
                         onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
-                    updateMultiSelectMediator(mediator),
+                    updateMultiSelectMediatorForRequest(mediator),
                 )
             }
         }
@@ -453,17 +460,18 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         onAllIndividualActionsFinished(type)
     }
 
-    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) {
+    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) = liveData(Dispatchers.Main) {
         if (!file.isFolder()) {
             val offlineFile = file.getOfflineFile(requireContext())
             val cacheFile = file.getCacheFile(requireContext())
-            if (type == BulkOperationType.ADD_OFFLINE) {
+            if (type == BulkOperationType.ADD_OFFLINE && !file.isOffline) {
                 addSelectedFileToOffline(file, offlineFile, cacheFile)
-            } else {
+            } else if (type == BulkOperationType.REMOVE_OFFLINE && file.isOffline) {
                 removeSelectedFileFromOffline(file, offlineFile, cacheFile)
             }
             onIndividualActionSuccess(type, Unit)
             closeMultiSelect()
+            emit(true)
         }
     }
 
