@@ -338,7 +338,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             BulkOperationType.TRASH -> {
                 mediator.addSource(
                     deleteFile(file, onSuccess = { onIndividualActionSuccess(type, it) }),
-                    updateMultiSelectMediatorForRequest(mediator),
+                    updateMultiSelectMediator(mediator),
                 )
             }
             BulkOperationType.MOVE -> {
@@ -348,7 +348,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         newParent = destinationFolder!!,
                         onSuccess = { onIndividualActionSuccess(type, it) },
                     ),
-                    updateMultiSelectMediatorForRequest(mediator),
+                    updateMultiSelectMediator(mediator),
                 )
             }
             BulkOperationType.COPY -> {
@@ -359,7 +359,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         copyName = file.name,
                         onSuccess = { it.data?.let { file -> onIndividualActionSuccess(type, file) } },
                     ),
-                    updateMultiSelectMediatorForRequest(mediator),
+                    updateMultiSelectMediator(mediator),
                 )
             }
             BulkOperationType.MANAGE_CATEGORIES -> Unit
@@ -367,7 +367,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 if (color != null && file.isAllowedToBeColored()) {
                     mediator.addSource(
                         updateFolderColor(file, color),
-                        updateMultiSelectMediatorForRequest(mediator),
+                        updateMultiSelectMediator(mediator),
                     )
                 } else {
                     mediator.apply {
@@ -384,7 +384,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     addFileToFavorites(
                         file = file,
                         onSuccess = { onIndividualActionSuccess(type, file.id) }),
-                    updateMultiSelectMediatorForRequest(mediator),
+                    updateMultiSelectMediator(mediator),
                 )
             }
             BulkOperationType.REMOVE_FAVORITES -> {
@@ -393,7 +393,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         file = file,
                         onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
-                    updateMultiSelectMediatorForRequest(mediator),
+                    updateMultiSelectMediator(mediator),
                 )
             }
             BulkOperationType.RESTORE_IN -> {
@@ -403,7 +403,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         newFolderId = destinationFolder!!.id,
                         onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
-                    updateMultiSelectMediatorForRequest(mediator),
+                    updateMultiSelectMediator(mediator),
                 )
             }
             BulkOperationType.RESTORE_TO_ORIGIN -> {
@@ -412,7 +412,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         file = file,
                         onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
-                    updateMultiSelectMediatorForRequest(mediator),
+                    updateMultiSelectMediator(mediator),
                 )
             }
             BulkOperationType.DELETE_PERMANENTLY -> {
@@ -421,7 +421,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         file = file,
                         onSuccess = { onIndividualActionSuccess(type, file.id) },
                     ),
-                    updateMultiSelectMediatorForRequest(mediator),
+                    updateMultiSelectMediator(mediator),
                 )
             }
         }
