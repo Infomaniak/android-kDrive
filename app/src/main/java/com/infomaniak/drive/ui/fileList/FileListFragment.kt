@@ -334,6 +334,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun onDestroyView() {
         isDownloading = false
+        showLoadingTimer.cancel()
         super.onDestroyView()
         _binding = null
     }
@@ -735,7 +736,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 trackEvent("fileList", newSortType.name)
                 fileListViewModel.sortType = newSortType
-                _binding?.let { it.sortButton.setText(fileListViewModel.sortType.translation) }
+                _binding?.sortButton?.setText(fileListViewModel.sortType.translation)
 
                 downloadFiles(fileListViewModel.isSharedWithMe, true)
 
