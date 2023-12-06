@@ -379,12 +379,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 }
             }
             BulkOperationType.ADD_OFFLINE,
-            BulkOperationType.REMOVE_OFFLINE -> {
-                mediator.addSource(
-                    addOrRemoveSelectedFilesToOffline(file, type),
-                    updateMultiSelectMediator(mediator)
-                )
-            }
+            BulkOperationType.REMOVE_OFFLINE -> addOrRemoveSelectedFilesToOffline(file, type)
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     addFileToFavorites(
@@ -460,7 +455,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         onAllIndividualActionsFinished(type)
     }
 
-    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) = liveData(Dispatchers.Main) {
+    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) {
         if (!file.isFolder()) {
             val offlineFile = file.getOfflineFile(requireContext())
             val cacheFile = file.getCacheFile(requireContext())
@@ -471,7 +466,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
             onIndividualActionSuccess(type, Unit)
             closeMultiSelect()
-            emit(true)
         }
     }
 
@@ -506,7 +500,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
         lifecycleScope.launch {
             if (offlineFile != null) {
-                mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
+                runBlocking { mainViewModel.removeOfflineFile(file, offlineFile, cacheFile) }
                 file.isOffline = false
             }
         }
