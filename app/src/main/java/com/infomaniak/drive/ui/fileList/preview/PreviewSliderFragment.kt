@@ -172,6 +172,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         configureBottomSheetFileInfo()
+        setupWindowInsetsListener()
     }
 
     override fun onStart() {
@@ -275,14 +276,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    private fun setupTransparentStatusBar() = with(binding) {
-        activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
-
-            lightStatusBar(false)
-            toggleEdgeToEdge(true)
-        }
-
+    private fun setupWindowInsetsListener() = with(binding) {
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                 header.setMargins(left = left, top = top, right = right)
@@ -298,6 +292,15 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             }
 
             windowInsets
+        }
+    }
+
+    private fun setupTransparentStatusBar() {
+        activity?.window?.apply {
+            statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
+
+            lightStatusBar(false)
+            toggleEdgeToEdge(true)
         }
     }
 
