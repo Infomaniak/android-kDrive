@@ -585,11 +585,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         downloadFiles(true, false)
     }
 
-    private fun showPendingFiles() = with(binding) {
+    private fun showPendingFiles() {
         val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
         if (!showPendingFiles || isNotCurrentDriveRoot) return
         fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
-            uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount, uploadFileInProgressLayout)
+            binding.uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount, binding.uploadFileInProgressLayout)
         }
     }
 
