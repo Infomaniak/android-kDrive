@@ -46,17 +46,17 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.utils.safeBinding
 import java.io.File
 
 open class PreviewVideoFragment : PreviewFragment() {
 
-    private var binding: FragmentPreviewVideoBinding by safeBinding()
+    private var _binding: FragmentPreviewVideoBinding? = null
+    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     private var exoPlayer: ExoPlayer? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentPreviewVideoBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentPreviewVideoBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
@@ -92,6 +92,11 @@ open class PreviewVideoFragment : PreviewFragment() {
     override fun onPause() {
         exoPlayer?.pause()
         super.onPause()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onDestroy() {
@@ -156,17 +161,20 @@ open class PreviewVideoFragment : PreviewFragment() {
                 }
             }
 
-            override fun onPlayerError(error: PlaybackException) = with(binding.errorLayout) {
+            override fun onPlayerError(error: PlaybackException) {
                 super.onPlayerError(error)
                 error.printStackTrace()
-                when (error.message) {
-                    "Source error" -> previewDescription.setText(R.string.previewVideoSourceError)
-                    else -> previewDescription.setText(R.string.previewLoadError)
+
+                _binding?.errorLayout?.let {
+                    when (error.message) {
+                        "Source error" -> it.previewDescription.setText(R.string.previewVideoSourceError)
+                        else -> it.previewDescription.setText(R.string.previewLoadError)
+                    }
+                    it.bigOpenWithButton.isVisible = true
+                    it.root.isVisible = true
+                    it.previewDescription.isVisible = true
                 }
-                bigOpenWithButton.isVisible = true
-                root.isVisible = true
-                previewDescription.isVisible = true
-                binding.playerView.isGone = true
+                _binding?.playerView?.isGone = true
             }
         })
     }
