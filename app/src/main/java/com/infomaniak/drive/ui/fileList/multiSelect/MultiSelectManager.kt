@@ -70,11 +70,11 @@ class MultiSelectManager {
     fun getMenuNavArgs(): MenuNavArgs {
         val fileIds = arrayListOf<Int>()
         var (onlyFolders, onlyFavorite, onlyOffline) = arrayOf(true, true, true)
-        getValidSelectedItems().forEach {
-            fileIds.add(it.id)
-            if (!it.isFolder()) onlyFolders = false
-            if (!it.isFavorite) onlyFavorite = false
-            if (!it.isOffline) onlyOffline = false
+        getValidSelectedItems().forEach { file ->
+            fileIds.add(file.id)
+            if (!file.isFolder()) onlyFolders = false
+            if (!file.isFavorite) onlyFavorite = false
+            if (!file.isOffline && !file.isFolder()) onlyOffline = false
         }
         return MenuNavArgs(
             fileIds = fileIds.toIntArray(),
