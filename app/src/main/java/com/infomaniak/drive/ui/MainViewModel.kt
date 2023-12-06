@@ -107,10 +107,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         updateMediator(mediator, apiResponse.isSuccess())
     }
 
-    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (Boolean) -> Unit = { isSuccess ->
-        updateMediator(mediator, isSuccess)
-    }
-
     private fun updateMediator(mediator: MediatorLiveData<Pair<Int, Int>>, isSuccess: Boolean) {
         val total = mediator.value!!.second + 1
         mediator.value = if (isSuccess) {
