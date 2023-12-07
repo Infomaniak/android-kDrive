@@ -388,7 +388,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                                     multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
                                 }
                                 enableMultiSelectButtons(true)
-                                onUpdateMultiSelect()
+                                onUpdateMultiSelect(fileCount.count)
                             }
                     }
                 }
