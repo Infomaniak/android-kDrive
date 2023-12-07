@@ -388,7 +388,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                                     multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
                                 }
                                 enableMultiSelectButtons(true)
-                                onUpdateMultiSelect(fileCount.count)
+                                onUpdateMultiSelect()
                             }
                     }
                 }
@@ -642,7 +642,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             selectAllTimer.cancel()
 
             val textId = with(multiSelectManager) {
-                if (isSelectAllOn && exceptedItemsIds.isEmpty()) R.string.buttonDeselectAll else R.string.buttonSelectAll
+                val selectedItemsCount = selectedItemsIds.count() - exceptedItemsIds.count()
+                if (selectedItemsCount == fileAdapter.itemCount) R.string.buttonDeselectAll else R.string.buttonSelectAll
             }
 
             if (isClickable) setText(textId) else hideProgress(textId)
