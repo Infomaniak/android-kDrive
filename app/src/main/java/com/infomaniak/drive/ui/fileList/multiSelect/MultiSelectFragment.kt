@@ -29,7 +29,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -56,7 +55,6 @@ import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.UUID
 
@@ -224,7 +222,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         destinationFolder: File? = null,
         color: String? = null,
     ) = with(requireContext()) {
-
         val selectedFiles = multiSelectManager.getValidSelectedItems(type)
         val fileCount = (allSelectedFilesCount?.minus(multiSelectManager.exceptedItemsIds.size)) ?: selectedFiles.size
 
@@ -283,7 +280,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     dialog = dialog,
                 )
             }
-
         } else {
             val mediator = mainViewModel.createMultiSelectMediator()
             enableMultiSelectButtons(false)
@@ -497,12 +493,10 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
-        lifecycleScope.launch {
-            if (offlineFile != null) {
-                runBlocking { mainViewModel.removeOfflineFile(file, offlineFile, cacheFile) }
-                file.isOffline = false
-            }
+        if (offlineFile != null) {
+            mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
         }
+        file.isOffline = false
     }
 
     private fun trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {

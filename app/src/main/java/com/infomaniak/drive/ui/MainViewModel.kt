@@ -363,13 +363,13 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    suspend fun removeOfflineFile(
-        file: File,
-        offlineFile: java.io.File,
-        cacheFile: java.io.File,
-        userDrive: UserDrive = UserDrive()
-    ) = withContext(Dispatchers.IO) {
-        FileController.updateOfflineStatus(file.id, false)
+    fun removeOfflineFile(file: File,
+                          offlineFile: java.io.File,
+                          cacheFile: java.io.File,
+                          userDrive: UserDrive = UserDrive()) {
+        viewModelScope.launch(Dispatchers.IO) {
+            FileController.updateOfflineStatus(file.id, false)
+        }
         if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
         if (cacheFile.exists()) cacheFile.delete()
         if (offlineFile.exists()) {
