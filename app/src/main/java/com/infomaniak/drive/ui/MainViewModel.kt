@@ -363,10 +363,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun removeOfflineFile(file: File,
-                          offlineFile: java.io.File,
-                          cacheFile: java.io.File,
-                          userDrive: UserDrive = UserDrive()) {
+    fun removeOfflineFile(
+        file: File,
+        offlineFile: java.io.File,
+        cacheFile: java.io.File,
+        userDrive: UserDrive = UserDrive()
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             FileController.updateOfflineStatus(file.id, false)
         }
