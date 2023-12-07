@@ -49,7 +49,7 @@ class MultiSelectManager {
     }
 
     fun getValidSelectedItems(type: BulkOperationType? = null): List<File> {
-        val selectedFiles = selectedItems.filter { it.isUsable() }
+        val selectedFiles = selectedItems.filter { it.isUsable() }.filter { !exceptedItemsIds.contains(it.id) }
         return when (type) {
             BulkOperationType.ADD_FAVORITES -> selectedFiles.filter { !it.isFavorite }
             BulkOperationType.REMOVE_FAVORITES -> selectedFiles.filter { it.isFavorite }
