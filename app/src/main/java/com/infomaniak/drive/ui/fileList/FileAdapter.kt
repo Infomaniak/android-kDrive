@@ -401,7 +401,6 @@ open class FileAdapter(
         } else {
             resetSelectedItems()
         }
-        isSelectAllOn = selectedItemsIds.size == fileList.size
         updateMultiSelect?.invoke()
     }
 
