@@ -56,7 +56,7 @@ class PreviewPDFFragment : PreviewFragment() {
         private const val WIDTH_HANDLE_DP = 65
         private const val HEIGHT_HANDLE_DP = 40
         private const val HANDLE_PAGE_PDF_PADDING_TOP = 100
-        private const val HANDLE_PAGE_PDF_PADDING_BOTTOM = 150
+        private const val HANDLE_PAGE_PDF_PADDING_BOTTOM = 130
         private const val HANDLE_VERTICAL_MARGIN_DP = 16
     }
 
@@ -67,7 +67,8 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
-            setPageHandleView(layoutInflater.inflate(R.layout.pdf_handle_view, null))
+            val handle: View = layoutInflater.inflate(R.layout.pdf_handle_view, null)
+            setPageHandleView(handle, handle.findViewById(R.id.pageIndicator))
             setHandleSize(WIDTH_HANDLE_DP, HEIGHT_HANDLE_DP)
             setHandlePaddings(0, HANDLE_PAGE_PDF_PADDING_TOP, 0, HANDLE_PAGE_PDF_PADDING_BOTTOM)
             setTextColor(ContextCompat.getColor(context, R.color.white))
