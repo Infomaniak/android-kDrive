@@ -46,9 +46,12 @@ import kotlinx.coroutines.withContext
 
 class PreviewPDFFragment : PreviewFragment() {
 
+    companion object {
+        private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
+    }
+
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
-    private var previewPDFAdapter: PreviewPDFAdapter? = null
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
     private var pdfFile: java.io.File? = null
@@ -86,7 +89,7 @@ class PreviewPDFFragment : PreviewFragment() {
         }
 
         previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
-            if (progress >= 100 && previewPDFViewModel.pdfJob.isCancelled) downloadPdf()
+            if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
             downloadProgress.progress = progress
         }
     }
@@ -94,7 +97,7 @@ class PreviewPDFFragment : PreviewFragment() {
     override fun setMenuVisibility(menuVisible: Boolean) {
         super.setMenuVisibility(menuVisible)
         if (menuVisible) {
-            if (!isDownloading) downloadPdf() else previewSliderViewModel.pdfIsDownloading.value = isDownloading
+            if (isDownloading) previewSliderViewModel.pdfIsDownloading.value = isDownloading else downloadPdf()
         }
     }
 
@@ -104,11 +107,11 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun showPdf(file: IOFile) = with(binding) {
-        lifecycleScope.launchWhenResumed {
-            withContext(Dispatchers.Main) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 downloadLayout.root.isGone = true
                 pdfView.fromFile(file)
-                binding.pdfView.fromFile(pdfFile)
+                pdfView.fromFile(pdfFile)
                     .enableAnnotationRendering(true)
                     .enableDoubletap(true)
                     .swipeHorizontal(false)
@@ -116,7 +119,7 @@ class PreviewPDFFragment : PreviewFragment() {
                     .disableLongpress()
                     .pageFling(false)
                     .pageSnap(false)
-                    .spacing(16)
+                    .spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
                     .touchPriority(true)
                     .onLoad { pageCount -> updatePageNumber(totalPage = pageCount) }
                     .onPageChange { currentPage, pageCount ->
@@ -124,21 +127,17 @@ class PreviewPDFFragment : PreviewFragment() {
                     }
                     .load()
 
-
                 getPageNumberChip()?.isVisible = true
             }
-
         }
     }
 
-    fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
-        if (currentPage >= 1) {
-            getPageNumberChip()?.text = getString(R.string.previewPdfPages, currentPage, totalPage)
-        }
+    private fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
+        getPageNumberChip()?.text = getString(R.string.previewPdfPages, currentPage, totalPage)
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {
-        if (pdfFile == null && (previewPDFAdapter == null || previewPDFAdapter?.itemCount == 0)) {
+        if (pdfFile == null) {
             previewSliderViewModel.pdfIsDownloading.value = true
             isDownloading = true
             previewPDFViewModel.downloadPdfFile(requireContext(), file, previewSliderViewModel.userDrive)
@@ -158,8 +157,9 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     class PreviewPDFViewModel(app: Application) : AndroidViewModel(app) {
-        var pdfJob = Job()
         val downloadProgress = MutableLiveData<Int>()
+
+        private var pdfJob = Job()
 
         fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<java.io.File>> {
             pdfJob.cancel()
@@ -173,6 +173,8 @@ class PreviewPDFFragment : PreviewFragment() {
                 emit(pdfCore)
             }
         }
+
+        fun isJobCancelled() = pdfJob.isCancelled
 
         fun cancelJobs() {
             pdfJob.cancel()
