@@ -42,7 +42,6 @@ import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PreviewPDFFragment : PreviewFragment() {
 
