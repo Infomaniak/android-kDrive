@@ -360,6 +360,10 @@
             android:name="destinationFileId"
             android:defaultValue="0"
             app:argType="integer" />
+        <argument
+            android:name="shortcutId"
+            android:defaultValue=""
+            app:argType="string" />
     </activity>
 
     <activity

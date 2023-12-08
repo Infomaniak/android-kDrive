@@ -39,6 +39,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -53,6 +54,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -70,10 +72,12 @@ import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.login.InfomaniakLogin
 import io.realm.RealmList
 import kotlin.math.abs
@@ -380,6 +384,11 @@ fun OneTimeWorkRequest.Builder.setExpeditedIfAvailable() = apply {
     if (VERSION.SDK_INT >= VERSION_CODES.S) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
 }
 //endregion
+
+fun Context.openSupport() {
+    ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.FEEDBACK.id)
+    openUrl(SUPPORT_URL)
+}
 
 fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): String {
 

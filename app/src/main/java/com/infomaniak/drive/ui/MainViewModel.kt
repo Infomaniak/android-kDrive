@@ -74,6 +74,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
+    var mustOpenShortcut: Boolean = true
+
     var ignoreSyncOffline = false
 
     private var getFileDetailsJob = Job()

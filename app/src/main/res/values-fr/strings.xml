@@ -598,6 +598,9 @@
     <string name="sharedConflictTitle">Conflit de permissions</string>
     <string name="sharedWithMeNoFile">Aucun fichier partagé avec moi</string>
     <string name="sharedWithMeTitle">Partagés avec moi</string>
+    <string name="shortcutFeedbackShortDescription">Support</string>
+    <string name="shortcutScanShortDescription">Numériser</string>
+    <string name="shortcutUploadShortDescription">Importer</string>
     <string name="snackBarCategoryDeleted">Catégorie supprimée avec succès</string>
     <string name="snackBarInvalidFileNameError">Le caractère \"%1$s\" du fichier %2$s n’est pas pris en charge pour la mise hors ligne</string>
     <plurals name="snackBarUploadError">

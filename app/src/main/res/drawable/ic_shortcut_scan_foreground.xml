@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2023 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:tint="@color/primary"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:translateX="27"
+        android:translateY="27">
+        <path
+            android:fillColor="#000000"
+            android:fillType="evenOdd"
+            android:pathData="M21,33C22.66,33 24,31.66 24,30V25.5C24,24.67 24.67,24 25.5,24H30C31.66,24 33,22.66 33,21C33,19.34 31.66,18 30,18H24C20.69,18 18,20.69 18,24V30C18,31.66 19.34,33 21,33ZM75,21C75,22.66 76.34,24 78,24H82.5C83.33,24 84,24.67 84,25.5V30C84,31.66 85.34,33 87,33C88.66,33 90,31.66 90,30V24C90,20.69 87.31,18 84,18H78C76.34,18 75,19.34 75,21ZM25.5,84H30C31.66,84 33,85.34 33,87C33,88.66 31.66,90 30,90H24C20.69,90 18,87.31 18,84V78C18,76.34 19.34,75 21,75C22.66,75 24,76.34 24,78V82.5C24,83.33 24.67,84 25.5,84ZM87,75C85.34,75 84,76.34 84,78V82.5C84,83.33 83.33,84 82.5,84H78C76.34,84 75,85.34 75,87C75,88.66 76.34,90 78,90H84C87.31,90 90,87.31 90,84V78C90,76.34 88.66,75 87,75ZM34.68,30H73.32C75.9,30 78,32.1 78,34.68V73.32C78,75.9 75.9,78 73.32,78H34.68C32.1,78 30,75.9 30,73.32V34.68C30,32.1 32.1,30 34.68,30ZM46.39,57.82C45.56,57.87 44.81,58.36 44.44,59.11L39.49,69.01C39.31,69.38 39.33,69.81 39.54,70.15C39.75,70.5 40.13,70.71 40.54,70.71H68.64C69.04,70.71 69.42,70.51 69.63,70.17C69.85,69.83 69.87,69.4 69.7,69.04L61.32,51.24C60.95,50.44 60.15,49.92 59.27,49.9C58.38,49.86 57.55,50.34 57.14,51.13L51.43,61.73C51.33,61.91 51.15,62.02 50.94,62.03C50.74,62.04 50.54,61.95 50.43,61.77L48.48,58.86C48.02,58.16 47.22,57.77 46.39,57.82ZM39.95,44.63C39.95,42.04 42.05,39.94 44.63,39.94C47.22,39.94 49.32,42.04 49.32,44.63C49.32,47.21 47.22,49.31 44.63,49.31C42.05,49.31 39.95,47.21 39.95,44.63Z" />
+    </group>
+</vector>

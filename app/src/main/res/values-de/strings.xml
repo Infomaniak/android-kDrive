@@ -598,6 +598,9 @@
     <string name="sharedConflictTitle">Genehmigungskonflikt</string>
     <string name="sharedWithMeNoFile">Keine Datei mit mir geteilt</string>
     <string name="sharedWithMeTitle">Mit mir geteilt</string>
+    <string name="shortcutFeedbackShortDescription">Support</string>
+    <string name="shortcutScanShortDescription">Scannen</string>
+    <string name="shortcutUploadShortDescription">Hochladen</string>
     <string name="snackBarCategoryDeleted">Kategorie erfolgreich gelöscht</string>
     <string name="snackBarInvalidFileNameError">Das Zeichen \"%1$s\" in der Datei %2$s wird für die Offline-Schaltung nicht unterstützt</string>
     <plurals name="snackBarUploadError">

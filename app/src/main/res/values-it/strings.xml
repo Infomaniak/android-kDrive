@@ -598,6 +598,9 @@
     <string name="sharedConflictTitle">Conflitto di autorizzazioni</string>
     <string name="sharedWithMeNoFile">Nessun file condiviso con me</string>
     <string name="sharedWithMeTitle">Condivisi con me</string>
+    <string name="shortcutFeedbackShortDescription">Assistenza</string>
+    <string name="shortcutScanShortDescription">Scansione</string>
+    <string name="shortcutUploadShortDescription">Importazione</string>
     <string name="snackBarCategoryDeleted">Categoria eliminata con successo</string>
     <string name="snackBarInvalidFileNameError">Il carattere \"%1$s\" nel file %2$s non è supportato per l’uso offline</string>
     <plurals name="snackBarUploadError">

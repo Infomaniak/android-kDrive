@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2023 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:tint="@color/primary"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <group
+        android:scaleX="0.4"
+        android:scaleY="0.4"
+        android:translateX="153.6"
+        android:translateY="153.6">
+        <path
+            android:fillColor="#fff"
+            android:pathData="M149.333,246.333l-9.6,-7.21a10.667,10.667 0,0 0,-17.066 8.533v168a10.667,10.667 0,0 0,17.066 8.533l9.6,-7.189a53.333,53.333 0,0 0,21.334 -42.667V289a53.333,53.333 0,0 0,-21.334 -42.667zM372.267,424.19a10.667,10.667 0,0 0,17.066 -8.534v-168a10.667,10.667 0,0 0,-17.066 -8.533l-9.6,7.21A53.333,53.333 0,0 0,341.333 289v85.333A53.333,53.333 0,0 0,362.667 417l9.6,7.19z" />
+        <path
+            android:fillColor="#fff"
+            android:pathData="M469.333,215.379a6.528,6.528 0,0 1,-5.226 -6.4c0,-114.876 -93.125,-208 -208,-208 -114.876,0 -208,93.124 -208,208a6.528,6.528 0,0 1,-5.227 6.4C17.952,220.36 0.005,242.245 0,267.667v128C0,425.122 23.878,449 53.333,449H80c5.891,0 10.667,-4.776 10.667,-10.667V208.98c0,-91.311 74.022,-165.334 165.333,-165.334 91.311,0 165.333,74.023 165.333,165.334v218.688c0,17.673 -14.327,32 -32,32H326.87c-2.6,0.001 -5.11,-0.947 -7.061,-2.667a32,32 0,0 0,-21.141 -8h-21.334c-17.673,0 -32,14.327 -32,32 0,17.673 14.327,32 32,32h21.334a31.787,31.787 0,0 0,21.141 -8,10.667 10.667,0 0,1 7.061,-2.667h62.464c30.69,-0.031 58.247,-18.808 69.504,-47.36a10.667,10.667 0,0 1,8.235 -6.634c25.885,-4.131 44.928,-26.46 44.928,-52.672v-128c0.015,-25.356 -17.823,-47.217 -42.667,-52.288z" />
+    </group>
+</vector>
