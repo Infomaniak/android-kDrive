@@ -45,10 +45,6 @@ import kotlinx.coroutines.launch
 
 class PreviewPDFFragment : PreviewFragment() {
 
-    companion object {
-        private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
-    }
-
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
@@ -183,5 +179,9 @@ class PreviewPDFFragment : PreviewFragment() {
             cancelJobs()
             super.onCleared()
         }
+    }
+
+    companion object {
+        private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
     }
 }
