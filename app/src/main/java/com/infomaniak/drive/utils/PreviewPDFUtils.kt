@@ -40,7 +40,7 @@ object PreviewPDFUtils {
         file: File,
         userDrive: UserDrive,
         onProgress: (progress: Int) -> Unit
-    ): ApiResponse<java.io.File> {
+    ): ApiResponse<IOFile> {
         return runCatching {
             val outputFile = when {
                 file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
