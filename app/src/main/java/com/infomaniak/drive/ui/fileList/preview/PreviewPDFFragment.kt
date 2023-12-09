@@ -107,7 +107,7 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private fun showPdf(file: IOFile) = with(binding) {
         lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            withResumed {
                 downloadLayout.root.isGone = true
                 pdfView.fromFile(file)
                 pdfView.fromFile(pdfFile)
