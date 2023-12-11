@@ -44,6 +44,7 @@ import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
@@ -670,11 +671,16 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun getFolderFiles(ignoreCache: Boolean, isNewSort: Boolean, onFinish: ((FolderFilesResult?) -> Unit)? = null) {
         showPendingFiles()
+        val sourceRestrictionType = when {
+            ignoreCache -> SourceRestrictionType.ONLY_FROM_REMOTE
+            mainViewModel.isInternetAvailable.value == false -> SourceRestrictionType.ONLY_FROM_LOCAL
+            else -> SourceRestrictionType.UNRESTRICTED
+        }
+
         fileListViewModel.getFiles(
             folderId,
-            ignoreCache = ignoreCache,
-            ignoreCloud = mainViewModel.isInternetAvailable.value == false,
             order = fileListViewModel.sortType,
+            sourceRestrictionType = sourceRestrictionType,
             userDrive = userDrive,
             isNewSort = isNewSort,
         ).observe(viewLifecycleOwner) {
