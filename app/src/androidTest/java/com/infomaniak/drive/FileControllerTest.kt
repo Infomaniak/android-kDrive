@@ -2,8 +2,9 @@ package com.infomaniak.drive
 
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.addMultiAccess
-import com.infomaniak.drive.data.api.ApiRepository.getDirectoryFiles
+import com.infomaniak.drive.data.api.ApiRepository.getFolderFiles
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.getGalleryDrive
 import com.infomaniak.drive.data.cache.FileController.getMySharedFiles
@@ -13,6 +14,7 @@ import com.infomaniak.drive.data.cache.FileController.saveFavoritesFiles
 import com.infomaniak.drive.data.cache.FileController.searchFiles
 import com.infomaniak.drive.data.cache.FileController.storeGalleryDrive
 import com.infomaniak.drive.data.cache.FolderFilesProvider
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.utils.AccountUtils
@@ -70,14 +72,14 @@ class FileControllerTest : KDriveTest() {
     @Test
     @DisplayName("Check if remote and local files are the same")
     fun getRootFiles_CanGetRemoteSavedFilesFromRealm() {
-        val remoteResult = getAndSaveRemoteRootFiles()
+        val remoteFolderFiles = getAndSaveRemoteRootFiles()?.folderFiles
 
         // We check that we get the data saved in realm
-        val localResult = getLocalRootFiles()
-        assertNotNull(localResult, "local root files cannot be null")
-        assertFalse(localResult?.second.isNullOrEmpty(), "local root files cannot be empty")
+        val localRootFiles = getLocalRootFiles()
+        assertNotNull(localRootFiles, "local root files cannot be null")
+        assertFalse(localRootFiles.isNullOrEmpty(), "local root files cannot be empty")
         assertTrue(
-            remoteResult?.second?.size == localResult?.second?.size,
+            remoteFolderFiles?.size == localRootFiles?.size,
             "the size of the local and remote files must be identical",
         )
     }
@@ -116,23 +118,13 @@ class FileControllerTest : KDriveTest() {
         saveFavoritesFiles(remoteFavoriteFiles, realm = realm)
 
         // Get saved favorite files
-        val localFavoriteFiles =
-            FolderFilesProvider.getFilesFromCacheOrDownload(
-                parentId = FAVORITES_FILE_ID,
-                isFirstPage = true,
-                ignoreCache = false,
-                userDrive = userDrive,
-                customRealm = realm,
-                ignoreCloud = true
-            )
-        val parent = localFavoriteFiles?.first
-        val files = localFavoriteFiles?.second
+        val localFavoriteFiles = FileController.getFilesFromCache(FAVORITES_FILE_ID)
         assertNotNull(localFavoriteFiles, "local favorite files cannot be null")
-        assertFalse(files.isNullOrEmpty(), "local favorite files cannot be empty")
+        assertFalse(localFavoriteFiles.isEmpty(), "local favorite files cannot be empty")
 
         // Compare remote files and local files
-        assertTrue(parent?.id == FAVORITES_FILE_ID)
-        assertTrue(files?.size == remoteFavoriteFiles.size, "local files and remote files cannot be different")
+        assertTrue(localFavoriteFiles.firstOrNull()?.parentId == FAVORITES_FILE_ID)
+        assertTrue(localFavoriteFiles.size == remoteFavoriteFiles.size, "local files and remote files cannot be different")
 
         // Delete Test file
         deleteTestFile(remoteFile)
@@ -231,11 +223,11 @@ class FileControllerTest : KDriveTest() {
     @DisplayName("Check if removing realm's root remove all files")
     fun removeFileCascade_IsCorrect() {
         getAndSaveRemoteRootFiles()
-        with(getLocalRootFiles()) {
+        getLocalRootFiles().also { localRootFiles ->
 
             // Check if remote files are stored
-            assertNotNull(this, "local root files cannot be null")
-            assertFalse(this?.second.isNullOrEmpty(), "local root files cannot be empty")
+            assertNotNull(localRootFiles, "local root files cannot be null")
+            assertFalse(localRootFiles.isNullOrEmpty(), "local root files cannot be empty")
         }
 
         // Delete root files
@@ -251,7 +243,7 @@ class FileControllerTest : KDriveTest() {
     @DisplayName("Check if realm root contains files")
     fun getTestFileListForFolder() {
         // Get the file list of root folder
-        with(getDirectoryFiles(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
+        with(getFolderFiles(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
             assertApiResponseData(this)
 
             // Use non null assertion because data nullability has been checked in assertApiResponse()
@@ -272,27 +264,31 @@ class FileControllerTest : KDriveTest() {
         deleteTestFile(file)
     }
 
-    private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
+    private fun getAndSaveRemoteRootFiles(): FolderFilesProvider.FolderFilesProviderResult? {
         // Get and save remote root files in realm db test
-        return FolderFilesProvider.getFilesFromCacheOrDownload(
-            parentId = Utils.ROOT_ID,
-            isFirstPage = true,
-            ignoreCache = true,
-            userDrive = userDrive,
-            customRealm = realm,
+        return FolderFilesProvider.getFiles(
+            FolderFilesProvider.FolderFilesProviderArgs(
+                folderId = Utils.ROOT_ID,
+                isFirstPage = true,
+                realm = realm,
+                sourceRestrictionType = SourceRestrictionType.ONLY_FROM_REMOTE,
+                userDrive = userDrive
+            )
         ).also {
             assertNotNull(it, "remote root files cannot be null")
         }
     }
 
     private fun getLocalRootFiles() =
-        FolderFilesProvider.getFilesFromCacheOrDownload(
-            parentId = Utils.ROOT_ID,
-            isFirstPage = true,
-            ignoreCache = false,
-            userDrive = userDrive,
-            customRealm = realm,
-        )
+        FolderFilesProvider.getFiles(
+            FolderFilesProvider.FolderFilesProviderArgs(
+                folderId = Utils.ROOT_ID,
+                isFirstPage = true,
+                realm = realm,
+                sourceRestrictionType = SourceRestrictionType.ONLY_FROM_LOCAL,
+                userDrive = userDrive
+            )
+        )?.folderFiles
 
     private fun createAndStoreOfficeFile(transaction: ((remoteFile: File) -> Unit)? = null): File {
         val remoteFile = createFileForTest()
