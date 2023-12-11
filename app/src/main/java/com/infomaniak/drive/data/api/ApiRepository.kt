@@ -24,6 +24,7 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.data.models.file.ListingFiles
 import com.infomaniak.drive.data.models.upload.UploadSegment.ChunkStatus
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
@@ -108,7 +109,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), DELETE)
 
-    fun getDirectoryFiles(
+    fun getFolderFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
         parentId: Int,
@@ -116,6 +117,20 @@ object ApiRepository : ApiRepositoryCore() {
         order: File.SortType
     ): CursorApiResponse<List<File>> {
         val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
+    }
+
+    fun getListingFiles(
+        okHttpClient: OkHttpClient,
+        driveId: Int,
+        parentId: Int,
+        cursor: String? = null,
+        order: File.SortType
+    ): CursorApiResponse<ListingFiles> {
+        val url = when (cursor) {
+            null -> ApiRoutes.getListingFiles(driveId, parentId, order)
+            else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
+        }
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 

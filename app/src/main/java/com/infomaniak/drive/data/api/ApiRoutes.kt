@@ -29,6 +29,8 @@ object ApiRoutes {
     private const val fileExtraWithQuery = "$fileWithQuery,users,version"
     private const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities," +
             "file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name"
+    private const val listingFilesWithQuery = "with=files,files.capabilities,files.categories,files.conversion_capabilities," +
+            "files.dropbox,files.dropbox.capabilities,files.is_favorite,files.sharelink,files.sorted_name"
     const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
@@ -146,6 +148,12 @@ object ApiRoutes {
     //region File/Directory
     fun getFolderFiles(driveId: Int, parentId: Int, order: SortType) =
         "${fileURL(driveId, parentId)}/files?$fileWithQuery&${orderQuery(order)}"
+
+    fun getListingFiles(driveId: Int, folderId: Int, order: SortType) =
+        "${fileURL(driveId, folderId)}/listing?$listingFilesWithQuery&${orderQuery(order)}"
+
+    fun getMoreListingFiles(driveId: Int, folderId: Int, order: SortType) =
+        "${fileURL(driveId, folderId)}/listing/continue?$listingFilesWithQuery&${orderQuery(order)}"
 
     fun getFileDetails(file: File) = "${fileURL(file)}?$fileExtraWithQuery"
 
