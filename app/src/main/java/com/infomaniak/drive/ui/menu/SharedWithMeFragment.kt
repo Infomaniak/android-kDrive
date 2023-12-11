@@ -27,6 +27,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
@@ -156,7 +157,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             folder?.let { folder ->
                 fileListViewModel.getFiles(
                     parentId = if (folder.isDrive()) ROOT_ID else folder.id,
-                    ignoreCache = true,
+                    sourceRestrictionType = SourceRestrictionType.ONLY_FROM_REMOTE,
                     order = fileListViewModel.sortType,
                     userDrive = userDrive,
                     isNewSort = isNewSort,

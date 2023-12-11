@@ -55,9 +55,8 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     fun getFiles(
         parentId: Int,
-        ignoreCache: Boolean,
         order: SortType,
-        ignoreCloud: Boolean = false,
+        sourceRestrictionType: FolderFilesProvider.SourceRestrictionType,
         userDrive: UserDrive? = null,
         isNewSort: Boolean,
     ): LiveData<FolderFilesResult?> {
@@ -65,48 +64,49 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFolderActivitiesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            tailrec suspend fun recursiveDownload(parentId: Int, nextPage: Boolean = false) {
+            tailrec suspend fun recursiveDownload(parentId: Int, isFirstPage: Boolean) {
                 getFilesJob.ensureActive()
-                val resultList = FolderFilesProvider.getFilesFromCacheOrDownload(
-                    parentId = parentId,
-                    isFirstPage = true,
-                    ignoreCache = ignoreCache,
-                    ignoreCloud = ignoreCloud,
-                    order = order,
-                    userDrive = userDrive,
-                    withChildren = true
+
+                val folderFilesProviderResult = FolderFilesProvider.getFiles(
+                    FolderFilesProvider.FolderFilesProviderArgs(
+                        folderId = parentId,
+                        isFirstPage = isFirstPage,
+                        order = order,
+                        sourceRestrictionType = sourceRestrictionType,
+                        userDrive = userDrive ?: UserDrive(),
+                    )
                 )
 
                 when {
-                    resultList == null -> emit(null)
-                    resultList.second.size < ApiRepository.PER_PAGE -> {
+                    folderFilesProviderResult == null -> emit(null)
+                    folderFilesProviderResult.isComplete -> {
                         emit(
                             FolderFilesResult(
-                                parentFolder = resultList.first,
-                                files = resultList.second,
+                                parentFolder = folderFilesProviderResult.folder,
+                                files = folderFilesProviderResult.folderFiles,
                                 isComplete = true,
-                                isFirstPage = !nextPage,
+                                isFirstPage = isFirstPage,
                                 isNewSort = isNewSort,
                             )
                         )
                     }
                     else -> {
-                        if (!nextPage) {
+                        if (isFirstPage) {
                             emit(
                                 FolderFilesResult(
-                                    parentFolder = resultList.first,
-                                    files = resultList.second,
+                                    parentFolder = folderFilesProviderResult.folder,
+                                    files = folderFilesProviderResult.folderFiles,
                                     isComplete = true,
                                     isFirstPage = true,
                                     isNewSort = isNewSort,
                                 )
                             )
                         }
-                        recursiveDownload(parentId, true)
+                        recursiveDownload(parentId, isFirstPage = false)
                     }
                 }
             }
-            recursiveDownload(parentId)
+            recursiveDownload(parentId, isFirstPage = true)
         }
     }
 
@@ -205,9 +205,12 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFolderActivitiesJob = Job()
         return liveData(Dispatchers.IO + getFolderActivitiesJob) {
             mutex.withLock {
-                getFolderActivitiesJob.ensureActive()
-                val activities = FolderFilesProvider.getFolderActivities(folder, userDrive)
-                emit(activities.isNotEmpty())
+                val activitiesAreLoadedWithSuccess = FolderFilesProvider.tryLoadActivitiesFromFolder(
+                    folder = folder,
+                    userDrive = userDrive ?: UserDrive(),
+                    activitiesJob = getFolderActivitiesJob
+                )
+                emit(activitiesAreLoadedWithSuccess)
             }
         }
     }
