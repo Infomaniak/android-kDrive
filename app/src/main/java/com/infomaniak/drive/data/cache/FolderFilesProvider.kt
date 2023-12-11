@@ -25,7 +25,7 @@ import com.infomaniak.drive.data.cache.FileController.saveRemoteFiles
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileAction
-import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.data.models.FileActivityType
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
@@ -286,16 +286,16 @@ object FolderFilesProvider {
     ) {
         val actionFile = actionFiles[fileId]
         when (action) {
-            FileActivity.FileActivityType.FILE_DELETE,
-            FileActivity.FileActivityType.FILE_MOVE_OUT,
-            FileActivity.FileActivityType.FILE_TRASH -> {
+            FileActivityType.FILE_DELETE,
+            FileActivityType.FILE_MOVE_OUT,
+            FileActivityType.FILE_TRASH -> {
                 // We used to have this condition, but it doesn't exist on the ios side, according to commit it was an api fix.
                 // returnResponse[fileId]?.createdAt?.time == createdAt.time
                 if (returnResponse[fileId] == null) {
                     FileController.getParentFile(fileId = fileId, realm = realm)?.let { localFolder ->
                         if (localFolder.id != currentFolder.id) return@let
 
-                        if (action == FileActivity.FileActivityType.FILE_MOVE_OUT) {
+                        if (action == FileActivityType.FILE_MOVE_OUT) {
                             FileController.updateFile(localFolder.id, realm) { it.children.remove(actionFile) }
                         } else {
                             FileController.removeFile(fileId, customRealm = realm, recursive = false)
@@ -305,9 +305,9 @@ object FolderFilesProvider {
                     returnResponse[fileId] = this
                 }
             }
-            FileActivity.FileActivityType.FILE_CREATE,
-            FileActivity.FileActivityType.FILE_MOVE_IN,
-            FileActivity.FileActivityType.FILE_RESTORE -> {
+            FileActivityType.FILE_CREATE,
+            FileActivityType.FILE_MOVE_IN,
+            FileActivityType.FILE_RESTORE -> {
                 if (returnResponse[fileId] == null && actionFile != null) {
                     if (actionFile.isImporting()) MqttClientWrapper.start(actionFile.externalImport?.id)
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
@@ -320,20 +320,20 @@ object FolderFilesProvider {
                     }
                 }
             }
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_CREATE,
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_DELETE,
-            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_UPDATE,
-            FileActivity.FileActivityType.FILE_FAVORITE_CREATE,
-            FileActivity.FileActivityType.FILE_FAVORITE_REMOVE,
-            FileActivity.FileActivityType.FILE_RENAME,
-            FileActivity.FileActivityType.FILE_CATEGORIZE,
-            FileActivity.FileActivityType.FILE_UNCATEGORIZE,
-            FileActivity.FileActivityType.FILE_COLOR_UPDATE,
-            FileActivity.FileActivityType.FILE_COLOR_DELETE,
-            FileActivity.FileActivityType.FILE_SHARE_CREATE,
-            FileActivity.FileActivityType.FILE_SHARE_DELETE,
-            FileActivity.FileActivityType.FILE_SHARE_UPDATE,
-            FileActivity.FileActivityType.FILE_UPDATE -> {
+            FileActivityType.COLLABORATIVE_FOLDER_CREATE,
+            FileActivityType.COLLABORATIVE_FOLDER_DELETE,
+            FileActivityType.COLLABORATIVE_FOLDER_UPDATE,
+            FileActivityType.FILE_FAVORITE_CREATE,
+            FileActivityType.FILE_FAVORITE_REMOVE,
+            FileActivityType.FILE_RENAME,
+            FileActivityType.FILE_CATEGORIZE,
+            FileActivityType.FILE_UNCATEGORIZE,
+            FileActivityType.FILE_COLOR_UPDATE,
+            FileActivityType.FILE_COLOR_DELETE,
+            FileActivityType.FILE_SHARE_CREATE,
+            FileActivityType.FILE_SHARE_DELETE,
+            FileActivityType.FILE_SHARE_UPDATE,
+            FileActivityType.FILE_UPDATE -> {
                 if (returnResponse[fileId] == null) {
                     if (actionFile == null) {
                         FileController.removeFile(fileId, customRealm = realm, recursive = false)
