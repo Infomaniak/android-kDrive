@@ -64,7 +64,6 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
-import com.infomaniak.drive.ui.LaunchActivity.*
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
@@ -90,7 +89,7 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Date
 
 class MainActivity : BaseActivity() {
 
@@ -98,6 +97,8 @@ class MainActivity : BaseActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
+    private val uiSettings by lazy { UiSettings(this) }
+
     private lateinit var downloadReceiver: DownloadReceiver
 
     private var lastAppClosingTime = Date().time
@@ -172,7 +173,7 @@ class MainActivity : BaseActivity() {
         bottomNavigation.apply {
             setupWithNavControllerCustom(navController)
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
-            selectedItemId = UiSettings(this@MainActivity).bottomNavigationSelectedItem
+            selectedItemId = uiSettings.bottomNavigationSelectedItem
             setOnItemReselectedListener { item ->
                 when (item.itemId) {
                     R.id.fileListFragment, R.id.favoritesFragment -> {
@@ -230,7 +231,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleUpdates(navController: NavController) {
-        if (!UiSettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
+        if (!uiSettings.updateLater || AppSettings.appLaunches % 10 == 0) {
             checkUpdateIsAvailable(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) { updateIsAvailable ->
                 if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
             }
@@ -410,7 +411,7 @@ class MainActivity : BaseActivity() {
     }
 
     fun saveLastNavigationItemSelected() {
-        UiSettings(this).bottomNavigationSelectedItem = binding.bottomNavigation.selectedItemId
+        uiSettings.bottomNavigationSelectedItem = binding.bottomNavigation.selectedItemId
     }
 
     override fun onDestroy() {
@@ -419,20 +420,18 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
     }
 
-    private fun displayInformationPanel() {
+    private fun displayInformationPanel() = with(uiSettings) {
         if (!hasDisplayedInformationPanel) {
-            UiSettings(this).apply {
-                val destinationId = when {
-                    !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
-                        hasDisplayedSyncDialog = true
-                        R.id.syncConfigureBottomSheetDialog
-                    }
-                    else -> null
+            val destinationId = when {
+                !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
+                    hasDisplayedSyncDialog = true
+                    R.id.syncConfigureBottomSheetDialog
                 }
-                destinationId?.let {
-                    hasDisplayedInformationPanel = true
-                    findNavController(R.id.hostFragment).navigate(it)
-                }
+                else -> null
+            }
+            destinationId?.let {
+                hasDisplayedInformationPanel = true
+                findNavController(R.id.hostFragment).navigate(it)
             }
         }
     }
