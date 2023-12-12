@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,10 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.api.ApiController
@@ -33,9 +34,9 @@ class UiSettings(context: Context) {
     fun removeUiSettings() = sharedPreferences.transaction { clear() }
 
     fun getSaveExternalFilesPref(): SaveExternalFilesData {
-        val userId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_USER_ID_KEY, -1)
-        val driveId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_DRIVE_ID_KEY, -1)
-        val folderId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_FOLDER_ID_KEY, -1)
+        val userId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_USER_ID_KEY, DEFAULT_SAVE_EXTERNAL_FILES_USER_ID)
+        val driveId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_DRIVE_ID_KEY, DEFAULT_SAVE_EXTERNAL_FILES_DRIVE_ID)
+        val folderId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_FOLDER_ID_KEY, DEFAULT_SAVE_EXTERNAL_FILES_FOLDER_ID)
 
         return SaveExternalFilesData(userId, driveId, if (folderId >= Utils.ROOT_ID) folderId else null)
     }
@@ -50,89 +51,53 @@ class UiSettings(context: Context) {
 
     var bottomNavigationSelectedItem: Int
         get() = sharedPreferences.getInt(BOTTOM_NAVIGATION_SELECTED_ITEM_KEY, R.id.hostFragment)
-        set(value) {
-            sharedPreferences.transaction {
-                putInt(BOTTOM_NAVIGATION_SELECTED_ITEM_KEY, value)
-            }
-        }
+        set(value) = sharedPreferences.transaction { putInt(BOTTOM_NAVIGATION_SELECTED_ITEM_KEY, value) }
 
     var hasDisplayedSyncDialog: Boolean
-        get() = sharedPreferences.getBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, false)
-        set(value) {
-            sharedPreferences.transaction {
-                putBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, value)
-            }
-        }
+        get() = sharedPreferences.getBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, DEFAULT_HAS_DISPLAYED_SYNC_DIALOG)
+        set(value) = sharedPreferences.transaction { putBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, value) }
 
     var lastHomeSelectedTab: Int
-        get() = sharedPreferences.getInt(LAST_HOME_SELECTED_TAB_KEY, 0)
-        set(value) {
-            sharedPreferences.transaction {
-                putInt(LAST_HOME_SELECTED_TAB_KEY, value)
-            }
-        }
+        get() = sharedPreferences.getInt(LAST_HOME_SELECTED_TAB_KEY, DEFAULT_LAST_HOME_SELECTED_TAB)
+        set(value) = sharedPreferences.transaction { putInt(LAST_HOME_SELECTED_TAB_KEY, value) }
 
     var listMode: Boolean
-        get() = sharedPreferences.getBoolean(LIST_MODE_KEY, true)
-        set(value) {
-            sharedPreferences.transaction {
-                putBoolean(LIST_MODE_KEY, value)
-            }
-        }
+        get() = sharedPreferences.getBoolean(LIST_MODE_KEY, DEFAULT_LIST_MODE)
+        set(value) = sharedPreferences.transaction { putBoolean(LIST_MODE_KEY, value) }
 
     var mustDisplayBatteryDialog: Boolean
-        get() = sharedPreferences.getBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, manufacturerWarning)
-        set(value) {
-            sharedPreferences.transaction {
-                putBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, value)
-            }
-        }
+        get() = sharedPreferences.getBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, DEFAULT_MUST_DISPLAY_BATTERY_DIALOG)
+        set(value) = sharedPreferences.transaction { putBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, value) }
 
     var nightMode: Int
-        get() = sharedPreferences.getInt(NIGHT_MODE_KEY, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        set(value) {
-            sharedPreferences.transaction {
-                putInt(NIGHT_MODE_KEY, value)
-            }
-        }
+        get() = sharedPreferences.getInt(NIGHT_MODE_KEY, DEFAULT_NIGHT_MODE)
+        set(value) = sharedPreferences.transaction { putInt(NIGHT_MODE_KEY, value) }
 
     var recentSearches: List<String>
         get() = ApiController.gson.fromJson(
-            sharedPreferences.getString(RECENT_SEARCHES_KEY, null),
+            sharedPreferences.getString(RECENT_SEARCHES_KEY, DEFAULT_RECENT_SEARCHES),
             object : TypeToken<List<String>>() {}.type,
         ) ?: emptyList()
-        set(value) {
-            sharedPreferences.transaction {
-                putString(RECENT_SEARCHES_KEY, ApiController.gson.toJson(value))
-            }
-        }
+        set(value) = sharedPreferences.transaction { putString(RECENT_SEARCHES_KEY, ApiController.gson.toJson(value)) }
 
-    var sortType: File.SortType
-        get() = when (sharedPreferences.getString(SORT_TYPE_KEY, File.SortType.NAME_AZ.name)) {
-            File.SortType.NAME_AZ.name -> File.SortType.NAME_AZ
-            File.SortType.NAME_ZA.name -> File.SortType.NAME_ZA
-            File.SortType.OLDER.name -> File.SortType.OLDER
-            File.SortType.RECENT.name -> File.SortType.RECENT
-            File.SortType.OLDEST_ADDED.name -> File.SortType.OLDEST_ADDED
-            File.SortType.MOST_RECENT_ADDED.name -> File.SortType.MOST_RECENT_ADDED
-            File.SortType.BIGGER.name -> File.SortType.BIGGER
-            File.SortType.SMALLER.name -> File.SortType.SMALLER
+    var sortType: SortType
+        get() = when (sharedPreferences.getString(SORT_TYPE_KEY, DEFAULT_SORT_TYPE)) {
+            SortType.NAME_AZ.name -> SortType.NAME_AZ
+            SortType.NAME_ZA.name -> SortType.NAME_ZA
+            SortType.OLDER.name -> SortType.OLDER
+            SortType.RECENT.name -> SortType.RECENT
+            SortType.OLDEST_ADDED.name -> SortType.OLDEST_ADDED
+            SortType.MOST_RECENT_ADDED.name -> SortType.MOST_RECENT_ADDED
+            SortType.BIGGER.name -> SortType.BIGGER
+            SortType.SMALLER.name -> SortType.SMALLER
             //File.SortType.EXTENSION.name -> File.SortType.EXTENSION
-            else -> File.SortType.NAME_AZ
+            else -> SortType.NAME_AZ
         }
-        set(value) {
-            sharedPreferences.transaction {
-                putString(SORT_TYPE_KEY, value.name)
-            }
-        }
+        set(value) = sharedPreferences.transaction { putString(SORT_TYPE_KEY, value.name) }
 
     var updateLater: Boolean
-        get() = sharedPreferences.getBoolean(UPDATE_LATER_KEY, false)
-        set(value) {
-            sharedPreferences.transaction {
-                putBoolean(UPDATE_LATER_KEY, value)
-            }
-        }
+        get() = sharedPreferences.getBoolean(UPDATE_LATER_KEY, DEFAULT_UPDATE_LATER)
+        set(value) = sharedPreferences.transaction { putBoolean(UPDATE_LATER_KEY, value) }
 
     data class SaveExternalFilesData(
         val userId: Int,
@@ -143,6 +108,20 @@ class UiSettings(context: Context) {
     companion object {
 
         private const val SHARED_PREFS_NAME = "UISettings"
+
+        //region Default values
+        private const val DEFAULT_SAVE_EXTERNAL_FILES_USER_ID = -1
+        private const val DEFAULT_SAVE_EXTERNAL_FILES_DRIVE_ID = -1
+        private const val DEFAULT_SAVE_EXTERNAL_FILES_FOLDER_ID = -1
+        private const val DEFAULT_HAS_DISPLAYED_SYNC_DIALOG = false
+        private const val DEFAULT_LAST_HOME_SELECTED_TAB = 0
+        private const val DEFAULT_LIST_MODE = true
+        private val DEFAULT_MUST_DISPLAY_BATTERY_DIALOG = manufacturerWarning
+        private const val DEFAULT_NIGHT_MODE = MODE_NIGHT_FOLLOW_SYSTEM
+        private val DEFAULT_RECENT_SEARCHES = null
+        private val DEFAULT_SORT_TYPE = SortType.NAME_AZ.name
+        private const val DEFAULT_UPDATE_LATER = false
+        //endregion
 
         //region Keys
         private const val SAVE_EXTERNAL_FILES_USER_ID_KEY = "saveExternalFilesPref_userId"
@@ -157,6 +136,6 @@ class UiSettings(context: Context) {
         private const val RECENT_SEARCHES_KEY = "recentSearches"
         private const val SORT_TYPE_KEY = "sortType"
         private const val UPDATE_LATER_KEY = "updateLater"
-        //endRegion
+        //endregion
     }
 }
