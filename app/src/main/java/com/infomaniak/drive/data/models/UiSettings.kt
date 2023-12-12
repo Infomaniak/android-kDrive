@@ -39,12 +39,13 @@ class UiSettings(private val context: Context) {
         }
     }
 
-    fun getSaveExternalFilesPref(): Triple<Int, Int, Int?> {
+    fun getSaveExternalFilesPref(): SaveExternalFilesData {
         val uiSettings = getUiSettings()
         val userId = uiSettings.getInt(SAVE_EXTERNAL_FILES_USER_ID_KEY, -1)
         val driveId = uiSettings.getInt(SAVE_EXTERNAL_FILES_DRIVE_ID_KEY, -1)
         val folderId = uiSettings.getInt(SAVE_EXTERNAL_FILES_FOLDER_ID_KEY, -1)
-        return Triple(userId, driveId, if (folderId >= Utils.ROOT_ID) folderId else null)
+
+        return SaveExternalFilesData(userId, driveId, if (folderId >= Utils.ROOT_ID) folderId else null)
     }
 
     fun setSaveExternalFilesPref(userId: Int, driveId: Int, folderId: Int) {
@@ -123,19 +124,17 @@ class UiSettings(private val context: Context) {
         }
 
     var sortType: File.SortType
-        get() {
-            return when (getUiSettings().getString(SORT_TYPE_KEY, File.SortType.NAME_AZ.name)) {
-                File.SortType.NAME_AZ.name -> File.SortType.NAME_AZ
-                File.SortType.NAME_ZA.name -> File.SortType.NAME_ZA
-                File.SortType.OLDER.name -> File.SortType.OLDER
-                File.SortType.RECENT.name -> File.SortType.RECENT
-                File.SortType.OLDEST_ADDED.name -> File.SortType.OLDEST_ADDED
-                File.SortType.MOST_RECENT_ADDED.name -> File.SortType.MOST_RECENT_ADDED
-                File.SortType.BIGGER.name -> File.SortType.BIGGER
-                File.SortType.SMALLER.name -> File.SortType.SMALLER
-                //File.SortType.EXTENSION.name -> File.SortType.EXTENSION
-                else -> File.SortType.NAME_AZ
-            }
+        get() = when (getUiSettings().getString(SORT_TYPE_KEY, File.SortType.NAME_AZ.name)) {
+            File.SortType.NAME_AZ.name -> File.SortType.NAME_AZ
+            File.SortType.NAME_ZA.name -> File.SortType.NAME_ZA
+            File.SortType.OLDER.name -> File.SortType.OLDER
+            File.SortType.RECENT.name -> File.SortType.RECENT
+            File.SortType.OLDEST_ADDED.name -> File.SortType.OLDEST_ADDED
+            File.SortType.MOST_RECENT_ADDED.name -> File.SortType.MOST_RECENT_ADDED
+            File.SortType.BIGGER.name -> File.SortType.BIGGER
+            File.SortType.SMALLER.name -> File.SortType.SMALLER
+            //File.SortType.EXTENSION.name -> File.SortType.EXTENSION
+            else -> File.SortType.NAME_AZ
         }
         set(value) {
             with(getUiSettings().edit()) {
@@ -152,6 +151,12 @@ class UiSettings(private val context: Context) {
                 apply()
             }
         }
+
+    data class SaveExternalFilesData(
+        val userId: Int,
+        val driveId: Int,
+        val folderId: Int?,
+    )
 
     companion object {
 
