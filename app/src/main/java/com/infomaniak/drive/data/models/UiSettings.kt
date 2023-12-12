@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
@@ -26,30 +25,27 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBotto
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.api.ApiController
 
-class UiSettings(private val context: Context) {
+class UiSettings(context: Context) {
 
-    private fun getUiSettings(): SharedPreferences {
-        return context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-    }
+    private val sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
 
     fun removeUiSettings() {
-        with(getUiSettings().edit()) {
+        with(sharedPreferences.edit()) {
             clear()
             apply()
         }
     }
 
     fun getSaveExternalFilesPref(): SaveExternalFilesData {
-        val uiSettings = getUiSettings()
-        val userId = uiSettings.getInt(SAVE_EXTERNAL_FILES_USER_ID_KEY, -1)
-        val driveId = uiSettings.getInt(SAVE_EXTERNAL_FILES_DRIVE_ID_KEY, -1)
-        val folderId = uiSettings.getInt(SAVE_EXTERNAL_FILES_FOLDER_ID_KEY, -1)
+        val userId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_USER_ID_KEY, -1)
+        val driveId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_DRIVE_ID_KEY, -1)
+        val folderId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_FOLDER_ID_KEY, -1)
 
         return SaveExternalFilesData(userId, driveId, if (folderId >= Utils.ROOT_ID) folderId else null)
     }
 
     fun setSaveExternalFilesPref(userId: Int, driveId: Int, folderId: Int) {
-        with(getUiSettings().edit()) {
+        with(sharedPreferences.edit()) {
             putInt(SAVE_EXTERNAL_FILES_USER_ID_KEY, userId)
             putInt(SAVE_EXTERNAL_FILES_DRIVE_ID_KEY, driveId)
             putInt(SAVE_EXTERNAL_FILES_FOLDER_ID_KEY, folderId)
@@ -58,54 +54,54 @@ class UiSettings(private val context: Context) {
     }
 
     var bottomNavigationSelectedItem: Int
-        get() = getUiSettings().getInt(BOTTOM_NAVIGATION_SELECTED_ITEM_KEY, R.id.hostFragment)
+        get() = sharedPreferences.getInt(BOTTOM_NAVIGATION_SELECTED_ITEM_KEY, R.id.hostFragment)
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putInt(BOTTOM_NAVIGATION_SELECTED_ITEM_KEY, value)
                 apply()
             }
         }
 
     var hasDisplayedSyncDialog: Boolean
-        get() = getUiSettings().getBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, false)
+        get() = sharedPreferences.getBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, false)
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, value)
                 apply()
             }
         }
 
     var lastHomeSelectedTab: Int
-        get() = getUiSettings().getInt(LAST_HOME_SELECTED_TAB_KEY, 0)
+        get() = sharedPreferences.getInt(LAST_HOME_SELECTED_TAB_KEY, 0)
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putInt(LAST_HOME_SELECTED_TAB_KEY, value)
                 apply()
             }
         }
 
     var listMode: Boolean
-        get() = getUiSettings().getBoolean(LIST_MODE_KEY, true)
+        get() = sharedPreferences.getBoolean(LIST_MODE_KEY, true)
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putBoolean(LIST_MODE_KEY, value)
                 apply()
             }
         }
 
     var mustDisplayBatteryDialog: Boolean
-        get() = getUiSettings().getBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, manufacturerWarning)
+        get() = sharedPreferences.getBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, manufacturerWarning)
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, value)
                 apply()
             }
         }
 
     var nightMode: Int
-        get() = getUiSettings().getInt(NIGHT_MODE_KEY, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        get() = sharedPreferences.getInt(NIGHT_MODE_KEY, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putInt(NIGHT_MODE_KEY, value)
                 apply()
             }
@@ -113,18 +109,18 @@ class UiSettings(private val context: Context) {
 
     var recentSearches: List<String>
         get() = ApiController.gson.fromJson(
-            getUiSettings().getString(RECENT_SEARCHES_KEY, null),
+            sharedPreferences.getString(RECENT_SEARCHES_KEY, null),
             object : TypeToken<List<String>>() {}.type,
         ) ?: emptyList()
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putString(RECENT_SEARCHES_KEY, ApiController.gson.toJson(value))
                 apply()
             }
         }
 
     var sortType: File.SortType
-        get() = when (getUiSettings().getString(SORT_TYPE_KEY, File.SortType.NAME_AZ.name)) {
+        get() = when (sharedPreferences.getString(SORT_TYPE_KEY, File.SortType.NAME_AZ.name)) {
             File.SortType.NAME_AZ.name -> File.SortType.NAME_AZ
             File.SortType.NAME_ZA.name -> File.SortType.NAME_ZA
             File.SortType.OLDER.name -> File.SortType.OLDER
@@ -137,16 +133,16 @@ class UiSettings(private val context: Context) {
             else -> File.SortType.NAME_AZ
         }
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putString(SORT_TYPE_KEY, value.name)
                 apply()
             }
         }
 
     var updateLater: Boolean
-        get() = getUiSettings().getBoolean(UPDATE_LATER_KEY, false)
+        get() = sharedPreferences.getBoolean(UPDATE_LATER_KEY, false)
         set(value) {
-            with(getUiSettings().edit()) {
+            with(sharedPreferences.edit()) {
                 putBoolean(UPDATE_LATER_KEY, value)
                 apply()
             }
