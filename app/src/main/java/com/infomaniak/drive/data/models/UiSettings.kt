@@ -24,17 +24,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.api.ApiController
+import com.infomaniak.lib.core.utils.transaction
 
 class UiSettings(context: Context) {
 
     private val sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun removeUiSettings() {
-        with(sharedPreferences.edit()) {
-            clear()
-            apply()
-        }
-    }
+    fun removeUiSettings() = sharedPreferences.transaction { clear() }
 
     fun getSaveExternalFilesPref(): SaveExternalFilesData {
         val userId = sharedPreferences.getInt(SAVE_EXTERNAL_FILES_USER_ID_KEY, -1)
@@ -45,65 +41,58 @@ class UiSettings(context: Context) {
     }
 
     fun setSaveExternalFilesPref(userId: Int, driveId: Int, folderId: Int) {
-        with(sharedPreferences.edit()) {
+        sharedPreferences.transaction {
             putInt(SAVE_EXTERNAL_FILES_USER_ID_KEY, userId)
             putInt(SAVE_EXTERNAL_FILES_DRIVE_ID_KEY, driveId)
             putInt(SAVE_EXTERNAL_FILES_FOLDER_ID_KEY, folderId)
-            apply()
         }
     }
 
     var bottomNavigationSelectedItem: Int
         get() = sharedPreferences.getInt(BOTTOM_NAVIGATION_SELECTED_ITEM_KEY, R.id.hostFragment)
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putInt(BOTTOM_NAVIGATION_SELECTED_ITEM_KEY, value)
-                apply()
             }
         }
 
     var hasDisplayedSyncDialog: Boolean
         get() = sharedPreferences.getBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, false)
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putBoolean(HAS_DISPLAYED_SYNC_DIALOG_KEY, value)
-                apply()
             }
         }
 
     var lastHomeSelectedTab: Int
         get() = sharedPreferences.getInt(LAST_HOME_SELECTED_TAB_KEY, 0)
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putInt(LAST_HOME_SELECTED_TAB_KEY, value)
-                apply()
             }
         }
 
     var listMode: Boolean
         get() = sharedPreferences.getBoolean(LIST_MODE_KEY, true)
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putBoolean(LIST_MODE_KEY, value)
-                apply()
             }
         }
 
     var mustDisplayBatteryDialog: Boolean
         get() = sharedPreferences.getBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, manufacturerWarning)
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putBoolean(MUST_DISPLAY_BATTERY_DIALOG_KEY, value)
-                apply()
             }
         }
 
     var nightMode: Int
         get() = sharedPreferences.getInt(NIGHT_MODE_KEY, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putInt(NIGHT_MODE_KEY, value)
-                apply()
             }
         }
 
@@ -113,9 +102,8 @@ class UiSettings(context: Context) {
             object : TypeToken<List<String>>() {}.type,
         ) ?: emptyList()
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putString(RECENT_SEARCHES_KEY, ApiController.gson.toJson(value))
-                apply()
             }
         }
 
@@ -133,18 +121,16 @@ class UiSettings(context: Context) {
             else -> File.SortType.NAME_AZ
         }
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putString(SORT_TYPE_KEY, value.name)
-                apply()
             }
         }
 
     var updateLater: Boolean
         get() = sharedPreferences.getBoolean(UPDATE_LATER_KEY, false)
         set(value) {
-            with(sharedPreferences.edit()) {
+            sharedPreferences.transaction {
                 putBoolean(UPDATE_LATER_KEY, value)
-                apply()
             }
         }
 
