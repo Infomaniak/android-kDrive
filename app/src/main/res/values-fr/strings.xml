@@ -30,7 +30,6 @@
     <string name="alertRemoveUserDescription">Êtes vous sûr(e) de vouloir retirer l’utilisateur “%s” de cette application ?</string>
     <string name="alertRemoveUserTitle">Retirer l’utilisateur</string>
     <string name="allActivated">Activé</string>
-    <string name="allActivityNotFoundError">Aucune application installée ne prend en charge ce fichier</string>
     <string name="allAddExpirationDateTitle">Ajouter une date d’expiration</string>
     <string name="allAllDriveUsers">Tous les utilisateurs du kDrive</string>
     <string name="allArchive">Archives</string>
@@ -599,6 +598,9 @@
     <string name="sharedConflictTitle">Conflit de permissions</string>
     <string name="sharedWithMeNoFile">Aucun fichier partagé avec moi</string>
     <string name="sharedWithMeTitle">Partagés avec moi</string>
+    <string name="shortcutFeedbackShortDescription">Support</string>
+    <string name="shortcutScanShortDescription">Numériser</string>
+    <string name="shortcutUploadShortDescription">Importer</string>
     <string name="snackBarCategoryDeleted">Catégorie supprimée avec succès</string>
     <string name="snackBarInvalidFileNameError">Le caractère \"%1$s\" du fichier %2$s n’est pas pris en charge pour la mise hors ligne</string>
     <plurals name="snackBarUploadError">

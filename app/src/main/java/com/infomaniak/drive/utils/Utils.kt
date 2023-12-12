@@ -239,7 +239,7 @@ object Utils {
         try {
             startActivity(openWithIntent(file, userDrive))
         } catch (e: ActivityNotFoundException) {
-            showToast(R.string.allActivityNotFoundError)
+            showToast(R.string.errorNoSupportingAppFound)
         }
     }
 
@@ -346,5 +346,12 @@ object Utils {
                 setView(root)
             }
         }.show()
+    }
+
+    enum class Shortcuts(val id: String) {
+        UPLOAD("upload"),
+        SCAN("scan"),
+        SEARCH("search"),
+        FEEDBACK("feedback"),
     }
 }

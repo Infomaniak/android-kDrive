@@ -31,13 +31,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.utils.*
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -123,9 +121,7 @@ class MenuFragment : Fragment() {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
             }
 
-            support.setOnClickListener {
-                requireContext().openUrl(SUPPORT_URL)
-            }
+            support.setOnClickListener { requireContext().openSupport() }
 
             changeUser.setOnClickListener {
                 val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)

@@ -30,7 +30,6 @@
     <string name="alertRemoveUserDescription">Rimuovere veramente l’utente “%s” da questa applicazione?</string>
     <string name="alertRemoveUserTitle">Rimuovi utente</string>
     <string name="allActivated">Attivato</string>
-    <string name="allActivityNotFoundError">Il file non è supportato da nessuna delle applicazioni installate</string>
     <string name="allAddExpirationDateTitle">Aggiungi una data di scadenza</string>
     <string name="allAllDriveUsers">Tutti gli utenti del kDrive</string>
     <string name="allArchive">Archivi</string>
@@ -599,6 +598,9 @@
     <string name="sharedConflictTitle">Conflitto di autorizzazioni</string>
     <string name="sharedWithMeNoFile">Nessun file condiviso con me</string>
     <string name="sharedWithMeTitle">Condivisi con me</string>
+    <string name="shortcutFeedbackShortDescription">Assistenza</string>
+    <string name="shortcutScanShortDescription">Scansione</string>
+    <string name="shortcutUploadShortDescription">Importazione</string>
     <string name="snackBarCategoryDeleted">Categoria eliminata con successo</string>
     <string name="snackBarInvalidFileNameError">Il carattere \"%1$s\" nel file %2$s non è supportato per l’uso offline</string>
     <plurals name="snackBarUploadError">

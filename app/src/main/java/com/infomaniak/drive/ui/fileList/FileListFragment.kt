@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -64,6 +65,7 @@ import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -188,7 +190,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
-                    R.id.searchItem -> safeNavigate(FileListFragmentDirections.actionFileListFragmentToSearchFragment())
+                    R.id.searchItem -> {
+                        ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
+                        safeNavigate(FileListFragmentDirections.actionFileListFragmentToSearchFragment())
+                    }
                     R.id.restartItem -> onRestartItemsClicked()
                     R.id.closeItem -> onCloseItemsClicked()
                 }
@@ -334,6 +339,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun onDestroyView() {
         isDownloading = false
+        showLoadingTimer.cancel()
         super.onDestroyView()
         _binding = null
     }
@@ -585,11 +591,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         downloadFiles(true, false)
     }
 
-    private fun showPendingFiles() = with(binding) {
+    private fun showPendingFiles() {
         val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
         if (!showPendingFiles || isNotCurrentDriveRoot) return
         fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
-            uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount, uploadFileInProgressLayout)
+            binding.uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount, binding.uploadFileInProgressLayout)
         }
     }
 
@@ -737,7 +743,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
                 trackEvent("fileList", newSortType.name)
                 fileListViewModel.sortType = newSortType
-                _binding?.let { it.sortButton.setText(fileListViewModel.sortType.translation) }
+                _binding?.sortButton?.setText(fileListViewModel.sortType.translation)
 
                 downloadFiles(fileListViewModel.isSharedWithMe, true)
 

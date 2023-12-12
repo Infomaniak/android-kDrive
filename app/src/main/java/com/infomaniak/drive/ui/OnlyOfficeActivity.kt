@@ -164,7 +164,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
             try {
                 print("PRINT_ONLYOFFICE_PDF_SERVICE", printDocumentAdapter, null)
             } catch (activityNotFoundException: ActivityNotFoundException) {
-                showToast(R.string.allActivityNotFoundError)
+                showToast(R.string.errorNoSupportingAppFound)
                 Sentry.withScope { scope ->
                     scope.level = SentryLevel.WARNING
                     Sentry.captureException(activityNotFoundException)

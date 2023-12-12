@@ -34,9 +34,11 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.view.View
 import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
@@ -51,6 +53,9 @@ import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
+import com.infomaniak.drive.GeniusScanUtils.startScanFlow
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -59,11 +64,15 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
+import com.infomaniak.drive.ui.LaunchActivity.*
+import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
+import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
@@ -119,6 +128,15 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private var uploadFilesHelper: UploadFilesHelper? = null
+
+    private val scanFlowResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
+            activityResult.whenResultIsOk {
+                it?.let { data -> scanResultProcessing(data, folder = null) }
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -137,6 +155,7 @@ class MainActivity : BaseActivity() {
         setupDrivePermissions()
         handleInAppReview()
         handleUpdates(navController)
+        handleShortcuts(navController)
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
     }
@@ -206,12 +225,8 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleInAppReview() {
-        with(AppSettings) {
-            if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) {
-                launchInAppReview()
-            }
-        }
+    private fun handleInAppReview() = with(AppSettings) {
+        if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
     }
 
     private fun handleUpdates(navController: NavController) {
@@ -356,6 +371,33 @@ class MainActivity : BaseActivity() {
         mainFab.isVisible = isVisible
         bottomNavigation.isVisible = isVisible
         bottomNavigationBackgroundView.isVisible = isVisible
+    }
+
+    private fun handleShortcuts(navController: NavController) = with(mainViewModel) {
+        navigationArgs?.shortcutId?.let { shortcutId ->
+            trackEvent("shortcuts", shortcutId)
+
+            when (shortcutId) {
+                Shortcuts.SEARCH.id -> {
+                    ShortcutManagerCompat.reportShortcutUsed(this@MainActivity, Shortcuts.SEARCH.id)
+                    navController.navigate(R.id.searchFragment)
+                }
+                Shortcuts.UPLOAD.id -> {
+                    uploadFilesHelper = UploadFilesHelper(this@MainActivity, navController)
+                    currentFolder.observe(this@MainActivity) { parentFolder ->
+                        if (mustOpenShortcut && parentFolder?.id == ROOT_ID) {
+                            mustOpenShortcut = false
+                            uploadFilesHelper?.apply {
+                                initParentFolder(parentFolder)
+                                uploadFiles()
+                            }
+                        }
+                    }
+                }
+                Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
+                Shortcuts.FEEDBACK.id -> openSupport()
+            }
+        }
     }
 
     private fun launchSyncOffline() {

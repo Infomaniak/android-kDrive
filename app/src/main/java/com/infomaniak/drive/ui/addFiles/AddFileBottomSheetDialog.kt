@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ import com.infomaniak.drive.data.models.File.Office
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetAddFileBinding
+import com.infomaniak.drive.ui.LaunchActivity.*
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
@@ -61,6 +62,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private var binding: FragmentBottomSheetAddFileBinding by safeBinding()
 
     private lateinit var currentFolderFile: File
+
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private lateinit var openCameraWritePermissions: DrivePermissions
@@ -83,7 +85,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                     FileListFragment::class.java, SharedWithMeFragment::class.java -> currentFolderFile
                     else -> null
                 }
-                scanResultProcessing(data, folder)
+
+                requireActivity().scanResultProcessing(data, folder)
             }
         }
         dismiss()
@@ -112,13 +115,12 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
         uploadFilesHelper = UploadFilesHelper(
             fragment = this@AddFileBottomSheetDialog,
-            parentFolder = currentFolderFile,
             onOpeningPicker = {
                 trackNewElement("uploadFile")
                 binding.documentUpload.isEnabled = false
             },
             onResult = { findNavController().popBackStack() },
-        )
+        ).apply { initParentFolder(currentFolderFile) }
 
         openCamera.setOnClickListener { openCamera() }
         documentUpload.setOnClickListener { uploadFilesHelper.uploadFiles() }
@@ -161,7 +163,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun scanDocuments() {
         trackNewElement("scan")
-        context?.startScanFlow(scanFlowResultLauncher)
+        activity?.startScanFlow(scanFlowResultLauncher)
     }
 
     private fun createFolder() {

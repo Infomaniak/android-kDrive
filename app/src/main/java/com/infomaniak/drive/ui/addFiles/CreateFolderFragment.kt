@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.addFiles
 
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,21 +39,28 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.hideKeyboard
+import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.showProgress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 open class CreateFolderFragment : Fragment() {
 
-    protected var binding: FragmentCreateFolderBinding by safeBinding()
+    private var _binding: FragmentCreateFolderBinding? = null
+    protected val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     protected val mainViewModel: MainViewModel by activityViewModels()
+
     protected lateinit var adapter: PermissionsAdapter
 
+    private var folderNameTextWatcher: TextWatcher? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentCreateFolderBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentCreateFolderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
@@ -66,9 +74,15 @@ open class CreateFolderFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        folderNameValueInput.doOnTextChanged { _, _, _, _ ->
+        folderNameTextWatcher = folderNameValueInput.doOnTextChanged { _, _, _, _ ->
             toggleCreateFolderButton()
         }
+    }
+
+    override fun onDestroyView() {
+        binding.folderNameValueInput.removeTextChangedListener(folderNameTextWatcher)
+        super.onDestroyView()
+        _binding = null
     }
 
     protected fun canInherit(userList: ArrayList<UserFileAccess>, teamList: ArrayList<Team>): Boolean {
