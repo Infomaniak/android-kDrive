@@ -72,7 +72,7 @@ object PreviewPDFUtils {
     }
 
     private fun downloadFile(
-        externalOutputFile: java.io.File,
+        externalOutputFile: IOFile,
         fileModel: File,
         onProgress: (progress: Int) -> Unit
     ) {
@@ -96,7 +96,7 @@ object PreviewPDFUtils {
         }
     }
 
-    private fun createTempPdfFile(response: Response, file: java.io.File) {
+    private fun createTempPdfFile(response: Response, file: IOFile) {
         BufferedInputStream(response.body?.byteStream(), BUFFER_SIZE).use { input ->
             file.outputStream().use { output ->
                 input.copyTo(output, BUFFER_SIZE)

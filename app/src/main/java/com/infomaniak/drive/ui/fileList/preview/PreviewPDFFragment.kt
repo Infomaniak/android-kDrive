@@ -49,7 +49,7 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
-    private var pdfFile: java.io.File? = null
+    private var pdfFile: IOFile? = null
     private var isDownloading = false
 
 
@@ -156,7 +156,7 @@ class PreviewPDFFragment : PreviewFragment() {
 
         private var pdfJob = Job()
 
-        fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<java.io.File>> {
+        fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<IOFile>> {
             pdfJob.cancel()
             pdfJob = Job()
             return liveData(Dispatchers.IO + pdfJob) {
