@@ -78,11 +78,16 @@ import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
 import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.SentryLog
+import com.infomaniak.lib.core.utils.SnackbarUtils.showIndefiniteSnackbar
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsAvailable
+import com.infomaniak.lib.stores.StoreUtils.initAppUpdateManager
+import com.infomaniak.lib.stores.StoreUtils.installDownloadedUpdate
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
+import com.infomaniak.lib.stores.StoreUtils.unregisterAppUpdateListener
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -106,6 +111,8 @@ class MainActivity : BaseActivity() {
     private var hasDisplayedInformationPanel: Boolean = false
 
     private lateinit var drivePermissions: DrivePermissions
+
+    private val navController by lazy { setupNavController() }
 
     private val filesDeletionResult = registerForActivityResult(StartIntentSenderForResult()) {
         it.whenResultIsOk { lifecycleScope.launch(Dispatchers.IO) { UploadFile.deleteAll(uploadedFilesToDelete) } }
@@ -138,6 +145,10 @@ class MainActivity : BaseActivity() {
             }
         }
 
+    private val inAppUpdateResultLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
+        uiSettings.isUserWantingUpdates = result.resultCode == RESULT_OK
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -155,10 +166,17 @@ class MainActivity : BaseActivity() {
         setupMainFab(navController)
         setupDrivePermissions()
         handleInAppReview()
-        handleUpdates(navController)
         handleShortcuts(navController)
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
+
+        initAppUpdateManager()
+        observeAppUpdateDownload()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        handleUpdates(navController)
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -230,13 +248,54 @@ class MainActivity : BaseActivity() {
         if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
     }
 
+
+    //region In-App Updates
+    private fun initAppUpdateManager() {
+        initAppUpdateManager(
+            context = this,
+            onUpdateDownloaded = { mainViewModel.toggleAppUpdateStatus(isUpdateDownloaded = true) },
+            onUpdateInstalled = { mainViewModel.toggleAppUpdateStatus(isUpdateDownloaded = false) },
+        )
+    }
+
     private fun handleUpdates(navController: NavController) {
-        if (!uiSettings.updateLater || AppSettings.appLaunches % 10 == 0) {
-            checkUpdateIsAvailable(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) { updateIsAvailable ->
-                if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
+        if (uiSettings.isUserWantingUpdates || AppSettings.appLaunches % 10 == 0) {
+            checkUpdateIsAvailable(
+                appId = BuildConfig.APPLICATION_ID,
+                versionCode = BuildConfig.VERSION_CODE,
+                inAppResultLauncher = inAppUpdateResultLauncher,
+                onFDroidResult = { updateIsAvailable ->
+                    if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
+                },
+            )
+        }
+    }
+
+    private fun launchUpdateInstall() {
+        trackEvent("inAppUpdate", "installUpdate")
+        mainViewModel.canInstallUpdate.value = false
+        installDownloadedUpdate(
+            onFailure = {
+                Sentry.captureException(it)
+                uiSettings.resetUpdateSettings()
+                showSnackbar(getString(R.string.errorUpdateInstall))
+            },
+        )
+    }
+
+    private fun observeAppUpdateDownload() {
+        mainViewModel.canInstallUpdate.observe(this) { canInstallUpdate ->
+            if (canInstallUpdate) {
+                showIndefiniteSnackbar(
+                    title = R.string.updateReadyTitle,
+                    actionButtonTitle = R.string.common_google_play_services_install_button,
+                    anchor = getMainFab(),
+                    onActionClicked = ::launchUpdateInstall,
+                )
             }
         }
     }
+    //endregion
 
     override fun onResume() {
         super.onResume()
@@ -261,6 +320,8 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         handleDeletionOfUploadedPhotos()
+
+        mainViewModel.checkAppUpdateStatus()
     }
 
     override fun onPause() {
@@ -406,6 +467,7 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onStop() {
+        unregisterAppUpdateListener()
         super.onStop()
         saveLastNavigationItemSelected()
     }
