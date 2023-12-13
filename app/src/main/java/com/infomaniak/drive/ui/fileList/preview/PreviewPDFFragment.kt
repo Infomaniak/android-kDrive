@@ -128,9 +128,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
-        if (currentPage >= 1) {
-            getPageNumberChip()?.text = getString(R.string.previewPdfPages, currentPage, totalPage)
-        }
+        getPageNumberChip()?.text = getString(R.string.previewPdfPages, currentPage + 1, totalPage)
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {
