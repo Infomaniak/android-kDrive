@@ -46,10 +46,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class PreviewPDFFragment : PreviewFragment() {
+    private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
+
+    private val navController by lazy { findNavController() }
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
-
-    private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
     private var pdfFile: IOFile? = null
     private var isDownloading = false
@@ -105,11 +106,11 @@ class PreviewPDFFragment : PreviewFragment() {
         }
 
         findNavController().currentBackStackEntry?.savedStateHandle?.apply {
-            getLiveData<String>("password").observe(viewLifecycleOwner) {
-                showPdf(it)
+            getLiveData<String>("password").observe(viewLifecycleOwner) { password ->
+                showPdf(password)
             }
             getLiveData<Boolean>("isCanceled").observe(viewLifecycleOwner) {
-                findNavController().popBackStack()
+                navController.popBackStack()
             }
         }
     }
@@ -126,11 +127,12 @@ class PreviewPDFFragment : PreviewFragment() {
         super.onPause()
     }
 
-    private fun showPdf() = with(binding) {
+    private fun showPdf(password: String? = null) = with(binding) {
         lifecycleScope.launch {
             withResumed {
                 downloadLayout.root.isGone = true
                 with(pdfView.fromFile(pdfFile)) {
+                    password(password)
                     disableLongpress()
                     enableAnnotationRendering(true)
                     enableDoubletap(true)
@@ -140,11 +142,15 @@ class PreviewPDFFragment : PreviewFragment() {
                     spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
                     swipeHorizontal(false)
                     touchPriority(true)
-                    onLoad { pageCount -> updatePageNumber(totalPage = pageCount) }
+                    onLoad { pageCount ->
+                        // Here, we know we have the password dialog on top if password != null so we have to dismiss it
+                        if (password != null) navController.popBackStack()
+                        updatePageNumber(totalPage = pageCount)
+                    }
                     onPageChange { currentPage, pageCount ->
                         updatePageNumber(currentPage = currentPage, totalPage = pageCount)
                     }
-					onError(onPdfLoadError)
+                    onError(onPdfLoadError)
                     load()
                 }
 
