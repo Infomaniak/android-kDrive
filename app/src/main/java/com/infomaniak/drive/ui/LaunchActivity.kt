@@ -54,6 +54,7 @@ class LaunchActivity : AppCompatActivity() {
             handleDeeplink()
             handleShortcuts()
 
+            // TODO: Refactor in another PR
             val destinationClass = getDestinationClass()
 
             if (destinationClass == LockActivity::class.java) {
