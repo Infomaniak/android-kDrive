@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -36,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@SuppressLint("CustomSplashScreen")
 class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
@@ -81,27 +83,6 @@ class LaunchActivity : AppCompatActivity() {
                     driveId = it.destinationDriveId,
                     fileId = it.destinationRemoteFolderId
                 )
-            }
-        }
-    }
-
-    private suspend fun getDestinationClass() = withContext(Dispatchers.IO) {
-        if (AccountUtils.requestCurrentUser() == null) {
-            LoginActivity::class.java
-        } else {
-            trackUserId(AccountUtils.currentUserId)
-
-            // When DriveInfosController is migrated
-            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
-                AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
-            }
-
-            when {
-                DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance } -> {
-                    MaintenanceActivity::class.java
-                }
-                isKeyguardSecure() && AppSettings.appSecurityLock -> LockActivity::class.java
-                else -> MainActivity::class.java
             }
         }
     }
