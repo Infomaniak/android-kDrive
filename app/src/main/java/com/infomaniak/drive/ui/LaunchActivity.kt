@@ -54,24 +54,7 @@ class LaunchActivity : AppCompatActivity() {
             handleDeeplink()
             handleShortcuts()
 
-            val destinationClass = if (AccountUtils.requestCurrentUser() == null) {
-                LoginActivity::class.java
-            } else {
-                trackUserId(AccountUtils.currentUserId)
-
-                // When DriveInfosController is migrated
-                if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
-                    AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
-                }
-
-                when {
-                    DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance } -> {
-                        MaintenanceActivity::class.java
-                    }
-                    isKeyguardSecure() && AppSettings.appSecurityLock -> LockActivity::class.java
-                    else -> MainActivity::class.java
-                }
-            }
+            val destinationClass = getDestinationClass()
 
             if (destinationClass == LockActivity::class.java) {
                 LockActivity.startAppLockActivity(
@@ -107,6 +90,27 @@ class LaunchActivity : AppCompatActivity() {
                     driveId = it.destinationDriveId,
                     fileId = it.destinationRemoteFolderId
                 )
+            }
+        }
+    }
+
+    private suspend fun getDestinationClass() = withContext(Dispatchers.IO) {
+        if (AccountUtils.requestCurrentUser() == null) {
+            LoginActivity::class.java
+        } else {
+            trackUserId(AccountUtils.currentUserId)
+
+            // When DriveInfosController is migrated
+            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
+                AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
+            }
+
+            when {
+                DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance } -> {
+                    MaintenanceActivity::class.java
+                }
+                isKeyguardSecure() && AppSettings.appSecurityLock -> LockActivity::class.java
+                else -> MainActivity::class.java
             }
         }
     }
