@@ -101,26 +101,26 @@ class PreviewPDFFragment : PreviewFragment() {
         super.onPause()
     }
 
-    private fun showPdf(file: IOFile) = with(binding) {
+    private fun showPdf() = with(binding) {
         lifecycleScope.launch {
             withResumed {
                 downloadLayout.root.isGone = true
-                pdfView.fromFile(file)
-                pdfView.fromFile(pdfFile)
-                    .enableAnnotationRendering(true)
-                    .enableDoubletap(true)
-                    .swipeHorizontal(false)
-                    .scrollHandle(DefaultScrollHandle(requireContext()))
-                    .disableLongpress()
-                    .pageFling(false)
-                    .pageSnap(false)
-                    .spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
-                    .touchPriority(true)
-                    .onLoad { pageCount -> updatePageNumber(totalPage = pageCount) }
-                    .onPageChange { currentPage, pageCount ->
+                with(pdfView.fromFile(pdfFile)) {
+                    disableLongpress()
+                    enableAnnotationRendering(true)
+                    enableDoubletap(true)
+                    pageFling(false)
+                    pageSnap(false)
+                    scrollHandle(DefaultScrollHandle(requireContext()))
+                    spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
+                    swipeHorizontal(false)
+                    touchPriority(true)
+                    onLoad { pageCount -> updatePageNumber(totalPage = pageCount) }
+                    onPageChange { currentPage, pageCount ->
                         updatePageNumber(currentPage = currentPage, totalPage = pageCount)
                     }
-                    .load()
+                    load()
+                }
 
                 getPageNumberChip()?.isVisible = true
             }
@@ -139,7 +139,7 @@ class PreviewPDFFragment : PreviewFragment() {
                 .observe(viewLifecycleOwner) { apiResponse ->
                     apiResponse.data?.let { pdfFile ->
                         this@PreviewPDFFragment.pdfFile = pdfFile
-                        showPdf(pdfFile)
+                        showPdf()
                     } ?: run {
                         downloadProgress.isGone = true
                         previewDescription.setText(apiResponse.translatedError)
@@ -148,6 +148,8 @@ class PreviewPDFFragment : PreviewFragment() {
                     previewSliderViewModel.pdfIsDownloading.value = false
                     isDownloading = false
                 }
+        } else {
+            showPdf()
         }
     }
 
