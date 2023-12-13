@@ -29,12 +29,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogFragmentPasswordBinding
 
 class PasswordDialogFragment : DialogFragment() {
-
-    companion object {
-        private const val NAVIGATION_ARG_PASSWORD_KEY = "password"
-        private const val NAVIGATION_ARG_IS_CANCELED_KEY = "isCanceled"
-    }
-
     private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
     private val navigationArgs: PasswordDialogFragmentArgs by navArgs()
 
@@ -94,5 +88,10 @@ class PasswordDialogFragment : DialogFragment() {
         binding.passwordEditText.text?.clear()
         binding.passwordTextLayout.isErrorEnabled = true
         binding.passwordTextLayout.error = getString(R.string.wrongPdfPassword)
+    }
+
+    companion object {
+        private const val NAVIGATION_ARG_PASSWORD_KEY = "password"
+        private const val NAVIGATION_ARG_IS_CANCELED_KEY = "isCanceled"
     }
 }
