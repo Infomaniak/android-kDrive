@@ -52,6 +52,7 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
+import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
@@ -148,6 +149,8 @@ class MainActivity : BaseActivity() {
     private val inAppUpdateResultLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
         uiSettings.isUserWantingUpdates = result.resultCode == RESULT_OK
     }
+
+    private var inAppUpdateSnackbar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -277,15 +280,15 @@ class MainActivity : BaseActivity() {
             onFailure = {
                 Sentry.captureException(it)
                 uiSettings.resetUpdateSettings()
-                showSnackbar(getString(R.string.errorUpdateInstall))
+                showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab())
             },
         )
     }
 
     private fun observeAppUpdateDownload() {
         mainViewModel.canInstallUpdate.observe(this) { isUploadDownloaded ->
-            if (isUploadDownloaded) {
-                showIndefiniteSnackbar(
+            if (isUploadDownloaded && canDisplayInAppSnackbar()) {
+                inAppUpdateSnackbar = showIndefiniteSnackbar(
                     title = R.string.updateReadyTitle,
                     actionButtonTitle = R.string.common_google_play_services_install_button,
                     anchor = getMainFab(),
@@ -294,6 +297,8 @@ class MainActivity : BaseActivity() {
             }
         }
     }
+
+    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
     //endregion
 
     override fun onResume() {
