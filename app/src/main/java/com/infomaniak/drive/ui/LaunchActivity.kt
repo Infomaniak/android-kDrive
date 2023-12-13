@@ -17,22 +17,18 @@
  */
 package com.infomaniak.drive.ui
 
-import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackScreen
-import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
-import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.LaunchDestination
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.applock.LockActivity
-import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -54,21 +50,8 @@ class LaunchActivity : AppCompatActivity() {
             handleDeeplink()
             handleShortcuts()
 
-            // TODO: Refactor in another PR
-            val destinationClass = getDestinationClass()
+            LaunchDestination.startApp(this@LaunchActivity, extrasMainActivity)
 
-            if (destinationClass == LockActivity::class.java) {
-                LockActivity.startAppLockActivity(
-                    context = this@LaunchActivity,
-                    destinationClass = MainActivity::class.java,
-                    destinationClassArgs = extrasMainActivity
-                )
-            } else {
-                Intent(this@LaunchActivity, destinationClass).apply {
-                    if (destinationClass == MainActivity::class.java) extrasMainActivity?.let(::putExtras)
-                    startActivity(this)
-                }
-            }
         }
         trackScreen()
     }
