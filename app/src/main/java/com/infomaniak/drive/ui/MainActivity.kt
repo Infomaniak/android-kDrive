@@ -155,18 +155,17 @@ class MainActivity : BaseActivity() {
 
         downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
-        val navController = setupNavController()
 
-        setupBottomNavigation(navController)
-        handleNavigateToDestinationFileId(navController)
+        setupBottomNavigation()
+        handleNavigateToDestinationFileId()
         listenToNetworkStatus()
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
-        setupMainFab(navController)
+        setupMainFab()
         setupDrivePermissions()
         handleInAppReview()
-        handleShortcuts(navController)
+        handleShortcuts()
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
@@ -176,7 +175,7 @@ class MainActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        handleUpdates(navController)
+        handleUpdates()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -187,7 +186,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setupBottomNavigation(navController: NavController) = with(binding) {
+    private fun setupBottomNavigation() = with(binding) {
         bottomNavigation.apply {
             setupWithNavControllerCustom(navController)
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
@@ -204,7 +203,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleNavigateToDestinationFileId(navController: NavController) {
+    private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
                 binding.bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
@@ -231,7 +230,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setupMainFab(navController: NavController) = with(binding) {
+    private fun setupMainFab() = with(binding) {
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
         mainViewModel.currentFolder.observe(this@MainActivity) { file ->
             mainFab.isEnabled = file?.rights?.canCreateFile == true
@@ -258,7 +257,7 @@ class MainActivity : BaseActivity() {
         )
     }
 
-    private fun handleUpdates(navController: NavController) {
+    private fun handleUpdates() {
         if (uiSettings.isUserWantingUpdates || AppSettings.appLaunches % 10 == 0) {
             checkUpdateIsAvailable(
                 appId = BuildConfig.APPLICATION_ID,
@@ -284,8 +283,8 @@ class MainActivity : BaseActivity() {
     }
 
     private fun observeAppUpdateDownload() {
-        mainViewModel.canInstallUpdate.observe(this) { canInstallUpdate ->
-            if (canInstallUpdate) {
+        mainViewModel.canInstallUpdate.observe(this) { isUploadDownloaded ->
+            if (isUploadDownloaded) {
                 showIndefiniteSnackbar(
                     title = R.string.updateReadyTitle,
                     actionButtonTitle = R.string.common_google_play_services_install_button,
@@ -435,7 +434,7 @@ class MainActivity : BaseActivity() {
         bottomNavigationBackgroundView.isVisible = isVisible
     }
 
-    private fun handleShortcuts(navController: NavController) = with(mainViewModel) {
+    private fun handleShortcuts() = with(mainViewModel) {
         navigationArgs?.shortcutId?.let { shortcutId ->
             trackEvent("shortcuts", shortcutId)
 
