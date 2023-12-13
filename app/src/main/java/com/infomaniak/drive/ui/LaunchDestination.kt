@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.utils
+package com.infomaniak.drive.ui
 
 import android.content.Context
 import android.content.Intent
@@ -24,9 +24,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.drive.ui.MaintenanceActivity
 import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import kotlinx.coroutines.Dispatchers

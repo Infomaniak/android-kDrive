@@ -28,7 +28,6 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.LaunchDestination
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
