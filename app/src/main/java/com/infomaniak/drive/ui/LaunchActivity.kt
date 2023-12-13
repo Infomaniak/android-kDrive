@@ -52,6 +52,9 @@ class LaunchActivity : AppCompatActivity() {
 
             LaunchDestination.startApp(this@LaunchActivity, extrasMainActivity)
 
+            // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
+            // so that even when we return, the activity will still be closed.
+            finish()
         }
         trackScreen()
     }
