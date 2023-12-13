@@ -29,7 +29,9 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogFragmentPasswordBinding
 
 class PasswordDialogFragment : DialogFragment() {
+
     private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
+
     private val navigationArgs: PasswordDialogFragmentArgs by navArgs()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -85,9 +87,11 @@ class PasswordDialogFragment : DialogFragment() {
     }
 
     private fun onWrongPasswordEntered() {
-        binding.passwordEditText.text?.clear()
-        binding.passwordTextLayout.isErrorEnabled = true
-        binding.passwordTextLayout.error = getString(R.string.wrongPdfPassword)
+        with(binding) {
+            passwordEditText.text?.clear()
+            passwordTextLayout.isErrorEnabled = true
+            passwordTextLayout.error = getString(R.string.wrongPdfPassword)
+        }
     }
 
     companion object {
