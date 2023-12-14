@@ -122,6 +122,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override val noItemsInitialListView: View
         get() = binding.fileRecyclerView
 
+    val fileRecyclerView get() = _binding?.fileRecyclerView
+
     protected var userDrive: UserDrive? = null
 
     private val selectAllTimer: CountDownTimer by lazy {
@@ -328,7 +330,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         fileListViewModel.isListMode.value?.let { isListMode ->
-            if (!isListMode) binding.fileRecyclerView.layoutManager = createLayoutManager(isListMode)
+            if (!isListMode) fileRecyclerView?.layoutManager = createLayoutManager(isListMode)
         }
     }
 

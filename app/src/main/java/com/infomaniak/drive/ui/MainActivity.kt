@@ -82,8 +82,8 @@ import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import com.infomaniak.lib.stores.checkUpdateIsAvailable
-import com.infomaniak.lib.stores.launchInAppReview
+import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsAvailable
+import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel

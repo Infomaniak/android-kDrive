@@ -205,9 +205,7 @@ class UploadInProgressFragment : FileListFragment() {
                 if (isPendingFolders()) UploadFile.deleteAll(null)
                 else UploadFile.deleteAll(folderId = it)
 
-                binding.fileRecyclerView.post {
-                    fileAdapter.setFiles(listOf())
-                }
+                fileRecyclerView?.post { fileAdapter.setFiles(listOf()) }
 
                 needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(folderId = it) == 0
             }
