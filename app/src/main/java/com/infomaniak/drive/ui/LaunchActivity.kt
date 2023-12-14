@@ -17,7 +17,9 @@
  */
 package com.infomaniak.drive.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -40,6 +42,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@SuppressLint("CustomSplashScreen")
 class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
@@ -54,28 +57,66 @@ class LaunchActivity : AppCompatActivity() {
             handleDeeplink()
             handleShortcuts()
 
-            // TODO: Refactor in another PR
-            val destinationClass = getDestinationClass()
+            startApp()
 
-            if (destinationClass == LockActivity::class.java) {
-                LockActivity.startAppLockActivity(
-                    context = this@LaunchActivity,
-                    destinationClass = MainActivity::class.java,
-                    destinationClassArgs = extrasMainActivity
-                )
-            } else {
-                Intent(this@LaunchActivity, destinationClass).apply {
-                    if (destinationClass == MainActivity::class.java) extrasMainActivity?.let(::putExtras)
-                    startActivity(this)
-                }
-            }
+            // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
+            // so that even when we return, the activity will still be closed.
+            finish()
         }
         trackScreen()
     }
 
     override fun onPause() {
         super.onPause()
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, android.R.anim.fade_in, android.R.anim.fade_out)
+        } else {
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
+    }
+
+    private suspend fun startApp() {
+
+        val destinationClass = getDestinationClass()
+
+        if (destinationClass == LockActivity::class.java) {
+            LockActivity.startAppLockActivity(
+                context = this,
+                destinationClass = MainActivity::class.java,
+                destinationClassArgs = extrasMainActivity
+            )
+        } else {
+            val intent = Intent(this, destinationClass).apply {
+                if (destinationClass == MainActivity::class.java) extrasMainActivity?.let(::putExtras)
+            }
+
+            startActivity(intent)
+        }
+    }
+
+    private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
+        if (AccountUtils.requestCurrentUser() == null) {
+            LoginActivity::class.java
+        } else {
+            loggedUserDestination()
+        }
+    }
+
+    private suspend fun loggedUserDestination(): Class<out AppCompatActivity> {
+        trackUserId(AccountUtils.currentUserId)
+
+        // When DriveInfosController is migrated
+        if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
+            AccountUtils.updateCurrentUserAndDrives(this)
+        }
+
+        val areAllDrivesInMaintenance = DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance }
+
+        return when {
+            areAllDrivesInMaintenance -> MaintenanceActivity::class.java
+            isKeyguardSecure() && AppSettings.appSecurityLock -> LockActivity::class.java
+            else -> MainActivity::class.java
+        }
     }
 
     private fun handleNotificationDestinationIntent() {
@@ -91,27 +132,6 @@ class LaunchActivity : AppCompatActivity() {
                     driveId = it.destinationDriveId,
                     fileId = it.destinationRemoteFolderId
                 )
-            }
-        }
-    }
-
-    private suspend fun getDestinationClass() = withContext(Dispatchers.IO) {
-        if (AccountUtils.requestCurrentUser() == null) {
-            LoginActivity::class.java
-        } else {
-            trackUserId(AccountUtils.currentUserId)
-
-            // When DriveInfosController is migrated
-            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
-                AccountUtils.updateCurrentUserAndDrives(this@LaunchActivity)
-            }
-
-            when {
-                DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance } -> {
-                    MaintenanceActivity::class.java
-                }
-                isKeyguardSecure() && AppSettings.appSecurityLock -> LockActivity::class.java
-                else -> MainActivity::class.java
             }
         }
     }
