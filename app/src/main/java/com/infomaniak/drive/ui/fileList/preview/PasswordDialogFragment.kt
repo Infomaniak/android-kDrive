@@ -76,7 +76,6 @@ class PasswordDialogFragment : DialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        isCancelable = false
         binding.passwordEditText.requestFocus()
         dialog?.showKeyboard()
         if (navigationArgs.isWrongPassword) onWrongPasswordEntered()
