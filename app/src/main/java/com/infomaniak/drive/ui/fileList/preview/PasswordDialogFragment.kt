@@ -27,28 +27,39 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogFragmentPasswordBinding
+import com.infomaniak.lib.core.utils.showKeyboard
 
 class PasswordDialogFragment : DialogFragment() {
 
     private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
 
+    private val navController by lazy { findNavController() }
+
     private val navigationArgs: PasswordDialogFragmentArgs by navArgs()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        binding.validate.setOnClickListener {
-            sendPassword()
-        }
-        binding.cancel.setOnClickListener {
-            findNavController().apply {
-                previousBackStackEntry?.savedStateHandle?.set(NAVIGATION_ARG_IS_CANCELED_KEY, true)
-                navigateUp()
+        isCancelable = false
+
+        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
+            .setTitle(R.string.pdfIsLocked)
+            .setPositiveButton(R.string.buttonValid) { _, _ -> sendPassword() }
+            .setNegativeButton(R.string.buttonCancel) { _, _ ->
+                navController.apply {
+                    previousBackStackEntry?.savedStateHandle?.set(NAVIGATION_ARG_IS_CANCELED_KEY, true)
+                    navigateUp()
+                }
             }
-        }
+            .setView(binding.root)
+            .create()
+
         binding.passwordEditText.apply {
             addTextChangedListener {
-                binding.passwordTextLayout.isErrorEnabled = false
-                binding.passwordTextLayout.error = null
+                with(binding) {
+                    passwordLayout.isErrorEnabled = false
+                    passwordEditText.error = null
+                }
             }
+
             setOnEditorActionListener { _, actionId, _ ->
                 when (actionId) {
                     EditorInfo.IME_ACTION_DONE -> {
@@ -60,25 +71,19 @@ class PasswordDialogFragment : DialogFragment() {
             }
         }
 
-        if (navigationArgs.isWrongPassword) {
-            onWrongPasswordEntered()
-        }
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setView(binding.root)
-            .create().apply {
-                setCanceledOnTouchOutside(false)
-                return this
-            }
+        return dialog
     }
 
     override fun onStart() {
         super.onStart()
         isCancelable = false
+        binding.passwordEditText.requestFocus()
+        dialog?.showKeyboard()
+        if (navigationArgs.isWrongPassword) onWrongPasswordEntered()
     }
 
     private fun sendPassword() {
-        findNavController().apply {
+        navController.apply {
             previousBackStackEntry?.savedStateHandle?.set(
                 NAVIGATION_ARG_PASSWORD_KEY,
                 binding.passwordEditText.text.toString()
@@ -89,8 +94,10 @@ class PasswordDialogFragment : DialogFragment() {
     private fun onWrongPasswordEntered() {
         with(binding) {
             passwordEditText.text?.clear()
-            passwordTextLayout.isErrorEnabled = true
-            passwordTextLayout.error = getString(R.string.wrongPdfPassword)
+            with(passwordLayout) {
+                isErrorEnabled = true
+                error = getString(R.string.wrongPdfPassword)
+            }
         }
     }
 

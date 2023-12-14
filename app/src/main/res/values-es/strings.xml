@@ -30,6 +30,7 @@
     <string name="alertRemoveUserDescription">¿Estás seguro/a de que deseas retirar al usuario “%s” de esta aplicación?</string>
     <string name="alertRemoveUserTitle">Retirar al usuario</string>
     <string name="allActivated">Activado</string>
+    <string name="allActivityNotFoundError">No hay ninguna aplicación instalada compatible con este archivo</string>
     <string name="allAddExpirationDateTitle">Añadir una fecha de caducidad</string>
     <string name="allAllDriveUsers">Todos los usuarios del kDrive</string>
     <string name="allArchive">Registros</string>
@@ -135,7 +136,6 @@
     <string name="buttonNoDriveFreeTest">Probar gratuitamente</string>
     <string name="buttonOpenDocument">Abrir el documento</string>
     <string name="buttonOpenReadOnly">Abrir en modo de solo lectura</string>
-    <string name="buttonOpenWith">Abrir con</string>
     <string name="buttonPlayerFfwd">Avanzar unos segundos</string>
     <string name="buttonPlayerNext">Siguiente</string>
     <string name="buttonPlayerPlayPause">Lectura/Pausa</string>
@@ -525,6 +525,7 @@
     <string name="onBoardingTitle1">Accede a tus archivos en todos tus dispositivos</string>
     <string name="onBoardingTitle2">Trabaja en grupo en un mismo lugar y gana en eficacia</string>
     <string name="onBoardingTitle3">Haz copia de seguridad de tus recuerdos</string>
+    <string name="pdfIsLocked">Tu PDF está bloqueado</string>
     <string name="picturesNoFile">Todavía no hay fotos</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparando la importación de 1 archivo</item>

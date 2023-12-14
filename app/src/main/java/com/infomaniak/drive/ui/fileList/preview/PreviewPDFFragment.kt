@@ -67,18 +67,15 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private var pdfFile: IOFile? = null
     private var isDownloading = false
+    private var hasEnteredPassword = false
 
     private val onPdfLoadError: OnErrorListener = OnErrorListener {
-        findNavController().apply {
-            if (currentDestination?.id == R.id.pdfPasswordDialog) {
-                popBackStack(R.id.pdfPasswordDialog, true)
-                navigate(
-                    R.id.action_previewSliderFragment_to_pdfPasswordDialog,
-                    PasswordDialogFragmentArgs(isWrongPassword = true).toBundle()
-                )
-            } else {
-                navigate(R.id.action_previewSliderFragment_to_pdfPasswordDialog)
-            }
+        navController.apply {
+            if (currentDestination?.id == R.id.pdfPasswordDialog) navigateUp()
+            navigate(
+                R.id.action_previewSliderFragment_to_pdfPasswordDialog,
+                PasswordDialogFragmentArgs(isWrongPassword = hasEnteredPassword).toBundle()
+            )
         }
     }
 
@@ -118,13 +115,9 @@ class PreviewPDFFragment : PreviewFragment() {
             downloadProgress.progress = progress
         }
 
-        findNavController().currentBackStackEntry?.savedStateHandle?.apply {
-            getLiveData<String>("password").observe(viewLifecycleOwner) { password ->
-                showPdf(password)
-            }
-            getLiveData<Boolean>("isCanceled").observe(viewLifecycleOwner) {
-                navController.popBackStack()
-            }
+        navController.currentBackStackEntry?.savedStateHandle?.apply {
+            getLiveData<String>(NAVIGATION_ARG_PASSWORD).observe(viewLifecycleOwner) { password -> showPdf(password) }
+            getLiveData<Boolean>(NAVIGATION_ARG_IS_CANCELED).observe(viewLifecycleOwner) { navController.popBackStack() }
         }
     }
 
@@ -141,6 +134,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun showPdf(password: String? = null) = with(binding) {
+        hasEnteredPassword = password != null
         lifecycleScope.launch {
             withResumed {
                 downloadLayout.root.isGone = true
@@ -229,6 +223,8 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     companion object {
+        private const val NAVIGATION_ARG_PASSWORD = "password"
+        private const val NAVIGATION_ARG_IS_CANCELED = "isCanceled"
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
         private const val WIDTH_HANDLE_DP = 65
         private const val HEIGHT_HANDLE_DP = 40
