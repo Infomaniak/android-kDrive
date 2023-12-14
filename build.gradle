@@ -1,18 +1,18 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
 
-    project.ext.kotlinVersion = '1.8.22'
+    project.ext.kotlinVersion = '1.9.21'
 
     repositories {
         google()
     }
 
     dependencies {
-        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:2.5.3'
+        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:2.7.5'
         classpath 'io.realm:realm-gradle-plugin:10.15.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath 'com.android.tools.build:gradle:8.1.4'
-        classpath 'com.google.gms:google-services:4.3.15'
+        classpath 'com.android.tools.build:gradle:8.2.0'
+        classpath 'com.google.gms:google-services:4.4.0'
         classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.9.3.0'
     }
 }
@@ -32,4 +32,4 @@ allprojects {
     }
 }
 
-task clean(type: Delete) { delete rootProject.buildDir }
+tasks.register('clean', Delete) { delete rootProject.layout.buildDirectory }
