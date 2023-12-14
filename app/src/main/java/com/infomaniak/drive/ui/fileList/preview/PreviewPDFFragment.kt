@@ -221,7 +221,7 @@ class PreviewPDFFragment : PreviewFragment() {
     companion object {
         private const val NAVIGATION_ARG_PASSWORD = "password"
         private const val NAVIGATION_ARG_IS_CANCELED = "isCanceled"
-        
+
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
         private const val WIDTH_HANDLE_DP = 65
         private const val HEIGHT_HANDLE_DP = 40
