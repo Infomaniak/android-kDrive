@@ -150,8 +150,7 @@ class PreviewPDFFragment : PreviewFragment() {
                     swipeHorizontal(false)
                     touchPriority(true)
                     onLoad { pageCount ->
-                        // Here, we know we have the password dialog on top if password != null so we have to dismiss it
-                        if (password != null) navController.popBackStack()
+                        if (navController.currentDestination?.id == R.id.pdfPasswordDialog) navController.popBackStack()
                         updatePageNumber(totalPage = pageCount)
                     }
                     onPageChange { currentPage, pageCount ->
