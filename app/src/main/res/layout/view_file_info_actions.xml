@@ -305,7 +305,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"
                     android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonOpenWith"
+                    android:text="@string/openWith"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/openWithIcon"
