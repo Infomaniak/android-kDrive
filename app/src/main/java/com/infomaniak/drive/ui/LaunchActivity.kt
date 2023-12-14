@@ -18,17 +18,23 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackScreen
+import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
+import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.lib.applock.LockActivity
+import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -51,7 +57,7 @@ class LaunchActivity : AppCompatActivity() {
             handleDeeplink()
             handleShortcuts()
 
-            LaunchDestination.startApp(this@LaunchActivity, extrasMainActivity)
+            startApp()
 
             // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
             // so that even when we return, the activity will still be closed.
@@ -66,6 +72,50 @@ class LaunchActivity : AppCompatActivity() {
             overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, android.R.anim.fade_in, android.R.anim.fade_out)
         } else {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
+    }
+
+    private suspend fun startApp() {
+
+        val destinationClass = getDestinationClass()
+
+        if (destinationClass == LockActivity::class.java) {
+            LockActivity.startAppLockActivity(
+                context = this,
+                destinationClass = MainActivity::class.java,
+                destinationClassArgs = extrasMainActivity
+            )
+        } else {
+            val intent = Intent(this, destinationClass).apply {
+                if (destinationClass == MainActivity::class.java) extrasMainActivity?.let(::putExtras)
+            }
+
+            startActivity(intent)
+        }
+    }
+
+    private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
+        if (AccountUtils.requestCurrentUser() == null) {
+            LoginActivity::class.java
+        } else {
+            loggedUserDestination()
+        }
+    }
+
+    private suspend fun loggedUserDestination(): Class<out AppCompatActivity> {
+        trackUserId(AccountUtils.currentUserId)
+
+        // When DriveInfosController is migrated
+        if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId) == 0L) {
+            AccountUtils.updateCurrentUserAndDrives(this)
+        }
+
+        val areAllDrivesInMaintenance = DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance }
+
+        return when {
+            areAllDrivesInMaintenance -> MaintenanceActivity::class.java
+            isKeyguardSecure() && AppSettings.appSecurityLock -> LockActivity::class.java
+            else -> MainActivity::class.java
         }
     }
 
