@@ -41,7 +41,6 @@
     <string name="alertRemoveUserDescription">Are you sure you want to remove the user “%s” from this application?</string>
     <string name="alertRemoveUserTitle">Remove user</string>
     <string name="allActivated">Enabled</string>
-    <string name="allActivityNotFoundError">This file is not supported by any installed application</string>
     <string name="allAddExpirationDateTitle">Add an expiry date</string>
     <string name="allAllDriveUsers">All kDrive users</string>
     <string name="allArchive">Archives</string>
