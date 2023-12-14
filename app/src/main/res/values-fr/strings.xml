@@ -135,7 +135,6 @@
     <string name="buttonNoDriveFreeTest">Tester gratuitement</string>
     <string name="buttonOpenDocument">Ouvrir le document</string>
     <string name="buttonOpenReadOnly">Ouvrir en lecture seule</string>
-    <string name="buttonOpenWith">Ouvrir avec</string>
     <string name="buttonPlayerFfwd">Avancer de quelques secondes</string>
     <string name="buttonPlayerNext">Suivant</string>
     <string name="buttonPlayerPlayPause">Lecture/Pause</string>
