@@ -41,6 +41,7 @@
     <string name="alertRemoveUserDescription">Are you sure you want to remove the user “%s” from this application?</string>
     <string name="alertRemoveUserTitle">Remove user</string>
     <string name="allActivated">Enabled</string>
+    <string name="allActivityNotFoundError">This file is not supported by any installed application</string>
     <string name="allAddExpirationDateTitle">Add an expiry date</string>
     <string name="allAllDriveUsers">All kDrive users</string>
     <string name="allArchive">Archives</string>
@@ -146,7 +147,6 @@
     <string name="buttonNoDriveFreeTest">Free trial</string>
     <string name="buttonOpenDocument">Open document</string>
     <string name="buttonOpenReadOnly">Open in read-only mode</string>
-    <string name="buttonOpenWith">Open with</string>
     <string name="buttonPlayerFfwd">Forward a few seconds</string>
     <string name="buttonPlayerNext">Next</string>
     <string name="buttonPlayerPlayPause">Play/Pause</string>
@@ -536,6 +536,7 @@
     <string name="onBoardingTitle1">Access your files on all your devices</string>
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
+    <string name="pdfIsLocked">Your PDF is locked</string>
     <string name="picturesNoFile">No photo at this time</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparing to upload 1 file</item>
