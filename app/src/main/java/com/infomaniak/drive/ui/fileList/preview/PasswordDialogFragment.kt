@@ -46,7 +46,6 @@ class PasswordDialogFragment : DialogFragment() {
             .setNegativeButton(R.string.buttonCancel) { _, _ ->
                 navController.apply {
                     previousBackStackEntry?.savedStateHandle?.set(NAVIGATION_ARG_IS_CANCELED_KEY, true)
-                    navigateUp()
                 }
             }
             .setView(binding.root)
