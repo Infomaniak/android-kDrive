@@ -46,31 +46,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-
 class PreviewPDFFragment : PreviewFragment() {
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
     private val navController by lazy { findNavController() }
 
-    companion object {
-        private const val WIDTH_HANDLE_DP = 65
-        private const val HEIGHT_HANDLE_DP = 40
-        private const val HANDLE_PAGE_PDF_PADDING_TOP = 100
-        private const val HANDLE_PAGE_PDF_PADDING_BOTTOM = 130
-        private const val HANDLE_VERTICAL_MARGIN_DP = 16
-    }
-
     private var binding: FragmentPreviewPdfBinding by safeBinding()
-
-    private var previewPDFAdapter: PreviewPDFAdapter? = null
-    private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
             val handle: View = layoutInflater.inflate(R.layout.pdf_handle_view, null)
             setPageHandleView(handle, handle.findViewById(R.id.pageIndicator))
             setHandleSize(WIDTH_HANDLE_DP, HEIGHT_HANDLE_DP)
-            setHandlePaddings(0, HANDLE_PAGE_PDF_PADDING_TOP, 0, HANDLE_PAGE_PDF_PADDING_BOTTOM)
+            setHandlePaddings(0, HANDLE_PAGE_PDF_PADDING_TOP_DP, 0, HANDLE_PAGE_PDF_PADDING_BOTTOM_DP)
             setTextColor(ContextCompat.getColor(context, R.color.white))
         }
     }
@@ -87,12 +75,6 @@ class PreviewPDFFragment : PreviewFragment() {
                 PasswordDialogFragmentArgs(isWrongPassword = hasEnteredPassword).toBundle()
             )
         }
-    }
-
-    private val onPdfLoadError: OnErrorListener = OnErrorListener {
-        PasswordDialogFragment { password ->
-            showPdf(password)
-        }.show(parentFragmentManager, this.javaClass::class.toString())
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -239,6 +221,11 @@ class PreviewPDFFragment : PreviewFragment() {
     companion object {
         private const val NAVIGATION_ARG_PASSWORD = "password"
         private const val NAVIGATION_ARG_IS_CANCELED = "isCanceled"
+        
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
+        private const val WIDTH_HANDLE_DP = 65
+        private const val HEIGHT_HANDLE_DP = 40
+        private const val HANDLE_PAGE_PDF_PADDING_TOP_DP = 120
+        private const val HANDLE_PAGE_PDF_PADDING_BOTTOM_DP = 130
     }
 }
