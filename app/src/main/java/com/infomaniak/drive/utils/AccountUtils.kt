@@ -88,7 +88,7 @@ object AccountUtils : CredentialManager() {
 
     private var currentDrive: Drive? = null
 
-    fun requestCurrentUser(): User? {
+    suspend fun requestCurrentUser(): User? {
         currentUser = getUserById(currentUserId)
         if (currentUser == null) {
             currentUser = userDatabase.userDao().getFirst()
