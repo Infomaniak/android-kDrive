@@ -46,6 +46,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
+
+    private var binding: FragmentPreviewPdfBinding by safeBinding()
+
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
     private val passwordDialog by lazy { PasswordDialogFragment() }
