@@ -82,17 +82,17 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
         fileName.text = file.name
         downloadProgress.isVisible = true
 
-        previewDescription.apply {
+        with(previewDescription) {
             setText(R.string.previewDownloadIndication)
             isVisible = true
         }
 
-        root.apply {
+        with(root) {
             isVisible = true
             setOnClickListener { toggleFullscreen() }
         }
 
-        bigOpenWithButton.apply {
+        with(bigOpenWithButton) {
             isGone = true
             setOnClickListener { openWithClicked() }
         }
