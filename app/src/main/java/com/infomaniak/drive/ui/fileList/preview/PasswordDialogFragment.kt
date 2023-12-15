@@ -73,7 +73,7 @@ class PasswordDialogFragment : DialogFragment() {
     }
 
     private fun initPasswordField() {
-        binding.passwordEditText.apply {
+        with(binding.passwordEditText) {
             addTextChangedListener {
                 with(binding) {
                     passwordLayout.isErrorEnabled = false
