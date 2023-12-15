@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -49,9 +50,18 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
+    private val scrollHandle by lazy {
+        DefaultScrollHandle(requireContext()).apply {
+            val handle: View = layoutInflater.inflate(R.layout.pdf_handle_view, null)
+            setPageHandleView(handle, handle.findViewById(R.id.pageIndicator))
+            setHandleSize(WIDTH_HANDLE_DP, HEIGHT_HANDLE_DP)
+            setHandlePaddings(0, HANDLE_PAGE_PDF_PADDING_TOP_DP, 0, HANDLE_PAGE_PDF_PADDING_BOTTOM_DP)
+            setTextColor(ContextCompat.getColor(context, R.color.white))
+        }
+    }
+
     private var pdfFile: IOFile? = null
     private var isDownloading = false
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPdfBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -111,7 +121,7 @@ class PreviewPDFFragment : PreviewFragment() {
                     enableDoubletap(true)
                     pageFling(false)
                     pageSnap(false)
-                    scrollHandle(DefaultScrollHandle(requireContext()))
+                    scrollHandle(scrollHandle)
                     spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
                     swipeHorizontal(false)
                     touchPriority(true)
@@ -185,5 +195,9 @@ class PreviewPDFFragment : PreviewFragment() {
 
     companion object {
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
+        private const val WIDTH_HANDLE_DP = 65
+        private const val HEIGHT_HANDLE_DP = 40
+        private const val HANDLE_PAGE_PDF_PADDING_TOP_DP = 120
+        private const val HANDLE_PAGE_PDF_PADDING_BOTTOM_DP = 130
     }
 }
