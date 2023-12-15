@@ -28,13 +28,11 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
-import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.getPageNumberChip
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
@@ -45,17 +43,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
+class PreviewPDFFragment : PreviewFragment() {
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
-    private val passwordDialog by lazy { PasswordDialogFragment() }
-
-    private var binding: FragmentPreviewPdfBinding by safeBinding()
-
-    private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
+    private val passwordDialog: PasswordDialogFragment by lazy {
+        PasswordDialogFragment().apply {
+            onPasswordEntered = { showPdf(password = it) }
+        }
+    }
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
@@ -85,19 +83,19 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
         fileName.text = file.name
         downloadProgress.isVisible = true
 
-        with(previewDescription) {
+        previewDescription.apply {
             setText(R.string.previewDownloadIndication)
             isVisible = true
         }
 
-        with(root) {
+       root.apply {
             isVisible = true
             setOnClickListener { toggleFullscreen() }
         }
 
-        with(bigOpenWithButton) {
+        bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { openWithClicked() }
+            setOnClickListener { passwordDialog.show(childFragmentManager, PasswordDialogFragment::class.java.toString()) }
         }
 
         previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
@@ -121,7 +119,6 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
     private fun showPdf(password: String? = null) = with(binding) {
         lifecycleScope.launch {
             withResumed {
-                downloadLayout.root.isGone = true
                 with(pdfView.fromFile(pdfFile)) {
                     password(password)
                     disableLongpress()
@@ -134,17 +131,36 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
                     swipeHorizontal(false)
                     touchPriority(true)
                     onLoad { pageCount ->
+                        binding.downloadLayout.root.isGone = true
                         dismissPasswordDialog()
                         updatePageNumber(totalPage = pageCount)
                     }
                     onPageChange { currentPage, pageCount -> updatePageNumber(currentPage = currentPage, totalPage = pageCount) }
-                    onError { onPDFLoadError() }
+                    onError {
+                        if (passwordDialog.isAdded) {
+                            onPDFLoadError()
+                        } else {
+                            displayError()
+                        }
+                    }
                     load()
                 }
 
                 getPageNumberChip()?.isVisible = true
             }
         }
+    }
+
+    private fun displayError() {
+        binding.downloadLayout.apply {
+            downloadProgress.isGone = true
+            previewDescription.setText(R.string.previewFileProtectedError)
+            bigOpenWithButton.text = resources.getString(R.string.buttonUnlock)
+            bigOpenWithButton.isVisible = true
+        }
+
+        previewSliderViewModel.pdfIsDownloading.value = false
+        isDownloading = false
     }
 
     private fun dismissPasswordDialog() {
@@ -185,15 +201,6 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
         }
     }
 
-
-    override fun onPasswordEntered(password: String) {
-        showPdf(password)
-    }
-
-    override fun onCanceled() {
-        findNavController().popBackStack()
-    }
-
     class PreviewPDFViewModel(app: Application) : AndroidViewModel(app) {
         val downloadProgress = MutableLiveData<Int>()
 
@@ -203,12 +210,12 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
             pdfJob.cancel()
             pdfJob = Job()
             return liveData(Dispatchers.IO + pdfJob) {
-                val pdfCore = PreviewPDFUtils.convertPdfFileToPdfCore(context, file, userDrive) {
+                val pdfFile = PreviewPDFUtils.convertPdfFileToIOFile(context, file, userDrive) {
                     viewModelScope.launch(Dispatchers.Main) {
                         downloadProgress.value = it
                     }
                 }
-                emit(pdfCore)
+                emit(pdfFile)
             }
         }
 

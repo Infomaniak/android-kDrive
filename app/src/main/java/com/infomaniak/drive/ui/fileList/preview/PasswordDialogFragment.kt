@@ -18,8 +18,8 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
@@ -34,18 +34,16 @@ class PasswordDialogFragment : DialogFragment() {
 
     private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
 
-    private var listener: Listener? = null
+    var onPasswordEntered: ((password: String) -> Unit)? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        isCancelable = false
-
         initPasswordField()
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setTitle(R.string.pdfIsLocked)
             //Here we set the listener to null because otherwise, the dialog is dismissed automatically when we press the button
             .setPositiveButton(R.string.buttonValid, null)
-            .setNegativeButton(R.string.buttonCancel) { _, _ -> listener?.onCanceled() }
+            .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setView(binding.root)
             .create()
     }
@@ -57,9 +55,11 @@ class PasswordDialogFragment : DialogFragment() {
         dialog?.showKeyboard()
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = parentFragment as? Listener
+    override fun onDetach() {
+        // This is to avoid a crash if the user display the dialog again
+        (binding.root.parent as ViewGroup).removeView(binding.root)
+        binding.passwordEditText.text?.clear()
+        super.onDetach()
     }
 
     fun onWrongPasswordEntered() {
@@ -97,11 +97,6 @@ class PasswordDialogFragment : DialogFragment() {
     }
 
     private fun sendPassword() {
-        listener?.onPasswordEntered(binding.passwordEditText.text.toString())
-    }
-
-    interface Listener {
-        fun onPasswordEntered(password: String)
-        fun onCanceled()
+        onPasswordEntered?.invoke(binding.passwordEditText.text.toString())
     }
 }
