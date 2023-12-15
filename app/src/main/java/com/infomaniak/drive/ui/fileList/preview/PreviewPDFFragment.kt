@@ -43,17 +43,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class PreviewPDFFragment : PreviewFragment() {
+class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
-    private val passwordDialog: PasswordDialogFragment by lazy {
-        PasswordDialogFragment().apply {
-            onPasswordEntered = { showPdf(password = it) }
-        }
-    }
+    private val passwordDialog: PasswordDialogFragment by lazy { PasswordDialogFragment() }
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
@@ -88,7 +84,7 @@ class PreviewPDFFragment : PreviewFragment() {
             isVisible = true
         }
 
-       root.apply {
+        root.apply {
             isVisible = true
             setOnClickListener { toggleFullscreen() }
         }
@@ -114,6 +110,10 @@ class PreviewPDFFragment : PreviewFragment() {
     override fun onPause() {
         previewPDFViewModel.cancelJobs()
         super.onPause()
+    }
+
+    override fun onPasswordEntered(password: String) {
+        showPdf(password)
     }
 
     private fun showPdf(password: String? = null) = with(binding) {

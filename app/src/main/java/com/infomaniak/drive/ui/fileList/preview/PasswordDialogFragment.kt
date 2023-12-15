@@ -18,11 +18,13 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
+import android.text.TextWatcher
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
-import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
@@ -34,7 +36,8 @@ class PasswordDialogFragment : DialogFragment() {
 
     private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
 
-    var onPasswordEntered: ((password: String) -> Unit)? = null
+    private var listener: Listener? = null
+    private var passwordTextWatcher: TextWatcher? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         initPasswordField()
@@ -55,10 +58,18 @@ class PasswordDialogFragment : DialogFragment() {
         dialog?.showKeyboard()
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = parentFragment as? Listener
+    }
+
     override fun onDetach() {
         // This is to avoid a crash if the user display the dialog again
         (binding.root.parent as ViewGroup).removeView(binding.root)
-        binding.passwordEditText.text?.clear()
+        binding.passwordEditText.apply {
+            text?.clear()
+            removeTextChangedListener(passwordTextWatcher)
+        }
         super.onDetach()
     }
 
@@ -74,12 +85,13 @@ class PasswordDialogFragment : DialogFragment() {
 
     private fun initPasswordField() {
         with(binding.passwordEditText) {
-            addTextChangedListener {
+            passwordTextWatcher = binding.passwordEditText.doOnTextChanged { _, _, _, _ ->
                 with(binding) {
                     passwordLayout.isErrorEnabled = false
                     passwordEditText.error = null
                 }
             }
+
             handleActionDone(this)
         }
     }
@@ -97,6 +109,10 @@ class PasswordDialogFragment : DialogFragment() {
     }
 
     private fun sendPassword() {
-        onPasswordEntered?.invoke(binding.passwordEditText.text.toString())
+        listener?.onPasswordEntered(binding.passwordEditText.text.toString())
+    }
+
+    interface Listener {
+        fun onPasswordEntered(password: String)
     }
 }
