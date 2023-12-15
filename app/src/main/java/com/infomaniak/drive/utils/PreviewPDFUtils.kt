@@ -35,7 +35,7 @@ import java.io.BufferedInputStream
 object PreviewPDFUtils {
     private const val BUFFER_SIZE = 8192
 
-    fun convertPdfFileToPdfCore(
+    fun convertPdfFileToIOFile(
         context: Context,
         file: File,
         userDrive: UserDrive,
