@@ -18,13 +18,14 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
+import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.DialogFragment
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogFragmentPasswordBinding
 import com.infomaniak.lib.core.utils.showKeyboard
@@ -33,63 +34,35 @@ class PasswordDialogFragment : DialogFragment() {
 
     private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
 
-    private val navController by lazy { findNavController() }
-
-    private val navigationArgs: PasswordDialogFragmentArgs by navArgs()
+    private var listener: Listener? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         isCancelable = false
 
-        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
+        initPasswordField()
+
+        return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setTitle(R.string.pdfIsLocked)
-            .setPositiveButton(R.string.buttonValid) { _, _ -> sendPassword() }
-            .setNegativeButton(R.string.buttonCancel) { _, _ ->
-                navController.apply {
-                    previousBackStackEntry?.savedStateHandle?.set(NAVIGATION_ARG_IS_CANCELED_KEY, true)
-                }
-            }
+            //Here we set the listener to null because otherwise, the dialog is dismissed automatically when we press the button
+            .setPositiveButton(R.string.buttonValid, null)
+            .setNegativeButton(R.string.buttonCancel) { _, _ -> listener?.onCanceled() }
             .setView(binding.root)
             .create()
-
-        binding.passwordEditText.apply {
-            addTextChangedListener {
-                with(binding) {
-                    passwordLayout.isErrorEnabled = false
-                    passwordEditText.error = null
-                }
-            }
-
-            setOnEditorActionListener { _, actionId, _ ->
-                when (actionId) {
-                    EditorInfo.IME_ACTION_DONE -> {
-                        sendPassword()
-                        true
-                    }
-                    else -> false
-                }
-            }
-        }
-
-        return dialog
     }
 
     override fun onStart() {
         super.onStart()
+        (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { sendPassword() }
         binding.passwordEditText.requestFocus()
         dialog?.showKeyboard()
-        if (navigationArgs.isWrongPassword) onWrongPasswordEntered()
     }
 
-    private fun sendPassword() {
-        navController.apply {
-            previousBackStackEntry?.savedStateHandle?.set(
-                NAVIGATION_ARG_PASSWORD_KEY,
-                binding.passwordEditText.text.toString()
-            )
-        }
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        listener = parentFragment as? Listener
     }
 
-    private fun onWrongPasswordEntered() {
+    fun onWrongPasswordEntered() {
         with(binding) {
             passwordEditText.text?.clear()
             with(passwordLayout) {
@@ -99,8 +72,36 @@ class PasswordDialogFragment : DialogFragment() {
         }
     }
 
-    companion object {
-        private const val NAVIGATION_ARG_PASSWORD_KEY = "password"
-        private const val NAVIGATION_ARG_IS_CANCELED_KEY = "isCanceled"
+    private fun initPasswordField() {
+        binding.passwordEditText.apply {
+            addTextChangedListener {
+                with(binding) {
+                    passwordLayout.isErrorEnabled = false
+                    passwordEditText.error = null
+                }
+            }
+            handleActionDone(this)
+        }
+    }
+
+    private fun handleActionDone(textInputEditText: TextInputEditText) {
+        textInputEditText.setOnEditorActionListener { _, actionId, _ ->
+            when (actionId) {
+                EditorInfo.IME_ACTION_DONE -> {
+                    sendPassword()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun sendPassword() {
+        listener?.onPasswordEntered(binding.passwordEditText.text.toString())
+    }
+
+    interface Listener {
+        fun onPasswordEntered(password: String)
+        fun onCanceled()
     }
 }
