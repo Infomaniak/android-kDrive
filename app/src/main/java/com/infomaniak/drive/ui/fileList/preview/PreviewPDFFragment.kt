@@ -40,16 +40,15 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.pdfview.listener.OnErrorListener
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class PreviewPDFFragment : PreviewFragment() {
+class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
-    private val navController by lazy { findNavController() }
+    private val passwordDialog by lazy { PasswordDialogFragment() }
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
@@ -67,17 +66,6 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private var pdfFile: IOFile? = null
     private var isDownloading = false
-    private var hasEnteredPassword = false
-
-    private val onPdfLoadError: OnErrorListener = OnErrorListener {
-        navController.apply {
-            if (currentDestination?.id == R.id.pdfPasswordDialog) navigateUp()
-            navigate(
-                R.id.action_previewSliderFragment_to_pdfPasswordDialog,
-                PasswordDialogFragmentArgs(isWrongPassword = hasEnteredPassword).toBundle()
-            )
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPdfBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -113,11 +101,6 @@ class PreviewPDFFragment : PreviewFragment() {
             if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
             downloadProgress.progress = progress
         }
-
-        navController.currentBackStackEntry?.savedStateHandle?.apply {
-            getLiveData<String>(NAVIGATION_ARG_PASSWORD).observe(viewLifecycleOwner) { password -> showPdf(password) }
-            getLiveData<Boolean>(NAVIGATION_ARG_IS_CANCELED).observe(viewLifecycleOwner) { navController.popBackStack() }
-        }
     }
 
     override fun setMenuVisibility(menuVisible: Boolean) {
@@ -133,7 +116,6 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun showPdf(password: String? = null) = with(binding) {
-        hasEnteredPassword = password != null
         lifecycleScope.launch {
             withResumed {
                 downloadLayout.root.isGone = true
@@ -149,18 +131,28 @@ class PreviewPDFFragment : PreviewFragment() {
                     swipeHorizontal(false)
                     touchPriority(true)
                     onLoad { pageCount ->
-                        if (navController.currentDestination?.id == R.id.pdfPasswordDialog) navController.popBackStack()
+                        dismissPasswordDialog()
                         updatePageNumber(totalPage = pageCount)
                     }
-                    onPageChange { currentPage, pageCount ->
-                        updatePageNumber(currentPage = currentPage, totalPage = pageCount)
-                    }
-                    onError(onPdfLoadError)
+                    onPageChange { currentPage, pageCount -> updatePageNumber(currentPage = currentPage, totalPage = pageCount) }
+                    onError { onPDFLoadError() }
                     load()
                 }
 
                 getPageNumberChip()?.isVisible = true
             }
+        }
+    }
+
+    private fun dismissPasswordDialog() {
+        if (passwordDialog.isAdded) passwordDialog.dismiss()
+    }
+
+    private fun onPDFLoadError() {
+        if (passwordDialog.isAdded) {
+            passwordDialog.onWrongPasswordEntered()
+        } else {
+            passwordDialog.show(childFragmentManager, PasswordDialogFragment::class.java.toString())
         }
     }
 
@@ -188,6 +180,15 @@ class PreviewPDFFragment : PreviewFragment() {
         } else {
             showPdf()
         }
+    }
+
+
+    override fun onPasswordEntered(password: String) {
+        showPdf(password)
+    }
+
+    override fun onCanceled() {
+        findNavController().popBackStack()
     }
 
     class PreviewPDFViewModel(app: Application) : AndroidViewModel(app) {
@@ -222,7 +223,6 @@ class PreviewPDFFragment : PreviewFragment() {
 
     companion object {
         private const val NAVIGATION_ARG_PASSWORD = "password"
-        private const val NAVIGATION_ARG_IS_CANCELED = "isCanceled"
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
         private const val WIDTH_HANDLE_DP = 65
         private const val HEIGHT_HANDLE_DP = 40
