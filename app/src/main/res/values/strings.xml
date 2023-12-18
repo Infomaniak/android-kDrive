@@ -146,7 +146,6 @@
     <string name="buttonNoDriveFreeTest">Free trial</string>
     <string name="buttonOpenDocument">Open document</string>
     <string name="buttonOpenReadOnly">Open in read-only mode</string>
-    <string name="buttonOpenWith">Open with</string>
     <string name="buttonPlayerFfwd">Forward a few seconds</string>
     <string name="buttonPlayerNext">Next</string>
     <string name="buttonPlayerPlayPause">Play/Pause</string>

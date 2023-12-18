@@ -94,7 +94,7 @@
                 style="@style/IconButton"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:contentDescription="@string/buttonOpenWith"
+                android:contentDescription="@string/openWith"
                 app:backgroundTint="@color/previewBackgroundTransparent"
                 app:icon="@drawable/ic_open_with"
                 app:iconSize="20dp"

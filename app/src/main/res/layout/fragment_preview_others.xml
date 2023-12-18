@@ -105,7 +105,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/marginStandard"
         android:padding="16dp"
-        android:text="@string/buttonOpenWith"
+        android:text="@string/openWith"
         app:icon="@drawable/ic_open_with"
         app:iconGravity="start"
         app:iconSize="20dp"
