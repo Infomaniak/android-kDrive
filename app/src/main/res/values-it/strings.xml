@@ -714,5 +714,5 @@
     <string name="userPermissionRemove">L’utente non avrà più accesso a questo file.</string>
     <string name="userPermissionWrite">Può modificare</string>
     <string name="userPermissionWriteDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file</string>
-    <string name="wrongPdfPassword">Password sbagliata</string>
+    <string name="wrongPdfPassword">Password errata</string>
 </resources>
