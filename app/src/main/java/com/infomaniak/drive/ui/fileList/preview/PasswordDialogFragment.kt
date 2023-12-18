@@ -17,11 +17,9 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.text.TextWatcher
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doOnTextChanged
@@ -34,12 +32,15 @@ import com.infomaniak.lib.core.utils.showKeyboard
 
 class PasswordDialogFragment : DialogFragment() {
 
-    private val binding by lazy { DialogFragmentPasswordBinding.inflate(layoutInflater) }
+    val binding get() = _binding!!
+    private var _binding: DialogFragmentPasswordBinding? = null
 
     private var listener: Listener? = null
     private var passwordTextWatcher: TextWatcher? = null
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
+        _binding = DialogFragmentPasswordBinding.inflate(layoutInflater)
+
         initPasswordField()
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
@@ -64,36 +65,29 @@ class PasswordDialogFragment : DialogFragment() {
     }
 
     override fun onDetach() {
-        // This is to avoid a crash if the user display the dialog again
-        (binding.root.parent as ViewGroup).removeView(binding.root)
         binding.passwordEditText.apply {
             text?.clear()
             removeTextChangedListener(passwordTextWatcher)
         }
+        _binding = null
         super.onDetach()
     }
 
-    fun onWrongPasswordEntered() {
-        with(binding) {
-            passwordEditText.text?.clear()
-            passwordLayout.apply {
-                isErrorEnabled = true
-                error = getString(R.string.wrongPdfPassword)
-            }
+    fun onWrongPasswordEntered() = with(binding) {
+        passwordEditText.text?.clear()
+        passwordLayout.apply {
+            isErrorEnabled = true
+            error = getString(R.string.wrongPdfPassword)
         }
     }
 
-    private fun initPasswordField() {
-        with(binding.passwordEditText) {
-            passwordTextWatcher = binding.passwordEditText.doOnTextChanged { _, _, _, _ ->
-                with(binding) {
-                    passwordLayout.isErrorEnabled = false
-                    passwordEditText.error = null
-                }
-            }
-
-            handleActionDone(this)
+    private fun initPasswordField() = with(binding) {
+        passwordTextWatcher = passwordEditText.doOnTextChanged { _, _, _, _ ->
+            passwordLayout.isErrorEnabled = false
+            passwordEditText.error = null
         }
+
+        handleActionDone(passwordEditText)
     }
 
     private fun handleActionDone(textInputEditText: TextInputEditText) {

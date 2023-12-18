@@ -53,7 +53,7 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
-            val handle: View = layoutInflater.inflate(R.layout.pdf_handle_view, null)
+            val handle: View = layoutInflater.inflate(R.layout.pdf_handle_view, null, false)
             setPageHandleView(handle, handle.findViewById(R.id.pageIndicator))
             setHandleSize(WIDTH_HANDLE_DP, HEIGHT_HANDLE_DP)
             setHandlePaddings(0, HANDLE_PAGE_PDF_PADDING_TOP_DP, 0, HANDLE_PAGE_PDF_PADDING_BOTTOM_DP)
@@ -91,7 +91,7 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { passwordDialog.show(childFragmentManager, PasswordDialogFragment::class.java.toString()) }
+            setOnClickListener { showPasswordDialog() }
         }
 
         previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
@@ -167,12 +167,16 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
         if (passwordDialog.isAdded) passwordDialog.dismiss()
     }
 
-    private fun onPDFLoadError() {
-        if (passwordDialog.isAdded) {
-            passwordDialog.onWrongPasswordEntered()
+    private fun onPDFLoadError() = with(passwordDialog) {
+        if (isAdded) {
+            onWrongPasswordEntered()
         } else {
-            passwordDialog.show(childFragmentManager, PasswordDialogFragment::class.java.toString())
+            showPasswordDialog()
         }
+    }
+
+    private fun showPasswordDialog() {
+        passwordDialog.show(childFragmentManager, PasswordDialogFragment::class.java.toString())
     }
 
     private fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
@@ -209,6 +213,7 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
         fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<IOFile>> {
             pdfJob.cancel()
             pdfJob = Job()
+
             return liveData(Dispatchers.IO + pdfJob) {
                 val pdfFile = PreviewPDFUtils.convertPdfFileToIOFile(context, file, userDrive) {
                     viewModelScope.launch(Dispatchers.Main) {
