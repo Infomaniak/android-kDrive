@@ -124,6 +124,12 @@ object FolderFilesProvider {
         if (files.size >= ApiRepository.PER_PAGE) getCloudStorageFiles(parentId, userDrive, sortType, false, transaction)
     }
 
+    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
+        return FileController.getRealmInstance(userDrive).use { realm ->
+            getFolderActivitiesRec(realm, folder, userDrive)
+        }
+    }
+
     private fun refreshRootFolder(realm: Realm, driveId: Int, okHttpClient: OkHttpClient) {
         val localRoot = FileController.getFileById(realm, Utils.ROOT_ID)
         val remoteRootFolder =
@@ -167,6 +173,116 @@ object FolderFilesProvider {
             result = (localFolder!! to localSortedFolderFiles)
         }
         return result
+    }
+
+    private tailrec fun getFolderActivitiesRec(
+        realm: Realm,
+        folder: File,
+        userDrive: UserDrive? = null,
+        cursor: String? = null,
+        returnResponse: ArrayMap<Int, FileActivity> = arrayMapOf(),
+    ): Map<out Int, FileActivity> {
+        val okHttpClient = runBlocking {
+            userDrive?.userId?.let { AccountUtils.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
+        }
+        val apiResponse = ApiRepository.getFileActivities(folder, cursor, true, okHttpClient)
+        if (!apiResponse.isSuccess()) return returnResponse
+
+        return if (apiResponse.data?.isNotEmpty() == true) {
+            apiResponse.data?.forEach { fileActivity ->
+                fileActivity.applyFileActivity(realm, returnResponse, folder)
+            }
+
+            if (apiResponse.hasMore && apiResponse.cursor != null) {
+                // Loading the next page, then the cursor is required
+                getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor, returnResponse)
+            } else {
+                if (apiResponse.responseAt > 0L) {
+                    FileController.updateFile(folder.id, realm) { file ->
+                        file.responseAt = apiResponse.responseAt
+                        apiResponse.cursor?.let { file.cursor = it }
+                    }
+                } else {
+                    Sentry.withScope { scope ->
+                        scope.setExtra("data", apiResponse.toString())
+                        Sentry.captureMessage("response at is null")
+                    }
+                }
+                returnResponse
+
+            }
+        } else {
+            if (apiResponse.responseAt > 0L) {
+                FileController.updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
+            } else {
+                Sentry.withScope { scope ->
+                    scope.setExtra("data", apiResponse.toString())
+                    Sentry.captureMessage("response at is null")
+                }
+            }
+            returnResponse
+        }
+    }
+
+    private fun FileActivity.applyFileActivity(realm: Realm, returnResponse: ArrayMap<Int, FileActivity>, currentFolder: File) {
+        when (val action = getAction()) {
+            FileActivity.FileActivityType.FILE_DELETE,
+            FileActivity.FileActivityType.FILE_MOVE_OUT,
+            FileActivity.FileActivityType.FILE_TRASH -> {
+                if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == createdAt.time) { // Api fix
+                    FileController.getParentFile(fileId = fileId, realm = realm)?.let { localFolder ->
+                        if (localFolder.id != currentFolder.id) return@let
+
+                        if (action == FileActivity.FileActivityType.FILE_MOVE_OUT) {
+                            FileController.updateFile(localFolder.id, realm) { it.children.remove(file) }
+                        } else {
+                            FileController.removeFile(fileId, customRealm = realm, recursive = false)
+                        }
+                    }
+
+                    returnResponse[fileId] = this
+                }
+            }
+            FileActivity.FileActivityType.FILE_CREATE,
+            FileActivity.FileActivityType.FILE_MOVE_IN,
+            FileActivity.FileActivityType.FILE_RESTORE -> {
+                if (returnResponse[fileId] == null && file != null) {
+                    if (file!!.isImporting()) MqttClientWrapper.start(file!!.externalImport?.id)
+                    realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
+                        if (!realmFolder.children.contains(file)) {
+                            realm.executeTransaction { realmFolder.children.add(file) }
+                        } else {
+                            FileController.updateFileFromActivity(realm, this, realmFolder.id)
+                        }
+                        returnResponse[fileId] = this
+                    }
+                }
+            }
+            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_CREATE,
+            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_DELETE,
+            FileActivity.FileActivityType.COLLABORATIVE_FOLDER_UPDATE,
+            FileActivity.FileActivityType.FILE_FAVORITE_CREATE,
+            FileActivity.FileActivityType.FILE_FAVORITE_REMOVE,
+            FileActivity.FileActivityType.FILE_RENAME,
+            FileActivity.FileActivityType.FILE_CATEGORIZE,
+            FileActivity.FileActivityType.FILE_UNCATEGORIZE,
+            FileActivity.FileActivityType.FILE_COLOR_UPDATE,
+            FileActivity.FileActivityType.FILE_COLOR_DELETE,
+            FileActivity.FileActivityType.FILE_SHARE_CREATE,
+            FileActivity.FileActivityType.FILE_SHARE_DELETE,
+            FileActivity.FileActivityType.FILE_SHARE_UPDATE,
+            FileActivity.FileActivityType.FILE_UPDATE -> {
+                if (returnResponse[fileId] == null) {
+                    if (file == null) {
+                        FileController.removeFile(fileId, customRealm = realm, recursive = false)
+                    } else {
+                        FileController.updateFileFromActivity(realm, this, currentFolder.id)
+                    }
+                    returnResponse[fileId] = this
+                }
+            }
+            else -> Unit
+        }
     }
 
 }
