@@ -134,13 +134,7 @@ class PreviewPDFFragment : PreviewFragment() {
                         updatePageNumber(totalPage = pageCount)
                     }
                     onPageChange { currentPage, pageCount -> updatePageNumber(currentPage = currentPage, totalPage = pageCount) }
-                    onError {
-                        if (passwordDialog.isAdded) {
-                            onPDFLoadError()
-                        } else {
-                            displayError()
-                        }
-                    }
+                    onError { if (passwordDialog.isAdded) onPDFLoadError() else displayError() }
                     load()
                 }
 
