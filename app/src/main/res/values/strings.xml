@@ -683,6 +683,7 @@
         <item quantity="one">%s recovered to the original location</item>
         <item quantity="other">%d items recovered to their original location</item>
     </plurals>
+    <string name="updateInstallButton">Install</string>
     <string name="uploadCancelDescription">Upload cancelled by the user</string>
     <string name="uploadCancelTitle">Upload cancelled</string>
     <string name="uploadErrorTitle">Upload error</string>

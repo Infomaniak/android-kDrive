@@ -290,7 +290,7 @@ class MainActivity : BaseActivity() {
             if (isUploadDownloaded && canDisplayInAppSnackbar()) {
                 inAppUpdateSnackbar = showIndefiniteSnackbar(
                     title = R.string.updateReadyTitle,
-                    actionButtonTitle = R.string.common_google_play_services_install_button,
+                    actionButtonTitle = R.string.updateInstallButton,
                     anchor = getMainFab(),
                     onActionClicked = ::launchUpdateInstall,
                 )
