@@ -5,7 +5,6 @@ import com.infomaniak.drive.data.api.ApiRepository.addMultiAccess
 import com.infomaniak.drive.data.api.ApiRepository.getDirectoryFiles
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
-import com.infomaniak.drive.data.cache.FileController.getFilesFromCacheOrDownload
 import com.infomaniak.drive.data.cache.FileController.getGalleryDrive
 import com.infomaniak.drive.data.cache.FileController.getMySharedFiles
 import com.infomaniak.drive.data.cache.FileController.getOfflineFiles
@@ -13,6 +12,7 @@ import com.infomaniak.drive.data.cache.FileController.removeFile
 import com.infomaniak.drive.data.cache.FileController.saveFavoritesFiles
 import com.infomaniak.drive.data.cache.FileController.searchFiles
 import com.infomaniak.drive.data.cache.FileController.storeGalleryDrive
+import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.utils.AccountUtils
@@ -117,7 +117,7 @@ class FileControllerTest : KDriveTest() {
 
         // Get saved favorite files
         val localFavoriteFiles =
-            getFilesFromCacheOrDownload(
+            FolderFilesProvider.getFilesFromCacheOrDownload(
                 parentId = FAVORITES_FILE_ID,
                 isFirstPage = true,
                 ignoreCache = false,
@@ -274,7 +274,7 @@ class FileControllerTest : KDriveTest() {
 
     private fun getAndSaveRemoteRootFiles(): Pair<File, ArrayList<File>>? {
         // Get and save remote root files in realm db test
-        return getFilesFromCacheOrDownload(
+        return FolderFilesProvider.getFilesFromCacheOrDownload(
             parentId = Utils.ROOT_ID,
             isFirstPage = true,
             ignoreCache = true,
@@ -286,7 +286,7 @@ class FileControllerTest : KDriveTest() {
     }
 
     private fun getLocalRootFiles() =
-        getFilesFromCacheOrDownload(
+        FolderFilesProvider.getFilesFromCacheOrDownload(
             parentId = Utils.ROOT_ID,
             isFirstPage = true,
             ignoreCache = false,
