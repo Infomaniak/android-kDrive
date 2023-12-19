@@ -87,19 +87,7 @@ class PasswordDialogFragment : DialogFragment() {
             passwordEditText.error = null
         }
 
-        handleActionDone(passwordEditText)
-    }
-
-    private fun handleActionDone(textInputEditText: TextInputEditText) {
-        textInputEditText.setOnEditorActionListener { _, actionId, _ ->
-            when (actionId) {
-                EditorInfo.IME_ACTION_DONE -> {
-                    sendPassword()
-                    true
-                }
-                else -> false
-            }
-        }
+        passwordEditText.handleActionDone { sendPassword() }
     }
 
     private fun sendPassword() {
