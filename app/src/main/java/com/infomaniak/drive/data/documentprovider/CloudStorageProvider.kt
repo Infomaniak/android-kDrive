@@ -39,6 +39,7 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -198,7 +199,7 @@ class CloudStorageProvider : DocumentsProvider() {
                             sortType = sortType,
                             transaction = { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) })
                     } else {
-                        FileController.getCloudStorageFiles(
+                        FolderFilesProvider.getCloudStorageFiles(
                             parentId = fileFolderId,
                             userDrive = UserDrive(userId, driveId, sharedWithMe = true),
                             sortType = sortType,
@@ -209,7 +210,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
             else -> {
                 CoroutineScope(Dispatchers.IO + cursor.job).launch {
-                    FileController.getCloudStorageFiles(
+                    FolderFilesProvider.getCloudStorageFiles(
                         parentId = fileFolderId,
                         userDrive = UserDrive(userId, driveId),
                         sortType = sortType,
