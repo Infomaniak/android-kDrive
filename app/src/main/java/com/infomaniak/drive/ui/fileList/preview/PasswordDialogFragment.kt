@@ -17,25 +17,24 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-import android.content.Context
 import android.os.Bundle
 import android.text.TextWatcher
-import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.textfield.TextInputEditText
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogFragmentPasswordBinding
 import com.infomaniak.lib.core.utils.showKeyboard
+import handleActionDone
 
 class PasswordDialogFragment : DialogFragment() {
 
     val binding get() = _binding!!
     private var _binding: DialogFragmentPasswordBinding? = null
 
-    private var listener: Listener? = null
+    var onPasswordEntered: ((password: String) -> Unit)? = null
+
     private var passwordTextWatcher: TextWatcher? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
@@ -57,11 +56,6 @@ class PasswordDialogFragment : DialogFragment() {
         (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { sendPassword() }
         binding.passwordEditText.requestFocus()
         dialog?.showKeyboard()
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        listener = parentFragment as? Listener
     }
 
     override fun onDetach() {
@@ -91,10 +85,6 @@ class PasswordDialogFragment : DialogFragment() {
     }
 
     private fun sendPassword() {
-        listener?.onPasswordEntered(binding.passwordEditText.text.toString())
-    }
-
-    interface Listener {
-        fun onPasswordEntered(password: String)
+        onPasswordEntered?.invoke(binding.passwordEditText.text.toString())
     }
 }

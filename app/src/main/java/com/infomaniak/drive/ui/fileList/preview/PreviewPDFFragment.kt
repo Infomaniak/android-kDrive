@@ -43,13 +43,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
+class PreviewPDFFragment : PreviewFragment() {
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
     private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
 
-    private val passwordDialog: PasswordDialogFragment by lazy { PasswordDialogFragment() }
+    private val passwordDialog: PasswordDialogFragment by lazy {
+        PasswordDialogFragment().apply { onPasswordEntered = ::showPdf }
+    }
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
@@ -112,40 +114,38 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
         super.onPause()
     }
 
-    override fun onPasswordEntered(password: String) {
-        showPdf(password)
-    }
-
-    private fun showPdf(password: String? = null) = lifecycleScope.launch {
-        withResumed {
-            with(binding.pdfView.fromFile(pdfFile)) {
-                password(password)
-                disableLongpress()
-                enableAnnotationRendering(true)
-                enableDoubletap(true)
-                pageFling(false)
-                pageSnap(false)
-                scrollHandle(scrollHandle)
-                spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
-                swipeHorizontal(false)
-                touchPriority(true)
-                onLoad { pageCount ->
-                    binding.downloadLayout.root.isGone = true
-                    dismissPasswordDialog()
-                    updatePageNumber(totalPage = pageCount)
-                }
-                onPageChange { currentPage, pageCount -> updatePageNumber(currentPage = currentPage, totalPage = pageCount) }
-                onError {
-                    if (passwordDialog.isAdded) {
-                        onPDFLoadError()
-                    } else {
-                        displayError()
+    private fun showPdf(password: String? = null) {
+        lifecycleScope.launch {
+            withResumed {
+                with(binding.pdfView.fromFile(pdfFile)) {
+                    password(password)
+                    disableLongpress()
+                    enableAnnotationRendering(true)
+                    enableDoubletap(true)
+                    pageFling(false)
+                    pageSnap(false)
+                    scrollHandle(scrollHandle)
+                    spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
+                    swipeHorizontal(false)
+                    touchPriority(true)
+                    onLoad { pageCount ->
+                        binding.downloadLayout.root.isGone = true
+                        dismissPasswordDialog()
+                        updatePageNumber(totalPage = pageCount)
                     }
+                    onPageChange { currentPage, pageCount -> updatePageNumber(currentPage = currentPage, totalPage = pageCount) }
+                    onError {
+                        if (passwordDialog.isAdded) {
+                            onPDFLoadError()
+                        } else {
+                            displayError()
+                        }
+                    }
+                    load()
                 }
-                load()
-            }
 
-            getPageNumberChip()?.isVisible = true
+                getPageNumberChip()?.isVisible = true
+            }
         }
     }
 
