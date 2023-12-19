@@ -53,7 +53,7 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
-            val handle: View = layoutInflater.inflate(R.layout.pdf_handle_view, null, false)
+            val handle: View = View.inflate(requireContext(), R.layout.pdf_handle_view, null)
             setPageHandleView(handle, handle.findViewById(R.id.pageIndicator))
             setHandleSize(WIDTH_HANDLE_DP, HEIGHT_HANDLE_DP)
             setHandlePaddings(0, HANDLE_PAGE_PDF_PADDING_TOP_DP, 0, HANDLE_PAGE_PDF_PADDING_BOTTOM_DP)
@@ -116,38 +116,36 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
         showPdf(password)
     }
 
-    private fun showPdf(password: String? = null) = with(binding) {
-        lifecycleScope.launch {
-            withResumed {
-                with(pdfView.fromFile(pdfFile)) {
-                    password(password)
-                    disableLongpress()
-                    enableAnnotationRendering(true)
-                    enableDoubletap(true)
-                    pageFling(false)
-                    pageSnap(false)
-                    scrollHandle(scrollHandle)
-                    spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
-                    swipeHorizontal(false)
-                    touchPriority(true)
-                    onLoad { pageCount ->
-                        binding.downloadLayout.root.isGone = true
-                        dismissPasswordDialog()
-                        updatePageNumber(totalPage = pageCount)
-                    }
-                    onPageChange { currentPage, pageCount -> updatePageNumber(currentPage = currentPage, totalPage = pageCount) }
-                    onError {
-                        if (passwordDialog.isAdded) {
-                            onPDFLoadError()
-                        } else {
-                            displayError()
-                        }
-                    }
-                    load()
+    private fun showPdf(password: String? = null) = lifecycleScope.launch {
+        withResumed {
+            with(binding.pdfView.fromFile(pdfFile)) {
+                password(password)
+                disableLongpress()
+                enableAnnotationRendering(true)
+                enableDoubletap(true)
+                pageFling(false)
+                pageSnap(false)
+                scrollHandle(scrollHandle)
+                spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
+                swipeHorizontal(false)
+                touchPriority(true)
+                onLoad { pageCount ->
+                    binding.downloadLayout.root.isGone = true
+                    dismissPasswordDialog()
+                    updatePageNumber(totalPage = pageCount)
                 }
-
-                getPageNumberChip()?.isVisible = true
+                onPageChange { currentPage, pageCount -> updatePageNumber(currentPage = currentPage, totalPage = pageCount) }
+                onError {
+                    if (passwordDialog.isAdded) {
+                        onPDFLoadError()
+                    } else {
+                        displayError()
+                    }
+                }
+                load()
             }
+
+            getPageNumberChip()?.isVisible = true
         }
     }
 
@@ -168,11 +166,7 @@ class PreviewPDFFragment : PreviewFragment(), PasswordDialogFragment.Listener {
     }
 
     private fun onPDFLoadError() = with(passwordDialog) {
-        if (isAdded) {
-            onWrongPasswordEntered()
-        } else {
-            showPasswordDialog()
-        }
+        if (isAdded) onWrongPasswordEntered() else showPasswordDialog()
     }
 
     private fun showPasswordDialog() {
