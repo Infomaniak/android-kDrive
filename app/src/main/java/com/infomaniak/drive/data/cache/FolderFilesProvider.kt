@@ -261,7 +261,7 @@ object FolderFilesProvider {
         returnResponse: ArrayMap<Int, FileAction>,
         currentFolder: File,
     ) {
-        val file = actionFiles[fileId]
+        val actionFile = actionFiles[fileId]
         when (action) {
             FileActivityType.FILE_DELETE,
             FileActivityType.FILE_MOVE_OUT,
@@ -273,7 +273,7 @@ object FolderFilesProvider {
                         if (localFolder.id != currentFolder.id) return@let
 
                         if (action == FileActivityType.FILE_MOVE_OUT) {
-                            FileController.updateFile(localFolder.id, realm) { it.children.remove(file) }
+                            FileController.updateFile(localFolder.id, realm) { it.children.remove(actionFile) }
                         } else {
                             FileController.removeFile(fileId, customRealm = realm, recursive = false)
                         }
@@ -285,13 +285,13 @@ object FolderFilesProvider {
             FileActivityType.FILE_CREATE,
             FileActivityType.FILE_MOVE_IN,
             FileActivityType.FILE_RESTORE -> {
-                if (returnResponse[fileId] == null && file != null) {
-                    if (file.isImporting()) MqttClientWrapper.start(file.externalImport?.id)
+                if (returnResponse[fileId] == null && actionFile != null) {
+                    if (actionFile.isImporting()) MqttClientWrapper.start(actionFile.externalImport?.id)
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
-                        if (!realmFolder.children.contains(file)) {
-                            realm.executeTransaction { realmFolder.children.add(file) }
+                        if (!realmFolder.children.contains(actionFile)) {
+                            realm.executeTransaction { realmFolder.children.add(actionFile) }
                         } else {
-                            FileController.updateFileFromActivity(realm, file, realmFolder.id)
+                            FileController.updateFileFromActivity(realm, actionFile, realmFolder.id)
                         }
                         returnResponse[fileId] = this
                     }
@@ -312,10 +312,10 @@ object FolderFilesProvider {
             FileActivityType.FILE_SHARE_UPDATE,
             FileActivityType.FILE_UPDATE -> {
                 if (returnResponse[fileId] == null) {
-                    if (file == null) {
+                    if (actionFile == null) {
                         FileController.removeFile(fileId, customRealm = realm, recursive = false)
                     } else {
-                        FileController.updateFileFromActivity(realm, file, currentFolder.id)
+                        FileController.updateFileFromActivity(realm, actionFile, currentFolder.id)
                     }
                     returnResponse[fileId] = this
                 }
