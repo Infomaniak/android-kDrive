@@ -104,6 +104,7 @@ class MainActivity : BaseActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
     private val uiSettings by lazy { UiSettings(this) }
+    private val navController by lazy { setupNavController() }
 
     private lateinit var downloadReceiver: DownloadReceiver
 
@@ -112,8 +113,6 @@ class MainActivity : BaseActivity() {
     private var hasDisplayedInformationPanel: Boolean = false
 
     private lateinit var drivePermissions: DrivePermissions
-
-    private val navController by lazy { setupNavController() }
 
     private val filesDeletionResult = registerForActivityResult(StartIntentSenderForResult()) {
         it.whenResultIsOk { lifecycleScope.launch(Dispatchers.IO) { UploadFile.deleteAll(uploadedFilesToDelete) } }
