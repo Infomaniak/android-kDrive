@@ -18,15 +18,12 @@
 package com.infomaniak.drive.data.cache
 
 import android.content.Context
-import androidx.collection.ArrayMap
-import androidx.collection.arrayMapOf
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
-import com.infomaniak.drive.data.models.FileActivity.FileActivityType
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -41,8 +38,6 @@ import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
 import java.util.Calendar
 
 object FileController {
@@ -59,7 +54,6 @@ object FileController {
     const val RECENT_CHANGES_FILE_ID = -4
     private const val GALLERY_FILE_ID = -3
 
-    private val ROOT_FILE get() = File(ROOT_ID, name = "Root", driveId = AccountUtils.currentDriveId)
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favorites")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
     private val GALLERY_FILE = File(GALLERY_FILE_ID, name = "Gallery")
@@ -67,16 +61,7 @@ object FileController {
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
-    private fun refreshRootFolder(realm: Realm, driveId: Int, okHttpClient: OkHttpClient) {
-        val localRoot = getFileById(realm, ROOT_ID)
-        val remoteRootFolder = ApiRepository.getFileDetails(File(id = ROOT_ID, driveId = driveId), okHttpClient).data?.apply {
-            localRoot?.let { keepOldLocalFilesData(it, this) }
-        }
-        val rootFolder = remoteRootFolder ?: localRoot ?: ROOT_FILE
-        realm.executeTransaction { realm.copyToRealmOrUpdate(rootFolder) }
-    }
-
-    private fun getFileById(realm: Realm, fileId: Int): File? {
+    fun getFileById(realm: Realm, fileId: Int): File? {
         return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
     }
 
@@ -344,7 +329,7 @@ object FileController {
 
     fun getRealmConfiguration(userDrive: UserDrive?) = getRealmConfiguration(getDriveFileName(userDrive ?: UserDrive()))
 
-    fun getRealmInstance(userDrive: UserDrive? = null) = Realm.getInstance(getRealmConfiguration(userDrive))
+    fun getRealmInstance(userDrive: UserDrive? = null): Realm = Realm.getInstance(getRealmConfiguration(userDrive))
 
     private fun getRealmConfiguration(dbName: String): RealmConfiguration {
         return RealmConfiguration.Builder()
@@ -408,25 +393,6 @@ object FileController {
         } else {
             null
         }
-    }
-
-    fun getCloudStorageFiles(
-        parentId: Int,
-        userDrive: UserDrive,
-        sortType: SortType,
-        loadNextPage: Boolean = false,
-        transaction: (files: ArrayList<File>) -> Unit
-    ) {
-        val filesFromCacheOrDownload = getFilesFromCacheOrDownload(
-            parentId = parentId,
-            isFirstPage = true,
-            ignoreCache = true,
-            order = sortType,
-            userDrive = userDrive
-        )
-        val files = filesFromCacheOrDownload?.second ?: arrayListOf()
-        transaction(files)
-        if (files.size >= ApiRepository.PER_PAGE) getCloudStorageFiles(parentId, userDrive, sortType, true, transaction)
     }
 
     tailrec suspend fun getMySharedFiles(
@@ -612,65 +578,6 @@ object FileController {
             ?: emptyList(realm)
     }
 
-    fun getFilesFromCacheOrDownload(
-        parentId: Int,
-        isFirstPage: Boolean,
-        ignoreCache: Boolean = false,
-        ignoreCloud: Boolean = false,
-        order: SortType = SortType.NAME_AZ,
-        userDrive: UserDrive?,
-        customRealm: Realm? = null,
-        withChildren: Boolean = true
-    ): Pair<File, ArrayList<File>>? {
-
-        fun hasDuplicatesFiles(query: RealmQuery<File>): Boolean {
-            return query.count() != query.distinct(File::id.name).count()
-        }
-
-        val operation: (Realm) -> Pair<File, ArrayList<File>>? = operation@{ realm ->
-            var result: Pair<File, ArrayList<File>>? = null
-            var folderProxy = getFileById(realm, parentId)
-            val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) }
-            val hasDuplicatesFiles = folderProxy?.children?.where()?.let(::hasDuplicatesFiles) ?: false
-            if (!isFirstPage && folderProxy?.cursor == null) return@operation null
-
-            val needToDownload = ignoreCache
-                    || folderProxy == null
-                    || folderProxy.children.isEmpty()
-                    || !folderProxy.isComplete
-                    || folderProxy.versionCode < MIN_VERSION_CODE
-                    || hasDuplicatesFiles
-                    || minDateToIgnoreCache >= folderProxy.responseAt
-
-            if (needToDownload && !ignoreCloud) {
-                val (okHttpClient, driveId) = if (userDrive == null) {
-                    HttpClient.okHttpClient to AccountUtils.currentDriveId
-                } else {
-                    runBlocking { AccountUtils.getHttpClient(userDrive.userId) } to userDrive.driveId
-                }
-
-                if (parentId == ROOT_ID) {
-                    refreshRootFolder(realm, driveId, okHttpClient)
-                    folderProxy = getFileById(realm, parentId)
-                }
-                result = realm.downloadAndSaveFiles(
-                    localFolderProxy = folderProxy,
-                    order = order,
-                    isFirstPage = isFirstPage,
-                    parentId = parentId,
-                    driveId = driveId,
-                    okHttpClient = okHttpClient,
-                    withChildren = withChildren
-                )
-            } else if (isFirstPage && localFolderWithoutChildren != null) {
-                val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(folderProxy, order) else arrayListOf()
-                result = (localFolderWithoutChildren to localSortedFolderFiles)
-            }
-            result
-        }
-        return customRealm?.let(operation) ?: getRealmInstance(userDrive).use(operation)
-    }
-
     fun getFilesFromIdList(realm: Realm, idList: Array<Int>, order: SortType = SortType.NAME_AZ): RealmResults<File>? {
         return realm.where(File::class.java)
             .oneOf(File::id.name, idList)
@@ -678,35 +585,8 @@ object FileController {
             .findAll()
     }
 
-    private fun Realm.downloadAndSaveFiles(
-        localFolderProxy: File?,
-        order: SortType,
-        isFirstPage: Boolean,
-        parentId: Int,
-        driveId: Int,
-        okHttpClient: OkHttpClient,
-        withChildren: Boolean,
-    ): Pair<File, ArrayList<File>>? {
-        var result: Pair<File, ArrayList<File>>? = null
-
-        val apiResponse = ApiRepository.getDirectoryFiles(okHttpClient, driveId, parentId, localFolderProxy?.cursor, order)
-        val localFolder = localFolderProxy?.realm?.copyFromRealm(localFolderProxy, 1)
-            ?: ApiRepository.getFileDetails(File(id = parentId, driveId = driveId)).data
-
-        if (apiResponse.isSuccess()) {
-            val remoteFiles = apiResponse.data
-            if (remoteFiles != null && localFolder != null) {
-                saveRemoteFiles(localFolderProxy, localFolder, apiResponse, isFirstPage)
-                result = (localFolder to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
-            }
-        } else if (isFirstPage && localFolderProxy != null) {
-            val localSortedFolderFiles = if (withChildren) getLocalSortedFolderFiles(localFolderProxy, order) else arrayListOf()
-            result = (localFolder!! to localSortedFolderFiles)
-        }
-        return result
-    }
-
-    private fun Realm.saveRemoteFiles(
+    fun saveRemoteFiles(
+        realm: Realm,
         localFolderProxy: File?,
         remoteFolder: File?,
         apiResponse: CursorApiResponse<List<File>>,
@@ -717,14 +597,14 @@ object FileController {
         // Save remote folder if it doesn't exist locally
         var newLocalFolderProxy: File? = null
         if (localFolderProxy == null && remoteFolder != null) {
-            executeTransaction { newLocalFolderProxy = copyToRealm(remoteFolder) }
+            realm.executeTransaction { newLocalFolderProxy = realm.copyToRealm(remoteFolder) }
         }
 
         // Restore same children data
         keepSubFolderChildren(localFolderProxy?.children, remoteFiles)
         // Save to realm
         (localFolderProxy ?: newLocalFolderProxy)?.let { folderProxy ->
-            executeTransaction {
+            realm.executeTransaction {
                 // Remove old children
                 if (isFirstPage) folderProxy.children.clear()
                 // Add children
@@ -773,7 +653,7 @@ object FileController {
             }?.findAll()
     }
 
-    private fun getLocalSortedFolderFiles(
+    fun getLocalSortedFolderFiles(
         localFolder: File?,
         order: SortType,
         localChildren: RealmResults<File>? = null,
@@ -783,122 +663,6 @@ object FileController {
             localFolder?.realm?.copyFromRealm(realmFiles, 1) ?: currentRealm?.copyFromRealm(realmFiles, 1)
         }
         return files?.let { ArrayList(it) } ?: arrayListOf()
-    }
-
-    fun getFolderActivities(folder: File, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
-        return getRealmInstance(userDrive).use { realm ->
-            getFolderActivitiesRec(realm, folder, userDrive)
-        }
-    }
-
-    private tailrec fun getFolderActivitiesRec(
-        realm: Realm,
-        folder: File,
-        userDrive: UserDrive? = null,
-        cursor: String? = null,
-        returnResponse: ArrayMap<Int, FileActivity> = arrayMapOf(),
-    ): Map<out Int, FileActivity> {
-        val okHttpClient = runBlocking {
-            userDrive?.userId?.let { AccountUtils.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
-        }
-        val apiResponse = ApiRepository.getFileActivities(folder, cursor, true, okHttpClient)
-        if (!apiResponse.isSuccess()) return returnResponse
-
-        return if (apiResponse.data?.isNotEmpty() == true) {
-            apiResponse.data?.forEach { fileActivity ->
-                fileActivity.applyFileActivity(realm, returnResponse, folder)
-            }
-
-            if (apiResponse.hasMore && apiResponse.cursor != null) {
-                // Loading the next page, then the cursor is required
-                getFolderActivitiesRec(realm, folder, userDrive, apiResponse.cursor, returnResponse)
-            } else {
-                if (apiResponse.responseAt > 0L) {
-                    updateFile(folder.id, realm) { file ->
-                        file.responseAt = apiResponse.responseAt
-                        apiResponse.cursor?.let { file.cursor = it }
-                    }
-                } else {
-                    Sentry.withScope { scope ->
-                        scope.setExtra("data", apiResponse.toString())
-                        Sentry.captureMessage("response at is null")
-                    }
-                }
-                returnResponse
-
-            }
-        } else {
-            if (apiResponse.responseAt > 0L) {
-                updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
-            } else {
-                Sentry.withScope { scope ->
-                    scope.setExtra("data", apiResponse.toString())
-                    Sentry.captureMessage("response at is null")
-                }
-            }
-            returnResponse
-        }
-    }
-
-    private fun FileActivity.applyFileActivity(realm: Realm, returnResponse: ArrayMap<Int, FileActivity>, currentFolder: File) {
-        when (val action = getAction()) {
-            FileActivityType.FILE_DELETE,
-            FileActivityType.FILE_MOVE_OUT,
-            FileActivityType.FILE_TRASH -> {
-                if (returnResponse[fileId] == null || returnResponse[fileId]?.createdAt?.time == createdAt.time) { // Api fix
-                    getParentFile(fileId = fileId, realm = realm)?.let { localFolder ->
-                        if (localFolder.id != currentFolder.id) return@let
-
-                        if (action == FileActivityType.FILE_MOVE_OUT) {
-                            updateFile(localFolder.id, realm) { it.children.remove(file) }
-                        } else {
-                            removeFile(fileId, customRealm = realm, recursive = false)
-                        }
-                    }
-
-                    returnResponse[fileId] = this
-                }
-            }
-            FileActivityType.FILE_CREATE,
-            FileActivityType.FILE_MOVE_IN,
-            FileActivityType.FILE_RESTORE -> {
-                if (returnResponse[fileId] == null && file != null) {
-                    if (file!!.isImporting()) MqttClientWrapper.start(file!!.externalImport?.id)
-                    realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
-                        if (!realmFolder.children.contains(file)) {
-                            realm.executeTransaction { realmFolder.children.add(file) }
-                        } else {
-                            updateFileFromActivity(realm, this, realmFolder.id)
-                        }
-                        returnResponse[fileId] = this
-                    }
-                }
-            }
-            FileActivityType.COLLABORATIVE_FOLDER_CREATE,
-            FileActivityType.COLLABORATIVE_FOLDER_DELETE,
-            FileActivityType.COLLABORATIVE_FOLDER_UPDATE,
-            FileActivityType.FILE_FAVORITE_CREATE,
-            FileActivityType.FILE_FAVORITE_REMOVE,
-            FileActivityType.FILE_RENAME,
-            FileActivityType.FILE_CATEGORIZE,
-            FileActivityType.FILE_UNCATEGORIZE,
-            FileActivityType.FILE_COLOR_UPDATE,
-            FileActivityType.FILE_COLOR_DELETE,
-            FileActivityType.FILE_SHARE_CREATE,
-            FileActivityType.FILE_SHARE_DELETE,
-            FileActivityType.FILE_SHARE_UPDATE,
-            FileActivityType.FILE_UPDATE -> {
-                if (returnResponse[fileId] == null) {
-                    if (file == null) {
-                        removeFile(fileId, customRealm = realm, recursive = false)
-                    } else {
-                        updateFileFromActivity(realm, this, currentFolder.id)
-                    }
-                    returnResponse[fileId] = this
-                }
-            }
-            else -> Unit
-        }
     }
 
     fun getOfflineFiles(
@@ -932,7 +696,7 @@ object FileController {
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    private fun updateFileFromActivity(realm: Realm, fileActivity: FileActivity, folderId: Int) {
+    fun updateFileFromActivity(realm: Realm, fileActivity: FileActivity, folderId: Int) {
         getFileProxyById(fileActivity.fileId, customRealm = realm)?.let { file ->
             insertOrUpdateFile(realm, fileActivity.file!!, file)
         } ?: also {
@@ -965,7 +729,7 @@ object FileController {
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
 
-    private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
+    fun keepOldLocalFilesData(oldFile: File, newFile: File) {
         newFile.apply {
             children = oldFile.children
             isComplete = oldFile.isComplete
