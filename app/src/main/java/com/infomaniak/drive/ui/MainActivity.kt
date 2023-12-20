@@ -90,6 +90,7 @@ import com.infomaniak.lib.stores.StoreUtils.initAppUpdateManager
 import com.infomaniak.lib.stores.StoreUtils.installDownloadedUpdate
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
 import com.infomaniak.lib.stores.StoreUtils.unregisterAppUpdateListener
+import com.infomaniak.lib.stores.StoresLocalSettings
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -105,6 +106,7 @@ class MainActivity : BaseActivity() {
     private val mainViewModel: MainViewModel by viewModels()
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
     private val uiSettings by lazy { UiSettings(this) }
+    private val storesLocalSettings = StoresLocalSettings.getInstance(this)
     private val navController by lazy { setupNavController() }
 
     private lateinit var downloadReceiver: DownloadReceiver
@@ -146,11 +148,11 @@ class MainActivity : BaseActivity() {
             }
         }
 
-    private val inAppUpdateResultLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
-        val isUserWantingUpdates = result.resultCode == RESULT_OK
-        uiSettings.isUserWantingUpdates = isUserWantingUpdates
-        trackInAppUpdate(if (isUserWantingUpdates) "discoverNow" else "discoverLater")
-    }
+//    private val inAppUpdateResultLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
+//        val isUserWantingUpdates = result.resultCode == RESULT_OK
+//        uiSettings.isUserWantingUpdates = isUserWantingUpdates
+//        trackInAppUpdate(if (isUserWantingUpdates) "discoverNow" else "discoverLater")
+//    }
 
     private var inAppUpdateSnackbar: Snackbar? = null
 
@@ -256,18 +258,16 @@ class MainActivity : BaseActivity() {
     //region In-App Updates
     private fun initAppUpdateManager() {
         initAppUpdateManager(
-            context = this,
             onUpdateDownloaded = { mainViewModel.toggleAppUpdateStatus(isUpdateDownloaded = true) },
             onUpdateInstalled = { mainViewModel.toggleAppUpdateStatus(isUpdateDownloaded = false) },
         )
     }
 
     private fun handleUpdates() {
-        if (uiSettings.isUserWantingUpdates || AppSettings.appLaunches % 10 == 0) {
+        if (storesLocalSettings.isUserWantingUpdates || AppSettings.appLaunches % 10 == 0) {
             checkUpdateIsAvailable(
                 appId = BuildConfig.APPLICATION_ID,
                 versionCode = BuildConfig.VERSION_CODE,
-                inAppResultLauncher = inAppUpdateResultLauncher,
                 onFDroidResult = { updateIsAvailable ->
                     if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
                 },
@@ -278,11 +278,9 @@ class MainActivity : BaseActivity() {
     private fun launchUpdateInstall() {
         trackInAppUpdate("installUpdate")
         mainViewModel.canInstallUpdate.value = false
-        uiSettings.hasAppUpdateDownloaded = false
         installDownloadedUpdate(
             onFailure = {
                 Sentry.captureException(it)
-                uiSettings.resetUpdateSettings()
                 showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab())
             },
         )

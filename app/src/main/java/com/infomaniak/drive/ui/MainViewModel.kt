@@ -44,6 +44,7 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import com.infomaniak.lib.stores.StoreUtils
+import com.infomaniak.lib.stores.StoresLocalSettings
 import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +62,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         } ?: FileController.getRealmInstance()
     }
 
-    private val uiSettings by lazy { UiSettings(getApplication()) }
+    private val storesLocalSettings = StoresLocalSettings.getInstance(getContext())
 
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
@@ -427,13 +428,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun checkAppUpdateStatus() {
-        canInstallUpdate.value = uiSettings.hasAppUpdateDownloaded
+        canInstallUpdate.value = storesLocalSettings.hasAppUpdateDownloaded
         StoreUtils.checkStalledUpdate()
     }
 
     fun toggleAppUpdateStatus(isUpdateDownloaded: Boolean) {
         canInstallUpdate.value = isUpdateDownloaded
-        uiSettings.hasAppUpdateDownloaded = isUpdateDownloaded
     }
 
     override fun onCleared() {
