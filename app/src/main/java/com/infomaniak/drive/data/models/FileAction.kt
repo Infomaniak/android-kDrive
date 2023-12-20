@@ -23,7 +23,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class FileAction(
-    val action: FileActivityType,
+    val action: FileActivity.FileActivityType,
     @SerializedName("file_id")
     val fileId: Int,
     @SerializedName("parent_id")
