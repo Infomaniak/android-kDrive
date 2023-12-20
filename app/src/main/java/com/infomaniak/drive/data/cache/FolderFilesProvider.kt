@@ -53,7 +53,7 @@ object FolderFilesProvider {
         order: File.SortType = File.SortType.NAME_AZ,
         userDrive: UserDrive?,
         customRealm: Realm? = null,
-        withChildren: Boolean = true
+        withChildren: Boolean = true,
     ): Pair<File, ArrayList<File>>? {
 
         fun hasDuplicatesFiles(query: RealmQuery<File>): Boolean {
