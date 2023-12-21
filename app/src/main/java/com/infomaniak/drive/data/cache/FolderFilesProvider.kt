@@ -246,7 +246,7 @@ object FolderFilesProvider {
 
         if (apiResponseData != null && apiResponseData.actions.isNotEmpty()) {
             val actionsFiles = apiResponseData.actionsFiles.associateBy(File::id)
-            apiResponseData.actions.forEach { fileActivity ->
+            apiResponseData.actions.asReversed().forEach { fileActivity ->
                 fileActivity.applyFileAction(realm, actionsFiles, returnResponse, folderProxy)
             }
         }
@@ -306,45 +306,17 @@ object FolderFilesProvider {
                     returnResponse[fileId] = this
                 }
             }
-            FileActivityType.FILE_CREATE,
-            FileActivityType.FILE_MOVE_IN,
-            FileActivityType.FILE_RESTORE -> {
-                if (returnResponse[fileId] == null && actionFile != null) {
-                    if (actionFile.isImporting()) MqttClientWrapper.start(actionFile.externalImport?.id)
-                    realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
-                        if (!realmFolder.children.contains(actionFile)) {
-                            realm.executeTransaction { realmFolder.children.add(actionFile) }
-                        } else {
-                            FileController.updateFileFromActivity(realm, actionFile, realmFolder.id)
-                        }
-                        returnResponse[fileId] = this
-                    }
-                }
-            }
-            FileActivityType.COLLABORATIVE_FOLDER_CREATE,
-            FileActivityType.COLLABORATIVE_FOLDER_DELETE,
-            FileActivityType.COLLABORATIVE_FOLDER_UPDATE,
-            FileActivityType.FILE_FAVORITE_CREATE,
-            FileActivityType.FILE_FAVORITE_REMOVE,
-            FileActivityType.FILE_RENAME,
-            FileActivityType.FILE_CATEGORIZE,
-            FileActivityType.FILE_UNCATEGORIZE,
-            FileActivityType.FILE_COLOR_UPDATE,
-            FileActivityType.FILE_COLOR_DELETE,
-            FileActivityType.FILE_SHARE_CREATE,
-            FileActivityType.FILE_SHARE_DELETE,
-            FileActivityType.FILE_SHARE_UPDATE,
-            FileActivityType.FILE_UPDATE -> {
+            else -> {
                 if (returnResponse[fileId] == null) {
                     if (actionFile == null) {
                         FileController.removeFile(fileId, customRealm = realm, recursive = false)
                     } else {
-                        FileController.updateFileFromActivity(realm, actionFile, currentFolder.id)
+                        if (actionFile.isImporting()) MqttClientWrapper.start(actionFile.externalImport?.id)
+                        FileController.upsertActionFile(realm, currentFolder.id, actionFile)
                     }
                     returnResponse[fileId] = this
                 }
             }
-            else -> Unit
         }
     }
 
