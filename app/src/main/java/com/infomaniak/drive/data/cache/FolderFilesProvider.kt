@@ -73,12 +73,35 @@ object FolderFilesProvider {
         return files
     }
 
-    fun getCloudStorageFiles(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
-        val realm = folderFilesProviderArgs.realm ?: FileController.getRealmInstance(folderFilesProviderArgs.userDrive)
-        val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
-        val files = loadFromRemote(realm, folderProxy, folderFilesProviderArgs, isCloudStorage = true)
-        if (folderFilesProviderArgs.realm == null) realm.close()
-        return files
+    fun getCloudStorageFiles(
+        realm: Realm,
+        folderId: Int,
+        userDrive: UserDrive,
+        sortType: File.SortType,
+        isFirstPage: Boolean = true,
+        transaction: (files: ArrayList<File>) -> Unit
+    ) {
+        val folderProxy = FileController.getFileById(realm, folderId)
+        val folderFilesProviderArgs = FolderFilesProviderArgs(
+            folderId = folderId,
+            isFirstPage = isFirstPage,
+            order = sortType,
+            realm = realm,
+            sourceRestrictionType = ONLY_FROM_REMOTE,
+            userDrive = userDrive,
+        )
+        val folderFilesProviderResult = loadFromRemote(realm, folderProxy, folderFilesProviderArgs, isCloudStorage = true)
+
+        transaction(folderFilesProviderResult?.folderFiles ?: arrayListOf())
+
+        if (folderFilesProviderResult?.isComplete == false) getCloudStorageFiles(
+            realm = realm,
+            folderId = folderId,
+            userDrive = userDrive,
+            sortType = sortType,
+            isFirstPage = false,
+            transaction = transaction
+        )
     }
 
     fun tryLoadActivitiesFromFolder(folder: File, userDrive: UserDrive, activitiesJob: Job): Boolean {
