@@ -28,9 +28,9 @@ object ApiRoutes {
             "external_import,is_favorite,path,sharelink,sorted_name"
     private const val fileExtraWithQuery = "$fileWithQuery,users,version"
     private const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities," +
-            "file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name"
+            "file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name,files.supported_by"
     private const val listingFilesWithQuery = "with=files,files.capabilities,files.categories,files.conversion_capabilities," +
-            "files.dropbox,files.dropbox.capabilities,files.is_favorite,files.sharelink,files.sorted_name"
+            "files.dropbox,files.dropbox.capabilities,files.is_favorite,files.sharelink,files.sorted_name,files.supported_by"
     const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
