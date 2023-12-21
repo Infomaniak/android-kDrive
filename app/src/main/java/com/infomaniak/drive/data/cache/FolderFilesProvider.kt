@@ -285,6 +285,7 @@ object FolderFilesProvider {
         currentFolder: File,
     ) {
         val actionFile = actionFiles[fileId]
+
         when (action) {
             FileActivityType.FILE_DELETE,
             FileActivityType.FILE_MOVE_OUT,
