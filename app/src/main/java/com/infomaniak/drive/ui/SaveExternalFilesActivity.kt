@@ -77,7 +77,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
     }
 
-    private val uiSettings by lazy { UiSettings(this) }
+    private val uiSettings by lazy { UiSettings(context = this) }
 
     private lateinit var drivePermissions: DrivePermissions
     private var currentUri: Uri? = null
