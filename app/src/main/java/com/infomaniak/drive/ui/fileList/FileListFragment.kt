@@ -45,6 +45,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.*
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
@@ -654,7 +655,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         fileListViewModel.getFolderActivities(updatedFolder, userDrive).observe(viewLifecycleOwner) { isNotEmpty ->
             if (isNotEmpty == true) {
                 getFolderFiles(
-                    ignoreCache = false,
+                    sourceRestrictionType = ONLY_FROM_LOCAL,
                     isNewSort = false,
                     onFinish = {
                         it?.let { (_, files, _) ->
@@ -669,18 +670,19 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun getFolderFiles(ignoreCache: Boolean, isNewSort: Boolean, onFinish: ((FolderFilesResult?) -> Unit)? = null) {
+    private fun getFolderFiles(
+        sourceRestrictionType: SourceRestrictionType,
+        isNewSort: Boolean,
+        onFinish: ((FolderFilesResult?) -> Unit)? = null,
+    ) {
         showPendingFiles()
-        val sourceRestrictionType = when {
-            ignoreCache -> SourceRestrictionType.ONLY_FROM_REMOTE
-            mainViewModel.isInternetAvailable.value == false -> SourceRestrictionType.ONLY_FROM_LOCAL
-            else -> SourceRestrictionType.UNRESTRICTED
-        }
+
+        val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
 
         fileListViewModel.getFiles(
             folderId,
             order = fileListViewModel.sortType,
-            sourceRestrictionType = sourceRestrictionType,
+            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else sourceRestrictionType,
             userDrive = userDrive,
             isNewSort = isNewSort,
         ).observe(viewLifecycleOwner) {
@@ -768,7 +770,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             isDownloading = true
             fileAdapter.isComplete = false
 
-            getFolderFiles(ignoreCache, isNewSort, onFinish = {
+            val sourceRestrictionType = if (ignoreCache) ONLY_FROM_REMOTE else UNRESTRICTED
+
+            getFolderFiles(sourceRestrictionType, isNewSort, onFinish = {
                 it?.let { result ->
 
                     if (fileAdapter.itemCount == 0 || !result.isFirstPage || isNewSort) {

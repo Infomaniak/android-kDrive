@@ -141,7 +141,7 @@ object FolderFilesProvider {
                 okHttpClient = okHttpClient,
                 driveId = driveId,
                 parentId = folderFilesProviderArgs.folderId,
-                cursor = if (folderFilesProviderArgs.sourceRestrictionType == ONLY_FROM_REMOTE) null else folderProxy?.cursor,
+                cursor = null,
                 order = folderFilesProviderArgs.order
             ).let {
                 CursorApiResponse(
@@ -175,7 +175,7 @@ object FolderFilesProvider {
         val folderWithChildren = folderFilesProviderArgs.withChildren
 
         return when {
-            !apiResponseData.isNullOrEmpty() -> {
+            apiResponseData != null -> {
                 val isCompleteFolder = !apiResponse.hasMore || apiResponseData.count() < ApiRepository.PER_PAGE
                 saveRemoteFiles(
                     realm = realm,
