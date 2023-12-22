@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2023 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,138 +18,56 @@
 package com.infomaniak.drive.data.models
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatDelegate
-import com.google.gson.reflect.TypeToken
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.api.ApiController
+import com.infomaniak.lib.core.utils.SharedValue.sharedValue
+import com.infomaniak.lib.core.utils.transaction
 
-class UiSettings(private val context: Context) {
+class UiSettings(context: Context) {
 
-    private fun getUiSettings(): SharedPreferences {
-        return context.getSharedPreferences("UISettings", Context.MODE_PRIVATE)
-    }
+    private val sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun removeUiSettings() {
-        with(getUiSettings().edit()) {
-            clear()
-            apply()
-        }
-    }
+    fun removeUiSettings() = sharedPreferences.transaction { clear() }
 
-    fun getSaveExternalFilesPref(): Triple<Int, Int, Int?> {
-        val uiSettings = getUiSettings()
-        val userId = uiSettings.getInt("saveExternalFilesPref_userId", -1)
-        val driveId = uiSettings.getInt("saveExternalFilesPref_driveId", -1)
-        val folderId = uiSettings.getInt("saveExternalFilesPref_folderId", -1)
-        return Triple(userId, driveId, if (folderId >= Utils.ROOT_ID) folderId else null)
-    }
+    //region Save External
+    fun getSaveExternalFilesPref() = SaveExternalFilesData(
+        userId = saveExternalFilesUserId,
+        driveId = saveExternalFilesDriveId,
+        folderId = if (saveExternalFilesFolderId >= Utils.ROOT_ID) saveExternalFilesFolderId else null,
+    )
 
     fun setSaveExternalFilesPref(userId: Int, driveId: Int, folderId: Int) {
-        with(getUiSettings().edit()) {
-            putInt("saveExternalFilesPref_userId", userId)
-            putInt("saveExternalFilesPref_driveId", driveId)
-            putInt("saveExternalFilesPref_folderId", folderId)
-            apply()
-        }
+        saveExternalFilesUserId = userId
+        saveExternalFilesDriveId = driveId
+        saveExternalFilesFolderId = folderId
     }
 
-    var bottomNavigationSelectedItem: Int
-        get() = getUiSettings().getInt("bottomNavigationSelectedItem", R.id.hostFragment)
-        set(value) {
-            with(getUiSettings().edit()) {
-                putInt("bottomNavigationSelectedItem", value)
-                apply()
-            }
-        }
+    private var saveExternalFilesUserId by sharedPreferences.sharedValue("saveExternalFilesPref_userId", -1)
+    private var saveExternalFilesDriveId by sharedPreferences.sharedValue("saveExternalFilesPref_driveId", -1)
+    private var saveExternalFilesFolderId by sharedPreferences.sharedValue("saveExternalFilesPref_folderId", -1)
+    //endregion
 
-    var hasDisplayedSyncDialog: Boolean
-        get() = getUiSettings().getBoolean("hasDisplayedSyncDialog", false)
-        set(value) {
-            with(getUiSettings().edit()) {
-                putBoolean("hasDisplayedSyncDialog", value)
-                apply()
-            }
-        }
+    var bottomNavigationSelectedItem by sharedPreferences.sharedValue("bottomNavigationSelectedItem", R.id.hostFragment)
+    var hasDisplayedSyncDialog by sharedPreferences.sharedValue("hasDisplayedSyncDialog", false)
+    var lastHomeSelectedTab by sharedPreferences.sharedValue("lastHomeSelectedTab", 0)
+    var listMode by sharedPreferences.sharedValue("listMode", true)
+    var mustDisplayBatteryDialog by sharedPreferences.sharedValue("mustDisplayBatteryDialog", manufacturerWarning)
+    var nightMode by sharedPreferences.sharedValue("nightMode", MODE_NIGHT_FOLLOW_SYSTEM)
+    var recentSearches by sharedPreferences.sharedValue("recentSearches", emptyList())
+    var sortType by sharedPreferences.sharedValue("sortType", SortType.NAME_AZ)
+    var updateLater by sharedPreferences.sharedValue("updateLater", false)
 
-    var lastHomeSelectedTab: Int
-        get() = getUiSettings().getInt("lastHomeSelectedTab", 0)
-        set(value) {
-            with(getUiSettings().edit()) {
-                putInt("lastHomeSelectedTab", value)
-                apply()
-            }
-        }
+    data class SaveExternalFilesData(
+        val userId: Int,
+        val driveId: Int,
+        val folderId: Int?,
+    )
 
-    var listMode: Boolean
-        get() = getUiSettings().getBoolean("listMode", true)
-        set(value) {
-            with(getUiSettings().edit()) {
-                putBoolean("listMode", value)
-                apply()
-            }
-        }
+    companion object {
 
-    var mustDisplayBatteryDialog: Boolean
-        get() = getUiSettings().getBoolean("mustDisplayBatteryDialog", manufacturerWarning)
-        set(value) {
-            with(getUiSettings().edit()) {
-                putBoolean("mustDisplayBatteryDialog", value)
-                apply()
-            }
-        }
-
-    var nightMode: Int
-        get() = getUiSettings().getInt("nightMode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        set(value) {
-            with(getUiSettings().edit()) {
-                putInt("nightMode", value)
-                apply()
-            }
-        }
-
-    var recentSearches: List<String>
-        get() = ApiController.gson.fromJson(
-            getUiSettings().getString("recentSearches", null),
-            object : TypeToken<List<String>>() {}.type,
-        ) ?: emptyList()
-        set(value) {
-            with(getUiSettings().edit()) {
-                putString("recentSearches", ApiController.gson.toJson(value))
-                apply()
-            }
-        }
-
-    var sortType: File.SortType
-        get() {
-            return when (getUiSettings().getString("sortType", File.SortType.NAME_AZ.name)) {
-                File.SortType.NAME_AZ.name -> File.SortType.NAME_AZ
-                File.SortType.NAME_ZA.name -> File.SortType.NAME_ZA
-                File.SortType.OLDER.name -> File.SortType.OLDER
-                File.SortType.RECENT.name -> File.SortType.RECENT
-                File.SortType.OLDEST_ADDED.name -> File.SortType.OLDEST_ADDED
-                File.SortType.MOST_RECENT_ADDED.name -> File.SortType.MOST_RECENT_ADDED
-                File.SortType.BIGGER.name -> File.SortType.BIGGER
-                File.SortType.SMALLER.name -> File.SortType.SMALLER
-                //File.SortType.EXTENSION.name -> File.SortType.EXTENSION
-                else -> File.SortType.NAME_AZ
-            }
-        }
-        set(value) {
-            with(getUiSettings().edit()) {
-                putString("sortType", value.name)
-                apply()
-            }
-        }
-
-    var updateLater: Boolean
-        get() = getUiSettings().getBoolean("updateLater", false)
-        set(value) {
-            with(getUiSettings().edit()) {
-                putBoolean("updateLater", value)
-                apply()
-            }
-        }
+        private const val SHARED_PREFS_NAME = "UISettings"
+    }
 }
