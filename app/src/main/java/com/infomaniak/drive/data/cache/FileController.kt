@@ -45,10 +45,6 @@ object FileController {
     private const val REALM_DB_FILE = "kDrive-%s-%s.realm"
     private const val REALM_DB_SHARES_WITH_ME = "kDrive-%s-%s-shares.realm"
 
-    // Bump this when we want to force-refresh files that are too old.
-    // Example: We did it when we added Categories & Colored folders, to automatically display them when updating the app.
-    private const val MIN_VERSION_CODE = 4_02_000_08
-
     const val FAVORITES_FILE_ID = -1
     const val MY_SHARES_FILE_ID = -2
     const val RECENT_CHANGES_FILE_ID = -4
@@ -591,13 +587,14 @@ object FileController {
         remoteFolder: File?,
         apiResponse: CursorApiResponse<List<File>>,
         isFirstPage: Boolean,
+        isCompleteFolder: Boolean,
     ) {
-        val remoteFiles = apiResponse.data!!
+        val remoteFiles = apiResponse.data ?: return
 
         // Save remote folder if it doesn't exist locally
         var newLocalFolderProxy: File? = null
         if (localFolderProxy == null && remoteFolder != null) {
-            realm.executeTransaction { newLocalFolderProxy = realm.copyToRealm(remoteFolder) }
+            realm.executeTransaction { newLocalFolderProxy = it.copyToRealm(remoteFolder) }
         }
 
         // Restore same children data
@@ -610,7 +607,7 @@ object FileController {
                 // Add children
                 folderProxy.children.addAll(remoteFiles)
                 // Update folder properties
-                if (remoteFiles.size < ApiRepository.PER_PAGE) folderProxy.isComplete = true
+                folderProxy.isComplete = isCompleteFolder
                 folderProxy.responseAt = apiResponse.responseAt
                 folderProxy.cursor = apiResponse.cursor
                 folderProxy.versionCode = BuildConfig.VERSION_CODE
@@ -696,12 +693,12 @@ object FileController {
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    fun updateFileFromActivity(realm: Realm, fileActivity: FileActivity, folderId: Int) {
-        getFileProxyById(fileActivity.fileId, customRealm = realm)?.let { file ->
-            insertOrUpdateFile(realm, fileActivity.file!!, file)
+    fun updateFileFromActivity(realm: Realm, remoteFile: File, folderId: Int) {
+        getFileProxyById(remoteFile.id, customRealm = realm)?.let { localFile ->
+            insertOrUpdateFile(realm, remoteFile, localFile)
         } ?: also {
             realm.executeTransaction {
-                realm.where(File::class.java).equalTo(File::id.name, folderId).findFirst()?.children?.add(fileActivity.file)
+                realm.where(File::class.java).equalTo(File::id.name, folderId).findFirst()?.children?.add(remoteFile)
             }
         }
     }

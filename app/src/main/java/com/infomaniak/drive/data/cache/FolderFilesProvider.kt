@@ -151,7 +151,7 @@ object FolderFilesProvider {
     ): Pair<File, ArrayList<File>>? {
         var result: Pair<File, ArrayList<File>>? = null
 
-        val apiResponse = ApiRepository.getDirectoryFiles(okHttpClient, driveId, parentId, localFolderProxy?.cursor, order)
+        val apiResponse = ApiRepository.getFolderFiles(okHttpClient, driveId, parentId, localFolderProxy?.cursor, order)
         val localFolder = localFolderProxy?.realm?.copyFromRealm(localFolderProxy, 1)
             ?: ApiRepository.getFileDetails(File(id = parentId, driveId = driveId)).data
 
@@ -163,7 +163,8 @@ object FolderFilesProvider {
                     localFolderProxy = localFolderProxy,
                     remoteFolder = localFolder,
                     apiResponse = apiResponse,
-                    isFirstPage = isFirstPage
+                    isFirstPage = isFirstPage,
+                    isCompleteFolder = remoteFiles.count() < ApiRepository.PER_PAGE,
                 )
                 result = (localFolder to if (withChildren) ArrayList(remoteFiles) else arrayListOf())
             }
@@ -225,6 +226,7 @@ object FolderFilesProvider {
     }
 
     private fun FileActivity.applyFileActivity(realm: Realm, returnResponse: ArrayMap<Int, FileActivity>, currentFolder: File) {
+        val remoteFile = file
         when (val action = getAction()) {
             FileActivity.FileActivityType.FILE_DELETE,
             FileActivity.FileActivityType.FILE_MOVE_OUT,
@@ -246,13 +248,13 @@ object FolderFilesProvider {
             FileActivity.FileActivityType.FILE_CREATE,
             FileActivity.FileActivityType.FILE_MOVE_IN,
             FileActivity.FileActivityType.FILE_RESTORE -> {
-                if (returnResponse[fileId] == null && file != null) {
-                    if (file!!.isImporting()) MqttClientWrapper.start(file!!.externalImport?.id)
+                if (returnResponse[fileId] == null && remoteFile != null) {
+                    if (remoteFile.isImporting()) MqttClientWrapper.start(remoteFile.externalImport?.id)
                     realm.where(File::class.java).equalTo(File::id.name, currentFolder.id).findFirst()?.let { realmFolder ->
-                        if (!realmFolder.children.contains(file)) {
-                            realm.executeTransaction { realmFolder.children.add(file) }
+                        if (!realmFolder.children.contains(remoteFile)) {
+                            realm.executeTransaction { realmFolder.children.add(remoteFile) }
                         } else {
-                            FileController.updateFileFromActivity(realm, this, realmFolder.id)
+                            FileController.updateFileFromActivity(realm, remoteFile, realmFolder.id)
                         }
                         returnResponse[fileId] = this
                     }
@@ -273,10 +275,10 @@ object FolderFilesProvider {
             FileActivity.FileActivityType.FILE_SHARE_UPDATE,
             FileActivity.FileActivityType.FILE_UPDATE -> {
                 if (returnResponse[fileId] == null) {
-                    if (file == null) {
+                    if (remoteFile == null) {
                         FileController.removeFile(fileId, customRealm = realm, recursive = false)
                     } else {
-                        FileController.updateFileFromActivity(realm, this, currentFolder.id)
+                        FileController.updateFileFromActivity(realm, remoteFile, currentFolder.id)
                     }
                     returnResponse[fileId] = this
                 }
