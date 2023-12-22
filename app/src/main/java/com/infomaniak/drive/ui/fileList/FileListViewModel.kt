@@ -22,6 +22,7 @@ import androidx.lifecycle.*
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
@@ -66,7 +67,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         return liveData(Dispatchers.IO + getFilesJob) {
             tailrec suspend fun recursiveDownload(parentId: Int, nextPage: Boolean = false) {
                 getFilesJob.ensureActive()
-                val resultList = FileController.getFilesFromCacheOrDownload(
+                val resultList = FolderFilesProvider.getFilesFromCacheOrDownload(
                     parentId = parentId,
                     isFirstPage = true,
                     ignoreCache = ignoreCache,
@@ -205,7 +206,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         return liveData(Dispatchers.IO + getFolderActivitiesJob) {
             mutex.withLock {
                 getFolderActivitiesJob.ensureActive()
-                val activities = FileController.getFolderActivities(folder, userDrive)
+                val activities = FolderFilesProvider.getFolderActivities(folder, userDrive)
                 emit(activities.isNotEmpty())
             }
         }
