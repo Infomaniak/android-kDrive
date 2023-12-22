@@ -26,6 +26,10 @@ import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import com.facebook.stetho.Stetho
@@ -34,6 +38,7 @@ import com.infomaniak.drive.MatomoDrive.buildTracker
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.services.AppUpdateWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
@@ -62,10 +67,12 @@ import org.matomo.sdk.Tracker
 import java.util.Locale
 import java.util.UUID
 
-class MainApplication : Application(), ImageLoaderFactory {
+class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
 
     val matomoTracker: Tracker by lazy { buildTracker() }
     var geniusScanIsReady = false
+
+    private val appUpdateWorkerScheduler by lazy { AppUpdateWorker.Scheduler(applicationContext) }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -73,7 +80,9 @@ class MainApplication : Application(), ImageLoaderFactory {
     }
 
     override fun onCreate() {
-        super.onCreate()
+        super<Application>.onCreate()
+
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         setDefaultLocal()
 
@@ -130,6 +139,16 @@ class MainApplication : Application(), ImageLoaderFactory {
         initNotificationChannel()
         HttpClient.init(tokenInterceptorListener())
         MqttClientWrapper.init(applicationContext)
+    }
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        owner.lifecycleScope.launch { appUpdateWorkerScheduler.cancelWorkIfNeeded() }
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        owner.lifecycleScope.launch { appUpdateWorkerScheduler.scheduleWorkIfNeeded() }
+        super.onStop(owner)
     }
 
     private fun setDefaultLocal() = with(resources) {
