@@ -20,13 +20,13 @@ package com.infomaniak.drive.data.models
 import com.google.gson.annotations.SerializedName
 
 enum class FileActivityType {
-    @SerializedName("file_create")
+    @SerializedName("file_access")
     FILE_ACCESS,
     @SerializedName("file_create")
     FILE_CREATE,
     @SerializedName("file_rename")
     FILE_RENAME,
-    @SerializedName("file_move_in")
+    @SerializedName("file_move")
     FILE_MOVE_IN,
     @SerializedName("file_move_out")
     FILE_MOVE_OUT,
