@@ -44,7 +44,7 @@ class PasswordDialogFragment : DialogFragment() {
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setTitle(R.string.pdfIsLocked)
-            //Here we set the listener to null because otherwise, the dialog is dismissed automatically when we press the button
+            // Here we set the listener to null because otherwise, the dialog is dismissed automatically when we press the button
             .setPositiveButton(R.string.buttonValid, null)
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setView(binding.root)
