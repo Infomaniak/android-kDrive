@@ -64,6 +64,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private var pdfFile: IOFile? = null
+    private var isPasswordProtected = false
     private var isDownloading = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -115,30 +116,43 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun showPdf(password: String? = null) {
-        lifecycleScope.launch {
-            withResumed {
-                with(binding.pdfView.fromFile(pdfFile)) {
-                    password(password)
-                    disableLongpress()
-                    enableAnnotationRendering(true)
-                    enableDoubletap(true)
-                    pageFling(false)
-                    pageSnap(false)
-                    scrollHandle(scrollHandle)
-                    spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
-                    swipeHorizontal(false)
-                    touchPriority(true)
-                    onLoad { pageCount ->
-                        binding.downloadLayout.root.isGone = true
-                        dismissPasswordDialog()
-                        updatePageNumber(totalPage = pageCount)
+        if (!binding.pdfView.isShown || isPasswordProtected) {
+            lifecycleScope.launch {
+                withResumed {
+                    with(binding.pdfView.fromFile(pdfFile)) {
+                        password(password)
+                        disableLongPress()
+                        enableAnnotationRendering(true)
+                        enableDoubletap(true)
+                        pageFling(false)
+                        pageSnap(false)
+                        scrollHandle(scrollHandle)
+                        spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
+                        swipeHorizontal(false)
+                        touchPriority(true)
+                        onLoad { pageCount ->
+                            binding.downloadLayout.root.isGone = true
+                            dismissPasswordDialog()
+                            updatePageNumber(totalPage = pageCount)
+                        }
+                        onPageChange { currentPage, pageCount ->
+                            updatePageNumber(
+                                currentPage = currentPage,
+                                totalPage = pageCount
+                            )
+                        }
+                        onError {
+                            // This is to handle the case where we have opened a PDF with a password so in order
+                            // for the user to be able to open it, we display the error layout
+                            binding.downloadLayout.root.isVisible = true
+                            isPasswordProtected = true
+                            if (passwordDialog.isAdded) onPDFLoadError() else displayError()
+                        }
+                        load()
                     }
-                    onPageChange { currentPage, pageCount -> updatePageNumber(currentPage = currentPage, totalPage = pageCount) }
-                    onError { if (passwordDialog.isAdded) onPDFLoadError() else displayError() }
-                    load()
-                }
 
-                getPageNumberChip()?.isVisible = true
+                    getPageNumberChip()?.isVisible = true
+                }
             }
         }
     }
