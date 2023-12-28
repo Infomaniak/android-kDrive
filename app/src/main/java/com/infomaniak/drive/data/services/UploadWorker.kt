@@ -172,6 +172,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 scope.setExtra("allPendingUploadsWithoutPriorityCount", "$allPendingUploadsWithoutPriorityCount")
                 Sentry.captureMessage("An upload count inconsistency has been detected")
             }
+            if (pendingCount == 0) throw CancellationException("Stop several restart")
         }
     }
 
