@@ -164,7 +164,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun checkUploadCountReliability() {
         val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount()
         if (allPendingUploadsCount != pendingCount) {
-            val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriority()
+            val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriority().count()
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.ERROR
                 scope.setExtra("uploadFiles", "$pendingCount")
