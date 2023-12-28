@@ -535,6 +535,7 @@
     <string name="onBoardingTitle1">Access your files on all your devices</string>
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
+    <string name="pdfIsLocked">Your PDF is locked</string>
     <string name="picturesNoFile">No photo at this time</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparing to upload 1 file</item>
@@ -723,4 +724,5 @@
     <string name="userPermissionRemove">User will no longer have access to this file.</string>
     <string name="userPermissionWrite">Can change</string>
     <string name="userPermissionWriteDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDeleting the file</string>
+    <string name="wrongPdfPassword">Wrong password</string>
 </resources>

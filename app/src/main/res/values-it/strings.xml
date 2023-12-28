@@ -524,6 +524,7 @@
     <string name="onBoardingTitle1">Accedi ai tuoi file su tutti i tuoi dispositivi</string>
     <string name="onBoardingTitle2">Collabora su una stessa punto e accresci la tua efficienza</string>
     <string name="onBoardingTitle3">Salva i tuoi ricordi in modo sicuro</string>
+    <string name="pdfIsLocked">Il PDF è bloccato</string>
     <string name="picturesNoFile">Al momento non ci sono foto</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparazione all’importazione di 1 file</item>
@@ -712,4 +713,5 @@
     <string name="userPermissionRemove">L’utente non avrà più accesso a questo file.</string>
     <string name="userPermissionWrite">Può modificare</string>
     <string name="userPermissionWriteDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file</string>
+    <string name="wrongPdfPassword">Password errata</string>
 </resources>
