@@ -135,8 +135,8 @@ class UploadTask(
                 chunkSize = uploadedChunks!!.validChuckSize
             }
 
-            BufferedInputStream(fileInputStream, chunkSize).use { input ->
-                val waitingCoroutines = mutableListOf<Job>()
+            BufferedInputStream(fileInputStream, chunkSize * 2).use { input ->
+                val chunkParentJob = Job()
                 val requestSemaphore = Semaphore(limitParallelRequest)
 
                 if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
@@ -174,11 +174,13 @@ class UploadTask(
                     val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count)
                     SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
-                    waitingCoroutines.add(
-                        coroutineScope.uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
-                    )
+                    @Suppress("DeferredResultUnused")
+                    coroutineScope.async(chunkParentJob) {
+                        uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
+                    }
                 }
-                waitingCoroutines.joinAll()
+                chunkParentJob.complete()
+                chunkParentJob.join()
             }
         }
 
@@ -202,13 +204,13 @@ class UploadTask(
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
     }
 
-    private fun CoroutineScope.uploadChunkRequest(
+    private fun uploadChunkRequest(
         requestSemaphore: Semaphore,
         requestBody: RequestBody,
-        url: String
-    ) = launch(Dispatchers.IO) {
+        url: String,
+    ) {
         val uploadRequestBody = ProgressRequestBody(requestBody) { currentBytes, bytesWritten, contentLength ->
-            launch {
+            runBlocking {
                 progressMutex.withLock {
                     updateProgress(currentBytes, bytesWritten, contentLength)
                 }
