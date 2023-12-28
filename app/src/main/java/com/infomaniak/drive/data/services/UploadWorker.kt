@@ -133,6 +133,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
 
+        checkUploadCountReliability()
+
         SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
 
         for (uploadFile in uploadFiles) {
@@ -157,6 +159,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         currentUploadFile?.showUploadedFilesNotification(applicationContext, successCount, successNames, failedCount, failedNames)
         if (uploadedCount > 0) Result.success() else Result.failure()
+    }
+
+    private fun checkUploadCountReliability() {
+        val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount()
+        if (allPendingUploadsCount != pendingCount) {
+            val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriority().count()
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.ERROR
+                scope.setExtra("uploadFiles", "$pendingCount")
+                scope.setExtra("realmAllPendingUploadsCount", "$allPendingUploadsCount")
+                scope.setExtra("allPendingUploadsWithoutPriorityCount", "$allPendingUploadsWithoutPriorityCount")
+                Sentry.captureMessage("An upload count inconsistency has been detected")
+            }
+            if (pendingCount == 0) throw CancellationException("Stop several restart")
+        }
     }
 
     private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
