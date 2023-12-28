@@ -296,7 +296,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
-        val jobs = mutableListOf<Deferred<Any?>>()
+        val parentJob = Job()
         var customSelection: String
         var customArgs: Array<String>
 
@@ -315,30 +315,34 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
             customArgs = args + mediaFolder.id.toString()
 
-            val getLastImagesOperation = getLocalLastMediasAsync(
-                syncSettings = syncSettings,
-                contentUri = MediaFoldersProvider.imagesExternalUri,
-                selection = customSelection,
-                args = customArgs,
-                mediaFolder = mediaFolder,
-            )
-            jobs.add(getLastImagesOperation)
-
-            if (syncSettings.syncVideo) {
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
-
-                val getLastVideosOperation = getLocalLastMediasAsync(
+            @Suppress("DeferredResultUnused")
+            async(parentJob) {
+                getLocalLastMedias(
                     syncSettings = syncSettings,
-                    contentUri = MediaFoldersProvider.videosExternalUri,
+                    contentUri = MediaFoldersProvider.imagesExternalUri,
                     selection = customSelection,
                     args = customArgs,
                     mediaFolder = mediaFolder,
                 )
-                jobs.add(getLastVideosOperation)
+            }
+
+            if (syncSettings.syncVideo) {
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
+
+                @Suppress("DeferredResultUnused")
+                async(parentJob) {
+                    getLocalLastMedias(
+                        syncSettings = syncSettings,
+                        contentUri = MediaFoldersProvider.videosExternalUri,
+                        selection = customSelection,
+                        args = customArgs,
+                        mediaFolder = mediaFolder,
+                    )
+                }
             }
         }
-
-        jobs.joinAll()
+        parentJob.complete()
+        parentJob.join()
     }
 
     private fun moreCustomConditions(): String = when {
@@ -347,13 +351,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         else -> ""
     }
 
-    private fun CoroutineScope.getLocalLastMediasAsync(
+    private fun getLocalLastMedias(
         syncSettings: SyncSettings,
         contentUri: Uri,
         selection: String,
         args: Array<String>,
         mediaFolder: MediaFolder
-    ) = async {
+    ) {
 
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " +
                 MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
