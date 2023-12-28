@@ -52,6 +52,7 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.navigation.NavigationBarItemView
+import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
@@ -64,7 +65,6 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
-import com.infomaniak.drive.ui.LaunchActivity.*
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
@@ -79,18 +79,23 @@ import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
 import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.SentryLog
+import com.infomaniak.lib.core.utils.SnackbarUtils.showIndefiniteSnackbar
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsAvailable
+import com.infomaniak.lib.stores.StoreUtils.initAppUpdateManager
+import com.infomaniak.lib.stores.StoreUtils.installDownloadedUpdate
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
+import com.infomaniak.lib.stores.StoreUtils.unregisterAppUpdateListener
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Date
 
 class MainActivity : BaseActivity() {
 
@@ -98,6 +103,9 @@ class MainActivity : BaseActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
+    private val uiSettings by lazy { UiSettings(this) }
+    private val navController by lazy { setupNavController() }
+
     private lateinit var downloadReceiver: DownloadReceiver
 
     private var lastAppClosingTime = Date().time
@@ -137,27 +145,39 @@ class MainActivity : BaseActivity() {
             }
         }
 
+    private val inAppUpdateResultLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
+        uiSettings.isUserWantingUpdates = result.resultCode == RESULT_OK
+    }
+
+    private var inAppUpdateSnackbar: Snackbar? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
         downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
-        val navController = setupNavController()
 
-        setupBottomNavigation(navController)
-        handleNavigateToDestinationFileId(navController)
+        setupBottomNavigation()
+        handleNavigateToDestinationFileId()
         listenToNetworkStatus()
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
-        setupMainFab(navController)
+        setupMainFab()
         setupDrivePermissions()
         handleInAppReview()
-        handleUpdates(navController)
-        handleShortcuts(navController)
+        handleShortcuts()
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
+
+        initAppUpdateManager()
+        observeAppUpdateDownload()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        handleUpdates()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -168,11 +188,11 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setupBottomNavigation(navController: NavController) = with(binding) {
+    private fun setupBottomNavigation() = with(binding) {
         bottomNavigation.apply {
             setupWithNavControllerCustom(navController)
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
-            selectedItemId = UiSettings(this@MainActivity).bottomNavigationSelectedItem
+            selectedItemId = uiSettings.bottomNavigationSelectedItem
             setOnItemReselectedListener { item ->
                 when (item.itemId) {
                     R.id.fileListFragment, R.id.favoritesFragment -> {
@@ -185,7 +205,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleNavigateToDestinationFileId(navController: NavController) {
+    private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
                 binding.bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
@@ -212,7 +232,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setupMainFab(navController: NavController) = with(binding) {
+    private fun setupMainFab() = with(binding) {
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
         mainViewModel.currentFolder.observe(this@MainActivity) { file ->
             mainFab.isEnabled = file?.rights?.canCreateFile == true
@@ -229,13 +249,56 @@ class MainActivity : BaseActivity() {
         if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
     }
 
-    private fun handleUpdates(navController: NavController) {
-        if (!UiSettings(this).updateLater || AppSettings.appLaunches % 10 == 0) {
-            checkUpdateIsAvailable(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) { updateIsAvailable ->
-                if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
+
+    //region In-App Updates
+    private fun initAppUpdateManager() {
+        initAppUpdateManager(
+            context = this,
+            onUpdateDownloaded = { mainViewModel.toggleAppUpdateStatus(isUpdateDownloaded = true) },
+            onUpdateInstalled = { mainViewModel.toggleAppUpdateStatus(isUpdateDownloaded = false) },
+        )
+    }
+
+    private fun handleUpdates() {
+        if (uiSettings.isUserWantingUpdates || AppSettings.appLaunches % 10 == 0) {
+            checkUpdateIsAvailable(
+                appId = BuildConfig.APPLICATION_ID,
+                versionCode = BuildConfig.VERSION_CODE,
+                inAppResultLauncher = inAppUpdateResultLauncher,
+                onFDroidResult = { updateIsAvailable ->
+                    if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
+                },
+            )
+        }
+    }
+
+    private fun launchUpdateInstall() {
+        trackEvent("inAppUpdate", "installUpdate")
+        mainViewModel.canInstallUpdate.value = false
+        installDownloadedUpdate(
+            onFailure = {
+                Sentry.captureException(it)
+                uiSettings.resetUpdateSettings()
+                showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab())
+            },
+        )
+    }
+
+    private fun observeAppUpdateDownload() {
+        mainViewModel.canInstallUpdate.observe(this) { isUploadDownloaded ->
+            if (isUploadDownloaded && canDisplayInAppSnackbar()) {
+                inAppUpdateSnackbar = showIndefiniteSnackbar(
+                    title = R.string.updateReadyTitle,
+                    actionButtonTitle = R.string.updateInstallButton,
+                    anchor = getMainFab(),
+                    onActionClicked = ::launchUpdateInstall,
+                )
             }
         }
     }
+
+    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
+    //endregion
 
     override fun onResume() {
         super.onResume()
@@ -260,6 +323,8 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         handleDeletionOfUploadedPhotos()
+
+        mainViewModel.checkAppUpdateStatus()
     }
 
     override fun onPause() {
@@ -373,7 +438,7 @@ class MainActivity : BaseActivity() {
         bottomNavigationBackgroundView.isVisible = isVisible
     }
 
-    private fun handleShortcuts(navController: NavController) = with(mainViewModel) {
+    private fun handleShortcuts() = with(mainViewModel) {
         navigationArgs?.shortcutId?.let { shortcutId ->
             trackEvent("shortcuts", shortcutId)
 
@@ -405,12 +470,13 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onStop() {
+        unregisterAppUpdateListener()
         super.onStop()
         saveLastNavigationItemSelected()
     }
 
     fun saveLastNavigationItemSelected() {
-        UiSettings(this).bottomNavigationSelectedItem = binding.bottomNavigation.selectedItemId
+        uiSettings.bottomNavigationSelectedItem = binding.bottomNavigation.selectedItemId
     }
 
     override fun onDestroy() {
@@ -419,20 +485,18 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
     }
 
-    private fun displayInformationPanel() {
+    private fun displayInformationPanel() = with(uiSettings) {
         if (!hasDisplayedInformationPanel) {
-            UiSettings(this).apply {
-                val destinationId = when {
-                    !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
-                        hasDisplayedSyncDialog = true
-                        R.id.syncConfigureBottomSheetDialog
-                    }
-                    else -> null
+            val destinationId = when {
+                !hasDisplayedSyncDialog && !AccountUtils.isEnableAppSync() -> {
+                    hasDisplayedSyncDialog = true
+                    R.id.syncConfigureBottomSheetDialog
                 }
-                destinationId?.let {
-                    hasDisplayedInformationPanel = true
-                    findNavController(R.id.hostFragment).navigate(it)
-                }
+                else -> null
+            }
+            destinationId?.let {
+                hasDisplayedInformationPanel = true
+                findNavController(R.id.hostFragment).navigate(it)
             }
         }
     }

@@ -672,6 +672,7 @@
         <item quantity="one">%s am ursprünglichen Ort wiederhergestellt</item>
         <item quantity="other">%d Elemente am ursprünglichen Ort wiederhergestellt</item>
     </plurals>
+    <string name="updateInstallButton">Installieren</string>
     <string name="uploadCancelDescription">Der Import wurde vom Benutzer abgebrochen</string>
     <string name="uploadCancelTitle">Import abgebrochen</string>
     <string name="uploadErrorTitle">Fehler beim Import</string>
