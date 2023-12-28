@@ -293,6 +293,8 @@ class MainActivity : BaseActivity() {
                     anchor = getMainFab(),
                     onActionClicked = ::launchUpdateInstall,
                 )
+            } else if (!isUploadDownloaded) {
+                inAppUpdateSnackbar?.dismiss()
             }
         }
     }
