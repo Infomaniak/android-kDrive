@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileRequest
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
@@ -215,7 +216,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun addFavoritesClicked() {
         super.addFavoritesClicked()
         currentFile.apply {
-            val observer: Observer<MainViewModel.FileRequest> = Observer { fileRequest ->
+            val observer: Observer<FileRequest> = Observer { fileRequest ->
                 if (fileRequest.isSuccess) {
                     isFavorite = !isFavorite
                     showFavoritesResultSnackbar()
