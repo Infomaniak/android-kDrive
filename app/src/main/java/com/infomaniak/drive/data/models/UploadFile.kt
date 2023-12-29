@@ -213,6 +213,14 @@ open class UploadFile(
             return customRealm?.let(block) ?: getRealmInstance().use(block)
         }
 
+        fun getAllPendingUploadsWithoutPriority(customRealm: Realm? = null): List<UploadFile> {
+            val block: (Realm) -> List<UploadFile> = { realm ->
+                pendingUploadsQuery(realm).findAll()
+            }
+
+            return customRealm?.let(block) ?: getRealmInstance().use(block)
+        }
+
         fun getAllPendingPriorityFilesCount(): Long {
             return getRealmInstance().use { pendingUploadsQuery(it).notEqualTo(UploadFile::type.name, Type.SYNC.name).count() }
         }

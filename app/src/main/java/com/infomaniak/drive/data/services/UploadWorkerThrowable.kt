@@ -79,6 +79,7 @@ object UploadWorkerThrowable {
             Result.failure()
 
         } catch (exception: Exception) {
+            exception.printStackTrace()
             handleGenericException(exception)
 
         } finally {

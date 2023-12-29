@@ -26,6 +26,8 @@ import com.infomaniak.lib.core.utils.goToPlayStore
 
 class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
 
+    private val uiSettings by lazy { UiSettings(requireContext()) }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -34,14 +36,14 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
         illu.setAnimation(R.raw.illu_upgrade)
 
         secondaryActionButton.setOnClickListener {
-            UiSettings(requireContext()).updateLater = true
+            uiSettings.isUserWantingUpdates = false
             dismiss()
         }
 
         actionButton.apply {
             setText(R.string.buttonUpdate)
             setOnClickListener {
-                UiSettings(requireContext()).updateLater = false
+                uiSettings.isUserWantingUpdates = true
                 requireContext().goToPlayStore()
                 dismiss()
             }

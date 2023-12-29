@@ -672,6 +672,7 @@
         <item quantity="one">%s ripristinato nell’ubicazione di origine</item>
         <item quantity="other">%d elementi ipristinati nell’ubicazione di origine</item>
     </plurals>
+    <string name="updateInstallButton">Installa</string>
     <string name="uploadCancelDescription">L’importazione è stata annullata dall’utente</string>
     <string name="uploadCancelTitle">Importazione annullata</string>
     <string name="uploadErrorTitle">Errore di importazione</string>

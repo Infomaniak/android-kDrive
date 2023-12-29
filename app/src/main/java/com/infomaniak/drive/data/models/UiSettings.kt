@@ -58,7 +58,16 @@ class UiSettings(context: Context) {
     var nightMode by sharedPreferences.sharedValue("nightMode", MODE_NIGHT_FOLLOW_SYSTEM)
     var recentSearches by sharedPreferences.sharedValue("recentSearches", emptyList())
     var sortType by sharedPreferences.sharedValue("sortType", SortType.NAME_AZ)
-    var updateLater by sharedPreferences.sharedValue("updateLater", false)
+
+    //region Update
+    var isUserWantingUpdates by sharedPreferences.sharedValue("isUserWantingUpdates", false)
+    var hasAppUpdateDownloaded by sharedPreferences.sharedValue("hasAppUpdateDownloaded", false)
+
+    fun resetUpdateSettings() {
+        isUserWantingUpdates = false // This avoid the user being instantly reprompted to download update
+        hasAppUpdateDownloaded = false
+    }
+    //endregion
 
     data class SaveExternalFilesData(
         val userId: Int,
