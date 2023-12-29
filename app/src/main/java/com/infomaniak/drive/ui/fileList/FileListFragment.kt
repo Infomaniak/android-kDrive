@@ -722,11 +722,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                     fileAdapter.notifyFileChanged(data as Int) { file -> if (!file.isManaged) file.isFavorite = true }
                 }
             }
+            BulkOperationType.ADD_OFFLINE,
+            BulkOperationType.REMOVE_OFFLINE -> lifecycleScope.launch(Dispatchers.Main) { closeMultiSelect() }
             BulkOperationType.MANAGE_CATEGORIES,
             BulkOperationType.COPY,
             BulkOperationType.COLOR_FOLDER,
-            BulkOperationType.ADD_OFFLINE,
-            BulkOperationType.REMOVE_OFFLINE,
             BulkOperationType.REMOVE_FAVORITES -> Unit
         }
     }

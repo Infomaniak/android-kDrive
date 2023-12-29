@@ -29,6 +29,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -41,21 +42,18 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileRequest
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.BulkOperationsUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import java.util.UUID
 
 abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
@@ -139,19 +137,22 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     open fun closeMultiSelect() {
-        swipeRefresh?.isEnabled = true
+        // This is to avoid to close the multiselect layout for every items we have selected
+        if (multiSelectLayout?.root?.isVisible == true) {
+            swipeRefresh?.isEnabled = true
 
-        multiSelectManager.apply {
-            resetSelectedItems()
-            exceptedItemsIds.clear()
-            isSelectAllOn = false
-            isMultiSelectOn = false
+            multiSelectManager.apply {
+                resetSelectedItems()
+                exceptedItemsIds.clear()
+                isSelectAllOn = false
+                isMultiSelectOn = false
+            }
+
+            adapter?.apply { notifyItemRangeChanged(0, itemCount) }
+
+            multiSelectToolbar?.isVisible = true
+            multiSelectLayout?.root?.isGone = true
         }
-
-        adapter?.apply { notifyItemRangeChanged(0, itemCount) }
-
-        multiSelectToolbar?.isVisible = true
-        multiSelectLayout?.root?.isGone = true
     }
 
     open fun onMenuButtonClicked(
@@ -373,8 +374,22 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     }
                 }
             }
-            BulkOperationType.ADD_OFFLINE,
-            BulkOperationType.REMOVE_OFFLINE -> addOrRemoveSelectedFilesToOffline(file, type)
+            BulkOperationType.ADD_OFFLINE ->  {
+                mediator.addSource(
+                    addSelectedFileFromOffline(
+                        file = file,
+                        onSuccess = { onIndividualActionSuccess(type, file.id) }),
+                    updateMultiSelectMediator(mediator),
+                )
+            }
+            BulkOperationType.REMOVE_OFFLINE -> {
+                mediator.addSource(
+                    removeSelectedFileFromOffline(
+                        file = file,
+                        onSuccess = { onIndividualActionSuccess(type, file.id) }),
+                    updateMultiSelectMediator(mediator),
+                )
+            }
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     addFileToFavorites(
@@ -450,27 +465,25 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         onAllIndividualActionsFinished(type)
     }
 
-    private fun addOrRemoveSelectedFilesToOffline(file: File, type: BulkOperationType) {
+    private fun addSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.Default) {
         if (!file.isFolder()) {
             val offlineFile = file.getOfflineFile(requireContext())
             val cacheFile = file.getCacheFile(requireContext())
-            if (type == BulkOperationType.ADD_OFFLINE && !file.isOffline) {
+            if (!file.isOffline) {
                 addSelectedFileToOffline(file, offlineFile, cacheFile)
-            } else if (type == BulkOperationType.REMOVE_OFFLINE && file.isOffline) {
-                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
             }
-            onIndividualActionSuccess(type, Unit)
-            closeMultiSelect()
         }
+
+        onSuccess?.invoke()
+        emit(FileRequest(isSuccess = true))
     }
 
-    private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+    private fun addSelectedFileToOffline(file: File, offlineFile: IOFile?, cacheFile: IOFile) {
         val invalidFileNameChar = Utils.getInvalidFileNameCharacter(file.name)
         if (invalidFileNameChar == null) {
             if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
                 Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-                runBlocking(Dispatchers.IO) { FileController.updateOfflineStatus(file.id, true) }
-
+                FileController.updateOfflineStatus(file.id, true)
                 updateFileProgressByFileId(file.id, 100) { _, currentFile ->
                     currentFile.apply {
                         if (isNotManagedByRealm()) {
@@ -490,6 +503,18 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 ).apply { NotificationManagerCompat.from(it).notify(UUID.randomUUID().hashCode(), build()) }
             }
         }
+    }
+
+    private fun removeSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.Default) {
+        if (!file.isFolder()) {
+            val offlineFile = file.getOfflineFile(requireContext())
+            val cacheFile = file.getCacheFile(requireContext())
+            if (file.isOffline) {
+                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
+            }
+        }
+        onSuccess?.invoke()
+        emit(MainViewModel.FileRequest(isSuccess = true))
     }
 
     private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {

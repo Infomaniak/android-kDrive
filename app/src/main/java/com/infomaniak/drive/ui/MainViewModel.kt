@@ -45,10 +45,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.Date
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
@@ -103,9 +100,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
     }
 
-    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (ApiResponse<*>) -> Unit = { apiResponse ->
+    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (FileRequest) -> Unit = { fileRequest ->
         val total = mediator.value!!.second + 1
-        mediator.value = if (apiResponse.isSuccess()) {
+        mediator.value = if (fileRequest.isSuccess) {
             mediator.value!!.first + 1 to total
         } else {
             mediator.value!!.first to total
@@ -196,7 +193,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.postFavoriteFile(file)) {
-                emit(this)
+                emit(FileRequest(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -210,7 +207,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onSuccess: ((File) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.deleteFavoriteFile(file)) {
-                emit(this)
+                emit(FileRequest(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -250,11 +247,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
             onSuccess?.invoke(file.id)
         }
-        emit(apiResponse)
+        emit(FileRequest(apiResponse.isSuccess()))
     }
 
-    private fun moveIfOfflineFileOrDelete(file: File, ioFile: java.io.File, newParent: File) {
-        if (file.isOffline) ioFile.renameTo(java.io.File("${newParent.getRemotePath()}/${file.name}"))
+    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
+        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
         else ioFile.delete()
     }
 
@@ -263,7 +260,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
-        emit(FileController.updateFolderColor(file, color))
+        val isSuccess  =FileController.updateFolderColor(file, color).isSuccess()
+        emit(FileRequest(isSuccess))
     }
 
     fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {
@@ -294,20 +292,22 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
-            emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))
+            with(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess)) {
+                emit(FileRequest(isSuccess = this.isSuccess(), data = this.data))
+            }
         }
 
     fun restoreTrashFile(file: File, newFolderId: Int? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         val body = newFolderId?.let { mapOf("destination_directory_id" to it) }
         with(ApiRepository.postRestoreTrashFile(file, body)) {
-            emit(this)
+            emit(FileRequest(this.isSuccess(), errorCode = this.error?.code))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
 
     fun deleteTrashFile(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         with(ApiRepository.deleteTrashFile(file)) {
-            emit(this)
+            emit(FileRequest(this.isSuccess()))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
@@ -320,7 +320,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     ) = liveData(Dispatchers.IO) {
         ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(apiResponse)
+            emit(FileRequest(apiResponse.isSuccess()))
         }
     }
 
@@ -365,17 +365,20 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun removeOfflineFile(
         file: File,
-        offlineFile: java.io.File,
-        cacheFile: java.io.File,
+        offlineFile: IOFile,
+        cacheFile: IOFile,
         userDrive: UserDrive = UserDrive()
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileController.updateOfflineStatus(file.id, false)
-        }
-        if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
-        if (cacheFile.exists()) cacheFile.delete()
-        if (offlineFile.exists()) {
-            offlineFile.delete()
+            async {
+                FileController.updateOfflineStatus(file.id, false)
+                if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
+            }.await()
+
+            if (cacheFile.exists()) cacheFile.delete()
+            if (offlineFile.exists()) {
+                offlineFile.delete()
+            }
         }
     }
 
@@ -401,7 +404,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                         try {
                             columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                             pathname = cursor.getString(columnIndex)
-                            java.io.File(pathname).delete()
+                            IOFile(pathname).delete()
                             getContext().contentResolver.delete(uri, null, null)
                         } catch (nullPointerException: NullPointerException) {
                             Sentry.withScope { scope ->
@@ -428,4 +431,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         realm.close()
         super.onCleared()
     }
+
+    data class FileRequest(
+        val isSuccess: Boolean,
+        val errorResId: Int? = null,
+        val data: Any? = null,
+        val errorCode: String? = null)
 }
