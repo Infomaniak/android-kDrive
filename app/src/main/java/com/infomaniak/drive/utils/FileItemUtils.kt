@@ -27,7 +27,6 @@ import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import android.util.Size
 import android.widget.ImageView
 import android.widget.TextView
@@ -336,11 +335,8 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
         file.isOfflineFile(context, checkLocalFile = false) -> {
             hideProgress()
             isVisible = true
-            Log.i("setupFileProgress", "setupFileProgress -> offline = true")
-            Log.i("setupFileProgress", "setupFileProgress -> ${file.isOffline}")
         }
         else -> {
-            Log.i("setupFileProgress", "setupFileProgress -> hiding progress")
             isGone = true
         }
     }
