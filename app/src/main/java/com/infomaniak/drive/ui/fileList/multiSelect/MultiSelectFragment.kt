@@ -465,7 +465,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         onAllIndividualActionsFinished(type)
     }
 
-    private fun addSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.Default) {
+    private fun addSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         if (!file.isFolder()) {
             val offlineFile = file.getOfflineFile(requireContext())
             val cacheFile = file.getCacheFile(requireContext())
@@ -505,7 +505,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         }
     }
 
-    private fun removeSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.Default) {
+    private fun removeSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         if (!file.isFolder()) {
             val offlineFile = file.getOfflineFile(requireContext())
             val cacheFile = file.getCacheFile(requireContext())
@@ -514,7 +514,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
         }
         onSuccess?.invoke()
-        emit(MainViewModel.FileRequest(isSuccess = true))
+        emit(FileRequest(isSuccess = true))
     }
 
     private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {

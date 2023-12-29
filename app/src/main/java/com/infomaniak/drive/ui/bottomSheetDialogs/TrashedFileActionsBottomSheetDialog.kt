@@ -32,6 +32,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentBottomSheetTrashedFileActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileRequest
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.TrashViewModel
@@ -112,7 +113,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun restoreResult(fileRequest: MainViewModel.FileRequest, originalPlace: Boolean, folderName: String? = null) {
+    private fun restoreResult(fileRequest: FileRequest, originalPlace: Boolean, folderName: String? = null) {
         if (fileRequest.isSuccess) {
             val title = if (originalPlace) R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess
             else R.plurals.trashedFileRestoreFileInSuccess
