@@ -146,10 +146,10 @@ class PreviewPDFFragment : PreviewFragment() {
                                 totalPage = pageCount
                             )
                         }
-                        onError {
+                        onError { exception ->
                             // This is to handle the case where we have opened a PDF with a password so in order
                             // for the user to be able to open it, we display the error layout
-                            if (it is PdfPasswordException) {
+                            if (exception is PdfPasswordException) {
                                 binding.downloadLayout.root.isVisible = true
                                 isPasswordProtected = true
                                 if (passwordDialog.isAdded) onPDFLoadError() else displayError()
