@@ -39,6 +39,7 @@ import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
+import com.shockwave.pdfium.PdfPasswordException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -148,9 +149,11 @@ class PreviewPDFFragment : PreviewFragment() {
                         onError {
                             // This is to handle the case where we have opened a PDF with a password so in order
                             // for the user to be able to open it, we display the error layout
-                            binding.downloadLayout.root.isVisible = true
-                            isPasswordProtected = true
-                            if (passwordDialog.isAdded) onPDFLoadError() else displayError()
+                            if (it is PdfPasswordException) {
+                                binding.downloadLayout.root.isVisible = true
+                                isPasswordProtected = true
+                                if (passwordDialog.isAdded) onPDFLoadError() else displayError()
+                            }
                         }
                         onAttach {
                             // This is to handle the case where we swipe in the ViewPager and we want to go back to
