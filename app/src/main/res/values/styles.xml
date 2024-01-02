@@ -141,7 +141,7 @@
     </style>
 
     <style name="BottomSheetStyle" parent="BottomSheetDialogTheme.ModalStyle">
-        <item name="shapeAppearance">?attr/shapeAppearanceLargeComponent</item>
+        <item name="shapeAppearance">?attr/shapeAppearanceCornerExtraLarge</item>
         <item name="behavior_hideable">false</item>
         <item name="behavior_draggable">true</item>
         <item name="behavior_skipCollapsed">false</item>
@@ -176,7 +176,7 @@
         <item name="colorAccent">@color/accent</item>
         <item name="colorControlNormal">@color/primary</item>
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorSurface">@color/appBar</item>
+        <item name="colorSurfaceContainerHigh">@color/appBar</item>
         <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogMaterialComponentsTitle</item>
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlayDialogRounded</item>
     </style>
@@ -352,7 +352,7 @@
     </style>
 
     <style name="MaterialCalendarThemeBackground" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
-        <item name="colorSurface">@color/background</item>
+        <item name="colorSurfaceContainerHigh">@color/background</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="colorOnPrimary">@color/white</item>
     </style>
