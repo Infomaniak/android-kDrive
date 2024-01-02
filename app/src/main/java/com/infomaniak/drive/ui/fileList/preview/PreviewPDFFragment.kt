@@ -106,7 +106,11 @@ class PreviewPDFFragment : PreviewFragment() {
     override fun setMenuVisibility(menuVisible: Boolean) {
         super.setMenuVisibility(menuVisible)
         if (menuVisible) {
-            if (isDownloading) previewSliderViewModel.pdfIsDownloading.value = isDownloading else downloadPdf()
+            when {
+                isDownloading -> previewSliderViewModel.pdfIsDownloading.value = isDownloading
+                pdfFile == null -> downloadPdf()
+                else -> showPdf()
+            }
         }
     }
 
@@ -147,6 +151,12 @@ class PreviewPDFFragment : PreviewFragment() {
                             binding.downloadLayout.root.isVisible = true
                             isPasswordProtected = true
                             if (passwordDialog.isAdded) onPDFLoadError() else displayError()
+                        }
+                        onAttach {
+                            // This is to handle the case where we swipe in the ViewPager and we want to go back to
+                            // a previously opened PDF. In that case, we want to display the default loader instead of
+                            // an empty screen
+                            if (pdfFile != null && !binding.pdfView.isShown) binding.downloadLayout.root.isVisible = true
                         }
                         load()
                     }
