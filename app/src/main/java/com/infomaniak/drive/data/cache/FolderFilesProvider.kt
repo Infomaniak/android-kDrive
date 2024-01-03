@@ -293,30 +293,37 @@ object FolderFilesProvider {
                 // We used to have this condition, but it doesn't exist on the ios side, according to commit it was an api fix.
                 // returnResponse[fileId]?.createdAt?.time == createdAt.time
                 if (returnResponse[fileId] == null) {
-                    FileController.getParentFile(fileId = fileId, realm = realm)?.let { localFolder ->
-                        if (localFolder.id != currentFolder.id) return@let
-
-                        if (action == FileActivityType.FILE_MOVE_OUT) {
-                            FileController.updateFile(localFolder.id, realm) { it.children.remove(actionFile) }
-                        } else {
-                            FileController.removeFile(fileId, customRealm = realm, recursive = false)
-                        }
-                    }
-
+                    removeAction(realm, currentFolder, actionFile)
                     returnResponse[fileId] = this
                 }
             }
             else -> {
                 if (returnResponse[fileId] == null) {
-                    if (actionFile == null) {
-                        FileController.removeFile(fileId, customRealm = realm, recursive = false)
-                    } else {
-                        if (actionFile.isImporting()) MqttClientWrapper.start(actionFile.externalImport?.id)
-                        FileController.upsertActionFile(realm, currentFolder.id, actionFile)
-                    }
+                    upsertAction(realm, currentFolder, actionFile)
                     returnResponse[fileId] = this
                 }
             }
+        }
+    }
+
+    private fun FileAction.removeAction(realm: Realm, currentFolder: File, actionFile: File?) {
+        FileController.getParentFile(fileId = fileId, realm = realm)?.let { localFolder ->
+            if (localFolder.id != currentFolder.id) return@let
+
+            if (action == FileActivityType.FILE_MOVE_OUT) {
+                FileController.updateFile(localFolder.id, realm) { it.children.remove(actionFile) }
+            } else {
+                FileController.removeFile(fileId, customRealm = realm, recursive = false)
+            }
+        }
+    }
+
+    private fun FileAction.upsertAction(realm: Realm, currentFolder: File, actionFile: File?) {
+        if (actionFile == null) {
+            FileController.removeFile(fileId, customRealm = realm, recursive = false)
+        } else {
+            if (actionFile.isImporting()) MqttClientWrapper.start(actionFile.externalImport?.id)
+            FileController.upsertActionFile(realm, currentFolder.id, actionFile)
         }
     }
 
