@@ -275,8 +275,8 @@ class MainActivity : BaseActivity() {
     private fun launchUpdateInstall() {
         trackEvent("inAppUpdate", "installUpdate")
         mainViewModel.canInstallUpdate.value = false
+        uiSettings.hasAppUpdateDownloaded = false
         installDownloadedUpdate(
-            onSuccess = { uiSettings.hasAppUpdateDownloaded = false },
             onFailure = {
                 Sentry.captureException(it)
                 uiSettings.resetUpdateSettings()
