@@ -57,6 +57,7 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -146,7 +147,9 @@ class MainActivity : BaseActivity() {
         }
 
     private val inAppUpdateResultLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
-        uiSettings.isUserWantingUpdates = result.resultCode == RESULT_OK
+        val isUserWantingUpdates = result.resultCode == RESULT_OK
+        uiSettings.isUserWantingUpdates = isUserWantingUpdates
+        trackInAppUpdate(if (isUserWantingUpdates) "discoverNow" else "discoverLater")
     }
 
     private var inAppUpdateSnackbar: Snackbar? = null
@@ -273,7 +276,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun launchUpdateInstall() {
-        trackEvent("inAppUpdate", "installUpdate")
+        trackInAppUpdate("installUpdate")
         mainViewModel.canInstallUpdate.value = false
         uiSettings.hasAppUpdateDownloaded = false
         installDownloadedUpdate(
