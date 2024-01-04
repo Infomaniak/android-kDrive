@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.extensions.RemoteFileException
 import com.infomaniak.drive.extensions.getFileFromRemote
+import com.infomaniak.drive.extensions.letAll
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MediaUtils
 import com.infomaniak.drive.utils.MediaUtils.isMedia
@@ -54,8 +55,7 @@ import java.io.File as IOFile
 class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
     private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-    private var files: MutableSet<File?> = mutableSetOf()
-    private var offlineFiles: MutableSet<IOFile?> = mutableSetOf()
+    private var filesPair: MutableMap<Int, Pair<File?, IOFile?>> = mutableMapOf()
 
     private val fileIds: IntArray by lazy { inputData.getIntArray(FILE_IDS) ?: intArrayOf() }
     private val userDrive: UserDrive by lazy {
@@ -69,6 +69,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
 
     private var downloadComplete = 0
     private var currentDownloadFileName: String = ""
+    private var lastUpdateProgressMillis = System.currentTimeMillis()
 
     override suspend fun doWork(): Result {
         return runCatching {
@@ -100,22 +101,26 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     }
 
     private fun clearFiles() {
-        offlineFiles.forEachIndexed { index, offlineFile ->
-            offlineFile?.let {
-                if (it.exists() && files.elementAt(index)?.isIntactFile(it) == false) it.delete()
+        for ((_, value) in filesPair.entries) {
+            Pair(value.first, value.second).letAll { file, offlineFile ->
+                if (offlineFile.exists() && !file.isIntactFile(offlineFile)) offlineFile.delete()
             }
         }
-
     }
 
     private suspend fun initOfflineDownload(): Result {
         var result = Result.failure()
-        fileIds.forEachIndexed { index, fileId ->
+        fileIds.forEach { fileId ->
             val file = FileController.getFileById(fileId, userDrive)
             val offlineFile = file?.getOfflineFile(applicationContext, userDrive.userId)
             val cacheFile = file?.getCacheFile(applicationContext, userDrive)
 
-            offlineFile?.let { if (file.isOfflineAndIntact(it)) result = Result.success() }
+            offlineFile?.let {
+                if (file.isOfflineAndIntact(it)) {
+                    result = Result.success()
+                    return@forEach
+                }
+            }
 
             setProgress(workDataOf(PROGRESS to 0, FILE_ID to fileId))
 
@@ -124,17 +129,16 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
 
             if (file == null || offlineFile == null) {
                 getFileFromRemote(fileId, userDrive) { downloadedFile ->
-                    files.add(downloadedFile)
-                    offlineFiles.add(downloadedFile.getOfflineFile(applicationContext, userDrive.driveId))
+                    filesPair[downloadedFile.id] =
+                        Pair(downloadedFile, downloadedFile.getOfflineFile(applicationContext, userDrive.driveId))
                 }
             } else {
-                files.add(file)
-                offlineFiles.add(offlineFile)
+                filesPair[file.id] = Pair(file, offlineFile)
             }
 
             result = file?.let {
                 currentDownloadFileName = file.name
-                startOfflineDownload(index, file)
+                startOfflineDownload(file = file, offlineFile = offlineFile!!)
             } ?: Result.failure()
         }
 
@@ -168,8 +172,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         }
     }
 
-    private suspend fun startOfflineDownload(indexOfFile: Int, file: File): Result = withContext(Dispatchers.Default) {
-        val offlineFile = offlineFiles.elementAt(indexOfFile)!!
+    private suspend fun startOfflineDownload(file: File, offlineFile: IOFile): Result = withContext(Dispatchers.Default) {
         val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
         val response = downloadFileResponse(
@@ -192,15 +195,21 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         }
 
         if (response.isSuccessful) {
-            downloadComplete += 1
-            val progressPercent = (downloadComplete * 100) / filesCount
-            updateDownloadNotification(
-                contentTitle = "Import in progress ($progressPercent%)",
-                contentText = "$downloadComplete files downloaded out of $filesCount",
-                progressPercent = progressPercent
-            )
+            fileDownloaded()
             Result.success()
         } else Result.failure()
+    }
+
+    private fun fileDownloaded() {
+        lastUpdateProgressMillis = System.currentTimeMillis()
+        downloadComplete += 1
+
+        val progressPercent = (downloadComplete * 100) / filesCount
+        updateDownloadNotification(
+            contentTitle = "Import in progress ($progressPercent%)",
+            contentText = "$downloadComplete files downloaded out of $filesCount",
+            progressPercent = progressPercent
+        )
     }
 
     private fun notifyDownloadCancelled() {
@@ -244,8 +253,12 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         originalResponse.newBuilder()
             .body(ProgressResponseBody(originalResponse.body!!, object : ProgressResponseBody.ProgressListener {
                 override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                    val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
-                    onProgress(progress)
+                    val currentSystemTimeMillis = System.currentTimeMillis()
+                    if (currentSystemTimeMillis - lastUpdateProgressMillis > MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS) {
+                        lastUpdateProgressMillis = currentSystemTimeMillis
+                        val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
+                        onProgress(progress)
+                    }
                 }
             })).build()
     }
@@ -261,5 +274,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         const val USER_ID = "user_id"
 
         private const val NOTIFICATION_ID = 0
+        private const val MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS = 1000L
     }
 }
