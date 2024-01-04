@@ -47,7 +47,9 @@ fun CoroutineWorker.getFileFromRemote(
         val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
         val translatedErrorText = if (translatedError == 0) "" else applicationContext.getString(translatedError)
         val responseJson = ApiController.gson.toJson(fileDetails, responseGsonType)
-        throw BulkDownloadWorker.RemoteFileException("$responseJson $translatedErrorText")
+        throw RemoteFileException("$responseJson $translatedErrorText")
     }
     onFileDownloaded.invoke(file)
 }
+
+class RemoteFileException(data: String) : Exception(data)
