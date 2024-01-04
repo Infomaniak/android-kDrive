@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive
 
+import android.app.Activity
 import android.content.Context
 import androidx.fragment.app.Fragment
 import com.infomaniak.lib.core.MatomoCore
@@ -50,5 +51,9 @@ object MatomoDrive : MatomoCore {
 
     fun Fragment.trackTrashEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent("trash", name, action, value)
+    }
+
+    fun Activity.trackInAppUpdate(name: String) {
+        trackEvent("inAppUpdate", name)
     }
 }
