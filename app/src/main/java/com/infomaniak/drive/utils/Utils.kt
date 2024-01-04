@@ -37,6 +37,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.liveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.work.*
@@ -47,6 +48,7 @@ import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
 import com.infomaniak.drive.databinding.DialogNamePromptBinding
@@ -284,6 +286,33 @@ object Utils {
             .build()
 
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
+    }
+
+    fun downloadAsOfflineFiles(context: Context, files: List<File>, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) = liveData {
+        val workManager = WorkManager.getInstance(context)
+
+        if (files.any { it.isPendingOffline(context) }) workManager.cancelAllWorkByTag(BulkDownloadWorker::class.java.toString())
+        val inputData = workDataOf(
+            BulkDownloadWorker.FILE_IDS to files.map { it.id }.toIntArray(),
+            BulkDownloadWorker.USER_ID to userDrive.userId,
+            BulkDownloadWorker.DRIVE_ID to userDrive.driveId,
+        )
+        val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(networkType)
+            .setRequiresStorageNotLow(true)
+            .build()
+        val downloadRequest = OneTimeWorkRequestBuilder<BulkDownloadWorker>()
+            .addTag(BulkDownloadWorker::class.java.toString())
+            .setInputData(inputData)
+            .setConstraints(constraints)
+            .setExpeditedIfAvailable()
+            .build()
+
+        workManager.enqueueUniqueWork(BulkDownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
+
+        onSuccess.invoke()
+        emit(MainViewModel.FileRequest(isSuccess = true))
     }
 
     fun getInvalidFileNameCharacter(fileName: String): String? = DownloadManagerUtils.regexInvalidSystemChar.find(fileName)?.value

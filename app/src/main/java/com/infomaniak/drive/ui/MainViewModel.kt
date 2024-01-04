@@ -21,6 +21,7 @@ import android.app.Application
 import android.content.Context
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
+import androidx.concurrent.futures.await
 import androidx.lifecycle.*
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
@@ -34,6 +35,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
+import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -70,6 +72,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
+
+    val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
     var mustOpenShortcut: Boolean = true
 
@@ -357,6 +361,25 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             .build()
     )
 
+    fun observeBulkDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
+        WorkQuery.Builder
+            .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG))
+            .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.SUCCEEDED))
+            .build()
+    )
+
+    fun checkBulkDownloadStatus(onWorkRunningResult: (isRunning: Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.Default) {
+            val workQuery = WorkQuery.Builder
+                .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                .build()
+            val workInfoList = WorkManager.getInstance(getApplication()).getWorkInfos(workQuery).await()
+            val isRunning = workInfoList.isNotEmpty() && workInfoList.first().state == WorkInfo.State.RUNNING
+            onWorkRunningResult(isRunning)
+        }
+    }
+
     suspend fun restartUploadWorkerIfNeeded() = withContext(Dispatchers.IO) {
         if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
             getContext().syncImmediately()
@@ -369,7 +392,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         cacheFile: IOFile,
         userDrive: UserDrive = UserDrive()
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             async {
                 FileController.updateOfflineStatus(file.id, false)
                 if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
@@ -388,6 +411,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         viewModelScope.launch(Dispatchers.IO + syncOfflineFilesJob) {
             SyncOfflineUtils.startSyncOffline(getContext(), syncOfflineFilesJob)
         }
+    }
+
+    fun cancelSyncOfflineFiles() {
+        syncOfflineFilesJob.cancel()
     }
 
     @Deprecated(message = "Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()")

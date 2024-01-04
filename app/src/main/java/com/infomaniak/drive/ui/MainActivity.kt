@@ -284,7 +284,9 @@ class MainActivity : BaseActivity() {
 
         launchAllUpload(drivePermissions)
 
-        if (!mainViewModel.ignoreSyncOffline) launchSyncOffline() else mainViewModel.ignoreSyncOffline = false
+        mainViewModel.checkBulkDownloadStatus { isRunning ->
+            if (!isRunning && !mainViewModel.ignoreSyncOffline) launchSyncOffline() else mainViewModel.ignoreSyncOffline = false
+        }
 
         AppSettings.appLaunches++
 
