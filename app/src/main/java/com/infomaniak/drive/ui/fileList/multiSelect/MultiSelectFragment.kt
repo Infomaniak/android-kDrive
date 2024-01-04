@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.app.NotificationManagerCompat
@@ -344,7 +343,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         color: String?,
     ) {
         selectedFiles.reversed().forEach { selectedFile ->
-           getFile(selectedFile)?.let { file -> sendIndividualAction(file, type, mediator, destinationFolder, color) }
+            getFile(selectedFile)?.let { file -> sendIndividualAction(file, type, mediator, destinationFolder, color) }
         }
     }
 
