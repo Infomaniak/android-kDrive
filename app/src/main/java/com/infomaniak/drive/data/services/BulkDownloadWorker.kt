@@ -70,8 +70,8 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     private var downloadComplete = 0
     private var currentDownloadFileName: String = ""
 
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        runCatching {
+    override suspend fun doWork(): Result {
+        return runCatching {
             SentryLog.i(TAG, "Work started")
             initOfflineDownload()
         }.getOrElse { exception ->
