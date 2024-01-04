@@ -173,7 +173,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     }
 
     private suspend fun startOfflineDownload(file: File, offlineFile: IOFile): Result = withContext(Dispatchers.Default) {
-        val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
         val response = downloadFileResponse(
             fileUrl = ApiRoutes.downloadFile(file),
@@ -188,7 +187,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         }
 
         saveRemoteData(response, offlineFile) {
-            launch(Dispatchers.Main) { setProgress(lastUpdate) }
+            launch(Dispatchers.Main) { setProgress(workDataOf(PROGRESS to 100, FILE_ID to file.id)) }
             FileController.updateOfflineStatus(file.id, true)
             offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
             if (file.isMedia()) MediaUtils.scanFile(applicationContext, offlineFile)
