@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.extensions.RemoteFileException
 import com.infomaniak.drive.extensions.getFileFromRemote
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MediaUtils
@@ -187,8 +188,6 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
         }
     }
-
-    class RemoteFileException(data: String) : Exception(data)
 
     companion object {
         const val TAG = "DownloadWorker"

@@ -31,6 +31,7 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.extensions.RemoteFileException
 import com.infomaniak.drive.extensions.getFileFromRemote
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MediaUtils
@@ -250,8 +251,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     }
 
     override suspend fun getForegroundInfo() = ForegroundInfo(0, downloadProgressNotification.build())
-
-    class RemoteFileException(data: String) : Exception(data)
 
     companion object {
         const val TAG = "BulkDownloadWorker"
