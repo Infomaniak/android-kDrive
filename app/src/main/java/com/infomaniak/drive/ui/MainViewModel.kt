@@ -265,7 +265,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
-        val isSuccess  =FileController.updateFolderColor(file, color).isSuccess()
+        val isSuccess = FileController.updateFolderColor(file, color).isSuccess()
         emit(FileRequest(isSuccess))
     }
 
@@ -474,5 +474,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         val isSuccess: Boolean,
         val errorResId: Int? = null,
         val data: Any? = null,
-        val errorCode: String? = null)
+        val errorCode: String? = null
+    )
 }
