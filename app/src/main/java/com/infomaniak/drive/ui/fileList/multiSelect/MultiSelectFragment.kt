@@ -316,11 +316,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         }
     }
 
-    private fun sendAddOfflineAction(selectedFiles: List<File>,
-                                     type: BulkOperationType,
-                                     mediator: MediatorLiveData<Pair<Int, Int>>,) {
+    private fun sendAddOfflineAction(
+        selectedFiles: List<File>,
+        type: BulkOperationType,
+        mediator: MediatorLiveData<Pair<Int, Int>>,
+    ) {
         val realmFiles = mutableListOf<File>()
-        selectedFiles.filter { !it.isFolder() && !it.isOffline }.forEach { selectedFile ->
+        selectedFiles.filter { !it.isFolder() }.forEach { selectedFile ->
             getFile(selectedFile)?.let { file -> realmFiles.add(file) }
         }
 
@@ -407,7 +409,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     }
                 }
             }
-            BulkOperationType.ADD_OFFLINE ->  {
+            BulkOperationType.ADD_OFFLINE -> {
                 mediator.addSource(
                     addSelectedFileFromOffline(
                         file = file,

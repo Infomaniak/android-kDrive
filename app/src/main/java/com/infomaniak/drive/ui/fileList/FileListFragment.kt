@@ -567,9 +567,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun observeOfflineBulkDownloadProgress() {
-        mainViewModel.observeBulkDownloadOffline(requireContext().applicationContext).observe(viewLifecycleOwner) { workInfoList ->
-            updateFileStatus(workInfoList, BulkDownloadWorker.FILE_ID, BulkDownloadWorker.PROGRESS)
-        }
+        mainViewModel.observeBulkDownloadOffline(requireContext().applicationContext)
+            .observe(viewLifecycleOwner) { workInfoList ->
+                updateFileStatus(workInfoList, BulkDownloadWorker.FILE_ID, BulkDownloadWorker.PROGRESS)
+            }
     }
 
     private fun updateFileStatus(workInfoList: List<WorkInfo>, fileIdKey: String, progressKey: String) {
@@ -583,7 +584,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
 
         workInfos.forEach { workInfo ->
-            val fileId: Int = workInfo.progress.getInt(fileIdKey, 0)
+            val fileId = workInfo.progress.getInt(fileIdKey, 0)
             if (fileId == 0) return
 
             val progress = workInfo.progress.getInt(progressKey, 100)
