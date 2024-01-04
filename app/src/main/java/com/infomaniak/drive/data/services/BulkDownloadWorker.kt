@@ -160,6 +160,15 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
 
     override suspend fun getForegroundInfo() = ForegroundInfo(0, downloadProgressNotification.build())
 
+    private fun updateDownloadNotification(contentTitle: String, contentText: String, progressPercent: Int) {
+        downloadProgressNotification.apply {
+            setContentTitle(contentTitle)
+            setContentText(contentText)
+            setProgress(100, progressPercent, false)
+            notificationManagerCompat.notifyCompat(applicationContext, NOTIFICATION_ID, build())
+        }
+    }
+
     private suspend fun startOfflineDownload(indexOfFile: Int, file: File): Result = withContext(Dispatchers.Default) {
         val offlineFile = offlineFiles.elementAt(indexOfFile)!!
         val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
@@ -185,13 +194,12 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
 
         if (response.isSuccessful) {
             downloadComplete += 1
-            downloadProgressNotification.apply {
-                val progressPercent = (downloadComplete * 100) / filesCount
-                setContentTitle("Import in progress ($progressPercent%)")
-                setContentText("$downloadComplete files downloaded out of $filesCount")
-                setProgress(100, progressPercent, false)
-                notificationManagerCompat.notifyCompat(applicationContext, NOTIFICATION_ID, build())
-            }
+            val progressPercent = (downloadComplete * 100) / filesCount
+            updateDownloadNotification(
+                contentTitle = "Import in progress ($progressPercent%)",
+                contentText = "$downloadComplete files downloaded out of $filesCount",
+                progressPercent = progressPercent
+            )
             Result.success()
         } else Result.failure()
     }
