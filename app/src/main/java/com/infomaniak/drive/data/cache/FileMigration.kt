@@ -317,21 +317,14 @@ class FileMigration : RealmMigration {
         if (oldVersionTemp == 6L) {
             schema.get(File::class.java.simpleName)?.apply {
                 addField("cursor", String::class.java)
-            }
-
-            oldVersionTemp++
-        }
-
-        // Migrate to version 8
-        if (oldVersionTemp == 7L) {
-            schema.get(File::class.java.simpleName)?.apply {
+                addRealmListField("supportedBy", String::class.java)
                 removeField("hasThumbnail")
                 removeField("hasOnlyoffice")
-                addRealmListField("supportedBy", String::class.java)
             }
 
             oldVersionTemp++
         }
+
     }
 
     override fun equals(other: Any?): Boolean {
