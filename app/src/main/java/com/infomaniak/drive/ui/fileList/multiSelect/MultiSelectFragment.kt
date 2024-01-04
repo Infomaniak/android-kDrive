@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.app.NotificationManagerCompat
@@ -49,6 +50,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSele
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
+import com.infomaniak.drive.utils.Utils.downloadAsOfflineFiles
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -223,6 +225,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         destinationFolder: File? = null,
         color: String? = null,
     ) = with(requireContext()) {
+        // Canceling sync of online files because everytime we put the app in background and then foreground,
+        // we try to sync offline files but if at the same time, we try to remove/add some at the same time, it can
+        // lead to weird behavior.
+        mainViewModel.cancelSyncOfflineFiles()
+
         val selectedFiles = multiSelectManager.getValidSelectedItems(type)
         val fileCount = (allSelectedFilesCount?.minus(multiSelectManager.exceptedItemsIds.size)) ?: selectedFiles.size
 
@@ -262,7 +269,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         destinationFolder: File?,
         color: String?,
     ): (Dialog?) -> Unit = { dialog ->
-
         val canBulkAllSelectedFiles = multiSelectManager.isSelectAllOn
         val hasEnoughSelectedFilesToBulk = selectedFiles.size > BulkOperationsUtils.MIN_SELECTED
         val isNotOfflineBulk = type != BulkOperationType.ADD_OFFLINE && type != BulkOperationType.REMOVE_OFFLINE
@@ -284,7 +290,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         } else {
             val mediator = mainViewModel.createMultiSelectMediator()
             enableMultiSelectButtons(false)
-            sendAllIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
+            if (type == BulkOperationType.ADD_OFFLINE) {
+                sendAddOfflineAction(selectedFiles, type, mediator)
+            } else {
+                sendAllIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
+            }
             observeMediator(mediator, fileCount, type, destinationFolder, dialog)
         }
     }
@@ -307,6 +317,25 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         }
     }
 
+    private fun sendAddOfflineAction(selectedFiles: List<File>,
+                                     type: BulkOperationType,
+                                     mediator: MediatorLiveData<Pair<Int, Int>>,) {
+        val realmFiles = mutableListOf<File>()
+        selectedFiles.filter { !it.isFolder() && !it.isOffline }.forEach { selectedFile ->
+            getFile(selectedFile)?.let { file -> realmFiles.add(file) }
+        }
+
+        if (type == BulkOperationType.ADD_OFFLINE) {
+            mediator.addSource(
+                downloadAsOfflineFiles(
+                    context = requireContext(),
+                    files = realmFiles,
+                    onSuccess = { onIndividualActionSuccess(type, Any()) }),
+                mainViewModel.updateMultiSelectMediator(mediator),
+            )
+        }
+    }
+
     private fun sendAllIndividualActions(
         selectedFiles: List<File>,
         type: BulkOperationType,
@@ -314,13 +343,18 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         destinationFolder: File?,
         color: String?,
     ) {
-        selectedFiles.reversed().forEach {
-            val file = when {
-                it.isManagedAndValidByRealm() -> it.realm.copyFromRealm(it, 0)
-                it.isNotManagedByRealm() -> it
-                else -> return@forEach
+        selectedFiles.reversed().forEach { selectedFile ->
+           getFile(selectedFile)?.let { file -> sendIndividualAction(file, type, mediator, destinationFolder, color) }
+        }
+    }
+
+    private fun getFile(file: File): File? {
+        return when {
+            file.isManagedAndValidByRealm() -> {
+                file.realm.copyFromRealm(file, 0)
             }
-            sendIndividualAction(file, type, mediator, destinationFolder, color)
+            file.isNotManagedByRealm() -> file
+            else -> null
         }
     }
 

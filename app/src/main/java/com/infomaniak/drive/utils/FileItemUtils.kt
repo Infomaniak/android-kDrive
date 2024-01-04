@@ -332,7 +332,7 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
             setProgress(file)
             isVisible = true
         }
-        file.isOfflineFile(context, checkLocalFile = false) -> {
+        file.isOfflineFile(context, checkLocalFile = false) && !file.isFolder() -> {
             hideProgress()
             isVisible = true
         }
