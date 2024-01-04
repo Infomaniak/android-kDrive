@@ -158,8 +158,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         }
     }
 
-    override suspend fun getForegroundInfo() = ForegroundInfo(0, downloadProgressNotification.build())
-
     private fun updateDownloadNotification(contentTitle: String, contentText: String, progressPercent: Int) {
         downloadProgressNotification.apply {
             setContentTitle(contentTitle)
@@ -250,6 +248,8 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
                 }
             })).build()
     }
+
+    override suspend fun getForegroundInfo() = ForegroundInfo(0, downloadProgressNotification.build())
 
     class RemoteFileException(data: String) : Exception(data)
 
