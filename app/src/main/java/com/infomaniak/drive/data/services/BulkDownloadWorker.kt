@@ -24,23 +24,20 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.*
-import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ProgressResponseBody
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.extensions.getFileFromRemote
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MediaUtils
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.SentryLog
@@ -124,8 +121,11 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             if (offlineFile?.exists() == true) offlineFile.delete()
             if (cacheFile?.exists() == true) cacheFile.delete()
 
-            if (file == null || offlineFile == null){
-                getFileFromRemote(fileId)
+            if (file == null || offlineFile == null) {
+                getFileFromRemote(fileId, userDrive) { downloadedFile ->
+                    files.add(downloadedFile)
+                    offlineFiles.add(downloadedFile.getOfflineFile(applicationContext, userDrive.driveId))
+                }
             } else {
                 files.add(file)
                 offlineFiles.add(offlineFile)
@@ -194,27 +194,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             }
             Result.success()
         } else Result.failure()
-    }
-
-    private fun getFileFromRemote(fileId: Int) {
-        val fileDetails = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
-        val remoteFile = fileDetails.data
-        val file = if (fileDetails.isSuccess() && remoteFile != null) {
-            FileController.getRealmInstance(userDrive).use { realm ->
-                FileController.updateExistingFile(newFile = remoteFile, realm = realm)
-            }
-            remoteFile
-        } else {
-            if (fileDetails.error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
-
-            val translatedError = fileDetails.translatedError
-            val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
-            val translatedErrorText = if (translatedError == 0) "" else applicationContext.getString(translatedError)
-            val responseJson = ApiController.gson.toJson(fileDetails, responseGsonType)
-            throw RemoteFileException("$responseJson $translatedErrorText")
-        }
-        files.add(file)
-        offlineFiles.add(file.getOfflineFile(applicationContext, userDrive.driveId))
     }
 
     private fun notifyDownloadCancelled() {
