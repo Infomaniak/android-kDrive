@@ -150,7 +150,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
                 notificationManagerCompat.cancel(file.id)
                 throw CancellationException()
             }
-            launch(Dispatchers.Default) {
+            launch(Dispatchers.Main) {
                 setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
             }
             SentryLog.d(TAG, "download $progress%")
@@ -162,7 +162,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         }
 
         saveRemoteData(response, offlineFile) {
-            launch(Dispatchers.Default) { setProgress(lastUpdate) }
+            launch(Dispatchers.Main) { setProgress(lastUpdate) }
             FileController.updateOfflineStatus(file.id, true)
             offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
             if (file.isMedia()) MediaUtils.scanFile(applicationContext, offlineFile)
