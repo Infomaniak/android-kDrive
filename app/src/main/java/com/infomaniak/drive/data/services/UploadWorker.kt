@@ -36,7 +36,6 @@ import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
-import com.infomaniak.drive.data.sync.UploadNotifications.NOTIFICATION_FILES_LIMIT
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.utils.*
@@ -45,7 +44,6 @@ import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.utils.*
 import io.sentry.Breadcrumb
@@ -57,10 +55,10 @@ import java.util.Date
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
 
-    private val failedNames by lazy { inputData.getStringArray(LAST_FAILED_NAMES)?.toMutableList() ?: mutableListOf() }
-    private val successNames by lazy { inputData.getStringArray(LAST_SUCCESS_NAMES)?.toMutableList() ?: mutableListOf() }
-    private var failedCount = inputData.getInt(LAST_FAILED_COUNT, 0)
-    private var successCount = inputData.getInt(LAST_SUCCESS_COUNT, 0)
+    private val failedNames = mutableListOf<String>()
+    private val successNames = mutableListOf<String>()
+    private var failedCount = 0
+    private var successCount = 0
 
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
@@ -76,20 +74,40 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         if (runAttemptCount >= MAX_RETRY_COUNT) return Result.failure()
 
         return runUploadCatching {
-            // Check if we have the required permissions before continuing
-            checkPermissions()?.let { return@runUploadCatching it }
+            var syncNewPendingUploads = false
+            var result: Result
+            var retryError = 0
+            var lastUploadFileName = ""
 
-            // Retrieve the latest media that have not been synced
-            val appSyncSettings = retrieveLatestNotSyncedMedia()
+            do {
+                // Check if we have the required permissions before continuing
+                checkPermissions()?.let { return@runUploadCatching it }
 
-            // Check if the user has cancelled the uploads and there is no more files to sync
-            checkRemainingUploadsAndUserCancellation()?.let { return@runUploadCatching it }
+                // Retrieve the latest media that have not been synced
+                val appSyncSettings = retrieveLatestNotSyncedMedia()
 
-            // Start uploads
-            val result = startSyncFiles()
+                // Check if the user has cancelled the uploads and there is no more files to sync
+                checkRemainingUploadsAndUserCancellation()?.let { return@runUploadCatching it }
 
-            // Check if re-sync is needed
-            checkIfNeedReSync(appSyncSettings)
+                // Start uploads
+                result = startSyncFiles()
+
+                // Check if re-sync is needed
+                appSyncSettings?.let {
+                    checkLocalLastMedias(it)
+                    syncNewPendingUploads = UploadFile.getAllPendingUploadsCount() > 0
+                }
+
+                // Update next iteration
+                retryError = if (currentUploadFile?.fileName == lastUploadFileName) retryError + 1 else 0
+                lastUploadFileName = currentUploadFile?.fileName ?: ""
+
+            } while (syncNewPendingUploads && retryError < MAX_RETRY_COUNT)
+
+            if (retryError == MAX_RETRY_COUNT) {
+                SentryLog.wtf(TAG, "A file has been restarted several times")
+                result = Result.failure()
+            }
 
             result
         }
@@ -173,19 +191,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 Sentry.captureMessage("An upload count inconsistency has been detected")
             }
             if (pendingCount == 0) throw CancellationException("Stop several restart")
-        }
-    }
-
-    private suspend fun checkIfNeedReSync(syncSettings: SyncSettings?) {
-        syncSettings?.let { checkLocalLastMedias(it) }
-        if (UploadFile.getAllPendingUploadsCount() > 0) {
-            val data = Data.Builder()
-                .putInt(LAST_FAILED_COUNT, failedCount)
-                .putInt(LAST_SUCCESS_COUNT, successCount)
-                .putStringArray(LAST_FAILED_NAMES, failedNames.take(NOTIFICATION_FILES_LIMIT).toTypedArray())
-                .putStringArray(LAST_SUCCESS_NAMES, successNames.take(NOTIFICATION_FILES_LIMIT).toTypedArray())
-                .build()
-            applicationContext.syncImmediately(data, true)
         }
     }
 
@@ -460,11 +465,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         const val REMOTE_FOLDER_ID = "remote_folder"
         const val CANCELLED_BY_USER = "cancelled_by_user"
         const val UPLOAD_FOLDER = "upload_folder"
-
-        private const val LAST_FAILED_COUNT = "last_failed_count"
-        private const val LAST_FAILED_NAMES = "last_failed_names"
-        private const val LAST_SUCCESS_COUNT = "last_success_count"
-        private const val LAST_SUCCESS_NAMES = "last_success_names"
 
         private const val MAX_RETRY_COUNT = 3
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10_000L // 10s (in ms)
