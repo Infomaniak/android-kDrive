@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import android.view.inputmethod.EditorInfo
-import com.google.android.material.textfield.TextInputEditText
+import android.widget.EditText
 
-fun TextInputEditText.handleActionDone(callback: () -> Unit) {
+fun EditText.handleActionDone(callback: () -> Unit) {
     setOnEditorActionListener { _, actionId, _ ->
         when (actionId) {
             EditorInfo.IME_ACTION_DONE -> {

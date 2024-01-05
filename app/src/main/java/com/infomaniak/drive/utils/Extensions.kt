@@ -26,7 +26,8 @@ import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
 import android.net.Uri
-import android.os.Build.*
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
 import android.util.DisplayMetrics
@@ -35,7 +36,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
-import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
@@ -79,6 +79,7 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.login.InfomaniakLogin
+import handleActionDone
 import io.realm.RealmList
 import kotlin.math.abs
 import kotlin.math.max
@@ -220,10 +221,7 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
         onDataPassed(item)
     }
     setAdapter(availableUsersAdapter)
-    setOnEditorActionListener { _, actionId, _ ->
-        if (actionId == EditorInfo.IME_ACTION_DONE) !availableUsersAdapter.addFirstAvailableItem() // if success -> close keyboard (false)
-        true
-    }
+    handleActionDone { !availableUsersAdapter.addFirstAvailableItem() }
 
     return availableUsersAdapter
 }
