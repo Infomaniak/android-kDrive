@@ -530,7 +530,6 @@
     <string name="onBoardingTitle1">Greifen Sie über alle Ihre Geräte auf Ihre Dateien zu</string>
     <string name="onBoardingTitle2">Arbeiten Sie am selben Ort zusammen und werden Sie effizienter</string>
     <string name="onBoardingTitle3">Speichern Sie Ihre Erinnerungen völlig sicher</string>
-    <string name="pdfIsLocked">Ihr PDF ist gesperrt</string>
     <string name="picturesNoFile">Derzeit kein Foto</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Vorbereitung auf den Import von 1 Datei</item>
@@ -720,5 +719,4 @@
     <string name="userPermissionRemove">Der Benutzer hat keinen Zugriff auf diese Datei mehr.</string>
     <string name="userPermissionWrite">Kann ändern</string>
     <string name="userPermissionWriteDescription">Änderung der Datei\nDownload\nHinzufügen eines Kommentars\nHinzufügen und Anlegen einer Datei / eines Ordners\nLöschen der Datei</string>
-    <string name="wrongPdfPassword">Falsches Passwort</string>
 </resources>
