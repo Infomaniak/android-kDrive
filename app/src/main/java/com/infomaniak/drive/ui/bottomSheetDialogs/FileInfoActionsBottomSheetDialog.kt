@@ -118,12 +118,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         if (isResumed) {
             mainViewModel.updateFolderColor(currentFile, color).observe(viewLifecycleOwner) { fileRequest ->
                 findNavController().popBackStack()
-                val text = if (fileRequest.isSuccess) {
+                val snackbarText = if (fileRequest.isSuccess) {
                     resources.getQuantityString(R.plurals.fileListColorFolderConfirmationSnackbar, 1)
                 } else {
                     fileRequest.errorResId?.let { getString(it) }
                 }
-                text?.let { showSnackbar(it, true) }
+                snackbarText?.let { text -> showSnackbar(text, true) }
             }
         }
     }
