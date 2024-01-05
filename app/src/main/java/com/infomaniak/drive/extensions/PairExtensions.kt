@@ -17,6 +17,6 @@
  */
 package com.infomaniak.drive.extensions
 
-fun<A: Any?, B: Any?> Pair<A?, B?>.letAll(callback: (value1: A, value2: B) -> Unit) {
+fun <A : Any?, B : Any?> Pair<A?, B?>.letAll(callback: (value1: A, value2: B) -> Unit) {
     if (first != null && second != null) callback.invoke(first!!, second!!)
 }
