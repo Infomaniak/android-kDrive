@@ -68,7 +68,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     private val downloadProgressNotification by lazy { createDownloadNotification() }
 
     private var downloadComplete = 0
-    private var currentDownloadFileName: String = ""
     private var lastUpdateProgressMillis = System.currentTimeMillis()
 
     override suspend fun doWork(): Result {
@@ -137,7 +136,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             }
 
             result = file?.let {
-                currentDownloadFileName = file.name
                 startOfflineDownload(file = file, offlineFile = offlineFile!!)
             } ?: Result.failure()
         }
