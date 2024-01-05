@@ -156,7 +156,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         )
         return applicationContext.downloadProgressNotification().apply {
             setOngoing(true)
-            setContentTitle("Import in progress")
+            setContentTitle(applicationContext.getString(R.string.bulkDownloadNotificationTitleNoProgress))
             addAction(cancelAction)
         }
     }
@@ -202,9 +202,19 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         numberOfFilesDownloaded += 1
 
         val progressPercent = (numberOfFilesDownloaded * 100) / filesCount
+        val notificationContentTitle = applicationContext.getString(
+            R.string.bulkDownloadNotificationTitleWithProgress,
+            progressPercent
+        )
+        val notificationContentText = applicationContext.resources.getQuantityString(
+            R.plurals.bulkDownloadNotificationContent,
+            numberOfFilesDownloaded,
+            numberOfFilesDownloaded,
+            filesCount
+        )
         updateDownloadNotification(
-            contentTitle = "Import in progress ($progressPercent%)",
-            contentText = "$numberOfFilesDownloaded files downloaded out of $filesCount",
+            contentTitle = notificationContentTitle,
+            contentText = notificationContentText,
             progressPercent = progressPercent
         )
     }
