@@ -88,10 +88,7 @@ class PreviewPDFFragment : PreviewFragment() {
             isVisible = true
         }
 
-        root.apply {
-            isVisible = true
-            setOnClickListener { toggleFullscreen() }
-        }
+        initViewsForFullscreen(root, binding.pdfView)
 
         bigOpenWithButton.apply {
             isGone = true
@@ -118,6 +115,15 @@ class PreviewPDFFragment : PreviewFragment() {
     override fun onPause() {
         previewPDFViewModel.cancelJobs()
         super.onPause()
+    }
+
+    private fun initViewsForFullscreen(vararg views: View) {
+        views.forEach { view ->
+            with(view) {
+                isVisible = true
+                setOnClickListener { toggleFullscreen() }
+            }
+        }
     }
 
     private fun showPdf(password: String? = null) {
