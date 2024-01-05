@@ -321,9 +321,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         type: BulkOperationType,
         mediator: MediatorLiveData<Pair<Int, Int>>,
     ) {
-        val realmFiles = mutableListOf<File>()
-        selectedFiles.filter { !it.isFolder() }.forEach { selectedFile ->
-            getFile(selectedFile)?.let { file -> realmFiles.add(file) }
+        val realmFiles = selectedFiles.mapNotNull { selectedFile ->
+            if (!selectedFile.isFolder()) getFile(selectedFile) else null
         }
 
         if (type == BulkOperationType.ADD_OFFLINE) {
