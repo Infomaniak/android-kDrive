@@ -67,7 +67,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     private val filesCount by lazy { fileIds.size }
     private val downloadProgressNotification by lazy { createDownloadNotification() }
 
-    private var downloadComplete = 0
+    private var numberOfFilesDownloaded = 0
     private var lastUpdateProgressMillis = System.currentTimeMillis()
 
     override suspend fun doWork(): Result {
@@ -199,12 +199,12 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
 
     private fun fileDownloaded() {
         lastUpdateProgressMillis = System.currentTimeMillis()
-        downloadComplete += 1
+        numberOfFilesDownloaded += 1
 
-        val progressPercent = (downloadComplete * 100) / filesCount
+        val progressPercent = (numberOfFilesDownloaded * 100) / filesCount
         updateDownloadNotification(
             contentTitle = "Import in progress ($progressPercent%)",
-            contentText = "$downloadComplete files downloaded out of $filesCount",
+            contentText = "$numberOfFilesDownloaded files downloaded out of $filesCount",
             progressPercent = progressPercent
         )
     }
