@@ -27,7 +27,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
+        mavenLocal() // Only used when we want to use a local version of a library (./gradlew publishToMavenLocal)
         maven { url 'https://jitpack.io' }
         maven { url 'https://s3.amazonaws.com/tgl.maven' }
         jcenter() // Only for io.realm:android-adapters
