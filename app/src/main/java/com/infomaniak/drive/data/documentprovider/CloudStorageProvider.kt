@@ -175,6 +175,9 @@ class CloudStorageProvider : DocumentsProvider() {
         val driveId = getDriveFromDocId(parentDocumentId).id
         val sortType = getSortType(sortOrder)
 
+        val userDrive = UserDrive(userId, driveId)
+        val realm = FileController.getRealmInstance(userDrive)
+
         when {
             isRootFolder -> {
                 cursor.addRootDrives(userId, isRootFolder = true)
@@ -200,7 +203,8 @@ class CloudStorageProvider : DocumentsProvider() {
                             transaction = { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) })
                     } else {
                         FolderFilesProvider.getCloudStorageFiles(
-                            parentId = fileFolderId,
+                            realm = realm,
+                            folderId = fileFolderId,
                             userDrive = UserDrive(userId, driveId, sharedWithMe = true),
                             sortType = sortType,
                             transaction = cursor.addFiles(parentDocumentId, uri)
@@ -211,8 +215,9 @@ class CloudStorageProvider : DocumentsProvider() {
             else -> {
                 CoroutineScope(Dispatchers.IO + cursor.job).launch {
                     FolderFilesProvider.getCloudStorageFiles(
-                        parentId = fileFolderId,
-                        userDrive = UserDrive(userId, driveId),
+                        realm = realm,
+                        folderId = fileFolderId,
+                        userDrive = userDrive,
                         sortType = sortType,
                         transaction = cursor.addFiles(parentDocumentId, uri)
                     )
@@ -220,6 +225,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
         }
 
+        realm.close()
         cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to false)
         cursor.setNotificationUri(context?.contentResolver, uri)
         return cursor
