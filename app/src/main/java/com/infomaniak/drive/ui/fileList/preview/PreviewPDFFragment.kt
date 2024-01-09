@@ -39,7 +39,6 @@ import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
-import com.infomaniak.lib.pdfview.util.FitPolicy
 import com.shockwave.pdfium.PdfPasswordException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
