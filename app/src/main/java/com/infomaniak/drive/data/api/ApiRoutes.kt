@@ -175,7 +175,7 @@ object ApiRoutes {
 
     fun copyFile(file: File, destinationId: Int) = "${fileURL(file)}/copy/$destinationId?$fileWithQuery"
 
-    fun renameFile(file: File) = "${fileURL(file)}/rename"
+    fun renameFile(file: File) = "${fileURLV2(file)}/rename"
 
     fun getFileCount(file: File) = "${fileURLV2(file)}/count"
 
