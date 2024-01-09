@@ -216,6 +216,16 @@ object FileController {
         }
     }
 
+    fun upsertActionFile(realm: Realm, folderId: Int, actionFile: File) {
+        realm.where(File::class.java).equalTo(File::id.name, folderId).findFirst()?.let { realmFolder ->
+            if (!realmFolder.children.contains(actionFile)) {
+                realm.executeTransaction { realmFolder.children.add(actionFile) }
+            } else {
+                updateFileFromActivity(realm, actionFile, realmFolder.id)
+            }
+        }
+    }
+
     fun updateShareLinkWithRemote(fileId: Int) {
         getRealmInstance().use { realm ->
             getFileProxyById(fileId, customRealm = realm)?.let { fileProxy ->
