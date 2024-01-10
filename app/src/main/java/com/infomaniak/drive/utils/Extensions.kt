@@ -374,7 +374,12 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
 fun Context.getInfomaniakLogin(): InfomaniakLogin {
-    return InfomaniakLogin(this, appUID = BuildConfig.APPLICATION_ID, clientID = BuildConfig.CLIENT_ID)
+    return InfomaniakLogin(
+        this,
+        appUID = BuildConfig.APPLICATION_ID,
+        clientID = BuildConfig.CLIENT_ID,
+        accessType = null
+    )
 }
 
 //region Worker
