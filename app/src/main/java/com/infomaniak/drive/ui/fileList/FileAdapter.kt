@@ -449,6 +449,10 @@ open class FileAdapter(
         }
     }
 
+    fun unselectSelectedItems() {
+        multiSelectManager.selectedItemsIds.forEach { selectedItemId -> notifyFileChanged(selectedItemId) }
+    }
+
     enum class DisplayType(val layout: Int) {
         GRID(R.layout.cardview_file_grid),
         GRID_FOLDER(R.layout.cardview_folder_grid),

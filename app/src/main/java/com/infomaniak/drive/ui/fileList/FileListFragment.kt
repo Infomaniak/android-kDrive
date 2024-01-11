@@ -754,6 +754,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         fileAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
     }
 
+    override fun closeMultiSelect() {
+        fileAdapter.unselectSelectedItems()
+        super.closeMultiSelect()
+    }
+
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
