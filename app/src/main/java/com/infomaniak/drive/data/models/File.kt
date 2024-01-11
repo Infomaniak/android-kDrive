@@ -349,18 +349,23 @@ open class File(
     }
 
     private fun getSortedCategoriesIds(): List<Int> {
-        return if (isManaged) {
-            categories.sort(FileCategory::addedAt.name).map { it.categoryId }
+        return if (categories.isNotEmpty()) {
+            if (isManaged) {
+                categories.sort(FileCategory::addedAt.name).map { it.categoryId }
+            } else {
+                runCatching {
+                    categories.sortedBy { it.addedAt }.map { it.categoryId }
+                }.onFailure {
+                    Sentry.withScope { scope ->
+                        scope.setExtra("categories", categories.joinToString { "id: ${it.categoryId} addedAt: ${it.addedAt}" })
+                        Sentry.captureException(it)
+                    }
+                }.getOrDefault(emptyList())
+            }
         } else {
-            runCatching {
-                categories.sortedBy { it.addedAt }.map { it.categoryId }
-            }.onFailure {
-                Sentry.withScope { scope ->
-                    scope.setExtra("categories", categories.joinToString { "id: ${it.categoryId} addedAt: ${it.addedAt}" })
-                    Sentry.captureException(it)
-                }
-            }.getOrDefault(emptyList())
+            emptyList()
         }
+
     }
 
     fun isAllowedToBeColored(): Boolean {

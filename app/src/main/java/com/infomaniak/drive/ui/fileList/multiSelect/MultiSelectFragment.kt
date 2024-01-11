@@ -108,8 +108,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
         multiSelectManager.isMultiSelectOn = true
 
-        adapter?.apply { notifyItemRangeChanged(0, itemCount) }
-
         multiSelectToolbar?.isGone = true
         multiSelectLayout?.root?.isVisible = true
     }
@@ -148,8 +146,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 isSelectAllOn = false
                 isMultiSelectOn = false
             }
-
-            adapter?.apply { notifyItemRangeChanged(0, itemCount) }
 
             multiSelectToolbar?.isVisible = true
             multiSelectLayout?.root?.isGone = true
