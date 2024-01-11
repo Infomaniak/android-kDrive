@@ -145,7 +145,8 @@ private fun ImageView.displayFileIcon(
     when {
         file.hasThumbnail && (isGrid || isGraphic) -> {
             scaleType = ImageView.ScaleType.CENTER_CROP
-            loadAny(file.thumbnail(), fileType.icon)
+            val thumbnailSize = if (isGrid) 300 else 100
+            loadAny(file.thumbnail(thumbnailSize), fileType.icon)
         }
         file.isFromUploads && isGraphic -> {
             scaleType = ImageView.ScaleType.CENTER_CROP

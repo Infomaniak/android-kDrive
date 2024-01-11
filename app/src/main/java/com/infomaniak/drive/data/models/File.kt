@@ -158,8 +158,8 @@ open class File(
         return status?.contains("trash") == true
     }
 
-    fun thumbnail(): String {
-        return if (isTrashed()) ApiRoutes.thumbnailTrashFile(this) else ApiRoutes.thumbnailFile(this)
+    fun thumbnail(size: Int? = null): String {
+        return if (isTrashed()) ApiRoutes.thumbnailTrashFile(this) else ApiRoutes.thumbnailFile(this, size)
     }
 
     fun imagePreview(): String {
