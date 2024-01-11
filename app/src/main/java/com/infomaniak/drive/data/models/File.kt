@@ -53,7 +53,7 @@ import io.sentry.Sentry
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import kotlinx.parcelize.WriteWith
-import java.util.*
+import java.util.Date
 
 @Parcelize
 open class File(
@@ -349,23 +349,20 @@ open class File(
     }
 
     private fun getSortedCategoriesIds(): List<Int> {
-        return if (categories.isNotEmpty()) {
-            if (isManaged) {
-                categories.sort(FileCategory::addedAt.name).map { it.categoryId }
-            } else {
-                runCatching {
-                    categories.sortedBy { it.addedAt }.map { it.categoryId }
-                }.onFailure {
-                    Sentry.withScope { scope ->
-                        scope.setExtra("categories", categories.joinToString { "id: ${it.categoryId} addedAt: ${it.addedAt}" })
-                        Sentry.captureException(it)
-                    }
-                }.getOrDefault(emptyList())
-            }
-        } else {
-            emptyList()
-        }
+        if (categories.isEmpty()) return emptyList()
 
+        return if (isManaged) {
+            categories.sort(FileCategory::addedAt.name).map { it.categoryId }
+        } else {
+            runCatching {
+                categories.sortedBy { it.addedAt }.map { it.categoryId }
+            }.onFailure {
+                Sentry.withScope { scope ->
+                    scope.setExtra("categories", categories.joinToString { "id: ${it.categoryId} addedAt: ${it.addedAt}" })
+                    Sentry.captureException(it)
+                }
+            }.getOrDefault(emptyList())
+        }
     }
 
     fun isAllowedToBeColored(): Boolean {
