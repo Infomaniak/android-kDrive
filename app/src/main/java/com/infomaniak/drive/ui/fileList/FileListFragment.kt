@@ -326,7 +326,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         super.onResume()
         if (!isDownloading) refreshActivities()
         showPendingFiles()
-        updateVisibleProgresses()
+        updateVisibleFiles()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -562,7 +562,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
 
         mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {
-            updateVisibleProgresses()
+            updateVisibleFiles()
         }
     }
 
@@ -579,7 +579,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val workInfos = workInfoList.filter { it.state == WorkInfo.State.RUNNING }
 
         if (workInfos.isEmpty()) {
-            updateVisibleProgresses()
+            updateVisibleFiles()
             return
         }
 
@@ -696,7 +696,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun updateVisibleProgresses() {
+    private fun updateVisibleFiles() {
         val layoutManager = binding.fileRecyclerView.layoutManager
         if (layoutManager is LinearLayoutManager) {
             val first = layoutManager.findFirstVisibleItemPosition()
