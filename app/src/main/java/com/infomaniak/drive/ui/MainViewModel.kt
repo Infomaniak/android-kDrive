@@ -105,7 +105,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
     }
 
-    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (FileResponse) -> Unit = { fileRequest ->
+    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (FileResult) -> Unit = { fileRequest ->
         val total = mediator.value!!.second + 1
         mediator.value = if (fileRequest.isSuccess) {
             mediator.value!!.first + 1 to total
@@ -198,7 +198,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.postFavoriteFile(file)) {
-                emit(FileResponse(this.isSuccess()))
+                emit(FileResult(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -212,7 +212,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onSuccess: ((File) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.deleteFavoriteFile(file)) {
-                emit(FileResponse(this.isSuccess()))
+                emit(FileResult(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -252,7 +252,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
             onSuccess?.invoke(file.id)
         }
-        emit(FileResponse(apiResponse.isSuccess()))
+        emit(FileResult(apiResponse.isSuccess()))
     }
 
     private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
@@ -266,7 +266,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
         val isSuccess = FileController.updateFolderColor(file, color).isSuccess()
-        emit(FileResponse(isSuccess))
+        emit(FileResult(isSuccess))
     }
 
     fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {
@@ -298,21 +298,21 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess)) {
-                emit(FileResponse(isSuccess = this.isSuccess(), data = this.data, errorCode = this.error?.code, errorResId = this.translatedError))
+                emit(FileResult(isSuccess = this.isSuccess(), data = this.data, errorCode = this.error?.code, errorResId = this.translatedError))
             }
         }
 
     fun restoreTrashFile(file: File, newFolderId: Int? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         val body = newFolderId?.let { mapOf("destination_directory_id" to it) }
         with(ApiRepository.postRestoreTrashFile(file, body)) {
-            emit(FileResponse(this.isSuccess(), errorCode = this.error?.code))
+            emit(FileResult(this.isSuccess(), errorCode = this.error?.code))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
 
     fun deleteTrashFile(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         with(ApiRepository.deleteTrashFile(file)) {
-            emit(FileResponse(this.isSuccess()))
+            emit(FileResult(this.isSuccess()))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
@@ -325,7 +325,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     ) = liveData(Dispatchers.IO) {
         ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(FileResponse(apiResponse.isSuccess()))
+            emit(FileResult(apiResponse.isSuccess()))
         }
     }
 
@@ -458,7 +458,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
 
-    data class FileResponse(
+    data class FileResult(
         val isSuccess: Boolean,
         val errorResId: Int? = null,
         val data: Any? = null,
