@@ -133,6 +133,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
                 clientId = BuildConfig.CLIENT_ID,
             )
             apiErrorCodes = ErrorCode.apiErrorCodes
+            accessType = null
         }
 
         AccountUtils.onRefreshTokenError = refreshTokenError
