@@ -23,12 +23,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.SharedValue.sharedValue
+import com.infomaniak.lib.core.utils.SharedValues
+import com.infomaniak.lib.core.utils.sharedValue
 import com.infomaniak.lib.core.utils.transaction
 
-class UiSettings(context: Context) {
+class UiSettings(context: Context) : SharedValues {
 
-    private val sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+    override val sharedPreferences = context.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)!!
 
     fun removeUiSettings() = sharedPreferences.transaction { clear() }
 
@@ -45,23 +46,23 @@ class UiSettings(context: Context) {
         saveExternalFilesFolderId = folderId
     }
 
-    private var saveExternalFilesUserId by sharedPreferences.sharedValue("saveExternalFilesPref_userId", -1)
-    private var saveExternalFilesDriveId by sharedPreferences.sharedValue("saveExternalFilesPref_driveId", -1)
-    private var saveExternalFilesFolderId by sharedPreferences.sharedValue("saveExternalFilesPref_folderId", -1)
+    private var saveExternalFilesUserId by sharedValue("saveExternalFilesPref_userId", -1)
+    private var saveExternalFilesDriveId by sharedValue("saveExternalFilesPref_driveId", -1)
+    private var saveExternalFilesFolderId by sharedValue("saveExternalFilesPref_folderId", -1)
     //endregion
 
-    var bottomNavigationSelectedItem by sharedPreferences.sharedValue("bottomNavigationSelectedItem", R.id.hostFragment)
-    var hasDisplayedSyncDialog by sharedPreferences.sharedValue("hasDisplayedSyncDialog", false)
-    var lastHomeSelectedTab by sharedPreferences.sharedValue("lastHomeSelectedTab", 0)
-    var listMode by sharedPreferences.sharedValue("listMode", true)
-    var mustDisplayBatteryDialog by sharedPreferences.sharedValue("mustDisplayBatteryDialog", manufacturerWarning)
-    var nightMode by sharedPreferences.sharedValue("nightMode", MODE_NIGHT_FOLLOW_SYSTEM)
-    var recentSearches by sharedPreferences.sharedValue("recentSearches", emptyList())
-    var sortType by sharedPreferences.sharedValue("sortType", SortType.NAME_AZ)
+    var bottomNavigationSelectedItem by sharedValue("bottomNavigationSelectedItem", R.id.hostFragment)
+    var hasDisplayedSyncDialog by sharedValue("hasDisplayedSyncDialog", false)
+    var lastHomeSelectedTab by sharedValue("lastHomeSelectedTab", 0)
+    var listMode by sharedValue("listMode", true)
+    var mustDisplayBatteryDialog by sharedValue("mustDisplayBatteryDialog", manufacturerWarning)
+    var nightMode by sharedValue("nightMode", MODE_NIGHT_FOLLOW_SYSTEM)
+    var recentSearches by sharedValue("recentSearches", emptyList())
+    var sortType by sharedValue("sortType", SortType.NAME_AZ)
 
     //region Update
-    var isUserWantingUpdates by sharedPreferences.sharedValue("isUserWantingUpdates", false)
-    var hasAppUpdateDownloaded by sharedPreferences.sharedValue("hasAppUpdateDownloaded", false)
+    var isUserWantingUpdates by sharedValue("isUserWantingUpdates", false)
+    var hasAppUpdateDownloaded by sharedValue("hasAppUpdateDownloaded", false)
 
     fun resetUpdateSettings() {
         isUserWantingUpdates = false // This avoid the user being instantly reprompted to download update
