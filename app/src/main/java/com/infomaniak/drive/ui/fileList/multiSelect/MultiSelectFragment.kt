@@ -42,7 +42,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.MainViewModel.FileResponse
+import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
@@ -509,7 +509,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         }
 
         onSuccess?.invoke()
-        emit(FileResponse(isSuccess = true))
+        emit(FileResult(isSuccess = true))
     }
 
     private fun addSelectedFileToOffline(file: File, offlineFile: IOFile?, cacheFile: IOFile) {
@@ -548,7 +548,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
         }
         onSuccess?.invoke()
-        emit(FileResponse(isSuccess = true))
+        emit(FileResult(isSuccess = true))
     }
 
     private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {

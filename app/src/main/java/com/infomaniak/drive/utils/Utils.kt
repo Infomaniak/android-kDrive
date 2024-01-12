@@ -312,7 +312,7 @@ object Utils {
         workManager.enqueueUniqueWork(BulkDownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
 
         onSuccess.invoke()
-        emit(MainViewModel.FileResponse(isSuccess = true))
+        emit(MainViewModel.FileResult(isSuccess = true))
     }
 
     fun getInvalidFileNameCharacter(fileName: String): String? = DownloadManagerUtils.regexInvalidSystemChar.find(fileName)?.value
