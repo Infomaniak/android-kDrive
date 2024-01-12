@@ -19,8 +19,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 4_04_000_02
-        versionName '4.4.0'
+        versionCode 4_04_001_01
+        versionName '4.4.1'
 
         setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
@@ -68,7 +68,7 @@ android {
             getIsDefault().set(true)
 
             dependencies {
-                def geniusscansdk_version = '4.20.1'
+                def geniusscansdk_version = '4.21.0'
                 implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
@@ -134,7 +134,7 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
-    implementation 'androidx.lifecycle:lifecycle-process:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
     implementation 'androidx.webkit:webkit:1.9.0'
 
