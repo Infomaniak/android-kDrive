@@ -61,7 +61,9 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     }
     private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
     private val filesCount by lazy { fileIds.size }
-    private val downloadProgressNotification by lazy { downloadWorkerUtils.createDownloadNotification(context, id) }
+    private val downloadProgressNotification by lazy {
+        downloadWorkerUtils.createDownloadNotification(context, id, context.getString(R.string.bulkDownloadNotificationTitleNoProgress))
+    }
 
     private var numberOfFilesDownloaded = 0
     private var lastUpdateProgressMillis = System.currentTimeMillis()

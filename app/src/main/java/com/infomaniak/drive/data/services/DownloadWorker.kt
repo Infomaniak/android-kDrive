@@ -124,12 +124,12 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(fileId, downloadWorkerUtils.createDownloadNotification(applicationContext, id).build())
+        return ForegroundInfo(fileId, downloadWorkerUtils.createDownloadNotification(applicationContext, id, fileName).build())
     }
 
     private suspend fun startOfflineDownload(): Result = withContext(Dispatchers.IO) {
         val (file, offlineFile) = file!! to offlineFile!!
-        val downloadNotification = downloadWorkerUtils.createDownloadNotification(applicationContext, id)
+        val downloadNotification = downloadWorkerUtils.createDownloadNotification(applicationContext, id, fileName)
         val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
         val response = downloadFileResponse(

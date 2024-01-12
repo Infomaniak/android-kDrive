@@ -19,10 +19,8 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import androidx.concurrent.futures.await
 import androidx.core.app.NotificationCompat
-import androidx.lifecycle.liveData
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
@@ -82,7 +80,7 @@ class DownloadWorkerUtils {
         !(!isRunning && !ignoreSyncOffline)
     }
 
-    fun createDownloadNotification(context: Context, id: UUID): NotificationCompat.Builder {
+    fun createDownloadNotification(context: Context, id: UUID, title: String): NotificationCompat.Builder {
         val cancelPendingIntent = WorkManager.getInstance(context).createCancelPendingIntent(id)
         val cancelAction = NotificationCompat.Action(
             /* icon = */ null,
@@ -91,7 +89,7 @@ class DownloadWorkerUtils {
         )
         return context.downloadProgressNotification().apply {
             setOngoing(true)
-            setContentTitle(context.getString(R.string.bulkDownloadNotificationTitleNoProgress))
+            setContentTitle(title)
             addAction(cancelAction)
         }
     }
