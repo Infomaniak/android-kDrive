@@ -44,6 +44,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DownloadWorkerUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -64,9 +65,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.IOException
 import java.net.URLEncoder
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 class CloudStorageProvider : DocumentsProvider() {
+
+    private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
 
     private lateinit var cacheDir: java.io.File
 
@@ -325,7 +329,7 @@ class CloudStorageProvider : DocumentsProvider() {
             val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
 
             if (response.isSuccessful) {
-                DownloadWorker.saveRemoteData(response, outputFile) {
+                downloadWorkerUtils.saveRemoteData(response, outputFile) {
                     parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
                 }
             } else if (outputFile.exists()) {
@@ -576,7 +580,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
 
             if (response.isSuccessful) {
-                DownloadWorker.saveRemoteData(response, cacheFile)
+                downloadWorkerUtils.saveRemoteData(response, cacheFile)
                 cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
                 return ParcelFileDescriptor.open(cacheFile, accessMode)
             }

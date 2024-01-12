@@ -291,7 +291,7 @@ object Utils {
     fun downloadAsOfflineFiles(context: Context, files: List<File>, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) = liveData {
         val workManager = WorkManager.getInstance(context)
 
-        if (files.any { it.isPendingOffline(context) }) workManager.cancelAllWorkByTag(BulkDownloadWorker::class.java.toString())
+        if (files.any { it.isPendingOffline(context) }) workManager.cancelAllWorkByTag(BulkDownloadWorker.TAG)
         val inputData = workDataOf(
             BulkDownloadWorker.FILE_IDS to files.map { it.id }.toIntArray(),
             BulkDownloadWorker.USER_ID to userDrive.userId,
@@ -312,7 +312,7 @@ object Utils {
         workManager.enqueueUniqueWork(BulkDownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
 
         onSuccess.invoke()
-        emit(MainViewModel.FileRequest(isSuccess = true))
+        emit(MainViewModel.FileResponse(isSuccess = true))
     }
 
     fun getInvalidFileNameCharacter(fileName: String): String? = DownloadManagerUtils.regexInvalidSystemChar.find(fileName)?.value

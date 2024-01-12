@@ -19,11 +19,12 @@ package com.infomaniak.drive.data.services
 
 import android.content.Context
 import android.content.Intent
-import android.os.ParcelFileDescriptor.AutoCloseOutputStream
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ProgressResponseBody
@@ -31,25 +32,19 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.extensions.RemoteFileException
-import com.infomaniak.drive.extensions.getFileFromRemote
 import com.infomaniak.drive.extensions.letAll
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DownloadWorkerUtils
 import com.infomaniak.drive.utils.MediaUtils
 import com.infomaniak.drive.utils.MediaUtils.isMedia
+import com.infomaniak.drive.utils.NotificationUtils.BULK_DOWNLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.drive.utils.RemoteFileException
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import java.io.BufferedInputStream
 import java.io.File as IOFile
 
 class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
@@ -64,8 +59,9 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             driveId = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
         )
     }
+    private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
     private val filesCount by lazy { fileIds.size }
-    private val downloadProgressNotification by lazy { createDownloadNotification() }
+    private val downloadProgressNotification by lazy { downloadWorkerUtils.createDownloadNotification(context, id) }
 
     private var numberOfFilesDownloaded = 0
     private var lastUpdateProgressMillis = System.currentTimeMillis()
@@ -95,9 +91,11 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
                 }
             }
         }.also {
-            notificationManagerCompat.cancel(NOTIFICATION_ID)
+            notificationManagerCompat.cancel(BULK_DOWNLOAD_ID)
         }
     }
+
+    override suspend fun getForegroundInfo() = ForegroundInfo(BULK_DOWNLOAD_ID, downloadProgressNotification.build())
 
     private fun clearFiles() {
         for ((_, value) in filesPair.entries) {
@@ -127,7 +125,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             if (cacheFile?.exists() == true) cacheFile.delete()
 
             if (file == null || offlineFile == null) {
-                getFileFromRemote(fileId, userDrive) { downloadedFile ->
+                downloadWorkerUtils.getFileFromRemote(applicationContext, fileId, userDrive) { downloadedFile ->
                     filesPair[downloadedFile.id] =
                         Pair(downloadedFile, downloadedFile.getOfflineFile(applicationContext, userDrive.driveId))
                 }
@@ -141,24 +139,10 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         }
 
         if (result == Result.success()) {
-            applicationContext.cancelNotification(NOTIFICATION_ID)
+            applicationContext.cancelNotification(BULK_DOWNLOAD_ID)
         }
 
         return result
-    }
-
-    private fun createDownloadNotification(): NotificationCompat.Builder {
-        val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
-        val cancelAction = NotificationCompat.Action(
-            /* icon = */ null,
-            /* title = */ applicationContext.getString(R.string.buttonCancel),
-            /* intent = */ cancelPendingIntent
-        )
-        return applicationContext.downloadProgressNotification().apply {
-            setOngoing(true)
-            setContentTitle(applicationContext.getString(R.string.bulkDownloadNotificationTitleNoProgress))
-            addAction(cancelAction)
-        }
     }
 
     private fun updateDownloadNotification(contentTitle: String, contentText: String, progressPercent: Int) {
@@ -166,25 +150,24 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             setContentTitle(contentTitle)
             setContentText(contentText)
             setProgress(100, progressPercent, false)
-            notificationManagerCompat.notifyCompat(applicationContext, NOTIFICATION_ID, build())
+            notificationManagerCompat.notifyCompat(applicationContext, BULK_DOWNLOAD_ID, build())
         }
     }
 
-    private suspend fun startOfflineDownload(file: File, offlineFile: IOFile): Result = withContext(Dispatchers.Default) {
+    private suspend fun startOfflineDownload(file: File, offlineFile: IOFile): Result = withContext(Dispatchers.IO) {
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
-        val response = downloadFileResponse(
+        val response = downloadWorkerUtils.downloadFileResponse(
             fileUrl = ApiRoutes.downloadFile(file),
-            okHttpClient = okHttpClient
-        ) { progress ->
-            if (!isActive) {
-                notificationManagerCompat.cancel(NOTIFICATION_ID)
-                throw CancellationException()
-            }
-            launch(Dispatchers.Main) { setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id)) }
-            SentryLog.d(TAG, "download $progress%")
-        }
+            okHttpClient = okHttpClient,
+            downloadProgressInterceptor { progress ->
+                ensureActive()
 
-        saveRemoteData(response, offlineFile) {
+                launch(Dispatchers.Main) { setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id)) }
+                SentryLog.d(TAG, "download $progress%")
+            }
+        )
+
+        downloadWorkerUtils.saveRemoteData(response, offlineFile) {
             launch(Dispatchers.Main) { setProgress(workDataOf(PROGRESS to 100, FILE_ID to file.id)) }
             FileController.updateOfflineStatus(file.id, true)
             offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
@@ -226,34 +209,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         }
     }
 
-    private fun saveRemoteData(
-        response: Response,
-        outputFile: IOFile? = null,
-        outputStream: AutoCloseOutputStream? = null,
-        onFinish: (() -> Unit)? = null
-    ) {
-        SentryLog.d(TAG, "save remote data to ${outputFile?.path}")
-        BufferedInputStream(response.body?.byteStream()).use { input ->
-            val stream = outputStream ?: outputFile?.outputStream()
-            stream?.use { output ->
-                input.copyTo(output)
-                onFinish?.invoke()
-            }
-        }
-    }
-
-    private fun downloadFileResponse(
-        fileUrl: String,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
-        onProgress: (progress: Int) -> Unit
-    ): Response {
-        val request = Request.Builder().url(fileUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
-
-        return okHttpClient.newBuilder()
-            .addNetworkInterceptor(downloadProgressInterceptor(onProgress)).build()
-            .newCall(request).execute()
-    }
-
     private fun downloadProgressInterceptor(onProgress: (progress: Int) -> Unit) = Interceptor { chain: Interceptor.Chain ->
         val originalResponse = chain.proceed(chain.request())
 
@@ -270,8 +225,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             })).build()
     }
 
-    override suspend fun getForegroundInfo() = ForegroundInfo(0, downloadProgressNotification.build())
-
     companion object {
         const val TAG = "BulkDownloadWorker"
         const val DRIVE_ID = "drive_id"
@@ -280,7 +233,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         const val PROGRESS = "progress"
         const val USER_ID = "user_id"
 
-        private const val NOTIFICATION_ID = 0
         private const val MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS = 1000L
     }
 }

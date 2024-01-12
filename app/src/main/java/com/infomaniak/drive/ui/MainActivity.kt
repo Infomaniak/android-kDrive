@@ -176,6 +176,7 @@ class MainActivity : BaseActivity() {
 
         initAppUpdateManager()
         observeAppUpdateDownload()
+        observeBulkDownloadRunning()
     }
 
     override fun onStart() {
@@ -303,6 +304,10 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private fun observeBulkDownloadRunning() {
+        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (isRunning) launchSyncOffline() }
+    }
+
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
     //endregion
 
@@ -319,9 +324,7 @@ class MainActivity : BaseActivity() {
 
         launchAllUpload(drivePermissions)
 
-        mainViewModel.checkBulkDownloadStatus { isRunning ->
-            if (!isRunning && !mainViewModel.ignoreSyncOffline) launchSyncOffline() else mainViewModel.ignoreSyncOffline = false
-        }
+        mainViewModel.checkBulkDownloadStatus()
 
         AppSettings.appLaunches++
 
