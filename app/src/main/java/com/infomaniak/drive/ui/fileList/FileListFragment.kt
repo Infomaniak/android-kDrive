@@ -583,7 +583,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             return
         }
 
-        workInfos.forEach { workInfo ->
+        workInfos.firstOrNull()?.let { workInfo ->
             val fileId = workInfo.progress.getInt(fileIdKey, 0)
             if (fileId == 0) return
 
