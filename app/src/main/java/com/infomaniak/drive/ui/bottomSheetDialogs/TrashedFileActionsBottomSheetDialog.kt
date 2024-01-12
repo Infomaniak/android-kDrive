@@ -125,8 +125,8 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
             showSnackbar(resources.getQuantityString(title, 1, *args.toTypedArray()))
             dismissAndRemoveFileFromList()
         } else {
-            val snackbarText = if (fileRequest.errorCode == ApiErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore
-            else fileRequest.errorResId
+            val snackbarText = if (fileResponse.errorCode == ApiErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore
+            else fileResponse.errorResId
 
             snackbarText?.let { text -> showSnackbar(text) }
             findNavController().popBackStack()
