@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
+import com.infomaniak.drive.utils.DownloadWorkerUtils
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
@@ -86,6 +87,8 @@ class DownloadProgressDialog : DialogFragment() {
 
     class DownloadViewModel : ViewModel() {
 
+        private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
+
         fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
             val outputFile = file.getStoredFile(context, userDrive)
             if (outputFile == null) {
@@ -115,7 +118,7 @@ class DownloadProgressDialog : DialogFragment() {
             response: Response
         ) {
             if (outputFile.exists()) outputFile.delete()
-            DownloadWorker.saveRemoteData(response, outputFile) {
+            downloadWorkerUtils.saveRemoteData(response, outputFile) {
                 runBlocking { emit(100 to true) }
             }
             outputFile.setLastModified(file.getLastModifiedInMilliSecond())

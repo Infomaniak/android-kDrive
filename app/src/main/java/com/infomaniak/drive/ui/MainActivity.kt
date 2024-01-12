@@ -170,6 +170,13 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
         initAppUpdateManager()
+        observeAppUpdateDownload()
+        observeBulkDownloadRunning()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        handleUpdates()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -268,7 +275,26 @@ class MainActivity : BaseActivity() {
         )
     }
 
-    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true
+    private fun observeAppUpdateDownload() {
+        mainViewModel.canInstallUpdate.observe(this) { isUploadDownloaded ->
+            if (isUploadDownloaded && canDisplayInAppSnackbar()) {
+                inAppUpdateSnackbar = showIndefiniteSnackbar(
+                    title = R.string.updateReadyTitle,
+                    actionButtonTitle = R.string.updateInstallButton,
+                    anchor = getMainFab(),
+                    onActionClicked = ::launchUpdateInstall,
+                )
+            } else if (!isUploadDownloaded) {
+                inAppUpdateSnackbar?.dismiss()
+            }
+        }
+    }
+
+    private fun observeBulkDownloadRunning() {
+        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (isRunning) launchSyncOffline() }
+    }
+
+    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
     //endregion
 
     override fun onResume() {
@@ -284,9 +310,7 @@ class MainActivity : BaseActivity() {
 
         launchAllUpload(drivePermissions)
 
-        mainViewModel.checkBulkDownloadStatus { isRunning ->
-            if (!isRunning && !mainViewModel.ignoreSyncOffline) launchSyncOffline() else mainViewModel.ignoreSyncOffline = false
-        }
+        mainViewModel.checkBulkDownloadStatus()
 
         AppSettings.appLaunches++
 

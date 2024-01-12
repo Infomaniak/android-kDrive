@@ -567,7 +567,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun observeOfflineBulkDownloadProgress() {
-        mainViewModel.observeBulkDownloadOffline(requireContext().applicationContext)
+        DownloadWorkerUtils.observeBulkDownloadOffline(requireContext().applicationContext)
             .observe(viewLifecycleOwner) { workInfoList ->
                 updateFileStatus(workInfoList, BulkDownloadWorker.FILE_ID, BulkDownloadWorker.PROGRESS)
             }

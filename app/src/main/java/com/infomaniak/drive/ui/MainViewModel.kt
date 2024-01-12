@@ -21,7 +21,6 @@ import android.app.Application
 import android.content.Context
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
-import androidx.concurrent.futures.await
 import androidx.lifecycle.*
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
@@ -35,7 +34,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
-import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -59,6 +57,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         } ?: FileController.getRealmInstance()
     }
 
+    private val uiSettings by lazy { UiSettings(getApplication()) }
+    private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
+
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
@@ -72,6 +73,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
+    val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
     var mustOpenShortcut: Boolean = true
     var ignoreSyncOffline = false
@@ -101,7 +103,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
     }
 
-    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (FileRequest) -> Unit = { fileRequest ->
+    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (FileResponse) -> Unit = { fileRequest ->
         val total = mediator.value!!.second + 1
         mediator.value = if (fileRequest.isSuccess) {
             mediator.value!!.first + 1 to total
@@ -194,7 +196,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.postFavoriteFile(file)) {
-                emit(FileRequest(this.isSuccess()))
+                emit(FileResponse(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -208,7 +210,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onSuccess: ((File) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.deleteFavoriteFile(file)) {
-                emit(FileRequest(this.isSuccess()))
+                emit(FileResponse(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -248,7 +250,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
             onSuccess?.invoke(file.id)
         }
-        emit(FileRequest(apiResponse.isSuccess()))
+        emit(FileResponse(apiResponse.isSuccess()))
     }
 
     private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
@@ -262,7 +264,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
         val isSuccess = FileController.updateFolderColor(file, color).isSuccess()
-        emit(FileRequest(isSuccess))
+        emit(FileResponse(isSuccess))
     }
 
     fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {
@@ -294,21 +296,21 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess)) {
-                emit(FileRequest(isSuccess = this.isSuccess(), data = this.data))
+                emit(FileResponse(isSuccess = this.isSuccess(), data = this.data, errorCode = this.error?.code, errorResId = this.translatedError))
             }
         }
 
     fun restoreTrashFile(file: File, newFolderId: Int? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         val body = newFolderId?.let { mapOf("destination_directory_id" to it) }
         with(ApiRepository.postRestoreTrashFile(file, body)) {
-            emit(FileRequest(this.isSuccess(), errorCode = this.error?.code))
+            emit(FileResponse(this.isSuccess(), errorCode = this.error?.code))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
 
     fun deleteTrashFile(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         with(ApiRepository.deleteTrashFile(file)) {
-            emit(FileRequest(this.isSuccess()))
+            emit(FileResponse(this.isSuccess()))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
@@ -321,7 +323,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     ) = liveData(Dispatchers.IO) {
         ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(FileRequest(apiResponse.isSuccess()))
+            emit(FileResponse(apiResponse.isSuccess()))
         }
     }
 
@@ -357,25 +359,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.SUCCEEDED))
             .build()
     )
-
-    fun observeBulkDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
-        WorkQuery.Builder
-            .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG))
-            .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.SUCCEEDED))
-            .build()
-    )
-
-    fun checkBulkDownloadStatus(onWorkRunningResult: (isRunning: Boolean) -> Unit) {
-        viewModelScope.launch(Dispatchers.Default) {
-            val workQuery = WorkQuery.Builder
-                .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING))
-                .build()
-            val workInfoList = WorkManager.getInstance(getApplication()).getWorkInfos(workQuery).await()
-            val isRunning = workInfoList.isNotEmpty() && workInfoList.first().state == WorkInfo.State.RUNNING
-            onWorkRunningResult(isRunning)
-        }
-    }
 
     suspend fun restartUploadWorkerIfNeeded() = withContext(Dispatchers.IO) {
         if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
@@ -456,7 +439,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         super.onCleared()
     }
 
-    data class FileRequest(
+
+    data class FileResponse(
         val isSuccess: Boolean,
         val errorResId: Int? = null,
         val data: Any? = null,

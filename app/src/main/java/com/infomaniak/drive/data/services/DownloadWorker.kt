@@ -19,26 +19,25 @@ package com.infomaniak.drive.data.services
 
 import android.content.Context
 import android.content.Intent
-import android.os.ParcelFileDescriptor.AutoCloseOutputStream
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.work.*
-import com.infomaniak.drive.R
+import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
+import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ProgressResponseBody
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.extensions.RemoteFileException
-import com.infomaniak.drive.extensions.getFileFromRemote
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DownloadWorkerUtils
 import com.infomaniak.drive.utils.MediaUtils
 import com.infomaniak.drive.utils.MediaUtils.isMedia
-import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
+import com.infomaniak.drive.utils.RemoteFileException
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.SentryLog
@@ -48,14 +47,9 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.io.BufferedInputStream
 import java.io.File as IOFile
 
 class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
-
-    private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-    private var file: File? = null
-    private var offlineFile: IOFile? = null
 
     private val fileId: Int by lazy { inputData.getInt(FILE_ID, 0) }
     private val fileName: String by lazy { inputData.getString(FILE_NAME) ?: "" }
@@ -65,6 +59,13 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             driveId = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
         )
     }
+    private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
+
+    private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+    private var file: File? = null
+    private var offlineFile: IOFile? = null
+
+
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         runCatching {
@@ -113,7 +114,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
 
 
         if (file == null || offlineFile == null) {
-            getFileFromRemote(fileId, userDrive) { downloadedFile ->
+            downloadWorkerUtils.getFileFromRemote(applicationContext, fileId, userDrive) { downloadedFile ->
                 file = downloadedFile
                 offlineFile = file?.getOfflineFile(applicationContext, userDrive.driveId)
             }
@@ -122,27 +123,13 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         return startOfflineDownload()
     }
 
-    private fun DownloadWorker.downloadNotification(): NotificationCompat.Builder {
-        val cancelPendingIntent = WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
-        val cancelAction = NotificationCompat.Action(
-            /* icon = */ null,
-            /* title = */ applicationContext.getString(R.string.buttonCancel),
-            /* intent = */ cancelPendingIntent
-        )
-        return applicationContext.downloadProgressNotification().apply {
-            setOngoing(true)
-            setContentTitle(fileName)
-            addAction(cancelAction)
-        }
-    }
-
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(fileId, downloadNotification().build())
+        return ForegroundInfo(fileId, downloadWorkerUtils.createDownloadNotification(applicationContext, id).build())
     }
 
     private suspend fun startOfflineDownload(): Result = withContext(Dispatchers.IO) {
         val (file, offlineFile) = file!! to offlineFile!!
-        val downloadNotification = downloadNotification()
+        val downloadNotification = downloadWorkerUtils.createDownloadNotification(applicationContext, id)
         val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
         val response = downloadFileResponse(
@@ -164,7 +151,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             }
         }
 
-        saveRemoteData(response, offlineFile) {
+        downloadWorkerUtils.saveRemoteData(response, offlineFile) {
             launch(Dispatchers.Main) { setProgress(lastUpdate) }
             FileController.updateOfflineStatus(file.id, true)
             offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
@@ -207,22 +194,6 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             return okHttpClient.newBuilder()
                 .addNetworkInterceptor(downloadProgressInterceptor(onProgress)).build()
                 .newCall(request).execute()
-        }
-
-        fun saveRemoteData(
-            response: Response,
-            outputFile: IOFile? = null,
-            outputStream: AutoCloseOutputStream? = null,
-            onFinish: (() -> Unit)? = null
-        ) {
-            SentryLog.d(TAG, "save remote data to ${outputFile?.path}")
-            BufferedInputStream(response.body?.byteStream()).use { input ->
-                val stream = outputStream ?: outputFile?.outputStream()
-                stream?.use { output ->
-                    input.copyTo(output)
-                    onFinish?.invoke()
-                }
-            }
         }
 
         fun downloadProgressInterceptor(onProgress: (progress: Int) -> Unit) = Interceptor { chain: Interceptor.Chain ->

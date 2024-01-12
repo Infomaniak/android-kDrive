@@ -45,7 +45,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.MainViewModel.FileRequest
+import com.infomaniak.drive.ui.MainViewModel.FileResponse
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
@@ -351,7 +351,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun addFavoritesClicked() {
         super.addFavoritesClicked()
         currentFile.apply {
-            val observer: Observer<FileRequest> = Observer { fileRequest ->
+            val observer: Observer<FileResponse> = Observer { fileRequest ->
                 if (fileRequest.isSuccess) {
                     isFavorite = !isFavorite
                     showFavoritesResultSnackbar()
