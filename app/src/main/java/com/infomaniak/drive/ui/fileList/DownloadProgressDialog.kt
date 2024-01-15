@@ -34,7 +34,6 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
 import com.infomaniak.drive.utils.DownloadWorkerUtils
 import com.infomaniak.drive.utils.IsComplete
@@ -97,9 +96,12 @@ class DownloadProgressDialog : DialogFragment() {
             }
             if (file.isObsoleteOrNotIntact(outputFile)) {
                 try {
-                    val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
-                        runBlocking { emit(progress to false) }
-                    }
+                    val response = downloadWorkerUtils.downloadFileResponse(
+                        fileUrl = ApiRoutes.downloadFile(file),
+                        downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor { progress ->
+                            runBlocking { emit(progress to false) }
+                        }
+                    )
                     if (response.isSuccessful) {
                         saveData(file, outputFile, response)
                     } else emit(null)

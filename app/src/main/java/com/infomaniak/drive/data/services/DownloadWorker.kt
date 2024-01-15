@@ -27,7 +27,6 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.api.ProgressResponseBody
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -38,15 +37,9 @@ import com.infomaniak.drive.utils.MediaUtils
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.RemoteFileException
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.*
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import java.io.File as IOFile
 
 class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
@@ -132,24 +125,25 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         val downloadNotification = downloadWorkerUtils.createDownloadNotification(applicationContext, id, fileName)
         val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
-        val response = downloadFileResponse(
+        val response = downloadWorkerUtils.downloadFileResponse(
             fileUrl = ApiRoutes.downloadFile(file),
-            okHttpClient = okHttpClient
-        ) { progress ->
-            if (!isActive) {
-                notificationManagerCompat.cancel(file.id)
-                throw CancellationException()
+            okHttpClient = okHttpClient,
+            downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor { progress ->
+                if (!isActive) {
+                    notificationManagerCompat.cancel(file.id)
+                    throw CancellationException()
+                }
+                launch(Dispatchers.Main) {
+                    setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
+                }
+                SentryLog.d(TAG, "download $progress%")
+                downloadNotification.apply {
+                    setContentText("$progress%")
+                    setProgress(100, progress, false)
+                    notificationManagerCompat.notifyCompat(applicationContext, file.id, build())
+                }
             }
-            launch(Dispatchers.Main) {
-                setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
-            }
-            SentryLog.d(TAG, "download $progress%")
-            downloadNotification.apply {
-                setContentText("$progress%")
-                setProgress(100, progress, false)
-                notificationManagerCompat.notifyCompat(applicationContext, file.id, build())
-            }
-        }
+        )
 
         downloadWorkerUtils.saveRemoteData(response, offlineFile) {
             launch(Dispatchers.Main) { setProgress(lastUpdate) }
@@ -183,29 +177,5 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         const val FILE_NAME = "file_name"
         const val PROGRESS = "progress"
         const val USER_ID = "user_id"
-
-        fun downloadFileResponse(
-            fileUrl: String,
-            okHttpClient: OkHttpClient = HttpClient.okHttpClient,
-            onProgress: (progress: Int) -> Unit
-        ): Response {
-            val request = Request.Builder().url(fileUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
-
-            return okHttpClient.newBuilder()
-                .addNetworkInterceptor(downloadProgressInterceptor(onProgress)).build()
-                .newCall(request).execute()
-        }
-
-        fun downloadProgressInterceptor(onProgress: (progress: Int) -> Unit) = Interceptor { chain: Interceptor.Chain ->
-            val originalResponse = chain.proceed(chain.request())
-
-            originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body!!, object : ProgressResponseBody.ProgressListener {
-                    override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                        val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
-                        onProgress(progress)
-                    }
-                })).build()
-        }
     }
 }

@@ -161,7 +161,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         val response = downloadWorkerUtils.downloadFileResponse(
             fileUrl = ApiRoutes.downloadFile(file),
             okHttpClient = okHttpClient,
-            downloadProgressInterceptor { progress ->
+            downloadInterceptor = downloadProgressInterceptor { progress ->
                 ensureActive()
 
                 launch(Dispatchers.Main) { setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id)) }

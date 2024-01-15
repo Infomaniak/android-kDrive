@@ -326,7 +326,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         try {
             val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
-            val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
+            val response = downloadWorkerUtils.downloadFileResponse(file.thumbnail(), okHttpClient)
 
             if (response.isSuccessful) {
                 downloadWorkerUtils.saveRemoteData(response, outputFile) {
@@ -572,12 +572,13 @@ class CloudStorageProvider : DocumentsProvider() {
 
             // Download data file
             val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
-            val response = DownloadWorker.downloadFileResponse(
+            val response = downloadWorkerUtils.downloadFileResponse(
                 fileUrl = ApiRoutes.downloadFile(file),
-                okHttpClient = okHttpClient
-            ) { progress ->
-                SentryLog.i(TAG, "open currentProgress: $progress")
-            }
+                okHttpClient = okHttpClient,
+                downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor {  progress ->
+                    SentryLog.i(TAG, "open currentProgress: $progress")
+                }
+            )
 
             if (response.isSuccessful) {
                 downloadWorkerUtils.saveRemoteData(response, cacheFile)
