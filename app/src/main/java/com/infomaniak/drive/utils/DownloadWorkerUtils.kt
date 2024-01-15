@@ -58,7 +58,7 @@ class DownloadWorkerUtils {
         onFinish: (() -> Unit)? = null
     ) {
         SentryLog.d(DownloadWorker.TAG, "save remote data to ${outputFile?.path}")
-        BufferedInputStream(response.body?.byteStream()).use { input ->
+        response.body?.byteStream()?.buffered()?.use { input ->
             val stream = outputStream ?: outputFile?.outputStream()
             stream?.use { output ->
                 input.copyTo(output)
