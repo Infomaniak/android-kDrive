@@ -49,8 +49,8 @@ import java.io.File as IOFile
 
 class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
-    private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-    private var filesPair: MutableMap<Int, Pair<File?, IOFile?>> = mutableMapOf()
+    private val notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+    private val filesPair: MutableMap<Int, Pair<File?, IOFile?>> = mutableMapOf()
 
     private val fileIds: IntArray by lazy { inputData.getIntArray(FILE_IDS) ?: intArrayOf() }
     private val userDrive: UserDrive by lazy {
