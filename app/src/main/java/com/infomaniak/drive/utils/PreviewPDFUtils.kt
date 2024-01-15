@@ -79,9 +79,12 @@ object PreviewPDFUtils {
 
         val downLoadUrl = ApiRoutes.downloadFile(fileModel) + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
         val request = Request.Builder().url(downLoadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
+        val downloadProgressInterceptor = DownloadWorkerUtils().downloadProgressInterceptor(onProgress = onProgress)
         val response = HttpClient.okHttpClient.newBuilder()
-            .addNetworkInterceptor(DownloadWorkerUtils().downloadProgressInterceptor(onProgress)).build()
-            .newCall(request).execute()
+            .addNetworkInterceptor(downloadProgressInterceptor)
+            .build()
+            .newCall(request)
+            .execute()
 
         response.use {
             if (!it.isSuccessful) {

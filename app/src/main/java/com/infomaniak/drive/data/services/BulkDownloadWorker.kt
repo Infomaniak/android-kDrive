@@ -27,7 +27,6 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.api.ProgressResponseBody
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -46,7 +45,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
-import okhttp3.Interceptor
 import java.io.File as IOFile
 
 class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
@@ -169,12 +167,16 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         val response = downloadWorkerUtils.downloadFileResponse(
             fileUrl = ApiRoutes.downloadFile(file),
             okHttpClient = okHttpClient,
-            downloadInterceptor = downloadProgressInterceptor { progress ->
-                ensureActive()
+            downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor(
+                getMostRecentLastUpdate = { lastUpdateProgressMillis },
+                onLastUpdateChange = { lastUpdate -> lastUpdateProgressMillis = lastUpdate },
+                onProgress = { progress ->
+                    ensureActive()
 
-                setProgressAsync(workDataOf(PROGRESS to progress, FILE_ID to file.id))
-                SentryLog.d(TAG, "download $progress%")
-            }
+                    setProgressAsync(workDataOf(PROGRESS to progress, FILE_ID to file.id))
+                    SentryLog.d(TAG, "download $progress%")
+                }
+            )
         )
 
         downloadWorkerUtils.saveRemoteData(response, offlineFile) {
@@ -219,22 +221,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         }
     }
 
-    private fun downloadProgressInterceptor(onProgress: (progress: Int) -> Unit) = Interceptor { chain: Interceptor.Chain ->
-        val originalResponse = chain.proceed(chain.request())
-
-        originalResponse.newBuilder()
-            .body(ProgressResponseBody(originalResponse.body!!, object : ProgressResponseBody.ProgressListener {
-                override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                    val currentSystemTimeMillis = System.currentTimeMillis()
-                    if (currentSystemTimeMillis - lastUpdateProgressMillis > MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS) {
-                        lastUpdateProgressMillis = currentSystemTimeMillis
-                        val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
-                        onProgress(progress)
-                    }
-                }
-            })).build()
-    }
-
     companion object {
         const val TAG = "BulkDownloadWorker"
         const val DRIVE_ID = "drive_id"
@@ -242,7 +228,5 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         const val FILE_ID = "file_id"
         const val PROGRESS = "progress"
         const val USER_ID = "user_id"
-
-        private const val MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS = 1000L
     }
 }
