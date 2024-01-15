@@ -67,12 +67,13 @@ class DownloadWorkerUtils {
         }
     }
 
-    suspend fun checkBulkDownloadStatus(
+    suspend fun checkWorkerDownloadStatus(
         context: Context,
         ignoreSyncOffline: Boolean,
+        workerName: String,
     ) = withContext(Dispatchers.Default) {
         val workQuery = WorkQuery.Builder
-            .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG))
+            .fromUniqueWorkNames(arrayListOf(workerName))
             .addStates(arrayListOf(WorkInfo.State.RUNNING))
             .build()
         val workInfoList = WorkManager.getInstance(context).getWorkInfos(workQuery).await()
