@@ -42,14 +42,17 @@ import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.RemoteFileException
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import java.io.File as IOFile
 
 class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
     private val notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-    private val filesPair: MutableMap<Int, Pair<File?, IOFile?>> = mutableMapOf()
+    private val filesPair: MutableMap<Int, Pair<File, IOFile>> = mutableMapOf()
 
     private val fileIds: IntArray by lazy { inputData.getIntArray(FILE_IDS) ?: intArrayOf() }
     private val userDrive: UserDrive by lazy {
@@ -131,8 +134,9 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             if (file == null || offlineFile == null) {
                 downloadWorkerUtils.getFileFromRemote(applicationContext, fileId, userDrive) { downloadedFile ->
                     lastDownloadedFileId = downloadedFile.id
-                    filesPair[downloadedFile.id] =
-                        Pair(downloadedFile, downloadedFile.getOfflineFile(applicationContext, userDrive.driveId))
+                    downloadedFile.getOfflineFile(applicationContext, userDrive.driveId)?.let { offlineFile ->
+                        filesPair[downloadedFile.id] = Pair(downloadedFile, offlineFile)
+                    }
                 }
             } else {
                 lastDownloadedFileId = file.id
@@ -168,13 +172,13 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             downloadInterceptor = downloadProgressInterceptor { progress ->
                 ensureActive()
 
-                launch(Dispatchers.Main) { setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id)) }
+                setProgressAsync(workDataOf(PROGRESS to progress, FILE_ID to file.id))
                 SentryLog.d(TAG, "download $progress%")
             }
         )
 
         downloadWorkerUtils.saveRemoteData(response, offlineFile) {
-            launch(Dispatchers.Main) { setProgress(workDataOf(PROGRESS to 100, FILE_ID to file.id)) }
+            setProgressAsync(workDataOf(PROGRESS to 100, FILE_ID to file.id))
             FileController.updateOfflineStatus(file.id, true)
             offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
             if (file.isMedia()) MediaUtils.scanFile(applicationContext, offlineFile)
