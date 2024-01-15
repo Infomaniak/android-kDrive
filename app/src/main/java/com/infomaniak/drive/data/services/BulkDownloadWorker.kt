@@ -32,7 +32,6 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.extensions.letAll
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DownloadWorkerUtils
 import com.infomaniak.drive.utils.MediaUtils
@@ -62,11 +61,16 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
     private val filesCount by lazy { fileIds.size }
     private val downloadProgressNotification by lazy {
-        downloadWorkerUtils.createDownloadNotification(context, id, context.getString(R.string.bulkDownloadNotificationTitleNoProgress))
+        downloadWorkerUtils.createDownloadNotification(
+            context = context,
+            id = id,
+            title = context.getString(R.string.bulkDownloadNotificationTitleNoProgress)
+        )
     }
 
     private var numberOfFilesDownloaded = 0
     private var lastUpdateProgressMillis = System.currentTimeMillis()
+    private var lastDownloadedFileId = 0
 
     override suspend fun doWork(): Result {
         return runCatching {
@@ -76,7 +80,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
             exception.printStackTrace()
             when (exception) {
                 is CancellationException -> {
-                    clearFiles()
+                    clearLastDownloadedFile()
                     notifyDownloadCancelled()
                     Result.failure()
                 }
@@ -99,11 +103,9 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
 
     override suspend fun getForegroundInfo() = ForegroundInfo(BULK_DOWNLOAD_ID, downloadProgressNotification.build())
 
-    private fun clearFiles() {
-        for ((_, value) in filesPair.entries) {
-            Pair(value.first, value.second).letAll { file, offlineFile ->
-                if (offlineFile.exists() && !file.isIntactFile(offlineFile)) offlineFile.delete()
-            }
+    private fun clearLastDownloadedFile() {
+        with(filesPair[lastDownloadedFileId]?.second) {
+            if (this?.exists() == true) delete()
         }
     }
 
@@ -128,10 +130,12 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
 
             if (file == null || offlineFile == null) {
                 downloadWorkerUtils.getFileFromRemote(applicationContext, fileId, userDrive) { downloadedFile ->
+                    lastDownloadedFileId = downloadedFile.id
                     filesPair[downloadedFile.id] =
                         Pair(downloadedFile, downloadedFile.getOfflineFile(applicationContext, userDrive.driveId))
                 }
             } else {
+                lastDownloadedFileId = file.id
                 filesPair[file.id] = Pair(file, offlineFile)
             }
 
