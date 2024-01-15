@@ -574,9 +574,9 @@ class CloudStorageProvider : DocumentsProvider() {
             val response = downloadWorkerUtils.downloadFileResponse(
                 fileUrl = ApiRoutes.downloadFile(file),
                 okHttpClient = okHttpClient,
-                downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor {  progress ->
+                downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor(onProgress = {  progress ->
                     SentryLog.i(TAG, "open currentProgress: $progress")
-                }
+                })
             )
 
             if (response.isSuccessful) {

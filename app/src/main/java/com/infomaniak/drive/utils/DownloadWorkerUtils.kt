@@ -132,19 +132,29 @@ class DownloadWorkerUtils {
         onFileDownloaded.invoke(file)
     }
 
-    fun downloadProgressInterceptor(onProgress: (progress: Int) -> Unit) = Interceptor { chain: Interceptor.Chain ->
+    fun downloadProgressInterceptor(
+        getMostRecentLastUpdate: (() -> Long)? = null,
+        onLastUpdateChange: ((lastUpdateValue: Long) -> Unit)? = null,
+        onProgress: (progress: Int) -> Unit
+    ) = Interceptor { chain: Interceptor.Chain ->
         val originalResponse = chain.proceed(chain.request())
 
         originalResponse.newBuilder()
             .body(ProgressResponseBody(originalResponse.body!!, object : ProgressResponseBody.ProgressListener {
                 override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                    val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
-                    onProgress(progress)
+                    val currentSystemTimeMillis = System.currentTimeMillis()
+                    val lastUpdate = getMostRecentLastUpdate?.invoke() ?: 0L
+                    if (currentSystemTimeMillis - lastUpdate > MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS) {
+                        onLastUpdateChange?.invoke(currentSystemTimeMillis)
+                        val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
+                        onProgress.invoke(progress)
+                    }
                 }
             })).build()
     }
 
     companion object {
+        private const val MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS = 1000L
 
         fun observeBulkDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
             WorkQuery.Builder
