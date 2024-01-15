@@ -27,6 +27,7 @@ import androidx.work.WorkQuery
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ProgressResponseBody
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -97,13 +98,13 @@ class DownloadWorkerUtils {
     fun downloadFileResponse(
         fileUrl: String,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
-        downloadInterceptor: Interceptor
+        downloadInterceptor: Interceptor? = null
     ): Response {
         val request = Request.Builder().url(fileUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
 
-        return okHttpClient.newBuilder()
-            .addNetworkInterceptor(downloadInterceptor).build()
-            .newCall(request).execute()
+        return okHttpClient.newBuilder().apply {
+            downloadInterceptor?.let {  interceptor -> addInterceptor(interceptor) }
+        }.build().newCall(request).execute()
     }
 
     fun getFileFromRemote(
@@ -129,6 +130,18 @@ class DownloadWorkerUtils {
             throw RemoteFileException("$responseJson $translatedErrorText")
         }
         onFileDownloaded.invoke(file)
+    }
+
+    fun downloadProgressInterceptor(onProgress: (progress: Int) -> Unit) = Interceptor { chain: Interceptor.Chain ->
+        val originalResponse = chain.proceed(chain.request())
+
+        originalResponse.newBuilder()
+            .body(ProgressResponseBody(originalResponse.body!!, object : ProgressResponseBody.ProgressListener {
+                override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
+                    val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
+                    onProgress(progress)
+                }
+            })).build()
     }
 
     companion object {
