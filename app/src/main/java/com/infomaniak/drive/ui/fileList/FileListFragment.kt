@@ -448,7 +448,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             updateMultiSelect = { onUpdateMultiSelect() }
         }
 
-        fileAdapter = FileAdapter(multiSelectManager, FileController.emptyList(mainViewModel.realm)).apply {
+        fileAdapter = FileAdapter(multiSelectManager, FileController.getRealmLiveFiles(
+            parentId = folderId,
+            order = fileListViewModel.sortType,
+            realm = mainViewModel.realm
+        )).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             setHasStableIds(true)
 
@@ -786,11 +790,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
                     if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
 
-                        FileController.getRealmLiveFiles(
+                        /*FileController.getRealmLiveFiles(
                             parentId = folderId,
                             order = fileListViewModel.sortType,
                             realm = mainViewModel.realm
-                        ).apply { fileAdapter.updateFileList(this) }
+                        ).apply { fileAdapter.updateFileList(this) }*/
 
                         multiSelectManager.currentFolder = if (result.parentFolder?.id == ROOT_ID) {
                             AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
