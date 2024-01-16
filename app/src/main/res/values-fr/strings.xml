@@ -458,6 +458,8 @@
     <string name="inputExpirationDate">Date d’expiration</string>
     <string name="inputExpirationTime">Heure d’expiration</string>
     <string name="lastEditsTitle">Dernières modifications</string>
+    <string name="localizedFilenamePrivateSpace">Mes fichiers</string>
+    <string name="localizedFilenameTeamSpace">Dossiers de l’organisation</string>
     <string name="locateButton">Localiser</string>
     <string name="manageCategoriesCreateTitle">Créer %s</string>
     <string name="manageCategoriesNoCategory">Aucune catégorie</string>
@@ -530,6 +532,7 @@
     <string name="onBoardingTitle1">Accédez à vos fichiers sur tous vos appareils</string>
     <string name="onBoardingTitle2">Travaillez ensemble au même endroit et gagnez en efficacité</string>
     <string name="onBoardingTitle3">Sauvegardez vos souvenirs en sécurité</string>
+    <string name="pdfIsLocked">Votre PDF est verrouillé</string>
     <string name="picturesNoFile">Aucune photo pour le moment</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Préparation de l’importation de 1 fichier</item>
@@ -719,4 +722,5 @@
     <string name="userPermissionRemove">L’utilisateur n’aura plus accès à ce fichier.</string>
     <string name="userPermissionWrite">Peut modifier</string>
     <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier</string>
+    <string name="wrongPdfPassword">Mot de passe incorrect</string>
 </resources>
