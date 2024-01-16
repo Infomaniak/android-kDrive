@@ -22,6 +22,9 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.LocaleManagerCompat
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackScreen
@@ -41,6 +44,7 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : AppCompatActivity() {
@@ -50,6 +54,9 @@ class LaunchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setDefaultLocalIfNeeded()
+
         lifecycleScope.launch {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
@@ -178,7 +185,25 @@ class LaunchActivity : AppCompatActivity() {
         intent.extras?.getString(SHORTCUTS_TAG)?.let { extrasMainActivity = MainActivityArgs(shortcutId = it).toBundle() }
     }
 
+    private fun setDefaultLocalIfNeeded() {
+        if (nothingLocaleAccepted()) {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.create(defaultLocale))
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU && !AppCompatDelegate.getApplicationLocales().isEmpty) {
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+        }
+    }
+
+    private fun nothingLocaleAccepted(): Boolean {
+        val systemLocales = LocaleManagerCompat.getSystemLocales(this)
+        for (i in 0..systemLocales.size()) {
+            if (systemLocales[i]?.language in acceptedLocale) return false
+        }
+        return true
+    }
+
     private companion object {
         const val SHORTCUTS_TAG = "shortcuts_tag"
+        val acceptedLocale = arrayOf("fr", "de", "it", "en", "es")
+        val defaultLocale: Locale = Locale.ENGLISH
     }
 }
