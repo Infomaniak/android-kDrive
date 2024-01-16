@@ -81,8 +81,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:localeConfig="@xml/locales_config"
         android:usesCleartextTraffic="false"
-        tools:targetApi="s">
+        tools:targetApi="tiramisu">
 
         <meta-data
             android:name="io.sentry.auto-init"

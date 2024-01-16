@@ -41,6 +41,8 @@ android {
 
         resValue 'string', 'EXPOSED_UPLOAD_DIR', 'upload_media'
         resValue 'string', 'EXPOSED_OFFLINE_DIR', 'offline_storage'
+
+        resourceConfigurations += ["de", "en", "es", "fr", "it"]
     }
 
     def javaVersion = JavaVersion.VERSION_17
@@ -96,10 +98,6 @@ android {
         testLogging {
             events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
         }
-    }
-
-    androidResources {
-        generateLocaleConfig true
     }
 }
 
