@@ -55,7 +55,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.BufferedInputStream
 import java.io.FileNotFoundException
-import java.util.*
+import java.util.Date
 import kotlin.math.ceil
 
 class UploadTask(
@@ -88,6 +88,7 @@ class UploadTask(
             return@withContext true
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
+            SentryLog.w(TAG, "file not found", exception)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
                 scope.setExtra("data", gson.toJson(uploadFile))
@@ -95,7 +96,7 @@ class UploadTask(
             }
 
         } catch (exception: TotalChunksExceededException) {
-            exception.printStackTrace()
+            SentryLog.w(TAG, "total chunks exceeded", exception)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
                 scope.setExtra("half heap", "${getAvailableHalfMemory()}")
@@ -104,7 +105,7 @@ class UploadTask(
                 Sentry.captureException(exception)
             }
         } catch (exception: UploadNotTerminated) {
-            exception.printStackTrace()
+            SentryLog.w(TAG, "upload not terminated", exception)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
@@ -445,6 +446,7 @@ class UploadTask(
     class WrittenBytesExceededException : Exception()
 
     companion object {
+        private val TAG = UploadTask::class.java.simpleName
         private val progressMutex = Mutex()
 
         private const val CHUNK_MIN_SIZE: Int = 1 * 1024 * 1024

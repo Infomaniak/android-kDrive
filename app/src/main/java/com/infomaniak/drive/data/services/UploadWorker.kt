@@ -23,7 +23,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.provider.OpenableColumns
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
@@ -156,12 +156,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
 
         for (uploadFile in uploadFiles) {
-            SentryLog.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
+            SentryLog.d(TAG, "startSyncFiles> ${uploadFile.fileName} uri: (${uploadFile.uri}) - size: ${uploadFile.fileSize}")
 
             if (uploadFile.initUpload()) {
+                Log.i(TAG, "startSyncFiles: ${uploadFile.fileName} uploaded with success")
                 successNames.add(uploadFile.fileName)
                 successCount++
             } else {
+                Log.i(TAG, "startSyncFiles: ${uploadFile.fileName} upload failed")
                 failedNames.add(uploadFile.fileName)
                 failedCount++
             }
@@ -208,14 +210,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 initUploadSchemeContent(uri)
             }
         } catch (exception: Exception) {
+            Log.w(TAG, "initUpload: $fileName failed", exception)
             handleException(exception)
             false
         }
     }
 
     private suspend fun UploadFile.initUploadSchemeFile(uri: Uri): Boolean {
+        Log.d(TAG, "initUploadSchemeFile: $fileName start")
         val cacheFile = uri.toFile().apply {
             if (!exists()) {
+                Log.i(TAG, "initUploadSchemeFile: $fileName doesn't exist")
                 deleteIfExists()
                 return false
             }
@@ -244,13 +249,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return if (size != 0L) {
             if (fileSize != size) updateFileSize(size)
 
-            currentUploadTask = UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker)
-            currentUploadTask!!.start().also { isUploaded ->
-                if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
-                    deleteIfExists(keepFile = isSync())
-                }
+            SentryLog.d(TAG, "startUploadFile: $fileName - size: ($fileSize)")
 
-                SentryLog.d(TAG, "startUploadFile> end upload $fileName")
+            UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker).run {
+                currentUploadTask = this
+                start().also { isUploaded ->
+                    if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
+                        deleteIfExists(keepFile = isSync())
+                    }
+
+                    SentryLog.d(TAG, "startUploadFile> end upload $fileName")
+                }
             }
 
         } else {
