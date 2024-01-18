@@ -35,7 +35,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
-import com.infomaniak.lib.core.extensions.setDefaultLocalIfNeeded
+import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -52,7 +52,7 @@ class LaunchActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setDefaultLocalIfNeeded()
+        setDefaultLocaleIfNeeded()
 
         lifecycleScope.launch {
 
@@ -182,7 +182,7 @@ class LaunchActivity : AppCompatActivity() {
         intent.extras?.getString(SHORTCUTS_TAG)?.let { extrasMainActivity = MainActivityArgs(shortcutId = it).toBundle() }
     }
 
-    private companion object {
-        const val SHORTCUTS_TAG = "shortcuts_tag"
+    companion object {
+        private const val SHORTCUTS_TAG = "shortcuts_tag"
     }
 }

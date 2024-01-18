@@ -83,7 +83,7 @@
         android:theme="@style/AppTheme"
         android:localeConfig="@xml/locales_config"
         android:usesCleartextTraffic="false"
-        tools:targetApi="tiramisu">
+        tools:targetApi="TIRAMISU">
 
         <meta-data
             android:name="io.sentry.auto-init"
