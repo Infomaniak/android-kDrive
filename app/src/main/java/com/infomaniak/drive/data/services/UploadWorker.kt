@@ -227,8 +227,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
-        return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) startUploadFile(uri.getFileSize(cursor)) else false
+        Log.d(TAG, "initUploadSchemeContent: $fileName start")
+        return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                startUploadFile(uri.getFileSize(cursor))
+            } else {
+                val columns = cursor.columnNames.joinToString { it }
+                Log.w(TAG, "initUploadSchemeContent: $fileName moveToFirst failed - count(${cursor.count}), columns($columns)")
+                deleteIfExists(keepFile = isSync())
+                false
+            }
         } ?: false
     }
 
