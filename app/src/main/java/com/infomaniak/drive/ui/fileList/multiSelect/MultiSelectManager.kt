@@ -55,6 +55,7 @@ class MultiSelectManager {
         return when (type) {
             BulkOperationType.ADD_FAVORITES -> selectedFiles.filter { !it.isFavorite }
             BulkOperationType.REMOVE_FAVORITES -> selectedFiles.filter { it.isFavorite }
+            BulkOperationType.ADD_OFFLINE -> selectedFiles.filter { !it.isFolder() }
             else -> selectedFiles
         }
     }

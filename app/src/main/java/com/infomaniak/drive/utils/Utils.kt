@@ -288,12 +288,10 @@ object Utils {
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
     }
 
-    fun downloadAsOfflineFiles(context: Context, files: List<File>, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) = liveData {
+    fun downloadAsOfflineFiles(context: Context, folderId: Int, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) = liveData {
         val workManager = WorkManager.getInstance(context)
-
-        if (files.any { it.isPendingOffline(context) }) workManager.cancelAllWorkByTag(BulkDownloadWorker.TAG)
         val inputData = workDataOf(
-            BulkDownloadWorker.FILE_IDS to files.map { it.id }.toIntArray(),
+            BulkDownloadWorker.FOLDER_ID to folderId,
             BulkDownloadWorker.USER_ID to userDrive.userId,
             BulkDownloadWorker.DRIVE_ID to userDrive.driveId,
         )

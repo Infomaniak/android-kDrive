@@ -155,6 +155,32 @@ object FileController {
         }
     }
 
+    fun getFolderOfflineFilesId(folderId: Int): List<Int> {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::parentId.name, folderId)
+                .equalTo(File::isOffline.name, true)
+                .equalTo(File::isFolder.name, false)
+                .findAll().let {
+                    it.map { it.id }
+                }
+        }
+    }
+
+    fun setFilesAsOffline(customRealm: Realm = getRealmInstance(), filesId: List<Int>) {
+        return customRealm.use { realm ->
+            filesId.forEach { fileId ->
+                realm.where(File::class.java)
+                    .equalTo(File::id.name, fileId)
+                    .findFirst()?.let { file ->
+                        realm.executeTransaction {
+                            file.isOffline = true
+                        }
+                    }
+            }
+        }
+    }
+
     fun removeFile(
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),

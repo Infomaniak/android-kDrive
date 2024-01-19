@@ -219,6 +219,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     open fun performBulkOperation(
         type: BulkOperationType,
+        folderId: Int? = null,
         areAllFromTheSameFolder: Boolean = true,
         allSelectedFilesCount: Int? = null,
         destinationFolder: File? = null,
@@ -235,7 +236,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         trackBulkActionEvent(matomoCategory, type, fileCount)
 
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(
-            type, areAllFromTheSameFolder, fileCount, selectedFiles, destinationFolder, color
+            type, areAllFromTheSameFolder, folderId, fileCount, selectedFiles, destinationFolder, color
         )
 
         when (type) {
@@ -256,6 +257,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     onConfirmation = sendActions,
                 )
             }
+            BulkOperationType.ADD_OFFLINE -> {
+                // Set all selected file as offline in order for BulkDownloadWorker to download them
+                mainViewModel.markFilesAsOffline(selectedFiles.map { selectedFile -> selectedFile.id })
+                sendActions(null)
+            }
             else -> sendActions(null)
         }
     }
@@ -263,6 +269,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     private fun sendActions(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean,
+        folderId: Int?,
         fileCount: Int,
         selectedFiles: List<File>,
         destinationFolder: File?,
@@ -290,7 +297,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             val mediator = mainViewModel.createMultiSelectMediator()
             enableMultiSelectButtons(false)
             if (type == BulkOperationType.ADD_OFFLINE) {
-                sendAddOfflineAction(selectedFiles, type, mediator)
+                sendAddOfflineAction(type, folderId, mediator)
             } else {
                 sendAllIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
             }
@@ -317,19 +324,15 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun sendAddOfflineAction(
-        selectedFiles: List<File>,
         type: BulkOperationType,
+        folderId: Int?,
         mediator: MediatorLiveData<Pair<Int, Int>>,
     ) {
-        val realmFiles = selectedFiles.mapNotNull { selectedFile ->
-            if (!selectedFile.isFolder()) getFile(selectedFile) else null
-        }
-
-        if (type == BulkOperationType.ADD_OFFLINE) {
+        if (folderId != null && type == BulkOperationType.ADD_OFFLINE) {
             mediator.addSource(
                 downloadAsOfflineFiles(
                     context = requireContext(),
-                    files = realmFiles,
+                    folderId = folderId,
                     onSuccess = { onIndividualActionSuccess(type, Any()) }),
                 mainViewModel.updateMultiSelectMediator(mediator),
             )

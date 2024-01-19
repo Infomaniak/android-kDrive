@@ -19,32 +19,24 @@ package com.infomaniak.drive.data.services
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DownloadWorkerUtils
-import com.infomaniak.drive.utils.MediaUtils
-import com.infomaniak.drive.utils.MediaUtils.isMedia
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.drive.utils.RemoteFileException
-import com.infomaniak.lib.core.utils.SentryLog
-import io.sentry.Sentry
-import kotlinx.coroutines.*
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
+import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import java.io.File as IOFile
 
-class DownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDownloadWorker(context, workerParams) {
 
     private val fileId: Int by lazy { inputData.getInt(FILE_ID, 0) }
+    private val file: File? by lazy { FileController.getFileById(fileId) }
+    private val offlineFile: IOFile? by lazy { file?.getOfflineFile(applicationContext, userDrive.userId) }
     private val fileName: String by lazy { inputData.getString(FILE_NAME) ?: "" }
     private val userDrive: UserDrive by lazy {
         UserDrive(
@@ -52,114 +44,60 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             driveId = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
         )
     }
-    private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
-
+    private val downloadOfflineFileManager by lazy {
+        DownloadOfflineFileManager(
+            userDrive,
+            0,
+            this,
+            notificationManagerCompat
+        )
+    }
+    private val downloadProgressNotification by lazy {
+        DownloadOfflineFileManager.createDownloadNotification(applicationContext, id, fileName)
+    }
     private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-    private var file: File? = null
-    private var offlineFile: IOFile? = null
 
-
-
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        runCatching {
-            SentryLog.i(TAG, "Work started")
-            file = FileController.getFileById(fileId, userDrive)
-            offlineFile = file?.getOfflineFile(applicationContext, userDrive.userId)
-            initOfflineDownload()
-        }.getOrElse { exception ->
-            exception.printStackTrace()
-            when (exception) {
-                is CancellationException -> {
-                    offlineFile?.let {
-                        if (it.exists() && file?.isIntactFile(it) == false) it.delete()
-                    }
-                    notifyDownloadCancelled()
-                    Result.failure()
-                }
-                is UploadTask.NetworkException -> {
-                    Result.failure()
-                }
-                is RemoteFileException -> {
-                    Sentry.captureException(exception)
-                    Result.failure()
-                }
-                else -> {
-                    SentryLog.e(TAG, "Failure", exception)
-                    Result.failure()
-                }
-            }
-        }.also {
-            file?.id?.let(notificationManagerCompat::cancel)
-            Log.i(TAG, "Work finished")
+    override fun downloadNotification(): DownloadNotification? {
+        return file?.id?.let { notificationId ->
+            DownloadNotification(id = notificationId, notification = downloadProgressNotification)
         }
     }
 
-    private suspend fun initOfflineDownload(): Result {
-        val cacheFile = file?.getCacheFile(applicationContext, userDrive)
+    override suspend fun downloadAction(): Result = downloadFile()
 
-        offlineFile?.let { if (file?.isOfflineAndIntact(it) == true) return Result.success() }
-
-        val firstUpdate = workDataOf(PROGRESS to 0, FILE_ID to fileId)
-        setProgress(firstUpdate)
-
-        if (offlineFile?.exists() == true) offlineFile?.delete()
-        if (cacheFile?.exists() == true) cacheFile.delete()
-
-
-        if (file == null || offlineFile == null) {
-            downloadWorkerUtils.getFileFromRemote(applicationContext, fileId, userDrive) { downloadedFile ->
-                file = downloadedFile
-                offlineFile = file?.getOfflineFile(applicationContext, userDrive.driveId)
-            }
-        }
-
-        return startOfflineDownload()
+    override fun isCanceled() {
+        offlineFile?.let { if (it.exists() && file?.isIntactFile(it) == false) it.delete() }
+        notifyDownloadCancelled()
+        Result.failure()
     }
+
+    override fun isFinished() {
+        file?.id?.let(notificationManagerCompat::cancel)
+    }
+
+    override fun isForOneFile() = true
+
+    override fun workerTag() = TAG
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(fileId, downloadWorkerUtils.createDownloadNotification(applicationContext, id, fileName).build())
+        return ForegroundInfo(
+            fileId,
+            DownloadOfflineFileManager.createDownloadNotification(applicationContext, id, fileName).build()
+        )
     }
 
-    private suspend fun startOfflineDownload(): Result = withContext(Dispatchers.IO) {
-        val (file, offlineFile) = file!! to offlineFile!!
-        val downloadNotification = downloadWorkerUtils.createDownloadNotification(applicationContext, id, fileName)
-        val lastUpdate = workDataOf(PROGRESS to 100, FILE_ID to file.id)
-        val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
-        val response = downloadWorkerUtils.downloadFileResponse(
-            fileUrl = ApiRoutes.downloadFile(file),
-            okHttpClient = okHttpClient,
-            downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor { progress ->
-                if (!isActive) {
-                    notificationManagerCompat.cancel(file.id)
-                    throw CancellationException()
-                }
-                launch(Dispatchers.Main) {
-                    setProgress(workDataOf(PROGRESS to progress, FILE_ID to file.id))
-                }
-                SentryLog.d(TAG, "download $progress%")
-                downloadNotification.apply {
-                    setContentText("$progress%")
-                    setProgress(100, progress, false)
-                    notificationManagerCompat.notifyCompat(applicationContext, file.id, build())
-                }
-            }
-        )
-
-        downloadWorkerUtils.saveRemoteData(response, offlineFile) {
-            launch(Dispatchers.Main) { setProgress(lastUpdate) }
-            FileController.updateOfflineStatus(file.id, true)
-            offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
-            if (file.isMedia()) MediaUtils.scanFile(applicationContext, offlineFile)
+    private suspend fun downloadFile(): Result {
+        val result = downloadOfflineFileManager.execute(applicationContext, fileId) { progress, downloadedFileId ->
+            setProgressAsync(
+                workDataOf(BulkDownloadWorker.PROGRESS to progress, BulkDownloadWorker.FILE_ID to downloadedFileId)
+            )
         }
 
-        if (response.isSuccessful) {
-            downloadNotification.apply {
-                setContentText("100%")
-                setProgress(100, 100, false)
-                notificationManagerCompat.notifyCompat(applicationContext, file.id, build())
-            }
-            Result.success()
-        } else Result.failure()
+        if (result == Result.success()) {
+            applicationContext.cancelNotification(fileId)
+        }
+
+        return result
     }
 
     private fun notifyDownloadCancelled() {

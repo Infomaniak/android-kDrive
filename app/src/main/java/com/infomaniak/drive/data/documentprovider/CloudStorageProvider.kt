@@ -43,7 +43,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DownloadWorkerUtils
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -68,8 +68,6 @@ import java.util.Date
 import java.util.UUID
 
 class CloudStorageProvider : DocumentsProvider() {
-
-    private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
 
     private lateinit var cacheDir: java.io.File
 
@@ -325,10 +323,10 @@ class CloudStorageProvider : DocumentsProvider() {
 
         try {
             val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
-            val response = downloadWorkerUtils.downloadFileResponse(file.thumbnail(), okHttpClient)
+            val response = DownloadOfflineFileManager.downloadFileResponse(file.thumbnail(), okHttpClient)
 
             if (response.isSuccessful) {
-                downloadWorkerUtils.saveRemoteData(response, outputFile) {
+                DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
                     parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
                 }
             } else if (outputFile.exists()) {
@@ -571,16 +569,16 @@ class CloudStorageProvider : DocumentsProvider() {
 
             // Download data file
             val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
-            val response = downloadWorkerUtils.downloadFileResponse(
+            val response = DownloadOfflineFileManager.downloadFileResponse(
                 fileUrl = ApiRoutes.downloadFile(file),
                 okHttpClient = okHttpClient,
-                downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor(onProgress = {  progress ->
+                downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
                     SentryLog.i(TAG, "open currentProgress: $progress")
                 })
             )
 
             if (response.isSuccessful) {
-                downloadWorkerUtils.saveRemoteData(response, cacheFile)
+                DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
                 cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
                 return ParcelFileDescriptor.open(cacheFile, accessMode)
             }

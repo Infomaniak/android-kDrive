@@ -247,6 +247,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
     override fun performBulkOperation(
         type: BulkOperationType,
+        folderId: Int?,
         areAllFromTheSameFolder: Boolean,
         allSelectedFilesCount: Int?,
         destinationFolder: File?,
@@ -255,7 +256,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
         // API doesn't support bulk operations for files originating from
         // different parent folders, so we repeat the action for each file.
         // Hence the `areAllFromTheSameFolder` set at false.
-        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
+        super.performBulkOperation(type, folderId, false, allSelectedFilesCount, destinationFolder, color)
     }
 
     override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {

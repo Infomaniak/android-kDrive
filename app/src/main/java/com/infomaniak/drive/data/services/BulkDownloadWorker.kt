@@ -21,129 +21,81 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DownloadWorkerUtils
-import com.infomaniak.drive.utils.MediaUtils
-import com.infomaniak.drive.utils.MediaUtils.isMedia
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.NotificationUtils.BULK_DOWNLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.drive.utils.RemoteFileException
-import com.infomaniak.lib.core.utils.SentryLog
-import io.sentry.Sentry
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.withContext
-import java.io.File as IOFile
 
-class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDownloadWorker(context, workerParams) {
 
     private val notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-    private val filesPair: MutableMap<Int, Pair<File, IOFile>> = mutableMapOf()
 
-    private val fileIds: IntArray by lazy { inputData.getIntArray(FILE_IDS) ?: intArrayOf() }
+    private val folderId: Int by lazy { inputData.getInt(FOLDER_ID, 0) }
+    private val fileIds: List<Int> by lazy { FileController.getFolderOfflineFilesId(folderId = folderId) }
     private val userDrive: UserDrive by lazy {
         UserDrive(
             userId = inputData.getInt(USER_ID, AccountUtils.currentUserId),
             driveId = inputData.getInt(DRIVE_ID, AccountUtils.currentDriveId)
         )
     }
-    private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
-    private val filesCount by lazy { fileIds.size }
+    private val downloadOfflineFileManager by lazy {
+        DownloadOfflineFileManager(
+            userDrive,
+            fileIds.size,
+            this,
+            notificationManagerCompat
+        )
+    }
     private val downloadProgressNotification by lazy {
-        downloadWorkerUtils.createDownloadNotification(
+        DownloadOfflineFileManager.createDownloadNotification(
             context = context,
             id = id,
             title = context.getString(R.string.bulkDownloadNotificationTitleNoProgress)
         )
     }
 
-    private var numberOfFilesDownloaded = 0
-    private var lastUpdateProgressMillis = System.currentTimeMillis()
-    private var lastDownloadedFileId = 0
-
-    override suspend fun doWork(): Result {
-        return runCatching {
-            SentryLog.i(TAG, "Work started")
-            initOfflineDownload()
-        }.getOrElse { exception ->
-            exception.printStackTrace()
-            when (exception) {
-                is CancellationException -> {
-                    clearLastDownloadedFile()
-                    notifyDownloadCancelled()
-                    Result.failure()
-                }
-                is UploadTask.NetworkException -> {
-                    Result.failure()
-                }
-                is RemoteFileException -> {
-                    Sentry.captureException(exception)
-                    Result.failure()
-                }
-                else -> {
-                    SentryLog.e(TAG, "Failure", exception)
-                    Result.failure()
-                }
-            }
-        }.also {
-            notificationManagerCompat.cancel(BULK_DOWNLOAD_ID)
-        }
+    override fun downloadNotification(): DownloadNotification {
+        return DownloadNotification(
+            titleResId = R.string.bulkDownloadNotificationTitleWithProgress,
+            contentResId = R.plurals.bulkDownloadNotificationContent,
+            id = BULK_DOWNLOAD_ID,
+            notification = downloadProgressNotification
+        )
     }
+
+    override suspend fun downloadAction(): Result = downloadFiles()
+
+    override fun isCanceled() {
+        clearLastDownloadedFile()
+        notifyDownloadCancelled()
+    }
+
+    override fun isFinished() {
+        notificationManagerCompat.cancel(BULK_DOWNLOAD_ID)
+    }
+
+    override fun isForOneFile() = false
+
+    override fun workerTag() = TAG
 
     override suspend fun getForegroundInfo() = ForegroundInfo(BULK_DOWNLOAD_ID, downloadProgressNotification.build())
 
     private fun clearLastDownloadedFile() {
-        with(filesPair[lastDownloadedFileId]?.second) {
-            if (this?.exists() == true) delete()
-        }
+        downloadOfflineFileManager.cleanLastDownloadedFile()
     }
 
-    private suspend fun initOfflineDownload(): Result {
+    private suspend fun downloadFiles(): Result {
         var result = Result.failure()
         fileIds.forEach { fileId ->
-            val file = FileController.getFileById(fileId, userDrive)
-            val offlineFile = file?.getOfflineFile(applicationContext, userDrive.userId)
-            val cacheFile = file?.getCacheFile(applicationContext, userDrive)
-
-            offlineFile?.let {
-                if (file.isOfflineAndIntact(it)) {
-                    result = Result.success()
-                    return@forEach
-                }
+            result = downloadOfflineFileManager.execute(applicationContext, fileId) { progress, downloadedFileId ->
+                setProgressAsync(workDataOf(PROGRESS to progress, FILE_ID to downloadedFileId))
             }
-
-            setProgress(workDataOf(PROGRESS to 0, FILE_ID to fileId))
-
-            if (offlineFile?.exists() == true) offlineFile.delete()
-            if (cacheFile?.exists() == true) cacheFile.delete()
-
-            if (file == null || offlineFile == null) {
-                downloadWorkerUtils.getFileFromRemote(applicationContext, fileId, userDrive) { downloadedFile ->
-                    lastDownloadedFileId = downloadedFile.id
-                    downloadedFile.getOfflineFile(applicationContext, userDrive.driveId)?.let { offlineFile ->
-                        filesPair[downloadedFile.id] = Pair(downloadedFile, offlineFile)
-                    }
-                }
-            } else {
-                lastDownloadedFileId = file.id
-                filesPair[file.id] = Pair(file, offlineFile)
-            }
-
-            result = file?.let {
-                startOfflineDownload(file = file, offlineFile = offlineFile!!)
-            } ?: Result.failure()
         }
 
         if (result == Result.success()) {
@@ -151,67 +103,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
         }
 
         return result
-    }
-
-    private fun updateDownloadNotification(contentTitle: String, contentText: String, progressPercent: Int) {
-        downloadProgressNotification.apply {
-            setContentTitle(contentTitle)
-            setContentText(contentText)
-            setProgress(100, progressPercent, false)
-            notificationManagerCompat.notifyCompat(applicationContext, BULK_DOWNLOAD_ID, build())
-        }
-    }
-
-    private suspend fun startOfflineDownload(file: File, offlineFile: IOFile): Result = withContext(Dispatchers.IO) {
-        val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
-        val response = downloadWorkerUtils.downloadFileResponse(
-            fileUrl = ApiRoutes.downloadFile(file),
-            okHttpClient = okHttpClient,
-            downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor(
-                getMostRecentLastUpdate = { lastUpdateProgressMillis },
-                onLastUpdateChange = { lastUpdate -> lastUpdateProgressMillis = lastUpdate },
-                onProgress = { progress ->
-                    ensureActive()
-
-                    setProgressAsync(workDataOf(PROGRESS to progress, FILE_ID to file.id))
-                    SentryLog.d(TAG, "download $progress%")
-                }
-            )
-        )
-
-        downloadWorkerUtils.saveRemoteData(response, offlineFile) {
-            setProgressAsync(workDataOf(PROGRESS to 100, FILE_ID to file.id))
-            FileController.updateOfflineStatus(file.id, true)
-            offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
-            if (file.isMedia()) MediaUtils.scanFile(applicationContext, offlineFile)
-        }
-
-        if (response.isSuccessful) {
-            fileDownloaded()
-            Result.success()
-        } else Result.failure()
-    }
-
-    private fun fileDownloaded() {
-        lastUpdateProgressMillis = System.currentTimeMillis()
-        numberOfFilesDownloaded += 1
-
-        val progressPercent = (numberOfFilesDownloaded * 100) / filesCount
-        val notificationContentTitle = applicationContext.getString(
-            R.string.bulkDownloadNotificationTitleWithProgress,
-            progressPercent
-        )
-        val notificationContentText = applicationContext.resources.getQuantityString(
-            R.plurals.bulkDownloadNotificationContent,
-            numberOfFilesDownloaded,
-            numberOfFilesDownloaded,
-            filesCount
-        )
-        updateDownloadNotification(
-            contentTitle = notificationContentTitle,
-            contentText = notificationContentText,
-            progressPercent = progressPercent
-        )
     }
 
     private fun notifyDownloadCancelled() {
@@ -224,9 +115,9 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Cor
     companion object {
         const val TAG = "BulkDownloadWorker"
         const val DRIVE_ID = "drive_id"
-        const val FILE_IDS = "file_ids"
         const val FILE_ID = "file_id"
         const val PROGRESS = "progress"
         const val USER_ID = "user_id"
+        const val FOLDER_ID = "folder_id"
     }
 }

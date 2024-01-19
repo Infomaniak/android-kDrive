@@ -567,7 +567,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun observeOfflineBulkDownloadProgress() {
-        DownloadWorkerUtils.observeBulkDownloadOffline(requireContext().applicationContext)
+        DownloadOfflineFileManager.observeBulkDownloadOffline(requireContext().applicationContext)
             .observe(viewLifecycleOwner) { workInfoList ->
                 updateFileStatus(workInfoList, BulkDownloadWorker.FILE_ID, BulkDownloadWorker.PROGRESS)
             }
@@ -707,12 +707,20 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun performBulkOperation(
         type: BulkOperationType,
+        folderId: Int?,
         areAllFromTheSameFolder: Boolean,
         allSelectedFilesCount: Int?,
         destinationFolder: File?,
         color: String?,
     ) {
-        super.performBulkOperation(type, areAllFromTheSameFolder, getAllSelectedFilesCount(), destinationFolder, color)
+        super.performBulkOperation(
+            type,
+            this.folderId,
+            areAllFromTheSameFolder,
+            getAllSelectedFilesCount(),
+            destinationFolder,
+            color
+        )
     }
 
     override fun getAllSelectedFilesCount(): Int? {
