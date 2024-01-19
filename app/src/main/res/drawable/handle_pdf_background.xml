@@ -18,7 +18,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="100dp"/>
+            <corners android:radius="100dp" />
             <solid android:color="@color/previewBackgroundTransparent" />
         </shape>
     </item>

@@ -63,7 +63,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.matomo.sdk.Tracker
-import java.util.Locale
 import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
