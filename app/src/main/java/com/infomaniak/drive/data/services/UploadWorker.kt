@@ -23,6 +23,7 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
@@ -234,10 +235,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
         Log.d(TAG, "initUploadSchemeContent: $fileName start")
         return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val columns = cursor.columnNames.joinToString { it }
+
             if (cursor.moveToFirst()) {
+                if (!columns.contains(OpenableColumns.SIZE)) {
+                    SentryLog.e(TAG, "initUploadSchemeContent: size column doesn't exist ($columns)")
+                }
                 startUploadFile(uri.getFileSize(cursor))
             } else {
-                val columns = cursor.columnNames.joinToString { it }
                 Log.w(TAG, "initUploadSchemeContent: $fileName moveToFirst failed - count(${cursor.count}), columns($columns)")
                 deleteIfExists(keepFile = isSync())
                 false
