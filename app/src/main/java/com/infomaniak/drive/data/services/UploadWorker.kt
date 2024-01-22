@@ -287,7 +287,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun UploadFile.handleException(exception: Exception) {
         when (exception) {
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
-                deleteIfExists()
+                deleteIfExists(keepFile = isSync())
 
                 // If is an ACTION_OPEN_DOCUMENT exception and the file is older than August 17, 2022 we ignore sentry
                 if (fileModifiedAt < Date(1660736262000) && exception.message?.contains("ACTION_OPEN_DOCUMENT") == true) return
