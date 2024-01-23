@@ -24,7 +24,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
@@ -160,11 +159,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             SentryLog.d(TAG, "startSyncFiles> ${uploadFile.fileName} uri: (${uploadFile.uri}) - size: ${uploadFile.fileSize}")
 
             if (uploadFile.initUpload()) {
-                Log.i(TAG, "startSyncFiles: ${uploadFile.fileName} uploaded with success")
+                SentryLog.i(TAG, "startSyncFiles: ${uploadFile.fileName} uploaded with success")
                 successNames.add(uploadFile.fileName)
                 successCount++
             } else {
-                Log.i(TAG, "startSyncFiles: ${uploadFile.fileName} upload failed")
+                SentryLog.i(TAG, "startSyncFiles: ${uploadFile.fileName} upload failed")
                 failedNames.add(uploadFile.fileName)
                 failedCount++
             }
@@ -211,17 +210,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 initUploadSchemeContent(uri)
             }
         } catch (exception: Exception) {
-            Log.w(TAG, "initUpload: $fileName failed", exception)
+            SentryLog.w(TAG, "initUpload: $fileName failed", exception)
             handleException(exception)
             false
         }
     }
 
     private suspend fun UploadFile.initUploadSchemeFile(uri: Uri): Boolean {
-        Log.d(TAG, "initUploadSchemeFile: $fileName start")
+        SentryLog.d(TAG, "initUploadSchemeFile: $fileName start")
         val cacheFile = uri.toFile().apply {
             if (!exists()) {
-                Log.i(TAG, "initUploadSchemeFile: $fileName doesn't exist")
+                SentryLog.i(TAG, "initUploadSchemeFile: $fileName doesn't exist")
                 deleteIfExists()
                 return false
             }
@@ -233,7 +232,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
-        Log.d(TAG, "initUploadSchemeContent: $fileName start")
+        SentryLog.d(TAG, "initUploadSchemeContent: $fileName start")
         return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val columns = cursor.columnNames.joinToString { it }
 
@@ -243,7 +242,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 }
                 startUploadFile(uri.getFileSize(cursor))
             } else {
-                Log.w(TAG, "initUploadSchemeContent: $fileName moveToFirst failed - count(${cursor.count}), columns($columns)")
+                val sentryMessage = "$fileName moveToFirst failed - count(${cursor.count}), columns($columns)"
+                SentryLog.w(TAG, "initUploadSchemeContent: $sentryMessage")
                 deleteIfExists(keepFile = isSync())
                 false
             }
