@@ -20,7 +20,6 @@ package com.infomaniak.drive
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
@@ -64,7 +63,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.matomo.sdk.Tracker
-import java.util.Locale
 import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
@@ -74,17 +72,10 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateWorker.Scheduler(applicationContext) }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        setDefaultLocal()
-    }
-
     override fun onCreate() {
         super<Application>.onCreate()
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-
-        setDefaultLocal()
 
         AppCompatDelegate.setDefaultNightMode(UiSettings(this).nightMode)
 
@@ -152,18 +143,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         super.onStop(owner)
     }
 
-    private fun setDefaultLocal() = with(resources) {
-        if (Locale.getDefault().language in acceptedLocale) return@with
-
-        Locale.setDefault(defaultLocale)
-        configuration.setLocale(defaultLocale)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createConfigurationContext(configuration)
-        } else {
-            updateConfiguration(configuration, displayMetrics)
-        }
-    }
-
     override fun newImageLoader(): ImageLoader = CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), true)
 
     private val refreshTokenError: (User) -> Unit = { user ->
@@ -198,10 +177,5 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         override suspend fun getApiToken(): ApiToken {
             return AccountUtils.currentUser!!.apiToken
         }
-    }
-
-    private companion object {
-        private val acceptedLocale = arrayOf("fr", "de", "it", "en", "es")
-        private val defaultLocale = Locale.ENGLISH
     }
 }

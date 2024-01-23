@@ -35,6 +35,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
+import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -50,6 +51,9 @@ class LaunchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setDefaultLocaleIfNeeded()
+
         lifecycleScope.launch {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
