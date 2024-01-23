@@ -156,12 +156,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
 
         for (uploadFile in uploadFiles) {
-            SentryLog.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
+            SentryLog.d(TAG, "startSyncFiles> ${uploadFile.fileName} uri: (${uploadFile.uri}) - size: ${uploadFile.fileSize}")
 
             if (uploadFile.initUpload()) {
+                SentryLog.i(TAG, "startSyncFiles: ${uploadFile.fileName} uploaded with success")
                 successNames.add(uploadFile.fileName)
                 successCount++
             } else {
+                SentryLog.i(TAG, "startSyncFiles: ${uploadFile.fileName} upload failed")
                 failedNames.add(uploadFile.fileName)
                 failedCount++
             }
@@ -208,14 +210,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 initUploadSchemeContent(uri)
             }
         } catch (exception: Exception) {
+            SentryLog.w(TAG, "initUpload: $fileName failed", exception)
             handleException(exception)
             false
         }
     }
 
     private suspend fun UploadFile.initUploadSchemeFile(uri: Uri): Boolean {
+        SentryLog.d(TAG, "initUploadSchemeFile: $fileName start")
         val cacheFile = uri.toFile().apply {
             if (!exists()) {
+                SentryLog.i(TAG, "initUploadSchemeFile: $fileName doesn't exist")
                 deleteIfExists()
                 return false
             }
@@ -227,8 +232,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
-        return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) startUploadFile(uri.getFileSize(cursor)) else false
+        SentryLog.d(TAG, "initUploadSchemeContent: $fileName start")
+        return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val columns = cursor.columnNames.joinToString { it }
+
+            if (cursor.moveToFirst()) {
+                if (!columns.contains(OpenableColumns.SIZE)) {
+                    SentryLog.e(TAG, "initUploadSchemeContent: size column doesn't exist ($columns)")
+                }
+                startUploadFile(uri.getFileSize(cursor))
+            } else {
+                val sentryMessage = "$fileName moveToFirst failed - count(${cursor.count}), columns($columns)"
+                SentryLog.w(TAG, "initUploadSchemeContent: $sentryMessage")
+                deleteIfExists(keepFile = isSync())
+                false
+            }
         } ?: false
     }
 
@@ -236,13 +254,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return if (size != 0L) {
             if (fileSize != size) updateFileSize(size)
 
-            currentUploadTask = UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker)
-            currentUploadTask!!.start().also { isUploaded ->
-                if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
-                    deleteIfExists(keepFile = isSync())
-                }
+            SentryLog.d(TAG, "startUploadFile: $fileName - size: ($fileSize)")
 
-                SentryLog.d(TAG, "startUploadFile> end upload $fileName")
+            UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker).run {
+                currentUploadTask = this
+                start().also { isUploaded ->
+                    if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
+                        deleteIfExists(keepFile = isSync())
+                    }
+
+                    SentryLog.d(TAG, "startUploadFile> end upload $fileName")
+                }
             }
 
         } else {
@@ -270,7 +292,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun UploadFile.handleException(exception: Exception) {
         when (exception) {
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
-                deleteIfExists()
+                deleteIfExists(keepFile = isSync())
 
                 // If is an ACTION_OPEN_DOCUMENT exception and the file is older than August 17, 2022 we ignore sentry
                 if (fileModifiedAt < Date(1660736262000) && exception.message?.contains("ACTION_OPEN_DOCUMENT") == true) return

@@ -19,8 +19,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 4_04_000_02
-        versionName '4.4.0'
+        versionCode 4_04_002_01
+        versionName '4.4.2'
 
         setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
@@ -42,6 +42,8 @@ android {
 
         resValue 'string', 'EXPOSED_UPLOAD_DIR', 'upload_media'
         resValue 'string', 'EXPOSED_OFFLINE_DIR', 'offline_storage'
+
+        resourceConfigurations += ["en", "de", "es", "fr", "it"]
     }
 
     def javaVersion = JavaVersion.VERSION_17
@@ -69,7 +71,7 @@ android {
             getIsDefault().set(true)
 
             dependencies {
-                def geniusscansdk_version = '4.20.1'
+                def geniusscansdk_version = '4.21.0'
                 implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
                 implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
@@ -98,10 +100,6 @@ android {
         testLogging {
             events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
         }
-    }
-
-    androidResources {
-        generateLocaleConfig true
     }
 }
 
@@ -136,7 +134,7 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
-    implementation 'androidx.lifecycle:lifecycle-process:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
     implementation 'androidx.webkit:webkit:1.9.0'
 
@@ -159,7 +157,7 @@ dependencies {
 
     implementation 'com.googlecode.plist:dd-plist:1.27'
 
-    implementation 'com.github.hannesa2:paho.mqtt.android:4.0'
+    implementation 'com.github.hannesa2:paho.mqtt.android:4.1'
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
     testImplementation 'io.github.serpro69:kotlin-faker:1.15.0'
