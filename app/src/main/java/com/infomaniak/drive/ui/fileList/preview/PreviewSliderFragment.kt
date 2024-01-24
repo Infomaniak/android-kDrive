@@ -184,7 +184,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun onResume() {
         super.onResume()
 
-        binding.bottomSheetFileInfos.apply {
+        with(binding.bottomSheetFileInfos) {
             updateAvailableOfflineItem()
             observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
                 previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
