@@ -706,7 +706,7 @@ object FileController {
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    fun updateFileFromActivity(realm: Realm, remoteFile: File, folderId: Int) {
+    private fun updateFileFromActivity(realm: Realm, remoteFile: File, folderId: Int) {
         getFileProxyById(remoteFile.id, customRealm = realm)?.let { localFile ->
             insertOrUpdateFile(realm, remoteFile, localFile)
         } ?: also {
@@ -739,7 +739,7 @@ object FileController {
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
 
-    fun keepOldLocalFilesData(oldFile: File, newFile: File) {
+    private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
         newFile.apply {
             children = oldFile.children
             isComplete = oldFile.isComplete
