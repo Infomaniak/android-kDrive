@@ -419,14 +419,14 @@ object FileController {
                 val apiResponseData = apiResponse.data
                 when {
                     apiResponseData.isNullOrEmpty() -> transaction(arrayListOf(), true)
-                    apiResponseData.size < ApiRepository.PER_PAGE -> {
-                        saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
-                        transaction(apiResponseData, true)
-                    }
-                    else -> {
+                    apiResponse.hasMore -> {
                         saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
                         transaction(apiResponseData, false)
                         getMySharedFiles(userDrive, sortType, apiResponse.cursor, false, transaction, isFirstPage = false)
+                    }
+                    else -> {
+                        saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
+                        transaction(apiResponseData, true)
                     }
                 }
             } else if (isFirstPage) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
