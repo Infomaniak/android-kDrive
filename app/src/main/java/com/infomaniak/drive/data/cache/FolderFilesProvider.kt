@@ -263,7 +263,7 @@ object FolderFilesProvider {
             }
         }
 
-        return if (apiResponse.hasMore && apiResponse.cursor != null) {
+        return if (apiResponse.hasMoreAndCursorExists) {
             // Loading the next page, then the cursor is required
             loadActivitiesFromFolderRec(
                 activitiesJob = activitiesJob,

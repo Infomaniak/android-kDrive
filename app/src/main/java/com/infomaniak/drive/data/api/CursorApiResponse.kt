@@ -35,4 +35,6 @@ class CursorApiResponse<T>(
     data = data,
     error = error,
     responseAt = responseAt,
-)
+) {
+    val hasMoreAndCursorExists inline get() = hasMore && cursor != null
+}

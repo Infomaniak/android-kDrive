@@ -59,7 +59,7 @@ class TrashViewModel : ViewModel() {
             val apiResponseData = apiResponse.data
             when {
                 apiResponseData.isNullOrEmpty() -> trashedFolderFilesResults.postValue(null)
-                apiResponse.hasMore && apiResponse.cursor != null -> {
+                apiResponse.hasMoreAndCursorExists -> {
                     trashedFolderFilesResults.postValue(
                         FolderFilesResult(
                             parentFolder = file,
@@ -95,7 +95,7 @@ class TrashViewModel : ViewModel() {
             val apiResponseData = apiResponse.data
             when {
                 apiResponseData.isNullOrEmpty() -> driveTrashResults.postValue(null)
-                apiResponse.hasMore && apiResponse.cursor != null -> {
+                apiResponse.hasMoreAndCursorExists -> {
                     driveTrashResults.postValue(
                         FolderFilesResult(
                             files = apiResponseData,

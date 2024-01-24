@@ -419,7 +419,7 @@ object FileController {
                 val apiResponseData = apiResponse.data
                 when {
                     apiResponseData.isNullOrEmpty() -> transaction(arrayListOf(), true)
-                    apiResponse.hasMore -> {
+                    apiResponse.hasMoreAndCursorExists -> {
                         saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
                         transaction(apiResponseData, false)
                         getMySharedFiles(userDrive, sortType, apiResponse.cursor, false, transaction, isFirstPage = false)
