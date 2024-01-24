@@ -220,15 +220,15 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         query: String? = null,
         sortType: File.SortType,
-        page: Int,
+        cursor: String?,
         date: Pair<String, String>? = null,
         type: String? = null,
         categories: String? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient
-    ): ApiResponse<ArrayList<File>> {
-        var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${pagination(page)}"
+    ): CursorApiResponse<ArrayList<File>> {
+        var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${loadCursor(cursor)}"
         if (!query.isNullOrBlank()) url += "&query=$query"
-        if (date != null) url += "&modified_at=custom&from=${date.first}&until=${date.second}"
+        if (date != null) url += "&modified_at=custom&modified_after=${date.first}&modified_before=${date.second}"
         if (type != null) url += "&type=$type"
         if (categories != null) url += "&category=$categories"
 
