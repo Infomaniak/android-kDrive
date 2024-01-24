@@ -62,7 +62,8 @@ import kotlin.math.max
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
-    private var binding: FragmentPreviewSliderBinding by safeBinding()
+    private var _binding: FragmentPreviewSliderBinding? = null
+    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: PreviewSliderFragmentArgs by navArgs()
     private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
@@ -101,7 +102,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = previewSliderViewModel.userDrive
         }
 
-        return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -180,12 +181,14 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         setupTransparentStatusBar()
     }
 
-    override fun onResume() = with(binding.bottomSheetFileInfos) {
+    override fun onResume() {
         super.onResume()
 
-        updateAvailableOfflineItem()
-        observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
-            previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+        with(binding.bottomSheetFileInfos) {
+            updateAvailableOfflineItem()
+            observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
+                previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+            }
         }
     }
 
@@ -199,6 +202,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun onStop() {
         clearEdgeToEdge()
         super.onStop()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        TransitionManager.endTransitions(binding.previewSliderParent)
+        _binding = null
     }
 
     override fun onDestroy() {
