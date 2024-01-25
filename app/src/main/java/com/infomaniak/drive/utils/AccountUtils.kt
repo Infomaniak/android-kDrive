@@ -41,6 +41,7 @@ import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
 import com.infomaniak.lib.core.utils.SentryLog
+import com.infomaniak.lib.stores.StoresLocalSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
@@ -237,6 +238,7 @@ object AccountUtils : CredentialManager() {
         if (getAllUsersCount() == 0) {
             AppSettings.removeAppSettings()
             UiSettings(context).removeUiSettings()
+            StoresLocalSettings.getInstance(context).removeSettings()
 
             if (isEnableAppSync()) {
                 Sentry.captureMessage(DISABLE_AUTO_SYNC)
