@@ -232,7 +232,7 @@ object ApiRepository : ApiRepositoryCore() {
         if (type != null) url += "&type=$type"
         if (categories != null) url += "&category=$categories"
 
-        return callApi(url, GET, okHttpClient = okHttpClient)
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
     fun deleteFile(file: File): ApiResponse<CancellableAction> {
