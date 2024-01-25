@@ -452,7 +452,7 @@ object FileController {
             val apiResponseData = apiResponse.data
             when {
                 apiResponseData.isNullOrEmpty() -> onResponse(arrayListOf())
-                apiResponse.hasMore && apiResponse.cursor != null -> {
+                apiResponse.hasMoreAndCursorExists -> {
                     onResponse(apiResponseData)
                     cloudStorageSearch(userDrive, query, onResponse, apiResponse.cursor)
                 }
