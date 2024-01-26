@@ -22,6 +22,7 @@ import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.FileController.getSortQueryByOrder
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
@@ -159,24 +160,25 @@ object FileController {
         return getRealmInstance().use { realm ->
             realm.where(File::class.java)
                 .equalTo(File::parentId.name, folderId)
-                .equalTo(File::isOffline.name, true)
-                .equalTo(File::isFolder.name, false)
-                .findAll().let {
-                    it.map { it.id }
+                .equalTo(File::isMarkedAsOffline.name, true)
+                .getSortQueryByOrder(SortType.NAME_AZ)
+                .findAll()
+                .let { realmFiles ->
+                    realmFiles.filter { !it.isFolder() }.map { it.id }
                 }
         }
     }
 
     fun setFilesAsOffline(customRealm: Realm = getRealmInstance(), filesId: List<Int>) {
         return customRealm.use { realm ->
-            filesId.forEach { fileId ->
-                realm.where(File::class.java)
-                    .equalTo(File::id.name, fileId)
-                    .findFirst()?.let { file ->
-                        realm.executeTransaction {
-                            file.isOffline = true
+            realm.executeTransaction {
+                filesId.forEach { fileId ->
+                    realm.where(File::class.java)
+                        .equalTo(File::id.name, fileId)
+                        .findFirst()?.let { file ->
+                            file.isMarkedAsOffline = true
                         }
-                    }
+                }
             }
         }
     }

@@ -312,6 +312,14 @@ class FileMigration : RealmMigration {
 
             oldVersionTemp++
         }
+
+        if (oldVersionTemp == 6L) {
+            schema.get(File::class.java.simpleName)?.apply {
+                addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
+            }
+
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -339,7 +347,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val dbVersion = 6L // Must be bumped when the schema changes
+        const val dbVersion = 7L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }
