@@ -53,7 +53,7 @@ import io.sentry.Sentry
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import kotlinx.parcelize.WriteWith
-import java.util.*
+import java.util.Date
 
 @Parcelize
 open class File(
