@@ -228,7 +228,8 @@ object ApiRepository : ApiRepositoryCore() {
     ): CursorApiResponse<ArrayList<File>> {
         var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${loadCursor(cursor)}"
         if (!query.isNullOrBlank()) url += "&query=$query"
-        if (date != null) url += "&modified_at=custom&modified_after=${date.first}&modified_before=${date.second}"
+        // TODO:(ApiV3)- Waiting for support for modified_after/modified_before instead of from/until
+        if (date != null) url += "&modified_at=custom&from=${date.first}&until=${date.second}"
         if (type != null) url += "&type=$type"
         if (categories != null) url += "&category=$categories"
 
