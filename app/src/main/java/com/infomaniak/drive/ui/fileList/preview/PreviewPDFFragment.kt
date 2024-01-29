@@ -139,6 +139,8 @@ class PreviewPDFFragment : PreviewFragment() {
                         pageSnap(false)
                         scrollHandle(scrollHandle)
                         spacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
+                        startEndSpacing(START_END_SPACING_DP, START_END_SPACING_DP)
+                        zoom(MIN_ZOOM, MID_ZOOM, MAX_ZOOM)
                         swipeHorizontal(false)
                         touchPriority(true)
                         onLoad { pageCount ->
@@ -259,6 +261,10 @@ class PreviewPDFFragment : PreviewFragment() {
 
     companion object {
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
+        private const val START_END_SPACING_DP = 200
+        private const val MIN_ZOOM = 0.93f
+        private const val MID_ZOOM = 3f
+        private const val MAX_ZOOM = 6f
         private const val WIDTH_HANDLE_DP = 65
         private const val HEIGHT_HANDLE_DP = 40
         private const val HANDLE_PAGE_PDF_PADDING_TOP_DP = 120
