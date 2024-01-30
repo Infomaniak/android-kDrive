@@ -26,7 +26,7 @@ import com.infomaniak.lib.stores.StoresLocalSettings
 
 class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
 
-    private val storesSettings = StoresLocalSettings.getInstance(requireContext())
+    private val storesSettings by lazy { StoresLocalSettings.getInstance(requireContext()) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)

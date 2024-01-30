@@ -73,7 +73,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     val navigateFileListTo = SingleLiveEvent<File>()
 
-    val canInstallUpdate = MutableLiveData(false)
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
@@ -425,15 +424,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             }
         }
         UploadFile.deleteAll(fileDeleted)
-    }
-
-    fun checkAppUpdateStatus() {
-        canInstallUpdate.value = storesLocalSettings.hasAppUpdateDownloaded
-        StoreUtils.checkStalledUpdate()
-    }
-
-    fun toggleAppUpdateStatus(isUpdateDownloaded: Boolean) {
-        canInstallUpdate.value = isUpdateDownloaded
     }
 
     override fun onCleared() {
