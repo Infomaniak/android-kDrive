@@ -77,6 +77,10 @@ class DownloadOfflineFileManager(
 
         offlineFile?.let {
             if (file.isOfflineAndIntact(it)) {
+                // We can have this case for example when we try to put a lot of files at once in offline mode
+                // and for some reason, the worker is cancelled after a long time, the worker is restarted
+                filesDownloaded += 1
+                lastDownloadedFile = offlineFile
                 return ListenableWorker.Result.success()
             }
         }

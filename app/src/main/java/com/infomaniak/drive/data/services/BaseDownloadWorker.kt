@@ -17,7 +17,9 @@
  */
 package com.infomaniak.drive.data.services
 
+import android.app.job.JobParameters
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
@@ -38,8 +40,12 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
             exception.printStackTrace()
             when (exception) {
                 is CancellationException -> {
-                    isCanceled()
-                    Result.failure()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && stopReason == JobParameters.STOP_REASON_TIMEOUT) {
+                        SentryLog.e(workerTag(), "Stopped because a time out error", exception)
+                        Result.retry()
+                    } else {
+                        Result.failure()
+                    }
                 }
                 is UploadTask.NetworkException -> {
                     Result.failure()
