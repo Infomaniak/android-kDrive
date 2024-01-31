@@ -90,12 +90,6 @@
     <string name="backgroundSyncTitle">Synchronisation en arrière-plan</string>
     <string name="belongToAllCategoriesFilterDescription">Les résultats doivent appartenir à toutes les catégories sélectionnées</string>
     <string name="belongToOneCategoryFilterDescription">Les résultats doivent appartenir à une des catégories sélectionnées</string>
-    <plurals name="bulkDownloadNotificationContent">
-        <item quantity="one">1 fichier téléchargé sur %2$d</item>
-        <item quantity="other">%1$d fichiers téléchargés sur %2$d</item>
-    </plurals>
-    <string name="bulkDownloadNotificationTitleNoProgress">Importation en cours</string>
-    <string name="bulkDownloadNotificationTitleWithProgress">Importation en cours (%1$d%%)</string>
     <string name="buttonAdd">Ajouter</string>
     <string name="buttonAddComment">Ajouter un commentaire</string>
     <string name="buttonAddFavorites">Ajouter aux favoris</string>
@@ -459,8 +453,6 @@
     <string name="inputExpirationTime">Heure d’expiration</string>
     <string name="kDrivePdfViewer">Lecteur PDF de kDrive</string>
     <string name="lastEditsTitle">Dernières modifications</string>
-    <string name="localizedFilenamePrivateSpace">Mes fichiers</string>
-    <string name="localizedFilenameTeamSpace">Dossiers de l’organisation</string>
     <string name="locateButton">Localiser</string>
     <string name="manageCategoriesCreateTitle">Créer %s</string>
     <string name="manageCategoriesNoCategory">Aucune catégorie</string>
