@@ -85,7 +85,7 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import com.infomaniak.lib.stores.InAppUpdateManager
+import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
