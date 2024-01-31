@@ -121,6 +121,7 @@
 
         <activity android:name=".ui.fileList.preview.PreviewPDFActivity"
             android:label="@string/kDrivePdfViewer"
+            android:permission=""
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
