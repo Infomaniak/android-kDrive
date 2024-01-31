@@ -119,6 +119,20 @@
 
         <activity android:name=".ui.OnlyOfficeActivity" />
 
+        <activity android:name=".ui.fileList.preview.PreviewPDFActivity"
+            android:label="@string/kDrivePdfViewer"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:host="*" />
+                <data android:mimeType="application/pdf" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.SaveExternalFilesActivity"
             android:configChanges="orientation|screenSize|layoutDirection"

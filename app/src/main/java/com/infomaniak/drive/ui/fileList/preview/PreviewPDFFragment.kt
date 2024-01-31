@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.app.Application
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,6 +29,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -38,6 +40,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.pdfview.PDFView
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import com.shockwave.pdfium.PdfPasswordException
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +56,8 @@ class PreviewPDFFragment : PreviewFragment() {
     private val passwordDialog: PasswordDialogFragment by lazy {
         PasswordDialogFragment().apply { onPasswordEntered = ::showPdf }
     }
+
+    private val navigationArgs: PreviewPDFFragmentArgs by navArgs()
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
@@ -75,13 +80,22 @@ class PreviewPDFFragment : PreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (noCurrentFile()) return@with
+        if (noCurrentFile() && navigationArgs.fileURI == null) return@with
 
-        container.layoutTransition?.setAnimateParentHierarchy(false)
+        if (navigationArgs.fileURI != null) {
+            showPdf()
+        } else {
+            container.layoutTransition?.setAnimateParentHierarchy(false)
 
-        fileIcon.setImageResource(file.getFileType().icon)
-        fileName.text = file.name
-        downloadProgress.isVisible = true
+            fileIcon.setImageResource(file.getFileType().icon)
+            fileName.text = file.name
+            downloadProgress.isVisible = true
+
+            previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
+                if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
+                downloadProgress.progress = progress
+            }
+        }
 
         previewDescription.apply {
             setText(R.string.previewDownloadIndication)
@@ -93,11 +107,6 @@ class PreviewPDFFragment : PreviewFragment() {
         bigOpenWithButton.apply {
             isGone = true
             setOnClickListener { showPasswordDialog() }
-        }
-
-        previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
-            if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
-            downloadProgress.progress = progress
         }
     }
 
@@ -130,7 +139,7 @@ class PreviewPDFFragment : PreviewFragment() {
         if (!binding.pdfView.isShown || isPasswordProtected) {
             lifecycleScope.launch {
                 withResumed {
-                    with(binding.pdfView.fromFile(pdfFile)) {
+                    with(getConfigurator(navigationArgs.fileURI, pdfFile)) {
                         password(password)
                         disableLongPress()
                         enableAnnotationRendering(true)
@@ -170,6 +179,12 @@ class PreviewPDFFragment : PreviewFragment() {
         }
     }
 
+    private fun getConfigurator(uriString: String?, pdfFile: IOFile?): PDFView.Configurator {
+        return uriString?.let {
+            binding.pdfView.fromUri(Uri.parse(uriString))
+        } ?: binding.pdfView.fromFile(pdfFile)
+    }
+
     private fun onPdfPasswordError() {
         // This is to handle the case where we have opened a PDF with a password so in order
         // for the user to be able to open it, we display the error layout
@@ -186,7 +201,7 @@ class PreviewPDFFragment : PreviewFragment() {
             bigOpenWithButton.isVisible = true
         }
 
-        previewSliderViewModel.pdfIsDownloading.value = false
+        if (navigationArgs.fileURI == null) previewSliderViewModel.pdfIsDownloading.value = false
         isDownloading = false
     }
 
@@ -260,6 +275,8 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     companion object {
+        const val TAG = "PreviewPDFFragment"
+
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
         private const val START_END_SPACING_DP = 200
         private const val MIN_ZOOM = 0.93f
