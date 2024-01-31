@@ -114,13 +114,13 @@ private fun ImageView.displayIcon(
     file: File,
     isGrid: Boolean,
     progressLayout: ProgressLayoutView,
-    filePreview2: ImageView? = null,
+    filePreview: ImageView? = null,
 ) {
     scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
     when {
         file.isFolder() -> displayFolderIcon(file)
         file.isDrive() -> displayDriveIcon(file)
-        else -> displayFileIcon(file, isGrid, progressLayout, filePreview2)
+        else -> displayFileIcon(file, isGrid, progressLayout, filePreview)
     }
 }
 
@@ -137,7 +137,7 @@ private fun ImageView.displayFileIcon(
     file: File,
     isGrid: Boolean,
     progressLayout: ProgressLayoutView,
-    filePreview2: ImageView? = null,
+    filePreview: ImageView? = null,
 ) {
     val fileType = file.getFileType()
     val isGraphic = fileType == ExtensionType.IMAGE || fileType == ExtensionType.VIDEO
@@ -145,7 +145,8 @@ private fun ImageView.displayFileIcon(
     when {
         file.hasThumbnail && (isGrid || isGraphic) -> {
             scaleType = ImageView.ScaleType.CENTER_CROP
-            loadAny(file.thumbnail(), fileType.icon)
+            val thumbnailSize = if (isGrid) 300 else 100
+            loadAny(file.thumbnail(thumbnailSize), fileType.icon)
         }
         file.isFromUploads && isGraphic -> {
             scaleType = ImageView.ScaleType.CENTER_CROP
@@ -162,7 +163,7 @@ private fun ImageView.displayFileIcon(
         }
     }
 
-    filePreview2?.load(fileType.icon)
+    filePreview?.load(fileType.icon)
     progressLayout.setupFileProgress(file)
 }
 

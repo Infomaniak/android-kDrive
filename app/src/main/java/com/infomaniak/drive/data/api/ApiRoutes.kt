@@ -148,7 +148,7 @@ object ApiRoutes {
 
     fun createOfficeFile(driveId: Int, folderId: Int) = "${fileURL(driveId, folderId)}/file?$fileWithQuery"
 
-    fun thumbnailFile(file: File) = "${fileURL(file)}/thumbnail?t=${file.lastModifiedAt}"
+    fun thumbnailFile(file: File, size: Int? = null) = "${fileURL(file)}/thumbnail?t=${file.lastModifiedAt}&height=$size"
 
     fun imagePreviewFile(file: File) = "${fileURL(file)}/preview?quality=80&t=${file.lastModifiedAt}"
 
