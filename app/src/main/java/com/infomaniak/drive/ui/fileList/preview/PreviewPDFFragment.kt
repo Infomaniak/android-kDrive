@@ -180,9 +180,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun getConfigurator(uriString: String?, pdfFile: IOFile?): PDFView.Configurator {
-        return uriString?.let {
-            binding.pdfView.fromUri(Uri.parse(uriString))
-        } ?: binding.pdfView.fromFile(pdfFile)
+        return uriString?.let { binding.pdfView.fromUri(Uri.parse(uriString)) } ?: binding.pdfView.fromFile(pdfFile)
     }
 
     private fun onPdfPasswordError() {

@@ -31,8 +31,7 @@ class PreviewPDFActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        val navController = setupNavController()
-        navController.navigate(R.id.previewPDFFragment)
+        setupNavController().navigate(R.id.previewPDFFragment)
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
