@@ -43,8 +43,6 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
-import com.infomaniak.lib.stores.StoreUtils
-import com.infomaniak.lib.stores.StoresLocalSettings
 import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -61,8 +59,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             FileController.getRealmInstance(it)
         } ?: FileController.getRealmInstance()
     }
-
-    private val storesLocalSettings = StoresLocalSettings.getInstance(getContext())
 
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()

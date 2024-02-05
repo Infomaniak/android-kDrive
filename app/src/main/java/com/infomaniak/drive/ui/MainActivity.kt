@@ -166,7 +166,7 @@ class MainActivity : BaseActivity() {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
-        lifecycle.addObserver(inAppUpdateManager)
+        setInAppManagerCallbacks()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -245,25 +245,29 @@ class MainActivity : BaseActivity() {
         appId = BuildConfig.APPLICATION_ID,
         versionCode = BuildConfig.VERSION_CODE,
         onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) "discoverNow" else "discoverLater") },
-        onFDroidResult = { updateIsAvailable ->
-            if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
-        },
         onInstallStart = { trackInAppUpdate("installUpdate") },
         onInstallFailure = {
             Sentry.captureException(it)
             showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab())
         },
-    ).also {
-        it.onInAppUpdateUiChange = { isUploadDownloaded ->
-            if (isUploadDownloaded && canDisplayInAppSnackbar()) {
-                inAppUpdateSnackbar = showIndefiniteSnackbar(
-                    title = R.string.updateReadyTitle,
-                    actionButtonTitle = R.string.updateInstallButton,
-                    anchor = getMainFab(),
-                    onActionClicked = it::installDownloadedUpdate,
-                )
-            } else if (!isUploadDownloaded) {
-                inAppUpdateSnackbar?.dismiss()
+    )
+
+    private fun setInAppManagerCallbacks() {
+        inAppUpdateManager.apply {
+            onInAppUpdateUiChange = { isUploadDownloaded ->
+                if (isUploadDownloaded && canDisplayInAppSnackbar()) {
+                    inAppUpdateSnackbar = showIndefiniteSnackbar(
+                        title = R.string.updateReadyTitle,
+                        actionButtonTitle = R.string.updateInstallButton,
+                        anchor = getMainFab(),
+                        onActionClicked = ::installDownloadedUpdate,
+                    )
+                } else if (!isUploadDownloaded) {
+                    inAppUpdateSnackbar?.dismiss()
+                }
+            }
+            onFDroidResult = { updateIsAvailable ->
+                if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
             }
         }
     }
@@ -449,7 +453,6 @@ class MainActivity : BaseActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        lifecycle.removeObserver(inAppUpdateManager)
         fileObserver.stopWatching()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
     }
