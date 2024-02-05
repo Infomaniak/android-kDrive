@@ -51,7 +51,7 @@ import com.infomaniak.lib.core.utils.CoilUtils
 import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
-import com.infomaniak.lib.stores.AppUpdateWorker
+import com.infomaniak.lib.stores.AppUpdateScheduler
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -70,7 +70,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     val matomoTracker: Tracker by lazy { buildTracker() }
     var geniusScanIsReady = false
 
-    private val appUpdateWorkerScheduler by lazy { AppUpdateWorker.Scheduler(applicationContext) }
+    private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
 
     override fun onCreate() {
         super<Application>.onCreate()
