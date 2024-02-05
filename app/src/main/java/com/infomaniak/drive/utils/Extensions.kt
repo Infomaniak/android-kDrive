@@ -47,7 +47,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
 import coil.load
-import coil.request.Disposable
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -98,16 +97,16 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     }
 }
 
-fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image): Disposable {
-    return load(data) {
+fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image) {
+    load(data) {
         error(errorRes)
         fallback(errorRes)
         placeholder(R.drawable.placeholder)
     }
 }
 
-fun ImageView.loadAvatar(driveUser: DriveUser): Disposable {
-    return loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.getInitials())
+fun ImageView.loadAvatar(driveUser: DriveUser) {
+    loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.getInitials())
 }
 
 fun TextInputEditText.showOrHideEmptyError(): Boolean {

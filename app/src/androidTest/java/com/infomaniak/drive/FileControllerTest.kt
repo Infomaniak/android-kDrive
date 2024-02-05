@@ -89,15 +89,14 @@ class FileControllerTest : KDriveTest() {
     fun deleteAddedFileFromAPI() {
         // Create a file
         val remoteFile = createAndStoreOfficeFile()
-        val order = File.SortType.NAME_AZ
 
         // Delete the file
         deleteTestFile(remoteFile)
 
         // Search the deleted file
-        with(ApiRepository.searchFiles(userDrive.driveId, remoteFile.name, order, 1)) {
-            assertTrue(isSuccess(), "Api response must be a success")
-            assertTrue(data.isNullOrEmpty(), "Founded files should be empty")
+        with(ApiRepository.getFileDetails(remoteFile)) {
+            assertTrue(!isSuccess(), "Api response must be a success")
+            assertTrue(data == null, "Founded files should be empty")
         }
     }
 

@@ -19,8 +19,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 4_04_002_01
-        versionName '4.4.2'
+        versionCode 4_04_003_01
+        versionName '4.4.3'
 
         setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
@@ -145,7 +145,7 @@ dependencies {
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
     implementation 'com.airbnb.android:lottie:6.3.0'
-    implementation 'com.github.infomaniak:android-pdfview:3.2.7'
+    implementation 'com.github.infomaniak:android-pdfview:3.2.8'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.5'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
     implementation 'com.tbuonomo:dotsindicator:5.0'
