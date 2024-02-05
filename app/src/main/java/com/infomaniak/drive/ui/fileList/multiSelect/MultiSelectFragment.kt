@@ -74,7 +74,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             data?.extras?.let { bundle ->
                 SelectFolderActivityArgs.fromBundle(bundle).apply {
                     val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
-                    val areAllFromTheSameFolder = customArgs.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true)
+                    val areAllFromTheSameFolder = customArgs?.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true) ?: true
 
                     performBulkOperation(
                         type = bulkOperationType,
@@ -293,7 +293,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation, dialog: Dialog? = null) {
-        MqttClientWrapper.start {
+        MqttClientWrapper.start(coroutineScope = viewLifecycleOwner.lifecycleScope) {
             multiSelectManager.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
                 dialog?.dismiss()
                 if (apiResponse.isSuccess()) {
