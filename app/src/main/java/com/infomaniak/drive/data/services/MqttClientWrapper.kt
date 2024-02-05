@@ -29,6 +29,9 @@ import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.*
 
 object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
@@ -76,12 +79,18 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         }
     }
 
-    fun start(externalImportId: Int? = null, completion: () -> Unit = {}) {
+    fun start(
+        externalImportId: Int? = null,
+        coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
+        completion: () -> Unit = {},
+    ) {
         externalImportId?.let { runningExternalImportIds.add(it) }
 
         // If we are already connected, just run the BulkOperation immediately
         if (client.isConnected) {
-            completion()
+            coroutineScope.launch {
+                completion()
+            }
             return
         }
 
@@ -89,21 +98,24 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
             client.connect(options, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     SentryLog.i("MQTT connection", "Success : true")
-                    currentToken?.let {
-                        subscribe(topicFor(it))
-                        completion()
-                    }
+                    coroutineScope.launch {
+                        currentToken?.let {
+                            subscribe(topicFor(it))
+                            completion()
 
-                    // If there is no more active worker, stop MQTT
-                    timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
-                        if (appContext.isBulkOperationActive() || runningExternalImportIds.size.isPositive()) {
-                            timer.start()
-                        } else {
-                            currentToken?.let { unsubscribe(topicFor(it)) }
-                            client.disconnect()
                         }
+
+                        // If there is no more active worker, stop MQTT
+                        timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
+                            if (appContext.isBulkOperationActive() || runningExternalImportIds.size.isPositive()) {
+                                timer.start()
+                            } else {
+                                currentToken?.let { unsubscribe(topicFor(it)) }
+                                client.disconnect()
+                            }
+                        }
+                        timer.start()
                     }
-                    timer.start()
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
