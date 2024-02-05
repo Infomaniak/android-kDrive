@@ -19,8 +19,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 4_04_003_01
-        versionName '4.4.3'
+        versionCode 4_04_004_01
+        versionName '4.4.4'
 
         setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
@@ -134,7 +134,7 @@ dependencies {
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
-    implementation 'androidx.webkit:webkit:1.9.0'
+    implementation 'androidx.webkit:webkit:1.10.0'
 
     def exoplayer_version = '2.19.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
@@ -173,7 +173,7 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidx_test_version"
     androidTestImplementation "androidx.test:runner:1.5.2"
 
-    def jupiter_version = '5.10.1'
+    def jupiter_version = '5.10.2'
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter_version"
 
