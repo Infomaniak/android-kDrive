@@ -18,6 +18,8 @@
 package com.infomaniak.drive.data.services
 
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.CountDownTimer
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.app.NotificationCompat
@@ -58,7 +60,18 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
         bulkOperationNotification = bulkOperationType.getNotificationBuilder(applicationContext).apply {
             setContentTitle(applicationContext.getString(bulkOperationType.title, 0, totalFiles))
         }
-        setForegroundAsync(ForegroundInfo(notificationId, bulkOperationNotification.build()))
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            setForegroundAsync(
+                ForegroundInfo(
+                    notificationId,
+                    bulkOperationNotification.build(),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            )
+        } else {
+            setForegroundAsync(ForegroundInfo(notificationId, bulkOperationNotification.build()))
+        }
 
         lastReception = Date()
 
