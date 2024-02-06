@@ -68,6 +68,10 @@ class FilesFragment : Fragment() {
             }
         }
 
+        favorites.setOnClickListener {
+            safeNavigate(FilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
+        }
+
         recentChanges.setOnClickListener {
             safeNavigate(FilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
         }
