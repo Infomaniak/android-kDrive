@@ -52,8 +52,8 @@
                     android:layout_marginEnd="@dimen/marginStandardSmall"
                     android:text="@string/buttonEmptyTrash"
                     android:visibility="gone" />
-            </com.google.android.material.appbar.MaterialToolbar>
 
+            </com.google.android.material.appbar.MaterialToolbar>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <include

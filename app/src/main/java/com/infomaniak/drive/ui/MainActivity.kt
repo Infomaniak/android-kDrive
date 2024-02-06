@@ -38,7 +38,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
-import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
@@ -184,7 +183,7 @@ class MainActivity : BaseActivity() {
             selectedItemId = uiSettings.bottomNavigationSelectedItem
             setOnItemReselectedListener { item ->
                 when (item.itemId) {
-                    R.id.fileListFragment, R.id.favoritesFragment -> {
+                    R.id.filesFragment, R.id.favoritesFragment -> { // TODO
                         navController.popBackStack(R.id.homeFragment, false)
                         navController.navigate(item.itemId)
                     }
@@ -197,7 +196,7 @@ class MainActivity : BaseActivity() {
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
-                binding.bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
+                binding.bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick() // TODO
                 mainViewModel.navigateFileListTo(navController, it.destinationFileId)
             }
         }
@@ -399,6 +398,7 @@ class MainActivity : BaseActivity() {
             R.id.favoritesFragment,
             R.id.fileInfoActionsBottomSheetDialog,
             R.id.fileListFragment,
+            R.id.filesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
             R.id.mySharesFragment,
@@ -416,10 +416,7 @@ class MainActivity : BaseActivity() {
             trackEvent("shortcuts", shortcutId)
 
             when (shortcutId) {
-                Shortcuts.SEARCH.id -> {
-                    ShortcutManagerCompat.reportShortcutUsed(this@MainActivity, Shortcuts.SEARCH.id)
-                    navController.navigate(R.id.searchFragment)
-                }
+                Shortcuts.SEARCH.id -> navigateToSearchFragment(navController)
                 Shortcuts.UPLOAD.id -> {
                     uploadFilesHelper = UploadFilesHelper(this@MainActivity, navController)
                     currentFolder.observe(this@MainActivity) { parentFolder ->

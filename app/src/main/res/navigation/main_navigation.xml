@@ -1017,4 +1017,10 @@
         android:label="MenuGalleryFragment"
         tools:layout="@layout/fragment_menu_gallery" />
 
+    <fragment
+        android:id="@+id/filesFragment"
+        android:name="com.infomaniak.drive.ui.home.FilesFragment"
+        android:label="FilesFragment"
+        tools:layout="@layout/fragment_files" />
+
 </navigation>
