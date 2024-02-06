@@ -42,6 +42,7 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
@@ -415,4 +416,14 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
     } else {
         Formatter.formatShortFileSize(this, decimalSize)
     }
+}
+
+fun Fragment.navigateToSearchFragment() {
+    ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
+    safeNavigate(R.id.searchFragment)
+}
+
+fun Activity.navigateToSearchFragment(navController: NavController) {
+    ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.SEARCH.id)
+    navController.navigate(R.id.searchFragment)
 }
