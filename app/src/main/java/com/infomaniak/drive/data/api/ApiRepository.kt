@@ -220,19 +220,20 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         query: String? = null,
         sortType: File.SortType,
-        page: Int,
+        cursor: String?,
         date: Pair<String, String>? = null,
         type: String? = null,
         categories: String? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient
-    ): ApiResponse<ArrayList<File>> {
-        var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${pagination(page)}"
+    ): CursorApiResponse<ArrayList<File>> {
+        var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${loadCursor(cursor)}"
         if (!query.isNullOrBlank()) url += "&query=$query"
+        // TODO:(ApiV3)- Waiting for support for modified_after/modified_before instead of from/until
         if (date != null) url += "&modified_at=custom&from=${date.first}&until=${date.second}"
         if (type != null) url += "&type=$type"
         if (categories != null) url += "&category=$categories"
 
-        return callApi(url, GET, okHttpClient = okHttpClient)
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
     fun deleteFile(file: File): ApiResponse<CancellableAction> {

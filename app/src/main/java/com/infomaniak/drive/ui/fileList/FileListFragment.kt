@@ -821,6 +821,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val isComplete: Boolean,
         val isFirstPage: Boolean,
         val isNewSort: Boolean,
+        @StringRes val errorRes: Int? = null,
     )
 
     /**

@@ -433,31 +433,34 @@ object FileController {
         }
     }
 
-    suspend fun cloudStorageSearch(
+    tailrec suspend fun cloudStorageSearch(
         userDrive: UserDrive,
         query: String,
         onResponse: (files: ArrayList<File>) -> Unit,
-        page: Int = 1
+        cursor: String? = null,
     ) {
         val order = SortType.NAME_AZ
         val apiResponse = ApiRepository.searchFiles(
             driveId = userDrive.driveId,
             query = query,
             sortType = order,
-            page = page,
+            cursor = cursor,
             okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
         )
 
         if (apiResponse.isSuccess()) {
+            val apiResponseData = apiResponse.data
             when {
-                apiResponse.data.isNullOrEmpty() -> onResponse(arrayListOf())
-                apiResponse.data!!.size < ApiRepository.PER_PAGE -> onResponse(apiResponse.data ?: arrayListOf())
+                apiResponseData.isNullOrEmpty() -> onResponse(arrayListOf())
+                apiResponse.hasMore && apiResponse.cursor != null -> {
+                    onResponse(apiResponseData)
+                    cloudStorageSearch(userDrive, query, onResponse, apiResponse.cursor)
+                }
                 else -> {
-                    onResponse(apiResponse.data ?: arrayListOf())
-                    cloudStorageSearch(userDrive, query, onResponse, page + 1)
+                    onResponse(apiResponseData)
                 }
             }
-        } else if (page == 1) {
+        } else if (cursor == null) {
             onResponse(searchFiles(query, order, userDrive))
         }
     }
