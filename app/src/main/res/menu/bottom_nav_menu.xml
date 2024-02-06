@@ -23,7 +23,7 @@
         android:title="@string/homeTitle" />
 
     <item
-        android:id="@+id/fileListFragment"
+        android:id="@+id/filesFragment"
         android:icon="@drawable/ic_folder"
         android:title="@string/fileListTitle" />
 
