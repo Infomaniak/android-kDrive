@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -66,6 +67,7 @@ import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -192,7 +194,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
             setOnMenuItemClickListener { menuItem ->
                 when (menuItem.itemId) {
-                    R.id.searchItem -> navigateToSearchFragment()
+                    R.id.searchItem -> {
+                        ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
+                        safeNavigate(FileListFragmentDirections.actionFileListFragmentToSearchFragment())
+                    }
                     R.id.restartItem -> onRestartItemsClicked()
                     R.id.closeItem -> onCloseItemsClicked()
                 }
