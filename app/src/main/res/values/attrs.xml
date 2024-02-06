@@ -55,4 +55,9 @@
     <declare-styleable name="ProgressLayoutView">
         <attr name="progressLayoutIndicatorSize" format="dimension" />
     </declare-styleable>
+
+    <declare-styleable name="MenuItemView">
+        <attr name="icon" format="reference" />
+        <attr name="title" format="string" />
+    </declare-styleable>
 </resources>
