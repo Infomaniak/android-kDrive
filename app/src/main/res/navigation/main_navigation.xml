@@ -977,7 +977,7 @@
 
     <fragment
         android:id="@+id/filesFragment"
-        android:name="com.infomaniak.drive.ui.home.FilesFragment"
+        android:name="com.infomaniak.drive.ui.home.RootFilesFragment"
         android:label="FilesFragment"
         tools:layout="@layout/fragment_files">
         <action
@@ -1027,6 +1027,9 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
+        <action
+            android:id="@+id/action_filesFragment_to_fileListFragment"
+            app:destination="@id/fileListFragment" />
     </fragment>
 
 </navigation>
