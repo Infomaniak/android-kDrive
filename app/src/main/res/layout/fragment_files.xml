@@ -68,15 +68,20 @@
                     android:id="@+id/organizationFolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:visibility="gone"
                     app:icon="@drawable/ic_folder_common_documents"
-                    tools:title="-" />
+                    app:title="@string/localizedFilenameTeamSpace"
+                    tools:visibility="visible" />
 
                 <com.infomaniak.drive.ui.menu.MenuItemView
                     android:id="@+id/personalFolder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:visibility="gone"
                     app:icon="@drawable/ic_folder_filled"
-                    tools:title="-" />
+                    app:iconColor="@color/iconColor"
+                    app:title="@string/localizedFilenamePrivateSpace"
+                    tools:visibility="visible" />
 
                 <com.infomaniak.drive.ui.menu.MenuItemView
                     android:id="@+id/favorites"
