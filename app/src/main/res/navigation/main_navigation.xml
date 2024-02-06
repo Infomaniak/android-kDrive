@@ -1020,6 +1020,13 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
+        <action
+            android:id="@+id/action_filesFragment_to_favoritesFragment"
+            app:destination="@id/favoritesFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_open_enter"
+            app:popExitAnim="@anim/fragment_open_exit" />
     </fragment>
 
 </navigation>
