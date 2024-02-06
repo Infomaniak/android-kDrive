@@ -120,18 +120,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 if (apiResponse.isSuccess()) {
                     when {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
-                        apiResponse.data!!.size < ApiRepository.PER_PAGE -> {
-                            FileController.saveFavoritesFiles(apiResponse.data!!, isFirstPage)
-                            emit(
-                                FolderFilesResult(
-                                    files = apiResponse.data!!,
-                                    isComplete = true,
-                                    isFirstPage = isFirstPage,
-                                    isNewSort = isNewSort,
-                                )
-                            )
-                        }
-                        else -> {
+                        apiResponse.hasMoreAndCursorExists -> {
                             apiResponse.data?.let { FileController.saveFavoritesFiles(it, isFirstPage) }
                             emit(
                                 FolderFilesResult(
@@ -142,6 +131,17 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                                 )
                             )
                             recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
+                        }
+                        else -> {
+                            FileController.saveFavoritesFiles(apiResponse.data!!, isFirstPage)
+                            emit(
+                                FolderFilesResult(
+                                    files = apiResponse.data!!,
+                                    isComplete = true,
+                                    isFirstPage = isFirstPage,
+                                    isNewSort = isNewSort,
+                                )
+                            )
                         }
                     }
                 } else emit(

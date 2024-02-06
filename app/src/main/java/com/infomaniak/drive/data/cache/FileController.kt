@@ -419,14 +419,14 @@ object FileController {
                 val apiResponseData = apiResponse.data
                 when {
                     apiResponseData.isNullOrEmpty() -> transaction(arrayListOf(), true)
-                    apiResponseData.size < ApiRepository.PER_PAGE -> {
-                        saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
-                        transaction(apiResponseData, true)
-                    }
-                    else -> {
+                    apiResponse.hasMoreAndCursorExists -> {
                         saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
                         transaction(apiResponseData, false)
                         getMySharedFiles(userDrive, sortType, apiResponse.cursor, false, transaction, isFirstPage = false)
+                    }
+                    else -> {
+                        saveMySharesFiles(userDrive, apiResponseData, isFirstPage)
+                        transaction(apiResponseData, true)
                     }
                 }
             } else if (isFirstPage) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
@@ -452,7 +452,7 @@ object FileController {
             val apiResponseData = apiResponse.data
             when {
                 apiResponseData.isNullOrEmpty() -> onResponse(arrayListOf())
-                apiResponse.hasMore && apiResponse.cursor != null -> {
+                apiResponse.hasMoreAndCursorExists -> {
                     onResponse(apiResponseData)
                     cloudStorageSearch(userDrive, query, onResponse, apiResponse.cursor)
                 }
@@ -706,7 +706,7 @@ object FileController {
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    fun updateFileFromActivity(realm: Realm, remoteFile: File, folderId: Int) {
+    private fun updateFileFromActivity(realm: Realm, remoteFile: File, folderId: Int) {
         getFileProxyById(remoteFile.id, customRealm = realm)?.let { localFile ->
             insertOrUpdateFile(realm, remoteFile, localFile)
         } ?: also {
@@ -739,7 +739,7 @@ object FileController {
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
 
-    fun keepOldLocalFilesData(oldFile: File, newFile: File) {
+    private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
         newFile.apply {
             children = oldFile.children
             isComplete = oldFile.isComplete
