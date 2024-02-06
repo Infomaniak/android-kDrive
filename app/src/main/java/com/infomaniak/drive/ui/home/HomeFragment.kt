@@ -25,29 +25,19 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.databinding.FragmentHomeBinding
-import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
-import com.infomaniak.drive.ui.menu.GalleryFragment
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.TabViewPagerUtils.FragmentTab
-import com.infomaniak.drive.utils.TabViewPagerUtils.getFragment
-import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.toPx
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
@@ -55,18 +45,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private val mainViewModel: MainViewModel by activityViewModels()
     private var mustRefreshUi: Boolean = false
-
-    private val offlineFragment = HomeOfflineFragment().apply {
-        arguments = FileListFragmentArgs(folderId = 1, folderName = "").toBundle()
-    }
-
-    private val galleryFragment = GalleryFragment()
-
-    private val tabsHome = arrayListOf(
-        FragmentTab(HomeActivitiesFragment(), R.id.homeActivitiesButton),
-        FragmentTab(offlineFragment, R.id.homeOfflineButton),
-        FragmentTab(galleryFragment, R.id.homeGalleryButton),
-    )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentHomeBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -102,9 +80,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         homeSwipeRefreshLayout.apply {
             setOnRefreshListener(this@HomeFragment)
-            appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+            appBarLayout.addOnOffsetChangedListener { _, verticalOffset ->
                 isEnabled = verticalOffset == 0
-            })
+            }
         }
 
         homeUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
@@ -116,20 +94,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)) {
                 showPendingFiles()
             }
-        }
-
-        lifecycleScope.launchWhenResumed {
-            setup(homeViewPager, tabsHomeGroup, tabsHome) { UiSettings(requireContext()).lastHomeSelectedTab = it }
-            homeViewPager.setCurrentItem(UiSettings(requireContext()).lastHomeSelectedTab, false)
-        }
-
-        val bottomNavigationOffset = with((activity as MainActivity).getBottomNavigation()) {
-            layoutParams.height + marginBottom + marginTop + 10.toPx()
-        }
-
-        appBarLayout.addOnOffsetChangedListener { _, verticalOffset ->
-            val margin = appBarLayout.totalScrollRange + verticalOffset + bottomNavigationOffset
-            galleryFragment.setScrollbarTrackOffset(margin)
         }
     }
 
@@ -149,9 +113,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private fun updateUi(forceDownload: Boolean = false) = with(binding) {
         AccountUtils.getCurrentDrive()?.let { currentDrive ->
             val downloadRequired = forceDownload || mustRefreshUi
-            (homeViewPager.getFragment(0) as? HomeActivitiesFragment)?.getLastActivities(currentDrive.id, downloadRequired)
-            (homeViewPager.getFragment(1) as? HomeOfflineFragment)?.reloadOffline()
-            (homeViewPager.getFragment(2) as? GalleryFragment)?.onRefreshGallery()
+            homeActivitiesFragment.getFragment<HomeActivitiesFragment>().getLastActivities(currentDrive.id, downloadRequired)
 
             setDriveHeader(currentDrive)
             notEnoughStorage.setup(currentDrive)
