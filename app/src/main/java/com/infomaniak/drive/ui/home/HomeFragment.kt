@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -36,6 +37,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -71,7 +73,10 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         searchViewCard.searchViewText.isVisible = true
         ViewCompat.requestApplyInsets(homeCoordinator)
 
-        searchViewCard.root.setOnClickListener { navigateToSearchFragment() }
+        searchViewCard.root.setOnClickListener {
+            ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
+            safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
+        }
 
         mainViewModel.deleteFileFromHome.observe(viewLifecycleOwner) { fileDeleted -> mustRefreshUi = fileDeleted }
 
