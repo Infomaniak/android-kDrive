@@ -21,12 +21,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.Fragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentFilesBinding
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.navigateToSearchFragment
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.safeNavigate
 
 class FilesFragment : Fragment() {
 
@@ -43,7 +45,8 @@ class FilesFragment : Fragment() {
 
         toolbar.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.searchItem) {
-                navigateToSearchFragment()
+                ShortcutManagerCompat.reportShortcutUsed(requireContext(), Utils.Shortcuts.SEARCH.id)
+                safeNavigate(FilesFragmentDirections.actionFilesFragmentToSearchFragment())
                 true
             } else {
                 false

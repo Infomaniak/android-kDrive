@@ -1021,6 +1021,12 @@
         android:id="@+id/filesFragment"
         android:name="com.infomaniak.drive.ui.home.FilesFragment"
         android:label="FilesFragment"
-        tools:layout="@layout/fragment_files" />
+        tools:layout="@layout/fragment_files">
+        <action
+            android:id="@+id/action_filesFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit" />
+    </fragment>
 
 </navigation>

@@ -38,6 +38,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
@@ -412,7 +413,10 @@ class MainActivity : BaseActivity() {
             trackEvent("shortcuts", shortcutId)
 
             when (shortcutId) {
-                Shortcuts.SEARCH.id -> navigateToSearchFragment(navController)
+                Shortcuts.SEARCH.id -> {
+                    ShortcutManagerCompat.reportShortcutUsed(this@MainActivity, Shortcuts.SEARCH.id)
+                    navController.navigate(R.id.searchFragment)
+                }
                 Shortcuts.UPLOAD.id -> {
                     uploadFilesHelper = UploadFilesHelper(this@MainActivity, navController)
                     currentFolder.observe(this@MainActivity) { parentFolder ->
