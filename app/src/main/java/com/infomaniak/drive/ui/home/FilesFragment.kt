@@ -27,7 +27,6 @@ import androidx.fragment.app.Fragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.databinding.FragmentFilesBinding
-import com.infomaniak.drive.ui.menu.MenuFragmentDirections
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.isPositive
@@ -63,26 +62,26 @@ class FilesFragment : Fragment() {
     private fun setupItems() = with(binding) {
         sharedWithMeFiles.apply {
             if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true).isPositive()) {
-                setOnClickListener { safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment()) }
+                setOnClickListener { safeNavigate(FilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment()) }
             } else {
                 isGone = true
             }
         }
 
         recentChanges.setOnClickListener {
-            safeNavigate(MenuFragmentDirections.actionMenuFragmentToRecentChangesFragment())
+            safeNavigate(FilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
         }
 
         offlineFile.setOnClickListener {
-            safeNavigate(MenuFragmentDirections.actionMenuFragmentToOfflineFileFragment())
+            safeNavigate(FilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
         }
 
         myShares.setOnClickListener {
-            safeNavigate(MenuFragmentDirections.actionMenuFragmentToMySharesFragment())
+            safeNavigate(FilesFragmentDirections.actionFilesFragmentToMySharesFragment())
         }
 
         trashbin.setOnClickListener {
-            safeNavigate(MenuFragmentDirections.actionMenuFragmentToTrashFragment())
+            safeNavigate(FilesFragmentDirections.actionFilesFragmentToTrashFragment())
         }
     }
 }
