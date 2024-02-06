@@ -89,34 +89,6 @@ class MenuFragment : Fragment() {
                 }
             }
 
-            sharedWithMeFiles.apply {
-                if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true).isPositive()) {
-                    setOnClickListener { safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment()) }
-                } else {
-                    isGone = true
-                }
-            }
-
-            recentChanges.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToRecentChangesFragment())
-            }
-
-            offlineFile.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToOfflineFileFragment())
-            }
-
-            myShares.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToMySharesFragment())
-            }
-
-            gallery.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToMenuGalleryFragment())
-            }
-
-            trashbin.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToTrashFragment())
-            }
-
             settings.setOnClickListener {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
             }

@@ -22,11 +22,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.databinding.FragmentFilesBinding
+import com.infomaniak.drive.ui.menu.MenuFragmentDirections
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -45,12 +49,40 @@ class FilesFragment : Fragment() {
 
         toolbar.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.searchItem) {
-                ShortcutManagerCompat.reportShortcutUsed(requireContext(), Utils.Shortcuts.SEARCH.id)
+                ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
                 safeNavigate(FilesFragmentDirections.actionFilesFragmentToSearchFragment())
                 true
             } else {
                 false
             }
+        }
+
+        setupItems()
+    }
+
+    private fun setupItems() = with(binding) {
+        sharedWithMeFiles.apply {
+            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true).isPositive()) {
+                setOnClickListener { safeNavigate(MenuFragmentDirections.actionMenuFragmentToSharedWithMeFragment()) }
+            } else {
+                isGone = true
+            }
+        }
+
+        recentChanges.setOnClickListener {
+            safeNavigate(MenuFragmentDirections.actionMenuFragmentToRecentChangesFragment())
+        }
+
+        offlineFile.setOnClickListener {
+            safeNavigate(MenuFragmentDirections.actionMenuFragmentToOfflineFileFragment())
+        }
+
+        myShares.setOnClickListener {
+            safeNavigate(MenuFragmentDirections.actionMenuFragmentToMySharesFragment())
+        }
+
+        trashbin.setOnClickListener {
+            safeNavigate(MenuFragmentDirections.actionMenuFragmentToTrashFragment())
         }
     }
 }
