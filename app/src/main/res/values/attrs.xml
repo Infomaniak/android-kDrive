@@ -59,5 +59,6 @@
     <declare-styleable name="MenuItemView">
         <attr name="icon" format="reference" />
         <attr name="title" format="string" />
+        <attr name="iconColor" format="color" />
     </declare-styleable>
 </resources>

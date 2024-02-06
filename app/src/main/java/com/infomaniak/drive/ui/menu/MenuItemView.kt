@@ -38,6 +38,9 @@ class MenuItemView @JvmOverloads constructor(
             with(binding) {
                 title.text = getString(R.styleable.MenuItemView_title) ?: ""
                 icon.setImageDrawable(getDrawable(R.styleable.MenuItemView_icon))
+                getColorStateList(R.styleable.MenuItemView_iconColor)?.let {
+                    icon.imageTintList = it
+                }
             }
         }
     }
