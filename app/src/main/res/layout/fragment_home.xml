@@ -114,44 +114,6 @@
                     android:visibility="gone"
                     tools:visibility="visible" />
 
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/tabsHomeGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/searchViewCard"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/homeActivitiesButton"
-                        style="@style/ButtonToggleGroupAlternative"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/fileDetailsActivitiesTitle" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/homeOfflineButton"
-                        style="@style/ButtonToggleGroupAlternative"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/offlineFileTitle" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/homeGalleryButton"
-                        style="@style/ButtonToggleGroupAlternative"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/galleryTitle" />
-
-                </com.google.android.material.button.MaterialButtonToggleGroup>
-
             </LinearLayout>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -164,12 +126,12 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/homeViewPager"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/homeActivitiesFragment"
+            android:name="com.infomaniak.drive.ui.home.HomeActivitiesFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:nestedScrollingEnabled="true" />
+            tools:layout="@layout/fragment_home_tabs" />
+
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
