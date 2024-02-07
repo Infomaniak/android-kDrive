@@ -41,19 +41,23 @@ class HomeViewModel : ViewModel() {
     private var lastActivities = arrayListOf<FileActivity>()
     private var lastMergedActivities = arrayListOf<FileActivity>()
 
+    val needToRestoreFiles get() = lastMergedActivities.isNotEmpty()
+
     fun loadLastActivities(driveId: Int, forceDownload: Boolean = false) {
         loadLastActivities(driveId, forceDownload, isFirstPage = true)
     }
 
     fun loadMoreActivities(driveId: Int) {
-        loadLastActivities(driveId, forceDownload = false, cursor = currentCursor)
+        currentCursor?.let {
+            loadLastActivities(driveId, forceDownload = false, cursor = it)
+        }
     }
 
     fun restoreActivitiesIfNeeded() {
         if (lastMergedActivities.isNotEmpty()) {
             lastActivitiesResult.value = LastActivityResult(
                 mergedActivities = lastMergedActivities,
-                isComplete = currentCursor != null,
+                isComplete = lastActivitiesResult.value?.isComplete == true,
                 isFirstPage = true,
             )
         }
