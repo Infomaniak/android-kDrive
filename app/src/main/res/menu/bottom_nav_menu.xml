@@ -32,9 +32,9 @@
         android:title="@null" />
 
     <item
-        android:id="@+id/favoritesFragment"
-        android:icon="@drawable/ic_star"
-        android:title="@string/favoritesTitle" />
+        android:id="@+id/menuGalleryFragment"
+        android:icon="@drawable/ic_gallery"
+        android:title="@string/galleryTitle" />
 
     <item
         android:id="@+id/menuFragment"
