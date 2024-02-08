@@ -131,7 +131,7 @@
             android:name="com.infomaniak.drive.ui.home.HomeActivitiesFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:layout="@layout/fragment_home_tabs" />
+            tools:layout="@layout/fragment_home_activities" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
