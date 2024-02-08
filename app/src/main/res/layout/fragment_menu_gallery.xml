@@ -61,7 +61,8 @@
             android:id="@+id/galleryFragmentView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="true" />
+            android:nestedScrollingEnabled="true"
+            tools:layout="@layout/fragment_gallery" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
