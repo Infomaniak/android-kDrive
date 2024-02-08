@@ -36,6 +36,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 class FavoritesFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = true
+    override var hideBackButtonWhenRoot: Boolean = false
 
     override val noItemsRootIcon = R.drawable.ic_star_filled
     override val noItemsRootTitle = R.string.favoritesNoFile
