@@ -62,8 +62,10 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
+import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -166,10 +168,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 isUploading = false
                 if (isResumed) refreshActivities()
             }
-        }
-
-        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
-            if (file.isFolder()) file.openFolder() else file.displayFile(withCurrentFiles = false)
         }
 
         mainViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
@@ -457,9 +455,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             onFileClicked = { file ->
                 if (file.isUsable()) {
                     when {
-                        file.isFolder() -> file.openFolder()
+                        file.isFolder() -> openFolder(file, navigationArgs.shouldHideBottomNavigation, fileListViewModel)
                         file.isBookmark() -> openBookmark(file)
-                        else -> file.displayFile()
+                        else -> displayFile(file, mainViewModel, fileAdapter)
                     }
                 } else {
                     refreshActivities()
@@ -500,33 +498,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
-
-    private fun File.openFolder() {
-        if (isDisabled()) {
-            safeNavigate(
-                FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
-                    isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
-                    folderId = id,
-                    folderName = name
-                )
-            )
-        } else {
-            fileListViewModel.cancelDownloadFiles()
-            safeNavigate(
-                FileListFragmentDirections.fileListFragmentToFileListFragment(
-                    folderId = id,
-                    folderName = name,
-                    shouldHideBottomNavigation = navigationArgs.shouldHideBottomNavigation,
-                )
-            )
-        }
-    }
-
-    private fun File.displayFile(withCurrentFiles: Boolean = true) {
-        trackEvent("preview", "preview${getFileType().value.capitalizeFirstChar()}")
-        val fileList = if (withCurrentFiles) fileAdapter.getFileObjectsList(mainViewModel.realm) else listOf(this)
-        Utils.displayFile(mainViewModel, findNavController(), this, fileList)
-    }
 
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(

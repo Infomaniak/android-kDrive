@@ -85,10 +85,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
         // Clear FileListFragment stack
-        with(navController) {
-            popBackStack(R.id.homeFragment, false)
-            navigate(R.id.fileListFragment)
-        }
+        navController.popBackStack(R.id.rootFilesFragment, false)
 
         if (fileId == Utils.ROOT_ID) return
 

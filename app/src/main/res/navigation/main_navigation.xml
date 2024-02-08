@@ -976,10 +976,10 @@
         tools:layout="@layout/fragment_menu_gallery" />
 
     <fragment
-        android:id="@+id/filesFragment"
+        android:id="@+id/rootFilesFragment"
         android:name="com.infomaniak.drive.ui.home.RootFilesFragment"
-        android:label="FilesFragment"
-        tools:layout="@layout/fragment_files">
+        android:label="RootFilesFragment"
+        tools:layout="@layout/fragment_root_files">
         <action
             android:id="@+id/action_filesFragment_to_searchFragment"
             app:destination="@id/searchFragment"
