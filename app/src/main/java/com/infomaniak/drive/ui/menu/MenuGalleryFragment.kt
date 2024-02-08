@@ -23,14 +23,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
+import androidx.core.view.marginBottom
+import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBottomSheetDialog
 import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.toPx
 
 class MenuGalleryFragment : Fragment() {
 
@@ -40,7 +44,6 @@ class MenuGalleryFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = FragmentMenuGalleryBinding.inflate(inflater, container, false).apply {
-            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
             swipeRefreshLayout.setOnRefreshListener { galleryFragment.onRefreshGallery() }
         }
 
@@ -84,5 +87,18 @@ class MenuGalleryFragment : Fragment() {
         binding.appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
             galleryFragment.setScrollbarTrackOffset(binding.appBar.totalScrollRange + verticalOffset)
         })
+
+        adjustFastScrollBarScrollRange()
+    }
+
+    private fun adjustFastScrollBarScrollRange() = with(binding) {
+        val bottomNavigationOffset = with((activity as MainActivity).getBottomNavigation()) {
+            layoutParams.height + marginBottom + marginTop + 10.toPx()
+        }
+
+        appBar.addOnOffsetChangedListener { _, verticalOffset ->
+            val margin = appBar.totalScrollRange + verticalOffset + bottomNavigationOffset
+            galleryFragment.setScrollbarTrackOffset(margin)
+        }
     }
 }
