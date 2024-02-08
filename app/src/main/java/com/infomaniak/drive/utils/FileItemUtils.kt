@@ -63,7 +63,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
@@ -74,7 +74,7 @@ fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
 }
 
 fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout)
@@ -83,7 +83,7 @@ fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
 }
 
 fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout, filePreview2)
