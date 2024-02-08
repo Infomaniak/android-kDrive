@@ -140,8 +140,12 @@ class RootFilesFragment : Fragment() {
     }
 
     private fun updateFolderToOpenWhenClicked(fileTypes: MutableMap<File.VisibilityType, File>) {
-        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file -> commonFolderToOpen = FolderToOpen(file.id, file.name) }
-        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file -> personalFolderToOpen = FolderToOpen(file.id, file.name) }
+        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file ->
+            commonFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
+        }
+        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
+            personalFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
+        }
     }
 
     private fun observeNavigateFileListTo() {
