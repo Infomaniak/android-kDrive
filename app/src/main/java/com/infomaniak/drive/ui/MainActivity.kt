@@ -187,7 +187,7 @@ class MainActivity : BaseActivity() {
             selectedItemId = uiSettings.bottomNavigationSelectedItem
             setOnItemReselectedListener { item ->
                 when (item.itemId) {
-                    R.id.filesFragment, R.id.favoritesFragment -> { // TODO
+                    R.id.rootFilesFragment, R.id.favoritesFragment -> {
                         navController.popBackStack(R.id.homeFragment, false)
                         navController.navigate(item.itemId)
                     }
@@ -200,7 +200,7 @@ class MainActivity : BaseActivity() {
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
-                binding.bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick() // TODO
+                clickOnBottomBarFolders()
                 mainViewModel.navigateFileListTo(navController, it.destinationFileId)
             }
         }
@@ -395,7 +395,7 @@ class MainActivity : BaseActivity() {
             R.id.favoritesFragment,
             R.id.fileInfoActionsBottomSheetDialog,
             R.id.fileListFragment,
-            R.id.filesFragment,
+            R.id.rootFilesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
             R.id.mySharesFragment,
@@ -527,7 +527,9 @@ class MainActivity : BaseActivity() {
 
     fun getMainFab() = binding.mainFab
 
-    fun getBottomNavigation() = binding.bottomNavigation
+    fun clickOnBottomBarFolders() {
+        binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
+    }
 
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10

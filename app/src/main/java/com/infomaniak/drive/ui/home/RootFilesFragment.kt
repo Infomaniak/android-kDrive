@@ -32,10 +32,12 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_LOCAL
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.UNRESTRICTED
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.databinding.FragmentFilesBinding
+import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.FilePresenter.displayFile
+import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.isPositive
@@ -44,7 +46,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 
 class RootFilesFragment : Fragment() {
 
-    private var binding: FragmentFilesBinding by safeBinding()
+    private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
     private val fileListViewModel: FileListViewModel by viewModels()
 
@@ -52,7 +54,7 @@ class RootFilesFragment : Fragment() {
     private var personalFolderToOpen: FolderToOpen? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentFilesBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentRootFilesBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
@@ -73,30 +75,7 @@ class RootFilesFragment : Fragment() {
         setupItems()
 
         updateAndObserveFiles()
-    }
-
-    private fun updateAndObserveFiles() = with(binding) {
-        val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
-
-        fileListViewModel.getFiles(
-            parentId = Utils.ROOT_ID,
-            order = File.SortType.NAME_AZ,
-            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else UNRESTRICTED,
-            isNewSort = false,
-        ).observe(viewLifecycleOwner) {
-            val fileTypes = mutableMapOf<File.VisibilityType, File>()
-            it?.files?.associateByTo(fileTypes, File::getVisibilityType)
-
-            organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
-            personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
-
-            updateFolderToOpenWhenClicked(fileTypes)
-        }
-    }
-
-    private fun updateFolderToOpenWhenClicked(fileTypes: MutableMap<File.VisibilityType, File>) {
-        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file -> commonFolderToOpen = FolderToOpen(file.id, file.name) }
-        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file -> personalFolderToOpen = FolderToOpen(file.id, file.name) }
+        observeNavigateFileListTo()
     }
 
     private fun setupItems() = with(binding) {
@@ -138,6 +117,40 @@ class RootFilesFragment : Fragment() {
 
         trashbin.setOnClickListener {
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
+        }
+    }
+
+    private fun updateAndObserveFiles() = with(binding) {
+        val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
+
+        fileListViewModel.getFiles(
+            parentId = Utils.ROOT_ID,
+            order = File.SortType.NAME_AZ,
+            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else UNRESTRICTED,
+            isNewSort = false,
+        ).observe(viewLifecycleOwner) {
+            val fileTypes = mutableMapOf<File.VisibilityType, File>()
+            it?.files?.associateByTo(fileTypes, File::getVisibilityType)
+
+            organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
+            personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
+
+            updateFolderToOpenWhenClicked(fileTypes)
+        }
+    }
+
+    private fun updateFolderToOpenWhenClicked(fileTypes: MutableMap<File.VisibilityType, File>) {
+        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file -> commonFolderToOpen = FolderToOpen(file.id, file.name) }
+        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file -> personalFolderToOpen = FolderToOpen(file.id, file.name) }
+    }
+
+    private fun observeNavigateFileListTo() {
+        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
+            if (file.isFolder()) {
+                openFolder(file, false, fileListViewModel)
+            } else {
+                displayFile(file, mainViewModel, fileAdapter = null)
+            }
         }
     }
 
