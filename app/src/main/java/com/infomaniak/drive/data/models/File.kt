@@ -333,6 +333,8 @@ open class File(
             "is_team_space_folder" -> VisibilityType.IS_TEAM_SPACE_FOLDER
             "is_in_team_space_folder" -> VisibilityType.IS_IN_TEAM_SPACE_FOLDER
             "is_shared_space" -> VisibilityType.IS_SHARED_SPACE
+            "is_in_shared_space" -> VisibilityType.IS_IN_SHARED_SPACE
+            "is_in_private_space" -> VisibilityType.IS_IN_PRIVATE_SPACE
             else -> {
                 when {
                     dropbox != null -> VisibilityType.IS_DROPBOX
@@ -403,7 +405,9 @@ open class File(
         IS_SHARED_SPACE,
         IS_TEAM_SPACE,
         IS_TEAM_SPACE_FOLDER,
-        IS_IN_TEAM_SPACE_FOLDER;
+        IS_IN_TEAM_SPACE_FOLDER,
+        IS_IN_SHARED_SPACE,
+        IS_IN_PRIVATE_SPACE,
     }
 
     enum class Office(val extensionType: ExtensionType, val extension: String) {
