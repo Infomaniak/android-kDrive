@@ -48,10 +48,8 @@ class RootFilesFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val fileListViewModel: FileListViewModel by viewModels()
 
-    private var commonFolderId: Int? = null
-    private var commonFolderName: String? = null
-    private var personalFolderId: Int? = null
-    private var personalFolderName: String? = null
+    private var commonFolderToOpen: FolderToOpen? = null
+    private var personalFolderToOpen: FolderToOpen? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentFilesBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -97,34 +95,21 @@ class RootFilesFragment : Fragment() {
     }
 
     private fun updateFolderToOpenWhenClicked(fileTypes: MutableMap<File.VisibilityType, File>) {
-        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file ->
-            commonFolderId = file.id
-            commonFolderName = file.name
-        }
-
-        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
-            personalFolderId = file.id
-            personalFolderName = file.name
-        }
+        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file -> commonFolderToOpen = FolderToOpen(file.id, file.name) }
+        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file -> personalFolderToOpen = FolderToOpen(file.id, file.name) }
     }
 
     private fun setupItems() = with(binding) {
         organizationFolder.setOnClickListener {
-            safeNavigate(
-                RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-                    folderId = commonFolderId!!,
-                    folderName = commonFolderName!!,
-                )
-            )
+            commonFolderToOpen?.let { (id, name) ->
+                safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(folderId = id, folderName = name))
+            }
         }
 
         personalFolder.setOnClickListener {
-            safeNavigate(
-                RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-                    folderId = personalFolderId!!,
-                    folderName = personalFolderName!!,
-                )
-            )
+            personalFolderToOpen?.let { (id, name) ->
+                safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(folderId = id, folderName = name))
+            }
         }
 
         sharedWithMeFiles.apply {
@@ -155,4 +140,6 @@ class RootFilesFragment : Fragment() {
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
         }
     }
+
+    data class FolderToOpen(val id: Int, val name: String)
 }
