@@ -112,14 +112,6 @@ class RootFilesFragment : Fragment() {
             }
         }
 
-        sharedWithMeFiles.apply {
-            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true).isPositive()) {
-                setOnClickListener { safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment()) }
-            } else {
-                isGone = true
-            }
-        }
-
         favorites.setOnClickListener {
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
         }
@@ -128,12 +120,20 @@ class RootFilesFragment : Fragment() {
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
         }
 
-        offlineFile.setOnClickListener {
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
+        sharedWithMeFiles.apply {
+            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true).isPositive()) {
+                setOnClickListener { safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment()) }
+            } else {
+                isGone = true
+            }
         }
 
         myShares.setOnClickListener {
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
+        }
+
+        offlineFile.setOnClickListener {
+            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
         }
 
         trashbin.setOnClickListener {
