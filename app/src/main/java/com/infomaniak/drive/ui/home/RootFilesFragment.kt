@@ -129,8 +129,8 @@ class RootFilesFragment : Fragment() {
             sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else UNRESTRICTED,
             isNewSort = false,
         ).observe(viewLifecycleOwner) {
-            val fileTypes = mutableMapOf<File.VisibilityType, File>()
-            it?.files?.associateByTo(fileTypes, File::getVisibilityType)
+            // TODO: Do not process data on the main thread. Wait for getFiles refactor
+            val fileTypes = it?.files?.associateBy(File::getVisibilityType) ?: emptyMap()
 
             organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
             personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
@@ -139,7 +139,7 @@ class RootFilesFragment : Fragment() {
         }
     }
 
-    private fun updateFolderToOpenWhenClicked(fileTypes: MutableMap<File.VisibilityType, File>) {
+    private fun updateFolderToOpenWhenClicked(fileTypes: Map<File.VisibilityType, File>) {
         fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file ->
             commonFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
         }
