@@ -402,6 +402,7 @@ class MainActivity : BaseActivity() {
             R.id.rootFilesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
+            R.id.menuGalleryFragment,
             R.id.mySharesFragment,
             R.id.sharedWithMeFragment -> shouldHideBottomNavigation != true
             else -> false

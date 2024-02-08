@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2024 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#000000"
+        android:fillType="evenOdd"
+        android:pathData="M2,2.467C2,2.209 2.209,2 2.467,2H21.533C21.791,2 22,2.209 22,2.467V17H21.097L16.58,8.625C16.557,8.582 16.53,8.54 16.5,8.5C16.267,8.19 15.965,7.938 15.618,7.764C15.271,7.59 14.888,7.5 14.5,7.5C14.112,7.5 13.729,7.59 13.382,7.764C13.035,7.938 12.733,8.19 12.5,8.5C12.468,8.543 12.439,8.589 12.414,8.637L10.745,11.83L10.68,11.766C10.427,11.513 10.122,11.317 9.786,11.191C9.451,11.066 9.092,11.014 8.735,11.04C8.377,11.065 8.03,11.167 7.715,11.339C7.401,11.51 7.127,11.748 6.912,12.034C6.898,12.053 6.884,12.072 6.872,12.092L3.705,17H2V2.467ZM6.085,17H18.824L14.865,9.658C14.825,9.615 14.777,9.579 14.724,9.553C14.654,9.518 14.578,9.5 14.5,9.5C14.422,9.5 14.346,9.518 14.276,9.553C14.225,9.579 14.178,9.613 14.139,9.655L11.886,13.963C11.739,14.245 11.466,14.44 11.151,14.488C10.837,14.537 10.518,14.432 10.293,14.207L9.266,13.18C9.215,13.129 9.154,13.09 9.087,13.065C9.02,13.04 8.948,13.03 8.877,13.035C8.805,13.04 8.736,13.06 8.673,13.095C8.618,13.125 8.568,13.165 8.528,13.214L6.085,17ZM4.25,19H2V21.533C2,21.791 2.209,22 2.467,22H21.533C21.791,22 22,21.791 22,21.533V19H20.5H4.25ZM0,21.533V18V2.467C0,1.104 1.104,0 2.467,0H21.533C22.896,0 24,1.104 24,2.467V18V21.533C24,22.896 22.896,24 21.533,24H2.467C1.104,24 0,22.896 0,21.533ZM5.5,6.375C5.5,5.892 5.892,5.5 6.375,5.5C6.858,5.5 7.25,5.892 7.25,6.375C7.25,6.858 6.858,7.25 6.375,7.25C5.892,7.25 5.5,6.858 5.5,6.375ZM6.375,3.5C4.787,3.5 3.5,4.787 3.5,6.375C3.5,7.963 4.787,9.25 6.375,9.25C7.963,9.25 9.25,7.963 9.25,6.375C9.25,4.787 7.963,3.5 6.375,3.5Z" />
+</vector>
