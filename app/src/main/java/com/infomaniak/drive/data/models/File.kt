@@ -343,6 +343,14 @@ open class File(
         }
     }
 
+    fun getDisplayName(context: Context): String {
+        return when (getVisibilityType()) {
+            VisibilityType.IS_PRIVATE -> context.getString(R.string.localizedFilenamePrivateSpace)
+            VisibilityType.IS_TEAM_SPACE -> context.getString(R.string.localizedFilenameTeamSpace)
+            else -> name
+        }
+    }
+
     // TODO This function is called in the FileAdapter, for each File, and is getting the RealmInstance each time. This is not very efficient.
     fun getCategories(): List<Category> {
         val fileCategoriesIds = getSortedCategoriesIds()
