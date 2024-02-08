@@ -528,6 +528,8 @@ class MainActivity : BaseActivity() {
 
     fun getMainFab() = binding.mainFab
 
+    fun getBottomNavigation() = binding.bottomNavigation
+
     fun clickOnBottomBarFolders() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
     }
