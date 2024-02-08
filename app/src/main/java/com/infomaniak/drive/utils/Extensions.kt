@@ -32,7 +32,6 @@ import android.provider.MediaStore
 import android.text.format.Formatter
 import android.util.DisplayMetrics
 import android.util.Patterns
-import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
@@ -272,7 +271,7 @@ fun Context.openOnlyOfficeActivity(file: File) {
 fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
-        (requireActivity() as MainActivity).getBottomNavigation().findViewById<View>(R.id.fileListFragment).performClick()
+        (requireActivity() as MainActivity).clickOnBottomBarFolders()
         mainViewModel.navigateFileListTo(this, folderId)
     }
 }
