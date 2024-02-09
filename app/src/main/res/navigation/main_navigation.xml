@@ -62,6 +62,10 @@
             android:name="shouldHideBottomNavigation"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="shouldShowSmallFab"
+            app:argType="boolean"
+            android:defaultValue="false" />
         <action
             android:id="@+id/action_fileListFragment_to_previewSliderFragment"
             app:destination="@id/previewSliderFragment" />
@@ -387,6 +391,10 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
+        <argument
+            android:name="shouldShowSmallFab"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </dialog>
 
     <fragment
