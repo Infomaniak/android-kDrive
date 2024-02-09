@@ -173,8 +173,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     private fun isGoToFolderVisible(): Boolean {
         val previousDestinationId = ownerFragment.findNavController().previousBackStackEntry?.destination?.id
         val parentFile = FileController.getParentFile(currentFile.id)
-        val exceptionDestinations = arrayOf(R.id.fileListFragment, R.id.rootFilesFragment)
-        return previousDestinationId !in exceptionDestinations && parentFile != null
+        return previousDestinationId != R.id.fileListFragment && parentFile != null
     }
 
     fun scrollToTop() {
