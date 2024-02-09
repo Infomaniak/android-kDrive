@@ -396,4 +396,12 @@
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
     </style>
+
+    <style name="MainFab">
+        <item name="android:contentDescription">@string/buttonAdd</item>
+        <item name="android:src">@drawable/ic_plus</item>
+        <item name="backgroundTint">@color/icon_toolbar_button</item>
+        <item name="elevation">16dp</item>
+        <item name="tint">@color/white</item>
+    </style>
 </resources>
