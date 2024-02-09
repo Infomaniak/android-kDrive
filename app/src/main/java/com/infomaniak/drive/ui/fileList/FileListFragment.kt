@@ -455,7 +455,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             onFileClicked = { file ->
                 if (file.isUsable()) {
                     when {
-                        file.isFolder() -> openFolder(file, navigationArgs.shouldHideBottomNavigation, fileListViewModel)
+                        file.isFolder() -> openFolder(
+                            file,
+                            navigationArgs.shouldHideBottomNavigation,
+                            navigationArgs.shouldShowSmallFab,
+                            fileListViewModel,
+                        )
                         file.isBookmark() -> openBookmark(file)
                         else -> displayFile(file, mainViewModel, fileAdapter)
                     }

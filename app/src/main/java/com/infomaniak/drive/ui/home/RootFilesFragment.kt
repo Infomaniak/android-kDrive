@@ -170,7 +170,12 @@ class RootFilesFragment : Fragment() {
     private fun observeNavigateFileListTo() {
         mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
             if (file.isFolder()) {
-                openFolder(file, false, fileListViewModel)
+                openFolder(
+                    file = file,
+                    shouldHideBottomNavigation = false,
+                    shouldShowSmallFab = false,
+                    fileListViewModel = fileListViewModel,
+                )
             } else {
                 displayFile(file, mainViewModel, fileAdapter = null)
             }

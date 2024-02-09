@@ -52,6 +52,7 @@ import androidx.navigation.fragment.NavHostFragment
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
@@ -67,6 +68,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
+import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
@@ -159,7 +161,7 @@ class MainActivity : BaseActivity() {
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
-        setupMainFab()
+        setupFabs()
         setupDrivePermissions()
         handleInAppReview()
         handleShortcuts()
@@ -221,10 +223,16 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setupMainFab() = with(binding) {
-        mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
+    private fun setupFabs() = with(binding) {
+        setupFab(mainFab)
+        setupFab(searchFab, shouldShowSmallFab = true)
+    }
+
+    private fun setupFab(fab: FloatingActionButton, shouldShowSmallFab: Boolean = false) {
+        val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab = shouldShowSmallFab).toBundle()
+        fab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog, args) }
         mainViewModel.currentFolder.observe(this@MainActivity) { file ->
-            mainFab.isEnabled = file?.rights?.canCreateFile == true
+            fab.isEnabled = file?.rights?.canCreateFile == true
         }
     }
 
@@ -334,8 +342,10 @@ class MainActivity : BaseActivity() {
         destination.addSentryBreadcrumb()
 
         val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
+        val shouldShowSmallFab = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
+            ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
 
-        handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
+        handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
 
         // TODO: Find a better way to do this. Currently, we need to put that
         //  here and not in the preview slider fragment because of APIs <= 27.
@@ -390,10 +400,17 @@ class MainActivity : BaseActivity() {
         trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
     }
 
-    private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) = with(binding) {
+    private fun handleBottomNavigationVisibility(
+        destinationId: Int,
+        shouldHideBottomNavigation: Boolean?,
+        shouldShowSmallFab: Boolean?,
+    ) = with(binding) {
 
         val isVisible = when (destinationId) {
-            R.id.addFileBottomSheetDialog,
+            R.id.addFileBottomSheetDialog -> {
+                val shouldHide = shouldHideBottomNavigation != false || shouldShowSmallFab == true
+                !shouldHide
+            }
             R.id.favoritesFragment,
             R.id.fileInfoActionsBottomSheetDialog,
             R.id.fileListFragment,
@@ -412,6 +429,9 @@ class MainActivity : BaseActivity() {
         mainFab.isVisible = isVisible
         bottomNavigation.isVisible = isVisible
         bottomNavigationBackgroundView.isVisible = isVisible
+
+        val isSearchFabVisible = destinationId == R.id.searchFragment || shouldShowSmallFab == true
+        searchFab.isVisible = isSearchFabVisible
     }
 
     private fun handleShortcuts() = with(mainViewModel) {
