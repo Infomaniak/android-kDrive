@@ -74,7 +74,6 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
@@ -354,7 +353,7 @@ class MainActivity : BaseActivity() {
             R.id.menuGalleryFragment,
             R.id.mySharesFragment -> {
                 // Defining default root folder
-                mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
+                mainViewModel.setCurrentFolderAsRoot()
             }
         }
 

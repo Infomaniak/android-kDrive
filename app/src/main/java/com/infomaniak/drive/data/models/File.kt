@@ -335,7 +335,7 @@ open class File(
             "is_shared_space" -> VisibilityType.IS_SHARED_SPACE
             "is_in_shared_space" -> VisibilityType.IS_IN_SHARED_SPACE
             "is_in_private_space" -> VisibilityType.IS_IN_PRIVATE_SPACE
-            "is_private_space" -> VisibilityType.IS_PRIVATE
+            IS_PRIVATE_SPACE -> VisibilityType.IS_PRIVATE
             else -> {
                 when {
                     dropbox != null -> VisibilityType.IS_DROPBOX
@@ -471,6 +471,7 @@ open class File(
     }
 
     companion object {
+        const val IS_PRIVATE_SPACE = "is_private_space"
 
         /**
          * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.
