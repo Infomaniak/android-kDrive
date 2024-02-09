@@ -387,6 +387,8 @@ class MainActivity : BaseActivity() {
             R.id.favoritesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
+            R.id.rootFilesFragment,
+            R.id.menuGalleryFragment,
             R.id.mySharesFragment -> {
                 // Defining default root folder
                 mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
