@@ -760,7 +760,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                             result.parentFolder
                         }
 
-                        mainViewModel.currentFolder.value = multiSelectManager.currentFolder
+                        mainViewModel.setCurrentFolder(multiSelectManager.currentFolder)
                         changeNoFilesLayoutVisibility(
                             hideFileList = fileAdapter.fileList.isEmpty(),
                             changeControlsVisibility = result.parentFolder?.isRoot() == false
