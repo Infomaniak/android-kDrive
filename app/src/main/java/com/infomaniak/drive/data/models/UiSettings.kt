@@ -60,16 +60,6 @@ class UiSettings(context: Context) : SharedValues {
     var recentSearches by sharedValue("recentSearches", emptyList())
     var sortType by sharedValue("sortType", SortType.NAME_AZ)
 
-    //region Update
-    var isUserWantingUpdates by sharedValue("isUserWantingUpdates", false)
-    var hasAppUpdateDownloaded by sharedValue("hasAppUpdateDownloaded", false)
-
-    fun resetUpdateSettings() {
-        isUserWantingUpdates = false // This avoid the user being instantly reprompted to download update
-        hasAppUpdateDownloaded = false
-    }
-    //endregion
-
     data class SaveExternalFilesData(
         val userId: Int,
         val driveId: Int,

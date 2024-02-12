@@ -21,9 +21,9 @@ import android.content.Context
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.work.*
 import com.google.common.util.concurrent.ListenableFuture
-import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.stores.StoreUtils
+import com.infomaniak.lib.stores.StoresLocalSettings
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,18 +31,18 @@ import java.util.concurrent.TimeUnit
 
 class AppUpdateWorker(appContext: Context, params: WorkerParameters) : ListenableWorker(appContext, params) {
 
-    private val uiSettings by lazy { UiSettings(appContext) }
+    private val storesLocalSettings = StoresLocalSettings.getInstance(appContext)
 
     override fun startWork(): ListenableFuture<Result> {
         SentryLog.i(TAG, "Work started")
 
         return CallbackToFutureAdapter.getFuture { completer ->
-            uiSettings.hasAppUpdateDownloaded = false
+            storesLocalSettings.hasAppUpdateDownloaded = false
             StoreUtils.installDownloadedUpdate(
                 onSuccess = { completer.setResult(Result.success()) },
                 onFailure = { exception ->
                     // This avoid the user being instantly reprompted to download update
-                    uiSettings.resetUpdateSettings()
+                    storesLocalSettings.resetUpdateSettings()
                     Sentry.captureException(exception)
                     completer.setResult(Result.failure())
                 },
@@ -58,10 +58,10 @@ class AppUpdateWorker(appContext: Context, params: WorkerParameters) : Listenabl
     class Scheduler(appContext: Context) {
 
         private val workManager = WorkManager.getInstance(appContext)
-        private val uiSettings by lazy { UiSettings(appContext) }
+        private val storesLocalSettings = StoresLocalSettings.getInstance(appContext)
 
         fun scheduleWorkIfNeeded() {
-            if (uiSettings.hasAppUpdateDownloaded) {
+            if (storesLocalSettings.hasAppUpdateDownloaded) {
                 SentryLog.d(TAG, "Work scheduled")
 
                 val workRequest = OneTimeWorkRequestBuilder<AppUpdateWorker>()

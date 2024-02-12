@@ -20,13 +20,13 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.os.Bundle
 import android.view.View
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.lib.core.utils.getAppName
 import com.infomaniak.lib.core.utils.goToPlayStore
+import com.infomaniak.lib.stores.StoresLocalSettings
 
 class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
 
-    private val uiSettings by lazy { UiSettings(requireContext()) }
+    private val storesSettings by lazy { StoresLocalSettings.getInstance(requireContext()) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
@@ -36,14 +36,14 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
         illu.setAnimation(R.raw.illu_upgrade)
 
         secondaryActionButton.setOnClickListener {
-            uiSettings.isUserWantingUpdates = false
+            storesSettings.isUserWantingUpdates = false
             dismiss()
         }
 
         actionButton.apply {
             setText(R.string.buttonUpdate)
             setOnClickListener {
-                uiSettings.isUserWantingUpdates = true
+                storesSettings.isUserWantingUpdates = true
                 requireContext().goToPlayStore()
                 dismiss()
             }
