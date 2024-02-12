@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
@@ -32,6 +33,8 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
+
+        storesViewModel.isUpdateBottomSheetShown = true
 
         title.setText(R.string.updateAvailableTitle)
         description.text = getString(R.string.updateAvailableDescription, requireContext().getAppName())
@@ -50,5 +53,10 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
                 dismiss()
             }
         }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        storesViewModel.isUpdateBottomSheetShown = false
+        super.onDismiss(dialog)
     }
 }

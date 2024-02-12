@@ -85,8 +85,8 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
+import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -254,15 +254,15 @@ class MainActivity : BaseActivity() {
 
     private fun setInAppManagerCallbacks() {
         inAppUpdateManager.apply {
-            onInAppUpdateUiChange = { isUploadDownloaded ->
-                if (isUploadDownloaded && canDisplayInAppSnackbar()) {
+            onInAppUpdateUiChange = { isUpdateDownloaded ->
+                if (isUpdateDownloaded && canDisplayInAppSnackbar()) {
                     inAppUpdateSnackbar = showIndefiniteSnackbar(
                         title = R.string.updateReadyTitle,
                         actionButtonTitle = R.string.updateInstallButton,
                         anchor = getMainFab(),
                         onActionClicked = ::installDownloadedUpdate,
                     )
-                } else if (!isUploadDownloaded) {
+                } else if (!isUpdateDownloaded) {
                     inAppUpdateSnackbar?.dismiss()
                 }
             }
@@ -272,7 +272,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
+    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true
     //endregion
 
     override fun onResume() {
