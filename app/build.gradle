@@ -19,8 +19,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 4_04_004_01
-        versionName '4.4.4'
+        versionCode 4_04_005_01
+        versionName '4.4.5'
 
         setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
@@ -151,7 +151,7 @@ dependencies {
 
     implementation 'io.realm:android-adapters:4.0.0'
 
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.4.0'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
 
     implementation 'com.googlecode.plist:dd-plist:1.27'
 
