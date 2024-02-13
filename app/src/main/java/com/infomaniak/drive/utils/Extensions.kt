@@ -42,6 +42,9 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
@@ -64,12 +67,14 @@ import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.ItemUserBinding
+import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.ui.home.HomeFragment
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
@@ -424,4 +429,30 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
     } else {
         Formatter.formatShortFileSize(this, decimalSize)
     }
+}
+
+
+fun LayoutSwitchDriveBinding.setDriveHeader(currentDrive: Drive) {
+    switchDriveButton.text = currentDrive.name
+}
+
+fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
+    switchDriveButton.apply {
+        AccountUtils.getCurrentDrive()?.let { setDriveHeader(it) }
+
+        if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
+            icon = null
+            isEnabled = false
+        } else {
+            setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
+        }
+    }
+
+//    fragment.viewLifecycleOwner.lifecycle.addObserver(
+//        object : LifecycleEventObserver {
+//            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+//                if (event == Lifecycle.Event.ON_RESUME) AccountUtils.getCurrentDrive()?.let { setDriveHeader(it) }
+//            }
+//        },
+//    )
 }
