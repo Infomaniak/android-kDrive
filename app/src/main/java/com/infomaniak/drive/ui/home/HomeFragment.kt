@@ -107,15 +107,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val downloadRequired = forceDownload || mustRefreshUi
             homeActivitiesFragment.getFragment<HomeActivitiesFragment>().getLastActivities(currentDrive.id, downloadRequired)
 
-            switchDriveLayout.setDriveHeader(currentDrive)
             notEnoughStorage.setup(currentDrive)
             mustRefreshUi = false
         }
     }
 
-    override fun onRefresh() {
+    override fun onRefresh() = with(binding) {
         updateUi(forceDownload = true)
-        binding.homeSwipeRefreshLayout.isRefreshing = false
+        AccountUtils.getCurrentDrive()?.let { switchDriveLayout.setDriveHeader(it) }
+        homeSwipeRefreshLayout.isRefreshing = false
     }
 
     companion object {

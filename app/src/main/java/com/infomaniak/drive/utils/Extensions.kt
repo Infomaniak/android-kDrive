@@ -73,7 +73,6 @@ import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
-import com.infomaniak.drive.ui.home.HomeFragment
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
@@ -438,11 +437,11 @@ fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
         }
     }
 
-//    fragment.viewLifecycleOwner.lifecycle.addObserver(
-//        object : LifecycleEventObserver {
-//            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-//                if (event == Lifecycle.Event.ON_RESUME) AccountUtils.getCurrentDrive()?.let { setDriveHeader(it) }
-//            }
-//        },
-//    )
+    fragment.viewLifecycleOwner.lifecycle.addObserver(
+        object : LifecycleEventObserver {
+            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                if (event == Lifecycle.Event.ON_RESUME) AccountUtils.getCurrentDrive()?.let { setDriveHeader(it) }
+            }
+        },
+    )
 }
