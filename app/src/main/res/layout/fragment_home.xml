@@ -39,34 +39,9 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="120.8dp"
-                    android:gravity="bottom">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/switchDriveButton"
-                        style="@style/TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:contentDescription="@string/buttonSwitchDrive"
-                        android:ellipsize="end"
-                        android:fontFamily="@font/suisseintl_bold"
-                        android:gravity="start|center"
-                        android:lineSpacingMultiplier="1"
-                        android:maxWidth="1000000dp"
-                        android:maxLines="2"
-                        android:textColor="@color/title"
-                        android:textSize="28sp"
-                        app:icon="@drawable/ic_keyboard_arrow_down"
-                        app:iconGravity="end"
-                        app:iconSize="28dp"
-                        app:iconTint="@color/iconColor"
-                        tools:text="Drive de test dev infomaniak" />
-
-                </LinearLayout>
+                <include
+                    android:id="@+id/switchDriveLayout"
+                    layout="@layout/layout_switch_drive" />
 
                 <include
                     android:id="@+id/noNetworkCard"

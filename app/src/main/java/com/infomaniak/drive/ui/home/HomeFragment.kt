@@ -29,9 +29,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.databinding.FragmentHomeBinding
@@ -55,19 +53,11 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        AccountUtils.getCurrentDrive()?.let { currentDrive -> setDriveHeader(currentDrive) }
 
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             noNetworkCard.root.isGone = isInternetAvailable
         }
-        switchDriveButton.apply {
-            if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
-                icon = null
-                isEnabled = false
-            } else {
-                setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
-            }
-        }
+        switchDriveLayout.setupSwitchDriveButton(this@HomeFragment)
 
         searchViewCard.searchView.isGone = true
         searchViewCard.searchViewText.isVisible = true
@@ -117,14 +107,10 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val downloadRequired = forceDownload || mustRefreshUi
             homeActivitiesFragment.getFragment<HomeActivitiesFragment>().getLastActivities(currentDrive.id, downloadRequired)
 
-            setDriveHeader(currentDrive)
+            switchDriveLayout.setDriveHeader(currentDrive)
             notEnoughStorage.setup(currentDrive)
             mustRefreshUi = false
         }
-    }
-
-    private fun setDriveHeader(currentDrive: Drive) {
-        binding.switchDriveButton.text = currentDrive.name
     }
 
     override fun onRefresh() {
