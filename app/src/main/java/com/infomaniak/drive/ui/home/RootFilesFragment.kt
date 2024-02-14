@@ -30,7 +30,7 @@ import androidx.fragment.app.viewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_LOCAL
-import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.UNRESTRICTED
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -126,7 +126,7 @@ class RootFilesFragment : Fragment() {
         fileListViewModel.getFiles(
             parentId = Utils.ROOT_ID,
             order = File.SortType.NAME_AZ,
-            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else UNRESTRICTED,
+            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else ONLY_FROM_REMOTE,
             isNewSort = false,
         ).observe(viewLifecycleOwner) {
             // TODO: Do not process data on the main thread. Wait for getFiles refactor
