@@ -17,36 +17,46 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.lib.core.utils.getAppName
 import com.infomaniak.lib.core.utils.goToPlayStore
+import com.infomaniak.lib.stores.StoresSettingsRepository
+import com.infomaniak.lib.stores.StoresViewModel
 
 class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
 
-    private val uiSettings by lazy { UiSettings(requireContext()) }
+    private val storesViewModel: StoresViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
+
+        storesViewModel.isUpdateBottomSheetShown = true
 
         title.setText(R.string.updateAvailableTitle)
         description.text = getString(R.string.updateAvailableDescription, requireContext().getAppName())
         illu.setAnimation(R.raw.illu_upgrade)
 
         secondaryActionButton.setOnClickListener {
-            uiSettings.isUserWantingUpdates = false
+            storesViewModel.set(StoresSettingsRepository.IS_USER_WANTING_UPDATES_KEY, false)
             dismiss()
         }
 
         actionButton.apply {
             setText(R.string.buttonUpdate)
             setOnClickListener {
-                uiSettings.isUserWantingUpdates = true
+                storesViewModel.set(StoresSettingsRepository.IS_USER_WANTING_UPDATES_KEY, true)
                 requireContext().goToPlayStore()
                 dismiss()
             }
         }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        storesViewModel.isUpdateBottomSheetShown = false
+        super.onDismiss(dialog)
     }
 }

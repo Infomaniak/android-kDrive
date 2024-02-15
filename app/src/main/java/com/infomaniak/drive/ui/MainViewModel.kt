@@ -43,7 +43,6 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
-import com.infomaniak.lib.stores.StoreUtils
 import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -61,8 +60,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         } ?: FileController.getRealmInstance()
     }
 
-    private val uiSettings by lazy { UiSettings(getApplication()) }
-
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
@@ -72,7 +69,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     val navigateFileListTo = SingleLiveEvent<File>()
 
-    val canInstallUpdate = MutableLiveData(false)
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
@@ -424,16 +420,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             }
         }
         UploadFile.deleteAll(fileDeleted)
-    }
-
-    fun checkAppUpdateStatus() {
-        canInstallUpdate.value = uiSettings.hasAppUpdateDownloaded
-        StoreUtils.checkStalledUpdate()
-    }
-
-    fun toggleAppUpdateStatus(isUpdateDownloaded: Boolean) {
-        canInstallUpdate.value = isUpdateDownloaded
-        uiSettings.hasAppUpdateDownloaded = isUpdateDownloaded
     }
 
     override fun onCleared() {

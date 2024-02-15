@@ -184,9 +184,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun onResume() {
         super.onResume()
 
-        with(binding.bottomSheetFileInfos) {
-            updateAvailableOfflineItem()
-            observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
+        _binding?.bottomSheetFileInfos?.let { fileInfoActionView ->
+            fileInfoActionView.updateAvailableOfflineItem()
+            fileInfoActionView.observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
                 previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
             }
         }
@@ -196,7 +196,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onPause()
         if (noPreviewList()) return
         previewSliderViewModel.currentPreview = currentFile
-        binding.bottomSheetFileInfos.removeOfflineObservations(this)
+        _binding?.bottomSheetFileInfos?.removeOfflineObservations(this)
     }
 
     override fun onStop() {
@@ -206,7 +206,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onDestroyView() {
         super.onDestroyView()
-        TransitionManager.endTransitions(binding.previewSliderParent)
+        _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
         _binding = null
     }
 
@@ -232,18 +232,18 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            binding.bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
+            _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
         }
     }
 
-    fun toggleFullscreen() = with(binding) {
-        previewSliderParent.apply {
+    fun toggleFullscreen() {
+        _binding?.previewSliderParent?.apply {
             val transition = Slide(Gravity.TOP).apply {
                 duration = 200
                 addTarget(R.id.header)
             }
             TransitionManager.beginDelayedTransition(this, transition)
-            header.isVisible = showUi
+            _binding?.header?.isVisible = showUi
 
             toggleBottomSheet(showUi)
             toggleSystemBar(showUi)
@@ -511,7 +511,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     companion object {
 
-        fun Fragment.getPageNumberChip() = (parentFragment as? PreviewSliderFragment)?.binding?.pageNumberChip
+        fun Fragment.getPageNumberChip() = (parentFragment as? PreviewSliderFragment)?._binding?.pageNumberChip
 
         fun Fragment.toggleFullscreen() {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
