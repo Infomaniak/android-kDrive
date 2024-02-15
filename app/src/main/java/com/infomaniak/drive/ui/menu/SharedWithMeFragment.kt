@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isInvisible
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -28,6 +29,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.SharedWithMeViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
@@ -35,12 +37,11 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.utils.safeNavigate
-import io.realm.Realm
 
 class SharedWithMeFragment : FileSubTypeListFragment() {
 
     private val navigationArgs: SharedWithMeFragmentArgs by navArgs()
-    private lateinit var realm: Realm
+    private val sharedWithMeViewModel: SharedWithMeViewModel by viewModels()
 
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
@@ -79,13 +80,13 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 }
                 file.isFolder() -> file.openSharedWithMeFolder()
                 else -> {
-                    val fileList = fileAdapter.getFileObjectsList(fileListViewModel.sharedWithMeRealm)
+                    val fileList = fileAdapter.getFileObjectsList(sharedWithMeViewModel.sharedWithMeRealm)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)
                 }
             }
         }
 
-        fileListViewModel.sharedWithMeFiles.observe(viewLifecycleOwner) { files ->
+        sharedWithMeViewModel.sharedWithMeFiles.observe(viewLifecycleOwner) { files ->
             populateFileList(
                 files = ArrayList(files),
                 isComplete = true,
@@ -141,7 +142,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            fileListViewModel.loadSharedWithMeFiles(
+            sharedWithMeViewModel.loadSharedWithMeFiles(
                 parentId = folderId,
                 order = fileListViewModel.sortType,
                 userDrive = userDrive ?: UserDrive(sharedWithMe = true),
