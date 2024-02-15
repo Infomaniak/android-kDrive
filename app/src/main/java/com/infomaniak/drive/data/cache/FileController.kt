@@ -42,18 +42,20 @@ import java.util.Calendar
 
 object FileController {
 
-    private const val REALM_DB_FILE = "kDrive-%s-%s.realm"
-    private const val REALM_DB_SHARES_WITH_ME = "kDrive-%s-%s-shares.realm"
+    private const val REALM_DB_FILE = "kDrive-%d-%d.realm"
+    private const val REALM_DB_SHARES_WITH_ME = "kDrive-%d-shares.realm"
 
     const val FAVORITES_FILE_ID = -1
     const val MY_SHARES_FILE_ID = -2
     const val RECENT_CHANGES_FILE_ID = -4
     private const val GALLERY_FILE_ID = -3
+    const val SHARED_WITH_ME_FILE_ID = -5
 
     private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favorites")
     private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
     private val GALLERY_FILE = File(GALLERY_FILE_ID, name = "Gallery")
     private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
+    val SHARED_WITH_ME_FILE = File(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me")
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
@@ -278,6 +280,12 @@ object FileController {
         }
     }
 
+    fun createSharedWithMeFolderIfNeeded(userDrive: UserDrive?) {
+        getRealmInstance(userDrive ?: UserDrive(sharedWithMe = true)).use {
+            getFileById(realm = it, SHARED_WITH_ME_FILE_ID) ?: saveFiles(SHARED_WITH_ME_FILE, emptyList(), realm = it)
+        }
+    }
+
     fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false, realm: Realm? = null) {
         saveFiles(FAVORITES_FILE, files, replaceOldData, realm)
     }
@@ -307,7 +315,7 @@ object FileController {
         }
     }
 
-    private fun saveFiles(
+    fun saveFiles(
         folder: File,
         files: List<File>,
         replaceOldData: Boolean = false,
@@ -330,7 +338,9 @@ object FileController {
 
     private fun getDriveFileName(userDrive: UserDrive): String {
         val realmDb = if (userDrive.sharedWithMe) REALM_DB_SHARES_WITH_ME else REALM_DB_FILE
-        return realmDb.format(userDrive.userId, userDrive.driveId)
+        return realmDb.run {
+            if (userDrive.sharedWithMe) format(userDrive.userId) else format(userDrive.userId, userDrive.driveId)
+        }
     }
 
     fun getRealmConfiguration(userDrive: UserDrive?) = getRealmConfiguration(getDriveFileName(userDrive ?: UserDrive()))
