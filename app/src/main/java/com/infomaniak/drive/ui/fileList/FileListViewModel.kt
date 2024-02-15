@@ -30,7 +30,9 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Position
+import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.SingleLiveEvent
+import io.realm.kotlin.toFlow
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -42,6 +44,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
     private var checkOfflineFilesJob = Job()
+    private var sharedWithMeJob: Job? = null
 
     lateinit var sortType: SortType
 
@@ -50,6 +53,13 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     val isListMode = SingleLiveEvent<Boolean>()
 
     var lastItemCount: FileCount? = null
+
+    val sharedWithMeRealm = FileController.getRealmInstance(UserDrive(sharedWithMe = true))
+
+    private val loadSharedWithMeFiles = MutableLiveData<Pair<Int, SortType>>()
+    val sharedWithMeFiles = loadSharedWithMeFiles.switchMap { (folderId, order) ->
+        FileController.getRealmLiveFiles(folderId, sharedWithMeRealm, order).toFlow().asLiveData()
+    }
 
     fun sortTypeIsInitialized() = ::sortType.isInitialized
 
@@ -107,6 +117,47 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 }
             }
             recursiveDownload(parentId, isFirstPage = true)
+        }
+    }
+
+    fun loadSharedWithMeFiles(
+        parentId: Int,
+        order: SortType,
+        userDrive: UserDrive,
+        isNewSort: Boolean,
+    ) {
+        sharedWithMeJob?.cancel()
+        sharedWithMeJob = viewModelScope.launch(Dispatchers.IO) {
+            val folderId = if (parentId == ROOT_ID) FileController.SHARED_WITH_ME_FILE_ID else parentId
+            var dataNotAlreadyLoaded = true
+
+            fun notifyUiToLoadData() {
+                loadSharedWithMeFiles.postValue(folderId to order)
+                dataNotAlreadyLoaded = false
+            }
+
+            if (parentId == ROOT_ID) {
+                FileController.createSharedWithMeFolderIfNeeded(userDrive)
+            }
+
+            val folderIsNotEmpty = FileController.getFileById(folderId, userDrive)?.children?.isNotEmpty() == true
+            if (folderIsNotEmpty) notifyUiToLoadData()
+
+            if (!isNewSort) {
+                FolderFilesProvider.loadSharedWithMeFiles(
+                    folderFilesProviderArgs = FolderFilesProvider.FolderFilesProviderArgs(
+                        folderId = parentId,
+                        order = order,
+                        userDrive = userDrive,
+                    ),
+                    onRecursionStart = {
+                        // Notify the first page is already loaded
+                        if (dataNotAlreadyLoaded) notifyUiToLoadData()
+                    }
+                )
+                // Notify finish with an error or success without recursion
+                if (dataNotAlreadyLoaded) notifyUiToLoadData()
+            }
         }
     }
 
@@ -259,11 +310,13 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     fun cancelDownloadFiles() {
         pendingJob.cancel()
         getFilesJob.cancel()
+        sharedWithMeJob?.cancel()
         getFilesJob.cancelChildren()
     }
 
     override fun onCleared() {
         super.onCleared()
+        runCatching { sharedWithMeRealm.close() }
         cancelDownloadFiles()
     }
 

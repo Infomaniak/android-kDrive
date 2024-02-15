@@ -400,7 +400,7 @@ object FolderFilesProvider {
         val folderId: FileId,
         val isFirstPage: Boolean = true,
         val order: File.SortType = File.SortType.NAME_AZ,
-        var realm: Realm? = null,
+        val realm: Realm? = null,
         val sourceRestrictionType: SourceRestrictionType = SourceRestrictionType.UNRESTRICTED,
         val userDrive: UserDrive = UserDrive(),
         val withChildren: Boolean = true,
