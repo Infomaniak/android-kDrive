@@ -105,6 +105,13 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiWithCursor(url, GET)
     }
 
+    fun getSharedWithMeFiles(order: File.SortType, cursor: String?): CursorApiResponse<List<File>> {
+        return callApiWithCursor(
+            url = "${ApiRoutes.getSharedWithMeFiles(order)}&${loadCursor(cursor)}",
+            method = GET
+        )
+    }
+
     fun postFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), POST)
 
     fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), DELETE)

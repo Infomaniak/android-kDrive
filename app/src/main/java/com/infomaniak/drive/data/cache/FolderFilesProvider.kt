@@ -73,6 +73,75 @@ object FolderFilesProvider {
         return files
     }
 
+    fun loadSharedWithMeFiles(
+        folderFilesProviderArgs: FolderFilesProviderArgs,
+        onRecursionStart: (() -> Unit)? = null,
+    ) = with(folderFilesProviderArgs) {
+        val block: (Realm) -> Unit = { realm ->
+            val rootFolder = File(id = FileController.SHARED_WITH_ME_FILE_ID, name = "/")
+            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
+            loadSharedWithMeFilesRec(
+                realm = realm,
+                okHttpClient = okHttpClient,
+                folderFilesProviderArgs = this,
+                isRoot = folderId == ROOT_ID,
+                rootFolder = rootFolder,
+                onRecursionStart = onRecursionStart,
+            )
+        }
+        realm?.let(block) ?: FileController.getRealmInstance(userDrive).use(block)
+    }
+
+    private tailrec fun loadSharedWithMeFilesRec(
+        realm: Realm,
+        okHttpClient: OkHttpClient,
+        isRoot: Boolean,
+        folderFilesProviderArgs: FolderFilesProviderArgs,
+        cursor: String? = null,
+        rootFolder: File? = null,
+        onRecursionStart: (() -> Unit)? = null,
+    ) {
+        val folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderFilesProviderArgs.folderId
+        val apiResponse = if (isRoot) {
+            ApiRepository.getSharedWithMeFiles(order = folderFilesProviderArgs.order, cursor = cursor)
+        } else {
+            ApiRepository.getFolderFiles(
+                okHttpClient = okHttpClient,
+                driveId = folderFilesProviderArgs.userDrive.driveId,
+                parentId = folderFilesProviderArgs.folderId,
+                cursor = cursor,
+                order = folderFilesProviderArgs.order,
+            )
+        }
+        val folderProxy = FileController.getFileById(realm, folderId)
+
+        fun saveFiles() = saveRemoteFiles(
+            realm = realm,
+            localFolderProxy = folderProxy,
+            remoteFolder = if (folderFilesProviderArgs.folderId == ROOT_ID) rootFolder else folderProxy,
+            apiResponse = apiResponse,
+            isFirstPage = cursor == null,
+            isCompleteFolder = !apiResponse.hasMore
+        )
+
+        when {
+            apiResponse.hasMoreAndCursorExists -> {
+                saveFiles()
+                if (cursor == null) onRecursionStart?.invoke()
+                loadSharedWithMeFilesRec(
+                    realm = realm,
+                    okHttpClient = okHttpClient,
+                    isRoot = isRoot,
+                    folderFilesProviderArgs = folderFilesProviderArgs,
+                    cursor = apiResponse.cursor
+                )
+            }
+            apiResponse.data?.isNotEmpty() == true -> {
+                saveFiles()
+            }
+        }
+    }
+
     fun getCloudStorageFiles(
         realm: Realm,
         folderId: Int,
