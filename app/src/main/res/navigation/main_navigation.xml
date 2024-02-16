@@ -64,8 +64,8 @@
             app:argType="boolean" />
         <argument
             android:name="shouldShowSmallFab"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_fileListFragment_to_previewSliderFragment"
             app:destination="@id/previewSliderFragment" />
@@ -171,6 +171,10 @@
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="shouldShowSmallFab"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />
@@ -393,8 +397,8 @@
             app:popExitAnim="@anim/fragment_open_exit" />
         <argument
             android:name="shouldShowSmallFab"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <fragment
