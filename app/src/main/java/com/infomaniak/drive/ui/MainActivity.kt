@@ -69,6 +69,7 @@ import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
@@ -350,6 +351,7 @@ class MainActivity : BaseActivity() {
         val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
         val shouldShowSmallFab = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
             ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
+            ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
 
@@ -414,13 +416,13 @@ class MainActivity : BaseActivity() {
     ) = with(binding) {
 
         val isVisible = when (destinationId) {
-            R.id.addFileBottomSheetDialog -> {
+            R.id.addFileBottomSheetDialog,
+            R.id.fileInfoActionsBottomSheetDialog,
+            R.id.fileListFragment -> {
                 val shouldHide = shouldHideBottomNavigation != false || shouldShowSmallFab == true
                 !shouldHide
             }
             R.id.favoritesFragment,
-            R.id.fileInfoActionsBottomSheetDialog,
-            R.id.fileListFragment,
             R.id.homeFragment,
             R.id.menuFragment,
             R.id.menuGalleryFragment,
