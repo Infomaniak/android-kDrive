@@ -30,7 +30,6 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
-import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.View
 import android.view.ViewGroup
@@ -167,17 +166,8 @@ fun ImageView.animateRotation(isDeployed: Boolean = false) {
  * Return the screen size in DPs
  */
 fun Activity.getScreenSizeInDp(): Point {
-    val displayMetrics = DisplayMetrics()
-    if (VERSION.SDK_INT >= VERSION_CODES.R) {
-        display?.apply {
-            getRealMetrics(displayMetrics)
-        }
-    } else {
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-    }
-
     val point = Point()
-    displayMetrics.apply {
+    application.resources.displayMetrics.apply {
         point.x = (widthPixels / density).roundToInt()
         point.y = (heightPixels / density).roundToInt()
     }
