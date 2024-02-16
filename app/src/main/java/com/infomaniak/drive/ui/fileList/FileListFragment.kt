@@ -760,11 +760,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                             realm = mainViewModel.realm
                         ).apply { fileAdapter.updateFileList(this) }
 
-                        multiSelectManager.currentFolder = if (result.parentFolder?.id == ROOT_ID) {
-                            AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
-                        } else {
-                            result.parentFolder
-                        }
+                        multiSelectManager.currentFolder = result.parentFolder
 
                         mainViewModel.setCurrentFolder(multiSelectManager.currentFolder)
                         changeNoFilesLayoutVisibility(
