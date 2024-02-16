@@ -368,6 +368,7 @@ class MainActivity : BaseActivity() {
             R.id.offlineFileFragment,
             R.id.recentChangesFragment,
             R.id.rootFilesFragment,
+            R.id.searchFragment,
             R.id.trashFragment -> {
                 // Defining default root folder
                 mainViewModel.setCurrentFolderAsRoot()
