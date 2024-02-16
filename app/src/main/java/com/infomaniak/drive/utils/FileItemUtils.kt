@@ -51,7 +51,6 @@ import com.infomaniak.drive.databinding.CardviewFolderGridBinding
 import com.infomaniak.drive.databinding.ItemCategoriesLayoutBinding
 import com.infomaniak.drive.databinding.ItemFileBinding
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
-import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.utils.context
@@ -91,7 +90,6 @@ fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
 }
 
 private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
-    isVisible = file.id != ROOT_ID
     text = if (file.deletedAt.isPositive()) {
         file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
     } else {
