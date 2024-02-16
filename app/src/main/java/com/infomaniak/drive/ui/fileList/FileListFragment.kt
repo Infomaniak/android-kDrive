@@ -474,6 +474,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 val bundle = FileInfoActionsBottomSheetDialogArgs(
                     fileId = fileObject.id,
                     userDrive = UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe),
+                    shouldShowSmallFab = navigationArgs.shouldShowSmallFab,
                 ).toBundle()
                 safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
             }
