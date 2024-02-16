@@ -66,7 +66,7 @@ object FilePresenter {
                 R.id.fileListFragment,
                 FileListFragmentArgs(
                     folderId = file.id,
-                    folderName = file.name,
+                    folderName = file.getDisplayName(requireContext()),
                     shouldHideBottomNavigation = shouldHideBottomNavigation,
                 ).toBundle()
             )
