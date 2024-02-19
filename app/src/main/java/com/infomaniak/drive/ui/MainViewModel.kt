@@ -57,7 +57,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         } ?: FileController.getRealmInstance()
     }
 
-    private var myFiles: File? = null
+    private var privateFolder: File? = null
     private val _currentFolder = MutableLiveData<File?>()
     val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
@@ -432,7 +432,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         setCurrentFolderJob.cancel()
         setCurrentFolderJob = Job()
         return viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
-            val file = myFiles ?: FileController.getMyFiles().also { myFiles = it }
+            val file = privateFolder ?: FileController.getPrivateFolder().also { privateFolder = it }
             setCurrentFolderJob.ensureActive()
             _currentFolder.postValue(file)
         }

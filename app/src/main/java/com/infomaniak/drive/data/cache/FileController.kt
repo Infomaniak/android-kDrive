@@ -792,7 +792,7 @@ object FileController {
         }
     }
 
-    fun getMyFiles(): File? {
+    fun getPrivateFolder(): File? {
         return getRealmInstance().use { realm ->
             realm.where(File::class.java)
                 .equalTo(File::visibility.name, IS_PRIVATE_SPACE)
