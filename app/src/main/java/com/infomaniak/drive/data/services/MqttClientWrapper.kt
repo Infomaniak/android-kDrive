@@ -44,7 +44,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
     private lateinit var timer: CountDownTimer
     private var currentToken: IpsToken? = null
     private var isSubscribed: Boolean = false
-    private var runningExternalImportIds: MutableSet<Int> = mutableSetOf()
+    private val runningExternalImportIds: MutableSet<Int> = mutableSetOf()
 
     private const val MQTT_USER = "ips:ips-public"
     private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
@@ -95,7 +95,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         }
 
         try {
-            client.connect(options, null, object : IMqttActionListener {
+            client.connect(options, userContext = null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     SentryLog.i("MQTT connection", "Success : true")
                     coroutineScope.launch {
@@ -131,12 +131,12 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     // QoS 0 to have auto-delete queues
     private fun subscribe(topic: String, qos: Int = 0) {
-        client.subscribe(topic, qos, null, null)
+        client.subscribe(topic, qos, userContext = null, callback = null)
         isSubscribed = true
     }
 
     private fun unsubscribe(topic: String) {
-        client.unsubscribe(topic, null, null)
+        client.unsubscribe(topic, userContext = null, callback = null)
         isSubscribed = false
     }
 
