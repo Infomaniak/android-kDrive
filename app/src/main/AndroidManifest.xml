@@ -192,6 +192,10 @@
             android:name="com.infomaniak.lib.applock.LockActivity"
             android:theme="@style/AppTheme.Lock" />
 
+        <activity
+            android:name="com.infomaniak.lib.stores.updaterequired.UpdateRequiredActivity"
+            android:theme="@style/AppTheme.RequiredUpdate" />
+
         <service android:name=".data.sync.MediaObserverService" />
 
         <receiver

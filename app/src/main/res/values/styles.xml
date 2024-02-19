@@ -80,6 +80,12 @@
 
     <style name="AppTheme.Lock" parent="AppTheme.LockBase" />
 
+    <style name="AppTheme.RequiredUpdate">
+        <item name="illustration">@drawable/illu_update_required</item>
+        <item name="titleStyle">@style/H2</item>
+        <item name="descriptionStyle">@color/secondaryText</item>
+    </style>
+
     <!--AppBar-->
 
     <style name="AppTheme.AppBarOverlay" parent="Widget.Design.AppBarLayout">
