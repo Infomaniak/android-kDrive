@@ -45,10 +45,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.Date
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
@@ -435,7 +432,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         setCurrentFolderJob.cancel()
         setCurrentFolderJob = Job()
         return viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
-            _currentFolder.postValue(myFiles ?: FileController.getMyFiles().also { myFiles = it })
+            val file = myFiles ?: FileController.getMyFiles().also { myFiles = it }
+            setCurrentFolderJob.ensureActive()
+            _currentFolder.postValue(file)
         }
     }
 
