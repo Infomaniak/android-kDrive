@@ -53,7 +53,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val isRoot = folderId == ROOT_ID && !navigationArgs.driveId.isPositive()
-        mainViewModel.currentFolder.value = null
+        mainViewModel.setCurrentFolder(null)
         userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = true).also {
             mainViewModel.loadCurrentFolder(folderId, userDrive = it)
         }

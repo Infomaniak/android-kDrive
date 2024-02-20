@@ -22,6 +22,7 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.Companion.IS_PRIVATE_SPACE
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
 import com.infomaniak.drive.data.models.file.FileExternalImport
@@ -788,6 +789,17 @@ object FileController {
             realm.where(File::class.java)
                 .equalTo("${File::externalImport.name}.${FileExternalImport::id.name}", importId)
                 .findFirst()?.let { file -> realm.executeTransaction { file.externalImport?.status = newStatus.value } }
+        }
+    }
+
+    fun getPrivateFolder(): File? {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::visibility.name, IS_PRIVATE_SPACE)
+                .findFirst()
+                ?.let {
+                    realm.copyFromRealm(it, Int.MAX_VALUE)
+                }
         }
     }
 }

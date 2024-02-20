@@ -45,10 +45,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.Date
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
@@ -60,7 +57,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         } ?: FileController.getRealmInstance()
     }
 
-    val currentFolder = MutableLiveData<File>()
+    private var privateFolder: File? = null
+    private val _currentFolder = MutableLiveData<File?>()
+    val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
     val isInternetAvailable = MutableLiveData(true)
@@ -80,6 +79,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
+    private var setCurrentFolderJob = Job()
 
     private fun getContext() = getApplication<MainApplication>()
 
@@ -97,7 +97,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
-        currentFolder.postValue(FileController.getFileById(folderId, userDrive))
+        postCurrentFolder(FileController.getFileById(folderId, userDrive))
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
@@ -426,5 +426,25 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     override fun onCleared() {
         realm.close()
         super.onCleared()
+    }
+
+    fun setCurrentFolderAsRoot(): Job {
+        setCurrentFolderJob.cancel()
+        setCurrentFolderJob = Job()
+        return viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
+            val file = privateFolder ?: FileController.getPrivateFolder().also { privateFolder = it }
+            setCurrentFolderJob.ensureActive()
+            _currentFolder.postValue(file)
+        }
+    }
+
+    fun setCurrentFolder(file: File?) {
+        setCurrentFolderJob.cancel()
+        _currentFolder.value = file
+    }
+
+    private fun postCurrentFolder(file: File?) {
+        setCurrentFolderJob.cancel()
+        _currentFolder.postValue(file)
     }
 }
