@@ -508,7 +508,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(
             hideFileList = fileAdapter.itemCount == 0,
-            changeControlsVisibility = !isCurrentFolderRoot(),
+            changeControlsVisibility = true,
             ignoreOffline = true
         )
     }
@@ -638,7 +638,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                         it?.let { (_, files, _) ->
                             changeNoFilesLayoutVisibility(
                                 hideFileList = files.isEmpty(),
-                                changeControlsVisibility = !updatedFolder.isRoot(),
+                                changeControlsVisibility = true,
                             )
                         }
                     },
@@ -765,7 +765,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                         mainViewModel.setCurrentFolder(multiSelectManager.currentFolder)
                         changeNoFilesLayoutVisibility(
                             hideFileList = fileAdapter.fileList.isEmpty(),
-                            changeControlsVisibility = result.parentFolder?.isRoot() == false
+                            changeControlsVisibility = result.parentFolder != null
                         )
                     }
 
@@ -777,7 +777,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 } ?: run {
                     changeNoFilesLayoutVisibility(
                         hideFileList = fileAdapter.itemCount == 0,
-                        changeControlsVisibility = folderId != ROOT_ID
+                        changeControlsVisibility = true
                     )
                     fileAdapter.isComplete = true
                 }
