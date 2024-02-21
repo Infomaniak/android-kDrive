@@ -57,9 +57,7 @@ import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.safeNavigate
 import io.sentry.Sentry
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class FileInfoActionsView @JvmOverloads constructor(
     context: Context,
@@ -77,6 +75,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     private lateinit var onItemClickListener: OnItemClickListener
     private lateinit var selectFolderResultLauncher: ActivityResultLauncher<Intent>
     private var isSharedWithMe = false
+    private var shareDebounceJob: Job? = null
 
     val openWith get() = binding.openWith
 
@@ -208,7 +207,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
         sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
-        sharePublicLink.setOnClickListener { onItemClickListener.sharePublicLink() }
+        sharePublicLink.safeSetOnClickListener { onItemClickListener.sharePublicLink() }
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }

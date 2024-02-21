@@ -79,6 +79,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
+import kotlinx.coroutines.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -414,5 +415,30 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
         "$decimalSize"
     } else {
         Formatter.formatShortFileSize(this, decimalSize)
+    }
+}
+
+fun View.safeSetOnClickListener(
+    delay: Long = 200L,
+    onClick: (View?) -> Unit
+) {
+    setOnClickListener(SafeClickListener(delay) { view -> onClick(view) })
+}
+
+private class SafeClickListener(
+    private val delay: Long,
+    private val onSafeClick: (View?) -> Unit
+) : View.OnClickListener {
+
+    private var safeClickDispatcherJob: Job? = null
+
+    override fun onClick(view: View?) {
+        safeClickDispatcherJob?.cancel()
+        safeClickDispatcherJob = CoroutineScope(Dispatchers.Main).launch {
+            view?.isClickable = false
+            onSafeClick(view)
+            delay(delay)
+            view?.isClickable = true
+        }
     }
 }
