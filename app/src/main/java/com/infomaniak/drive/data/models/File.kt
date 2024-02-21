@@ -303,10 +303,6 @@ open class File(
 
     fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
 
-    fun isRoot(): Boolean {
-        return id == ROOT_ID
-    }
-
     fun getWorkerTag() = "${id}_$driveId"
 
     fun isPendingOffline(context: Context): Boolean {
