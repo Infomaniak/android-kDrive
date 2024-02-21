@@ -805,7 +805,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
      */
     internal fun changeNoFilesLayoutVisibility(
         hideFileList: Boolean,
-        changeControlsVisibility: Boolean = true,
+        changeControlsVisibility: Boolean,
         ignoreOffline: Boolean = false
     ) {
         if (_binding == null) return
