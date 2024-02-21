@@ -17,12 +17,21 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
+import com.infomaniak.drive.ui.SaveExternalFilesActivity
+import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.setupTransparentStatusBar
+import com.infomaniak.lib.core.utils.setMargins
 
 class PreviewPDFActivity : AppCompatActivity() {
 
@@ -32,6 +41,39 @@ class PreviewPDFActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setupNavController().navigate(R.id.previewPDFFragment)
+
+        binding.backButton.setOnClickListener { finish() }
+        binding.saveToKDrive.setOnClickListener { saveToKDrive(Uri.parse(intent.dataString)) }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        setupWindowInsetsListener()
+        setupTransparentStatusBar()
+    }
+
+    private fun saveToKDrive(uri: Uri) {
+        Intent(this, SaveExternalFilesActivity::class.java).apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtras(
+                SaveExternalFilesActivityArgs(
+                    userId = AccountUtils.currentUserId,
+                    driveId = AccountUtils.currentDriveId,
+                ).toBundle()
+            )
+            type = "/pdf"
+            startActivity(this)
+        }
+    }
+
+    private fun setupWindowInsetsListener() = with(binding) {
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
+            with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
+                header.setMargins(left = left, top = top, right = right)
+            }
+            windowInsets
+        }
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment

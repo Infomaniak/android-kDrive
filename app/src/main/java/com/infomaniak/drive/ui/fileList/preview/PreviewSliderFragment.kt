@@ -179,7 +179,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onStart() {
         super.onStart()
-        setupTransparentStatusBar()
+        setupTransparentStatusBar ()
     }
 
     override fun onResume() {
@@ -201,7 +201,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onStop() {
-        clearEdgeToEdge()
+        requireActivity().clearEdgeToEdge()
         super.onStop()
     }
 
@@ -221,11 +221,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
-
-    private fun clearEdgeToEdge() {
-        toggleSystemBar(shouldShow = true)
-        requireActivity().window.toggleEdgeToEdge(false)
-    }
 
     private fun setBackActionHandlers() {
         getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {

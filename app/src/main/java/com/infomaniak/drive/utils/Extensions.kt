@@ -39,8 +39,7 @@ import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
@@ -79,6 +78,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
+import kotlinx.coroutines.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -119,6 +119,28 @@ fun Cursor.uri(contentUri: Uri): Uri {
 }
 
 fun Number.isPositive(): Boolean = toLong() > 0
+
+fun Activity.clearEdgeToEdge() {
+    toggleSystemBar(true)
+    window.toggleEdgeToEdge(false)
+}
+
+fun Activity.setupTransparentStatusBar() {
+    window?.apply {
+        statusBarColor = ContextCompat.getColor(this@setupTransparentStatusBar, R.color.previewBackgroundTransparent)
+
+        lightStatusBar(false)
+        toggleEdgeToEdge(true)
+    }
+}
+
+fun Activity.toggleSystemBar(show: Boolean) {
+    ViewCompat.getWindowInsetsController(window.decorView)?.apply {
+        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        val systemBars = WindowInsetsCompat.Type.systemBars()
+        if (show) show(systemBars) else hide(systemBars)
+    }
+}
 
 fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
