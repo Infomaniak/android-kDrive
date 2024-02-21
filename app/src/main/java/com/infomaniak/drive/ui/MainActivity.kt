@@ -42,6 +42,7 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
@@ -72,7 +73,6 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
-import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
@@ -133,8 +133,6 @@ class MainActivity : BaseActivity() {
             }
         }
     }
-
-    private var uploadFilesHelper: UploadFilesHelper? = null
 
     private val scanFlowResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
@@ -420,16 +418,19 @@ class MainActivity : BaseActivity() {
                     navController.navigate(R.id.searchFragment)
                 }
                 Shortcuts.UPLOAD.id -> {
-                    uploadFilesHelper = UploadFilesHelper(this@MainActivity, navController)
-                    currentFolder.observe(this@MainActivity) { parentFolder ->
-                        if (mustOpenShortcut && parentFolder?.id == ROOT_ID) {
-                            mustOpenShortcut = false
-                            uploadFilesHelper?.apply {
-                                initParentFolder(parentFolder)
-                                uploadFiles()
-                            }
+                    var onCurrentFolderSet: Observer<File>? = null
+                    onCurrentFolderSet = Observer { parentFolder ->
+                        onCurrentFolderSet?.let { privateFolder.removeObserver(it) }
+
+                        UploadFilesHelper(this@MainActivity, navController).apply {
+                            initParentFolder(parentFolder)
+                            uploadFiles()
                         }
                     }
+
+                    // TODO : We need to find a way to handle the case where the app has never fetched the private folder and
+                    //  therefore can't find it in Realm
+                    privateFolder.observe(this@MainActivity, onCurrentFolderSet)
                 }
                 Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
                 Shortcuts.FEEDBACK.id -> openSupport()

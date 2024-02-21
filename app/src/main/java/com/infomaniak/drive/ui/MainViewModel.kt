@@ -57,7 +57,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         } ?: FileController.getRealmInstance()
     }
 
-    private var privateFolder: File? = null
+    private val _privateFolder = MutableLiveData<File>()
+    val privateFolder: LiveData<File> = _privateFolder
     private val _currentFolder = MutableLiveData<File?>()
     val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
@@ -72,8 +73,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
-
-    var mustOpenShortcut: Boolean = true
 
     var ignoreSyncOffline = false
 
@@ -432,7 +431,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         setCurrentFolderJob.cancel()
         setCurrentFolderJob = Job()
         return viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
-            val file = privateFolder ?: FileController.getPrivateFolder().also { privateFolder = it }
+            val file = privateFolder.value ?: FileController.getPrivateFolder().also { _privateFolder.postValue(it) }
             setCurrentFolderJob.ensureActive()
             _currentFolder.postValue(file)
         }
