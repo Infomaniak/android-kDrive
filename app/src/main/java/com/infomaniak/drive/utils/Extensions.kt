@@ -424,21 +424,3 @@ fun View.safeSetOnClickListener(
 ) {
     setOnClickListener(SafeClickListener(delay) { view -> onClick(view) })
 }
-
-private class SafeClickListener(
-    private val delay: Long,
-    private val onSafeClick: (View?) -> Unit
-) : View.OnClickListener {
-
-    private var safeClickDispatcherJob: Job? = null
-
-    override fun onClick(view: View?) {
-        safeClickDispatcherJob?.cancel()
-        safeClickDispatcherJob = CoroutineScope(Dispatchers.Main).launch {
-            view?.isClickable = false
-            onSafeClick(view)
-            delay(delay)
-            view?.isClickable = true
-        }
-    }
-}
