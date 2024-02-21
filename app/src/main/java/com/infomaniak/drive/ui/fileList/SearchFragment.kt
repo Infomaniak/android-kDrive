@@ -371,7 +371,7 @@ class SearchFragment : FileListFragment() {
         fun displaySearchResult(mode: VisibilityMode) {
             recentSearchesBinding.root.isGone = true
             filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
-            changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, false)
+            changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, changeControlsVisibility = false)
         }
 
         when (mode) {
