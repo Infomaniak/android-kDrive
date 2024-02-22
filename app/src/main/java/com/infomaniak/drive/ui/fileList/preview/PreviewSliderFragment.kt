@@ -341,14 +341,19 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
-    override fun sharePublicLink() {
-        binding.bottomSheetFileInfos.createPublicShareLink(onSuccess = { sharelinkUrl ->
-            context?.shareText(sharelinkUrl)
-            toggleBottomSheet(true)
-        }, onError = { translatedError ->
-            showSnackbar(translatedError)
-            toggleBottomSheet(true)
-        })
+    override fun sharePublicLink(onActionFinished: () -> Unit) {
+        binding.bottomSheetFileInfos.createPublicShareLink(
+            onSuccess = { shareLinkUrl ->
+                context?.shareText(shareLinkUrl)
+                toggleBottomSheet(true)
+                onActionFinished()
+            },
+            onError = { translatedError ->
+                showSnackbar(translatedError)
+                toggleBottomSheet(true)
+                onActionFinished()
+            }
+        )
     }
 
     override fun addFavoritesClicked() {

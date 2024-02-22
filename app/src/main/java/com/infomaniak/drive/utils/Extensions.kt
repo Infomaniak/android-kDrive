@@ -79,7 +79,6 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
-import kotlinx.coroutines.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -416,11 +415,4 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
     } else {
         Formatter.formatShortFileSize(this, decimalSize)
     }
-}
-
-fun View.safeSetOnClickListener(
-    delay: Long = 200L,
-    onClick: (View?) -> Unit
-) {
-    setOnClickListener(SafeClickListener(delay) { view -> onClick(view) })
 }
