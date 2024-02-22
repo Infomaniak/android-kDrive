@@ -433,7 +433,7 @@ class MainActivity : BaseActivity() {
         bottomNavigation.isVisible = isVisible
         bottomNavigationBackgroundView.isVisible = isVisible
 
-        val isSearchFabVisible = destinationId == R.id.searchFragment || shouldShowSmallFab == true
+        val isSearchFabVisible = shouldShowSmallFab == true
         searchFab.isVisible = isSearchFabVisible
     }
 
