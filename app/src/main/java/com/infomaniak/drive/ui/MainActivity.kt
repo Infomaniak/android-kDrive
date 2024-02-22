@@ -351,9 +351,12 @@ class MainActivity : BaseActivity() {
             R.id.favoritesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
-            R.id.rootFilesFragment,
             R.id.menuGalleryFragment,
-            R.id.mySharesFragment -> {
+            R.id.mySharesFragment,
+            R.id.offlineFileFragment,
+            R.id.recentChangesFragment,
+            R.id.rootFilesFragment,
+            R.id.trashFragment -> {
                 // Defining default root folder
                 mainViewModel.setCurrentFolderAsRoot()
             }
@@ -398,12 +401,15 @@ class MainActivity : BaseActivity() {
             R.id.favoritesFragment,
             R.id.fileInfoActionsBottomSheetDialog,
             R.id.fileListFragment,
-            R.id.rootFilesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
             R.id.menuGalleryFragment,
             R.id.mySharesFragment,
-            R.id.sharedWithMeFragment -> shouldHideBottomNavigation != true
+            R.id.offlineFileFragment,
+            R.id.recentChangesFragment,
+            R.id.rootFilesFragment,
+            R.id.sharedWithMeFragment,
+            R.id.trashFragment -> shouldHideBottomNavigation != true
             else -> false
         }
 
