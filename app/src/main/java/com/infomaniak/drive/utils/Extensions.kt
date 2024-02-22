@@ -30,6 +30,9 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
+import android.transition.AutoTransition
+import android.transition.TransitionManager
+import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -38,6 +41,7 @@ import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.view.children
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -66,6 +70,7 @@ import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.ItemUserBinding
+import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
 import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
@@ -444,4 +449,19 @@ fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
             }
         },
     )
+}
+
+fun Fragment.observeAndDisplayNetworkAvailability(
+    mainViewModel: MainViewModel,
+    binding: LayoutNoNetworkSmallBinding,
+    directParent: ViewGroup,
+) {
+    mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
+        with(AutoTransition()) {
+            directParent.children.forEach { child -> addTarget(child) }
+            TransitionManager.beginDelayedTransition(directParent, this)
+        }
+
+        binding.noNetwork.isGone = isInternetAvailable
+    }
 }
