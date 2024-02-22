@@ -37,13 +37,10 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
-import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.drive.utils.isPositive
-import com.infomaniak.drive.utils.setupSwitchDriveButton
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -79,6 +76,7 @@ class RootFilesFragment : Fragment() {
 
         updateAndObserveFiles()
         observeNavigateFileListTo()
+        observeAndDisplayNetworkAvailability(mainViewModel, noNetworkInclude, contentLinearLayout)
     }
 
     private fun setupDriveToolbar() = with(binding) {
