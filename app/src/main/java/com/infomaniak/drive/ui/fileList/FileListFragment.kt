@@ -289,8 +289,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                         }
                     }) else null
 
-                    showSnackbar(title, true, onActionClicked = onCancelActionClicked)
-                } ?: run { showSnackbar(title, true) }
+                    showSnackbar(title, showAboveFab = true, onActionClicked = onCancelActionClicked)
+                } ?: run { showSnackbar(title, showAboveFab = true) }
             }
         }
 

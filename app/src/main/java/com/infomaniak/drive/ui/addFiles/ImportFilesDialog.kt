@@ -78,7 +78,7 @@ class ImportFilesDialog : DialogFragment() {
 
         if (errorCount > 0) {
             val errorMessage = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
-            showSnackbar(errorMessage, true)
+            showSnackbar(errorMessage, showAboveFab = true)
         }
 
         if (successCount > 0) mainViewModel.refreshActivities.value = true
@@ -104,7 +104,10 @@ class ImportFilesDialog : DialogFragment() {
 
         if (errorCount > 0) {
             withContext(Dispatchers.Main) {
-                showSnackbar(resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount), true)
+                showSnackbar(
+                    title = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount),
+                    showAboveFab = true,
+                )
             }
         }
         lifecycleScope.launch { lifecycle.withResumed { findNavController().popBackStack() } }
@@ -118,7 +121,7 @@ class ImportFilesDialog : DialogFragment() {
 
                 when {
                     isLowMemory() -> withContext(Dispatchers.Main) {
-                        showSnackbar(R.string.uploadOutOfMemoryError, true)
+                        showSnackbar(R.string.uploadOutOfMemoryError, showAboveFab = true)
                     }
                     else -> {
                         val outputFile = getOutputFile(uri, fileModifiedAt)
