@@ -124,11 +124,11 @@ class FavoritesFragment : FileListFragment() {
                             withVisibilitySort = false
                         )
                         fileAdapter.updateFileList(realmFiles)
-                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), false)
+                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), changeControlsVisibility = false)
                     }
                     fileAdapter.isComplete = result.isComplete
                 } ?: run {
-                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
+                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, changeControlsVisibility = false)
                     fileAdapter.isComplete = true
                 }
                 showLoadingTimer.cancel()
