@@ -314,11 +314,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun copyFile(
         file: File,
-        destinationId: Int? = null,
+        destinationId: Int,
         copyName: String?,
         onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
     ) = liveData(Dispatchers.IO) {
-        ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
+        ApiRepository.copyFile(file, copyName, destinationId).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
             emit(apiResponse)
         }
