@@ -128,16 +128,18 @@
                 tools:text="60 Go / 1 To" />
         </LinearLayout>
 
-        <include
-            android:id="@+id/menuUploadFileInProgressLayout"
-            layout="@layout/layout_upload_file_in_progress"
+        <com.infomaniak.drive.views.PendingFilesView
+            android:id="@+id/menuUploadFileInProgressView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/marginStandard"
+            android:layout_marginHorizontal="@dimen/marginStandardMedium"
             android:layout_marginTop="@dimen/marginStandardMedium"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/driveStorageProgress" />
+            app:layout_constraintTop_toBottomOf="@id/driveStorageProgress"
+            app:title="@string/uploadInProgressTitle"
+            tools:visibility="visible" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/group2CardView"
@@ -151,7 +153,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/menuUploadFileInProgressLayout">
+            app:layout_constraintTop_toBottomOf="@id/menuUploadFileInProgressView">
 
             <LinearLayout
                 android:layout_width="match_parent"
