@@ -76,9 +76,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        homeUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
-            navigateToUploadView(Utils.OTHER_ROOT_ID)
-        }
+        setUploadFileInProgress(homeUploadFileInProgressLayout, R.string.uploadInProgressTitle, Utils.OTHER_ROOT_ID)
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
@@ -95,10 +93,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun showPendingFiles() = with(binding) {
-        homeUploadFileInProgress.updateUploadFileInProgress(
-            UploadFile.getCurrentUserPendingUploadsCount(),
-            homeUploadFileInProgressLayout,
-        )
+        homeUploadFileInProgressLayout.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
     }
 
     private fun updateUi(forceDownload: Boolean = false) = with(binding) {

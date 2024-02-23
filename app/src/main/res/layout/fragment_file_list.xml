@@ -106,7 +106,10 @@
 
             <include
                 android:id="@+id/uploadFileInProgressLayout"
-                layout="@layout/layout_upload_file_in_progress" />
+                layout="@layout/layout_upload_file_in_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium" />
 
             <include
                 android:id="@+id/noNetworkInclude"
