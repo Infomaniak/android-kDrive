@@ -67,10 +67,7 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.databinding.CardviewFileListBinding
-import com.infomaniak.drive.databinding.ItemUserBinding
-import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
-import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
+import com.infomaniak.drive.databinding.*
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -302,6 +299,24 @@ fun CardviewFileListBinding.setUploadFileInProgress(title: Int, onClickListener:
     root.setOnClickListener { onClickListener() }
 }
 
+fun Fragment.setUploadFileInProgress(
+    binding: LayoutUploadFileInProgressBinding,
+    title: Int,
+    folderId: Int,
+) = with(binding.uploadFileInProgress) {
+    val radius = context.resources.getDimension(R.dimen.cardViewRadius)
+    root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
+        .setTopLeftCorner(CornerFamily.ROUNDED, radius)
+        .setTopRightCorner(CornerFamily.ROUNDED, radius)
+        .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
+        .setBottomRightCorner(CornerFamily.ROUNDED, radius)
+        .build()
+
+    itemViewFile.fileName.setText(title)
+
+    root.setOnClickListener { navigateToUploadView(folderId) }
+}
+
 fun CardviewFileListBinding.updateUploadFileInProgress(pendingFilesCount: Int, parentLayout: ViewGroup) = with(itemViewFile) {
     if (pendingFilesCount > 0) {
         fileSize.text = context.resources.getQuantityString(
@@ -314,6 +329,21 @@ fun CardviewFileListBinding.updateUploadFileInProgress(pendingFilesCount: Int, p
         parentLayout.isVisible = true
     } else {
         parentLayout.isGone = true
+    }
+}
+
+fun LayoutUploadFileInProgressBinding.updateUploadFileInProgress(pendingFilesCount: Int) {
+    if (pendingFilesCount > 0) {
+        uploadFileInProgress.itemViewFile.fileSize.text = context.resources.getQuantityString(
+            R.plurals.uploadInProgressNumberFile,
+            pendingFilesCount,
+            pendingFilesCount
+        )
+        uploadFileInProgress.itemViewFile.filePreview.isGone = true
+        uploadFileInProgress.itemViewFile.fileProgression.isVisible = true
+        root.isVisible = true
+    } else {
+        root.isGone = true
     }
 }
 

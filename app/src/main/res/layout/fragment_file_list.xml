@@ -104,22 +104,9 @@
                 tools:listitem="@layout/item_search_filter_chip"
                 tools:visibility="visible" />
 
-            <FrameLayout
+            <include
                 android:id="@+id/uploadFileInProgressLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <include
-                    android:id="@+id/uploadFileInProgress"
-                    layout="@layout/cardview_file_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandardMedium"
-                    android:layout_marginVertical="@dimen/marginStandardSmall" />
-
-            </FrameLayout>
+                layout="@layout/layout_upload_file_in_progress" />
 
             <include
                 android:id="@+id/noNetworkInclude"
