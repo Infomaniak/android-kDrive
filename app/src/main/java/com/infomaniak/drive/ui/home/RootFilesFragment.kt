@@ -76,7 +76,11 @@ class RootFilesFragment : Fragment() {
 
         updateAndObserveFiles()
         observeNavigateFileListTo()
-        observeAndDisplayNetworkAvailability(mainViewModel, noNetworkInclude, contentLinearLayout)
+        observeAndDisplayNetworkAvailability(
+            mainViewModel = mainViewModel,
+            noNetworkBinding = noNetworkInclude,
+            noNetworkBindingDirectParent = contentLinearLayout,
+        )
     }
 
     private fun setupDriveToolbar() = with(binding) {

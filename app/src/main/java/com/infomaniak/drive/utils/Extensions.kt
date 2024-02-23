@@ -30,8 +30,7 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
-import android.transition.AutoTransition
-import android.transition.TransitionManager
+import android.transition.*
 import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.ViewGroup
@@ -462,15 +461,18 @@ fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
 
 fun Fragment.observeAndDisplayNetworkAvailability(
     mainViewModel: MainViewModel,
-    binding: LayoutNoNetworkSmallBinding,
-    directParent: ViewGroup,
+    noNetworkBinding: LayoutNoNetworkSmallBinding,
+    noNetworkBindingDirectParent: ViewGroup,
+    additionalChanges: ((isInternetAvailable: Boolean) -> Unit)? = null,
 ) {
     mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-        with(AutoTransition()) {
-            directParent.children.forEach { child -> addTarget(child) }
-            TransitionManager.beginDelayedTransition(directParent, this)
+        val togetherAutoTransition = AutoTransition().apply { ordering = TransitionSet.ORDERING_TOGETHER }
+        with(togetherAutoTransition) {
+            noNetworkBindingDirectParent.children.forEach { child -> addTarget(child) }
+            TransitionManager.beginDelayedTransition(noNetworkBindingDirectParent, this)
         }
 
-        binding.noNetwork.isGone = isInternetAvailable
+        noNetworkBinding.noNetwork.isGone = isInternetAvailable
+        additionalChanges?.invoke(isInternetAvailable)
     }
 }
