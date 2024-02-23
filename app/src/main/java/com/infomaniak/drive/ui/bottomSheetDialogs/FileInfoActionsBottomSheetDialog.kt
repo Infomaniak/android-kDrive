@@ -189,12 +189,19 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun sharePublicLink() {
-        super.sharePublicLink()
-        binding.fileInfoActionsView.createPublicShareLink(onSuccess = {
-            context?.shareText(it)
-            findNavController().popBackStack()
-        }, onError = { translatedError -> showSnackbar(translatedError, true) })
+    override fun sharePublicLink(onActionFinished: () -> Unit) {
+        super.sharePublicLink(onActionFinished)
+        binding.fileInfoActionsView.createPublicShareLink(
+            onSuccess = {
+                context?.shareText(it)
+                findNavController().popBackStack()
+                onActionFinished()
+            },
+            onError = { translatedError ->
+                showSnackbar(translatedError, true)
+                onActionFinished()
+            },
+        )
     }
 
     override fun downloadFileClicked() {

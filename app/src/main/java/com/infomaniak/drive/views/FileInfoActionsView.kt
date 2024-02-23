@@ -208,7 +208,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
         sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
-        sharePublicLink.setOnClickListener { onItemClickListener.sharePublicLink() }
+        sharePublicLink.setOnClickListener { view ->
+            view.isClickable = false
+            onItemClickListener.sharePublicLink { view.isClickable = true }
+        }
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }
@@ -464,7 +467,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun openWithClicked() = trackFileActionEvent("openWith")
         fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
-        fun sharePublicLink() = trackFileActionEvent("shareLink")
+        fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent("shareLink")
 
         fun editDocumentClicked() {
             trackFileActionEvent("edit")
