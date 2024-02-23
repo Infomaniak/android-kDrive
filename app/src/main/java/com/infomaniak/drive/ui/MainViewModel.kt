@@ -86,12 +86,12 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         // Clear FileListFragment stack
         navController.popBackStack(R.id.rootFilesFragment, false)
 
-        if (fileId == Utils.ROOT_ID) return
+        if (fileId <= Utils.ROOT_ID) return // Deeplinks could lead us to navigating to the true root
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
             val file = FileController.getFileById(fileId) ?: FileController.getFileDetails(fileId) ?: return@launch
-            if (fileId > Utils.ROOT_ID) navigateFileListTo.postValue(file)
+            navigateFileListTo.postValue(file)
         }
     }
 
