@@ -238,7 +238,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     val fileName = currentFile.name
                     showSnackbar(
                         getString(R.string.snackBarInvalidFileNameError, Utils.getInvalidFileNameCharacter(fileName), fileName),
-                        isBottomSheetFragmentView
+                        showAboveFab = isBottomSheetFragmentView,
                     )
                 }
                 if (isBottomSheetFragmentView) {

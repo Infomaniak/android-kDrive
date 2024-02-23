@@ -123,7 +123,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 } else {
                     getString(apiResponse.translatedError)
                 }
-                showSnackbar(text, true)
+                showSnackbar(text, showAboveFab = true)
             }
         }
     }
@@ -198,7 +198,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 onActionFinished()
             },
             onError = { translatedError ->
-                showSnackbar(translatedError, true)
+                showSnackbar(translatedError, showAboveFab = true)
                 onActionFinished()
             },
         )
@@ -229,7 +229,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                     showFavoritesResultSnackbar()
                     setBackNavigationResult(REFRESH_FAVORITE_FILE, currentFile.id)
                 } else {
-                    showSnackbar(R.string.errorAddFavorite, true)
+                    showSnackbar(R.string.errorAddFavorite, showAboveFab = true)
                     findNavController().popBackStack()
                 }
             }
@@ -319,7 +319,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun openWithClicked() {
         super.openWithClicked()
         if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
-            showSnackbar(R.string.errorNoSupportingAppFound, true)
+            showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
             findNavController().popBackStack()
         } else {
             safeNavigate(
@@ -367,13 +367,18 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         super.cancelExternalImportClicked()
 
         mainViewModel.cancelExternalImport(currentFile.externalImport!!.id).observe(viewLifecycleOwner) { apiResponse ->
-            if (!apiResponse.isSuccess()) showSnackbar(requireContext().getString(apiResponse.translatedError), true)
+            if (!apiResponse.isSuccess()) {
+                showSnackbar(requireContext().getString(apiResponse.translatedError), showAboveFab = true)
+            }
             findNavController().popBackStack()
         }
     }
 
     private fun File.showFavoritesResultSnackbar() {
-        showSnackbar(getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name), true)
+        showSnackbar(
+            title = getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name),
+            showAboveFab = true,
+        )
     }
 
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {

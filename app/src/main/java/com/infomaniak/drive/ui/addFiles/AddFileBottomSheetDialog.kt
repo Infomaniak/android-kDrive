@@ -199,10 +199,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
-                        showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name), true)
+                        showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name), showAboveFab = true)
                         apiResponse.data?.let { file -> requireContext().openOnlyOfficeActivity(file) }
                     } else {
-                        showSnackbar(R.string.errorFileCreate, true)
+                        showSnackbar(R.string.errorFileCreate, showAboveFab = true)
                     }
                     mainViewModel.refreshActivities.value = true
                     dialog.dismiss()
@@ -234,7 +234,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             }
         } catch (exception: Exception) {
             exception.printStackTrace()
-            showSnackbar(R.string.errorDeviceStorage, true)
+            showSnackbar(R.string.errorDeviceStorage, showAboveFab = true)
         }
     }
 
