@@ -109,7 +109,8 @@
                 layout="@layout/layout_upload_file_in_progress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandardMedium" />
+                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginVertical="@dimen/marginStandardSmall" />
 
             <include
                 android:id="@+id/noNetworkInclude"
