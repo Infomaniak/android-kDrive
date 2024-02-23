@@ -17,6 +17,10 @@
   -->
 <resources>
 
+    <declare-styleable name="CommonAttributes">
+        <attr name="title" format="string" />
+    </declare-styleable>
+
     <declare-styleable name="FabBottomNavigationView">
         <attr name="cradle_vertical_offset" format="dimension" />
         <attr name="fab_cradle_margin" format="dimension" />
@@ -58,7 +62,11 @@
 
     <declare-styleable name="MenuItemView">
         <attr name="icon" format="reference" />
-        <attr name="title" format="string" />
         <attr name="iconColor" format="color" />
+        <attr name="title" />
+    </declare-styleable>
+
+    <declare-styleable name="PendingFilesView">
+        <attr name="title" />
     </declare-styleable>
 </resources>

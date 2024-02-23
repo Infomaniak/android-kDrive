@@ -104,13 +104,14 @@
                 tools:listitem="@layout/item_search_filter_chip"
                 tools:visibility="visible" />
 
-            <include
-                android:id="@+id/uploadFileInProgressLayout"
-                layout="@layout/layout_upload_file_in_progress"
+            <com.infomaniak.drive.views.PendingFilesView
+                android:id="@+id/uploadFileInProgressView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandardMedium"
-                android:layout_marginVertical="@dimen/marginStandardSmall" />
+                android:layout_margin="@dimen/marginStandardSmall"
+                android:visibility="gone"
+                app:title="@string/uploadInThisFolderTitle"
+                tools:visibility="visible" />
 
             <include
                 android:id="@+id/noNetworkInclude"
