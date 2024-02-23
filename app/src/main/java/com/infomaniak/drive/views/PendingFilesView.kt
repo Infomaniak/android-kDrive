@@ -32,7 +32,8 @@ import com.infomaniak.drive.utils.navigateToUploadView
 import com.infomaniak.lib.core.utils.getAttributes
 
 class PendingFilesView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null,
+    context: Context,
+    attrs: AttributeSet? = null,
     defStyle: Int = 0,
 ) : FrameLayout(context, attrs, defStyle) {
 
