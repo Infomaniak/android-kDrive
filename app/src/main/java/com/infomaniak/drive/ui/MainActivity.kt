@@ -41,6 +41,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -348,10 +349,12 @@ class MainActivity : BaseActivity() {
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
         destination.addSentryBreadcrumb()
 
-        val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
+        val shouldHideBottomNavigation =
+            navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation ?: false
         val shouldShowSmallFab = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
             ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
             ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
+            ?: false
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
 
@@ -411,17 +414,14 @@ class MainActivity : BaseActivity() {
 
     private fun handleBottomNavigationVisibility(
         destinationId: Int,
-        shouldHideBottomNavigation: Boolean?,
-        shouldShowSmallFab: Boolean?,
+        shouldHideBottomNavigation: Boolean,
+        shouldShowSmallFab: Boolean,
     ) = with(binding) {
 
-        val isVisible = when (destinationId) {
+        val isGone = when (destinationId) {
             R.id.addFileBottomSheetDialog,
             R.id.fileInfoActionsBottomSheetDialog,
-            R.id.fileListFragment -> {
-                val shouldHide = shouldHideBottomNavigation != false || shouldShowSmallFab == true
-                !shouldHide
-            }
+            R.id.fileListFragment -> shouldHideBottomNavigation || shouldShowSmallFab
             R.id.favoritesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
@@ -431,16 +431,15 @@ class MainActivity : BaseActivity() {
             R.id.recentChangesFragment,
             R.id.rootFilesFragment,
             R.id.sharedWithMeFragment,
-            R.id.trashFragment -> shouldHideBottomNavigation != true
-            else -> false
+            R.id.trashFragment -> shouldHideBottomNavigation
+            else -> true
         }
 
-        mainFab.isVisible = isVisible
-        bottomNavigation.isVisible = isVisible
-        bottomNavigationBackgroundView.isVisible = isVisible
+        mainFab.isGone = isGone
+        bottomNavigation.isGone = isGone
+        bottomNavigationBackgroundView.isGone = isGone
 
-        val isSearchFabVisible = shouldShowSmallFab == true
-        searchFab.isVisible = isSearchFabVisible
+        searchFab.isVisible = shouldShowSmallFab
     }
 
     private fun handleShortcuts() = with(mainViewModel) {
