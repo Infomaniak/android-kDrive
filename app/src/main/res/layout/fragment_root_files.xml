@@ -63,6 +63,17 @@
                 android:id="@+id/noNetworkInclude"
                 layout="@layout/layout_no_network_small" />
 
+
+            <com.infomaniak.drive.views.PendingFilesView
+                android:id="@+id/rootFilesUploadFileInProgressView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandardMedium"
+                android:layout_marginTop="@dimen/marginStandardMedium"
+                android:visibility="gone"
+                app:title="@string/uploadInProgressTitle"
+                tools:visibility="visible" />
+
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
