@@ -294,20 +294,6 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
 
-fun CardviewFileListBinding.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {
-    val radius = context.resources.getDimension(R.dimen.cardViewRadius)
-    root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
-        .setTopLeftCorner(CornerFamily.ROUNDED, radius)
-        .setTopRightCorner(CornerFamily.ROUNDED, radius)
-        .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-        .setBottomRightCorner(CornerFamily.ROUNDED, radius)
-        .build()
-
-    itemViewFile.fileName.setText(title)
-
-    root.setOnClickListener { onClickListener() }
-}
-
 fun Fragment.setUploadFileInProgress(
     binding: LayoutUploadFileInProgressBinding,
     title: Int,
@@ -324,21 +310,6 @@ fun Fragment.setUploadFileInProgress(
     itemViewFile.fileName.setText(title)
 
     root.setOnClickListener { navigateToUploadView(folderId) }
-}
-
-fun CardviewFileListBinding.updateUploadFileInProgress(pendingFilesCount: Int, parentLayout: ViewGroup) = with(itemViewFile) {
-    if (pendingFilesCount > 0) {
-        fileSize.text = context.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingFilesCount,
-            pendingFilesCount
-        )
-        filePreview.isGone = true
-        fileProgression.isVisible = true
-        parentLayout.isVisible = true
-    } else {
-        parentLayout.isGone = true
-    }
 }
 
 fun LayoutUploadFileInProgressBinding.updateUploadFileInProgress(pendingFilesCount: Int) {
