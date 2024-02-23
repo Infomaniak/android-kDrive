@@ -199,6 +199,7 @@ class SearchFragment : FileListFragment() {
                         folderId = file.id,
                         folderName = file.name,
                         shouldHideBottomNavigation = true,
+                        shouldShowSmallFab = true,
                     )
                 )
             } else {
