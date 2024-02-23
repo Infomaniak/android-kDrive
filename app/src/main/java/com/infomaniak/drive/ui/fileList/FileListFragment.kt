@@ -436,10 +436,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     protected open fun setupFileAdapter() {
-        mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-            fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable)
-            binding.noNetwork.isGone = isInternetAvailable
-        }
+        observeAndDisplayNetworkAvailability(
+            mainViewModel = mainViewModel,
+            noNetworkBinding = binding.noNetworkInclude,
+            noNetworkBindingDirectParent = binding.fileListLayout,
+            additionalChanges = { isInternetAvailable -> fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable) }
+        )
 
         multiSelectManager.apply {
             openMultiSelect = { openMultiSelect() }
@@ -818,7 +820,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
             if (changeControlsVisibility) {
                 val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
-                noNetwork.isVisible = hasFilesAndIsOffline
+                noNetworkInclude.noNetwork.isVisible = hasFilesAndIsOffline
                 toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
             }
 

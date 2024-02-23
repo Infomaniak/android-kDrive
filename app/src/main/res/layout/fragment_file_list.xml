@@ -121,20 +121,9 @@
 
             </FrameLayout>
 
-            <TextView
-                android:id="@+id/noNetwork"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:layout_marginBottom="@dimen/marginStandardSmall"
-                android:drawablePadding="10dp"
-                android:gravity="center"
-                android:text="@string/allNoNetwork"
-                android:textColor="@color/primaryText"
-                android:textSize="13sp"
-                android:visibility="gone"
-                app:drawableStartCompat="@drawable/ic_no_network"
-                tools:visibility="visible" />
+            <include
+                android:id="@+id/noNetworkInclude"
+                layout="@layout/layout_no_network_small" />
 
             <LinearLayout
                 android:id="@+id/currentActivity"

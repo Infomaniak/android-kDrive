@@ -30,6 +30,7 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
+import android.transition.*
 import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.ViewGroup
@@ -39,6 +40,7 @@ import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.view.children
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -67,6 +69,7 @@ import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.ItemUserBinding
+import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
 import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
@@ -454,4 +457,22 @@ fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
             }
         },
     )
+}
+
+fun Fragment.observeAndDisplayNetworkAvailability(
+    mainViewModel: MainViewModel,
+    noNetworkBinding: LayoutNoNetworkSmallBinding,
+    noNetworkBindingDirectParent: ViewGroup,
+    additionalChanges: ((isInternetAvailable: Boolean) -> Unit)? = null,
+) {
+    mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
+        val togetherAutoTransition = AutoTransition().apply { ordering = TransitionSet.ORDERING_TOGETHER }
+        with(togetherAutoTransition) {
+            noNetworkBindingDirectParent.children.forEach { child -> addTarget(child) }
+            TransitionManager.beginDelayedTransition(noNetworkBindingDirectParent, this)
+        }
+
+        noNetworkBinding.noNetwork.isGone = isInternetAvailable
+        additionalChanges?.invoke(isInternetAvailable)
+    }
 }

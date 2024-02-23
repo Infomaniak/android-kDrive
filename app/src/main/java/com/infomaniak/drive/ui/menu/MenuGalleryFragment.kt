@@ -26,19 +26,22 @@ import androidx.core.view.isGone
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBottomSheetDialog
+import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.toPx
 
 class MenuGalleryFragment : Fragment() {
 
     private var binding: FragmentMenuGalleryBinding by safeBinding()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private var galleryFragment = GalleryFragment()
 
@@ -89,6 +92,11 @@ class MenuGalleryFragment : Fragment() {
         })
 
         adjustFastScrollBarScrollRange()
+        observeAndDisplayNetworkAvailability(
+            mainViewModel = mainViewModel,
+            noNetworkBinding = binding.noNetworkInclude,
+            noNetworkBindingDirectParent = binding.galleryContentLinearLayout,
+        )
     }
 
     private fun adjustFastScrollBarScrollRange() = with(binding) {
