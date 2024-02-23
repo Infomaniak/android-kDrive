@@ -294,39 +294,6 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
 
-fun Fragment.setUploadFileInProgress(
-    binding: LayoutUploadFileInProgressBinding,
-    title: Int,
-    folderId: Int,
-) = with(binding.uploadFileInProgress) {
-    val radius = context.resources.getDimension(R.dimen.cardViewRadius)
-    root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
-        .setTopLeftCorner(CornerFamily.ROUNDED, radius)
-        .setTopRightCorner(CornerFamily.ROUNDED, radius)
-        .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-        .setBottomRightCorner(CornerFamily.ROUNDED, radius)
-        .build()
-
-    itemViewFile.fileName.setText(title)
-
-    root.setOnClickListener { navigateToUploadView(folderId) }
-}
-
-fun LayoutUploadFileInProgressBinding.updateUploadFileInProgress(pendingFilesCount: Int) {
-    if (pendingFilesCount > 0) {
-        uploadFileInProgress.itemViewFile.fileSize.text = context.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingFilesCount,
-            pendingFilesCount
-        )
-        uploadFileInProgress.itemViewFile.filePreview.isGone = true
-        uploadFileInProgress.itemViewFile.fileProgression.isVisible = true
-        root.isVisible = true
-    } else {
-        root.isGone = true
-    }
-}
-
 fun Context.shareText(text: String) {
     trackShareRightsEvent("shareButton")
     val intent = Intent().apply {
