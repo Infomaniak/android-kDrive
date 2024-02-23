@@ -63,23 +63,12 @@
                     android:layout_marginTop="@dimen/marginStandardMedium"
                     android:layout_marginBottom="@dimen/marginStandardMedium" />
 
-                <FrameLayout
+                <include
                     android:id="@+id/homeUploadFileInProgressLayout"
+                    layout="@layout/layout_upload_file_in_progress"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    tools:visibility="visible">
-
-                    <include
-                        android:id="@+id/homeUploadFileInProgress"
-                        layout="@layout/cardview_file_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/marginStandard"
-                        android:layout_marginTop="@dimen/marginStandardSmall"
-                        android:layout_marginBottom="@dimen/marginStandardMedium" />
-
-                </FrameLayout>
+                    android:layout_marginHorizontal="@dimen/marginStandard" />
 
                 <com.infomaniak.drive.views.NotEnoughStorageView
                     android:id="@+id/notEnoughStorage"
