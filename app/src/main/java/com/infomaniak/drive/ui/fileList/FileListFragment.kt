@@ -400,7 +400,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         setupToggleDisplayButton()
         setupListMode()
         setupSortButton()
-        setUploadFileInProgress(binding.uploadFileInProgressLayout, R.string.uploadInThisFolderTitle, folderId)
+        binding.uploadFileInProgressView.setUploadFileInProgress(this, folderId)
     }
 
     private fun setupToggleDisplayButton() {
@@ -576,7 +576,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
         if (!showPendingFiles || isNotCurrentDriveRoot) return
         fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
-            binding.uploadFileInProgressLayout.updateUploadFileInProgress(pendingFilesCount)
+            binding.uploadFileInProgressView.updateUploadFileInProgress(pendingFilesCount)
         }
     }
 
