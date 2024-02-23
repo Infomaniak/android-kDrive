@@ -63,14 +63,14 @@
                     android:layout_marginTop="@dimen/marginStandardMedium"
                     android:layout_marginBottom="@dimen/marginStandardMedium" />
 
-                <include
-                    android:id="@+id/homeUploadFileInProgressLayout"
-                    layout="@layout/layout_upload_file_in_progress"
+                <com.infomaniak.drive.views.PendingFilesView
+                    android:id="@+id/homeUploadFileInProgressView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
-                    android:layout_marginBottom="@dimen/marginStandardMedium" />
+                    android:layout_margin="@dimen/marginStandardMedium"
+                    android:visibility="gone"
+                    app:title="@string/uploadInProgressTitle"
+                    tools:visibility="visible" />
 
                 <com.infomaniak.drive.views.NotEnoughStorageView
                     android:id="@+id/notEnoughStorage"

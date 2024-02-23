@@ -65,7 +65,7 @@ class PendingFilesView @JvmOverloads constructor(
 
             if (isInEditMode) {
                 itemViewFile.apply {
-                    fileSize.text = "One pending file"
+                    fileSize.text = context.resources.getQuantityString(R.plurals.uploadInProgressNumberFile, 5, 5)
                     fileSeparator.isGone = true
                     fileDate.text = ""
                     fileFavorite.isGone = true
