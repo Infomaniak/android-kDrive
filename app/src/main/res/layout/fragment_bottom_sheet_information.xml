@@ -105,7 +105,6 @@
         app:layout_constraintTop_toBottomOf="@id/urlDisplay"
         tools:visibility="visible" />
 
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/secondaryActionButton"
         style="@style/ButtonInfomaniak.Light"

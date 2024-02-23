@@ -241,7 +241,6 @@ class MainActivity : BaseActivity() {
         if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
     }
 
-
     //region In-App Updates
     private fun initAppUpdateManager() {
         inAppUpdateManager.init(

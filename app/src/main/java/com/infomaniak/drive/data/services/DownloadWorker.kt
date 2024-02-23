@@ -113,7 +113,6 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
         if (offlineFile?.exists() == true) offlineFile?.delete()
         if (cacheFile?.exists() == true) cacheFile.delete()
 
-
         if (file == null || offlineFile == null) getFileFromRemote()
 
         return startOfflineDownload()

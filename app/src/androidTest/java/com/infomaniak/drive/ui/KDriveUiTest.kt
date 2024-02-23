@@ -152,7 +152,6 @@ open class KDriveUiTest : KDriveTest() {
         }
     }
 
-
     fun closeBottomSheetInfoModalIfDisplayed() {
         try {
             onView(withId(R.id.secondaryActionButton)).perform(click())
@@ -215,7 +214,6 @@ open class KDriveUiTest : KDriveTest() {
             }
         }
     }
-
 
     private fun Matcher<View?>.first(): Matcher<View?> {
         return object : TypeSafeMatcher<View?>() {
