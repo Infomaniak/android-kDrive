@@ -436,10 +436,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     protected open fun setupFileAdapter() {
-        mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-            fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable)
-            binding.noNetworkInclude.noNetwork.isGone = isInternetAvailable
-        }
+        observeAndDisplayNetworkAvailability(
+            mainViewModel = mainViewModel,
+            noNetworkBinding = binding.noNetworkInclude,
+            noNetworkBindingDirectParent = binding.fileListLayout,
+            additionalChanges = { isInternetAvailable -> fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable) }
+        )
 
         multiSelectManager.apply {
             openMultiSelect = { openMultiSelect() }
