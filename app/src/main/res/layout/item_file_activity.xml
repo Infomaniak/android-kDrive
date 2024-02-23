@@ -65,7 +65,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/activityDateCardView" />
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/activityContainer"
         android:layout_width="0dp"
