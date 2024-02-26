@@ -52,9 +52,11 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
+import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
@@ -78,6 +80,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
+import io.sentry.Sentry
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -435,5 +438,22 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
         "$decimalSize"
     } else {
         Formatter.formatShortFileSize(this, decimalSize)
+    }
+}
+
+fun Context.shareFile(getUriToShare: () -> Uri?) {
+    trackFileActionEvent("sendFileCopy")
+
+    val shareIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        putExtra(Intent.EXTRA_STREAM, getUriToShare())
+        type = "*/*"
+    }
+
+    runCatching {
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.buttonSendCopy)))
+    }.onFailure {
+        Sentry.captureException(it)
     }
 }

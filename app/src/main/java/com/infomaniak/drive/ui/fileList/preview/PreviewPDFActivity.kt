@@ -17,39 +17,107 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.CancellationSignal
+import android.os.ParcelFileDescriptor
+import android.print.*
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.ExtensionType
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.SyncUtils.uploadFolder
+import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.utils.setupTransparentStatusBar
+import com.infomaniak.drive.utils.shareFile
+import com.infomaniak.drive.views.ExternalFileInfoActionsView
+import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.getFileNameAndSize
 import com.infomaniak.lib.core.utils.setMargins
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
-class PreviewPDFActivity : AppCompatActivity() {
+class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnItemClickListener {
+
+    private val navController by lazy { setupNavController() }
+    private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
     private val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
+
+    private val externalPDFUri: Uri by lazy { Uri.parse(intent.dataString) }
+    private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(Uri.parse(intent.dataString!!)) }
+    private val fileName: String by lazy { fileNameAndSize?.first ?: "Document to print" }
+    private val fileSize: Long? by lazy { fileNameAndSize?.second }
+
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        setupNavController().navigate(R.id.previewPDFFragment)
+        navController.navigate(R.id.previewPDFFragment)
 
-        binding.backButton.setOnClickListener { finish() }
-        binding.saveToKDrive.setOnClickListener { saveToKDrive(Uri.parse(intent.dataString)) }
+        with(binding) {
+            backButton.setOnClickListener { finish() }
+            intent.dataString?.let {
+                bottomSheetFileInfos.updateWithExternalFile(getFile())
+                bottomSheetFileInfos.init(this@PreviewPDFActivity)
+                bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFileInfos)
+            }
+        }
     }
 
     override fun onStart() {
         super.onStart()
         setupWindowInsetsListener()
         setupTransparentStatusBar()
+    }
+
+    override fun openWithClicked(context: Context) {
+        super.openWithClicked(context)
+        startActivity(openWithIntent(externalPDFUri))
+    }
+
+    override fun shareFile(context: Context) {
+        super.shareFile(context)
+        shareFile { externalPDFUri }
+    }
+
+    override fun saveToKDriveClicked(context: Context) {
+        super.saveToKDriveClicked(context)
+        saveToKDrive(externalPDFUri)
+    }
+
+    override fun printClicked(context: Context) {
+        super.printClicked(context)
+        val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+        val printAdapter = PDFDocumentAdapter(fileName, getOutputFile(externalPDFUri))
+        printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
+    }
+
+    private fun getFile(): File {
+        return File().apply {
+            name = fileName
+            size = fileSize
+            id = ROOT_ID
+            extensionType = ExtensionType.PDF.value
+            type = ""
+        }
     }
 
     private fun saveToKDrive(uri: Uri) {
@@ -70,17 +138,82 @@ class PreviewPDFActivity : AppCompatActivity() {
     private fun setupWindowInsetsListener() = with(binding) {
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                header.setMargins(left = left, top = top, right = right)
+                val defaultMargin = context.resources.getDimension(R.dimen.marginStandardMedium).toInt()
+                backButton.setMargins(top = top + defaultMargin)
+                /* Add padding to the bottom to allow the last element of the list to be displayed right over the
+                 android navigation bar */
+                bottomSheetFileInfos.setPadding(0, 0, 0, bottom)
             }
             windowInsets
         }
     }
 
-    private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
-
     private fun setupNavController(): NavController {
-        return getNavHostFragment().navController.apply {
-            setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileURI = intent.dataString).toBundle())
+        return navHostFragment.navController.apply {
+            intent.dataString?.let {
+                setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileURI = it).toBundle())
+            }
+        }
+    }
+
+    private fun getOutputFile(uri: Uri): IOFile {
+        return IOFile(uploadFolder, uri.hashCode().toString()).apply {
+            if (exists()) delete()
+            createNewFile()
+            contentResolver?.openInputStream(uri)?.use { inputStream ->
+                outputStream().use { inputStream.copyTo(it) }
+            }
+        }
+    }
+}
+
+class PDFDocumentAdapter(private val fileName: String, private val file: java.io.File) : PrintDocumentAdapter() {
+
+    override fun onLayout(
+        oldAttributes: PrintAttributes?,
+        newAttributes: PrintAttributes?,
+        cancellationSignal: CancellationSignal,
+        callback: LayoutResultCallback,
+        extras: Bundle?
+    ) {
+        if (cancellationSignal.isCanceled) {
+            callback.onLayoutCancelled()
+            return
+        }
+
+        val info = PrintDocumentInfo.Builder(fileName)
+            .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
+            .setPageCount(PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
+            .build()
+
+        callback.onLayoutFinished(info, oldAttributes != newAttributes)
+    }
+
+    override fun onWrite(
+        pages: Array<out PageRange>,
+        destination: ParcelFileDescriptor,
+        cancellationSignal: CancellationSignal,
+        callback: WriteResultCallback
+    ) {
+        var inputStream: InputStream? = null
+        var outputStream: OutputStream? = null
+
+        try {
+            inputStream = FileInputStream(file)
+            outputStream = FileOutputStream(destination.fileDescriptor)
+
+            inputStream.copyTo(outputStream)
+
+            if (cancellationSignal.isCanceled) {
+                callback.onWriteCancelled()
+            } else {
+                callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
+            }
+        } catch (ex: Exception) {
+            callback.onWriteFailed(ex.message)
+        } finally {
+            inputStream?.close()
+            outputStream?.close()
         }
     }
 }

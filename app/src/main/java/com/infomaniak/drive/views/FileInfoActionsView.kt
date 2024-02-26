@@ -181,24 +181,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         binding.scrollView.fullScroll(View.FOCUS_UP)
     }
 
-    private fun shareFile() {
-        context?.trackFileActionEvent("sendFileCopy")
-
-        val context = ownerFragment.requireContext()
-        val shareIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            putExtra(Intent.EXTRA_STREAM, CloudStorageProvider.createShareFileUri(context, currentFile))
-            type = "*/*"
-        }
-
-        runCatching {
-            ownerFragment.startActivity(Intent.createChooser(shareIntent, ownerFragment.getString(R.string.buttonSendCopy)))
-        }.onFailure {
-            Sentry.captureException(it)
-        }
-    }
-
     private fun openAddFileBottom() {
         mainViewModel.currentFolderOpenAddFileBottom.value = currentFile
         ownerFragment.safeNavigate(R.id.addFileBottomSheetDialog)
@@ -208,11 +190,17 @@ class FileInfoActionsView @JvmOverloads constructor(
         editDocument.setOnClickListener { onItemClickListener.editDocumentClicked() }
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
-        sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
-        sharePublicLink.setOnClickListener { view ->
-            view.isClickable = false
-            onItemClickListener.sharePublicLink { view.isClickable = true }
+        sendCopy.setOnClickListener {
+            if (currentFile.isFolder()) {
+                openAddFileBottom()
+            } else {
+                ownerFragment.requireContext().shareFile { CloudStorageProvider.createShareFileUri(context, currentFile) }
+            }
         }
+        sharePublicLink.setOnClickListener { 
+view.isClickable = false
+onItemClickListener.sharePublicLink() 
+}
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }

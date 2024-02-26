@@ -63,6 +63,7 @@ import java.util.Date
 import kotlin.math.min
 import kotlin.math.pow
 
+
 object Utils {
 
     const val ROOT_ID = 1
@@ -251,6 +252,16 @@ object Utils {
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
                     Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
             setDataAndType(uri, contentResolver.getType(cloudUri))
+        }
+    }
+
+    fun Context.getExtensionType(uri: Uri) = contentResolver.getType(uri)
+
+    fun Context.openWithIntent(uri: Uri): Intent {
+        return Intent().apply {
+            action = Intent.ACTION_VIEW
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            setDataAndType(uri, getExtensionType(uri))
         }
     }
 

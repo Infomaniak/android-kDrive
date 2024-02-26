@@ -24,7 +24,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -40,7 +39,6 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.getFileName
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.pdfview.PDFView
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
@@ -182,7 +180,6 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun getConfigurator(uriString: String?, pdfFile: IOFile?): PDFView.Configurator {
-        (activity as? PreviewPDFActivity)?.findViewById<TextView>(R.id.pdfName)?.text = requireContext().getFileName(Uri.parse(uriString))
         return uriString?.let { binding.pdfView.fromUri(Uri.parse(uriString)) } ?: binding.pdfView.fromFile(pdfFile)
     }
 
