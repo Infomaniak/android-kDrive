@@ -57,7 +57,6 @@ import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.safeNavigate
-import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -197,10 +196,10 @@ class FileInfoActionsView @JvmOverloads constructor(
                 ownerFragment.requireContext().shareFile { CloudStorageProvider.createShareFileUri(context, currentFile) }
             }
         }
-        sharePublicLink.setOnClickListener { 
-view.isClickable = false
-onItemClickListener.sharePublicLink() 
-}
+        sharePublicLink.setOnClickListener { view ->
+            view.isClickable = false
+            onItemClickListener.sharePublicLink { view.isClickable = true }
+        }
         openWith.setOnClickListener { onItemClickListener.openWithClicked() }
         downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }
