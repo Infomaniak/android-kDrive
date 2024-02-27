@@ -179,7 +179,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onStart() {
         super.onStart()
-        setupTransparentStatusBar ()
+        setupTransparentStatusBar()
     }
 
     override fun onResume() {
