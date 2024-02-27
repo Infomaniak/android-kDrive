@@ -21,6 +21,8 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewMenuItemBinding
 import com.infomaniak.lib.core.utils.getAttributes
@@ -38,6 +40,7 @@ class MenuItemView @JvmOverloads constructor(
             with(binding) {
                 title.text = getString(R.styleable.MenuItemView_title) ?: ""
                 icon.setImageDrawable(getDrawable(R.styleable.MenuItemView_icon))
+                endIcon.isVisible = getBoolean(R.styleable.MenuItemView_withArrow, false)
             }
         }
     }
