@@ -21,7 +21,6 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewMenuItemBinding
