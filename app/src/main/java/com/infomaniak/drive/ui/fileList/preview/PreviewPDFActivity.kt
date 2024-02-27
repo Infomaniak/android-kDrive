@@ -21,9 +21,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.CancellationSignal
-import android.os.ParcelFileDescriptor
-import android.print.*
+import android.print.PrintAttributes
+import android.print.PrintManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -57,9 +56,9 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
 
     private val externalPDFUri: Uri by lazy { Uri.parse(intent.dataString) }
-    private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(Uri.parse(intent.dataString!!)) }
-    private val fileName: String by lazy { fileNameAndSize?.first ?: "Document to print" }
-    private val fileSize: Long? by lazy { fileNameAndSize?.second }
+    private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(externalPDFUri) }
+    private val fileName: String by lazy { fileNameAndSize?.first ?: "" }
+    private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
@@ -70,11 +69,9 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
         with(binding) {
             backButton.setOnClickListener { finish() }
-            intent.dataString?.let {
-                bottomSheetFileInfos.updateWithExternalFile(getFile())
-                bottomSheetFileInfos.init(this@PreviewPDFActivity)
-                bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFileInfos)
-            }
+            bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
+            bottomSheetFileInfos.init(this@PreviewPDFActivity)
+            bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFileInfos)
         }
     }
 
@@ -102,11 +99,12 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     override fun printClicked(context: Context) {
         super.printClicked(context)
         val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
-        val printAdapter = PDFDocumentAdapter(fileName, getOutputFile(externalPDFUri))
+        val printAdapter = PDFDocumentAdapter(fileName, getFileForPrint(externalPDFUri))
         printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
     }
 
-    private fun getFile(): File {
+    // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
+    private fun getFakeFile(): File {
         return File().apply {
             name = fileName
             size = fileSize
@@ -136,8 +134,6 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                 val defaultMargin = context.resources.getDimension(R.dimen.marginStandardMedium).toInt()
                 backButton.setMargins(top = top + defaultMargin)
-                /* Add padding to the bottom to allow the last element of the list to be displayed right over the
-                 android navigation bar */
                 bottomSheetFileInfos.setPadding(0, 0, 0, bottom)
             }
             windowInsets
@@ -146,13 +142,13 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     private fun setupNavController(): NavController {
         return navHostFragment.navController.apply {
-            intent.dataString?.let {
-                setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileURI = it).toBundle())
+            intent.dataString?.let { fileURI ->
+                setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileURI = fileURI).toBundle())
             }
         }
     }
 
-    private fun getOutputFile(uri: Uri): IOFile {
+    private fun getFileForPrint(uri: Uri): IOFile {
         return IOFile(uploadFolder, uri.hashCode().toString()).apply {
             if (exists()) delete()
             createNewFile()
