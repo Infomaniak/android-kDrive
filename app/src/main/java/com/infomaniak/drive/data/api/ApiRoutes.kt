@@ -45,7 +45,7 @@ object ApiRoutes {
 
     /** V1 */
     //region V1
-    fun getAllDrivesData() = "${DRIVE_API_V1}init?with=drives,users,teams,ips,categories"
+    fun getAllDrivesData() = "${DRIVE_API_V1}init?no_avatar_default=1&with=drives,users,teams,ips,categories"
     //endregion
 
     /** Archive */
@@ -86,12 +86,12 @@ object ApiRoutes {
             "&actions[]=comment_create"
 
     fun getLastActivities(driveId: Int) =
-        "${filesURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
+        "${filesURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions&no_avatar_default=1"
 
-    fun getFileActivities(file: File) = "${fileURL(file)}/activities"
+    fun getFileActivities(file: File) = "${fileURL(file)}/activities?no_avatar_default=1"
 
     fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
-        "${filesURL(driveId)}/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
+        "${filesURL(driveId)}/activities/batch?no_avatar_default=1&$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
                 "&actions[]=file_rename" +
                 "&actions[]=file_update"
 
