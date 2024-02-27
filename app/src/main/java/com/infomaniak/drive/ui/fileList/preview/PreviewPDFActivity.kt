@@ -48,10 +48,6 @@ import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.getFileNameAndSize
 import com.infomaniak.lib.core.utils.setMargins
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.io.OutputStream
 
 class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnItemClickListener {
 
@@ -163,57 +159,6 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
             contentResolver?.openInputStream(uri)?.use { inputStream ->
                 outputStream().use { inputStream.copyTo(it) }
             }
-        }
-    }
-}
-
-class PDFDocumentAdapter(private val fileName: String, private val file: java.io.File) : PrintDocumentAdapter() {
-
-    override fun onLayout(
-        oldAttributes: PrintAttributes?,
-        newAttributes: PrintAttributes?,
-        cancellationSignal: CancellationSignal,
-        callback: LayoutResultCallback,
-        extras: Bundle?
-    ) {
-        if (cancellationSignal.isCanceled) {
-            callback.onLayoutCancelled()
-            return
-        }
-
-        val info = PrintDocumentInfo.Builder(fileName)
-            .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
-            .setPageCount(PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
-            .build()
-
-        callback.onLayoutFinished(info, oldAttributes != newAttributes)
-    }
-
-    override fun onWrite(
-        pages: Array<out PageRange>,
-        destination: ParcelFileDescriptor,
-        cancellationSignal: CancellationSignal,
-        callback: WriteResultCallback
-    ) {
-        var inputStream: InputStream? = null
-        var outputStream: OutputStream? = null
-
-        try {
-            inputStream = FileInputStream(file)
-            outputStream = FileOutputStream(destination.fileDescriptor)
-
-            inputStream.copyTo(outputStream)
-
-            if (cancellationSignal.isCanceled) {
-                callback.onWriteCancelled()
-            } else {
-                callback.onWriteFinished(arrayOf(PageRange.ALL_PAGES))
-            }
-        } catch (ex: Exception) {
-            callback.onWriteFailed(ex.message)
-        } finally {
-            inputStream?.close()
-            outputStream?.close()
         }
     }
 }
