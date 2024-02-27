@@ -25,6 +25,7 @@
     <string name="accessDeniedDescriptionIsAdmin">Wollen Sie die Rechte dieses Ordners ändern, um darauf zuzugreifen? Sie werden zu den Benutzern hinzugefügt, die Zugang zu diesem Ordner besitzen. Die anderen Benutzer dieses Ordners werden per E-Mail benachrichtigt.</string>
     <string name="accessDeniedDescriptionIsNotAdmin">Bitte wenden Sie sich an einen Administrator des kDrive, um Ihre Rechte zu ändern.</string>
     <string name="accessDeniedTitle">Sie haben nicht die Berechtigung für den Zugriff auf diesen Ordner.</string>
+    <string name="actionPrint">Drucken</string>
     <string name="addCategoriesTitle">Kategorien hinzufügen</string>
     <string name="addPassword">Mit Passwort schützen</string>
     <string name="alertRemoveUserDescription">Sind Sie sicher, den Benutzer “%s” von dieser Anwendung entfernen zu wollen?</string>
@@ -90,6 +91,12 @@
     <string name="backgroundSyncTitle">Hintergrundsynchronisation</string>
     <string name="belongToAllCategoriesFilterDescription">Die Ergebnisse müssen allen ausgewählten Kategorien angehören</string>
     <string name="belongToOneCategoryFilterDescription">Die Ergebnisse müssen einer der ausgewählten Kategorien angehören</string>
+    <plurals name="bulkDownloadNotificationContent">
+        <item quantity="one">1 Datei aus %2$d heruntergeladen</item>
+        <item quantity="other">%1$d Dateien aus %2$d heruntergeladen</item>
+    </plurals>
+    <string name="bulkDownloadNotificationTitleNoProgress">Import in Arbeit</string>
+    <string name="bulkDownloadNotificationTitleWithProgress">Import in Arbeit (%1$d%%)</string>
     <string name="buttonAdd">Hinzufügen</string>
     <string name="buttonAddComment">Kommentar hinzufügen</string>
     <string name="buttonAddFavorites">Zu Favoriten hinzufügen</string>
@@ -131,6 +138,7 @@
     <string name="buttonMove">Verschieben</string>
     <string name="buttonMoveTo">Verschieben zu</string>
     <string name="buttonNewPassword">Neues Passwort festlegen</string>
+    <string name="buttonNo">Nein</string>
     <string name="buttonNoDriveAnotherUser">Ein anderes Infomaniak-Profil verwenden</string>
     <string name="buttonNoDriveFreeTest">Kostenlos testen</string>
     <string name="buttonOpenDocument">Dokument öffnen</string>
@@ -181,6 +189,7 @@
     <string name="categoryWork">Arbeit</string>
     <string name="cloudStorageMissingPermissionNotifDescription">Die App kann aufgrund einer fehlenden Berechtigung nicht im Hintergrund ausgeführt werden.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Suche nicht möglich, es wurde kein Drive ausgewählt</string>
+    <string name="commonDocumentsDescription">Dieser Bereich gehört %s und zentralisiert die gemeinsamen Dateien Ihrer Organisation.</string>
     <string name="commonFolderDescription">Teilen Sie diesen Ordner mit den Benutzern des kDrive %s</string>
     <string name="commonFolderTitle">Gemeinsamer Ordner</string>
     <string name="contentDescriptionIsSelected">Wurde ausgewählt</string>
@@ -453,6 +462,8 @@
     <string name="inputExpirationTime">Verfallszeit</string>
     <string name="kDrivePdfViewer">kDrive PDF-Betrachter</string>
     <string name="lastEditsTitle">Letzte Änderungen</string>
+    <string name="localizedFilenamePrivateSpace">Meine Dateien</string>
+    <string name="localizedFilenameTeamSpace">Akten der Organisation</string>
     <string name="locateButton">Finden Sie</string>
     <string name="manageCategoriesCreateTitle">%s erstellen</string>
     <string name="manageCategoriesNoCategory">Keine Kategorie</string>
@@ -562,6 +573,7 @@
     <string name="settingsOnlyWifiSyncDescription">Uploads und Aktualisierungen von Offline-Dateien können nur über eine Wi-Fi-Verbindung durchgeführt werden.</string>
     <string name="settingsOnlyWifiSyncTitle">Übertragung nur im WLAN</string>
     <string name="settingsTitle">Einstellungen</string>
+    <string name="share">Teilen Sie</string>
     <string name="shareFileInputUserAndEmail">Laden Sie einen Benutzer oder eine E-Mail-Adresse ein…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Benutzer können das Dokument nur einsehen.</string>
     <string name="shareLinkOfficePermissionReadFolderDescription">Benutzer können nur Dateien innerhalb des freigegebenen Ordners einsehen.</string>
