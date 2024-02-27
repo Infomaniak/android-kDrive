@@ -35,10 +35,7 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
 
     private val binding by lazy { ViewExternalFileInfoActionsBinding.inflate(LayoutInflater.from(context), this, true) }
 
-
     private lateinit var onItemClickListener: OnItemClickListener
-
-    val openWith get() = binding.openWith
 
     fun init(onItemClickListener: OnItemClickListener) {
         this.onItemClickListener = onItemClickListener
