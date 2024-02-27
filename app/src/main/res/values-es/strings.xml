@@ -91,12 +91,6 @@
     <string name="backgroundSyncTitle">Sincronización de fondo</string>
     <string name="belongToAllCategoriesFilterDescription">Los resultados deben pertenecer a todas las categorías seleccionadas</string>
     <string name="belongToOneCategoryFilterDescription">Los resultados deben pertenecer a una de las categorías seleccionadas</string>
-    <plurals name="bulkDownloadNotificationContent">
-        <item quantity="one">archivo 1 descargado de %2$d</item>
-        <item quantity="other">%1$d archivos descargados de %2$d</item>
-    </plurals>
-    <string name="bulkDownloadNotificationTitleNoProgress">Importación en curso</string>
-    <string name="bulkDownloadNotificationTitleWithProgress">Importación en curso (%1$d%%)</string>
     <string name="buttonAdd">Añadir</string>
     <string name="buttonAddComment">Añadir un comentario</string>
     <string name="buttonAddFavorites">Añadir a favoritos</string>
@@ -138,7 +132,6 @@
     <string name="buttonMove">Mover</string>
     <string name="buttonMoveTo">Mover a</string>
     <string name="buttonNewPassword">Definir una nueva contraseña</string>
-    <string name="buttonNo">No</string>
     <string name="buttonNoDriveAnotherUser">Utilizar otro perfil Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Probar gratuitamente</string>
     <string name="buttonOpenDocument">Abrir el documento</string>
@@ -189,7 +182,6 @@
     <string name="categoryWork">Trabajo</string>
     <string name="cloudStorageMissingPermissionNotifDescription">La aplicación no se puede ejecutar en segundo plano porque falta un permiso.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">No se puede buscar. No se ha seleccionado ningún drive</string>
-    <string name="commonDocumentsDescription">Este espacio pertenece a %s y centraliza los archivos comunes de su organización.</string>
     <string name="commonFolderDescription">Comparte esta carpeta con los usuarios del kDrive %s</string>
     <string name="commonFolderTitle">Carpeta común</string>
     <string name="contentDescriptionIsSelected">Está seleccionado</string>
@@ -462,8 +454,6 @@
     <string name="inputExpirationTime">Tiempo de expiración</string>
     <string name="kDrivePdfViewer">visor de PDF kDrive</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
-    <string name="localizedFilenamePrivateSpace">Mis archivos</string>
-    <string name="localizedFilenameTeamSpace">Archivos de la organización</string>
     <string name="locateButton">Localizar</string>
     <string name="manageCategoriesCreateTitle">Crear %s</string>
     <string name="manageCategoriesNoCategory">Sin categoría</string>
@@ -554,7 +544,6 @@
     <string name="recentActivitySeeMore">Ver más archivos recientes</string>
     <string name="refreshTokenError">Ha sido desconectado</string>
     <string name="restrictedSharedLinkTitle">Enlace de uso compartido restringido</string>
-    <string name="reviewAlertTitle">¿Te gusta kDrive?</string>
     <string name="saveExternalFileInputFileName">Nombre del documento</string>
     <string name="saveExternalFileTitle">Guardar en el kDrive</string>
     <string name="searchFilterTitle">Tipos de archivos</string>

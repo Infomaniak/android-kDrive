@@ -102,12 +102,6 @@
     <string name="backgroundSyncTitle">Background synchronization</string>
     <string name="belongToAllCategoriesFilterDescription">Results must belong to all selected categories</string>
     <string name="belongToOneCategoryFilterDescription">Results must belong to one of the selected categories</string>
-    <plurals name="bulkDownloadNotificationContent">
-        <item quantity="one">1 file downloaded out of %2$d</item>
-        <item quantity="other">%1$d files downloaded out of %2$d</item>
-    </plurals>
-    <string name="bulkDownloadNotificationTitleNoProgress">Import in progress</string>
-    <string name="bulkDownloadNotificationTitleWithProgress">Import in progress (%1$d%%)</string>
     <string name="buttonAdd">Add</string>
     <string name="buttonAddComment">Add a comment</string>
     <string name="buttonAddFavorites">Add to favorites</string>
@@ -149,7 +143,6 @@
     <string name="buttonMove">Move</string>
     <string name="buttonMoveTo">Move to</string>
     <string name="buttonNewPassword">Set a new password</string>
-    <string name="buttonNo">No</string>
     <string name="buttonNoDriveAnotherUser">Use a different Infomaniak profile</string>
     <string name="buttonNoDriveFreeTest">Free trial</string>
     <string name="buttonOpenDocument">Open document</string>
@@ -200,7 +193,6 @@
     <string name="categoryWork">Work</string>
     <string name="cloudStorageMissingPermissionNotifDescription">The app can’t run in background because of a missing permission.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">No search possible: no drive selected</string>
-    <string name="commonDocumentsDescription">This space belongs to %s and centralizes your organization’s common files.</string>
     <string name="commonFolderDescription">Share this folder with users of kDrive %s</string>
     <string name="commonFolderTitle">Common folder</string>
     <string name="contentDescriptionIsSelected">Is selected</string>
@@ -473,8 +465,6 @@
     <string name="inputExpirationTime">Expiration time</string>
     <string name="kDrivePdfViewer">kDrive PDF Viewer</string>
     <string name="lastEditsTitle">Most recent changes</string>
-    <string name="localizedFilenamePrivateSpace">My files</string>
-    <string name="localizedFilenameTeamSpace">Organisation’s files</string>
     <string name="locateButton">Locate</string>
     <string name="manageCategoriesCreateTitle">Create %s</string>
     <string name="manageCategoriesNoCategory">No category</string>
@@ -565,7 +555,6 @@
     <string name="recentActivitySeeMore">View more recent files</string>
     <string name="refreshTokenError">You have been disconnected</string>
     <string name="restrictedSharedLinkTitle">Restricted sharing link</string>
-    <string name="reviewAlertTitle">Do you like kDrive?</string>
     <string name="saveExternalFileInputFileName">Document name</string>
     <string name="saveExternalFileTitle">Save to kDrive</string>
     <string name="searchFilterTitle">File types</string>

@@ -91,12 +91,6 @@
     <string name="backgroundSyncTitle">Hintergrundsynchronisation</string>
     <string name="belongToAllCategoriesFilterDescription">Die Ergebnisse müssen allen ausgewählten Kategorien angehören</string>
     <string name="belongToOneCategoryFilterDescription">Die Ergebnisse müssen einer der ausgewählten Kategorien angehören</string>
-    <plurals name="bulkDownloadNotificationContent">
-        <item quantity="one">1 Datei aus %2$d heruntergeladen</item>
-        <item quantity="other">%1$d Dateien aus %2$d heruntergeladen</item>
-    </plurals>
-    <string name="bulkDownloadNotificationTitleNoProgress">Import in Arbeit</string>
-    <string name="bulkDownloadNotificationTitleWithProgress">Import in Arbeit (%1$d%%)</string>
     <string name="buttonAdd">Hinzufügen</string>
     <string name="buttonAddComment">Kommentar hinzufügen</string>
     <string name="buttonAddFavorites">Zu Favoriten hinzufügen</string>
@@ -138,7 +132,6 @@
     <string name="buttonMove">Verschieben</string>
     <string name="buttonMoveTo">Verschieben zu</string>
     <string name="buttonNewPassword">Neues Passwort festlegen</string>
-    <string name="buttonNo">Nein</string>
     <string name="buttonNoDriveAnotherUser">Ein anderes Infomaniak-Profil verwenden</string>
     <string name="buttonNoDriveFreeTest">Kostenlos testen</string>
     <string name="buttonOpenDocument">Dokument öffnen</string>
@@ -189,7 +182,6 @@
     <string name="categoryWork">Arbeit</string>
     <string name="cloudStorageMissingPermissionNotifDescription">Die App kann aufgrund einer fehlenden Berechtigung nicht im Hintergrund ausgeführt werden.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Suche nicht möglich, es wurde kein Drive ausgewählt</string>
-    <string name="commonDocumentsDescription">Dieser Bereich gehört %s und zentralisiert die gemeinsamen Dateien Ihrer Organisation.</string>
     <string name="commonFolderDescription">Teilen Sie diesen Ordner mit den Benutzern des kDrive %s</string>
     <string name="commonFolderTitle">Gemeinsamer Ordner</string>
     <string name="contentDescriptionIsSelected">Wurde ausgewählt</string>
@@ -462,8 +454,6 @@
     <string name="inputExpirationTime">Verfallszeit</string>
     <string name="kDrivePdfViewer">kDrive PDF-Betrachter</string>
     <string name="lastEditsTitle">Letzte Änderungen</string>
-    <string name="localizedFilenamePrivateSpace">Meine Dateien</string>
-    <string name="localizedFilenameTeamSpace">Akten der Organisation</string>
     <string name="locateButton">Finden Sie</string>
     <string name="manageCategoriesCreateTitle">%s erstellen</string>
     <string name="manageCategoriesNoCategory">Keine Kategorie</string>
@@ -554,7 +544,6 @@
     <string name="recentActivitySeeMore">Mehr neue Dateien anzeigen</string>
     <string name="refreshTokenError">Ihre Verbindung wurde unterbrochen</string>
     <string name="restrictedSharedLinkTitle">Eingeschränkter Freigabelink</string>
-    <string name="reviewAlertTitle">Mögen Sie kDrive?</string>
     <string name="saveExternalFileInputFileName">Name des Dokuments</string>
     <string name="saveExternalFileTitle">Auf kDrive speichern</string>
     <string name="searchFilterTitle">Dateitypen</string>
