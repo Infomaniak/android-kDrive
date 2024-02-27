@@ -60,6 +60,7 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
         }
 
         fun openWithClicked(context: Context) = trackFileActionEvent(context, "openWith")
+
         fun shareFile(context: Context) = trackFileActionEvent(context, "sendFileCopy")
 
         fun saveToKDriveClicked(context: Context) = trackFileActionEvent(context, "saveToKDrive")

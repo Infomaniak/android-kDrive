@@ -63,7 +63,6 @@ import java.util.Date
 import kotlin.math.min
 import kotlin.math.pow
 
-
 object Utils {
 
     const val ROOT_ID = 1
