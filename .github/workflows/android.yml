@@ -13,10 +13,10 @@ jobs:
 
   instrumentation-tests:
     if: github.event.pull_request.draft == false
-    runs-on: [ self-hosted, Android ]
+    runs-on: [ self-hosted, test ]
     strategy:
       matrix:
-        api-level: [ 31 ]
+        api-level: [ 34 ]
         target: [ google_apis ]
 
     env:
@@ -32,30 +32,15 @@ jobs:
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout the code
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v4.1.1
         with:
           token: ${{ secrets.MY_REPO_PAT }}
           submodules: recursive
-
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2.27.0
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          profile: Pixel 4
-          arch: x86_64
-          disk-size: 6G
-          avd-name: kdrive-test
-          force-avd-creation: false
-          disable-animations: false
-          emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
-          script: echo "Generated AVD snapshot for caching."
 
       - name: Create test env
         run: |
@@ -72,12 +57,12 @@ jobs:
         run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Run instrumentation tests
-        uses: ReactiveCircus/android-emulator-runner@v2.27.0
+        uses: ReactiveCircus/android-emulator-runner@v2.30.1
         with:
           api-level: ${{ matrix.api-level }}
           target: ${{ matrix.target }}
-          profile: Pixel 4
-          arch: x86_64
+          profile: pixel_7
+          arch: arm64-v8a
           disk-size: 6G
           avd-name: kdrive-test
           force-avd-creation: false
