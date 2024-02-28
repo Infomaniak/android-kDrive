@@ -27,7 +27,6 @@ import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.google.android.material.appbar.AppBarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
@@ -43,60 +42,63 @@ class MenuGalleryFragment : Fragment() {
     private var binding: FragmentMenuGalleryBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private var galleryFragment = GalleryFragment()
+    private var galleryFragment: GalleryFragment? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentMenuGalleryBinding.inflate(inflater, container, false).apply {
-            swipeRefreshLayout.setOnRefreshListener { galleryFragment.onRefreshGallery() }
-        }
+        return FragmentMenuGalleryBinding.inflate(inflater, container, false).also { binding = it }.root
+    }
 
-        binding.multiSelectLayout.apply {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
+        super.onViewCreated(view, savedInstanceState)
+
+        ViewCompat.requestApplyInsets(galleryListCoordinator)
+
+        instantiateGalleryFragment()
+
+        swipeRefreshLayout.setOnRefreshListener { galleryFragment?.onRefreshGallery() }
+
+        multiSelectLayout.apply {
             selectAllButton.isGone = true
             setMultiSelectClickListeners()
         }
 
-        return binding.root
-    }
+        galleryFragment!!.menuGalleryBinding = binding
 
-    private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(galleryFragment) {
-        toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
-        moveButtonMultiSelect.setOnClickListener { onMoveButtonClicked() }
-        deleteButtonMultiSelect.setOnClickListener { deleteFiles() }
-        menuButtonMultiSelect.setOnClickListener {
-            onMenuButtonClicked(
-                multiSelectBottomSheet = GalleryMultiSelectActionsBottomSheetDialog(),
-                areAllFromTheSameFolder = false,
-            )
+        appBar.addOnOffsetChangedListener { _, verticalOffset ->
+            galleryFragment!!.setScrollbarTrackOffset(appBar.totalScrollRange + verticalOffset)
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        ViewCompat.requestApplyInsets(binding.galleryListCoordinator)
-
-        with(childFragmentManager) {
-            (findFragmentByTag(GalleryFragment.TAG) as? GalleryFragment)?.let {
-                galleryFragment = it
-            } ?: run {
-                beginTransaction()
-                    .replace(R.id.galleryFragmentView, galleryFragment, GalleryFragment.TAG)
-                    .commit()
-            }
-        }
-
-        galleryFragment.menuGalleryBinding = binding
-
-        binding.appBar.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-            galleryFragment.setScrollbarTrackOffset(binding.appBar.totalScrollRange + verticalOffset)
-        })
 
         adjustFastScrollBarScrollRange()
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
-            noNetworkBinding = binding.noNetworkInclude,
-            noNetworkBindingDirectParent = binding.galleryContentLinearLayout,
+            noNetworkBinding = noNetworkInclude,
+            noNetworkBindingDirectParent = galleryContentLinearLayout,
         )
+    }
+
+    private fun instantiateGalleryFragment() {
+        with(childFragmentManager) {
+            (findFragmentByTag(GalleryFragment.TAG) as? GalleryFragment)?.let {
+                galleryFragment = it
+            } ?: run {
+                val fragment = galleryFragment ?: GalleryFragment().also { galleryFragment = it }
+                beginTransaction()
+                    .replace(R.id.galleryFragmentView, fragment, GalleryFragment.TAG)
+                    .commitNow()
+            }
+        }
+    }
+
+    private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(galleryFragment) {
+        toolbarMultiSelect.setNavigationOnClickListener { galleryFragment?.closeMultiSelect() }
+        moveButtonMultiSelect.setOnClickListener { galleryFragment?.onMoveButtonClicked() }
+        deleteButtonMultiSelect.setOnClickListener { galleryFragment?.deleteFiles() }
+        menuButtonMultiSelect.setOnClickListener {
+            galleryFragment?.onMenuButtonClicked(
+                multiSelectBottomSheet = GalleryMultiSelectActionsBottomSheetDialog(),
+                areAllFromTheSameFolder = false,
+            )
+        }
     }
 
     private fun adjustFastScrollBarScrollRange() = with(binding) {
@@ -106,7 +108,7 @@ class MenuGalleryFragment : Fragment() {
 
         appBar.addOnOffsetChangedListener { _, verticalOffset ->
             val margin = appBar.totalScrollRange + verticalOffset + bottomNavigationOffset
-            galleryFragment.setScrollbarTrackOffset(margin)
+            galleryFragment!!.setScrollbarTrackOffset(margin)
         }
     }
 }
