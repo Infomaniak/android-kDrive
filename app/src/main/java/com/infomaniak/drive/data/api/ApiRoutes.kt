@@ -61,7 +61,7 @@ object ApiRoutes {
 
     fun fileInvitationAccess(file: File, invitationId: Int) = "${driveURL(file.driveId)}/files/invitations/$invitationId"
 
-    fun getFileShare(file: File) = "${accessUrl(file)}?with=user"
+    fun getFileShare(file: File) = "${accessUrl(file)}?no_avatar_default=1&with=user"
 
     fun checkFileShare(file: File) = "${accessUrl(file)}/check"
 
@@ -112,7 +112,7 @@ object ApiRoutes {
 
     /** Comment */
     //region Comment
-    private const val withComments = "with=user,likes,responses,responses.user,responses.likes"
+    private const val withComments = "no_avatar_default=1&with=user,likes,responses,responses.user,responses.likes"
 
     fun fileComments(file: File) = "${fileURL(file)}/comments?$withComments"
 

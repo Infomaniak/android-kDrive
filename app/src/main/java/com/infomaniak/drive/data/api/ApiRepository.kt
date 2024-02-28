@@ -108,7 +108,11 @@ object ApiRepository : ApiRepositoryCore() {
         forFileList: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
     ): ApiResponse<ArrayList<FileActivity>> {
-        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithExtraQuery" else "&with=user"
+        val queries = if (forFileList) {
+            "&depth=children&from_date=${file.responseAt}&$activitiesWithExtraQuery"
+        } else {
+            "&no_avatar_default=1&with=user"
+        }
         val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
                 if (forFileList) "" else ADDITIONAL_ACTIONS
 
