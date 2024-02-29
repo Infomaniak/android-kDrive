@@ -29,38 +29,41 @@ import com.infomaniak.drive.ui.fileList.SortFilesBottomSheetAdapter.SortFilesVie
 
 class SortFilesBottomSheetAdapter(
     private val selectedType: SortType,
-    private val usage: SortTypeUsage,
+    usage: SortTypeUsage,
     private val onItemClicked: (sortType: SortType) -> Unit,
 ) : Adapter<SortFilesViewHolder>() {
+
+    private val types by lazy { usage.types() }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SortFilesViewHolder {
         return SortFilesViewHolder(ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun onBindViewHolder(holder: SortFilesViewHolder, position: Int) = with(holder.binding) {
-        usage.types()[position].let { sortType ->
+        types[position].let { sortType ->
             itemSelectText.setText(sortType.translation)
             itemSelectActiveIcon.isVisible = selectedType == sortType
             root.setOnClickListener { onItemClicked(sortType) }
         }
     }
 
-    override fun getItemCount() = usage.types().size
+    override fun getItemCount() = types.size
 
-    private fun SortTypeUsage.types(): Array<SortType> {
+    private fun SortTypeUsage.types(): List<SortType> {
         return when (this) {
-            SortTypeUsage.FILE_LIST -> SortType.values().fileListTypes()
-            SortTypeUsage.TRASH -> SortType.values().trashTypes()
+            SortTypeUsage.FILE_LIST -> SortType.entries.fileListTypes()
+            SortTypeUsage.TRASH -> SortType.entries.trashTypes()
+            SortTypeUsage.SEARCH -> searchTypes()
         }
     }
 
-    private fun Array<SortType>.fileListTypes(): Array<SortType> {
-        return filter { it != SortType.OLDER_TRASHED && it != SortType.RECENT_TRASHED }.toTypedArray()
+    private fun List<SortType>.fileListTypes(): List<SortType> {
+        return filter { it != SortType.OLDER_TRASHED && it != SortType.RECENT_TRASHED }
     }
 
-    private fun Array<SortType>.trashTypes(): Array<SortType> {
-        return filter { it != SortType.OLDER && it != SortType.RECENT }.toTypedArray()
-    }
+    private fun List<SortType>.trashTypes(): List<SortType> = filter { it != SortType.OLDER && it != SortType.RECENT }
+
+    private fun searchTypes(): List<SortType> = listOf(SortType.OLDER, SortType.RECENT)
 
     class SortFilesViewHolder(val binding: ItemSelectBottomSheetBinding) : ViewHolder(binding.root)
 }

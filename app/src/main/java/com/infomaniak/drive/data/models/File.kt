@@ -430,7 +430,7 @@ open class File(
         // EXTENSION("asc", "extension", R.string.sortExtension); // TODO: Awaiting API
     }
 
-    enum class SortTypeUsage { FILE_LIST, TRASH }
+    enum class SortTypeUsage { FILE_LIST, TRASH, SEARCH }
 
     @Parcelize
     enum class FolderPermission(
