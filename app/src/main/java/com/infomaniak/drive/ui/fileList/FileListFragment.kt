@@ -105,7 +105,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
     protected open var allowCancellation = true
-    protected open var sortTypeUsage = SortTypeUsage.FILE_LIST
+    protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
     private val noItemsFoldersTitle: Int by lazy {
         if (mainViewModel.currentFolder.value?.rights?.canCreateFile == true

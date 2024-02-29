@@ -45,7 +45,7 @@ class TrashFragment : FileSubTypeListFragment() {
     val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
 
     override var enabledMultiSelectMode: Boolean = true
-    override var sortTypeUsage = SortTypeUsage.TRASH
+    override val sortTypeUsage = SortTypeUsage.TRASH
 
     override val noItemsRootIcon = R.drawable.ic_delete
     override val noItemsRootTitle = R.string.trashNoFile
