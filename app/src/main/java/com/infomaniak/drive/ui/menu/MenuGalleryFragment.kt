@@ -42,33 +42,46 @@ class MenuGalleryFragment : Fragment() {
     private var binding: FragmentMenuGalleryBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private var galleryFragment: GalleryFragment? = null
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentMenuGalleryBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        ViewCompat.requestApplyInsets(binding.galleryListCoordinator)
+        val galleryFragment = addGalleryFragment()
+        setUi(galleryFragment)
+    }
 
-        ViewCompat.requestApplyInsets(galleryListCoordinator)
+    private fun addGalleryFragment(): GalleryFragment {
+        with(childFragmentManager) {
+            (findFragmentByTag(GalleryFragment.TAG) as? GalleryFragment)?.let {
+                return it
+            } ?: run {
+                val galleryFragment = GalleryFragment()
+                beginTransaction()
+                    .replace(R.id.galleryFragmentView, galleryFragment, GalleryFragment.TAG)
+                    .commit()
+                return galleryFragment
+            }
+        }
+    }
 
-        instantiateGalleryFragment()
-
-        swipeRefreshLayout.setOnRefreshListener { galleryFragment?.onRefreshGallery() }
+    private fun setUi(galleryFragment: GalleryFragment) = with(binding) {
+        swipeRefreshLayout.setOnRefreshListener { galleryFragment.onRefreshGallery() }
 
         multiSelectLayout.apply {
             selectAllButton.isGone = true
-            setMultiSelectClickListeners()
+            setMultiSelectClickListeners(galleryFragment)
         }
 
-        galleryFragment!!.menuGalleryBinding = binding
+        galleryFragment.menuGalleryBinding = binding
 
         appBar.addOnOffsetChangedListener { _, verticalOffset ->
-            galleryFragment!!.setScrollbarTrackOffset(appBar.totalScrollRange + verticalOffset)
+            galleryFragment.setScrollbarTrackOffset(appBar.totalScrollRange + verticalOffset)
         }
 
-        adjustFastScrollBarScrollRange()
+        adjustFastScrollBarScrollRange(galleryFragment)
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
             noNetworkBinding = noNetworkInclude,
@@ -76,39 +89,26 @@ class MenuGalleryFragment : Fragment() {
         )
     }
 
-    private fun instantiateGalleryFragment() {
-        with(childFragmentManager) {
-            (findFragmentByTag(GalleryFragment.TAG) as? GalleryFragment)?.let {
-                galleryFragment = it
-            } ?: run {
-                val fragment = galleryFragment ?: GalleryFragment().also { galleryFragment = it }
-                beginTransaction()
-                    .replace(R.id.galleryFragmentView, fragment, GalleryFragment.TAG)
-                    .commitNow()
-            }
-        }
-    }
-
-    private fun MultiSelectLayoutBinding.setMultiSelectClickListeners() = with(galleryFragment) {
-        toolbarMultiSelect.setNavigationOnClickListener { galleryFragment?.closeMultiSelect() }
-        moveButtonMultiSelect.setOnClickListener { galleryFragment?.onMoveButtonClicked() }
-        deleteButtonMultiSelect.setOnClickListener { galleryFragment?.deleteFiles() }
+    private fun MultiSelectLayoutBinding.setMultiSelectClickListeners(galleryFragment: GalleryFragment) = with(galleryFragment) {
+        toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
+        moveButtonMultiSelect.setOnClickListener { onMoveButtonClicked() }
+        deleteButtonMultiSelect.setOnClickListener { deleteFiles() }
         menuButtonMultiSelect.setOnClickListener {
-            galleryFragment?.onMenuButtonClicked(
+            onMenuButtonClicked(
                 multiSelectBottomSheet = GalleryMultiSelectActionsBottomSheetDialog(),
                 areAllFromTheSameFolder = false,
             )
         }
     }
 
-    private fun adjustFastScrollBarScrollRange() = with(binding) {
+    private fun adjustFastScrollBarScrollRange(galleryFragment: GalleryFragment) = with(binding) {
         val bottomNavigationOffset = with((activity as MainActivity).getBottomNavigation()) {
             layoutParams.height + marginBottom + marginTop + 10.toPx()
         }
 
         appBar.addOnOffsetChangedListener { _, verticalOffset ->
             val margin = appBar.totalScrollRange + verticalOffset + bottomNavigationOffset
-            galleryFragment!!.setScrollbarTrackOffset(margin)
+            galleryFragment.setScrollbarTrackOffset(margin)
         }
     }
 }
