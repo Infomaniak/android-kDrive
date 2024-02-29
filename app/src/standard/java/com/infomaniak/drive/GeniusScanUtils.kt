@@ -101,7 +101,7 @@ object GeniusScanUtils : IGeniusScanUtils {
     }
 
     override fun Context.initGeniusScanSdk() = try {
-        GeniusScanSDK.init(this, GeniusScanEnv.GENIUS_SCAN_KEY)
+        GeniusScanSDK.setLicenseKey(this, GeniusScanEnv.GENIUS_SCAN_KEY)
         true
     } catch (licenseException: LicenseException) {
         licenseException.printStackTrace()
