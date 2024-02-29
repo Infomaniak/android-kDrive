@@ -250,6 +250,10 @@ open class UploadFile(
             }
         }
 
+        fun getCurrentUserPendingUploadFile(folderId: Int? = null): RealmResults<UploadFile> {
+            return pendingUploadsQuery(getRealmInstance(), folderId, true, driveIds = currentDriveAndSharedWithMeIds()).findAll()
+        }
+
         fun getAllUploadedFiles(type: String = Type.SYNC.name): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
             realm.uploadTable
                 .equalTo(UploadFile::type.name, type)

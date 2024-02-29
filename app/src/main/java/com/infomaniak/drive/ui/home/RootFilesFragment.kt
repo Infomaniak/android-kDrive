@@ -34,7 +34,6 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_LOCAL
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
@@ -76,6 +75,7 @@ class RootFilesFragment : Fragment() {
         setupItems()
 
         updateAndObserveFiles()
+        observePendingFilesUpload()
         observeNavigateFileListTo()
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
@@ -85,9 +85,10 @@ class RootFilesFragment : Fragment() {
         rootFilesUploadFileInProgressView.setUploadFileInProgress(this@RootFilesFragment, Utils.OTHER_ROOT_ID)
     }
 
-    override fun onResume() {
-        super.onResume()
-        showPendingFiles()
+    private fun observePendingFilesUpload() {
+        mainViewModel.pendingUploadsCount.observe(viewLifecycleOwner) {
+            binding.rootFilesUploadFileInProgressView.updateUploadFileInProgress(it)
+        }
     }
 
     private fun setupDriveToolbar() = with(binding) {
@@ -189,10 +190,6 @@ class RootFilesFragment : Fragment() {
                 displayFile(file, mainViewModel, fileAdapter = null)
             }
         }
-    }
-
-    private fun showPendingFiles() {
-        binding.rootFilesUploadFileInProgressView.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
     }
 
     data class FolderToOpen(val id: Int, val name: String)
