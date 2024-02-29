@@ -617,8 +617,10 @@
     <string name="sortBigger">Plus grand</string>
     <string name="sortDay">Par jour</string>
     <string name="sortExtension">Extension</string>
+    <string name="sortLeastRelevant">Moins pertinent</string>
     <string name="sortMonth">Par mois</string>
     <string name="sortMostRecentAdded">Plus récemment ajouté</string>
+    <string name="sortMostRelevant">Plus pertinent</string>
     <string name="sortNameAZ">Nom : de A à Z</string>
     <string name="sortNameZA">Nom : de Z à A</string>
     <string name="sortOlder">Plus ancien</string>

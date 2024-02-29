@@ -772,6 +772,10 @@ object FileController {
             SortType.RECENT_TRASHED -> sort(File::deletedAt.name, Sort.DESCENDING)
             SortType.SMALLER -> sort(File::size.name, Sort.ASCENDING)
             SortType.BIGGER -> sort(File::size.name, Sort.DESCENDING)
+            // Because we don't know how to compute relevance here, we fallback on the 'last modified' sorting for this pretty
+            // unusual case
+            SortType.LEAST_RELEVANT -> sort(File::lastModifiedAt.name, Sort.ASCENDING)
+            SortType.MOST_RELEVANT -> sort(File::lastModifiedAt.name, Sort.DESCENDING)
             // SortType.EXTENSION -> sort(File::convertedType.name, Sort.ASCENDING) // TODO implement
         }
     }
