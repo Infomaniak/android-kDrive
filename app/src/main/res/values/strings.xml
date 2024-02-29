@@ -573,7 +573,6 @@
     <string name="settingsOnlyWifiSyncDescription">Uploads and updates of offline files will only be done with a Wi-Fi connection.</string>
     <string name="settingsOnlyWifiSyncTitle">WiFi-only transfer</string>
     <string name="settingsTitle">Settings</string>
-    <string name="share">Share</string>
     <string name="shareFileInputUserAndEmail">Invite a user or an email address…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Users can only view the document.</string>
     <string name="shareLinkOfficePermissionReadFolderDescription">Users can only view files within the shared folder.</string>

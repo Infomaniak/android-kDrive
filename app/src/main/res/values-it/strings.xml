@@ -562,7 +562,6 @@
     <string name="settingsOnlyWifiSyncDescription">I caricamenti e gli aggiornamenti dei file offline saranno effettuati solo con una connessione Wi-Fi.</string>
     <string name="settingsOnlyWifiSyncTitle">Trasferimento solo tramite Wi-Fi</string>
     <string name="settingsTitle">Impostazioni</string>
-    <string name="share">Condividi</string>
     <string name="shareFileInputUserAndEmail">Invita un utente o un indirizzo e-mail…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Gli utenti possono soltanto consultare il documento.</string>
     <string name="shareLinkOfficePermissionReadFolderDescription">Gli utenti possono soltanto consultare i file presenti nella cartella condivisa.</string>

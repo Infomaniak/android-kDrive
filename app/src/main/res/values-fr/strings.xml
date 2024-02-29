@@ -562,7 +562,6 @@
     <string name="settingsOnlyWifiSyncDescription">Les importations et la mise à jour des fichiers hors ligne seront uniquement effectuées avec une connexion Wi-Fi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transfert uniquement en Wi-Fi</string>
     <string name="settingsTitle">Paramètres</string>
-    <string name="share">Partager</string>
     <string name="shareFileInputUserAndEmail">Invitez un utilisateur ou une adresse mail…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Les utilisateurs peuvent uniquement consulter le document.</string>
     <string name="shareLinkOfficePermissionReadFolderDescription">Les utilisateurs peuvent uniquement consulter les fichiers à l’intérieur du dossier partagé.</string>

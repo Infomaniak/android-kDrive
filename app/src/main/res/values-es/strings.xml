@@ -562,7 +562,6 @@
     <string name="settingsOnlyWifiSyncDescription">Las cargas y actualizaciones de archivos sin conexión sólo se harán con una conexión Wi-Fi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transferencia sólo con WiFi</string>
     <string name="settingsTitle">Parámetros</string>
-    <string name="share">Compartir</string>
     <string name="shareFileInputUserAndEmail">Invita a un usuario o una dirección de correo electrónico…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Los usuarios únicamente pueden consultar el documento.</string>
     <string name="shareLinkOfficePermissionReadFolderDescription">Los usuarios únicamente pueden consultar los archivos dentro de la carpeta compartida.</string>

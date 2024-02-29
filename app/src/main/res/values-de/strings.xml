@@ -562,7 +562,6 @@
     <string name="settingsOnlyWifiSyncDescription">Uploads und Aktualisierungen von Offline-Dateien können nur über eine Wi-Fi-Verbindung durchgeführt werden.</string>
     <string name="settingsOnlyWifiSyncTitle">Übertragung nur im WLAN</string>
     <string name="settingsTitle">Einstellungen</string>
-    <string name="share">Teilen Sie</string>
     <string name="shareFileInputUserAndEmail">Laden Sie einen Benutzer oder eine E-Mail-Adresse ein…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Benutzer können das Dokument nur einsehen.</string>
     <string name="shareLinkOfficePermissionReadFolderDescription">Benutzer können nur Dateien innerhalb des freigegebenen Ordners einsehen.</string>
