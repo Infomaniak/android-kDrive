@@ -421,12 +421,14 @@ open class File(
         NAME_ZA("desc", "name", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
-        OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
-        MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         OLDER_TRASHED("asc", "deleted_at", R.string.sortOlder),
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
+        OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
+        MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         SMALLER("asc", "size", R.string.sortSmaller),
         BIGGER("desc", "size", R.string.sortBigger),
+        LEAST_RELEVANT("asc", "relevance", R.string.sortLeastRelevant),
+        MOST_RELEVANT("desc", "relevance", R.string.sortMostRelevant),
         // EXTENSION("asc", "extension", R.string.sortExtension); // TODO: Awaiting API
     }
 

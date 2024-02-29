@@ -58,12 +58,28 @@ class SortFilesBottomSheetAdapter(
     }
 
     private fun List<SortType>.fileListTypes(): List<SortType> {
-        return filter { it != SortType.OLDER_TRASHED && it != SortType.RECENT_TRASHED }
+        val forbiddenSortTypes = setOf(
+            SortType.OLDER_TRASHED,
+            SortType.RECENT_TRASHED,
+            SortType.LEAST_RELEVANT,
+            SortType.MOST_RELEVANT,
+        )
+        return filterNot(forbiddenSortTypes::contains)
     }
 
-    private fun List<SortType>.trashTypes(): List<SortType> = filter { it != SortType.OLDER && it != SortType.RECENT }
+    private fun List<SortType>.trashTypes(): List<SortType> {
+        val forbiddenSortTypes = setOf(
+            SortType.OLDER,
+            SortType.RECENT,
+            SortType.LEAST_RELEVANT,
+            SortType.MOST_RELEVANT,
+        )
+        return filterNot(forbiddenSortTypes::contains)
+    }
 
-    private fun searchTypes(): List<SortType> = listOf(SortType.OLDER, SortType.RECENT)
+    private fun searchTypes(): List<SortType> {
+        return listOf(SortType.OLDER, SortType.RECENT, SortType.MOST_RELEVANT, SortType.LEAST_RELEVANT)
+    }
 
     class SortFilesViewHolder(val binding: ItemSelectBottomSheetBinding) : ViewHolder(binding.root)
 }
