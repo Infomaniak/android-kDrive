@@ -31,7 +31,7 @@ jobs:
       GENIUS_SCAN_KEY: ${{ secrets.GENIUS_SCAN_KEY }}
 
     steps:
-      - name: Cancel Previous Runs
+      - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
@@ -42,7 +42,7 @@ jobs:
           token: ${{ secrets.MY_REPO_PAT }}
           submodules: recursive
 
-      - name: create AVD and generate snapshot for caching
+      - name: Create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2.27.0
         with:
@@ -68,7 +68,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run Unit tests
+      - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Run instrumentation tests
