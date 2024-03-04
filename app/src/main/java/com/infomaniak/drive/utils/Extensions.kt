@@ -405,15 +405,15 @@ fun LayoutSwitchDriveBinding.setDriveHeader(currentDrive: Drive) {
 }
 
 fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
-    switchDriveButton.apply {
-        AccountUtils.getCurrentDrive()?.let { setDriveHeader(it) }
+    AccountUtils.getCurrentDrive()?.let { setDriveHeader(it) }
 
-        if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
+    if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
+        switchDriveButton.apply {
             icon = null
             isEnabled = false
-        } else {
-            setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
         }
+    } else {
+        offsetOverlayedRipple.setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
     }
 
     fragment.viewLifecycleOwner.lifecycle.addObserver(
