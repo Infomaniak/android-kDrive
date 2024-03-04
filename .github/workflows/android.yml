@@ -39,9 +39,9 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v4.1.1
         with:
-          token: ${{ secrets.MY_REPO_PAT }}
+          token: ${{ github.token }}
           submodules: recursive
-
+          
       - name: Create test env
         run: |
           touch $ENV_PATH
