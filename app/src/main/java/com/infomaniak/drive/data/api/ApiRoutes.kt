@@ -24,12 +24,45 @@ import com.infomaniak.drive.utils.FileId
 
 object ApiRoutes {
 
-    private const val fileWithQuery = "with=capabilities,categories,conversion_capabilities,dropbox,dropbox.capabilities," +
-            "external_import,is_favorite,path,sharelink,sorted_name"
+    private const val fileWithQuery = "with=capabilities,categories,conversion_capabilities," +
+            "dropbox,dropbox.capabilities,external_import,is_favorite,path,sharelink,sorted_name"
     private const val fileExtraWithQuery = "$fileWithQuery,users,version"
     private const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities," +
             "file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name"
-    const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
+    private const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
+
+    private const val ACTIONS = "&actions[]=file_create" +
+            "&actions[]=file_rename" +
+            "&actions[]=file_move" +
+            "&actions[]=file_move_out" +
+            "&actions[]=file_trash" +
+            "&actions[]=file_restore" +
+            "&actions[]=file_delete" +
+            "&actions[]=file_update" +
+            "&actions[]=file_favorite_create" +
+            "&actions[]=file_favorite_remove" +
+            "&actions[]=file_share_create" +
+            "&actions[]=file_share_update" +
+            "&actions[]=file_share_delete" +
+            "&actions[]=file_categorize" +
+            "&actions[]=file_uncategorize" +
+            "&actions[]=file_color_update" +
+            "&actions[]=file_color_delete" +
+            "&actions[]=share_link_create" +
+            "&actions[]=share_link_update" +
+            "&actions[]=share_link_delete" +
+            "&actions[]=collaborative_folder_create" +
+            "&actions[]=collaborative_folder_update" +
+            "&actions[]=collaborative_folder_delete"
+
+    private const val ADDITIONAL_ACTIONS = "&actions[]=file_access" +
+            "&actions[]=comment_create" +
+            "&actions[]=comment_update" +
+            "&actions[]=comment_delete" +
+            "&actions[]=comment_like" +
+            "&actions[]=comment_unlike" +
+            "&actions[]=comment_resolve" +
+            "&actions[]=share_link_show"
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
@@ -88,7 +121,19 @@ object ApiRoutes {
     fun getLastActivities(driveId: Int) =
         "${filesURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions&no_avatar_default=1"
 
-    fun getFileActivities(file: File) = "${fileURL(file)}/activities?no_avatar_default=1"
+    fun getFileActivities(file: File, forFileList: Boolean, pagination: String): String {
+
+        val baseUrl = "${fileURL(file)}/activities"
+        val baseParameters = "?no_avatar_default=1&${pagination}"
+        val sourceDependentParameters = if (forFileList) {
+            "&depth=children&from_date=${file.responseAt}&${activitiesWithExtraQuery}"
+        } else {
+            "&with=user"
+        }
+        val actionsParameters = ACTIONS + if (forFileList) "" else ADDITIONAL_ACTIONS
+
+        return baseUrl + baseParameters + sourceDependentParameters + actionsParameters
+    }
 
     fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
         "${filesURL(driveId)}/activities/batch?no_avatar_default=1&$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
