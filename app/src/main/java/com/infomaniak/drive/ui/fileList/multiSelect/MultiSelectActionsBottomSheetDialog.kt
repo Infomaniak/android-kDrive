@@ -78,8 +78,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     protected open fun configureManageCategories(areIndividualActionsVisible: Boolean) = with(binding) {
         if (areIndividualActionsVisible) {
-            disabledManageCategories.isGone = computeManageCategoriesAvailability()
             manageCategories.apply {
+                isEnabled = computeManageCategoriesAvailability()
                 setOnClickListener { onActionSelected(SelectDialogAction.MANAGE_CATEGORIES) }
                 isVisible = true
             }
@@ -109,8 +109,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) = with(binding) {
         if (areIndividualActionsVisible) {
-            disabledColoredFolder.isGone = computeColoredFolderAvailability()
             coloredFolder.apply {
+                isEnabled = computeColoredFolderAvailability()
                 setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
                 isVisible = true
             }
@@ -125,7 +125,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     protected open fun configureAvailableOffline(): Unit = with(binding) {
         availableOfflineIcon.isGone = navigationArgs.onlyOffline
         availableOfflineComplete.isVisible = navigationArgs.onlyOffline
-        disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
+        availableOffline.isEnabled = !navigationArgs.onlyFolders
 
         availableOfflineSwitch.apply {
             isChecked = navigationArgs.onlyOffline
