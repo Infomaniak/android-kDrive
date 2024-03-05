@@ -42,16 +42,15 @@ class MediaObserverWorker(appContext: Context, params: WorkerParameters) : Corou
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         SentryLog.d("MediaContentJob", "$TAG> JOB STARTED!")
 
-        triggeredContentAuthorities.ifEmpty { null }?.let {
-            if (!applicationContext.isSyncActive()) {
-                when {
-                    MediaFolder.getAllSyncedFoldersCount() > 0 -> applicationContext.syncImmediately()
-                    else -> applicationContext.showSyncConfigNotification()
-                }
+        if (!applicationContext.isSyncActive()) {
+            when {
+                MediaFolder.getAllSyncedFoldersCount() > 0 -> applicationContext.syncImmediately()
+                else -> applicationContext.showSyncConfigNotification()
             }
         }
 
         nextScheduleWork(applicationContext)
+        SentryLog.d("MediaContentJob", "$TAG> JOB FINISHED!")
         Result.success()
     }
 
