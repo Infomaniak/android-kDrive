@@ -25,6 +25,7 @@
     <string name="accessDeniedDescriptionIsAdmin">Souhaitez-vous modifier les droits de ce dossier pour y accéder ? Vous serez ajouté aux utilisateurs ayant accès à ce dosser. Les autres utilisateurs de ce dossier seront notifiés par e-mail.</string>
     <string name="accessDeniedDescriptionIsNotAdmin">Veuillez contacter un administrateur du kDrive pour modifier vos droits.</string>
     <string name="accessDeniedTitle">Vous n’avez pas l’autorisation d’accéder à ce dossier.</string>
+    <string name="actionPrint">Imprimer</string>
     <string name="addCategoriesTitle">Ajouter des catégories</string>
     <string name="addPassword">Protéger avec un mot de passe</string>
     <string name="alertRemoveUserDescription">Êtes vous sûr(e) de vouloir retirer l’utilisateur “%s” de cette application ?</string>
@@ -90,6 +91,12 @@
     <string name="backgroundSyncTitle">Synchronisation en arrière-plan</string>
     <string name="belongToAllCategoriesFilterDescription">Les résultats doivent appartenir à toutes les catégories sélectionnées</string>
     <string name="belongToOneCategoryFilterDescription">Les résultats doivent appartenir à une des catégories sélectionnées</string>
+    <plurals name="bulkDownloadNotificationContent">
+        <item quantity="one">1 fichier téléchargé sur %2$d</item>
+        <item quantity="other">%1$d fichiers téléchargés sur %2$d</item>
+    </plurals>
+    <string name="bulkDownloadNotificationTitleNoProgress">Importation en cours</string>
+    <string name="bulkDownloadNotificationTitleWithProgress">Importation en cours (%1$d%%)</string>
     <string name="buttonAdd">Ajouter</string>
     <string name="buttonAddComment">Ajouter un commentaire</string>
     <string name="buttonAddFavorites">Ajouter aux favoris</string>
@@ -131,6 +138,7 @@
     <string name="buttonMove">Déplacer</string>
     <string name="buttonMoveTo">Déplacer vers</string>
     <string name="buttonNewPassword">Définir un nouveau mot de passe</string>
+    <string name="buttonNo">Non</string>
     <string name="buttonNoDriveAnotherUser">Utiliser un autre profil Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Tester gratuitement</string>
     <string name="buttonOpenDocument">Ouvrir le document</string>
@@ -181,6 +189,7 @@
     <string name="categoryWork">Travail</string>
     <string name="cloudStorageMissingPermissionNotifDescription">L’app ne peut pas fonctionner en arrière-plan à cause d’une permission manquante.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Recherche impossible, aucun drive n’a été sélectionné</string>
+    <string name="commonDocumentsDescription">Cet espace appartient à %s et centralise les fichiers communs de votre organisation.</string>
     <string name="commonFolderDescription">Partagez ce dossier avec des utilisateurs du kDrive %s</string>
     <string name="commonFolderTitle">Dossier commun</string>
     <string name="contentDescriptionIsSelected">Est sélectionné</string>
@@ -451,7 +460,10 @@
     <string name="homeTitle">Accueil</string>
     <string name="inputExpirationDate">Date d’expiration</string>
     <string name="inputExpirationTime">Heure d’expiration</string>
+    <string name="kDrivePdfViewer">Lecteur PDF de kDrive</string>
     <string name="lastEditsTitle">Dernières modifications</string>
+    <string name="localizedFilenamePrivateSpace">Mes fichiers</string>
+    <string name="localizedFilenameTeamSpace">Dossiers de l’organisation</string>
     <string name="locateButton">Localiser</string>
     <string name="manageCategoriesCreateTitle">Créer %s</string>
     <string name="manageCategoriesNoCategory">Aucune catégorie</string>
@@ -542,6 +554,7 @@
     <string name="recentActivitySeeMore">Voir plus de fichiers récents</string>
     <string name="refreshTokenError">Vous avez été déconnecté en raison d’un problème. Veuillez vous reconnecter</string>
     <string name="restrictedSharedLinkTitle">Lien de partage restreint</string>
+    <string name="reviewAlertTitle">Aimez-vous kDrive ?</string>
     <string name="saveExternalFileInputFileName">Nom du document</string>
     <string name="saveExternalFileTitle">Enregistrer sur le kDrive</string>
     <string name="searchFilterTitle">Types de fichiers</string>
@@ -615,8 +628,10 @@
     <string name="sortBigger">Plus grand</string>
     <string name="sortDay">Par jour</string>
     <string name="sortExtension">Extension</string>
+    <string name="sortLeastRelevant">Moins pertinent</string>
     <string name="sortMonth">Par mois</string>
     <string name="sortMostRecentAdded">Plus récemment ajouté</string>
+    <string name="sortMostRelevant">Plus pertinent</string>
     <string name="sortNameAZ">Nom : de A à Z</string>
     <string name="sortNameZA">Nom : de Z à A</string>
     <string name="sortOlder">Plus ancien</string>
@@ -705,6 +720,7 @@
     <string name="uploadNetworkErrorWifiRequired">En attente de réseau Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Mémoire vive disponible insuffisante</string>
     <string name="uploadPermissionError">Autorisations supplémentaires demandées</string>
+    <string name="urlUserReportAndroid">https://feedback.userreport.com/62305caf-7dd2-4573-9422-bb0d255fe834/</string>
     <string name="userInviteByEmail">Inviter par e-mail</string>
     <string name="userPermissionManage">Peut gérer</string>
     <string name="userPermissionManageDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier\nPartage avec d’autres utilisateurs</string>

@@ -56,4 +56,8 @@ object MatomoDrive : MatomoCore {
     fun Activity.trackInAppUpdate(name: String) {
         trackEvent("inAppUpdate", name)
     }
+
+    fun Activity.trackInAppReview(name: String) {
+        trackEvent("inAppReview", name)
+    }
 }

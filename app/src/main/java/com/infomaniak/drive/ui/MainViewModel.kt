@@ -43,6 +43,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
+import com.infomaniak.lib.stores.StoresSettingsRepository
 import io.realm.Realm
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -80,6 +81,13 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
+
+    private val storesSettingsRepository = StoresSettingsRepository(getApplication())
+
+    val canInstallUpdate = storesSettingsRepository
+        .flowOf(StoresSettingsRepository.HAS_APP_UPDATE_DOWNLOADED_KEY)
+        .asLiveData(viewModelScope.coroutineContext + Dispatchers.IO)
+        .distinctUntilChanged()
 
     private fun getContext() = getApplication<MainApplication>()
 
