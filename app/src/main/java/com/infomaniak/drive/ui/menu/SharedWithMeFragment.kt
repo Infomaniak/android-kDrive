@@ -107,7 +107,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     private fun File.openSharedWithMeFolder() {
         safeNavigate(
             SharedWithMeFragmentDirections.actionSharedWithMeFragmentSelf(
-                folderId = if (isDrive()) ROOT_ID else id,
+                folderId = id,
                 folderName = name,
                 driveId = driveId,
             )
