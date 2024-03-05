@@ -447,7 +447,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         } else {
             resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
         }
-        showSnackbar(title, true)
+        showSnackbar(title, showAboveFab = true)
         closeMultiSelect()
 
         onAllIndividualActionsFinished(type)

@@ -245,6 +245,7 @@ open class UploadFile(
 
         fun getCurrentUserPendingUploadsCount(folderId: Int? = null): Int {
             return getRealmInstance().use { realm ->
+                realm.refresh() // TODO : Remove when we update to Realm Kotlin
                 pendingUploadsQuery(realm, folderId, true, driveIds = currentDriveAndSharedWithMeIds()).count().toInt()
             }
         }

@@ -85,6 +85,7 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
+import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
 import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import io.sentry.Breadcrumb
@@ -143,12 +144,14 @@ class MainActivity : BaseActivity() {
             }
         }
 
-    private val inAppUpdateManager by lazy { initAppUpdateManager() }
+    private val inAppUpdateManager by lazy { InAppUpdateManager(this, BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) }
     private var inAppUpdateSnackbar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
         downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
@@ -166,7 +169,7 @@ class MainActivity : BaseActivity() {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
-        setInAppManagerCallbacks()
+        initAppUpdateManager()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -238,38 +241,31 @@ class MainActivity : BaseActivity() {
         if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
     }
 
-
     //region In-App Updates
-    private fun initAppUpdateManager() = InAppUpdateManager(
-        activity = this,
-        appId = BuildConfig.APPLICATION_ID,
-        versionCode = BuildConfig.VERSION_CODE,
-        onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) "discoverNow" else "discoverLater") },
-        onInstallStart = { trackInAppUpdate("installUpdate") },
-        onInstallFailure = {
-            Sentry.captureException(it)
-            showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab())
-        },
-    )
-
-    private fun setInAppManagerCallbacks() {
-        inAppUpdateManager.apply {
+    private fun initAppUpdateManager() {
+        inAppUpdateManager.init(
+            onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) "discoverNow" else "discoverLater") },
+            onInstallStart = { trackInAppUpdate("installUpdate") },
+            onInstallFailure = {
+                Sentry.captureException(it)
+                showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab())
+            },
             onInAppUpdateUiChange = { isUpdateDownloaded ->
                 if (isUpdateDownloaded && canDisplayInAppSnackbar()) {
                     inAppUpdateSnackbar = showIndefiniteSnackbar(
                         title = R.string.updateReadyTitle,
                         actionButtonTitle = R.string.updateInstallButton,
                         anchor = getMainFab(),
-                        onActionClicked = ::installDownloadedUpdate,
+                        onActionClicked = inAppUpdateManager::installDownloadedUpdate,
                     )
                 } else if (!isUpdateDownloaded) {
                     inAppUpdateSnackbar?.dismiss()
                 }
-            }
+            },
             onFDroidResult = { updateIsAvailable ->
                 if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
-            }
-        }
+            },
+        )
     }
 
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true

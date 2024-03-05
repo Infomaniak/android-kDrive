@@ -352,7 +352,6 @@ class SaveExternalFilesActivity : BaseActivity() {
             *fileNameEdit.filters
         )
 
-
         val fileName = when {
             intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return
             intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()

@@ -72,7 +72,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
     private lateinit var userDrive: UserDrive
-    private var showUi = false
+    private var isUiShown = false
 
     override val ownerFragment = this
     override lateinit var currentFile: File
@@ -222,7 +222,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
 
     private fun clearEdgeToEdge() {
-        toggleSystemBar(true)
+        toggleSystemBar(shouldShow = true)
         requireActivity().window.toggleEdgeToEdge(false)
     }
 
@@ -243,20 +243,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 addTarget(R.id.header)
             }
             TransitionManager.beginDelayedTransition(this, transition)
-            _binding?.header?.isVisible = showUi
+            _binding?.header?.isVisible = isUiShown
 
-            toggleBottomSheet(showUi)
-            toggleSystemBar(showUi)
+            toggleBottomSheet(shouldShow = isUiShown)
+            toggleSystemBar(shouldShow = isUiShown)
 
-            showUi = !showUi
-        }
-    }
-
-    private fun toggleSystemBar(show: Boolean) {
-        getWindowInsetsController(requireActivity().window.decorView)?.apply {
-            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            val systemBars = WindowInsetsCompat.Type.systemBars()
-            if (show) show(systemBars) else hide(systemBars)
+            isUiShown = !isUiShown
         }
     }
 
@@ -295,8 +287,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     expandedOffset = topOffset
                     maxHeight = root.height - topOffset
                 }
-                /* Add padding to the bottom to allow the last element of the list to be displayed right over the
-                 android navigation bar */
+                // Add padding to the bottom to allow the last element of the
+                // list to be displayed right over the android navigation bar
                 bottomSheetFileInfos.setPadding(0, 0, 0, bottom)
             }
 
@@ -341,14 +333,19 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
-    override fun sharePublicLink() {
-        binding.bottomSheetFileInfos.createPublicShareLink(onSuccess = { sharelinkUrl ->
-            context?.shareText(sharelinkUrl)
-            toggleBottomSheet(true)
-        }, onError = { translatedError ->
-            showSnackbar(translatedError)
-            toggleBottomSheet(true)
-        })
+    override fun sharePublicLink(onActionFinished: () -> Unit) {
+        binding.bottomSheetFileInfos.createPublicShareLink(
+            onSuccess = { shareLinkUrl ->
+                context?.shareText(shareLinkUrl)
+                toggleBottomSheet(shouldShow = true)
+                onActionFinished()
+            },
+            onError = { translatedError ->
+                showSnackbar(translatedError)
+                toggleBottomSheet(shouldShow = true)
+                onActionFinished()
+            },
+        )
     }
 
     override fun addFavoritesClicked() {
@@ -362,7 +359,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 } else {
                     showSnackbar(R.string.errorDelete)
                 }
-                toggleBottomSheet(true)
+                toggleBottomSheet(shouldShow = true)
             }
             if (isFavorite) {
                 mainViewModel.deleteFileFromFavorites(this).observe(viewLifecycleOwner, observer)
@@ -372,12 +369,20 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    private fun toggleBottomSheet(show: Boolean) {
+    private fun toggleBottomSheet(shouldShow: Boolean) {
         binding.bottomSheetFileInfos.scrollToTop()
-        bottomSheetBehavior.state = if (show) {
+        bottomSheetBehavior.state = if (shouldShow) {
             BottomSheetBehavior.STATE_COLLAPSED
         } else {
             BottomSheetBehavior.STATE_HIDDEN
+        }
+    }
+
+    private fun toggleSystemBar(shouldShow: Boolean) {
+        getWindowInsetsController(requireActivity().window.decorView)?.apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            val systemBars = WindowInsetsCompat.Type.systemBars()
+            if (shouldShow) show(systemBars) else hide(systemBars)
         }
     }
 
@@ -413,7 +418,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun downloadFileClicked() {
         super.downloadFileClicked()
         binding.bottomSheetFileInfos.downloadFile(drivePermissions) {
-            toggleBottomSheet(true)
+            toggleBottomSheet(shouldShow = true)
         }
     }
 
@@ -434,11 +439,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     mainViewModel.currentPreviewFileList[file.id] = file
                     previewSliderAdapter.addFile(file)
                     showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
-                    toggleBottomSheet(true)
+                    toggleBottomSheet(shouldShow = true)
                 }
             } else {
                 showSnackbar(R.string.errorDuplicate)
-                toggleBottomSheet(true)
+                toggleBottomSheet(shouldShow = true)
             }
             onApiResponse()
         }
@@ -447,11 +452,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) {
         binding.bottomSheetFileInfos.onRenameFile(mainViewModel, newName,
             onSuccess = {
-                toggleBottomSheet(true)
+                toggleBottomSheet(shouldShow = true)
                 showSnackbar(getString(R.string.allFileRename, currentFile.name))
                 onApiResponse()
             }, onError = { translatedError ->
-                toggleBottomSheet(true)
+                toggleBottomSheet(shouldShow = true)
                 showSnackbar(translatedError)
                 onApiResponse()
             })
@@ -505,7 +510,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         if (previewSliderAdapter.deleteFile(currentFile)) {
             findNavController().popBackStack()
         } else {
-            toggleBottomSheet(true)
+            toggleBottomSheet(shouldShow = true)
         }
     }
 

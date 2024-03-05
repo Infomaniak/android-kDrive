@@ -171,5 +171,4 @@
             android:nestedScrollingEnabled="true" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

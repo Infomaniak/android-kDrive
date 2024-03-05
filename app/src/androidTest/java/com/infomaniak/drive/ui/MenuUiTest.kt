@@ -55,10 +55,10 @@ class MenuUiTest : KDriveUiTest() {
         with(device) {
 
             // Username
-            findObject(UiSelector().instance(0).className(EditText::class.java)).text = Env.NEW_USER_NAME
+            findObject(UiSelector().instance(0).className(EditText::class.java)).setText(Env.NEW_USER_NAME)
 
             // Password
-            findObject(UiSelector().instance(1).className(EditText::class.java)).text = Env.NEW_USER_PASSWORD
+            findObject(UiSelector().instance(1).className(EditText::class.java)).setText(Env.NEW_USER_PASSWORD)
 
             // Save button
             try {

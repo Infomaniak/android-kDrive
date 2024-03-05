@@ -90,7 +90,6 @@ fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
     categoriesLayout.displayCategories(file)
 }
 
-
 private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
     isVisible = file.id != ROOT_ID
     text = if (file.deletedAt.isPositive()) {
