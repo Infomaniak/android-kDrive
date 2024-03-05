@@ -53,22 +53,19 @@ class MenuGalleryFragment : Fragment() {
         setUi(galleryFragment)
     }
 
-    private fun addGalleryFragment(): GalleryFragment {
-        with(childFragmentManager) {
-            (findFragmentByTag(GalleryFragment.TAG) as? GalleryFragment)?.let {
-                return it
-            } ?: run {
-                val galleryFragment = GalleryFragment()
+    private fun addGalleryFragment(): GalleryFragment = with(childFragmentManager) {
+        return@with (findFragmentByTag(GalleryFragment.TAG) as? GalleryFragment) ?: run {
+            GalleryFragment().also {
                 beginTransaction()
-                    .replace(R.id.galleryFragmentView, galleryFragment, GalleryFragment.TAG)
+                    .replace(R.id.galleryFragmentView, it, GalleryFragment.TAG)
                     .commit()
-                return galleryFragment
             }
         }
     }
 
     private fun setUi(galleryFragment: GalleryFragment) = with(binding) {
-        swipeRefreshLayout.setOnRefreshListener { galleryFragment.onRefreshGallery() }
+
+        swipeRefreshLayout.setOnRefreshListener(galleryFragment::onRefreshGallery)
 
         multiSelectLayout.apply {
             selectAllButton.isGone = true
@@ -82,6 +79,7 @@ class MenuGalleryFragment : Fragment() {
         }
 
         adjustFastScrollBarScrollRange(galleryFragment)
+
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
             noNetworkBinding = noNetworkInclude,
