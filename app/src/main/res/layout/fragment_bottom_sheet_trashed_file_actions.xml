@@ -17,7 +17,6 @@
   -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -46,100 +45,26 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/restoreFileIn"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_restore"
+                app:text="@string/trashActionRestoreFileIn" />
 
-                <ImageView
-                    android:id="@+id/restoreFileInIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_restore"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/restoreFileInText"
-                    style="@style/Subtitle1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/trashActionRestoreFileIn"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/restoreFileInIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/restoreFileToOriginalPlace"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_restore"
+                app:text="@string/trashActionRestoreFileOriginalPlace" />
 
-                <ImageView
-                    android:id="@+id/restoreFileToOriginalPlaceIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_restore"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/restoreFileToOriginalPlaceText"
-                    style="@style/Subtitle1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/trashActionRestoreFileOriginalPlace"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/restoreFileToOriginalPlaceIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/delete"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
-
-                <ImageView
-                    android:id="@+id/deleteIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_delete"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/deleteText"
-                    style="@style/Subtitle1"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/trashActionDelete"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/deleteIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_delete"
+                app:text="@string/trashActionDelete" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
