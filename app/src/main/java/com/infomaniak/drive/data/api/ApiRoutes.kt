@@ -30,6 +30,7 @@ object ApiRoutes {
     private const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities," +
             "file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name"
     private const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
+    private const val noAvatar = "no_avatar_default=1"
 
     private const val ACTIONS = "&actions[]=file_create" +
             "&actions[]=file_rename" +
@@ -78,7 +79,7 @@ object ApiRoutes {
 
     /** V1 */
     //region V1
-    fun getAllDrivesData() = "${DRIVE_API_V1}init?no_avatar_default=1&with=drives,users,teams,ips,categories"
+    fun getAllDrivesData() = "${DRIVE_API_V1}init?${noAvatar}&with=drives,users,teams,ips,categories"
     //endregion
 
     /** Archive */
@@ -94,7 +95,7 @@ object ApiRoutes {
 
     fun fileInvitationAccess(file: File, invitationId: Int) = "${driveURL(file.driveId)}/files/invitations/$invitationId"
 
-    fun getFileShare(file: File) = "${accessUrl(file)}?no_avatar_default=1&with=user"
+    fun getFileShare(file: File) = "${accessUrl(file)}?${noAvatar}&with=user"
 
     fun checkFileShare(file: File) = "${accessUrl(file)}/check"
 
@@ -119,12 +120,12 @@ object ApiRoutes {
             "&actions[]=comment_create"
 
     fun getLastActivities(driveId: Int) =
-        "${filesURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions&no_avatar_default=1"
+        "${filesURL(driveId)}/activities?${activitiesWithQuery},user&depth=unlimited&${activitiesActions}&${noAvatar}"
 
     fun getFileActivities(file: File, forFileList: Boolean, pagination: String): String {
 
         val baseUrl = "${fileURL(file)}/activities"
-        val baseParameters = "?no_avatar_default=1&${pagination}"
+        val baseParameters = "?${noAvatar}&${pagination}"
         val sourceDependentParameters = if (forFileList) {
             "&depth=children&from_date=${file.responseAt}&${activitiesWithExtraQuery}"
         } else {
@@ -135,10 +136,9 @@ object ApiRoutes {
         return baseUrl + baseParameters + sourceDependentParameters + actionsParameters
     }
 
-    fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
-        "${filesURL(driveId)}/activities/batch?no_avatar_default=1&$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
-                "&actions[]=file_rename" +
-                "&actions[]=file_update"
+    fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) = "${filesURL(driveId)}/activities/batch" +
+            "?${noAvatar}&${activitiesWithQuery}&file_ids=${fileIds}" +
+            "&from_date=${fromDate}&actions[]=file_rename&actions[]=file_update"
 
     fun getTrashedFilesActivities(file: File) = "${trashURL(file)}/activities"
     //endregion
@@ -157,7 +157,7 @@ object ApiRoutes {
 
     /** Comment */
     //region Comment
-    private const val withComments = "no_avatar_default=1&with=user,likes,responses,responses.user,responses.likes"
+    private const val withComments = "${noAvatar}&with=user,likes,responses,responses.user,responses.likes"
 
     fun fileComments(file: File) = "${fileURL(file)}/comments?$withComments"
 
