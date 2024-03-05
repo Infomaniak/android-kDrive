@@ -92,17 +92,16 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean): Unit = with(binding) {
-        val (text, action) = with(navigationArgs) {
-            addFavoritesIcon.isEnabled = onlyFavorite
-            if (onlyFavorite) {
-                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
-            } else {
-                R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
-            }
+        val (textRes, action) = if (navigationArgs.onlyFavorite) {
+            R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
+        } else {
+            R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
         }
-        addFavoritesText.setText(text)
+
         addFavorites.apply {
+            text = getString(textRes)
             setOnClickListener { onActionSelected(action) }
+            isActivated = navigationArgs.onlyFavorite
             isVisible = areIndividualActionsVisible
         }
     }
