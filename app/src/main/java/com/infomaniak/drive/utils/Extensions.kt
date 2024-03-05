@@ -30,7 +30,9 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
-import android.transition.*
+import android.transition.AutoTransition
+import android.transition.TransitionManager
+import android.transition.TransitionSet
 import android.util.DisplayMetrics
 import android.util.Patterns
 import android.view.ViewGroup
@@ -47,6 +49,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
@@ -67,14 +70,18 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.databinding.*
+import com.infomaniak.drive.databinding.ItemUserBinding
+import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
+import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.views.PendingFilesView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.utils.*
@@ -434,4 +441,9 @@ fun Fragment.observeAndDisplayNetworkAvailability(
         noNetworkBinding.noNetwork.isGone = isInternetAvailable
         additionalChanges?.invoke(isInternetAvailable)
     }
+}
+
+fun Fragment.setupRootPendingFilesIndicator(countLiveData: LiveData<Int>, pendingFilesView: PendingFilesView) {
+    pendingFilesView.setUploadFileInProgress(this, OTHER_ROOT_ID)
+    countLiveData.observe(viewLifecycleOwner, pendingFilesView::updateUploadFileInProgress)
 }

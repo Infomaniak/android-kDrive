@@ -75,20 +75,14 @@ class RootFilesFragment : Fragment() {
         setupItems()
 
         updateAndObserveFiles()
-        observePendingFilesUpload()
         observeNavigateFileListTo()
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
             noNetworkBinding = noNetworkInclude,
             noNetworkBindingDirectParent = contentLinearLayout,
         )
-        rootFilesUploadFileInProgressView.setUploadFileInProgress(this@RootFilesFragment, Utils.OTHER_ROOT_ID)
-    }
 
-    private fun observePendingFilesUpload() {
-        mainViewModel.pendingUploadsCount.observe(viewLifecycleOwner) {
-            binding.rootFilesUploadFileInProgressView.updateUploadFileInProgress(it)
-        }
+        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, rootFilesUploadFileInProgressView)
     }
 
     private fun setupDriveToolbar() = with(binding) {
