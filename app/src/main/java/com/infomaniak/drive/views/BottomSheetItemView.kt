@@ -18,6 +18,7 @@
 package com.infomaniak.drive.views
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -51,6 +52,12 @@ class BottomSheetItemView @JvmOverloads constructor(
             binding.text.text = value
         }
 
+    var iconTintList: ColorStateList?
+        get() = binding.icon.imageTintList
+        set(value) {
+            binding.icon.imageTintList = value
+        }
+
     private var displaySwitch: Boolean
         get() = binding.switchMaterial.isVisible
         set(value) {
@@ -69,6 +76,7 @@ class BottomSheetItemView @JvmOverloads constructor(
             icon = getDrawable(R.styleable.BottomSheetItemView_icon)
             getString(R.styleable.BottomSheetItemView_text)?.let { text = it }
             displaySwitch = getBoolean(R.styleable.BottomSheetItemView_displaySwitch, displaySwitch)
+            getColorStateList(R.styleable.BottomSheetItemView_iconTint)?.let { iconTintList = it }
 
             if (isInEditMode) displaySwitch = getBoolean(R.styleable.BottomSheetItemView_displaySwitch, false)
         }

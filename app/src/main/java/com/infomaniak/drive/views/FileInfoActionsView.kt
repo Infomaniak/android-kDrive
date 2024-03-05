@@ -151,7 +151,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
 
             if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
-                dropBoxText.text = context.getString(
+                dropBox.text = context.getString(
                     if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
                 )
                 dropBox.setOnClickListener { onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox()) }
