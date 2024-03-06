@@ -170,13 +170,7 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
         initAppUpdateManager()
-        observeAppUpdateDownload()
         observeBulkDownloadRunning()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        handleUpdates()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -273,21 +267,6 @@ class MainActivity : BaseActivity() {
                 if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
             },
         )
-    }
-
-    private fun observeAppUpdateDownload() {
-        mainViewModel.canInstallUpdate.observe(this) { isUploadDownloaded ->
-            if (isUploadDownloaded && canDisplayInAppSnackbar()) {
-                inAppUpdateSnackbar = showIndefiniteSnackbar(
-                    title = R.string.updateReadyTitle,
-                    actionButtonTitle = R.string.updateInstallButton,
-                    anchor = getMainFab(),
-                    onActionClicked = ::launchUpdateInstall,
-                )
-            } else if (!isUploadDownloaded) {
-                inAppUpdateSnackbar?.dismiss()
-            }
-        }
     }
 
     private fun observeBulkDownloadRunning() {

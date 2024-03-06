@@ -434,6 +434,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         UploadFile.deleteAll(fileDeleted)
     }
 
+    fun checkBulkDownloadStatus() = viewModelScope.launch {
         val isRunning = DownloadOfflineFileManager.checkWorkerDownloadStatus(
             context = getContext(),
             ignoreSyncOffline = ignoreSyncOffline,
@@ -448,7 +449,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun checkBulkDownloadStatus() = viewModelScope.launch {
     override fun onCleared() {
         realm.close()
         super.onCleared()
