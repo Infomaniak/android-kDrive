@@ -187,13 +187,7 @@ class MainActivity : BaseActivity() {
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
             selectedItemId = uiSettings.bottomNavigationSelectedItem
             setOnItemReselectedListener { item ->
-                when (item.itemId) {
-                    R.id.rootFilesFragment, R.id.favoritesFragment -> {
-                        navController.popBackStack(R.id.homeFragment, false)
-                        navController.navigate(item.itemId)
-                    }
-                    else -> navController.popBackStack(item.itemId, false)
-                }
+                navController.popBackStack(item.itemId, false)
             }
         }
     }
