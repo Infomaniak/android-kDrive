@@ -453,8 +453,6 @@
     <string name="inputExpirationDate">Ablaufdatum</string>
     <string name="inputExpirationTime">Verfallszeit</string>
     <string name="lastEditsTitle">Letzte Änderungen</string>
-    <string name="localizedFilenamePrivateSpace">Meine Dateien</string>
-    <string name="localizedFilenameTeamSpace">Akten der Organisation</string>
     <string name="locateButton">Finden Sie</string>
     <string name="manageCategoriesCreateTitle">%s erstellen</string>
     <string name="manageCategoriesNoCategory">Keine Kategorie</string>

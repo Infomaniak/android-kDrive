@@ -453,8 +453,6 @@
     <string name="inputExpirationDate">Fecha de caducidad</string>
     <string name="inputExpirationTime">Tiempo de expiración</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
-    <string name="localizedFilenamePrivateSpace">Mis archivos</string>
-    <string name="localizedFilenameTeamSpace">Archivos de la organización</string>
     <string name="locateButton">Localizar</string>
     <string name="manageCategoriesCreateTitle">Crear %s</string>
     <string name="manageCategoriesNoCategory">Sin categoría</string>
