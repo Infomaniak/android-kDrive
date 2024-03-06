@@ -24,7 +24,7 @@ import com.infomaniak.drive.utils.Utils
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import java.util.*
+import java.util.Date
 
 open class Drive(
 
@@ -35,16 +35,11 @@ open class Drive(
      */
     @SerializedName("account_admin")
     var accountAdmin: Boolean = false,
-    @SerializedName("can_add_user")
-    var canAddUser: Boolean = false,
-    @SerializedName("can_create_team_folder")
-    var canCreateTeamFolder: Boolean = false,
-    @SerializedName("has_technical_right")
-    var hasTechnicalRight: Boolean = false,
     var name: String = "",
     @SerializedName("preferences")
     private var _preferences: DrivePreferences? = DrivePreferences(),
     private var role: String = "",
+    private var _capabilities: DriveCapabilities? = DriveCapabilities(),
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
     @SerializedName("category_rights")
@@ -82,6 +77,9 @@ open class Drive(
 
     val preferences: DrivePreferences
         get() = _preferences ?: DrivePreferences()
+
+    val capabilities: DriveCapabilities
+        get() = _capabilities ?: DriveCapabilities()
 
     val categoryRights: CategoryRights
         get() = _categoryRights ?: CategoryRights()
