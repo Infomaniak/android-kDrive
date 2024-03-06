@@ -25,7 +25,6 @@
     <string name="accessDeniedDescriptionIsAdmin">Vuoi modificare i diritti di questa cartella per potervi accedere? Verrai aggiunto agli utenti con diritti di accesso a questa cartella. Gli altri utenti della cartella riceveranno una notifica tramite e-mail.</string>
     <string name="accessDeniedDescriptionIsNotAdmin">Contatta l’amministratore del kDrive per modificare i tuoi diritti.</string>
     <string name="accessDeniedTitle">Non si dispone dell’autorizzazione necessaria per accedere alla cartella.</string>
-    <string name="actionPrint">Stampa</string>
     <string name="addCategoriesTitle">Aggiungi categorie</string>
     <string name="addPassword">Proteggi con una password</string>
     <string name="alertRemoveUserDescription">Rimuovere veramente l’utente “%s” da questa applicazione?</string>
@@ -91,12 +90,6 @@
     <string name="backgroundSyncTitle">Sincronizzazione in background</string>
     <string name="belongToAllCategoriesFilterDescription">I risultati devono appartenere a tutte le categorie selezionate</string>
     <string name="belongToOneCategoryFilterDescription">I risultati devono appartenere a una delle categorie selezionate</string>
-    <plurals name="bulkDownloadNotificationContent">
-        <item quantity="one">file 1 scaricato da %2$d</item>
-        <item quantity="other">%1$d file scaricati da %2$d</item>
-    </plurals>
-    <string name="bulkDownloadNotificationTitleNoProgress">Importazione in corso</string>
-    <string name="bulkDownloadNotificationTitleWithProgress">Importazione in corso (%1$d%%)</string>
     <string name="buttonAdd">Aggiungi</string>
     <string name="buttonAddComment">Aggiungi un commento</string>
     <string name="buttonAddFavorites">Aggiungi ai preferiti</string>
@@ -189,7 +182,6 @@
     <string name="categoryWork">Lavoro</string>
     <string name="cloudStorageMissingPermissionNotifDescription">L’app non può essere eseguita in background a causa di un’autorizzazione mancante.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Impossibile effettuare la ricerca, non è stato selezionato nessun drive</string>
-    <string name="commonDocumentsDescription">Questo spazio appartiene a %s e centralizza i file comuni della vostra organizzazione.</string>
     <string name="commonFolderDescription">Condividi questa cartella con utenti del kDrive %s</string>
     <string name="commonFolderTitle">Cartella comune</string>
     <string name="contentDescriptionIsSelected">È selezionata</string>
@@ -460,7 +452,6 @@
     <string name="homeTitle">Home</string>
     <string name="inputExpirationDate">Data di scadenza</string>
     <string name="inputExpirationTime">Tempo di scadenza</string>
-    <string name="kDrivePdfViewer">visualizzatore di PDF kDrive</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
     <string name="localizedFilenamePrivateSpace">I miei file</string>
     <string name="localizedFilenameTeamSpace">File dell’organizzazione</string>
@@ -628,10 +619,8 @@
     <string name="sortBigger">Più grande</string>
     <string name="sortDay">Per giorno</string>
     <string name="sortExtension">Estensione</string>
-    <string name="sortLeastRelevant">Meno rilevante</string>
     <string name="sortMonth">Per mese</string>
     <string name="sortMostRecentAdded">Aggiunte più recenti</string>
-    <string name="sortMostRelevant">Più rilevante</string>
     <string name="sortNameAZ">Nome: dalla A alla Z</string>
     <string name="sortNameZA">Nome: dalla Z alla A</string>
     <string name="sortOlder">Più vecchio</string>
