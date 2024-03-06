@@ -310,11 +310,11 @@ open class File(
 
     fun isPendingOffline(context: Context): Boolean {
         val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get()
-        return get.firstOrNull {
+        return get.any {
             it.state == WorkInfo.State.ENQUEUED
                     || it.state == WorkInfo.State.RUNNING
                     || it.state == WorkInfo.State.BLOCKED
-        } != null
+        }
     }
 
     fun getMimeType(): String = name.guessMimeType()
