@@ -34,8 +34,8 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
@@ -94,9 +94,12 @@ class DownloadProgressDialog : DialogFragment() {
             }
             if (file.isObsoleteOrNotIntact(outputFile)) {
                 try {
-                    val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
-                        runBlocking { emit(progress to false) }
-                    }
+                    val response = DownloadOfflineFileManager.downloadFileResponse(
+                        fileUrl = ApiRoutes.downloadFile(file),
+                        downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor { progress ->
+                            runBlocking { emit(progress to false) }
+                        }
+                    )
                     if (response.isSuccessful) {
                         saveData(file, outputFile, response)
                     } else emit(null)
@@ -115,7 +118,7 @@ class DownloadProgressDialog : DialogFragment() {
             response: Response
         ) {
             if (outputFile.exists()) outputFile.delete()
-            DownloadWorker.saveRemoteData(response, outputFile) {
+            DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
                 runBlocking { emit(100 to true) }
             }
             outputFile.setLastModified(file.getLastModifiedInMilliSecond())
@@ -125,5 +128,6 @@ class DownloadProgressDialog : DialogFragment() {
     companion object {
         const val OPEN_WITH = "open_with"
         const val OPEN_BOOKMARK = "open_bookmark"
+        private const val TAG = "DownloadProgressDialog"
     }
 }

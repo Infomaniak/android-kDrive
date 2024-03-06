@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
+import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
@@ -45,10 +46,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.Date
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
@@ -59,6 +57,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
             FileController.getRealmInstance(it)
         } ?: FileController.getRealmInstance()
     }
+
+    private val uiSettings by lazy { UiSettings(getApplication()) }
 
     val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
@@ -73,9 +73,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
+    val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
     var mustOpenShortcut: Boolean = true
-
     var ignoreSyncOffline = false
 
     private var getFileDetailsJob = Job()
@@ -103,9 +103,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
     }
 
-    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (ApiResponse<*>) -> Unit = { apiResponse ->
+    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (FileResult) -> Unit = { fileRequest ->
         val total = mediator.value!!.second + 1
-        mediator.value = if (apiResponse.isSuccess()) {
+        mediator.value = if (fileRequest.isSuccess) {
             mediator.value!!.first + 1 to total
         } else {
             mediator.value!!.first to total
@@ -196,7 +196,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.postFavoriteFile(file)) {
-                emit(this)
+                emit(FileResult(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -210,7 +210,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onSuccess: ((File) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.deleteFavoriteFile(file)) {
-                emit(this)
+                emit(FileResult(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -250,11 +250,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
             onSuccess?.invoke(file.id)
         }
-        emit(apiResponse)
+        emit(FileResult(apiResponse.isSuccess()))
     }
 
-    private fun moveIfOfflineFileOrDelete(file: File, ioFile: java.io.File, newParent: File) {
-        if (file.isOffline) ioFile.renameTo(java.io.File("${newParent.getRemotePath()}/${file.name}"))
+    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
+        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
         else ioFile.delete()
     }
 
@@ -263,7 +263,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     }
 
     fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
-        emit(FileController.updateFolderColor(file, color))
+        val isSuccess = FileController.updateFolderColor(file, color).isSuccess()
+        emit(FileResult(isSuccess))
     }
 
     fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {
@@ -294,20 +295,22 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
-            emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))
+            with(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess)) {
+                emit(FileResult(isSuccess = this.isSuccess(), data = this.data, errorCode = this.error?.code, errorResId = this.translatedError))
+            }
         }
 
     fun restoreTrashFile(file: File, newFolderId: Int? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         val body = newFolderId?.let { mapOf("destination_directory_id" to it) }
         with(ApiRepository.postRestoreTrashFile(file, body)) {
-            emit(this)
+            emit(FileResult(this.isSuccess(), errorCode = this.error?.code))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
 
     fun deleteTrashFile(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         with(ApiRepository.deleteTrashFile(file)) {
-            emit(this)
+            emit(FileResult(this.isSuccess()))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
@@ -320,7 +323,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     ) = liveData(Dispatchers.IO) {
         ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(apiResponse)
+            emit(FileResult(apiResponse.isSuccess()))
         }
     }
 
@@ -363,17 +366,22 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    suspend fun removeOfflineFile(
+    fun removeOfflineFile(
         file: File,
-        offlineFile: java.io.File,
-        cacheFile: java.io.File,
+        offlineFile: IOFile,
+        cacheFile: IOFile,
         userDrive: UserDrive = UserDrive()
-    ) = withContext(Dispatchers.IO) {
-        FileController.updateOfflineStatus(file.id, false)
-        if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
-        if (cacheFile.exists()) cacheFile.delete()
-        if (offlineFile.exists()) {
-            offlineFile.delete()
+    ) {
+        viewModelScope.launch(Dispatchers.Default) {
+            async {
+                FileController.updateOfflineStatus(file.id, false)
+                if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
+            }.await()
+
+            if (cacheFile.exists()) cacheFile.delete()
+            if (offlineFile.exists()) {
+                offlineFile.delete()
+            }
         }
     }
 
@@ -383,6 +391,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         viewModelScope.launch(Dispatchers.IO + syncOfflineFilesJob) {
             SyncOfflineUtils.startSyncOffline(getContext(), syncOfflineFilesJob)
         }
+    }
+
+    fun cancelSyncOfflineFiles() {
+        syncOfflineFilesJob.cancel()
     }
 
     @Deprecated(message = "Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()")
@@ -399,7 +411,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                         try {
                             columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                             pathname = cursor.getString(columnIndex)
-                            java.io.File(pathname).delete()
+                            IOFile(pathname).delete()
                             getContext().contentResolver.delete(uri, null, null)
                         } catch (nullPointerException: NullPointerException) {
                             Sentry.withScope { scope ->
@@ -422,8 +434,30 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         UploadFile.deleteAll(fileDeleted)
     }
 
+    fun checkBulkDownloadStatus() = viewModelScope.launch {
+        val isRunning = DownloadOfflineFileManager.checkWorkerDownloadStatus(
+            context = getContext(),
+            ignoreSyncOffline = ignoreSyncOffline,
+            workerName = BulkDownloadWorker.TAG)
+        isBulkDownloadRunning.value = isRunning
+        ignoreSyncOffline = isRunning
+    }
+
+    fun markFilesAsOffline(filesId: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
+        FileController.getRealmInstance().use { realm ->
+            FileController.setFilesAsOffline(customRealm = realm, filesId = filesId)
+        }
+    }
+
     override fun onCleared() {
         realm.close()
         super.onCleared()
     }
+
+    data class FileResult(
+        val isSuccess: Boolean,
+        val errorResId: Int? = null,
+        val data: Any? = null,
+        val errorCode: String? = null
+    )
 }

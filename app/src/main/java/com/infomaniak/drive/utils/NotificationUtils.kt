@@ -31,6 +31,7 @@ object NotificationUtils : NotificationUtilsCore() {
     const val UPLOAD_STATUS_ID = 2
     const val CURRENT_UPLOAD_ID = 3
     const val SYNC_CONFIG_ID = 4
+    const val BULK_DOWNLOAD_ID = 5
 
     const val ELAPSED_TIME = 500L
 

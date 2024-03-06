@@ -45,6 +45,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
@@ -52,7 +53,6 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
-import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -351,8 +351,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override fun addFavoritesClicked() {
         super.addFavoritesClicked()
         currentFile.apply {
-            val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
-                if (apiResponse.isSuccess()) {
+            val observer: Observer<FileResult> = Observer { fileRequest ->
+                if (fileRequest.isSuccess) {
                     isFavorite = !isFavorite
                     showFavoritesResultSnackbar()
                     binding.bottomSheetFileInfos.refreshBottomSheetUi(this)
@@ -396,21 +396,19 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile, userDrive)
             previewSliderAdapter.updateFile(currentFile.id) { file -> file.isOffline = false }
 
-            withContext(Dispatchers.Main) {
-                currentFile.isOffline = false
-                binding.bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
-            }
+            currentFile.isOffline = false
+            binding.bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
         }
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { fileRequest ->
             onApiResponse()
-            if (apiResponse.isSuccess()) {
+            if (fileRequest.isSuccess) {
                 removeFileInSlider()
                 showSnackbar(R.string.snackbarLeaveShareConfirmation)
             } else {
-                showSnackbar(apiResponse.translatedError)
+                fileRequest.errorResId?.let { showSnackbar(it) }
             }
         }
     }
@@ -463,9 +461,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { fileRequest ->
             onApiResponse()
-            if (apiResponse.isSuccess()) {
+            if (fileRequest.isSuccess) {
                 removeFileInSlider()
                 showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, currentFile.name))
                 mainViewModel.deleteFileFromHome.value = true
@@ -493,8 +491,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onMoveFile(destinationFolder: File) {
         mainViewModel.moveFile(currentFile, destinationFolder)
-            .observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
+            .observe(viewLifecycleOwner) { fileRequest ->
+                if (fileRequest.isSuccess) {
                     // Because if we are on the favorite view we do not want to remove it for example
                     if (findNavController().previousBackStackEntry?.destination?.id == R.id.fileListFragment) removeFileInSlider()
                     mainViewModel.refreshActivities.value = true

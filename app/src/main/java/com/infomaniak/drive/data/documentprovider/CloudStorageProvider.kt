@@ -42,8 +42,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -64,7 +64,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.IOException
 import java.net.URLEncoder
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 class CloudStorageProvider : DocumentsProvider() {
 
@@ -322,10 +323,10 @@ class CloudStorageProvider : DocumentsProvider() {
 
         try {
             val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
-            val response = DownloadWorker.downloadFileResponse(file.thumbnail(), okHttpClient) {}
+            val response = DownloadOfflineFileManager.downloadFileResponse(file.thumbnail(), okHttpClient)
 
             if (response.isSuccessful) {
-                DownloadWorker.saveRemoteData(response, outputFile) {
+                DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
                     parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
                 }
             } else if (outputFile.exists()) {
@@ -568,15 +569,16 @@ class CloudStorageProvider : DocumentsProvider() {
 
             // Download data file
             val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
-            val response = DownloadWorker.downloadFileResponse(
+            val response = DownloadOfflineFileManager.downloadFileResponse(
                 fileUrl = ApiRoutes.downloadFile(file),
-                okHttpClient = okHttpClient
-            ) { progress ->
-                SentryLog.i(TAG, "open currentProgress: $progress")
-            }
+                okHttpClient = okHttpClient,
+                downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
+                    SentryLog.i(TAG, "open currentProgress: $progress")
+                })
+            )
 
             if (response.isSuccessful) {
-                DownloadWorker.saveRemoteData(response, cacheFile)
+                DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
                 cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
                 return ParcelFileDescriptor.open(cacheFile, accessMode)
             }

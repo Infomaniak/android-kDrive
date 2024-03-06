@@ -64,7 +64,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFolderActivitiesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            suspend fun recursiveDownload(parentId: Int, page: Int) {
+            tailrec suspend fun recursiveDownload(parentId: Int, page: Int) {
                 getFilesJob.ensureActive()
                 val resultList = FileController.getFilesFromCacheOrDownload(
                     parentId = parentId,

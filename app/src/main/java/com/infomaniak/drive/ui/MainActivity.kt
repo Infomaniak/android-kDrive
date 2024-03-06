@@ -170,6 +170,7 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
         initAppUpdateManager()
+        observeBulkDownloadRunning()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -268,7 +269,11 @@ class MainActivity : BaseActivity() {
         )
     }
 
-    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true
+    private fun observeBulkDownloadRunning() {
+        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (isRunning) launchSyncOffline() }
+    }
+
+    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
     //endregion
 
     override fun onResume() {
@@ -284,7 +289,7 @@ class MainActivity : BaseActivity() {
 
         launchAllUpload(drivePermissions)
 
-        if (!mainViewModel.ignoreSyncOffline) launchSyncOffline() else mainViewModel.ignoreSyncOffline = false
+        mainViewModel.checkBulkDownloadStatus()
 
         AppSettings.appLaunches++
 

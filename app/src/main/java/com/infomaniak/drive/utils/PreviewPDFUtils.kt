@@ -23,7 +23,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
@@ -80,9 +79,12 @@ object PreviewPDFUtils {
 
         val downLoadUrl = ApiRoutes.downloadFile(fileModel) + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
         val request = Request.Builder().url(downLoadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
+        val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
         val response = HttpClient.okHttpClient.newBuilder()
-            .addNetworkInterceptor(DownloadWorker.downloadProgressInterceptor(onProgress)).build()
-            .newCall(request).execute()
+            .addNetworkInterceptor(downloadProgressInterceptor)
+            .build()
+            .newCall(request)
+            .execute()
 
         response.use {
             if (!it.isSuccessful) {

@@ -119,6 +119,7 @@ open class File(
     var isFromActivities: Boolean = false,
     var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
+    var isMarkedAsOffline: Boolean = false,
     var isOffline: Boolean = false,
     var versionCode: Int = 0,
     var responseAt: Long = 0,

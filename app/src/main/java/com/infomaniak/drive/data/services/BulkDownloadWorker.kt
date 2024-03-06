@@ -24,20 +24,20 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
+import com.infomaniak.drive.utils.NotificationUtils.BULK_DOWNLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import java.io.File as IOFile
 
-class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDownloadWorker(context, workerParams) {
+class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDownloadWorker(context, workerParams) {
 
-    private val fileId: Int by lazy { inputData.getInt(FILE_ID, 0) }
-    private val file: File? by lazy { FileController.getFileById(fileId) }
-    private val offlineFile: IOFile? by lazy { file?.getOfflineFile(applicationContext, userDrive.userId) }
-    private val fileName: String by lazy { inputData.getString(FILE_NAME) ?: "" }
+    private val notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+
+    private val folderId: Int by lazy { inputData.getInt(FOLDER_ID, 0) }
+    private val fileIds: List<Int> by lazy { FileController.getFolderOfflineFilesId(folderId = folderId) }
     private val userDrive: UserDrive by lazy {
         UserDrive(
             userId = inputData.getInt(USER_ID, AccountUtils.currentUserId),
@@ -47,54 +47,59 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
     private val downloadOfflineFileManager by lazy {
         DownloadOfflineFileManager(
             userDrive,
-            0,
+            fileIds.size,
             this,
             notificationManagerCompat
         )
     }
     private val downloadProgressNotification by lazy {
-        DownloadOfflineFileManager.createDownloadNotification(applicationContext, id, fileName)
-    }
-    private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
-
-    override fun downloadNotification(): DownloadNotification? {
-        return file?.id?.let { notificationId ->
-            DownloadNotification(id = notificationId, notification = downloadProgressNotification)
-        }
-    }
-
-    override suspend fun downloadAction(): Result = downloadFile()
-
-    override fun isCanceled() {
-        offlineFile?.let { if (it.exists() && file?.isIntactFile(it) == false) it.delete() }
-        notifyDownloadCancelled()
-        Result.failure()
-    }
-
-    override fun isFinished() {
-        file?.id?.let(notificationManagerCompat::cancel)
-    }
-
-    override fun isForOneFile() = true
-
-    override fun workerTag() = TAG
-
-    override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(
-            fileId,
-            DownloadOfflineFileManager.createDownloadNotification(applicationContext, id, fileName).build()
+        DownloadOfflineFileManager.createDownloadNotification(
+            context = context,
+            id = id,
+            title = context.getString(R.string.bulkDownloadNotificationTitleNoProgress)
         )
     }
 
-    private suspend fun downloadFile(): Result {
-        val result = downloadOfflineFileManager.execute(applicationContext, fileId) { progress, downloadedFileId ->
-            setProgressAsync(
-                workDataOf(BulkDownloadWorker.PROGRESS to progress, BulkDownloadWorker.FILE_ID to downloadedFileId)
-            )
+    override fun downloadNotification(): DownloadNotification {
+        return DownloadNotification(
+            titleResId = R.string.bulkDownloadNotificationTitleWithProgress,
+            contentResId = R.plurals.bulkDownloadNotificationContent,
+            id = BULK_DOWNLOAD_ID,
+            notification = downloadProgressNotification
+        )
+    }
+
+    override suspend fun downloadAction(): Result = downloadFiles()
+
+    override fun isCanceled() {
+        clearLastDownloadedFile()
+        notifyDownloadCancelled()
+    }
+
+    override fun isFinished() {
+        notificationManagerCompat.cancel(BULK_DOWNLOAD_ID)
+    }
+
+    override fun isForOneFile() = false
+
+    override fun workerTag() = TAG
+
+    override suspend fun getForegroundInfo() = ForegroundInfo(BULK_DOWNLOAD_ID, downloadProgressNotification.build())
+
+    private fun clearLastDownloadedFile() {
+        downloadOfflineFileManager.cleanLastDownloadedFile()
+    }
+
+    private suspend fun downloadFiles(): Result {
+        var result = Result.failure()
+        fileIds.forEach { fileId ->
+            result = downloadOfflineFileManager.execute(applicationContext, fileId) { progress, downloadedFileId ->
+                setProgressAsync(workDataOf(PROGRESS to progress, FILE_ID to downloadedFileId))
+            }
         }
 
         if (result == Result.success()) {
-            applicationContext.cancelNotification(fileId)
+            applicationContext.cancelNotification(BULK_DOWNLOAD_ID)
         }
 
         return result
@@ -102,18 +107,17 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     private fun notifyDownloadCancelled() {
         Intent().apply {
-            action = DownloadReceiver.TAG
-            putExtra(DownloadReceiver.CANCELLED_FILE_ID, fileId)
+            action = TAG
             LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
         }
     }
 
     companion object {
-        const val TAG = "DownloadWorker"
+        const val TAG = "BulkDownloadWorker"
         const val DRIVE_ID = "drive_id"
         const val FILE_ID = "file_id"
-        const val FILE_NAME = "file_name"
         const val PROGRESS = "progress"
         const val USER_ID = "user_id"
+        const val FOLDER_ID = "folder_id"
     }
 }
