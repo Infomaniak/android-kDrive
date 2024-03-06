@@ -429,7 +429,7 @@ open class File(
         BIGGER("desc", "size", R.string.sortBigger),
         LEAST_RELEVANT("asc", "relevance", R.string.sortLeastRelevant),
         MOST_RELEVANT("desc", "relevance", R.string.sortMostRelevant),
-        // EXTENSION("asc", "extension", R.string.sortExtension); // TODO: Awaiting API
+        // EXTENSION("asc", "extension", R.string.sortExtension), // TODO: Awaiting API
     }
 
     enum class SortTypeUsage { FILE_LIST, TRASH, SEARCH }
