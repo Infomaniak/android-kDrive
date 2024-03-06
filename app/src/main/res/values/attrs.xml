@@ -66,7 +66,6 @@
     </declare-styleable>
 
     <declare-styleable name="BottomSheetItemView">
-        <attr name="displaySwitch" format="boolean" />
         <attr name="icon" />
         <attr name="iconTint" format="color" />
         <attr name="text" format="string" />

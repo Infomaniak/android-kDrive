@@ -58,12 +58,6 @@ class BottomSheetItemView @JvmOverloads constructor(
             binding.icon.imageTintList = value
         }
 
-    private var displaySwitch: Boolean
-        get() = binding.switchMaterial.isVisible
-        set(value) {
-            binding.switchMaterial.isVisible = value
-        }
-
 
     override fun setEnabled(enabled: Boolean) {
         binding.disabledOverlay.isGone = enabled
@@ -75,10 +69,7 @@ class BottomSheetItemView @JvmOverloads constructor(
         attrs?.getAttributes(context, R.styleable.BottomSheetItemView) {
             icon = getDrawable(R.styleable.BottomSheetItemView_icon)
             getString(R.styleable.BottomSheetItemView_text)?.let { text = it }
-            displaySwitch = getBoolean(R.styleable.BottomSheetItemView_displaySwitch, displaySwitch)
             getColorStateList(R.styleable.BottomSheetItemView_iconTint)?.let { iconTintList = it }
-
-            if (isInEditMode) displaySwitch = getBoolean(R.styleable.BottomSheetItemView_displaySwitch, false)
         }
     }
 
