@@ -37,6 +37,8 @@ open class Drive(
      */
     @SerializedName("account_admin")
     var accountAdmin: Boolean = false,
+    @SerializedName("rights")
+    private var _rights: DriveRights? = DriveRights(),
     var name: String = "",
     @SerializedName("preferences")
     private var _preferences: DrivePreferences? = DrivePreferences(),
@@ -91,6 +93,9 @@ open class Drive(
 
     val teams: DriveTeamsCategories
         get() = _teams ?: DriveTeamsCategories()
+
+    val rights: DriveRights
+        get() = _rights ?: DriveRights()
 
     val role: DriveUser.Role?
         get() = enumValueOfOrNull<DriveUser.Role>(_role)
