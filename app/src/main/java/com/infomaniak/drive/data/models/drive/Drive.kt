@@ -18,9 +18,11 @@
 package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
@@ -38,7 +40,7 @@ open class Drive(
     var name: String = "",
     @SerializedName("preferences")
     private var _preferences: DrivePreferences? = DrivePreferences(),
-    private var role: String = "",
+    private var _role: String = "",
     private var _capabilities: DriveCapabilities? = DriveCapabilities(),
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
@@ -90,6 +92,9 @@ open class Drive(
     val teams: DriveTeamsCategories
         get() = _teams ?: DriveTeamsCategories()
 
+    val role: DriveUser.Role?
+        get() = enumValueOfOrNull<DriveUser.Role>(_role)
+
     inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
@@ -105,7 +110,7 @@ open class Drive(
         ).apply { driveColor = preferences.color }
     }
 
-    fun isUserAdmin(): Boolean = role == "admin"
+    fun isUserAdmin(): Boolean = role == DriveUser.Role.ADMIN
 
     fun getUpdatedAt(): Date = Date(updatedAt * 1000)
 

@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import com.infomaniak.lib.core.utils.firstOrEmpty
@@ -60,6 +61,9 @@ open class DriveUser(
         }
     }
 
+    /**
+     * Role for [DriveUser] or Role of the current user in [Drive]
+     */
     enum class Role {
         @SerializedName("admin")
         ADMIN,
@@ -68,6 +72,9 @@ open class DriveUser(
         USER,
 
         @SerializedName("external")
-        EXTERNAL
+        EXTERNAL,
+
+        /** Only for [Drive], the current user has no role */
+        NONE,
     }
 }
