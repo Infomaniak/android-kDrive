@@ -60,7 +60,7 @@ open class Drive(
     var maintenance: Boolean = false,
     @SerializedName("maintenance_reason")
     var maintenanceReason: String = "",
-    var pack: String = "",
+    var pack: DrivePack? = DrivePack(),
     var size: Long = 0,
     var version: String = "",
     @SerializedName("pack_functionality")
@@ -90,7 +90,7 @@ open class Drive(
     val teams: DriveTeamsCategories
         get() = _teams ?: DriveTeamsCategories()
 
-    inline val isFreePack get() = pack == DrivePack.FREE.value
+    inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
@@ -118,16 +118,6 @@ open class Drive(
     }
 
     override fun hashCode(): Int = objectId.hashCode()
-
-    enum class DrivePack(val value: String) {
-        FREE("free"),
-        SOLO("solo"),
-        TEAM("team"),
-        PRO("pro"),
-        KSUITE_STANDARD("ksuite_standard"),
-        KSUITE_PRO("ksuite_pro"),
-        KSUITE_ENTREPRISE("ksuite_entreprise"),
-    }
 
     enum class MaintenanceReason(val value: String) {
         NOT_RENEW("not_renew"),

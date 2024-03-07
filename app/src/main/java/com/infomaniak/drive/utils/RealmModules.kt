@@ -49,7 +49,7 @@ object RealmModules {
         classes = [
             Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class,
             Team::class, TeamDetails::class, DriveTeamsCategories::class, Category::class, CategoryRights::class,
-            DriveCapabilities::class
+            DriveCapabilities::class, DrivePack::class, DrivePackCapabilities::class,
         ]
     )
     class DriveFilesModule
