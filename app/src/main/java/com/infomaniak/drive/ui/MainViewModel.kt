@@ -359,7 +359,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         UploadFile.getCurrentUserPendingUploadFile(folderId)
             .toFlow()
             .mapLatest { list -> list.count() }
-            .asLiveData()
+            .asLiveData(viewModelScope.coroutineContext + Dispatchers.IO)
+
             .distinctUntilChanged()
     }
 
