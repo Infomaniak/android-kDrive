@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
+import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerSucceeded
 import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
@@ -116,6 +117,11 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             if (workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)) {
                 showPendingFiles()
             }
+        }
+
+        requireContext().trackUploadWorkerSucceeded().observe(viewLifecycleOwner) {
+            it.firstOrNull() ?: return@observe
+            binding.homeUploadFileInProgress.fileCardView.isVisible = false
         }
 
         lifecycleScope.launchWhenResumed {
