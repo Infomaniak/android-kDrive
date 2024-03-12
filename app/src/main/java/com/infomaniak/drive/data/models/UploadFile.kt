@@ -119,8 +119,8 @@ open class UploadFile(
         uploadToken = newUploadToken
     }
 
-    fun deleteIfExists(keepFile: Boolean = false) {
-        getRealmInstance().use { realm ->
+    fun deleteIfExists(keepFile: Boolean = false, makeTransaction: Boolean = true, customRealm: Realm? = null) {
+        val block: (Realm) -> Unit? = { realm ->
             syncFileByUriQuery(realm, uri).findFirst()?.let { uploadFileProxy ->
                 // Cancel session if exists
                 uploadFileProxy.uploadToken?.let {
@@ -129,13 +129,15 @@ open class UploadFile(
                     }
                 }
                 // Delete in realm
-                realm.executeTransaction {
+                val deleteFromRealm: (Realm) -> Unit = {
                     if (uploadFileProxy.isValid) {
                         if (keepFile) uploadFileProxy.deletedAt = Date() else uploadFileProxy.deleteFromRealm()
                     }
                 }
+                if (makeTransaction) realm.executeTransaction(deleteFromRealm) else deleteFromRealm(realm)
             }
         }
+        customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     enum class Type {
@@ -197,6 +199,7 @@ open class UploadFile(
 
         fun getAllPendingUploads(customRealm: Realm? = null): ArrayList<UploadFile> {
             val block: (Realm) -> ArrayList<UploadFile> = { realm ->
+                realm.refresh() // TODO: (Realm kotlin) - Remove when we update to Realm Kotlin
                 val results = pendingUploadsQuery(realm).findAll()
                 val priorityUploadFiles = results.where().notEqualTo(UploadFile::type.name, Type.SYNC.name).findAll()
                 val syncUploadFiles = results.where().equalTo(UploadFile::type.name, Type.SYNC.name).findAll()
@@ -235,13 +238,14 @@ open class UploadFile(
 
         fun getAllPendingUploadsCount(): Int {
             return getRealmInstance().use { realm ->
+                realm.refresh() // TODO: (Realm kotlin) - Remove when we update to Realm Kotlin
                 pendingUploadsQuery(realm).count().toInt()
             }
         }
 
         fun getCurrentUserPendingUploadsCount(folderId: Int? = null): Int {
             return getRealmInstance().use { realm ->
-                realm.refresh() // TODO : Remove when we update to Realm Kotlin
+                realm.refresh() // TODO: (Realm kotlin) - Remove when we update to Realm Kotlin
                 pendingUploadsQuery(realm, folderId, true, driveIds = currentDriveAndSharedWithMeIds()).count().toInt()
             }
         }
@@ -278,12 +282,13 @@ open class UploadFile(
             }
         }
 
-        fun canUpload(uri: Uri, lastModified: Date): Boolean {
-            return getRealmInstance().use { realm ->
+        fun canUpload(uri: Uri, lastModified: Date, customRealm: Realm? = null): Boolean {
+            val block: (Realm) -> Boolean = { realm ->
                 syncFileByUriQuery(realm, uri.toString())
                     .equalTo(UploadFile::fileModifiedAt.name, lastModified)
                     .findFirst() == null
             }
+            return customRealm?.let(block) ?: getRealmInstance().use(block)
         }
 
         fun deleteAll(uploadFiles: List<UploadFile>) {
@@ -375,10 +380,12 @@ open class UploadFile(
             }
         }
 
-        fun setAppSyncSettings(syncSettings: SyncSettings) {
-            getRealmInstance().use { realm ->
-                realm.executeTransaction { it.insertOrUpdate(syncSettings) }
+        fun setAppSyncSettings(syncSettings: SyncSettings, customRealm: Realm? = null, makeTransaction: Boolean = true) {
+            val block: (Realm) -> Unit = { realm ->
+                val transaction: (Realm) -> Unit = { it.insertOrUpdate(syncSettings) }
+                if (makeTransaction) realm.executeTransaction(transaction) else transaction(realm)
             }
+            customRealm?.let(block) ?: getRealmInstance().use(block)
         }
 
         fun getAppSyncSettings(): SyncSettings? {
