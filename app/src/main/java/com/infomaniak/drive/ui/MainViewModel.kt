@@ -21,6 +21,7 @@ import android.app.Application
 import android.content.Context
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
@@ -35,6 +36,7 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
@@ -51,7 +53,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
 
-class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
+class MainViewModel(
+    appContext: Application,
+    private val savedStateHandle: SavedStateHandle
+) : AndroidViewModel(appContext) {
 
     var selectFolderUserDrive: UserDrive? = null
     val realm: Realm by lazy {
@@ -81,7 +86,38 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
 
+    lateinit var uploadFilesHelper: UploadFilesHelper
+
     private fun getContext() = getApplication<MainApplication>()
+
+    fun setCurrentFolder(folder: File?) {
+        folder?.let {
+            it.saveToSavedStateHandle(savedStateHandle)
+            currentFolder.value = it
+        }
+    }
+
+    fun initUploadFilesHelper(fragmentActivity: FragmentActivity, navController: NavController) {
+        uploadFilesHelper = UploadFilesHelper(
+            activity = fragmentActivity,
+            navController = navController,
+            onOpeningPicker = {
+                //TODO Add log matomo
+                setParentFolder(uploadFilesHelper)
+            },
+            onResult = {
+                val i = 0
+            },
+        ).apply {
+            setParentFolder(this)
+        }
+    }
+
+    private fun setParentFolder(uploadFilesHelper: UploadFilesHelper) {
+        val currentFolder : File = currentFolder.value ?: File.getFileFromSavedStateHandle(savedStateHandle)
+        currentFolder.saveToSavedStateHandle(savedStateHandle)
+        uploadFilesHelper.initParentFolder(File(id = currentFolder.id, name = currentFolder.name, driveId = currentFolder.driveId))
+    }
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
         // Clear FileListFragment stack

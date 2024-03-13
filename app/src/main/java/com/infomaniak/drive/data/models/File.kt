@@ -22,6 +22,7 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.lifecycle.SavedStateHandle
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.gson.annotations.SerializedName
@@ -373,6 +374,13 @@ open class File(
 
     fun hasCreationRight() = isFolder() && rights?.canCreateFile == true
 
+    fun saveToSavedStateHandle(savedStateHandle: SavedStateHandle) {
+        savedStateHandle["folderId"] = id
+        savedStateHandle["driveId"] = driveId
+        savedStateHandle["name"] = name
+        savedStateHandle["rights"] = rights
+    }
+
     // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {
         if (other is File) {
@@ -451,6 +459,15 @@ open class File(
     }
 
     companion object {
+
+        fun getFileFromSavedStateHandle(savedStateHandle: SavedStateHandle): File {
+            return File().apply {
+                id = savedStateHandle["folderId"] ?: 0
+                driveId = savedStateHandle["driveId"] ?: 0
+                name = savedStateHandle["name"] ?: ""
+                rights = savedStateHandle["rights"]
+            }
+        }
 
         /**
          * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.

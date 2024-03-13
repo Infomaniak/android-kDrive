@@ -33,6 +33,7 @@ import android.os.FileObserver
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.view.View
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
@@ -137,8 +138,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private var uploadFilesHelper: UploadFilesHelper? = null
-
     private val scanFlowResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
             activityResult.whenResultIsOk {
@@ -161,6 +160,8 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        mainViewModel.initUploadFilesHelper(this, navController)
 
         checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
@@ -374,7 +375,7 @@ class MainActivity : BaseActivity() {
             R.id.menuFragment,
             R.id.mySharesFragment -> {
                 // Defining default root folder
-                mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
+                mainViewModel.setCurrentFolder(AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this)))
             }
         }
 
