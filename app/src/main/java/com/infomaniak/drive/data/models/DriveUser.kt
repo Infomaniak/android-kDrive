@@ -33,7 +33,7 @@ open class DriveUser(
     var avatarUrl: String? = "",
     @SerializedName("display_name")
     var displayName: String = "",
-    var avatar: String = "",
+    private var avatar: String? = "",
     var email: String = "",
     @SerializedName("role")
     private var _role: String = "",
@@ -50,7 +50,7 @@ open class DriveUser(
         displayName = user.displayName ?: ""
     }
 
-    fun getUserAvatar() = avatar.ifBlank { avatarUrl.toString() }
+    fun getUserAvatar() = avatar?.ifBlank { avatarUrl.toString() } ?: avatarUrl.toString()
 
     fun getInitials(): String {
         displayName.split(" ").let { initials ->

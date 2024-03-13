@@ -164,7 +164,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                             background = getBackgroundColorBasedOnId(item.id)
                         )
                         val request = ImageRequest.Builder(this)
-                            .data(item.avatar)
+                            .data(item.getUserAvatar())
                             .transformations(CircleCropTransformation())
                             .fallback(fallback)
                             .error(fallback)

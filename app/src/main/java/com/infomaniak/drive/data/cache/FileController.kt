@@ -783,11 +783,11 @@ object FileController {
 
     fun getFolderActivities(folder: File, page: Int, userDrive: UserDrive? = null): Map<out Int, FileActivity> {
         return getRealmInstance(userDrive).use { realm ->
-            getFolderActivitiesRec(realm, folder, page, userDrive)
+            getFolderActivitiesRecursive(realm, folder, page, userDrive)
         }
     }
 
-    private fun getFolderActivitiesRec(
+    private fun getFolderActivitiesRecursive(
         realm: Realm,
         folder: File,
         page: Int,
@@ -797,7 +797,7 @@ object FileController {
             userDrive?.userId?.let { AccountUtils.getHttpClient(it, 30) } ?: HttpClient.okHttpClientLongTimeout
         }
         val returnResponse = arrayMapOf<Int, FileActivity>()
-        val apiResponse = ApiRepository.getFileActivities(folder, page, true, okHttpClient)
+        val apiResponse = ApiRepository.getFileActivities(folder, page, forFileList = true, okHttpClient)
         if (!apiResponse.isSuccess()) return returnResponse
 
         return if (apiResponse.data?.isNotEmpty() == true) {
@@ -816,7 +816,7 @@ object FileController {
                 }
                 returnResponse
 
-            } else returnResponse.apply { putAll(getFolderActivitiesRec(realm, folder, page + 1, userDrive)) }
+            } else returnResponse.apply { putAll(getFolderActivitiesRecursive(realm, folder, page + 1, userDrive)) }
         } else {
             if (apiResponse.responseAt > 0L) {
                 updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
