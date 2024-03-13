@@ -115,9 +115,7 @@ class MenuFragment : Fragment() {
             }
         }
 
-        menuUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
-            navigateToUploadView(Utils.OTHER_ROOT_ID)
-        }
+        menuUploadFileInProgressView.setUploadFileInProgress(this@MenuFragment, Utils.OTHER_ROOT_ID)
     }
 
     override fun onResume() {
@@ -125,10 +123,7 @@ class MenuFragment : Fragment() {
         showPendingFiles()
     }
 
-    private fun showPendingFiles() = with(binding) {
-        menuUploadFileInProgress.updateUploadFileInProgress(
-            UploadFile.getCurrentUserPendingUploadsCount(),
-            menuUploadFileInProgressLayout,
-        )
+    private fun showPendingFiles() {
+        binding.menuUploadFileInProgressView.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
     }
 }

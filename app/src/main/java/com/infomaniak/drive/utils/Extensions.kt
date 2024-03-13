@@ -67,10 +67,7 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.databinding.CardviewFileListBinding
-import com.infomaniak.drive.databinding.ItemUserBinding
-import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
-import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
+import com.infomaniak.drive.databinding.*
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
@@ -287,35 +284,6 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
-
-fun CardviewFileListBinding.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {
-    val radius = context.resources.getDimension(R.dimen.cardViewRadius)
-    root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
-        .setTopLeftCorner(CornerFamily.ROUNDED, radius)
-        .setTopRightCorner(CornerFamily.ROUNDED, radius)
-        .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-        .setBottomRightCorner(CornerFamily.ROUNDED, radius)
-        .build()
-
-    itemViewFile.fileName.setText(title)
-
-    root.setOnClickListener { onClickListener() }
-}
-
-fun CardviewFileListBinding.updateUploadFileInProgress(pendingFilesCount: Int, parentLayout: ViewGroup) = with(itemViewFile) {
-    if (pendingFilesCount > 0) {
-        fileSize.text = context.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingFilesCount,
-            pendingFilesCount
-        )
-        filePreview.isGone = true
-        fileProgression.isVisible = true
-        parentLayout.isVisible = true
-    } else {
-        parentLayout.isGone = true
-    }
-}
 
 fun Context.shareText(text: String) {
     trackShareRightsEvent("shareButton")

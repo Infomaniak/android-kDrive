@@ -28,7 +28,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
@@ -76,9 +75,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        homeUploadFileInProgress.setUploadFileInProgress(R.string.uploadInProgressTitle) {
-            navigateToUploadView(Utils.OTHER_ROOT_ID)
-        }
+        homeUploadFileInProgressView.setUploadFileInProgress(this@HomeFragment, Utils.OTHER_ROOT_ID)
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
@@ -95,10 +92,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun showPendingFiles() = with(binding) {
-        homeUploadFileInProgress.updateUploadFileInProgress(
-            UploadFile.getCurrentUserPendingUploadsCount(),
-            homeUploadFileInProgressLayout,
-        )
+        homeUploadFileInProgressView.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
     }
 
     private fun updateUi(forceDownload: Boolean = false) = with(binding) {
