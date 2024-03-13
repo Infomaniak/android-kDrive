@@ -152,7 +152,7 @@ class MainActivity : BaseActivity() {
     private val inAppReviewManager by lazy {
         InAppReviewManager(
             this,
-            R.style.DialogStyle,
+            R.style.DefaultDialogStyle,
             R.string.reviewAlertTitle,
             R.string.urlUserReportAndroid
         )
