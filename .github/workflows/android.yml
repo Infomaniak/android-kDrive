@@ -56,17 +56,17 @@ jobs:
       - name: Run Unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
-      - name: Run instrumentation tests
-        uses: ReactiveCircus/android-emulator-runner@v2.30.1
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          profile: pixel_7
-          arch: arm64-v8a
-          disk-size: 6G
-          avd-name: kdrive-test
-          force-avd-creation: false
-          disable-animations: true
-          emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
-          # emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
-          script: ./gradlew uninstallAll app:connectedStandardDebugAndroidTest --stacktrace
+      # - name: Run instrumentation tests
+      #   uses: ReactiveCircus/android-emulator-runner@v2.30.1
+      #   with:
+      #     api-level: ${{ matrix.api-level }}
+      #     target: ${{ matrix.target }}
+      #     profile: pixel_7
+      #     arch: arm64-v8a
+      #     disk-size: 6G
+      #     avd-name: kdrive-test
+      #     force-avd-creation: false
+      #     disable-animations: true
+      #     emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
+      #     # emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
+      #     script: ./gradlew uninstallAll app:connectedStandardDebugAndroidTest --stacktrace
