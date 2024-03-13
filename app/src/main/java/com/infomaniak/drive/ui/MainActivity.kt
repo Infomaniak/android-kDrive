@@ -151,10 +151,10 @@ class MainActivity : BaseActivity() {
 
     private val inAppReviewManager by lazy {
         InAppReviewManager(
-            this,
-            R.style.DialogStyle,
-            R.string.reviewAlertTitle,
-            R.string.urlUserReportAndroid
+            activity = this,
+            reviewDialogTheme = R.style.DialogStyle,
+            reviewDialogTitleResId = R.string.reviewAlertTitle,
+            feedbackUrlResId = R.string.urlUserReportAndroid
         )
     }
 
@@ -284,7 +284,6 @@ class MainActivity : BaseActivity() {
     //endregion
 
     //region In-App Review
-
     private fun initAppReviewManager() {
         inAppReviewManager.init(
             onDialogShown = { trackInAppReview("presentAlert") },
@@ -292,7 +291,6 @@ class MainActivity : BaseActivity() {
             onUserWantToGiveFeedback = { trackInAppReview("dislike") },
         )
     }
-
     //endregion
 
     override fun onResume() {
