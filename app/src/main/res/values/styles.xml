@@ -181,10 +181,12 @@
         <item name="colorControlNormal">@color/primary</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="colorSurface">@color/appBar</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogMaterialComponentsTitle</item>
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlayDialogRounded</item>
     </style>
 
     <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:fontFamily">@font/suisseintl_medium</item>
         <item name="android:letterSpacing">0</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">14sp</item>
@@ -196,6 +198,12 @@
 
     <style name="DeletePositiveButtonStyle" parent="PositiveButtonStyle">
         <item name="android:textColor">@color/delete_button</item>
+    </style>
+
+    <style name="MaterialAlertDialogMaterialComponentsTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:fontFamily">@font/suisseintl_regular</item>
+        <item name="android:textColor">@color/title</item>
+        <item name="android:textSize">16sp</item>
     </style>
 
     <style name="ShapeAppearanceOverlayDialogRounded">
