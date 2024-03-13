@@ -28,13 +28,13 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
 import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.setDriveHeader
+import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
+import com.infomaniak.drive.utils.setupSwitchDriveButton
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -75,24 +75,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             }
         }
 
-        homeUploadFileInProgressView.setUploadFileInProgress(this@HomeFragment, Utils.OTHER_ROOT_ID)
-
-        requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
-            val workInfo = it.firstOrNull() ?: return@observe
-            if (workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)) {
-                showPendingFiles()
-            }
-        }
+        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, homeUploadFileInProgressView)
     }
 
     override fun onResume() {
         super.onResume()
         updateUi()
-        showPendingFiles()
-    }
-
-    private fun showPendingFiles() = with(binding) {
-        homeUploadFileInProgressView.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
     }
 
     private fun updateUi(forceDownload: Boolean = false) = with(binding) {

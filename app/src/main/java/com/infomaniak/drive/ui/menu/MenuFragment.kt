@@ -28,6 +28,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -35,7 +36,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentMenuBinding
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.formatShortBinarySize
+import com.infomaniak.drive.utils.openSupport
+import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -45,6 +50,7 @@ import kotlinx.coroutines.launch
 class MenuFragment : Fragment() {
 
     private var binding: FragmentMenuBinding by safeBinding()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentMenuBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -115,15 +121,6 @@ class MenuFragment : Fragment() {
             }
         }
 
-        menuUploadFileInProgressView.setUploadFileInProgress(this@MenuFragment, Utils.OTHER_ROOT_ID)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        showPendingFiles()
-    }
-
-    private fun showPendingFiles() {
-        binding.menuUploadFileInProgressView.updateUploadFileInProgress(UploadFile.getCurrentUserPendingUploadsCount())
+        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, menuUploadFileInProgressView)
     }
 }

@@ -44,8 +44,10 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
+import io.realm.kotlin.toFlow
 import io.sentry.Sentry
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.mapLatest
 import java.util.Date
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
@@ -64,6 +66,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
     val isInternetAvailable = MutableLiveData(true)
+
+    private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()
 
@@ -348,6 +352,16 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
 
         emit(apiResponse)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pendingUploadsCount: LiveData<Int> = _pendingUploadsCount.switchMap { folderId ->
+        UploadFile.getCurrentUserPendingUploadFile(folderId)
+            .toFlow()
+            .mapLatest { list -> list.count() }
+            .asLiveData(viewModelScope.coroutineContext + Dispatchers.IO)
+
+            .distinctUntilChanged()
     }
 
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
