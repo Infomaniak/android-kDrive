@@ -312,6 +312,19 @@ class FileMigration : RealmMigration {
 
             oldVersionTemp++
         }
+
+        // Migrated to version 7
+        if (oldVersionTemp == 6L) {
+            schema.get(File::class.java.simpleName)?.apply {
+                addField("cursor", String::class.java)
+                addRealmListField("supportedBy", String::class.java)
+                removeField("hasThumbnail")
+                removeField("hasOnlyoffice")
+            }
+
+            oldVersionTemp++
+        }
+
     }
 
     override fun equals(other: Any?): Boolean {
@@ -339,7 +352,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val dbVersion = 6L // Must be bumped when the schema changes
+        const val dbVersion = 8L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }

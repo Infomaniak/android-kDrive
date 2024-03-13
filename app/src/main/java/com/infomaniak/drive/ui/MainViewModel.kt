@@ -99,6 +99,10 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
+    fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
+        currentFolder.postValue(FileController.getFileById(folderId, userDrive))
+    }
+
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
     }

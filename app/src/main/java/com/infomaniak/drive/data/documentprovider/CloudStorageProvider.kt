@@ -39,6 +39,7 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -174,6 +175,9 @@ class CloudStorageProvider : DocumentsProvider() {
         val driveId = getDriveFromDocId(parentDocumentId).id
         val sortType = getSortType(sortOrder)
 
+        val userDrive = UserDrive(userId, driveId)
+        val realm = FileController.getRealmInstance(userDrive)
+
         when {
             isRootFolder -> {
                 cursor.addRootDrives(userId, isRootFolder = true)
@@ -194,12 +198,13 @@ class CloudStorageProvider : DocumentsProvider() {
                 CoroutineScope(Dispatchers.IO + cursor.job).launch {
                     if (parentDocumentId.contains(MY_SHARES_FOLDER_ID.toString())) {
                         FileController.getMySharedFiles(
-                            UserDrive(userId, driveId),
-                            sortType
-                        ) { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) }
+                            userDrive = UserDrive(userId, driveId),
+                            sortType = sortType,
+                            transaction = { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) })
                     } else {
-                        FileController.getCloudStorageFiles(
-                            parentId = fileFolderId,
+                        FolderFilesProvider.getCloudStorageFiles(
+                            realm = realm,
+                            folderId = fileFolderId,
                             userDrive = UserDrive(userId, driveId, sharedWithMe = true),
                             sortType = sortType,
                             transaction = cursor.addFiles(parentDocumentId, uri)
@@ -209,9 +214,10 @@ class CloudStorageProvider : DocumentsProvider() {
             }
             else -> {
                 CoroutineScope(Dispatchers.IO + cursor.job).launch {
-                    FileController.getCloudStorageFiles(
-                        parentId = fileFolderId,
-                        userDrive = UserDrive(userId, driveId),
+                    FolderFilesProvider.getCloudStorageFiles(
+                        realm = realm,
+                        folderId = fileFolderId,
+                        userDrive = userDrive,
                         sortType = sortType,
                         transaction = cursor.addFiles(parentDocumentId, uri)
                     )
@@ -219,6 +225,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
         }
 
+        realm.close()
         cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to false)
         cursor.setNotificationUri(context?.contentResolver, uri)
         return cursor

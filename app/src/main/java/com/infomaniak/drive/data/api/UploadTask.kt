@@ -130,11 +130,12 @@ class UploadTask(
             val isNewUploadSession = uploadedChunks?.needToResetUpload() ?: true
             val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
-            if (isNewUploadSession) {
+            val uploadHost = if (isNewUploadSession) {
                 uploadFile.prepareUploadSession(totalChunks)
             } else {
                 chunkSize = uploadedChunks!!.validChuckSize
-            }
+                uploadFile.uploadHost
+            }!!
 
             BufferedInputStream(fileInputStream, chunkSize * 2).use { input ->
                 val chunkParentJob = Job()
@@ -172,7 +173,7 @@ class UploadTask(
 
                     data = if (count == chunkSize) data else data.copyOf(count)
 
-                    val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count)
+                    val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count, uploadHost = uploadHost)
                     SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
                     @Suppress("DeferredResultUnused")
@@ -265,7 +266,7 @@ class UploadTask(
         return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
-        } else false
+        } else uploadFile.uploadHost == null
     }
 
     private fun manageApiResponse(response: Response) {
@@ -349,7 +350,7 @@ class UploadTask(
         return uploadToken?.let { ApiRepository.getValidChunks(uploadFile.driveId, it, okHttpClient).data }
     }
 
-    private fun UploadFile.prepareUploadSession(totalChunks: Int) {
+    private fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
         val sessionBody = UploadSession.StartSessionBody(
             conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
@@ -361,10 +362,12 @@ class UploadTask(
             totalSize = fileSize
         )
 
-        with(ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient)) {
-            if (isSuccess()) data?.token?.let { uploadFile.updateUploadToken(it) }
-            else manageUploadErrors()
-        }
+        return ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient).also {
+            if (it.isSuccess()) it.data?.token?.let { uploadToken ->
+                uploadFile.updateUploadToken(uploadToken, it.data!!.uploadHost)
+            }
+            else it.manageUploadErrors()
+        }.data?.uploadHost
     }
 
     private fun <T> ApiResponse<T>.manageUploadErrors() {
@@ -418,8 +421,12 @@ class UploadTask(
         }
     }
 
-    private fun UploadFile.uploadUrl(chunkNumber: Int, currentChunkSize: Int): String {
-        return ApiRoutes.addChunkToSession(driveId, uploadToken!!) + "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
+    private fun UploadFile.uploadUrl(uploadHost: String, chunkNumber: Int, currentChunkSize: Int): String {
+        return ApiRoutes.addChunkToSession(
+            uploadHost,
+            driveId,
+            uploadToken!!
+        ) + "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
     }
 
     /**

@@ -24,13 +24,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import androidx.annotation.StringRes
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.SearchFilter
@@ -41,8 +41,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setPagination
@@ -187,7 +185,6 @@ class SearchFragment : FileListFragment() {
         binding.fileRecyclerView.setPagination({
             if (!fileAdapter.isComplete && !isDownloading) {
                 fileAdapter.showLoading()
-                searchViewModel.currentPage++
                 downloadFiles(true, false)
             }
         })
@@ -243,9 +240,9 @@ class SearchFragment : FileListFragment() {
             fileAdapter.isComplete = true
         }
 
-        fun handleApiCallFailure(apiResponse: ApiResponse<ArrayList<File>>) {
+        fun handleApiCallFailure(@StringRes errorRes: Int) {
             searchViewModel.visibilityMode.value = VisibilityMode.NO_RESULTS
-            showSnackbar(apiResponse.translateError())
+            showSnackbar(errorRes)
         }
 
         fun getSearchResults(data: ArrayList<File>?): ArrayList<File> {
@@ -282,20 +279,22 @@ class SearchFragment : FileListFragment() {
 
             if (!binding.swipeRefreshLayout.isRefreshing) return@observe
 
-            it?.let { apiResponse ->
+            it?.let { folderFilesResult ->
 
-                if (apiResponse.isSuccess()) {
+                if (folderFilesResult.errorRes == null) {
                     updateMostRecentSearches()
-                    val searchList = getSearchResults(apiResponse.data)
+                    val searchList = getSearchResults(folderFilesResult.files)
+
+                    fileAdapter.isComplete = folderFilesResult.isComplete
 
                     when {
-                        searchViewModel.currentPage == 1 -> handleFirstResult(searchList)
+                        folderFilesResult.isFirstPage -> handleFirstResult(searchList)
                         searchList.isEmpty() -> handleNoResult()
-                        searchList.size < ApiRepository.PER_PAGE -> handleLastPage(searchList)
+                        folderFilesResult.isComplete -> handleLastPage(searchList)
                         else -> handleNewPage(searchList)
                     }
                 } else {
-                    handleApiCallFailure(apiResponse)
+                    handleApiCallFailure(folderFilesResult.errorRes)
                 }
 
             } ?: handleLiveDataTriggerWhenInitialized()
@@ -318,7 +317,7 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun triggerSearch() {
-        searchViewModel.currentPage = 1
+        searchViewModel.resetSearchPagination()
         downloadFiles(true, false)
     }
 

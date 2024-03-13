@@ -22,6 +22,7 @@ import androidx.lifecycle.*
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
@@ -54,74 +55,105 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     fun getFiles(
         parentId: Int,
-        page: Int = 1,
-        ignoreCache: Boolean,
         order: SortType,
-        ignoreCloud: Boolean = false,
-        userDrive: UserDrive? = null
+        sourceRestrictionType: FolderFilesProvider.SourceRestrictionType,
+        userDrive: UserDrive? = null,
+        isNewSort: Boolean,
     ): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFolderActivitiesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            suspend fun recursiveDownload(parentId: Int, page: Int) {
+            tailrec suspend fun recursiveDownload(parentId: Int, isFirstPage: Boolean) {
                 getFilesJob.ensureActive()
-                val resultList = FileController.getFilesFromCacheOrDownload(
-                    parentId = parentId,
-                    page = page,
-                    ignoreCache = ignoreCache,
-                    ignoreCloud = ignoreCloud,
-                    order = order,
-                    userDrive = userDrive,
-                    withChildren = true
+
+                val folderFilesProviderResult = FolderFilesProvider.getFiles(
+                    FolderFilesProvider.FolderFilesProviderArgs(
+                        folderId = parentId,
+                        isFirstPage = isFirstPage,
+                        order = order,
+                        sourceRestrictionType = sourceRestrictionType,
+                        userDrive = userDrive ?: UserDrive(),
+                    )
                 )
 
                 when {
-                    resultList == null -> emit(null)
-                    resultList.second.size < ApiRepository.PER_PAGE -> {
-                        emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                    folderFilesProviderResult == null -> emit(null)
+                    folderFilesProviderResult.isComplete -> {
+                        emit(
+                            FolderFilesResult(
+                                parentFolder = folderFilesProviderResult.folder,
+                                files = folderFilesProviderResult.folderFiles,
+                                isComplete = true,
+                                isFirstPage = isFirstPage,
+                                isNewSort = isNewSort,
+                            )
+                        )
                     }
                     else -> {
-                        if (page == 1) {
-                            emit(FolderFilesResult(resultList.first, resultList.second, true, page))
+                        if (isFirstPage) {
+                            emit(
+                                FolderFilesResult(
+                                    parentFolder = folderFilesProviderResult.folder,
+                                    files = folderFilesProviderResult.folderFiles,
+                                    isComplete = true,
+                                    isFirstPage = true,
+                                    isNewSort = isNewSort,
+                                )
+                            )
                         }
-                        recursiveDownload(parentId, page + 1)
+                        recursiveDownload(parentId, isFirstPage = false)
                     }
                 }
             }
-            recursiveDownload(parentId, page)
+            recursiveDownload(parentId, isFirstPage = true)
         }
     }
 
-    fun getFavoriteFiles(order: SortType): LiveData<FolderFilesResult?> {
+    fun getFavoriteFiles(order: SortType, isNewSort: Boolean): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            suspend fun recursive(page: Int) {
+            tailrec suspend fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
                 getFilesJob.ensureActive()
-                val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, page)
+                val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, cursor)
                 if (apiResponse.isSuccess()) {
                     when {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
-                        apiResponse.data!!.size < ApiRepository.PER_PAGE -> {
-                            FileController.saveFavoritesFiles(apiResponse.data!!, page == 1)
-                            emit(FolderFilesResult(files = apiResponse.data!!, isComplete = true, page = apiResponse.page))
+                        apiResponse.hasMoreAndCursorExists -> {
+                            apiResponse.data?.let { FileController.saveFavoritesFiles(it, isFirstPage) }
+                            emit(
+                                FolderFilesResult(
+                                    files = apiResponse.data!!,
+                                    isComplete = false,
+                                    isFirstPage = isFirstPage,
+                                    isNewSort = isNewSort,
+                                )
+                            )
+                            recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                         }
                         else -> {
-                            apiResponse.data?.let { FileController.saveFavoritesFiles(it, page == 1) }
-                            emit(FolderFilesResult(files = apiResponse.data!!, isComplete = false, page = apiResponse.page))
-                            recursive(page + 1)
+                            FileController.saveFavoritesFiles(apiResponse.data!!, isFirstPage)
+                            emit(
+                                FolderFilesResult(
+                                    files = apiResponse.data!!,
+                                    isComplete = true,
+                                    isFirstPage = isFirstPage,
+                                    isNewSort = isNewSort,
+                                )
+                            )
                         }
                     }
                 } else emit(
                     FolderFilesResult(
                         files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
                         isComplete = true,
-                        page = 1
+                        isFirstPage = true,
+                        isNewSort = isNewSort,
                     )
                 )
             }
-            recursive(1)
+            recursive(isFirstPage = true, isNewSort = isNewSort)
         }
     }
 
@@ -141,9 +173,9 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            FileController.getMySharedFiles(UserDrive(), sortType) { files, isComplete ->
+            FileController.getMySharedFiles(UserDrive(), sortType, transaction = { files, isComplete ->
                 runBlocking { emit(files to isComplete) }
-            }
+            })
         }
     }
 
@@ -173,9 +205,12 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFolderActivitiesJob = Job()
         return liveData(Dispatchers.IO + getFolderActivitiesJob) {
             mutex.withLock {
-                getFolderActivitiesJob.ensureActive()
-                val activities = FileController.getFolderActivities(folder, 1, userDrive)
-                emit(activities.isNotEmpty())
+                val activitiesAreLoadedWithSuccess = FolderFilesProvider.tryLoadActivitiesFromFolder(
+                    folder = folder,
+                    userDrive = userDrive ?: UserDrive(),
+                    activitiesJob = getFolderActivitiesJob
+                )
+                emit(activitiesAreLoadedWithSuccess)
             }
         }
     }

@@ -30,7 +30,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeTabsBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.navigateToParentFolder
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setPagination
 
@@ -53,7 +56,12 @@ class HomeActivitiesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initAdapter()
-        AccountUtils.getCurrentDrive()?.let { currentDrive -> getLastActivities(currentDrive.id) }
+        AccountUtils.getCurrentDrive()?.let { currentDrive ->
+            if (!homeViewModel.needToRestoreFiles) {
+                getLastActivities(currentDrive.id)
+            }
+        }
+        observeLastActivities()
     }
 
     override fun onDestroyView() {
@@ -63,7 +71,6 @@ class HomeActivitiesFragment : Fragment() {
 
     private fun initAdapter() {
         binding.homeTabsRecyclerView.apply {
-            homeViewModel.lastActivityPage = 1
             paginationListener?.let(::removeOnScrollListener)
 
             val lastActivitiesAdapter = LastActivitiesAdapter()
@@ -74,10 +81,10 @@ class HomeActivitiesFragment : Fragment() {
             paginationListener = setPagination(
                 whenLoadMoreIsPossible = {
                     if (!lastActivitiesAdapter.isComplete && !isDownloadingActivities) {
-                        homeViewModel.lastActivityPage++
-                        homeViewModel.lastActivityLastPage++
-
-                        AccountUtils.getCurrentDrive()?.let { currentDrive -> getLastActivities(currentDrive.id) }
+                        AccountUtils.getCurrentDrive()?.let { currentDrive ->
+                            isDownloadingActivities = true
+                            homeViewModel.loadMoreActivities(currentDrive.id)
+                        }
                     }
                 })
 
@@ -107,31 +114,41 @@ class HomeActivitiesFragment : Fragment() {
     }
 
     fun getLastActivities(driveId: Int, forceDownload: Boolean = false) {
-        if (_binding == null) return
+        if (_binding == null || isDownloadingActivities) return
 
         (binding.homeTabsRecyclerView.adapter as? LastActivitiesAdapter)?.apply {
             if (forceDownload) {
-                homeViewModel.apply {
-                    lastActivityPage = 1
-                    lastActivityLastPage = 1
-                }
                 clean()
             }
             showLoading()
             isComplete = false
             isDownloadingActivities = true
-            homeViewModel.getLastActivities(driveId, forceDownload).observe(viewLifecycleOwner) {
+            homeViewModel.loadLastActivities(driveId, forceDownload)
+        }
+    }
+
+    private fun observeLastActivities() {
+        val lastActivitiesAdapter = binding.homeTabsRecyclerView.adapter as? LastActivitiesAdapter ?: return
+
+        if (homeViewModel.needToRestoreFiles && lastActivitiesAdapter.itemList.isEmpty()) {
+            // TODO: (Realm kotlin) - Should be improved with realm kotlin, the current problem will no longer exist
+            homeViewModel.restoreActivitiesIfNeeded()
+        }
+
+        homeViewModel.lastActivitiesResult.observe(viewLifecycleOwner) { lastActivityResult ->
+            with(lastActivitiesAdapter) {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-                it?.let { (apiResponse, mergedActivities) ->
-                    if (apiResponse.page == 1 && itemCount > 0) clean()
+
+                lastActivityResult?.let { (mergedActivities, isComplete, isFirstPage) ->
+                    if (isFirstPage && itemCount > 0) clean()
                     addAll(mergedActivities)
-                    isComplete = apiResponse.isLastPage()
+                    this.isComplete = isComplete
                 } ?: also {
                     isComplete = true
                     addAll(arrayListOf())
                 }
-                isDownloadingActivities = false
             }
+            isDownloadingActivities = false
         }
     }
 

@@ -44,6 +44,8 @@ import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.*
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
@@ -537,7 +539,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun refreshActivities() {
         val isUploadInProgressNavigation = findNavController().currentDestination?.id == R.id.uploadInProgressFragment
 
-        if (folderId == OTHER_ROOT_ID || isUploadInProgressNavigation || !fileAdapter.isComplete) return
+        if (folderId in arrayOf(OTHER_ROOT_ID, ROOT_ID) || isUploadInProgressNavigation || !fileAdapter.isComplete) return
 
         if (isLoadingActivities) {
             retryLoadingActivities = true
@@ -653,7 +655,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         fileListViewModel.getFolderActivities(updatedFolder, userDrive).observe(viewLifecycleOwner) { isNotEmpty ->
             if (isNotEmpty == true) {
                 getFolderFiles(
-                    ignoreCache = false,
+                    sourceRestrictionType = ONLY_FROM_LOCAL,
+                    isNewSort = false,
                     onFinish = {
                         it?.let { (_, files, _) ->
                             changeNoFilesLayoutVisibility(
@@ -667,14 +670,21 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun getFolderFiles(ignoreCache: Boolean, onFinish: ((FolderFilesResult?) -> Unit)? = null) {
+    private fun getFolderFiles(
+        sourceRestrictionType: SourceRestrictionType,
+        isNewSort: Boolean,
+        onFinish: ((FolderFilesResult?) -> Unit)? = null,
+    ) {
         showPendingFiles()
+
+        val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
+
         fileListViewModel.getFiles(
             folderId,
-            ignoreCache = ignoreCache,
-            ignoreCloud = mainViewModel.isInternetAvailable.value == false,
             order = fileListViewModel.sortType,
-            userDrive = userDrive
+            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else sourceRestrictionType,
+            userDrive = userDrive,
+            isNewSort = isNewSort,
         ).observe(viewLifecycleOwner) {
             onFinish?.invoke(it)
         }
@@ -760,10 +770,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             isDownloading = true
             fileAdapter.isComplete = false
 
-            getFolderFiles(ignoreCache, onFinish = {
+            val sourceRestrictionType = if (ignoreCache) ONLY_FROM_REMOTE else UNRESTRICTED
+
+            getFolderFiles(sourceRestrictionType, isNewSort, onFinish = {
                 it?.let { result ->
 
-                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+                    if (fileAdapter.itemCount == 0 || !result.isFirstPage || isNewSort) {
 
                         FileController.getRealmLiveFiles(
                             parentId = folderId,
@@ -807,7 +819,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val parentFolder: File? = null,
         val files: ArrayList<File>,
         val isComplete: Boolean,
-        val page: Int
+        val isFirstPage: Boolean,
+        val isNewSort: Boolean,
+        @StringRes val errorRes: Int? = null,
     )
 
     /**

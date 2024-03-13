@@ -36,8 +36,7 @@ import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
-import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
+import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
@@ -88,6 +87,7 @@ open class File(
     @SerializedName("capabilities")
     var rights: Rights? = null,
     var categories: @RawValue RealmList<FileCategory> = RealmList(),
+    var cursor: String? = null,
 
     /**
      * DIRECTORY ONLY
@@ -101,10 +101,8 @@ open class File(
      * FILE ONLY
      */
     var size: Long? = null,
-    @SerializedName("has_thumbnail")
-    var hasThumbnail: Boolean = false,
-    @SerializedName("has_onlyoffice")
-    var hasOnlyoffice: Boolean = false,
+    @SerializedName("supported_by")
+    var supportedBy: @WriteWith<StringRealmListParceler> RealmList<String>? = null,
     @SerializedName("extension_type")
     var extensionType: String = "",
     var version: FileVersion? = null,
@@ -120,10 +118,13 @@ open class File(
     var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
     var isOffline: Boolean = false,
-    var versionCode: Int = 0,
     var responseAt: Long = 0,
+    var versionCode: Int = 0,
 
     ) : RealmObject(), Parcelable {
+
+    val hasThumbnail inline get() = supportedBy?.contains(SupportedByType.THUMBNAIL.apiValue) ?: false
+    val hasOnlyoffice inline get() = supportedBy?.contains(SupportedByType.ONLYOFFICE.apiValue) ?: false
 
     @LinkingObjects("children")
     val localParent: RealmResults<File>? = null
@@ -332,13 +333,24 @@ open class File(
             "is_team_space_folder" -> VisibilityType.IS_TEAM_SPACE_FOLDER
             "is_in_team_space_folder" -> VisibilityType.IS_IN_TEAM_SPACE_FOLDER
             "is_shared_space" -> VisibilityType.IS_SHARED_SPACE
+            "is_in_shared_space" -> VisibilityType.IS_IN_SHARED_SPACE
+            "is_in_private_space" -> VisibilityType.IS_IN_PRIVATE_SPACE
+            "is_private_space" -> VisibilityType.IS_PRIVATE
             else -> {
                 when {
                     dropbox != null -> VisibilityType.IS_DROPBOX
                     users.size > 1 -> VisibilityType.IS_SHARED
-                    else -> VisibilityType.IS_PRIVATE
+                    else -> VisibilityType.UNKNOWN
                 }
             }
+        }
+    }
+
+    fun getDisplayName(context: Context): String {
+        return when (getVisibilityType()) {
+            VisibilityType.IS_PRIVATE -> context.getString(R.string.localizedFilenamePrivateSpace)
+            VisibilityType.IS_TEAM_SPACE -> context.getString(R.string.localizedFilenameTeamSpace)
+            else -> name
         }
     }
 
@@ -394,7 +406,10 @@ open class File(
         IS_SHARED_SPACE,
         IS_TEAM_SPACE,
         IS_TEAM_SPACE_FOLDER,
-        IS_IN_TEAM_SPACE_FOLDER;
+        IS_IN_TEAM_SPACE_FOLDER,
+        IS_IN_SHARED_SPACE,
+        IS_IN_PRIVATE_SPACE,
+        UNKNOWN,
     }
 
     enum class Office(val extensionType: ExtensionType, val extension: String) {
@@ -406,8 +421,8 @@ open class File(
     }
 
     enum class SortType(val order: String, val orderBy: String, val translation: Int) {
-        NAME_AZ("asc", "path", R.string.sortNameAZ),
-        NAME_ZA("desc", "path", R.string.sortNameZA),
+        NAME_AZ("asc", "name", R.string.sortNameAZ),
+        NAME_ZA("desc", "name", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
         OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
@@ -447,6 +462,12 @@ open class File(
             R.string.allAllDriveUsers,
             R.string.createCommonFolderAllUsersDescription
         )
+    }
+
+    enum class SupportedByType(val apiValue: String) {
+        THUMBNAIL("thumbnail"),
+        ONLYOFFICE("onlyoffice"),
+        KMAIL("kmail")
     }
 
     companion object {

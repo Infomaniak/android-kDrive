@@ -112,9 +112,9 @@ class FavoritesFragment : FileListFragment() {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
-            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
+            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType, isNewSort).observe(viewLifecycleOwner) {
                 it?.let { result ->
-                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+                    if (fileAdapter.itemCount == 0 || result.isFirstPage || isNewSort) {
                         val realmFiles = FileController.getRealmLiveFiles(
                             isFavorite = true,
                             order = fileListViewModel.sortType,
