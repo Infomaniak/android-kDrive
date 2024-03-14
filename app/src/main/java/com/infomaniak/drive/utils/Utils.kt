@@ -254,13 +254,26 @@ object Utils {
         }
     }
 
-    fun Context.getExtensionType(uri: Uri) = contentResolver.getType(uri)
-
     fun Context.openWithIntent(uri: Uri): Intent {
-        return Intent().apply {
+        val openWithIntent = Intent().apply {
             action = Intent.ACTION_VIEW
             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            setDataAndType(uri, getExtensionType(uri))
+            setDataAndType(uri, contentResolver.getType(uri))
+        }
+
+        val openWithIntentLists = mutableListOf<Intent>()
+        packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
+            val resInfoPackageName = resInfo.activityInfo.packageName
+            if (!resInfoPackageName.lowercase().contains(packageName)) {
+                with(Intent(openWithIntent)) {
+                    setPackage(resInfoPackageName)
+                    openWithIntentLists.add(this)
+                }
+            }
+        }
+
+        return Intent.createChooser(openWithIntentLists.removeAt(0), null).apply {
+            putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
         }
     }
 
