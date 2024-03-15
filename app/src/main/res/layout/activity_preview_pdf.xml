@@ -24,25 +24,34 @@
     android:background="@color/previewBackground"
     tools:context=".ui.fileList.preview.PreviewPDFActivity">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/hostFragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pdfContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:defaultNavHost="true" />
+        android:layout_height="match_parent">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/backButton"
-        style="@style/IconButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="@dimen/marginStandardMedium"
-        android:layout_marginTop="@dimen/marginStandardMedium"
-        android:contentDescription="@string/buttonBack"
-        app:backgroundTint="@color/previewBackgroundTransparent"
-        app:icon="@drawable/ic_chevron_left"
-        app:iconSize="20dp"
-        app:iconTint="@android:color/white" />
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/hostFragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:defaultNavHost="true" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backButton"
+            style="@style/IconButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="@dimen/marginStandardMedium"
+            android:layout_marginTop="@dimen/marginStandardMedium"
+            android:contentDescription="@string/buttonBack"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:backgroundTint="@color/previewBackgroundTransparent"
+            app:icon="@drawable/ic_chevron_left"
+            app:iconSize="20dp"
+            app:iconTint="@android:color/white" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.infomaniak.drive.views.ExternalFileInfoActionsView
         android:id="@+id/bottomSheetFileInfos"

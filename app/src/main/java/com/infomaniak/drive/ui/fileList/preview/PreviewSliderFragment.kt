@@ -517,6 +517,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         fun Fragment.toggleFullscreen() {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+            (activity as? PreviewPDFActivity)?.toggleFullscreen()
         }
 
         fun Fragment.openWithClicked() {

@@ -23,12 +23,18 @@ import android.net.Uri
 import android.os.Bundle
 import android.print.PrintAttributes
 import android.print.PrintManager
+import android.view.Gravity
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.transition.AutoTransition
+import androidx.transition.Slide
+import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
@@ -36,13 +42,10 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.openWithIntent
-import com.infomaniak.drive.utils.setupTransparentStatusBar
-import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.getFileNameAndSize
@@ -62,9 +65,25 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
+    private val baseConstraintSet by lazy {
+        ConstraintSet().apply {
+            clone(binding.pdfContainer)
+        }
+    }
+
+    private val collapsedConstraintSet by lazy {
+        ConstraintSet().apply {
+            clone(baseConstraintSet)
+            clear(R.id.backButton, ConstraintSet.TOP)
+            connect(R.id.backButton, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        setColorNavigationBar(appBar = true)
+
         navController.navigate(R.id.previewPDFFragment)
 
         with(binding) {
@@ -101,6 +120,27 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
         val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
         val printAdapter = PDFDocumentAdapter(fileName, getFileForPrint(externalPDFUri))
         printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
+    }
+
+    fun toggleFullscreen() = with(bottomSheetBehavior) {
+        val transition = AutoTransition().apply {
+            duration = 125
+        }
+
+        TransitionManager.beginDelayedTransition(binding.pdfContainer, transition)
+
+        val shouldHide = state != BottomSheetBehavior.STATE_HIDDEN
+
+        isHideable = shouldHide
+        state = if (shouldHide) {
+            collapsedConstraintSet.applyTo(binding.pdfContainer)
+            BottomSheetBehavior.STATE_HIDDEN
+        } else {
+            baseConstraintSet.applyTo(binding.pdfContainer)
+            BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        toggleSystemBar(show = !shouldHide)
     }
 
     // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
