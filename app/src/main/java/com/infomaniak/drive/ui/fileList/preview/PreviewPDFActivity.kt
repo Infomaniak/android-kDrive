@@ -54,20 +54,12 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
     private val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
-
-    private val externalPDFUri: Uri by lazy { Uri.parse(intent.dataString) }
-    private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(externalPDFUri) }
-    private val fileName: String by lazy { fileNameAndSize?.first ?: "" }
-    private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
-
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-
+    private val bottomSheetBehavior: BottomSheetBehavior<View> by lazy { BottomSheetBehavior.from(binding.bottomSheetFileInfos) }
     private val baseConstraintSet by lazy {
         ConstraintSet().apply {
             clone(binding.pdfContainer)
         }
     }
-
     private val collapsedConstraintSet by lazy {
         ConstraintSet().apply {
             clone(baseConstraintSet)
@@ -75,6 +67,18 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
             connect(R.id.backButton, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         }
     }
+    private val transition by lazy {
+        AutoTransition().apply {
+            duration = 125
+        }
+    }
+
+    private val externalPDFUri: Uri by lazy { Uri.parse(intent.dataString) }
+    private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(externalPDFUri) }
+    private val fileName: String by lazy { fileNameAndSize?.first ?: "" }
+    private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,7 +91,6 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
             backButton.setOnClickListener { finish() }
             bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
             bottomSheetFileInfos.init(this@PreviewPDFActivity)
-            bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetFileInfos)
         }
     }
 
@@ -124,10 +127,6 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     }
 
     fun toggleFullscreen() = with(bottomSheetBehavior) {
-        val transition = AutoTransition().apply {
-            duration = 125
-        }
-
         TransitionManager.beginDelayedTransition(binding.pdfContainer, transition)
 
         val shouldHide = state != BottomSheetBehavior.STATE_HIDDEN
