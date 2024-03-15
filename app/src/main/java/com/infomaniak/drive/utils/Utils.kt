@@ -235,9 +235,17 @@ object Utils {
         }
     }
 
+    fun Context.openWith(uri: Uri, type: String?, flags: Int) {
+        startActivityFor(openWithIntent(uri, type, flags))
+    }
+
     fun Context.openWith(file: File, userDrive: UserDrive = UserDrive()) {
+        startActivityFor(openWithIntent(file, userDrive))
+    }
+
+    private fun Context.startActivityFor(openWithIntent: Intent) {
         try {
-            startActivity(openWithIntent(file, userDrive))
+            startActivity(openWithIntent)
         } catch (e: ActivityNotFoundException) {
             showToast(R.string.errorNoSupportingAppFound)
         }
@@ -245,35 +253,39 @@ object Utils {
 
     fun Context.openWithIntent(file: File, userDrive: UserDrive = UserDrive()): Intent {
         val (cloudUri, uri) = file.getCloudAndFileUris(this, userDrive)
-        return Intent().apply {
-            action = Intent.ACTION_VIEW
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
-                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-            setDataAndType(uri, contentResolver.getType(cloudUri))
-        }
+        val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+        return openWithIntent(uri, contentResolver.getType(cloudUri), flags)
     }
 
-    fun Context.openWithIntent(uri: Uri): Intent {
+    fun Context.openWithIntent(uri: Uri, type: String?, flags: Int): Intent {
         val openWithIntent = Intent().apply {
             action = Intent.ACTION_VIEW
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            setDataAndType(uri, contentResolver.getType(uri))
+            this.flags = flags
+            setDataAndType(uri, type)
         }
 
-        val openWithIntentLists = mutableListOf<Intent>()
-        packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
-            val resInfoPackageName = resInfo.activityInfo.packageName
-            if (!resInfoPackageName.lowercase().contains(packageName)) {
-                with(Intent(openWithIntent)) {
-                    setPackage(resInfoPackageName)
-                    openWithIntentLists.add(this)
+        //We only do that when we try to openWith with a PDF because we have our own PDF reader
+        //Title in the chooser might not be displayed, at the discretion of the brand manufacturer
+        //So we keep the ACTION_VIEW for every type of files EXCEPT PDF files
+        return if (type == "application/pdf") {
+            val openWithIntentLists = mutableListOf<Intent>()
+            packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
+                val resInfoPackageName = resInfo.activityInfo.packageName
+                if (!resInfoPackageName.lowercase().contains(packageName)) {
+                    with(Intent(openWithIntent)) {
+                        setPackage(resInfoPackageName)
+                        openWithIntentLists.add(this)
+                    }
                 }
             }
-        }
 
-        return Intent.createChooser(openWithIntentLists.removeAt(0), null).apply {
-            putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
+            Intent.createChooser(openWithIntentLists.removeAt(0), getString(R.string.openWith)).apply {
+                putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
+            }
+        } else {
+            openWithIntent
         }
     }
 

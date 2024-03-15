@@ -23,17 +23,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.print.PrintAttributes
 import android.print.PrintManager
-import android.view.Gravity
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.transition.AutoTransition
-import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
@@ -45,7 +42,7 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.Utils.openWithIntent
+import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.getFileNameAndSize
@@ -102,7 +99,11 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     override fun openWithClicked(context: Context) {
         super.openWithClicked(context)
-        startActivity(openWithIntent(externalPDFUri))
+        openWith(
+            externalPDFUri,
+            contentResolver.getType(externalPDFUri),
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
     }
 
     override fun shareFile(context: Context) {
