@@ -452,7 +452,7 @@
     <string name="homeTitle">Recepción</string>
     <string name="inputExpirationDate">Fecha de caducidad</string>
     <string name="inputExpirationTime">Tiempo de expiración</string>
-    <string name="kDrivePdfViewer">visor de PDF kDrive</string>
+    <string name="kDrivePdfViewer">Visor de PDF kDrive</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
     <string name="locateButton">Localizar</string>
     <string name="manageCategoriesCreateTitle">Crear %s</string>

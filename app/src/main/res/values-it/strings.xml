@@ -452,7 +452,7 @@
     <string name="homeTitle">Home</string>
     <string name="inputExpirationDate">Data di scadenza</string>
     <string name="inputExpirationTime">Tempo di scadenza</string>
-    <string name="kDrivePdfViewer">visualizzatore di PDF kDrive</string>
+    <string name="kDrivePdfViewer">Visualizzatore di PDF kDrive</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
     <string name="locateButton">Localizzare</string>
     <string name="manageCategoriesCreateTitle">Crea %s</string>
