@@ -32,7 +32,6 @@ class UploadFilesHelper private constructor(
     private val context: Context,
     private val navController: NavController,
     private val onOpeningPicker: (() -> Unit)?,
-    private val onResult: (() -> Unit)?,
 ) {
 
     private lateinit var filePicker: FilePicker
@@ -43,10 +42,9 @@ class UploadFilesHelper private constructor(
         activity: FragmentActivity,
         navController: NavController,
         onOpeningPicker: (() -> Unit)? = null,
-        onResult: (() -> Unit)? = null,
-    ) : this(context = activity, navController, onOpeningPicker = onOpeningPicker, onResult = onResult) {
+    ) : this(context = activity, navController, onOpeningPicker = onOpeningPicker) {
 
-        filePicker = FilePicker(activity).apply { initCallback(::initFilePicker) }
+        filePicker = FilePicker(activity).apply { initCallback(::onSelectFilesResult) }
 
         uploadFilesPermissions = DrivePermissions().apply {
             registerPermissions(activity) { authorized -> if (authorized) uploadFiles() }
@@ -63,11 +61,6 @@ class UploadFilesHelper private constructor(
             onOpeningPicker?.invoke()
             filePicker.open()
         }
-    }
-
-    private fun initFilePicker(uris: List<Uri>) {
-        onResult?.invoke()
-        onSelectFilesResult(uris)
     }
 
     private fun onSelectFilesResult(uris: List<Uri>) {

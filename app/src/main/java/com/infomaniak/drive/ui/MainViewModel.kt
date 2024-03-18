@@ -106,7 +106,6 @@ class MainViewModel(
                 getContext().trackNewElementEvent("uploadFile")
                 setParentFolder(uploadFilesHelper)
             },
-            onResult = {},
         ).apply {
             setParentFolder(this)
         }
