@@ -37,16 +37,20 @@ object MatomoDrive : MatomoCore {
         trackEvent("fileAction", name, action, value)
     }
 
-    fun Fragment.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("newElement", name, action, value)
-    }
-
     fun Fragment.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         context?.trackShareRightsEvent(name, action, value)
     }
 
     fun Context.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent("shareAndRights", name, action, value)
+    }
+
+    fun Fragment.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        context?.trackNewElementEvent(name, action, value)
+    }
+
+    fun Context.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent("newElement", name, action, value)
     }
 
     fun Fragment.trackTrashEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
