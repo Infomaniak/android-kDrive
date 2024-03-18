@@ -154,7 +154,7 @@ class MainActivity : BaseActivity() {
             activity = this,
             reviewDialogTheme = R.style.DialogStyle,
             reviewDialogTitleResId = R.string.reviewAlertTitle,
-            feedbackUrlResId = R.string.urlUserReportAndroid
+            feedbackUrlResId = R.string.urlUserReportAndroid,
         )
     }
 
