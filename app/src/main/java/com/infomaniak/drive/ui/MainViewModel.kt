@@ -114,13 +114,7 @@ class MainViewModel(
     private fun setParentFolder(uploadFilesHelper: UploadFilesHelper) {
         val currentFolder: File = currentFolder.value ?: File.getFileFromSavedStateHandle(savedStateHandle)
         currentFolder.saveToSavedStateHandle(savedStateHandle)
-        uploadFilesHelper.initParentFolder(
-            File(
-                id = currentFolder.id,
-                name = currentFolder.name,
-                driveId = currentFolder.driveId
-            )
-        )
+        uploadFilesHelper.initParentFolder(currentFolder)
     }
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
