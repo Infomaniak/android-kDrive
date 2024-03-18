@@ -29,6 +29,8 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -102,7 +104,7 @@ class MainViewModel(
             activity = fragmentActivity,
             navController = navController,
             onOpeningPicker = {
-                //TODO Add log matomo
+                getContext().trackNewElementEvent("uploadFile")
                 setParentFolder(uploadFilesHelper)
             },
             onResult = {

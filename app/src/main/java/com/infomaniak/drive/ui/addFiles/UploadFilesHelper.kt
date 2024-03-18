@@ -43,24 +43,11 @@ class UploadFilesHelper private constructor(
     private lateinit var parentFolder: File
 
     constructor(
-        fragment: Fragment,
-        onOpeningPicker: () -> Unit,
-        onResult: (() -> Unit)? = null,
-    ) : this(fragment.requireContext(), fragment.findNavController(), onOpeningPicker, onResult) {
-
-        filePicker = FilePicker(fragment).apply { initCallback(::initFilePicker) }
-
-        uploadFilesPermissions = DrivePermissions().apply {
-            registerPermissions(fragment) { authorized -> if (authorized) uploadFiles() }
-        }
-    }
-
-    constructor(
         activity: FragmentActivity,
         navController: NavController,
         onOpeningPicker: (() -> Unit)? = null,
         onResult: (() -> Unit)? = null,
-    ) : this(activity, navController, onOpeningPicker = onOpeningPicker, onResult = onResult) {
+    ) : this(context = activity, navController, onOpeningPicker = onOpeningPicker, onResult = onResult) {
 
         filePicker = FilePicker(activity).apply { initCallback(::initFilePicker) }
 
