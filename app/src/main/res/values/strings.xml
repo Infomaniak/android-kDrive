@@ -553,6 +553,7 @@
     <string name="recentActivitySeeMore">View more recent files</string>
     <string name="refreshTokenError">You’ve been disconnected due to a problem. Please log in again</string>
     <string name="restrictedSharedLinkTitle">Restricted sharing link</string>
+    <string name="reviewAlertTitle">Do you like kDrive?</string>
     <string name="saveExternalFileInputFileName">Document name</string>
     <string name="saveExternalFileTitle">Save to kDrive</string>
     <string name="searchFilterTitle">File types</string>
@@ -716,6 +717,7 @@
     <string name="uploadNetworkErrorWifiRequired">Waiting for WiFi network</string>
     <string name="uploadOutOfMemoryError">Insufficient available ram memory</string>
     <string name="uploadPermissionError">Additional permissions requested</string>
+    <string name="urlUserReportAndroid">https://feedback.userreport.com/1d484922-97e1-4a43-a4c9-4d19bc1b5494/</string>
     <string name="userInviteByEmail">Invite via email</string>
     <string name="userPermissionManage">Can manage</string>
     <string name="userPermissionManageDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete the file\nShare with other users</string>

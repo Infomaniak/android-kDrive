@@ -542,6 +542,7 @@
     <string name="recentActivitySeeMore">Ver más archivos recientes</string>
     <string name="refreshTokenError">Te has desconectado por un problema. Vuelve a conectarte</string>
     <string name="restrictedSharedLinkTitle">Enlace de uso compartido restringido</string>
+    <string name="reviewAlertTitle">¿Te gusta kDrive?</string>
     <string name="saveExternalFileInputFileName">Nombre del documento</string>
     <string name="saveExternalFileTitle">Guardar en el kDrive</string>
     <string name="searchFilterTitle">Tipos de archivos</string>
@@ -705,6 +706,7 @@
     <string name="uploadNetworkErrorWifiRequired">A la espera de red WiFi</string>
     <string name="uploadOutOfMemoryError">Insuficiente memoria RAM disponible</string>
     <string name="uploadPermissionError">Permisos adicionales solicitados</string>
+    <string name="urlUserReportAndroid">https://feedback.userreport.com/6351a88b-79c5-46ba-9e8a-a5942a5bf65d/</string>
     <string name="userInviteByEmail">Invitar por correo</string>
     <string name="userPermissionManage">Puede gestionar</string>
     <string name="userPermissionManageDescription">Modificar el archivo\nDescargar\nAñadir comentario\nAñadir y crear archivo/carpeta\nEliminar el archivo\nCompartir con otros usuarios</string>
