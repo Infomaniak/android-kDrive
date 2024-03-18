@@ -29,7 +29,6 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.MainApplication
-import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -107,18 +106,22 @@ class MainViewModel(
                 getContext().trackNewElementEvent("uploadFile")
                 setParentFolder(uploadFilesHelper)
             },
-            onResult = {
-                val i = 0
-            },
+            onResult = {},
         ).apply {
             setParentFolder(this)
         }
     }
 
     private fun setParentFolder(uploadFilesHelper: UploadFilesHelper) {
-        val currentFolder : File = currentFolder.value ?: File.getFileFromSavedStateHandle(savedStateHandle)
+        val currentFolder: File = currentFolder.value ?: File.getFileFromSavedStateHandle(savedStateHandle)
         currentFolder.saveToSavedStateHandle(savedStateHandle)
-        uploadFilesHelper.initParentFolder(File(id = currentFolder.id, name = currentFolder.name, driveId = currentFolder.driveId))
+        uploadFilesHelper.initParentFolder(
+            File(
+                id = currentFolder.id,
+                name = currentFolder.name,
+                driveId = currentFolder.driveId
+            )
+        )
     }
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
