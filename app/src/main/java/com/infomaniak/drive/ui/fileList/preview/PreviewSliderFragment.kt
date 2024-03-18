@@ -173,7 +173,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             }
         }
 
-        configureBottomSheetFileInfo()
+        requireActivity().getBottomSheetFileBehavior(binding.bottomSheetFileInfos, !navigationArgs.hideActions)
         setupWindowInsetsListener()
     }
 
@@ -245,31 +245,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             toggleSystemBar(shouldShow = isUiShown)
 
             isUiShown = !isUiShown
-        }
-    }
-
-    private fun configureBottomSheetFileInfo() {
-        activity?.setColorNavigationBar(true)
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
-        bottomSheetBehavior.apply {
-            isHideable = true
-            isDraggable = !navigationArgs.hideActions
-            addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    when (bottomSheetBehavior.state) {
-                        BottomSheetBehavior.STATE_HIDDEN -> {
-                            activity?.window?.navigationBarColor =
-                                ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
-                            activity?.window?.lightNavigationBar(false)
-                        }
-                        else -> {
-                            activity?.setColorNavigationBar(true)
-                        }
-                    }
-                }
-
-                override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
-            })
         }
     }
 

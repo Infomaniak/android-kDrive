@@ -45,6 +45,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
 import coil.load
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -161,6 +162,32 @@ fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
     } else {
         navigationBarColor = Color.BLACK
     }
+}
+
+fun Activity.getBottomSheetFileBehavior(bottomSheet: View, isDraggable: Boolean): BottomSheetBehavior<View> {
+    setColorNavigationBar(true)
+    val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+    bottomSheetBehavior.apply {
+        isHideable = true
+        this.isDraggable = isDraggable
+        addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                when (bottomSheetBehavior.state) {
+                    BottomSheetBehavior.STATE_HIDDEN -> {
+                        window?.navigationBarColor =
+                            ContextCompat.getColor(this@getBottomSheetFileBehavior, R.color.previewBackgroundTransparent)
+                        window?.lightNavigationBar(false)
+                    }
+                    else -> {
+                        setColorNavigationBar(true)
+                    }
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+        })
+    }
+    return bottomSheetBehavior
 }
 
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()

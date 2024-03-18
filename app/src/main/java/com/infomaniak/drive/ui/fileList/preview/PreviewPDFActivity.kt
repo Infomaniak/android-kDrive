@@ -54,7 +54,6 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
     private val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
-    private val bottomSheetBehavior: BottomSheetBehavior<View> by lazy { BottomSheetBehavior.from(binding.bottomSheetFileInfos) }
     private val baseConstraintSet by lazy {
         ConstraintSet().apply {
             clone(binding.pdfContainer)
@@ -78,7 +77,8 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private val fileName: String by lazy { fileNameAndSize?.first ?: "" }
     private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
 
-
+    private var bottomSheetBehavior: BottomSheetBehavior<View>? = null
+    private var isUiShown = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,11 +87,15 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
         navController.navigate(R.id.previewPDFFragment)
 
-        with(binding) {
-            backButton.setOnClickListener { finish() }
-            bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
-            bottomSheetFileInfos.init(this@PreviewPDFActivity)
-        }
+        binding.backButton.setOnClickListener { finish() }
+        initBottomSheet()
+
+    }
+
+    private fun initBottomSheet() = with(binding) {
+        bottomSheetBehavior = getBottomSheetFileBehavior(bottomSheetFileInfos, true)
+        bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
+        bottomSheetFileInfos.init(this@PreviewPDFActivity)
     }
 
     override fun onStart() {
@@ -129,18 +133,16 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     fun toggleFullscreen() = with(bottomSheetBehavior) {
         TransitionManager.beginDelayedTransition(binding.pdfContainer, transition)
 
-        val shouldHide = state != BottomSheetBehavior.STATE_HIDDEN
-
-        isHideable = shouldHide
-        state = if (shouldHide) {
-            collapsedConstraintSet.applyTo(binding.pdfContainer)
-            BottomSheetBehavior.STATE_HIDDEN
-        } else {
-            baseConstraintSet.applyTo(binding.pdfContainer)
-            BottomSheetBehavior.STATE_COLLAPSED
+        this?.state?.let {
+            state = if (isUiShown) {
+                collapsedConstraintSet.applyTo(binding.pdfContainer)
+                BottomSheetBehavior.STATE_HIDDEN
+            } else {
+                baseConstraintSet.applyTo(binding.pdfContainer)
+                BottomSheetBehavior.STATE_COLLAPSED
+            }
         }
-
-        toggleSystemBar(show = !shouldHide)
+        isUiShown = !isUiShown
     }
 
     // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
