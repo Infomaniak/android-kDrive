@@ -20,11 +20,8 @@ package com.infomaniak.drive.ui.addFiles
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.DrivePermissions
