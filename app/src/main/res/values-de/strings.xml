@@ -132,6 +132,7 @@
     <string name="buttonMove">Verschieben</string>
     <string name="buttonMoveTo">Verschieben zu</string>
     <string name="buttonNewPassword">Neues Passwort festlegen</string>
+    <string name="buttonNo">Nein</string>
     <string name="buttonNoDriveAnotherUser">Ein anderes Infomaniak-Profil verwenden</string>
     <string name="buttonNoDriveFreeTest">Kostenlos testen</string>
     <string name="buttonOpenDocument">Dokument öffnen</string>
@@ -544,6 +545,7 @@
     <string name="recentActivitySeeMore">Mehr neue Dateien anzeigen</string>
     <string name="refreshTokenError">Ihre Verbindung wurde unterbrochen</string>
     <string name="restrictedSharedLinkTitle">Eingeschränkter Freigabelink</string>
+    <string name="reviewAlertTitle">Mögen Sie kDrive?</string>
     <string name="saveExternalFileInputFileName">Name des Dokuments</string>
     <string name="saveExternalFileTitle">Auf kDrive speichern</string>
     <string name="searchFilterTitle">Dateitypen</string>

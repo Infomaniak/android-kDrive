@@ -132,6 +132,7 @@
     <string name="buttonMove">Déplacer</string>
     <string name="buttonMoveTo">Déplacer vers</string>
     <string name="buttonNewPassword">Définir un nouveau mot de passe</string>
+    <string name="buttonNo">Non</string>
     <string name="buttonNoDriveAnotherUser">Utiliser un autre profil Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Tester gratuitement</string>
     <string name="buttonOpenDocument">Ouvrir le document</string>
@@ -544,6 +545,7 @@
     <string name="recentActivitySeeMore">Voir plus de fichiers récents</string>
     <string name="refreshTokenError">Vous avez été déconnecté</string>
     <string name="restrictedSharedLinkTitle">Lien de partage restreint</string>
+    <string name="reviewAlertTitle">Aimez-vous kDrive ?</string>
     <string name="saveExternalFileInputFileName">Nom du document</string>
     <string name="saveExternalFileTitle">Enregistrer sur le kDrive</string>
     <string name="searchFilterTitle">Types de fichiers</string>
