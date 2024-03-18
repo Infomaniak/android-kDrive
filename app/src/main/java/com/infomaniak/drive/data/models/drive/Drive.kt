@@ -42,11 +42,13 @@ open class Drive(
     var name: String = "",
     @SerializedName("preferences")
     private var _preferences: DrivePreferences? = DrivePreferences(),
+    @SerializedName("role")
     private var _role: String = "",
+    @SerializedName("capabilities")
     private var _capabilities: DriveCapabilities? = DriveCapabilities(),
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
-    @SerializedName("category_rights")
+    @SerializedName("categories_permissions")
     private var _categoryRights: CategoryRights? = CategoryRights(),
 
     /**
@@ -61,6 +63,7 @@ open class Drive(
     @SerializedName("used_size")
     var usedSize: Long = 0,
     var id: Int = -1,
+    @SerializedName("in_maintenance")
     var maintenance: Boolean = false,
     @SerializedName("maintenance_reason")
     var maintenanceReason: String = "",

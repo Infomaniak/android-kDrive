@@ -22,7 +22,7 @@ import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 
 @RealmClass(embedded = true)
-class DriveCapabilities(
+open class DriveCapabilities(
     @SerializedName("use_versioning")
     var useVersioning: Boolean = false,
     @SerializedName("use_upload_compression")
