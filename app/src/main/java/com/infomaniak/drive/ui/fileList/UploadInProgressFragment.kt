@@ -141,7 +141,6 @@ class UploadInProgressFragment : FileListFragment() {
                         fileAdapter.deleteAt(position)
                     }
                 }
-
             }
         }
     }
