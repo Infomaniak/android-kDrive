@@ -72,7 +72,7 @@ object DriveInfosController {
 
     fun storeDriveInfos(userId: Int, driveInfo: DriveInfo): List<Drive> {
         val driveList = arrayListOf<Drive>()
-        for (drive in driveInfo.drives) {
+        for (drive in driveInfo.drives.filter { drive -> drive.role != DriveUser.Role.NONE }) {
             driveList.initDriveForRealm(drive, userId, sharedWithMe = drive.role == DriveUser.Role.EXTERNAL)
         }
 
