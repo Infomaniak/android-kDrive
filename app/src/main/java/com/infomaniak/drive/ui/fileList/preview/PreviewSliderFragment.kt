@@ -25,8 +25,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
-import androidx.core.view.*
-import androidx.core.view.ViewCompat.getWindowInsetsController
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -58,6 +60,10 @@ import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
+import kotlin.collections.first
+import kotlin.collections.joinToString
 import kotlin.collections.set
 import kotlin.math.max
 
