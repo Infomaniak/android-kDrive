@@ -68,7 +68,7 @@ object ApiRoutes {
     private const val driveInitWith =
         "with=drives,users,teams,teams.users,teams.users_count,drives.capabilities,drives.preferences," +
                 "drives.pack,drives.pack.capabilities,drives.pack.limits,drive.limits,drives.settings,drives.k_suite,drives.tags," +
-                "drives.rights,drives.categories,drives.categories_permissions,drives.users,drives.teams,drives.rewind"
+                "drives.rights,drives.categories,drives.categories_permissions,drives.users,drives.teams,drives.rewind,drives.account"
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 

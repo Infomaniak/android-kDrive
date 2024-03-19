@@ -56,6 +56,7 @@ open class Drive(
      */
     @SerializedName("account_id")
     var accountId: Int = -1,
+    private var _driveAccount: DriveAccount? = null,
     @SerializedName("created_at")
     var createdAt: Long = 0,
     @SerializedName("updated_at")
@@ -78,6 +79,9 @@ open class Drive(
     private var _teams: DriveTeamsCategories? = DriveTeamsCategories(),
     var categories: RealmList<Category> = RealmList(),
 ) : RealmObject() {
+
+    val driveAccount: DriveAccount
+        get() = _driveAccount ?: DriveAccount()
 
     val packFunctionality: DrivePackFunctionality
         get() = _packFunctionality ?: DrivePackFunctionality()
