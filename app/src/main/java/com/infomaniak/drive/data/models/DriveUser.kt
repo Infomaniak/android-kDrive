@@ -30,8 +30,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 open class DriveUser(
     @PrimaryKey final override var id: Int = -1,
-    @SerializedName("avatar_url")
-    var avatarUrl: String? = "",
     @SerializedName("display_name")
     var displayName: String = "",
     var avatar: String? = "",
@@ -50,8 +48,6 @@ open class DriveUser(
         id = user.id
         displayName = user.displayName ?: ""
     }
-
-    fun getUserAvatar() = avatar?.ifBlank { avatarUrl.toString() } ?: avatarUrl.toString()
 
     fun getInitials(): String {
         displayName.split(" ").let { initials ->
