@@ -17,22 +17,15 @@
  */
 package com.infomaniak.drive.data.models.drive
 
-import androidx.collection.ArrayMap
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.Team
 
 data class DriveInfo(
-    val drives: DriveList = DriveList(),
-    val users: ArrayMap<Int, DriveUser> = ArrayMap(),
-    val teams: ArrayList<Team> = ArrayList(),
-    @SerializedName("ips_token")
+    val drives: List<Drive> = emptyList(),
+    val users: List<DriveUser> = emptyList(),
+    val teams: List<Team> = emptyList(),
+    @SerializedName("ips")
     val ipsToken: IpsToken
-) {
-    data class DriveList(
-        val main: ArrayList<Drive> = ArrayList(),
-        @SerializedName("shared_with_me")
-        val sharedWithMe: ArrayList<Drive> = ArrayList()
-    )
-}
+)

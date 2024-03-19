@@ -120,6 +120,8 @@ open class Drive(
 
     fun isUserAdmin(): Boolean = role == DriveUser.Role.ADMIN
 
+    fun isDriveUser(): Boolean = role != DriveUser.Role.NONE && role != DriveUser.Role.EXTERNAL
+
     fun getUpdatedAt(): Date = Date(updatedAt * 1000)
 
     override fun equals(other: Any?): Boolean {

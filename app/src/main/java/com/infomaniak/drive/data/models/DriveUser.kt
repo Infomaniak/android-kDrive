@@ -34,7 +34,7 @@ open class DriveUser(
     var avatarUrl: String? = "",
     @SerializedName("display_name")
     var displayName: String = "",
-    private var avatar: String? = "",
+    var avatar: String? = "",
     var email: String = "",
     @SerializedName("role")
     private var _role: String = "",

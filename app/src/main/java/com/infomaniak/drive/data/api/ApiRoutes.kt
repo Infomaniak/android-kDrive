@@ -65,6 +65,11 @@ object ApiRoutes {
             "&actions[]=comment_resolve" +
             "&actions[]=share_link_show"
 
+    private const val driveInitWith =
+        "with=drives,users,teams,teams.users,teams.users_count,drives.capabilities,drives.preferences," +
+                "drives.pack,drives.pack.capabilities,drives.pack.limits,drive.limits,drives.settings,drives.k_suite,drives.tags," +
+                "drives.rights,drives.categories,drives.categories_permissions,drives.users,drives.teams,drives.rewind"
+
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
     private fun driveURL(driveId: Int) = "${DRIVE_API_V2}${driveId}"
@@ -77,9 +82,9 @@ object ApiRoutes {
 
     fun trashURL(file: File) = "${driveURL(file.driveId)}/trash/${file.id}"
 
-    /** V1 */
-    //region V1
-    fun getAllDrivesData() = "${DRIVE_API_V1}init?${noAvatar}&with=drives,users,teams,ips,categories"
+    /** Drive */
+    //region Drive
+    fun getAllDrivesData() = "${DRIVE_API_V2}init?$driveInitWith"
     //endregion
 
     /** Archive */
