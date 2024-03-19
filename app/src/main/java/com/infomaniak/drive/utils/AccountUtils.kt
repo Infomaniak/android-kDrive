@@ -157,16 +157,17 @@ object AccountUtils : CredentialManager() {
         }
     }
 
-    private fun reloadAppIfNeeded(fromMaintenance: Boolean, driveInfo: DriveInfo) {
+    private suspend fun reloadAppIfNeeded(fromMaintenance: Boolean, driveInfo: DriveInfo) {
+        val internalDrives = driveInfo.drives.filter { it.isDriveUser() }
         if (fromMaintenance) {
-            if (driveInfo.drives.main.any { drive -> !drive.maintenance }) {
-                GlobalScope.launch(Dispatchers.Main) {
+            if (internalDrives.any { drive -> !drive.maintenance }) {
+                Dispatchers.Main {
                     reloadApp?.invoke(bundleOf())
                 }
             }
-        } else if (driveInfo.drives.main.all { drive -> drive.maintenance } ||
-            driveInfo.drives.main.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
-            GlobalScope.launch(Dispatchers.Main) {
+        } else if (internalDrives.none { drive -> !drive.maintenance } ||
+            internalDrives.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
+            Dispatchers.Main {
                 reloadApp?.invoke(bundleOf())
             }
         }
