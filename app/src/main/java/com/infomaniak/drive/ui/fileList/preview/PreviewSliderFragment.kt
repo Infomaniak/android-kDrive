@@ -242,7 +242,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             _binding?.header?.isVisible = isUiShown
 
             toggleBottomSheet(shouldShow = isUiShown)
-            toggleSystemBar(shouldShow = isUiShown)
+            requireActivity().toggleSystemBar(show = isUiShown)
 
             isUiShown = !isUiShown
         }
@@ -347,14 +347,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             BottomSheetBehavior.STATE_COLLAPSED
         } else {
             BottomSheetBehavior.STATE_HIDDEN
-        }
-    }
-
-    private fun toggleSystemBar(shouldShow: Boolean) {
-        getWindowInsetsController(requireActivity().window.decorView)?.apply {
-            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            val systemBars = WindowInsetsCompat.Type.systemBars()
-            if (shouldShow) show(systemBars) else hide(systemBars)
         }
     }
 

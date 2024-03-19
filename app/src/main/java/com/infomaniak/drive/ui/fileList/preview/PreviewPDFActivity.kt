@@ -78,7 +78,7 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
 
     private var bottomSheetBehavior: BottomSheetBehavior<View>? = null
-    private var isUiShown = false
+    private var isUiShown = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -143,6 +143,7 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
             }
         }
         isUiShown = !isUiShown
+        toggleSystemBar(isUiShown)
     }
 
     // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
