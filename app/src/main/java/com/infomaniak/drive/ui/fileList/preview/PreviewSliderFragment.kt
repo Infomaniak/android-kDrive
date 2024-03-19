@@ -173,7 +173,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             }
         }
 
-        requireActivity().getBottomSheetFileBehavior(binding.bottomSheetFileInfos, !navigationArgs.hideActions)
+        bottomSheetBehavior = requireActivity().getBottomSheetFileBehavior(binding.bottomSheetFileInfos, !navigationArgs.hideActions)
         setupWindowInsetsListener()
     }
 
