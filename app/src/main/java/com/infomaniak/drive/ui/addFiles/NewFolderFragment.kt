@@ -86,7 +86,7 @@ class NewFolderFragment : Fragment() {
     private fun initDropBoxFolder() {
         binding.dropBox.setOnClickListener {
             safeNavigate(
-                if (AccountUtils.getCurrentDrive()?.packFunctionality?.dropbox == true) R.id.createDropBoxFolderFragment
+                if (AccountUtils.getCurrentDrive()?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
                 else R.id.dropBoxBottomSheetDialog
             )
         }
