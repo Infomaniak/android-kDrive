@@ -540,7 +540,7 @@
     <string name="recentActivityMeTitle">Durch mich</string>
     <string name="recentActivityMyTeam">Durch mein Team</string>
     <string name="recentActivitySeeMore">Mehr neue Dateien anzeigen</string>
-    <string name="refreshTokenError">Sie wurden aufgrund eines Problems getrennt. Bitte verbinden Sie sich erneut.</string>
+    <string name="refreshTokenError">Ihre Verbindung wurde unterbrochen</string>
     <string name="restrictedSharedLinkTitle">Eingeschränkter Freigabelink</string>
     <string name="reviewAlertTitle">Mögen Sie kDrive?</string>
     <string name="saveExternalFileInputFileName">Name des Dokuments</string>
