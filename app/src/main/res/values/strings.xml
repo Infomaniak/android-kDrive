@@ -551,7 +551,7 @@
     <string name="recentActivityMeTitle">By me</string>
     <string name="recentActivityMyTeam">By my team</string>
     <string name="recentActivitySeeMore">View more recent files</string>
-    <string name="refreshTokenError">You’ve been disconnected due to a problem. Please log in again</string>
+    <string name="refreshTokenError">You have been disconnected</string>
     <string name="restrictedSharedLinkTitle">Restricted sharing link</string>
     <string name="reviewAlertTitle">Do you like kDrive?</string>
     <string name="saveExternalFileInputFileName">Document name</string>
