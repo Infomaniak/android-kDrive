@@ -476,7 +476,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onMoveFile(destinationFolder: File)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun openWithClicked() = trackFileActionEvent("openWith")
-        fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File)
+        fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
         fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent("shareLink")
 
         fun editDocumentClicked() {

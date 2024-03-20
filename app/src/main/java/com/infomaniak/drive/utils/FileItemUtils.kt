@@ -256,7 +256,7 @@ private fun Context.getThumbnailAfterAndroidPie(file: File, fileUri: Uri, thumbn
 private fun Context.getThumbnailUntilAndroidPie(file: File, fileUri: Uri, thumbnailSize: Int): Bitmap? {
     val isSchemeFile = fileUri.scheme.equals(ContentResolver.SCHEME_FILE)
     val localFile = fileUri.lastPathSegment?.split(":")?.let { list ->
-        list.getOrNull(1)?.let { path -> java.io.File(path) }
+        list.getOrNull(1)?.let { path -> IOFile(path) }
     }
     val externalRealPath = getExternalRealPath(fileUri, isSchemeFile, localFile)
 
@@ -267,7 +267,7 @@ private fun Context.getThumbnailUntilAndroidPie(file: File, fileUri: Uri, thumbn
     }
 }
 
-private fun Context.getExternalRealPath(fileUri: Uri, isSchemeFile: Boolean, localFile: java.io.File?): String {
+private fun Context.getExternalRealPath(fileUri: Uri, isSchemeFile: Boolean, localFile: IOFile?): String {
     return when {
         !isSchemeFile && localFile?.exists() == true -> {
             Sentry.withScope { scope -> // Get more information in uri with absolute path

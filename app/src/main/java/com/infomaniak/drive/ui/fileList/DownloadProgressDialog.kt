@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
@@ -109,11 +110,7 @@ class DownloadProgressDialog : DialogFragment() {
             }
         }
 
-        private fun LiveDataScope<Pair<Int, IsComplete>?>.saveData(
-            file: File,
-            outputFile: java.io.File,
-            response: Response
-        ) {
+        private fun LiveDataScope<Pair<Int, IsComplete>?>.saveData(file: File, outputFile: IOFile, response: Response) {
             if (outputFile.exists()) outputFile.delete()
             DownloadWorker.saveRemoteData(response, outputFile) {
                 runBlocking { emit(100 to true) }

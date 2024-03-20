@@ -58,6 +58,7 @@ import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.collections.set
 import kotlin.math.max
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
@@ -391,7 +392,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         showSnackbar(getString(id, name))
     }
 
-    override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
+    override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) {
         lifecycleScope.launch {
             mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile, userDrive)
             previewSliderAdapter.updateFile(currentFile.id) { file -> file.isOffline = false }

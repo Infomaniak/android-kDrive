@@ -253,8 +253,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(apiResponse)
     }
 
-    private fun moveIfOfflineFileOrDelete(file: File, ioFile: java.io.File, newParent: File) {
-        if (file.isOffline) ioFile.renameTo(java.io.File("${newParent.getRemotePath()}/${file.name}"))
+    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
+        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
         else ioFile.delete()
     }
 
@@ -365,8 +365,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     suspend fun removeOfflineFile(
         file: File,
-        offlineFile: java.io.File,
-        cacheFile: java.io.File,
+        offlineFile: IOFile,
+        cacheFile: IOFile,
         userDrive: UserDrive = UserDrive()
     ) = withContext(Dispatchers.IO) {
         FileController.updateOfflineStatus(file.id, false)
@@ -399,7 +399,7 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                         try {
                             columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                             pathname = cursor.getString(columnIndex)
-                            java.io.File(pathname).delete()
+                            IOFile(pathname).delete()
                             getContext().contentResolver.delete(uri, null, null)
                         } catch (nullPointerException: NullPointerException) {
                             Sentry.withScope { scope ->

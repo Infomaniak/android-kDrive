@@ -31,7 +31,7 @@ object MediaUtils {
         return fileType == ExtensionType.IMAGE || fileType == ExtensionType.VIDEO || fileType == ExtensionType.AUDIO
     }
 
-    fun scanFile(context: Context, file: java.io.File) {
+    fun scanFile(context: Context, file: IOFile) {
         MediaScannerConnection.scanFile(context, arrayOf(file.path), null, null)
     }
 

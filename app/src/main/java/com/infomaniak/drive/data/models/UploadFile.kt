@@ -30,6 +30,7 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.utils.format
@@ -40,7 +41,6 @@ import io.realm.kotlin.oneOf
 import io.sentry.Sentry
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import java.io.File
 import java.util.Date
 
 open class UploadFile(
@@ -274,7 +274,7 @@ open class UploadFile(
             }
 
             return if (date == null) {
-                Date(File(context.filesDir, DB_NAME).lastModified())
+                Date(IOFile(context.filesDir, DB_NAME).lastModified())
             } else {
                 val now = System.currentTimeMillis()
                 // If you change time zone
