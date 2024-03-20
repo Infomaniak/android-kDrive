@@ -24,6 +24,7 @@ import android.print.PageRange
 import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
+import com.infomaniak.drive.utils.IOFile
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -31,7 +32,7 @@ import java.io.OutputStream
 
 class PDFDocumentAdapter(
     private val fileName: String,
-    private val file: java.io.File
+    private val file: IOFile,
 ) : PrintDocumentAdapter() {
 
     override fun onLayout(

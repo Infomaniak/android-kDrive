@@ -60,10 +60,6 @@ import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashMap
-import kotlin.collections.first
-import kotlin.collections.joinToString
 import kotlin.collections.set
 import kotlin.math.max
 
@@ -179,7 +175,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             }
         }
 
-        bottomSheetBehavior = requireActivity().getBottomSheetFileBehavior(binding.bottomSheetFileInfos, !navigationArgs.hideActions)
+        bottomSheetBehavior = requireActivity().getBottomSheetFileBehavior(
+            binding.bottomSheetFileInfos,
+            !navigationArgs.hideActions
+        )
         setupWindowInsetsListener()
     }
 
