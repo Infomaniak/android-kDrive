@@ -386,22 +386,31 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun refreshBottomSheetUi(file: File, isOfflineProgress: Boolean = false): Unit = with(binding) {
-        val isPendingOffline = file.isPendingOffline(context)
-        val isOfflineFile = file.isOfflineFile(context)
-        enableAvailableOffline(!isPendingOffline || file.currentProgress == 100)
-        if (isOfflineProgress) fileView.progressLayout.setupFileProgress(file) else fileView.setFileItem(file)
-        if (availableOfflineSwitch.isEnabled && availableOffline.isVisible) {
-            availableOfflineSwitch.isChecked = isOfflineFile
-        }
         addFavorites.isEnabled = true
         addFavoritesIcon.isEnabled = file.isFavorite
         addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
         sharePublicLinkText.setText(if (file.sharelink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
 
+        setOfflineItemUi(file, isOfflineProgress)
+    }
+
+    private fun setOfflineItemUi(file: File, isOfflineProgress: Boolean): Unit = with(binding) {
+        // Update file item progress
+        if (isOfflineProgress) fileView.progressLayout.setupFileProgress(file) else fileView.setFileItem(file)
+
+        val isPendingOffline = file.isPendingOffline(context)
+        val isItemInteractable = !isPendingOffline || file.currentProgress == 100
+        enableAvailableOffline(isItemInteractable)
+
+        val isOfflineFile = file.isOfflineFile(context)
+        if (isItemInteractable) availableOfflineSwitch.isChecked = isOfflineFile
+
         when {
+            // We can have a currentProgress in [0,99] yet the file is not pending?
             isPendingOffline && file.currentProgress in 0..99 -> {
                 availableOfflineComplete.isGone = true
                 availableOfflineIcon.isGone = true
+
                 availableOfflineProgress.apply {
                     isGone = true // We need to hide the view before updating its `isIndeterminate`
                     if (isOfflineProgress) {
@@ -414,9 +423,10 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
             }
             !isOfflineProgress -> {
-                availableOfflineProgress.isGone = true
                 availableOfflineComplete.isVisible = isOfflineFile
                 availableOfflineIcon.isGone = isOfflineFile
+
+                availableOfflineProgress.isGone = true
             }
         }
     }
