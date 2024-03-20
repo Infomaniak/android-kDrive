@@ -51,8 +51,8 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:text="Drive de test dev infomaniak" />
 
-    <!--  To prevent the button from overlapping the toolbar search button in the RootFilesFragment we do all of this complex
-    computations with views -->
+    <!-- To prevent the button from overlapping the toolbar Search button in the
+        RootFilesFragment, we do all of this complex computations with views. -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/offsetOverlayedRipple"
         style="@style/TextButton"
