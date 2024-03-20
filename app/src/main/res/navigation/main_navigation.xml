@@ -996,10 +996,10 @@
     </dialog>
 
     <dialog
-        android:id="@+id/importFileDialog"
-        android:name="com.infomaniak.drive.ui.addFiles.ImportFilesDialog"
-        android:label="ImportFileDialog"
-        tools:layout="@layout/dialog_import_files">
+        android:id="@+id/uploadFilesDialog"
+        android:name="com.infomaniak.drive.ui.addFiles.UploadFilesDialog"
+        android:label="UploadFilesDialog"
+        tools:layout="@layout/dialog_upload_files">
         <argument
             android:name="folderId"
             app:argType="integer" />

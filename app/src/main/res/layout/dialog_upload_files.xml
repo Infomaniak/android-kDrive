@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/marginStandardMedium"
-    tools:context=".ui.addFiles.ImportFilesDialog">
+    tools:context=".ui.addFiles.UploadFilesDialog">
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:layout_width="wrap_content"

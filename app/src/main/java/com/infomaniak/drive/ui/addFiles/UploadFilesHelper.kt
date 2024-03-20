@@ -42,7 +42,7 @@ class UploadFilesHelper private constructor(
         activity: FragmentActivity,
         navController: NavController,
         onOpeningPicker: (() -> Unit)? = null,
-    ) : this(context = activity, navController, onOpeningPicker = onOpeningPicker) {
+    ) : this(context = activity, navController, onOpeningPicker) {
 
         filePicker = FilePicker(activity).apply { initCallback(::onSelectFilesResult) }
 
@@ -65,8 +65,8 @@ class UploadFilesHelper private constructor(
 
     private fun onSelectFilesResult(uris: List<Uri>) {
         navController.navigate(
-            resId = R.id.importFileDialog,
-            args = ImportFilesDialogArgs(parentFolder.id, parentFolder.name, parentFolder.driveId, uris.toTypedArray()).toBundle(),
+            resId = R.id.uploadFilesDialog,
+            args = UploadFilesDialogArgs(parentFolder.id, parentFolder.name, parentFolder.driveId, uris.toTypedArray()).toBundle(),
         )
     }
 }
