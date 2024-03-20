@@ -56,7 +56,7 @@ import java.util.Date
 
 class MainViewModel(
     appContext: Application,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(appContext) {
 
     var selectFolderUserDrive: UserDrive? = null
@@ -107,7 +107,7 @@ class MainViewModel(
                 setParentFolder(uploadFilesHelper)
             },
         ).apply {
-            setParentFolder(this)
+            setParentFolder(uploadFilesHelper = this)
         }
     }
 

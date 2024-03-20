@@ -374,7 +374,7 @@ class MainActivity : BaseActivity() {
             R.id.menuFragment,
             R.id.mySharesFragment -> {
                 // Defining default root folder
-                mainViewModel.setCurrentFolder(AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this)))
+                mainViewModel.setCurrentFolder(AccountUtils.getCurrentDrive()?.convertToFile(getRootName(context = this)))
             }
         }
 

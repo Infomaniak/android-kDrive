@@ -375,10 +375,10 @@ open class File(
     fun hasCreationRight() = isFolder() && rights?.canCreateFile == true
 
     fun saveToSavedStateHandle(savedStateHandle: SavedStateHandle) {
-        savedStateHandle["folderId"] = id
-        savedStateHandle["driveId"] = driveId
-        savedStateHandle["name"] = name
-        savedStateHandle["rights"] = rights
+        savedStateHandle[SAVED_STATE_FOLDER_ID_KEY] = id
+        savedStateHandle[SAVED_STATE_DRIVE_ID_KEY] = driveId
+        savedStateHandle[SAVED_STATE_NAME_KEY] = name
+        savedStateHandle[SAVED_STATE_RIGHTS_KEY] = rights
     }
 
     // For applyFileActivity in FileController
@@ -460,12 +460,17 @@ open class File(
 
     companion object {
 
+        private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
+        private const val SAVED_STATE_DRIVE_ID_KEY = "driveId"
+        private const val SAVED_STATE_NAME_KEY = "name"
+        private const val SAVED_STATE_RIGHTS_KEY = "rights"
+
         fun getFileFromSavedStateHandle(savedStateHandle: SavedStateHandle): File {
             return File().apply {
-                id = savedStateHandle["folderId"] ?: 0
-                driveId = savedStateHandle["driveId"] ?: 0
-                name = savedStateHandle["name"] ?: ""
-                rights = savedStateHandle["rights"]
+                id = savedStateHandle[SAVED_STATE_FOLDER_ID_KEY] ?: 0
+                driveId = savedStateHandle[SAVED_STATE_DRIVE_ID_KEY] ?: 0
+                name = savedStateHandle[SAVED_STATE_NAME_KEY] ?: ""
+                rights = savedStateHandle[SAVED_STATE_RIGHTS_KEY]
             }
         }
 
