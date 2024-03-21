@@ -44,9 +44,9 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
-import java.io.File
 
 open class PreviewVideoFragment : PreviewFragment() {
 
@@ -208,7 +208,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         return DefaultDataSource.Factory(appContext, okHttpDataSource)
     }
 
-    private fun getUri(offlineFile: File?, offlineIsComplete: Boolean): Uri {
+    private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
         return if (offlineFile != null && offlineIsComplete) {
             offlineFile.toUri()
         } else {

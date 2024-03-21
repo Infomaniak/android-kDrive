@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
@@ -228,19 +229,19 @@ open class File(
 
     fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
 
-    fun isObsolete(dataFile: java.io.File): Boolean {
+    fun isObsolete(dataFile: IOFile): Boolean {
         return (dataFile.lastModified() / 1000) < lastModifiedAt
     }
 
-    fun isIntactFile(dataFile: java.io.File): Boolean {
+    fun isIntactFile(dataFile: IOFile): Boolean {
         return dataFile.length() == size
     }
 
-    fun isObsoleteOrNotIntact(dataFile: java.io.File): Boolean {
+    fun isObsoleteOrNotIntact(dataFile: IOFile): Boolean {
         return isObsolete(dataFile) || !isIntactFile(dataFile)
     }
 
-    fun getStoredFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File? {
+    fun getStoredFile(context: Context, userDrive: UserDrive = UserDrive()): IOFile? {
         return if (isOffline) getOfflineFile(context, userDrive.userId) else getCacheFile(context, userDrive)
     }
 
@@ -255,32 +256,32 @@ open class File(
     /**
      * File is offline and local file is the same as in the server (same modification date and size)
      */
-    fun isOfflineAndIntact(offlineFile: java.io.File): Boolean {
+    fun isOfflineAndIntact(offlineFile: IOFile): Boolean {
         return isOffline && ((offlineFile.lastModified() / 1000) == lastModifiedAt && isIntactFile(offlineFile))
     }
 
-    fun getConvertedPdfCache(context: Context, userDrive: UserDrive): java.io.File {
-        val folder = java.io.File(context.cacheDir, "converted_pdf/${userDrive.userId}/${userDrive.driveId}")
+    fun getConvertedPdfCache(context: Context, userDrive: UserDrive): IOFile {
+        val folder = IOFile(context.cacheDir, "converted_pdf/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
-        return java.io.File(folder, id.toString())
+        return IOFile(folder, id.toString())
     }
 
-    fun getOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): java.io.File? {
+    fun getOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): IOFile? {
         val userDrive = UserDrive(userId, driveId)
-        val rootFolder = java.io.File(getOfflineFolder(context), "${userId}/$driveId")
+        val rootFolder = IOFile(getOfflineFolder(context), "${userId}/$driveId")
         val path = getRemotePath(userDrive)
 
         if (path.isEmpty()) return null
-        val folder = java.io.File(rootFolder, path.substringBeforeLast("/"))
+        val folder = IOFile(rootFolder, path.substringBeforeLast("/"))
 
         if (!folder.exists()) folder.mkdirs()
-        return java.io.File(folder, name)
+        return IOFile(folder, name)
     }
 
-    fun getCacheFile(context: Context, userDrive: UserDrive = UserDrive()): java.io.File {
-        val folder = java.io.File(context.cacheDir, "cloud_storage/${userDrive.userId}/${userDrive.driveId}")
+    fun getCacheFile(context: Context, userDrive: UserDrive = UserDrive()): IOFile {
+        val folder = IOFile(context.cacheDir, "cloud_storage/${userDrive.userId}/${userDrive.driveId}")
         if (!folder.exists()) folder.mkdirs()
-        return java.io.File(folder, id.toString())
+        return IOFile(folder, id.toString())
     }
 
     fun deleteCaches(context: Context) {
@@ -479,9 +480,9 @@ open class File(
          * This is not the only method in this case, search this comment in the project, and you'll see.
          * Realm's Github issue: https://github.com/realm/realm-java/issues/7637
          */
-        fun getOfflineFolder(context: Context): java.io.File {
+        fun getOfflineFolder(context: Context): IOFile {
             val mediaFolder = context.externalMediaDirs?.firstOrNull() ?: context.filesDir
-            return java.io.File(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
+            return IOFile(mediaFolder, context.getString(R.string.EXPOSED_OFFLINE_DIR))
         }
 
         /**
