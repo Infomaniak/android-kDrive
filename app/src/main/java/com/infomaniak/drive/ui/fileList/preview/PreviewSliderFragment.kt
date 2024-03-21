@@ -40,6 +40,7 @@ import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.chip.Chip
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -485,7 +486,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     companion object {
 
-        fun Fragment.getPageNumberChip() = (parentFragment as? PreviewSliderFragment)?._binding?.pageNumberChip
+        fun Fragment.getPageNumberChip(): Chip? {
+            return if (parentFragment is PreviewSliderFragment) {
+                (parentFragment as PreviewSliderFragment)._binding?.pageNumberChip
+            } else {
+                (activity as PreviewPDFActivity).binding.pageNumberChip
+            }
+        }
 
         fun Fragment.toggleFullscreen() {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()

@@ -51,6 +51,36 @@
             app:iconSize="20dp"
             app:iconTint="@android:color/white" />
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/pageNumberChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/marginStandardMedium"
+            android:backgroundTint="#80111C28"
+            android:clickable="false"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            app:layout_constraintEnd_toStartOf="@+id/openWithButton"
+            app:layout_constraintStart_toEndOf="@+id/backButton"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="102 sur 250"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/openWithButton"
+            style="@style/IconButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/openWith"
+            android:layout_marginEnd="@dimen/marginStandardMedium"
+            android:layout_marginTop="@dimen/marginStandardMedium"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:backgroundTint="@color/previewBackgroundTransparent"
+            app:icon="@drawable/ic_open_with"
+            app:iconSize="20dp"
+            app:iconTint="@android:color/white" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.infomaniak.drive.views.ExternalFileInfoActionsView

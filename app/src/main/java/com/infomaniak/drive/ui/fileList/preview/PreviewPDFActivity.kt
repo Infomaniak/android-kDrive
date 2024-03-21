@@ -50,10 +50,11 @@ import com.infomaniak.lib.core.utils.setMargins
 
 class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnItemClickListener {
 
+    val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
+
     private val navController by lazy { setupNavController() }
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
-    private val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
     private val baseConstraintSet by lazy {
         ConstraintSet().apply {
             clone(binding.pdfContainer)
@@ -62,8 +63,14 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private val collapsedConstraintSet by lazy {
         ConstraintSet().apply {
             clone(baseConstraintSet)
+
             clear(R.id.backButton, ConstraintSet.TOP)
+            clear(R.id.pageNumberChip, ConstraintSet.TOP)
+            clear(R.id.openWithButton, ConstraintSet.TOP)
+
             connect(R.id.backButton, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            connect(R.id.pageNumberChip, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            connect(R.id.openWithButton, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         }
     }
     private val transition by lazy {
@@ -82,14 +89,17 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(binding.root)
-        setColorNavigationBar(appBar = true)
+        with(binding) {
+            setContentView(root)
+            setColorNavigationBar(appBar = true)
 
-        navController.navigate(R.id.previewPDFFragment)
+            navController.navigate(R.id.previewPDFFragment)
 
-        binding.backButton.setOnClickListener { finish() }
-        initBottomSheet()
+            backButton.setOnClickListener { finish() }
+            openWithButton.setOnClickListener { openPDFWith() }
 
+            initBottomSheet()
+        }
     }
 
     private fun initBottomSheet() = with(binding) {
@@ -106,11 +116,7 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     override fun openWithClicked(context: Context) {
         super.openWithClicked(context)
-        openWith(
-            externalPDFUri,
-            contentResolver.getType(externalPDFUri),
-            Intent.FLAG_GRANT_READ_URI_PERMISSION
-        )
+        openPDFWith()
     }
 
     override fun shareFile(context: Context) {
@@ -146,6 +152,14 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
         toggleSystemBar(isUiShown)
     }
 
+    private fun openPDFWith() {
+        openWith(
+            externalPDFUri,
+            contentResolver.getType(externalPDFUri),
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+    }
+
     // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
     private fun getFakeFile(): File {
         return File().apply {
@@ -177,6 +191,8 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                 val defaultMargin = context.resources.getDimension(R.dimen.marginStandardMedium).toInt()
                 backButton.setMargins(top = top + defaultMargin)
+                pageNumberChip.setMargins(top = top + defaultMargin)
+                openWithButton.setMargins(top = top + defaultMargin)
                 bottomSheetFileInfos.setPadding(0, 0, 0, bottom)
             }
             windowInsets
