@@ -1,7 +1,10 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2017–2020 刘振林 "lzls". All rights reserved. File initially licensed under Apache license 2.0 : http://www.apache.org/licenses/LICENSE-2.0
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2017–2020 刘振林 "lzls".
+ * Copyright (C) 2022-2024 Infomaniak Network SA
+ *
+ * All rights reserved.
+ * File initially licensed under Apache license 2.0 : http://www.apache.org/licenses/LICENSE-2.0
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +21,6 @@
  *
  * The initial code comes from this repository : https://github.com/lzls/SlidingItemMenuRecyclerView
 */
-
 package com.infomaniak.drive.views.com.liuzhenlin.simrv
 
 import android.animation.Animator
