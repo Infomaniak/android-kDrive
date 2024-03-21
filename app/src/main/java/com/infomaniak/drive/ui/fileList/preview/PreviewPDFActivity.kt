@@ -64,13 +64,10 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
         ConstraintSet().apply {
             clone(baseConstraintSet)
 
-            clear(R.id.backButton, ConstraintSet.TOP)
-            clear(R.id.pageNumberChip, ConstraintSet.TOP)
-            clear(R.id.openWithButton, ConstraintSet.TOP)
-
-            connect(R.id.backButton, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-            connect(R.id.pageNumberChip, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-            connect(R.id.openWithButton, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            listOf(R.id.backButton, R.id.pageNumberChip, R.id.openWithButton).forEach { id ->
+                clear(id, ConstraintSet.TOP)
+                connect(id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            }
         }
     }
     private val transition by lazy {
