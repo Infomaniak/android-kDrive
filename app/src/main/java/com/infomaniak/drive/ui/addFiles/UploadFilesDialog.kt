@@ -33,7 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.databinding.DialogImportFilesBinding
+import com.infomaniak.drive.databinding.DialogUploadFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.AccountUtils
@@ -49,83 +49,87 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import java.util.Date
 
-class ImportFilesDialog : DialogFragment() {
+class UploadFilesDialog : DialogFragment() {
 
-    private val dialogBinding by lazy { DialogImportFilesBinding.inflate(LayoutInflater.from(context)) }
+    private val dialogBinding by lazy { DialogUploadFilesBinding.inflate(LayoutInflater.from(context)) }
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val navArgs: ImportFilesDialogArgs by navArgs()
-    private val importCount by lazy { navArgs.uris.size }
+    private val navArgs: UploadFilesDialogArgs by navArgs()
+    private val uploadCount by lazy { navArgs.uris.size }
 
-    private var currentImportFile: IOFile? = null
+    private var currentFile: IOFile? = null
     private var successCount = 0
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val countMessage = requireContext().resources.getQuantityString(R.plurals.preparingToUpload, importCount, importCount)
-        dialogBinding.description.text = countMessage
+        val numberOfUploadMessage = requireContext().resources.getQuantityString(R.plurals.preparingToUpload, uploadCount, uploadCount)
+        dialogBinding.description.text = numberOfUploadMessage
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setView(dialogBinding.root)
             .create().also {
-                lifecycleScope.launch { importFiles() }
+                lifecycleScope.launch { uploadFiles() }
             }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        val errorCount = importCount - successCount
+        val errorCount = uploadCount - successCount
 
-        if (errorCount > 0) {
-            val errorMessage = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
-            showSnackbar(errorMessage, showAboveFab = true)
-        }
+        if (errorCount > 0) displayErrorSnackbar(errorCount)
 
         if (successCount > 0) mainViewModel.refreshActivities.value = true
 
-        currentImportFile?.delete()
+        currentFile?.delete()
     }
 
-    private suspend fun importFiles() {
+    private suspend fun uploadFiles() {
         var errorCount = 0
         val uploadFilesJobs = mutableListOf<Job>()
         navArgs.uris.forEach { uri ->
-            uploadFilesJobs.add(lifecycleScope.launch {
-                runCatching {
-                    initUpload(uri)
-                }.onFailure {
-                    it.printStackTrace()
-                    Sentry.withScope { scope ->
-                        scope.level = SentryLevel.ERROR
-                        scope.setExtra("uri", uri.toString())
-                        Sentry.captureException(it)
-                    }
-                    errorCount++
-                }
-            })
+            val uploadJob = getUploadJob(uri, onError = { errorCount++ })
+            uploadFilesJobs.add(uploadJob)
         }
-
         uploadFilesJobs.joinAll()
 
         if (errorCount > 0) {
             withContext(Dispatchers.Main) {
-                showSnackbar(
-                    title = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount),
-                    showAboveFab = true,
-                )
-            }
-        }
-        lifecycleScope.launch {
-            lifecycle.withResumed {
-                with(findNavController()) {
-                    popBackStack()
-                    findNavController().navigate(
-                        R.id.fileListFragment,
-                        FileListFragmentArgs(folderId = navArgs.folderId, folderName = navArgs.folderName).toBundle()
-                    )
-                }
+                displayErrorSnackbar(errorCount)
             }
         }
 
+        lifecycleScope.launch { lifecycle.withResumed { navigateToFileListFragment() } }
+
         context?.syncImmediately()
+    }
+
+    private fun displayErrorSnackbar(errorCount: Int) {
+        showSnackbar(
+            title = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount),
+            showAboveFab = true,
+        )
+    }
+
+    private fun navigateToFileListFragment() {
+        with(findNavController()) {
+            popBackStack()
+            navigate(
+                R.id.fileListFragment,
+                FileListFragmentArgs(folderId = navArgs.folderId, folderName = navArgs.folderName).toBundle()
+            )
+        }
+    }
+
+    private suspend fun getUploadJob(uri: Uri, onError: () -> Unit) = lifecycleScope.launch {
+        runCatching {
+            initUpload(uri)
+        }.onFailure { exception ->
+            exception.printStackTrace()
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.ERROR
+                scope.setExtra("uri", uri.toString())
+                Sentry.captureException(exception)
+            }
+            onError()
+        }
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
@@ -153,16 +157,15 @@ class ImportFilesDialog : DialogFragment() {
                             userId = AccountUtils.currentUserId,
                         ).store()
                         successCount++
-                        currentImportFile = null
+                        currentFile = null
                     }
                 }
             }
         }
     }
 
-    private fun isLowMemory(): Boolean {
-        val memoryInfo = requireContext().getAvailableMemory()
-        return memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
+    private fun isLowMemory() = with(requireContext().getAvailableMemory()) {
+        lowMemory || availMem < UploadTask.chunkSize
     }
 
     private fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
@@ -170,7 +173,7 @@ class ImportFilesDialog : DialogFragment() {
             if (exists()) delete()
             setLastModified(fileModifiedAt.time)
             createNewFile()
-            currentImportFile = this
+            currentFile = this
             context?.contentResolver?.openInputStream(uri)?.use { inputStream ->
                 outputStream().use { inputStream.copyTo(it) }
             }
