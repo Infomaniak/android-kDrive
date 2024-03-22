@@ -30,10 +30,7 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
-import android.transition.AutoTransition
-import android.transition.TransitionManager
-import android.transition.TransitionSet
-import android.util.DisplayMetrics
+import android.transition.*
 import android.util.Patterns
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -46,7 +43,7 @@ import androidx.core.view.children
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Lifecycle.*
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -405,21 +402,22 @@ fun LayoutSwitchDriveBinding.setDriveHeader(currentDrive: Drive) {
 }
 
 fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
-    switchDriveButton.apply {
-        AccountUtils.getCurrentDrive()?.let { setDriveHeader(it) }
 
-        if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
+    AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
+
+    if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
+        switchDriveButton.apply {
             icon = null
             isEnabled = false
-        } else {
-            setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
         }
+    } else {
+        offsetOverlayedRipple.setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
     }
 
     fragment.viewLifecycleOwner.lifecycle.addObserver(
         object : LifecycleEventObserver {
-            override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-                if (event == Lifecycle.Event.ON_RESUME) AccountUtils.getCurrentDrive()?.let { setDriveHeader(it) }
+            override fun onStateChanged(source: LifecycleOwner, event: Event) {
+                if (event == Event.ON_RESUME) AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
             }
         },
     )

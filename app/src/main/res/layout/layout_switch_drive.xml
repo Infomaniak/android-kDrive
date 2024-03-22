@@ -15,12 +15,13 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="120.8dp"
-    android:gravity="bottom"
+    android:paddingStart="16dp"
+    android:paddingEnd="@dimen/marginStandard"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
@@ -30,8 +31,7 @@
         style="@style/TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="@dimen/marginStandard"
+        android:clickable="false"
         android:contentDescription="@string/buttonSwitchDrive"
         android:ellipsize="end"
         android:fontFamily="@font/suisseintl_bold"
@@ -45,6 +45,49 @@
         app:iconGravity="end"
         app:iconSize="28dp"
         app:iconTint="@color/iconColor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
         tools:text="Drive de test dev infomaniak" />
 
-</LinearLayout>
+    <!-- To prevent the button from overlapping the toolbar Search button in the
+        RootFilesFragment, we do all of this complex computations with views. -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/offsetOverlayedRipple"
+        style="@style/TextButton"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:backgroundTint="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@id/switchDriveButton"
+        app:layout_constraintEnd_toEndOf="@id/maxRippleEnd"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="@id/switchDriveButton"
+        app:layout_constraintTop_toTopOf="@id/switchDriveButton" />
+
+    <View
+        android:id="@+id/switchDriveButtonEndView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/switchDriveButton"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/buttonNegativeInset"
+        android:layout_width="16dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/maxRippleEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="switchDriveButtonEndView,buttonNegativeInset" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
