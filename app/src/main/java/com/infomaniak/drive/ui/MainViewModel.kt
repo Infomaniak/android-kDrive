@@ -44,11 +44,10 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
+import io.realm.kotlin.toFlow
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.mapLatest
 import java.util.Date
 
 class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
@@ -60,10 +59,15 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         } ?: FileController.getRealmInstance()
     }
 
-    val currentFolder = MutableLiveData<File>()
+    private val _privateFolder = MutableLiveData<File>()
+    val privateFolder: LiveData<File> = _privateFolder
+    private val _currentFolder = MutableLiveData<File?>()
+    val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
     val isInternetAvailable = MutableLiveData(true)
+
+    private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()
 
@@ -74,33 +78,29 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
-    var mustOpenShortcut: Boolean = true
-
     var ignoreSyncOffline = false
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
+    private var setCurrentFolderJob = Job()
 
     private fun getContext() = getApplication<MainApplication>()
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
         // Clear FileListFragment stack
-        with(navController) {
-            popBackStack(R.id.homeFragment, false)
-            navigate(R.id.fileListFragment)
-        }
+        navController.popBackStack(R.id.rootFilesFragment, false)
 
-        if (fileId == Utils.ROOT_ID) return
+        if (fileId <= Utils.ROOT_ID) return // Deeplinks could lead us to navigating to the true root
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
             val file = FileController.getFileById(fileId) ?: FileController.getFileDetails(fileId) ?: return@launch
-            if (fileId > Utils.ROOT_ID) navigateFileListTo.postValue(file)
+            navigateFileListTo.postValue(file)
         }
     }
 
     fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
-        currentFolder.postValue(FileController.getFileById(folderId, userDrive))
+        postCurrentFolder(FileController.getFileById(folderId, userDrive))
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
@@ -318,11 +318,11 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
     fun copyFile(
         file: File,
-        destinationId: Int? = null,
+        destinationId: Int,
         copyName: String?,
         onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
     ) = liveData(Dispatchers.IO) {
-        ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
+        ApiRepository.copyFile(file, copyName, destinationId).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
             emit(apiResponse)
         }
@@ -352,6 +352,16 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
 
         emit(apiResponse)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pendingUploadsCount: LiveData<Int> = _pendingUploadsCount.switchMap { folderId ->
+        UploadFile.getCurrentUserPendingUploadFile(folderId)
+            .toFlow()
+            .mapLatest { list -> list.count() }
+            .asLiveData(viewModelScope.coroutineContext + Dispatchers.IO)
+
+            .distinctUntilChanged()
     }
 
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
@@ -429,5 +439,25 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     override fun onCleared() {
         realm.close()
         super.onCleared()
+    }
+
+    fun setCurrentFolderAsRoot(): Job {
+        setCurrentFolderJob.cancel()
+        setCurrentFolderJob = Job()
+        return viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
+            val file = privateFolder.value ?: FileController.getPrivateFolder().also { _privateFolder.postValue(it) }
+            setCurrentFolderJob.ensureActive()
+            _currentFolder.postValue(file)
+        }
+    }
+
+    fun setCurrentFolder(file: File?) {
+        setCurrentFolderJob.cancel()
+        _currentFolder.value = file
+    }
+
+    private fun postCurrentFolder(file: File?) {
+        setCurrentFolderJob.cancel()
+        _currentFolder.postValue(file)
     }
 }

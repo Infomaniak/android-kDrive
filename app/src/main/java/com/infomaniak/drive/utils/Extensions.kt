@@ -30,8 +30,8 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
+import android.transition.*
 import android.util.Patterns
-import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
@@ -39,9 +39,14 @@ import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.view.children
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle.*
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
@@ -62,15 +67,18 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.ItemUserBinding
+import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
+import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.views.PendingFilesView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.utils.*
@@ -262,7 +270,7 @@ fun Context.openOnlyOfficeActivity(file: File) {
 fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
-        (requireActivity() as MainActivity).getBottomNavigation().findViewById<View>(R.id.fileListFragment).performClick()
+        (requireActivity() as MainActivity).clickOnBottomBarFolders()
         mainViewModel.navigateFileListTo(this, folderId)
     }
 }
@@ -280,35 +288,6 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
-
-fun CardviewFileListBinding.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {
-    val radius = context.resources.getDimension(R.dimen.cardViewRadius)
-    root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
-        .setTopLeftCorner(CornerFamily.ROUNDED, radius)
-        .setTopRightCorner(CornerFamily.ROUNDED, radius)
-        .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-        .setBottomRightCorner(CornerFamily.ROUNDED, radius)
-        .build()
-
-    itemViewFile.fileName.setText(title)
-
-    root.setOnClickListener { onClickListener() }
-}
-
-fun CardviewFileListBinding.updateUploadFileInProgress(pendingFilesCount: Int, parentLayout: ViewGroup) = with(itemViewFile) {
-    if (pendingFilesCount > 0) {
-        fileSize.text = context.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingFilesCount,
-            pendingFilesCount
-        )
-        filePreview.isGone = true
-        fileProgression.isVisible = true
-        parentLayout.isVisible = true
-    } else {
-        parentLayout.isGone = true
-    }
-}
 
 fun Context.shareText(text: String) {
     trackShareRightsEvent("shareButton")
@@ -415,4 +394,54 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
     } else {
         Formatter.formatShortFileSize(this, decimalSize)
     }
+}
+
+
+fun LayoutSwitchDriveBinding.setDriveHeader(currentDrive: Drive) {
+    switchDriveButton.text = currentDrive.name
+}
+
+fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
+
+    AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
+
+    if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
+        switchDriveButton.apply {
+            icon = null
+            isEnabled = false
+        }
+    } else {
+        offsetOverlayedRipple.setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
+    }
+
+    fragment.viewLifecycleOwner.lifecycle.addObserver(
+        object : LifecycleEventObserver {
+            override fun onStateChanged(source: LifecycleOwner, event: Event) {
+                if (event == Event.ON_RESUME) AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
+            }
+        },
+    )
+}
+
+fun Fragment.observeAndDisplayNetworkAvailability(
+    mainViewModel: MainViewModel,
+    noNetworkBinding: LayoutNoNetworkSmallBinding,
+    noNetworkBindingDirectParent: ViewGroup,
+    additionalChanges: ((isInternetAvailable: Boolean) -> Unit)? = null,
+) {
+    mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
+        val togetherAutoTransition = AutoTransition().apply { ordering = TransitionSet.ORDERING_TOGETHER }
+        with(togetherAutoTransition) {
+            noNetworkBindingDirectParent.children.forEach { child -> addTarget(child) }
+            TransitionManager.beginDelayedTransition(noNetworkBindingDirectParent, this)
+        }
+
+        noNetworkBinding.noNetwork.isGone = isInternetAvailable
+        additionalChanges?.invoke(isInternetAvailable)
+    }
+}
+
+fun Fragment.setupRootPendingFilesIndicator(countLiveData: LiveData<Int>, pendingFilesView: PendingFilesView) {
+    pendingFilesView.setUploadFileInProgress(this, OTHER_ROOT_ID)
+    countLiveData.observe(viewLifecycleOwner, pendingFilesView::updateUploadFileInProgress)
 }

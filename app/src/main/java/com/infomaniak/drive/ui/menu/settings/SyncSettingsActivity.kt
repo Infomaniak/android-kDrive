@@ -119,7 +119,6 @@ class SyncSettingsActivity : BaseActivity() {
                         userId = selectDriveViewModel.selectedUserId.value!!,
                         driveId = selectDriveViewModel.selectedDrive.value?.id!!,
                         folderId = syncSettingsViewModel.syncFolder.value ?: -1,
-                        disabledFolderId = Utils.ROOT_ID,
                     ).toBundle()
                 )
                 selectFolderResultLauncher.launch(this)

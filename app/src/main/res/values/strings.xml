@@ -628,8 +628,10 @@
     <string name="sortBigger">Larger</string>
     <string name="sortDay">Per day</string>
     <string name="sortExtension">Extension</string>
+    <string name="sortLeastRelevant">Least relevant</string>
     <string name="sortMonth">Per month</string>
     <string name="sortMostRecentAdded">Most recently added</string>
+    <string name="sortMostRelevant">Most relevant</string>
     <string name="sortNameAZ">Name: from A to Z</string>
     <string name="sortNameZA">Name: from Z to A</string>
     <string name="sortOlder">Older</string>

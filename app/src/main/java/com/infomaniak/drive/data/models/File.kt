@@ -303,10 +303,6 @@ open class File(
 
     fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
 
-    fun isRoot(): Boolean {
-        return id == ROOT_ID
-    }
-
     fun getWorkerTag() = "${id}_$driveId"
 
     fun isPendingOffline(context: Context): Boolean {
@@ -335,7 +331,7 @@ open class File(
             "is_shared_space" -> VisibilityType.IS_SHARED_SPACE
             "is_in_shared_space" -> VisibilityType.IS_IN_SHARED_SPACE
             "is_in_private_space" -> VisibilityType.IS_IN_PRIVATE_SPACE
-            "is_private_space" -> VisibilityType.IS_PRIVATE
+            IS_PRIVATE_SPACE -> VisibilityType.IS_PRIVATE
             else -> {
                 when {
                     dropbox != null -> VisibilityType.IS_DROPBOX
@@ -425,16 +421,18 @@ open class File(
         NAME_ZA("desc", "name", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
-        OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
-        MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         OLDER_TRASHED("asc", "deleted_at", R.string.sortOlder),
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
+        OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
+        MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         SMALLER("asc", "size", R.string.sortSmaller),
         BIGGER("desc", "size", R.string.sortBigger),
-        // EXTENSION("asc", "extension", R.string.sortExtension); // TODO: Awaiting API
+        LEAST_RELEVANT("asc", "relevance", R.string.sortLeastRelevant),
+        MOST_RELEVANT("desc", "relevance", R.string.sortMostRelevant),
+        // EXTENSION("asc", "extension", R.string.sortExtension), // TODO: Awaiting API
     }
 
-    enum class SortTypeUsage { FILE_LIST, TRASH }
+    enum class SortTypeUsage { FILE_LIST, TRASH, SEARCH }
 
     @Parcelize
     enum class FolderPermission(
@@ -471,6 +469,7 @@ open class File(
     }
 
     companion object {
+        const val IS_PRIVATE_SPACE = "is_private_space"
 
         /**
          * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.

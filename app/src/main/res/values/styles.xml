@@ -99,9 +99,11 @@
         <item name="expandedTitleGravity">bottom</item>
         <item name="expandedTitleMarginBottom">@dimen/marginStandardSmall</item>
         <item name="expandedTitleMarginStart">@dimen/marginStandard</item>
-        <item name="expandedTitleTextAppearance">@style/H1</item>
+        <item name="expandedTitleTextAppearance">@style/CollapsingToolbarExpandedTitleTextAppearance</item>
         <item name="maxLines">2</item>
     </style>
+
+    <style name="CollapsingToolbarExpandedTitleTextAppearance" parent="@style/H1" />
 
     <style name="AppTheme.ToolbarTheme" parent="Widget.MaterialComponents.Toolbar">
         <item name="contentInsetEnd">54dp</item>
@@ -394,5 +396,13 @@
         <item name="android:background">@color/backgroundCardview</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
+    </style>
+
+    <style name="MainFab">
+        <item name="android:contentDescription">@string/buttonAdd</item>
+        <item name="android:src">@drawable/ic_plus</item>
+        <item name="backgroundTint">@color/icon_toolbar_button</item>
+        <item name="elevation">16dp</item>
+        <item name="tint">@color/white</item>
     </style>
 </resources>

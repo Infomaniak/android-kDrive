@@ -41,7 +41,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
@@ -51,6 +53,7 @@ import androidx.navigation.fragment.NavHostFragment
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
@@ -66,15 +69,15 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
+import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
-import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
@@ -135,8 +138,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private var uploadFilesHelper: UploadFilesHelper? = null
-
     private val scanFlowResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
             activityResult.whenResultIsOk {
@@ -162,7 +163,7 @@ class MainActivity : BaseActivity() {
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
-        setupMainFab()
+        setupFabs()
         setupDrivePermissions()
         handleInAppReview()
         handleShortcuts()
@@ -186,13 +187,7 @@ class MainActivity : BaseActivity() {
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
             selectedItemId = uiSettings.bottomNavigationSelectedItem
             setOnItemReselectedListener { item ->
-                when (item.itemId) {
-                    R.id.fileListFragment, R.id.favoritesFragment -> {
-                        navController.popBackStack(R.id.homeFragment, false)
-                        navController.navigate(item.itemId)
-                    }
-                    else -> navController.popBackStack(item.itemId, false)
-                }
+                navController.popBackStack(item.itemId, false)
             }
         }
     }
@@ -200,7 +195,7 @@ class MainActivity : BaseActivity() {
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
-                binding.bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
+                clickOnBottomBarFolders()
                 mainViewModel.navigateFileListTo(navController, it.destinationFileId)
             }
         }
@@ -224,10 +219,16 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun setupMainFab() = with(binding) {
-        mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
+    private fun setupFabs() = with(binding) {
+        setupFab(mainFab)
+        setupFab(searchFab, shouldShowSmallFab = true)
+    }
+
+    private fun setupFab(fab: FloatingActionButton, shouldShowSmallFab: Boolean = false) {
+        val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
+        fab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog, args) }
         mainViewModel.currentFolder.observe(this@MainActivity) { file ->
-            mainFab.isEnabled = file?.rights?.canCreateFile == true
+            fab.isEnabled = file?.rights?.canCreateFile == true
         }
     }
 
@@ -336,9 +337,14 @@ class MainActivity : BaseActivity() {
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
         destination.addSentryBreadcrumb()
 
-        val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
+        val shouldHideBottomNavigation =
+            navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation ?: false
+        val shouldShowSmallFab = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
+            ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
+            ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
+            ?: false
 
-        handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
+        handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
 
         // TODO: Find a better way to do this. Currently, we need to put that
         //  here and not in the preview slider fragment because of APIs <= 27.
@@ -350,9 +356,15 @@ class MainActivity : BaseActivity() {
             R.id.favoritesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
-            R.id.mySharesFragment -> {
+            R.id.menuGalleryFragment,
+            R.id.mySharesFragment,
+            R.id.offlineFileFragment,
+            R.id.recentChangesFragment,
+            R.id.rootFilesFragment,
+            R.id.searchFragment,
+            R.id.trashFragment -> {
                 // Defining default root folder
-                mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
+                mainViewModel.setCurrentFolderAsRoot()
             }
         }
 
@@ -388,23 +400,34 @@ class MainActivity : BaseActivity() {
         trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
     }
 
-    private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) = with(binding) {
+    private fun handleBottomNavigationVisibility(
+        destinationId: Int,
+        shouldHideBottomNavigation: Boolean,
+        shouldShowSmallFab: Boolean,
+    ) = with(binding) {
 
-        val isVisible = when (destinationId) {
+        val isGone = when (destinationId) {
             R.id.addFileBottomSheetDialog,
-            R.id.favoritesFragment,
             R.id.fileInfoActionsBottomSheetDialog,
-            R.id.fileListFragment,
+            R.id.fileListFragment -> shouldHideBottomNavigation || shouldShowSmallFab
+            R.id.favoritesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
+            R.id.menuGalleryFragment,
             R.id.mySharesFragment,
-            R.id.sharedWithMeFragment -> shouldHideBottomNavigation != true
-            else -> false
+            R.id.offlineFileFragment,
+            R.id.recentChangesFragment,
+            R.id.rootFilesFragment,
+            R.id.sharedWithMeFragment,
+            R.id.trashFragment -> shouldHideBottomNavigation
+            else -> true
         }
 
-        mainFab.isVisible = isVisible
-        bottomNavigation.isVisible = isVisible
-        bottomNavigationBackgroundView.isVisible = isVisible
+        mainFab.isGone = isGone
+        bottomNavigation.isGone = isGone
+        bottomNavigationBackgroundView.isGone = isGone
+
+        searchFab.isVisible = shouldShowSmallFab
     }
 
     private fun handleShortcuts() = with(mainViewModel) {
@@ -417,16 +440,19 @@ class MainActivity : BaseActivity() {
                     navController.navigate(R.id.searchFragment)
                 }
                 Shortcuts.UPLOAD.id -> {
-                    uploadFilesHelper = UploadFilesHelper(this@MainActivity, navController)
-                    currentFolder.observe(this@MainActivity) { parentFolder ->
-                        if (mustOpenShortcut && parentFolder?.id == ROOT_ID) {
-                            mustOpenShortcut = false
-                            uploadFilesHelper?.apply {
-                                initParentFolder(parentFolder)
-                                uploadFiles()
-                            }
+                    var onCurrentFolderSet: Observer<File>? = null
+                    onCurrentFolderSet = Observer { parentFolder ->
+                        onCurrentFolderSet?.let { privateFolder.removeObserver(it) }
+
+                        UploadFilesHelper(this@MainActivity, navController).apply {
+                            initParentFolder(parentFolder)
+                            uploadFiles()
                         }
                     }
+
+                    // TODO : We need to find a way to handle the case where the app has never fetched the private folder and
+                    //  therefore can't find it in Realm
+                    privateFolder.observe(this@MainActivity, onCurrentFolderSet)
                 }
                 Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
                 Shortcuts.FEEDBACK.id -> openSupport()
@@ -527,6 +553,10 @@ class MainActivity : BaseActivity() {
     fun getMainFab() = binding.mainFab
 
     fun getBottomNavigation() = binding.bottomNavigation
+
+    fun clickOnBottomBarFolders() {
+        binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
+    }
 
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10

@@ -36,6 +36,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 class FavoritesFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = true
+    override var hideBackButtonWhenRoot: Boolean = false
 
     override val noItemsRootIcon = R.drawable.ic_star_filled
     override val noItemsRootTitle = R.string.favoritesNoFile
@@ -123,11 +124,11 @@ class FavoritesFragment : FileListFragment() {
                             withVisibilitySort = false
                         )
                         fileAdapter.updateFileList(realmFiles)
-                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), false)
+                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), changeControlsVisibility = false)
                     }
                     fileAdapter.isComplete = result.isComplete
                 } ?: run {
-                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
+                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, changeControlsVisibility = false)
                     fileAdapter.isComplete = true
                 }
                 showLoadingTimer.cancel()

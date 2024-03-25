@@ -33,6 +33,7 @@ import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.drive.data.models.SearchFilter.FilterKey
 import com.infomaniak.drive.data.models.UiSettings
@@ -53,6 +54,7 @@ class SearchFragment : FileListFragment() {
 
     override val noItemsIcon = R.drawable.ic_search_grey
     override val noItemsTitle = R.string.searchNoFile
+    override val sortTypeUsage = SortTypeUsage.SEARCH
 
     private lateinit var filtersAdapter: SearchFiltersAdapter
     private lateinit var recentSearchesAdapter: RecentSearchesAdapter
@@ -199,6 +201,7 @@ class SearchFragment : FileListFragment() {
                         folderId = file.id,
                         folderName = file.name,
                         shouldHideBottomNavigation = true,
+                        shouldShowSmallFab = true,
                     )
                 )
             } else {
@@ -370,7 +373,7 @@ class SearchFragment : FileListFragment() {
         fun displaySearchResult(mode: VisibilityMode) {
             recentSearchesBinding.root.isGone = true
             filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
-            changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, false)
+            changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, changeControlsVisibility = false)
         }
 
         when (mode) {

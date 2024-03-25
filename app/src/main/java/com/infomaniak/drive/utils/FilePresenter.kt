@@ -20,17 +20,25 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
 import com.dd.plist.NSString
 import com.dd.plist.PropertyListParser
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.bottomSheetDialogs.AccessDeniedBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
+import com.infomaniak.drive.ui.fileList.FileAdapter
+import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
+import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
+import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.safeNavigate
 import java.io.BufferedInputStream
 import java.io.BufferedReader
@@ -41,6 +49,36 @@ import java.io.InputStreamReader
  * Responsible for file opening actions from [com.infomaniak.drive.ui.fileList.FileListFragment]
  */
 object FilePresenter {
+
+    fun Fragment.openFolder(file: File, shouldHideBottomNavigation: Boolean, shouldShowSmallFab: Boolean, fileListViewModel: FileListViewModel) {
+        if (file.isDisabled()) {
+            safeNavigate(
+                R.id.accessDeniedBottomSheetFragment,
+                AccessDeniedBottomSheetDialogArgs(
+                    isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
+                    folderId = file.id,
+                    folderName = file.name
+                ).toBundle()
+            )
+        } else {
+            fileListViewModel.cancelDownloadFiles()
+            safeNavigate(
+                R.id.fileListFragment,
+                FileListFragmentArgs(
+                    folderId = file.id,
+                    folderName = file.getDisplayName(requireContext()),
+                    shouldHideBottomNavigation = shouldHideBottomNavigation,
+                    shouldShowSmallFab = shouldShowSmallFab,
+                ).toBundle()
+            )
+        }
+    }
+
+    fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?) {
+        trackEvent("preview", "preview${file.getFileType().value.capitalizeFirstChar()}")
+        val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
+        Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+    }
 
     fun Fragment.openBookmark(file: File) {
         if (file.canUseStoredFile(requireContext())) {

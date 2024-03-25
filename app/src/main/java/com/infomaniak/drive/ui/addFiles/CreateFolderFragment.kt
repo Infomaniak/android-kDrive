@@ -95,7 +95,7 @@ open class CreateFolderFragment : Fragment() {
                 newFolderViewModel.saveNewFolder(parentFolderId, newFolder)
             }
         }
-        mainViewModel.currentFolder.value = newFolder
+        mainViewModel.setCurrentFolder(newFolder)
     }
 
     private fun setupAdapter() {

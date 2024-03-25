@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2024 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#000000"
+        android:fillType="evenOdd"
+        android:pathData="M2,18.535C2.793,17.401 3.717,16.183 4.499,15.178C5.009,14.523 5.463,13.953 5.791,13.547C5.954,13.343 6.086,13.18 6.178,13.068L6.283,12.939L6.29,12.931C6.594,12.497 7.092,12.241 7.62,12.241C8.116,12.241 8.585,12.467 8.892,12.855L10.237,14.062L12.808,10.004C13.108,9.532 13.627,9.251 14.18,9.251C14.721,9.251 15.23,9.52 15.532,9.975L21.824,18.763L22,19.029V3.2H2V18.535ZM2,1.2C0.895,1.2 0,2.095 0,3.2V20.8C0,21.905 0.895,22.8 2,22.8H22C23.105,22.8 24,21.905 24,20.8V3.2C24,2.095 23.105,1.2 22,1.2H2ZM10.752,7.68C10.752,9.1 9.584,10.251 8.144,10.251C6.703,10.251 5.535,9.1 5.535,7.68C5.535,6.26 6.703,5.109 8.144,5.109C9.584,5.109 10.752,6.26 10.752,7.68ZM11.481,15.835L14.198,11.547L20.176,19.897L20.641,20.6H3.016C3.865,19.301 5.071,17.699 6.077,16.407C6.579,15.762 7.027,15.201 7.349,14.8C7.468,14.653 7.569,14.527 7.65,14.427L9.379,15.98C9.628,16.27 9.993,16.438 10.376,16.438C10.819,16.438 11.237,16.214 11.481,15.835Z" />
+</vector>
