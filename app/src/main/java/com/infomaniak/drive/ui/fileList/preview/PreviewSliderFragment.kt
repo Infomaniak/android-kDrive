@@ -25,8 +25,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -62,7 +60,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.collections.set
-import kotlin.math.max
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
@@ -184,7 +181,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             binding.bottomSheetFileInfos,
             !navigationArgs.hideActions
         )
-        binding.header.setupWindowInsetsListener(root, bottomSheetBehavior, binding.bottomSheetFileInfos)
+        binding.header.setupWindowInsetsListener(
+            rootView = root,
+            bottomSheetBehavior = bottomSheetBehavior,
+            bottomSheetView = binding.bottomSheetFileInfos,
+        )
     }
 
     override fun onStart() {

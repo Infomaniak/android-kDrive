@@ -25,7 +25,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
@@ -67,16 +66,19 @@ class PreviewHeaderView @JvmOverloads constructor(
     fun setupWindowInsetsListener(
         rootView: View,
         bottomSheetBehavior: BottomSheetBehavior<View>?,
-        bottomSheetView: View
+        bottomSheetView: View,
     ) = with(binding.header) {
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, windowInsets ->
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                 setMargins(left = left, top = top, right = right)
-                val topOffset = max(top, rootView.height - bottomSheetView.height)
+                val topOffset = getTopOffset(bottomSheetView)
                 bottomSheetBehavior?.apply {
-                    peekHeight = context.getDefaultPeekHeight() + bottom
-                    expandedOffset = topOffset
-                    maxHeight = rootView.height - topOffset
+                    peekHeight = rootView.context.getDefaultPeekHeight() + bottom
+
+                    if (topOffset > 0) {
+                        expandedOffset = topOffset
+                        maxHeight = rootView.height - topOffset
+                    }
                 }
                 // Add padding to the bottom to allow the last element of the
                 // list to be displayed right over the android navigation bar
@@ -85,5 +87,9 @@ class PreviewHeaderView @JvmOverloads constructor(
 
             windowInsets
         }
+    }
+
+    private fun getTopOffset(bottomSheetView: View): Int {
+        return if (rootView.height < bottomSheetView.height) max(top, rootView.height - bottomSheetView.height) else 0
     }
 }

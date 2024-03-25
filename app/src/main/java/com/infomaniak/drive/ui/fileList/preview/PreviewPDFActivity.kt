@@ -103,7 +103,11 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     override fun onStart() {
         super.onStart()
-        binding.header.setupWindowInsetsListener(binding.root, bottomSheetBehavior, binding.bottomSheetFileInfos)
+        binding.header.setupWindowInsetsListener(
+            rootView = binding.root,
+            bottomSheetBehavior = bottomSheetBehavior,
+            bottomSheetView = binding.bottomSheetFileInfos,
+        )
         setupTransparentStatusBar()
     }
 

@@ -170,6 +170,7 @@ fun Activity.getBottomSheetFileBehavior(bottomSheet: View, isDraggable: Boolean)
     bottomSheetBehavior.apply {
         isHideable = true
         this.isDraggable = isDraggable
+        isFitToContents = true
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (bottomSheetBehavior.state) {
