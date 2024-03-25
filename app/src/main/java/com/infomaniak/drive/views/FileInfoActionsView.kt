@@ -151,7 +151,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
 
             if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
-                dropBoxText.text = context.getString(
+                dropBox.text = context.getString(
                     if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
                 )
                 dropBox.setOnClickListener { onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox()) }
@@ -386,9 +386,11 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun refreshBottomSheetUi(file: File, isOfflineProgress: Boolean = false): Unit = with(binding) {
-        addFavorites.isEnabled = true
-        addFavoritesIcon.isEnabled = file.isFavorite
-        addFavoritesText.setText(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
+        addFavorites.apply {
+            isEnabled = true
+            isActivated = file.isFavorite
+            text = context.getString(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
+        }
         sharePublicLinkText.setText(if (file.sharelink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
 
         setOfflineItemUi(file, isOfflineProgress)

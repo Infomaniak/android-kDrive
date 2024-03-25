@@ -24,118 +24,27 @@
 
     <include layout="@layout/view_bottom_sheet_separator" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/manageCategories"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground"
-        android:visibility="gone"
-        tools:visibility="visible">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_category"
+        app:text="@string/manageCategoriesTitle" />
 
-        <ImageView
-            android:id="@+id/manageCategoriesIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_category"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/manageCategoriesText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/manageCategoriesTitle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/manageCategoriesIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/disabledManageCategories"
-            style="@style/DisabledView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/addFavorites"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_star_filled"
+        app:iconTint="@color/star_favorites"
+        app:text="@string/buttonAddFavorites" />
 
-        <ImageView
-            android:id="@+id/addFavoritesIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_star_filled"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/star_favorites"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/addFavoritesText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonAddFavorites"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/addFavoritesIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/coloredFolder"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <ImageView
-            android:id="@+id/coloredFolderIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_color_bucket"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/coloredFolderText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonChangeFolderColor"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/coloredFolderIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/disabledColoredFolder"
-            style="@style/DisabledView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_color_bucket"
+        app:text="@string/buttonChangeFolderColor" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/availableOffline"
@@ -170,7 +79,7 @@
 
         <TextView
             android:id="@+id/availableOfflineText"
-            style="@style/Subtitle1"
+            style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
@@ -198,192 +107,46 @@
             android:visibility="gone" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/downloadFile"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_download"
+        app:text="@string/buttonDownload" />
 
-        <ImageView
-            android:id="@+id/downloadFileIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_download"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/downloadFileText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonDownload"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/downloadFileIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/moveFile"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_folder_select"
+        app:text="@string/buttonMoveTo" />
 
-        <ImageView
-            android:id="@+id/moveFileIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_folder_select"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/moveFileText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonMoveTo"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/moveFileIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/duplicateFile"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_duplicate"
+        app:text="@string/buttonDuplicate" />
 
-        <ImageView
-            android:id="@+id/duplicateFileIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_duplicate"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/duplicateFileText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonDuplicate"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/duplicateFileIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/restoreFileIn"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_restore"
+        app:text="@string/trashActionRestoreFileIn" />
 
-        <ImageView
-            android:id="@+id/restoreFileInIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_restore"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/restoreFileInText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/trashActionRestoreFileIn"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/restoreFileInIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/restoreFileToOriginalPlace"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_restore"
+        app:text="@string/trashActionRestoreFileOriginalPlace" />
 
-        <ImageView
-            android:id="@+id/restoreFileToOriginalPlaceIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_restore"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/restoreFileToOriginalPlaceText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/trashActionRestoreFileOriginalPlace"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/restoreFileToOriginalPlaceIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/deletePermanently"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
-
-        <ImageView
-            android:id="@+id/deleteIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_delete"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/deleteText"
-            style="@style/Subtitle1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/trashActionDelete"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/deleteIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_delete"
+        app:text="@string/trashActionDelete" />
 
 </LinearLayout>
