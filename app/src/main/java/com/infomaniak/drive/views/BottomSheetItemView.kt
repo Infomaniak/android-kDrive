@@ -72,5 +72,5 @@ class BottomSheetItemView @JvmOverloads constructor(
         }
     }
 
-    override fun setOnClickListener(l: OnClickListener?) = binding.root.setOnClickListener(l)
+    override fun setOnClickListener(onClickListener: OnClickListener?) = binding.root.setOnClickListener(onClickListener)
 }
