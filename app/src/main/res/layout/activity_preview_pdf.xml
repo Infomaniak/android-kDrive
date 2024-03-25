@@ -27,7 +27,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pdfContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/marginStandardMedium">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/hostFragment"
@@ -36,49 +37,11 @@
             android:layout_height="match_parent"
             app:defaultNavHost="true" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/backButton"
-            style="@style/IconButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginTop="@dimen/marginStandardMedium"
-            android:contentDescription="@string/buttonBack"
-            app:backgroundTint="@color/previewBackgroundTransparent"
-            app:icon="@drawable/ic_chevron_left"
-            app:iconSize="20dp"
-            app:iconTint="@android:color/white"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/pageNumberChip"
-            android:layout_width="wrap_content"
+        <com.infomaniak.drive.views.PreviewHeaderView
+            android:id="@+id/header"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/marginStandardMedium"
-            android:backgroundTint="#80111C28"
-            android:clickable="false"
-            android:textColor="@color/white"
-            android:visibility="gone"
-            app:layout_constraintEnd_toStartOf="@+id/openWithButton"
-            app:layout_constraintStart_toEndOf="@+id/backButton"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="102 sur 250"
-            tools:visibility="visible" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/openWithButton"
-            style="@style/IconButton"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandardMedium"
-            android:contentDescription="@string/openWith"
-            app:backgroundTint="@color/previewBackgroundTransparent"
-            app:icon="@drawable/ic_open_with"
-            app:iconSize="20dp"
-            app:iconTint="@android:color/white"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingTop="@dimen/marginStandardMedium"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

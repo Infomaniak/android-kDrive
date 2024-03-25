@@ -26,8 +26,6 @@ import android.print.PrintManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.transition.AutoTransition
@@ -44,9 +42,7 @@ import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
-import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.getFileNameAndSize
-import com.infomaniak.lib.core.utils.setMargins
 
 class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnItemClickListener {
 
@@ -64,10 +60,8 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
         ConstraintSet().apply {
             clone(baseConstraintSet)
 
-            listOf(R.id.backButton, R.id.pageNumberChip, R.id.openWithButton).forEach { id ->
-                clear(id, ConstraintSet.TOP)
-                connect(id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-            }
+            clear(R.id.header, ConstraintSet.TOP)
+            connect(R.id.header, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         }
     }
     private val transition by lazy {
@@ -92,8 +86,10 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
             navController.navigate(R.id.previewPDFFragment)
 
-            backButton.setOnClickListener { finish() }
-            openWithButton.setOnClickListener { openPDFWith() }
+            binding.header.setup(
+                onBackClicked = { finish() },
+                onOpenWithClicked = { openPDFWith() },
+            )
 
             initBottomSheet()
         }
@@ -107,7 +103,7 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     override fun onStart() {
         super.onStart()
-        setupWindowInsetsListener()
+        binding.header.setupWindowInsetsListener(binding.root, bottomSheetBehavior, binding.bottomSheetFileInfos)
         setupTransparentStatusBar()
     }
 
@@ -180,19 +176,6 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
             )
             type = "/pdf"
             startActivity(this)
-        }
-    }
-
-    private fun setupWindowInsetsListener() = with(binding) {
-        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
-            with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                val defaultMargin = context.resources.getDimension(R.dimen.marginStandardMedium).toInt()
-                backButton.setMargins(top = top + defaultMargin)
-                pageNumberChip.setMargins(top = top + defaultMargin)
-                openWithButton.setMargins(top = top + defaultMargin)
-                bottomSheetFileInfos.setPadding(0, 0, 0, bottom)
-            }
-            windowInsets
         }
     }
 

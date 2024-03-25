@@ -483,3 +483,12 @@ fun Context.shareFile(getUriToShare: () -> Uri?) {
         Sentry.captureException(it)
     }
 }
+
+fun Context.getDefaultPeekHeight(): Int {
+    val typedArray = theme.obtainStyledAttributes(
+        R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
+    )
+    val peekHeight = typedArray.getDimensionPixelSize(0, 0)
+    typedArray.recycle()
+    return peekHeight
+}

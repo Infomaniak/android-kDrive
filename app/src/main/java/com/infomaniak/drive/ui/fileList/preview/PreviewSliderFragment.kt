@@ -141,8 +141,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
 
                     currentFile = previewSliderAdapter.getFile(position)
-                    editButton.isVisible = currentFile.isOnlyOfficePreview()
-                    openWithButton.isGone = currentFile.isOnlyOfficePreview()
+                    with(header) {
+                        editButton.isVisible = currentFile.isOnlyOfficePreview()
+                        openWithButton.isGone = currentFile.isOnlyOfficePreview()
+                    }
                     bottomSheetFileInfos.openWith.isVisible = true
                     lifecycleScope.launchWhenResumed {
                         withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
@@ -152,13 +154,15 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
-            if (!currentFile.isOnlyOfficePreview()) openWithButton.isGone = isDownloading
+            if (!currentFile.isOnlyOfficePreview()) header.openWithButton.isGone = isDownloading
             bottomSheetFileInfos.openWith.isGone = isDownloading
         }
 
-        editButton.setOnClickListener { openOnlyOfficeDocument(currentFile) }
-        openWithButton.setOnClickListener { openWithClicked() }
-        backButton.setOnClickListener { findNavController().popBackStack() }
+        binding.header.setup(
+            onBackClicked = { findNavController().popBackStack() },
+            onOpenWithClicked = { openWithClicked() },
+            onEditClicked = { openOnlyOfficeDocument(currentFile) },
+        )
 
         mainViewModel.currentPreviewFileList.let { files ->
             previewSliderAdapter.setFiles(ArrayList(files.values))
@@ -180,7 +184,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             binding.bottomSheetFileInfos,
             !navigationArgs.hideActions
         )
-        setupWindowInsetsListener()
+        binding.header.setupWindowInsetsListener(root, bottomSheetBehavior, binding.bottomSheetFileInfos)
     }
 
     override fun onStart() {
@@ -254,25 +258,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    private fun setupWindowInsetsListener() = with(binding) {
-        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
-            with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                header.setMargins(left = left, top = top, right = right)
-                val topOffset = max(top, root.height - bottomSheetFileInfos.height)
-                bottomSheetBehavior.apply {
-                    peekHeight = getDefaultPeekHeight() + bottom
-                    expandedOffset = topOffset
-                    maxHeight = root.height - topOffset
-                }
-                // Add padding to the bottom to allow the last element of the
-                // list to be displayed right over the android navigation bar
-                bottomSheetFileInfos.setPadding(0, 0, 0, bottom)
-            }
-
-            windowInsets
-        }
-    }
-
     private fun setupTransparentStatusBar() {
         activity?.window?.apply {
             statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
@@ -280,15 +265,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             lightStatusBar(false)
             toggleEdgeToEdge(true)
         }
-    }
-
-    private fun getDefaultPeekHeight(): Int {
-        val typedArray = requireContext().theme.obtainStyledAttributes(
-            R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
-        )
-        val peekHeight = typedArray.getDimensionPixelSize(0, 0)
-        typedArray.recycle()
-        return peekHeight
     }
 
     override fun displayInfoClicked() {
@@ -487,11 +463,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     companion object {
 
         fun Fragment.getPageNumberChip(): Chip? {
-            return if (parentFragment is PreviewSliderFragment) {
-                (parentFragment as PreviewSliderFragment)._binding?.pageNumberChip
-            } else {
-                (activity as PreviewPDFActivity).binding.pageNumberChip
-            }
+            return (parentFragment as? PreviewSliderFragment)?._binding?.header?.pageNumberChip
+                ?: (activity as? PreviewPDFActivity)?.binding?.header?.pageNumberChip
         }
 
         fun Fragment.toggleFullscreen() {
