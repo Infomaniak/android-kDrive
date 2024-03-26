@@ -21,6 +21,7 @@ import android.app.Application
 import android.content.Context
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
@@ -28,6 +29,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -35,6 +37,7 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
@@ -51,7 +54,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
 
-class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
+class MainViewModel(
+    appContext: Application,
+    private val savedStateHandle: SavedStateHandle,
+) : AndroidViewModel(appContext) {
 
     var selectFolderUserDrive: UserDrive? = null
     val realm: Realm by lazy {
@@ -74,14 +80,46 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
-    var mustOpenShortcut: Boolean = true
+    var mustOpenUploadShortcut: Boolean
+        get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: true
+        set(value) {
+            savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] = value
+        }
 
     var ignoreSyncOffline = false
+
+    var uploadFilesHelper: UploadFilesHelper? = null
 
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
 
     private fun getContext() = getApplication<MainApplication>()
+
+    fun setCurrentFolder(folder: File?) {
+        folder?.let {
+            saveCurrentFolderId()
+            uploadFilesHelper?.setParentFolder(it)
+            currentFolder.value = it
+        }
+    }
+
+    fun initUploadFilesHelper(fragmentActivity: FragmentActivity, navController: NavController) {
+        uploadFilesHelper = UploadFilesHelper(
+            activity = fragmentActivity,
+            navController = navController,
+            onOpeningPicker = {
+                fragmentActivity.trackNewElementEvent("uploadFile")
+                uploadFilesHelper?.let(::setParentFolder) ?: Sentry.captureMessage("UploadFilesHelper is null. It should not!")
+            },
+        ).apply {
+            initCurrentFolderFromRealm()
+            setParentFolder(uploadFilesHelper = this)
+        }
+    }
+
+    fun saveMustOpenUploadShortcut(mustOpenShortcut: Boolean) {
+        savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] = mustOpenShortcut
+    }
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
         // Clear FileListFragment stack
@@ -253,11 +291,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(apiResponse)
     }
 
-    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
-        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
-        else ioFile.delete()
-    }
-
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
         emit(FileController.renameFile(file, newName))
     }
@@ -282,14 +315,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
 
             emit(this)
         }
-    }
-
-    private fun manageCategoryApiCall(
-        files: List<File>,
-        categoryId: Int,
-        isAdding: Boolean,
-    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
-        return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
     }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
@@ -422,8 +447,51 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         UploadFile.deleteAll(fileDeleted)
     }
 
+    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
+        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
+        else ioFile.delete()
+    }
+
+    private fun setParentFolder(uploadFilesHelper: UploadFilesHelper) {
+        currentFolder.value?.let {
+            saveCurrentFolderId()
+            uploadFilesHelper.setParentFolder(it)
+        } ?: {
+            initCurrentFolderFromRealm()
+            saveCurrentFolderId()
+            uploadFilesHelper.setParentFolder(currentFolder.value!!)
+        }
+    }
+
+    private fun manageCategoryApiCall(
+        files: List<File>,
+        categoryId: Int,
+        isAdding: Boolean,
+    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+        return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
+    }
+
+    private fun saveCurrentFolderId() {
+        currentFolder.value?.let { savedStateHandle[SAVED_STATE_FOLDER_ID_KEY] = it.id }
+    }
+
+    private fun initCurrentFolderFromRealm() {
+        val savedFolderId = savedStateHandle.get<Int>(SAVED_STATE_FOLDER_ID_KEY)
+        if (currentFolder.value == null && savedFolderId != null) {
+            FileController.getFileById(savedStateHandle[SAVED_STATE_FOLDER_ID_KEY]!!)?.let {
+                this.currentFolder.value = it
+                uploadFilesHelper?.setParentFolder(it)
+            }
+        }
+    }
+
     override fun onCleared() {
         realm.close()
         super.onCleared()
+    }
+
+    companion object {
+        private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
+        private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
     }
 }

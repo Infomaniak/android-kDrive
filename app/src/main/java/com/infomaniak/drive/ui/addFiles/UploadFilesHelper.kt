@@ -20,10 +20,8 @@ package com.infomaniak.drive.ui.addFiles
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
-import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.DrivePermissions
@@ -34,7 +32,6 @@ class UploadFilesHelper private constructor(
     private val context: Context,
     private val navController: NavController,
     private val onOpeningPicker: (() -> Unit)?,
-    private val onResult: (() -> Unit)?,
 ) {
 
     private lateinit var filePicker: FilePicker
@@ -42,31 +39,18 @@ class UploadFilesHelper private constructor(
     private lateinit var parentFolder: File
 
     constructor(
-        fragment: Fragment,
-        onOpeningPicker: () -> Unit,
-        onResult: (() -> Unit)? = null,
-    ) : this(fragment.requireContext(), fragment.findNavController(), onOpeningPicker, onResult) {
-
-        filePicker = FilePicker(fragment).apply { initCallback(::initFilePicker) }
-
-        uploadFilesPermissions = DrivePermissions().apply {
-            registerPermissions(fragment) { authorized -> if (authorized) uploadFiles() }
-        }
-    }
-
-    constructor(
         activity: FragmentActivity,
         navController: NavController,
-    ) : this(activity, navController, onOpeningPicker = null, onResult = null) {
-
-        filePicker = FilePicker(activity).apply { initCallback(::initFilePicker) }
+        onOpeningPicker: (() -> Unit)? = null,
+    ) : this(context = activity, navController, onOpeningPicker = onOpeningPicker) {
+        filePicker = FilePicker(activity).apply { initCallback(::onSelectFilesResult) }
 
         uploadFilesPermissions = DrivePermissions().apply {
             registerPermissions(activity) { authorized -> if (authorized) uploadFiles() }
         }
     }
 
-    fun initParentFolder(folder: File) {
+    fun setParentFolder(folder: File) {
         parentFolder = folder
     }
 
@@ -78,15 +62,12 @@ class UploadFilesHelper private constructor(
         }
     }
 
-    private fun initFilePicker(uris: List<Uri>) {
-        onResult?.invoke()
-        onSelectFilesResult(uris)
-    }
-
     private fun onSelectFilesResult(uris: List<Uri>) {
-        navController.navigate(
-            resId = R.id.importFileDialog,
-            args = ImportFilesDialogArgs(parentFolder.id, parentFolder.driveId, uris.toTypedArray()).toBundle(),
-        )
+        parentFolder?.let {
+            navController.navigate(
+                resId = R.id.importFileDialog,
+                args = ImportFilesDialogArgs(it.id, it.name, it.driveId, uris.toTypedArray()).toBundle(),
+            )
+        }
     }
 }

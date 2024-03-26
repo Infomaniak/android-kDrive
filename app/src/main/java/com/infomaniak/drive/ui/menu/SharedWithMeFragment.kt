@@ -161,7 +161,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                     userDrive = userDrive
                 ).observe(viewLifecycleOwner) {
                     it?.let { (_, children, _) ->
-                        mainViewModel.currentFolder.value = it.parentFolder
+                        mainViewModel.setCurrentFolder(it.parentFolder)
                         populateFileList(
                             ArrayList(children),
                             isComplete = true,

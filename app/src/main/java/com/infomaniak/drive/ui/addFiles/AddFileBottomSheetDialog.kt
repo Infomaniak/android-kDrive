@@ -68,8 +68,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var openCameraWritePermissions: DrivePermissions
     private lateinit var openCameraPermissions: CameraPermissions
 
-    private lateinit var uploadFilesHelper: UploadFilesHelper
-
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
@@ -113,17 +111,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
         }
 
-        uploadFilesHelper = UploadFilesHelper(
-            fragment = this@AddFileBottomSheetDialog,
-            onOpeningPicker = {
-                trackNewElement("uploadFile")
-                binding.documentUpload.isEnabled = false
-            },
-            onResult = { findNavController().popBackStack() },
-        ).apply { initParentFolder(currentFolderFile) }
-
         openCamera.setOnClickListener { openCamera() }
-        documentUpload.setOnClickListener { uploadFilesHelper.uploadFiles() }
+        documentUpload.setOnClickListener { mainViewModel.uploadFilesHelper?.uploadFiles() }
         documentScanning.setOnClickListener { scanDocuments() }
         folderCreate.setOnClickListener { createFolder() }
         docsCreate.setOnClickListener { createFile(Office.DOCS) }
