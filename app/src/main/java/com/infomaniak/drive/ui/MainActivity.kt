@@ -67,7 +67,6 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
-import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
@@ -160,7 +159,7 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
-        mainViewModel.initUploadFilesHelper(this, navController)
+        mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 
         checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
@@ -182,6 +181,7 @@ class MainActivity : BaseActivity() {
 
         initAppUpdateManager()
         initAppReviewManager()
+        observeCurrentFolder()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -238,9 +238,6 @@ class MainActivity : BaseActivity() {
 
     private fun setupMainFab() = with(binding) {
         mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
-        mainViewModel.currentFolder.observe(this@MainActivity) { file ->
-            mainFab.isEnabled = file?.rights?.canCreateFile == true
-        }
     }
 
     private fun setupDrivePermissions() {
@@ -438,20 +435,23 @@ class MainActivity : BaseActivity() {
                     ShortcutManagerCompat.reportShortcutUsed(this@MainActivity, Shortcuts.SEARCH.id)
                     navController.navigate(R.id.searchFragment)
                 }
-                Shortcuts.UPLOAD.id -> {
-                    uploadFilesHelper = UploadFilesHelper(this@MainActivity, navController)
-                    currentFolder.observe(this@MainActivity) { parentFolder ->
-                        if (mustOpenShortcut && parentFolder?.id == ROOT_ID) {
-                            mustOpenShortcut = false
-                            uploadFilesHelper?.apply {
-                                initParentFolder(parentFolder)
-                                uploadFiles()
-                            }
-                        }
-                    }
-                }
                 Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
                 Shortcuts.FEEDBACK.id -> openSupport()
+                Shortcuts.UPLOAD.id -> Unit
+            }
+        }
+    }
+
+    private fun observeCurrentFolder() = with(mainViewModel) {
+        currentFolder.observe(this@MainActivity) { parentFolder ->
+            binding.mainFab.isEnabled = parentFolder?.rights?.canCreateFile == true
+
+            if (navigationArgs?.shortcutId == Shortcuts.UPLOAD.id && mustOpenUploadShortcut && parentFolder?.id == ROOT_ID) {
+                saveMustOpenUploadShortcut(false)
+                uploadFilesHelper?.apply {
+                    setParentFolder(parentFolder)
+                    uploadFiles()
+                }
             }
         }
     }

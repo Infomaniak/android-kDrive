@@ -43,7 +43,6 @@ class UploadFilesHelper private constructor(
         navController: NavController,
         onOpeningPicker: (() -> Unit)? = null,
     ) : this(context = activity, navController, onOpeningPicker = onOpeningPicker) {
-
         filePicker = FilePicker(activity).apply { initCallback(::onSelectFilesResult) }
 
         uploadFilesPermissions = DrivePermissions().apply {
@@ -51,7 +50,7 @@ class UploadFilesHelper private constructor(
         }
     }
 
-    fun initParentFolder(folder: File) {
+    fun setParentFolder(folder: File) {
         parentFolder = folder
     }
 
@@ -64,9 +63,11 @@ class UploadFilesHelper private constructor(
     }
 
     private fun onSelectFilesResult(uris: List<Uri>) {
-        navController.navigate(
-            resId = R.id.importFileDialog,
-            args = ImportFilesDialogArgs(parentFolder.id, parentFolder.name, parentFolder.driveId, uris.toTypedArray()).toBundle(),
-        )
+        parentFolder?.let {
+            navController.navigate(
+                resId = R.id.importFileDialog,
+                args = ImportFilesDialogArgs(it.id, it.name, it.driveId, uris.toTypedArray()).toBundle(),
+            )
+        }
     }
 }

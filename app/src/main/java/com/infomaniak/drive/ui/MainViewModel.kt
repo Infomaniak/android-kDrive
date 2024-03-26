@@ -80,20 +80,25 @@ class MainViewModel(
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
-    var mustOpenShortcut: Boolean = true
+    var mustOpenUploadShortcut: Boolean
+        get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: true
+        set(value) {
+            savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] = value
+        }
 
     var ignoreSyncOffline = false
 
+    var uploadFilesHelper: UploadFilesHelper? = null
+
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
-
-    lateinit var uploadFilesHelper: UploadFilesHelper
 
     private fun getContext() = getApplication<MainApplication>()
 
     fun setCurrentFolder(folder: File?) {
         folder?.let {
-            it.saveToSavedStateHandle(savedStateHandle)
+            saveCurrentFolderId()
+            uploadFilesHelper?.setParentFolder(it)
             currentFolder.value = it
         }
     }
@@ -103,18 +108,17 @@ class MainViewModel(
             activity = fragmentActivity,
             navController = navController,
             onOpeningPicker = {
-                getContext().trackNewElementEvent("uploadFile")
-                setParentFolder(uploadFilesHelper)
+                fragmentActivity.trackNewElementEvent("uploadFile")
+                uploadFilesHelper?.let(::setParentFolder) ?: Sentry.captureMessage("UploadFilesHelper is null. It should not!")
             },
         ).apply {
+            initCurrentFolderFromRealm()
             setParentFolder(uploadFilesHelper = this)
         }
     }
 
-    private fun setParentFolder(uploadFilesHelper: UploadFilesHelper) {
-        val currentFolder: File = currentFolder.value ?: File.getFileFromSavedStateHandle(savedStateHandle)
-        currentFolder.saveToSavedStateHandle(savedStateHandle)
-        uploadFilesHelper.initParentFolder(currentFolder)
+    fun saveMustOpenUploadShortcut(mustOpenShortcut: Boolean) {
+        savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] = mustOpenShortcut
     }
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
@@ -287,11 +291,6 @@ class MainViewModel(
         emit(apiResponse)
     }
 
-    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
-        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
-        else ioFile.delete()
-    }
-
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
         emit(FileController.renameFile(file, newName))
     }
@@ -316,14 +315,6 @@ class MainViewModel(
 
             emit(this)
         }
-    }
-
-    private fun manageCategoryApiCall(
-        files: List<File>,
-        categoryId: Int,
-        isAdding: Boolean,
-    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
-        return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
     }
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
@@ -456,8 +447,51 @@ class MainViewModel(
         UploadFile.deleteAll(fileDeleted)
     }
 
+    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
+        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
+        else ioFile.delete()
+    }
+
+    private fun setParentFolder(uploadFilesHelper: UploadFilesHelper) {
+        currentFolder.value?.let {
+            saveCurrentFolderId()
+            uploadFilesHelper.setParentFolder(it)
+        } ?: {
+            initCurrentFolderFromRealm()
+            saveCurrentFolderId()
+            uploadFilesHelper.setParentFolder(currentFolder.value!!)
+        }
+    }
+
+    private fun manageCategoryApiCall(
+        files: List<File>,
+        categoryId: Int,
+        isAdding: Boolean,
+    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+        return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
+    }
+
+    private fun saveCurrentFolderId() {
+        currentFolder.value?.let { savedStateHandle[SAVED_STATE_FOLDER_ID_KEY] = it.id }
+    }
+
+    private fun initCurrentFolderFromRealm() {
+        val savedFolderId = savedStateHandle.get<Int>(SAVED_STATE_FOLDER_ID_KEY)
+        if (currentFolder.value == null && savedFolderId != null) {
+            FileController.getFileById(savedStateHandle[SAVED_STATE_FOLDER_ID_KEY]!!)?.let {
+                this.currentFolder.value = it
+                uploadFilesHelper?.setParentFolder(it)
+            }
+        }
+    }
+
     override fun onCleared() {
         realm.close()
         super.onCleared()
+    }
+
+    companion object {
+        private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
+        private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
     }
 }

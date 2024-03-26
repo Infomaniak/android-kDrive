@@ -21,7 +21,6 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
 import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
@@ -35,7 +34,6 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.DialogImportFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SyncUtils.getFileDates
@@ -51,7 +49,7 @@ import java.util.Date
 
 class ImportFilesDialog : DialogFragment() {
 
-    private val dialogBinding by lazy { DialogImportFilesBinding.inflate(LayoutInflater.from(context)) }
+    private val dialogBinding by lazy { DialogImportFilesBinding.inflate(layoutInflater) }
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navArgs: ImportFilesDialogArgs by navArgs()
     private val importCount by lazy { navArgs.uris.size }
@@ -116,11 +114,7 @@ class ImportFilesDialog : DialogFragment() {
         lifecycleScope.launch {
             lifecycle.withResumed {
                 with(findNavController()) {
-                    popBackStack()
-                    findNavController().navigate(
-                        R.id.fileListFragment,
-                        FileListFragmentArgs(folderId = navArgs.folderId, folderName = navArgs.folderName).toBundle()
-                    )
+                    popBackStack(R.id.fileListFragment, false)
                 }
             }
         }
