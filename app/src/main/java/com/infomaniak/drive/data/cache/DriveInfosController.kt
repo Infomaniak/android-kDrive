@@ -72,11 +72,8 @@ object DriveInfosController {
 
     fun storeDriveInfos(userId: Int, driveInfo: DriveInfo): List<Drive> {
         val driveList = arrayListOf<Drive>()
-        for (drive in driveInfo.drives.main) {
-            driveList.initDriveForRealm(drive, userId, false)
-        }
-        for (drive in driveInfo.drives.sharedWithMe) {
-            driveList.initDriveForRealm(drive, userId, true)
+        for (drive in driveInfo.drives.filter { drive -> drive.role != DriveUser.Role.NONE }) {
+            driveList.initDriveForRealm(drive, userId, sharedWithMe = drive.role == DriveUser.Role.EXTERNAL)
         }
 
         val driveRemoved = getDrives(userId, sharedWithMe = null).filterNot { driveList.contains(it) }
@@ -91,9 +88,9 @@ object DriveInfosController {
 
                 realm.insertOrUpdate(driveList)
                 realm.delete(DriveUser::class.java)
-                realm.insertOrUpdate(driveInfo.users.values.toList())
+                realm.insertOrUpdate(driveInfo.users)
                 realm.delete(Team::class.java)
-                realm.insertOrUpdate(driveInfo.teams.toList())
+                realm.insertOrUpdate(driveInfo.teams)
             }
         }
 

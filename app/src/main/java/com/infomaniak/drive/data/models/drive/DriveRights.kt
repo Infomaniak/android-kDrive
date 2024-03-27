@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,11 @@
  */
 package com.infomaniak.drive.data.models.drive
 
-import com.google.gson.annotations.SerializedName
-import com.infomaniak.drive.data.models.DriveUser
-import com.infomaniak.drive.data.models.IpsToken
-import com.infomaniak.drive.data.models.Team
+import io.realm.RealmObject
+import io.realm.annotations.RealmClass
 
-data class DriveInfo(
-    val drives: List<Drive> = emptyList(),
-    val users: List<DriveUser> = emptyList(),
-    val teams: List<Team> = emptyList(),
-    @SerializedName("ips")
-    val ipsToken: IpsToken
-)
+@RealmClass(embedded = true)
+open class DriveRights(
+    var technical: Boolean = false,
+) : RealmObject()
+

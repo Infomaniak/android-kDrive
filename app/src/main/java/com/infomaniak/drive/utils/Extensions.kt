@@ -105,7 +105,7 @@ fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallba
 }
 
 fun ImageView.loadAvatar(driveUser: DriveUser) {
-    loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.getInitials())
+    loadAvatar(driveUser.id, driveUser.avatar, driveUser.getInitials())
 }
 
 fun TextInputEditText.showOrHideEmptyError(): Boolean {
