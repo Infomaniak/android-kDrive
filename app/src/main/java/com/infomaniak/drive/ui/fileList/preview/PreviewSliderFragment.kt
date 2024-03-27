@@ -335,6 +335,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun sharePublicLink(onActionFinished: () -> Unit) {
+        super.sharePublicLink(onActionFinished)
         binding.bottomSheetFileInfos.createPublicShareLink(
             onSuccess = { shareLinkUrl ->
                 context?.shareText(shareLinkUrl)
