@@ -24,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.CallSuper
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -462,25 +463,50 @@ class FileInfoActionsView @JvmOverloads constructor(
             context.trackFileActionEvent(name, value = value?.toFloat())
         }
 
+        @CallSuper
         fun addFavoritesClicked() = trackFileActionEvent("favorite", !currentFile.isFavorite)
+
+        @CallSuper
         fun cancelExternalImportClicked() = trackFileActionEvent("cancelExternalImport")
+
+        @CallSuper
         fun colorFolderClicked(color: String?) = context.trackEvent("colorFolder", "switch")
-        fun displayInfoClicked()
+
+        fun displayInfoClicked() = Unit
+
+        @CallSuper
         fun downloadFileClicked() = trackFileActionEvent("download")
+
+        @CallSuper
         fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
-        fun fileRightsClicked()
-        fun goToFolder()
-        fun manageCategoriesClicked(fileId: Int)
+
+        fun fileRightsClicked() = Unit
+
+        fun goToFolder() = Unit
+
+        fun manageCategoriesClicked(fileId: Int) = Unit
+
         fun onCacheAddedToOffline() = Unit
-        fun onDeleteFile(onApiResponse: () -> Unit)
-        fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
-        fun onLeaveShare(onApiResponse: () -> Unit)
-        fun onMoveFile(destinationFolder: File)
-        fun onRenameFile(newName: String, onApiResponse: () -> Unit)
+
+        fun onDeleteFile(onApiResponse: () -> Unit) = Unit
+
+        fun onDuplicateFile(result: String, onApiResponse: () -> Unit) = Unit
+
+        fun onLeaveShare(onApiResponse: () -> Unit) = Unit
+
+        fun onMoveFile(destinationFolder: File) = Unit
+
+        fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
+
+        @CallSuper
         fun openWithClicked() = trackFileActionEvent("openWith")
-        fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
+
+        fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) = Unit
+
+        @CallSuper
         fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent("shareLink")
 
+        @CallSuper
         fun editDocumentClicked() {
             trackFileActionEvent("edit")
             ownerFragment.openOnlyOfficeDocument(currentFile)
