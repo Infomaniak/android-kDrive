@@ -47,6 +47,8 @@ import io.realm.Realm
 import io.realm.kotlin.toFlow
 import io.sentry.Sentry
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import java.util.Date
 
@@ -359,9 +361,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         UploadFile.getCurrentUserPendingUploadFile(folderId)
             .toFlow()
             .mapLatest { list -> list.count() }
-            .asLiveData(viewModelScope.coroutineContext + Dispatchers.IO)
-
             .distinctUntilChanged()
+            .cancellable()
+            .asLiveData()
     }
 
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(

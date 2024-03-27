@@ -251,7 +251,12 @@ open class UploadFile(
         }
 
         fun getCurrentUserPendingUploadFile(folderId: Int? = null): RealmResults<UploadFile> {
-            return pendingUploadsQuery(getRealmInstance(), folderId, true, driveIds = currentDriveAndSharedWithMeIds()).findAll()
+            return pendingUploadsQuery(
+                realm = getRealmInstance(),
+                folderId = folderId,
+                onlyCurrentUser = true,
+                driveIds = currentDriveAndSharedWithMeIds()
+            ).findAllAsync()
         }
 
         fun getAllUploadedFiles(type: String = Type.SYNC.name): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
