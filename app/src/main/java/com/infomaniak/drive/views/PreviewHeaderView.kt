@@ -22,14 +22,17 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
+import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.PreviewHeaderViewBinding
-import com.infomaniak.drive.utils.getDefaultPeekHeight
 import com.infomaniak.lib.core.utils.setMargins
 import kotlin.math.max
 
@@ -50,14 +53,35 @@ class PreviewHeaderView @JvmOverloads constructor(
 
     private val binding by lazy { PreviewHeaderViewBinding.inflate(LayoutInflater.from(context), this, true) }
 
+    private val parentConstraintLayout by lazy { parent as ConstraintLayout }
+
+    private val baseConstraintSet by lazy {
+        ConstraintSet().apply {
+            clone(parentConstraintLayout)
+        }
+    }
+    private val collapsedConstraintSet by lazy {
+        ConstraintSet().apply {
+            clone(baseConstraintSet)
+
+            clear(R.id.header, ConstraintSet.TOP)
+            connect(R.id.header, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+        }
+    }
+    private val transition by lazy {
+        AutoTransition().apply {
+            duration = 125
+        }
+    }
+
     fun setup(
         onBackClicked: (() -> Unit)? = null,
         onOpenWithClicked: (() -> Unit)? = null,
         onEditClicked: (() -> Unit)? = null
-    ) {
-        binding.backButton.setOnClickListener { onBackClicked?.invoke() }
-        binding.openWithButton.setOnClickListener { onOpenWithClicked?.invoke() }
-        binding.editButton.apply {
+    ) = with(binding) {
+        backButton.setOnClickListener { onBackClicked?.invoke() }
+        openWithButton.setOnClickListener { onOpenWithClicked?.invoke() }
+        editButton.apply {
             setOnClickListener { onEditClicked?.invoke() }
             isGone = onEditClicked == null
         }
@@ -65,15 +89,15 @@ class PreviewHeaderView @JvmOverloads constructor(
 
     fun setupWindowInsetsListener(
         rootView: View,
-        bottomSheetBehavior: BottomSheetBehavior<View>?,
         bottomSheetView: View,
     ) = with(binding.header) {
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, windowInsets ->
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                 setMargins(left = left, top = top, right = right)
                 val topOffset = getTopOffset(bottomSheetView)
-                bottomSheetBehavior?.apply {
-                    peekHeight = rootView.context.getDefaultPeekHeight() + bottom
+                bottomSheetBehavior.apply {
+                    peekHeight = getDefaultPeekHeight() + bottom
 
                     if (topOffset > 0) {
                         expandedOffset = topOffset
@@ -89,7 +113,21 @@ class PreviewHeaderView @JvmOverloads constructor(
         }
     }
 
+    fun toggleVisibility(isVisible: Boolean) {
+        TransitionManager.beginDelayedTransition(parentConstraintLayout, transition)
+        (if (isVisible) baseConstraintSet else collapsedConstraintSet).applyTo(parentConstraintLayout)
+    }
+
     private fun getTopOffset(bottomSheetView: View): Int {
         return if (rootView.height < bottomSheetView.height) max(top, rootView.height - bottomSheetView.height) else 0
+    }
+
+    private fun getDefaultPeekHeight(): Int {
+        val typedArray = context.theme.obtainStyledAttributes(
+            R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
+        )
+        val peekHeight = typedArray.getDimensionPixelSize(0, 0)
+        typedArray.recycle()
+        return peekHeight
     }
 }

@@ -19,12 +19,10 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -34,7 +32,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -50,11 +47,14 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.PreviewUtils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -69,11 +69,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private val navigationArgs: PreviewSliderFragmentArgs by navArgs()
     private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private val bottomSheetBehavior: BottomSheetBehavior<View> by lazy { BottomSheetBehavior.from(binding.bottomSheetFileInfos) }
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
     private lateinit var userDrive: UserDrive
-    private var isUiShown = false
+    private var isOverlayShown = false
 
     override val ownerFragment = this
     override lateinit var currentFile: File
@@ -177,20 +177,16 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             }
         }
 
-        bottomSheetBehavior = requireActivity().getBottomSheetFileBehavior(
-            binding.bottomSheetFileInfos,
-            !navigationArgs.hideActions
-        )
+        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
         binding.header.setupWindowInsetsListener(
             rootView = root,
-            bottomSheetBehavior = bottomSheetBehavior,
             bottomSheetView = binding.bottomSheetFileInfos,
         )
     }
 
     override fun onStart() {
         super.onStart()
-        setupTransparentStatusBar()
+        requireActivity().setupTransparentStatusBar()
     }
 
     override fun onResume() {
@@ -245,26 +241,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     fun toggleFullscreen() {
         _binding?.previewSliderParent?.apply {
-            val transition = Slide(Gravity.TOP).apply {
-                duration = 200
-                addTarget(R.id.header)
-            }
-            TransitionManager.beginDelayedTransition(this, transition)
-            _binding?.header?.isVisible = isUiShown
+            _binding?.header?.toggleVisibility(isOverlayShown)
+            toggleBottomSheet(shouldShow = isOverlayShown)
+            requireActivity().toggleSystemBar(show = isOverlayShown)
 
-            toggleBottomSheet(shouldShow = isUiShown)
-            requireActivity().toggleSystemBar(show = isUiShown)
-
-            isUiShown = !isUiShown
-        }
-    }
-
-    private fun setupTransparentStatusBar() {
-        activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
-
-            lightStatusBar(false)
-            toggleEdgeToEdge(true)
+            isOverlayShown = !isOverlayShown
         }
     }
 

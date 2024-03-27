@@ -24,16 +24,24 @@
     android:background="@color/previewBackground"
     tools:context="com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment">
 
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/viewPager"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pdfContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
 
-    <com.infomaniak.drive.views.PreviewHeaderView
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/marginStandardMedium" />
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.infomaniak.drive.views.PreviewHeaderView
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/marginStandardMedium"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.infomaniak.drive.views.FileInfoActionsView
         android:id="@+id/bottomSheetFileInfos"

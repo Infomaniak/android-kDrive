@@ -32,8 +32,8 @@
         tools:layout="@layout/fragment_preview_pdf">
 
         <argument
-            android:name="fileURI"
-            app:argType="string"
+            android:name="fileUri"
+            app:argType="android.net.Uri"
             app:nullable="true"
             android:defaultValue="@null"/>
 

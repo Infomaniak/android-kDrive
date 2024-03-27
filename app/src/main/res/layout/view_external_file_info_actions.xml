@@ -32,36 +32,40 @@
         android:layout_marginHorizontal="@dimen/marginStandardSmall"
         android:layout_marginBottom="@dimen/marginStandardSmall" />
 
-    <com.infomaniak.drive.ui.menu.MenuItemView
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/openWith"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:icon="@drawable/ic_open_with"
-        app:title="@string/openWith"
+        app:iconTint="@color/iconColor"
+        app:text="@string/openWith"
         app:withArrow="false" />
 
-    <com.infomaniak.drive.ui.menu.MenuItemView
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/shareFile"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:icon="@drawable/ic_share_file"
-        app:title="@string/buttonSendCopy"
+        app:icon="@drawable/ic_export"
+        app:iconTint="@color/iconColor"
+        app:text="@string/buttonSendCopy"
         app:withArrow="false" />
 
-    <com.infomaniak.drive.ui.menu.MenuItemView
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/saveToKDrive"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:icon="@drawable/ic_drive"
-        app:title="@string/saveExternalFileTitle"
+        app:iconTint="@color/iconColor"
+        app:text="@string/saveExternalFileTitle"
         app:withArrow="false" />
 
-    <com.infomaniak.drive.ui.menu.MenuItemView
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/print"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:icon="@drawable/ic_print"
-        app:title="@string/actionPrint"
+        app:iconTint="@color/iconColor"
+        app:text="@string/actionPrint"
         app:withArrow="false" />
 
 </LinearLayout>

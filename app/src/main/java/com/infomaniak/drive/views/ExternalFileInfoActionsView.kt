@@ -37,7 +37,7 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
 
     private lateinit var onItemClickListener: OnItemClickListener
 
-    fun init(onItemClickListener: OnItemClickListener) {
+    fun setClickListener(onItemClickListener: OnItemClickListener) {
         this.onItemClickListener = onItemClickListener
         initOnClickListeners()
     }

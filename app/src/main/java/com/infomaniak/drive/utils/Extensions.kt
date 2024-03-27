@@ -164,33 +164,6 @@ fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
     }
 }
 
-fun Activity.getBottomSheetFileBehavior(bottomSheet: View, isDraggable: Boolean): BottomSheetBehavior<View> {
-    setColorNavigationBar(true)
-    val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-    bottomSheetBehavior.apply {
-        isHideable = true
-        this.isDraggable = isDraggable
-        isFitToContents = true
-        addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                when (bottomSheetBehavior.state) {
-                    BottomSheetBehavior.STATE_HIDDEN -> {
-                        window?.navigationBarColor =
-                            ContextCompat.getColor(this@getBottomSheetFileBehavior, R.color.previewBackgroundTransparent)
-                        window?.lightNavigationBar(false)
-                    }
-                    else -> {
-                        setColorNavigationBar(true)
-                    }
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
-        })
-    }
-    return bottomSheetBehavior
-}
-
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
 fun ItemUserBinding.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
@@ -483,13 +456,4 @@ fun Context.shareFile(getUriToShare: () -> Uri?) {
     }.onFailure {
         Sentry.captureException(it)
     }
-}
-
-fun Context.getDefaultPeekHeight(): Int {
-    val typedArray = theme.obtainStyledAttributes(
-        R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
-    )
-    val peekHeight = typedArray.getDimensionPixelSize(0, 0)
-    typedArray.recycle()
-    return peekHeight
 }

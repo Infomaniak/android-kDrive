@@ -27,8 +27,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pdfContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="@dimen/marginStandardMedium">
+        android:layout_height="match_parent">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/hostFragment"

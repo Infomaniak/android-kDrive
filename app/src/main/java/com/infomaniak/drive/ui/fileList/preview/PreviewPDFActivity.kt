@@ -25,11 +25,8 @@ import android.print.PrintAttributes
 import android.print.PrintManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
@@ -38,6 +35,7 @@ import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.PreviewUtils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.openWith
@@ -51,63 +49,40 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private val navController by lazy { setupNavController() }
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
-    private val baseConstraintSet by lazy {
-        ConstraintSet().apply {
-            clone(binding.pdfContainer)
-        }
-    }
-    private val collapsedConstraintSet by lazy {
-        ConstraintSet().apply {
-            clone(baseConstraintSet)
-
-            clear(R.id.header, ConstraintSet.TOP)
-            connect(R.id.header, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
-        }
-    }
-    private val transition by lazy {
-        AutoTransition().apply {
-            duration = 125
-        }
-    }
-
     private val externalPDFUri: Uri by lazy { Uri.parse(intent.dataString) }
     private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(externalPDFUri) }
     private val fileName: String by lazy { fileNameAndSize?.first ?: "" }
     private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
 
-    private var bottomSheetBehavior: BottomSheetBehavior<View>? = null
-    private var isUiShown = true
+    private val bottomSheetBehavior: BottomSheetBehavior<View> by lazy { BottomSheetBehavior.from(binding.bottomSheetFileInfos) }
+    private var isOverlayShown = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         with(binding) {
             setContentView(root)
-            setColorNavigationBar(appBar = true)
 
             navController.navigate(R.id.previewPDFFragment)
 
-            binding.header.setup(
+            header.setup(
                 onBackClicked = { finish() },
                 onOpenWithClicked = { openPDFWith() },
             )
-
-            initBottomSheet()
         }
+
+        initBottomSheet()
     }
 
     private fun initBottomSheet() = with(binding) {
-        bottomSheetBehavior = getBottomSheetFileBehavior(bottomSheetFileInfos, true)
+        setupBottomSheetFileBehavior(bottomSheetBehavior, true)
         bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
-        bottomSheetFileInfos.init(this@PreviewPDFActivity)
+        bottomSheetFileInfos.setClickListener(this@PreviewPDFActivity)
     }
 
     override fun onStart() {
         super.onStart()
-        binding.header.setupWindowInsetsListener(
-            rootView = binding.root,
-            bottomSheetBehavior = bottomSheetBehavior,
-            bottomSheetView = binding.bottomSheetFileInfos,
-        )
+        binding.header.setupWindowInsetsListener(rootView = binding.root, bottomSheetView = binding.bottomSheetFileInfos)
         setupTransparentStatusBar()
     }
 
@@ -134,19 +109,10 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     }
 
     fun toggleFullscreen() = with(bottomSheetBehavior) {
-        TransitionManager.beginDelayedTransition(binding.pdfContainer, transition)
-
-        this?.state?.let {
-            state = if (isUiShown) {
-                collapsedConstraintSet.applyTo(binding.pdfContainer)
-                BottomSheetBehavior.STATE_HIDDEN
-            } else {
-                baseConstraintSet.applyTo(binding.pdfContainer)
-                BottomSheetBehavior.STATE_COLLAPSED
-            }
-        }
-        isUiShown = !isUiShown
-        toggleSystemBar(isUiShown)
+        binding.header.toggleVisibility(!isOverlayShown)
+        this?.state = if (isOverlayShown) BottomSheetBehavior.STATE_HIDDEN else BottomSheetBehavior.STATE_COLLAPSED
+        isOverlayShown = !isOverlayShown
+        toggleSystemBar(isOverlayShown)
     }
 
     private fun openPDFWith() {
@@ -186,7 +152,7 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private fun setupNavController(): NavController {
         return navHostFragment.navController.apply {
             intent.dataString?.let { fileURI ->
-                setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileURI = fileURI).toBundle())
+                setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileUri = Uri.parse(fileURI)).toBundle())
             }
         }
     }

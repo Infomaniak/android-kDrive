@@ -59,6 +59,8 @@ class PreviewPDFFragment : PreviewFragment() {
 
     private val navigationArgs: PreviewPDFFragmentArgs by navArgs()
 
+    private val isExternalPDF by lazy { navigationArgs.fileUri != null }
+
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
             val handle: View = View.inflate(requireContext(), R.layout.pdf_handle_view, null)
@@ -80,9 +82,9 @@ class PreviewPDFFragment : PreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (noCurrentFile() && navigationArgs.fileURI == null) return@with
+        if (noCurrentFile() && !isExternalPDF) return@with
 
-        if (navigationArgs.fileURI != null) {
+        if (isExternalPDF) {
             showPdf()
         } else {
             container.layoutTransition?.setAnimateParentHierarchy(false)
@@ -139,7 +141,7 @@ class PreviewPDFFragment : PreviewFragment() {
         if (!binding.pdfView.isShown || isPasswordProtected) {
             lifecycleScope.launch {
                 withResumed {
-                    with(getConfigurator(navigationArgs.fileURI, pdfFile)) {
+                    with(getConfigurator(navigationArgs.fileUri, pdfFile)) {
                         password(password)
                         disableLongPress()
                         enableAnnotationRendering(true)
@@ -179,8 +181,8 @@ class PreviewPDFFragment : PreviewFragment() {
         }
     }
 
-    private fun getConfigurator(uriString: String?, pdfFile: IOFile?): PDFView.Configurator {
-        return uriString?.let { binding.pdfView.fromUri(Uri.parse(uriString)) } ?: binding.pdfView.fromFile(pdfFile)
+    private fun getConfigurator(fileUri: Uri?, pdfFile: IOFile?): PDFView.Configurator {
+        return fileUri?.let { binding.pdfView.fromUri(fileUri) } ?: binding.pdfView.fromFile(pdfFile)
     }
 
     private fun onPdfPasswordError() {
@@ -199,7 +201,7 @@ class PreviewPDFFragment : PreviewFragment() {
             bigOpenWithButton.isVisible = true
         }
 
-        if (navigationArgs.fileURI == null) previewSliderViewModel.pdfIsDownloading.value = false
+        if (!isExternalPDF) previewSliderViewModel.pdfIsDownloading.value = false
         isDownloading = false
     }
 
