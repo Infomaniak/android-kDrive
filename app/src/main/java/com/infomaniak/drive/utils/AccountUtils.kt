@@ -158,18 +158,17 @@ object AccountUtils : CredentialManager() {
     }
 
     private suspend fun reloadAppIfNeeded(fromMaintenance: Boolean, driveInfo: DriveInfo) {
+
+        suspend fun reloadApp() = Dispatchers.Main { reloadApp?.invoke(bundleOf()) }
+
         val internalDrives = driveInfo.drives.filter { it.isDriveUser() }
         if (fromMaintenance) {
             if (internalDrives.any { drive -> !drive.maintenance }) {
-                Dispatchers.Main {
-                    reloadApp?.invoke(bundleOf())
-                }
+                reloadApp()
             }
         } else if (internalDrives.none { drive -> !drive.maintenance } ||
             internalDrives.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
-            Dispatchers.Main {
-                reloadApp?.invoke(bundleOf())
-            }
+            reloadApp()
         }
     }
 
