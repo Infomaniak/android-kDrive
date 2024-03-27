@@ -156,6 +156,12 @@
         <item name="behavior_expandedOffset">0dp</item>
     </style>
 
+    <style name="ExternalFileBottomSheetStyle" parent="BottomSheetStyle">
+        <item name="shapeAppearance">?attr/shapeAppearanceLargeComponent</item>
+        <item name="behavior_peekHeight">120dp</item>
+        <item name="behavior_fitToContents">true</item>
+    </style>
+
     <style name="FullScreenBottomSheetDialogTheme.Base" parent="BottomSheetDialogTheme">
         <item name="android:textColor">@color/primaryText</item>
         <item name="android:textColorHint">@color/secondaryText</item>

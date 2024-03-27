@@ -56,7 +56,6 @@ import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.safeNavigate
-import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -180,24 +179,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         binding.scrollView.fullScroll(View.FOCUS_UP)
     }
 
-    private fun shareFile() {
-        context?.trackFileActionEvent("sendFileCopy")
-
-        val context = ownerFragment.requireContext()
-        val shareIntent = Intent().apply {
-            action = Intent.ACTION_SEND
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            putExtra(Intent.EXTRA_STREAM, CloudStorageProvider.createShareFileUri(context, currentFile))
-            type = "*/*"
-        }
-
-        runCatching {
-            ownerFragment.startActivity(Intent.createChooser(shareIntent, ownerFragment.getString(R.string.buttonSendCopy)))
-        }.onFailure {
-            Sentry.captureException(it)
-        }
-    }
-
     private fun openAddFileBottom() {
         mainViewModel.currentFolderOpenAddFileBottom.value = currentFile
         ownerFragment.safeNavigate(R.id.addFileBottomSheetDialog)
@@ -207,7 +188,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         editDocument.setOnClickListener { onItemClickListener.editDocumentClicked() }
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
-        sendCopy.setOnClickListener { if (currentFile.isFolder()) openAddFileBottom() else shareFile() }
+        sendCopy.setOnClickListener { shareFile() }
         sharePublicLink.setOnClickListener { view ->
             view.isClickable = false
             onItemClickListener.sharePublicLink { view.isClickable = true }
@@ -254,6 +235,14 @@ class FileInfoActionsView @JvmOverloads constructor(
         renameFile.setOnClickListener { onItemClickListener.renameFileClicked() }
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked() }
         goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
+    }
+
+    private fun shareFile() {
+        if (currentFile.isFolder()) {
+            openAddFileBottom()
+        } else {
+            ownerFragment.requireContext().shareFile { CloudStorageProvider.createShareFileUri(context, currentFile) }
+        }
     }
 
     /**
