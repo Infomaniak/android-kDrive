@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,8 +78,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     protected open fun configureManageCategories(areIndividualActionsVisible: Boolean) = with(binding) {
         if (areIndividualActionsVisible) {
-            disabledManageCategories.isGone = computeManageCategoriesAvailability()
             manageCategories.apply {
+                isEnabled = computeManageCategoriesAvailability()
                 setOnClickListener { onActionSelected(SelectDialogAction.MANAGE_CATEGORIES) }
                 isVisible = true
             }
@@ -92,25 +92,24 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     protected open fun configureAddFavorites(areIndividualActionsVisible: Boolean): Unit = with(binding) {
-        val (text, action) = with(navigationArgs) {
-            addFavoritesIcon.isEnabled = onlyFavorite
-            if (onlyFavorite) {
-                R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
-            } else {
-                R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
-            }
+        val (textRes, action) = if (navigationArgs.onlyFavorite) {
+            R.string.buttonRemoveFavorites to SelectDialogAction.REMOVE_FAVORITES
+        } else {
+            R.string.buttonAddFavorites to SelectDialogAction.ADD_FAVORITES
         }
-        addFavoritesText.setText(text)
+
         addFavorites.apply {
+            text = getString(textRes)
             setOnClickListener { onActionSelected(action) }
+            isActivated = navigationArgs.onlyFavorite
             isVisible = areIndividualActionsVisible
         }
     }
 
     protected open fun configureColoredFolder(areIndividualActionsVisible: Boolean) = with(binding) {
         if (areIndividualActionsVisible) {
-            disabledColoredFolder.isGone = computeColoredFolderAvailability()
             coloredFolder.apply {
+                isEnabled = computeColoredFolderAvailability()
                 setOnClickListener { onActionSelected(SelectDialogAction.COLOR_FOLDER) }
                 isVisible = true
             }
@@ -125,7 +124,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     protected open fun configureAvailableOffline(): Unit = with(binding) {
         availableOfflineIcon.isGone = navigationArgs.onlyOffline
         availableOfflineComplete.isVisible = navigationArgs.onlyOffline
-        disabledAvailableOffline.isVisible = navigationArgs.onlyFolders
+        availableOffline.isEnabled = !navigationArgs.onlyFolders
 
         availableOfflineSwitch.apply {
             isChecked = navigationArgs.onlyOffline

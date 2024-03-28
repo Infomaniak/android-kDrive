@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ object SyncUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
         else "datetaken"
 
-    inline val Context.uploadFolder get() = java.io.File(cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
+    inline val Context.uploadFolder get() = IOFile(cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
 
     fun getFileDates(cursor: Cursor): Pair<Date?, Date> {
         val dateTakenIndex = cursor.getColumnIndex(DATE_TAKEN)

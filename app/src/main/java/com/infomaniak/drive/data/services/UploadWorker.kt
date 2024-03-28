@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.utils.*
+import io.realm.Realm
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -94,6 +95,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
                 // Check if re-sync is needed
                 appSyncSettings?.let {
+                    SentryLog.i(TAG, "Check if need re-sync")
                     checkLocalLastMedias(it)
                     syncNewPendingUploads = UploadFile.getAllPendingUploadsCount() > 0
                 }
@@ -108,6 +110,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 SentryLog.wtf(TAG, "A file has been restarted several times")
                 result = Result.failure()
             }
+
+            SentryLog.d(TAG, "Work finished, result=$result || retryError=$retryError || lastUpload=$lastUploadFileName")
 
             result
         }
@@ -401,8 +405,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                         level = SentryLevel.INFO
                     })
 
-                    while (cursor.moveToNext()) {
-                        localMediaFound(cursor, contentUri, mediaFolder, syncSettings)
+                    UploadFile.getRealmInstance().use {
+                        it.executeTransaction { realm ->
+                            while (cursor.moveToNext()) {
+                                localMediaFound(realm, cursor, contentUri, mediaFolder, syncSettings)
+                            }
+                        }
                     }
                 }
         }.onFailure { exception ->
@@ -410,7 +418,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun localMediaFound(cursor: Cursor, contentUri: Uri, mediaFolder: MediaFolder, syncSettings: SyncSettings) {
+    private fun localMediaFound(
+        realm: Realm,
+        cursor: Cursor,
+        contentUri: Uri,
+        mediaFolder: MediaFolder,
+        syncSettings: SyncSettings
+    ) {
         val uri = cursor.uri(contentUri)
 
         val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
@@ -425,7 +439,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             level = SentryLevel.INFO
         })
 
-        if (UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
+        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
             UploadFile(
                 uri = uri.toString(),
                 driveId = syncSettings.driveId,
@@ -436,14 +450,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 remoteFolder = syncSettings.syncFolder,
                 userId = syncSettings.userId
             ).apply {
-                deleteIfExists()
+                deleteIfExists(makeTransaction = false, customRealm = realm)
                 createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
-                store()
+                realm.insertOrUpdate(this)
+                SentryLog.i(TAG, "localMediaFound> $fileName saved in realm")
             }
 
-            UploadFile.setAppSyncSettings(syncSettings.apply {
-                if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
-            })
+            UploadFile.setAppSyncSettings(
+                customRealm = realm,
+                makeTransaction = false,
+                syncSettings = syncSettings.apply {
+                    if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
+                },
+            )
+        } else {
+            SentryLog.w(TAG, "localMediaFound> Cannot upload $fileName size=$fileSize")
         }
     }
 

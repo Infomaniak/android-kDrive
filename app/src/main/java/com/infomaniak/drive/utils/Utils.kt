@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -254,7 +254,7 @@ object Utils {
         }
     }
 
-    fun moveCacheFileToOffline(file: File, cacheFile: java.io.File, offlineFile: java.io.File) {
+    fun moveCacheFileToOffline(file: File, cacheFile: IOFile, offlineFile: IOFile) {
         if (offlineFile.exists()) offlineFile.delete()
         cacheFile.copyTo(offlineFile)
         cacheFile.delete()
@@ -288,8 +288,8 @@ object Utils {
 
     fun getInvalidFileNameCharacter(fileName: String): String? = DownloadManagerUtils.regexInvalidSystemChar.find(fileName)?.value
 
-    fun copyDataToUploadCache(context: Context, file: java.io.File, fileModifiedAt: Date): Uri {
-        val outputFile = java.io.File(context.uploadFolder, file.toUri().hashCode().toString()).apply {
+    fun copyDataToUploadCache(context: Context, file: IOFile, fileModifiedAt: Date): Uri {
+        val outputFile = IOFile(context.uploadFolder, file.toUri().hashCode().toString()).apply {
             if (exists()) delete()
             setLastModified(fileModifiedAt.time)
         }

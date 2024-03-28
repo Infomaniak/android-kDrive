@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,41 @@ object ApiRoutes {
             "files.dropbox,files.dropbox.capabilities,files.is_favorite,files.sharelink,files.sorted_name,files.supported_by"
     const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
 
+    private const val ACTIONS = "&actions[]=file_create" +
+            "&actions[]=file_rename" +
+            "&actions[]=file_move" +
+            "&actions[]=file_move_out" +
+            "&actions[]=file_trash" +
+            "&actions[]=file_restore" +
+            "&actions[]=file_delete" +
+            "&actions[]=file_update" +
+            "&actions[]=file_favorite_create" +
+            "&actions[]=file_favorite_remove" +
+            "&actions[]=file_share_create" +
+            "&actions[]=file_share_update" +
+            "&actions[]=file_share_delete" +
+            "&actions[]=file_categorize" +
+            "&actions[]=file_uncategorize" +
+            "&actions[]=file_color_update" +
+            "&actions[]=file_color_delete" +
+            "&actions[]=share_link_create" +
+            "&actions[]=share_link_update" +
+            "&actions[]=share_link_delete" +
+            "&actions[]=collaborative_folder_create" +
+            "&actions[]=collaborative_folder_update" +
+            "&actions[]=collaborative_folder_delete"
+
+    private const val ADDITIONAL_ACTIONS = "&actions[]=file_access" +
+            "&actions[]=comment_create" +
+            "&actions[]=comment_update" +
+            "&actions[]=comment_delete" +
+            "&actions[]=comment_like" +
+            "&actions[]=comment_unlike" +
+            "&actions[]=comment_resolve" +
+            "&actions[]=share_link_show"
+
+    private const val noAvatar = "no_avatar_default=1"
+
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
     private fun driveURLV2(driveId: Int) = "${DRIVE_API_V2}${driveId}"
@@ -52,7 +87,7 @@ object ApiRoutes {
 
     /** V1 */
     //region V1
-    fun getAllDrivesData() = "${DRIVE_API_V1}init?with=drives,users,teams,ips,categories"
+    fun getAllDrivesData() = "${DRIVE_API_V1}init?${noAvatar}&with=drives,users,teams,ips,categories"
     //endregion
 
     /** Archive */
@@ -68,7 +103,7 @@ object ApiRoutes {
 
     fun fileInvitationAccess(file: File, invitationId: Int) = "${driveURLV2(file.driveId)}/files/invitations/$invitationId"
 
-    fun getFileShare(file: File) = "${accessUrl(file)}?with=user"
+    fun getFileShare(file: File) = "${accessUrl(file)}?${noAvatar}&with=user"
 
     fun checkFileShare(file: File) = "${accessUrl(file)}/check"
 
@@ -93,14 +128,26 @@ object ApiRoutes {
             "&actions[]=comment_create"
 
     fun getLastActivities(driveId: Int) =
-        "${filesURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions"
+        "${filesURL(driveId)}/activities?${activitiesWithQuery},user&depth=unlimited&${activitiesActions}&${noAvatar}"
 
-    fun getFileActivities(file: File) = "${fileURL(file)}/activities"
+    fun getFileActivities(file: File, forFileList: Boolean, pagination: String): String {
 
-    fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) =
-        "${filesURLV2(driveId)}/activities/batch?$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
-                "&actions[]=file_rename" +
-                "&actions[]=file_update"
+        val baseUrl = "${fileURL(file)}/activities"
+        val baseParameters = "?${noAvatar}&${pagination}"
+        val sourceDependentParameters = if (forFileList) {
+            "&depth=children&from_date=${file.responseAt}&${activitiesWithExtraQuery}"
+        } else {
+            "&with=user"
+        }
+        val actionsParameters = ACTIONS + if (forFileList) "" else ADDITIONAL_ACTIONS
+
+        return baseUrl + baseParameters + sourceDependentParameters + actionsParameters
+    }
+
+    fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) = "${filesURLV2(driveId)}/activities/batch" +
+            "?${noAvatar}&${activitiesWithQuery}&file_ids=${fileIds}&from_date=${fromDate}" +
+            "&actions[]=file_rename" +
+            "&actions[]=file_update"
 
     fun getTrashedFilesActivities(file: File) = "${trashURL(file)}/activities"
     //endregion
@@ -119,7 +166,7 @@ object ApiRoutes {
 
     /** Comment */
     //region Comment
-    private const val withComments = "with=user,likes,responses,responses.user,responses.likes"
+    private const val withComments = "${noAvatar}&with=user,likes,responses,responses.user,responses.likes"
 
     fun fileComments(file: File) = "${fileURLV2(file)}/comments?$withComments"
 

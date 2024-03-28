@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,7 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
@@ -90,6 +91,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
+import com.infomaniak.lib.stores.reviewmanagers.InAppReviewManager
 import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -148,6 +150,15 @@ class MainActivity : BaseActivity() {
     private val inAppUpdateManager by lazy { InAppUpdateManager(this, BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) }
     private var inAppUpdateSnackbar: Snackbar? = null
 
+    private val inAppReviewManager by lazy {
+        InAppReviewManager(
+            activity = this,
+            reviewDialogTheme = R.style.DialogStyle,
+            reviewDialogTitleResId = R.string.reviewAlertTitle,
+            feedbackUrlResId = R.string.urlUserReportAndroid,
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -171,6 +182,7 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
         initAppUpdateManager()
+        initAppReviewManager()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -270,6 +282,16 @@ class MainActivity : BaseActivity() {
     }
 
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true
+    //endregion
+
+    //region In-App Review
+    private fun initAppReviewManager() {
+        inAppReviewManager.init(
+            onDialogShown = { trackInAppReview("presentAlert") },
+            onUserWantToReview = { trackInAppReview("like") },
+            onUserWantToGiveFeedback = { trackInAppReview("dislike") },
+        )
+    }
     //endregion
 
     override fun onResume() {

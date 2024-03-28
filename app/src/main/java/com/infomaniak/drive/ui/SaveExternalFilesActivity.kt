@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,8 +73,8 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private lateinit var saveExternalUriAdapter: SaveExternalUriAdapter
 
-    private val sharedFolder: java.io.File by lazy {
-        java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
+    private val sharedFolder: IOFile by lazy {
+        IOFile(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
     }
 
     private val uiSettings by lazy { UiSettings(context = this) }
@@ -460,7 +460,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
-    private fun getOutputFile(fileName: String) = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
+    private fun getOutputFile(fileName: String) = IOFile(sharedFolder, fileName).also { if (it.exists()) it.delete() }
 
     private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->

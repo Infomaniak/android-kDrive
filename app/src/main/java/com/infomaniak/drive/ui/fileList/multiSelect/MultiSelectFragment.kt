@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,13 +45,10 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.BulkOperationsUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.whenResultIsOk
@@ -467,7 +464,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         }
     }
 
-    private fun addSelectedFileToOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+    private fun addSelectedFileToOffline(file: File, offlineFile: IOFile?, cacheFile: IOFile) {
         val invalidFileNameChar = Utils.getInvalidFileNameCharacter(file.name)
         if (invalidFileNameChar == null) {
             if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
@@ -495,7 +492,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         }
     }
 
-    private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
+    private fun removeSelectedFileFromOffline(file: File, offlineFile: IOFile?, cacheFile: IOFile) {
         lifecycleScope.launch {
             if (offlineFile != null) {
                 mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)

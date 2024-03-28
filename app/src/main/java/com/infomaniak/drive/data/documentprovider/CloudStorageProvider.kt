@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -69,7 +70,7 @@ import java.util.*
 
 class CloudStorageProvider : DocumentsProvider() {
 
-    private lateinit var cacheDir: java.io.File
+    private lateinit var cacheDir: IOFile
 
     override fun onCreate(): Boolean {
         SentryLog.d(TAG, "onCreate")
@@ -77,7 +78,7 @@ class CloudStorageProvider : DocumentsProvider() {
         var result = false
         runBlocking {
             context?.let {
-                cacheDir = java.io.File(it.filesDir, "cloud_storage_temp_files")
+                cacheDir = IOFile(it.filesDir, "cloud_storage_temp_files")
                 it.initRealm()
                 result = true
             }
@@ -322,9 +323,9 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun generateThumbnail(fileId: Int, file: File, userId: String): ParcelFileDescriptor? {
 
-        val outputFolder = java.io.File(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
+        val outputFolder = IOFile(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
         val name = "${fileId}_${file.name}"
-        val outputFile = java.io.File(outputFolder, name)
+        val outputFile = IOFile(outputFolder, name)
         var parcel: ParcelFileDescriptor? = null
 
         try {
@@ -523,9 +524,9 @@ class CloudStorageProvider : DocumentsProvider() {
         throw RuntimeException("Copy file failed")
     }
 
-    private fun createTempFile(parentFileId: Int, displayName: String): java.io.File {
-        val tempFileFolder = java.io.File(cacheDir, "$parentFileId").apply { if (!exists()) mkdirs() }
-        return java.io.File(tempFileFolder, displayName).apply { if (!exists()) createNewFile() }
+    private fun createTempFile(parentFileId: Int, displayName: String): IOFile {
+        val tempFileFolder = IOFile(cacheDir, "$parentFileId").apply { if (!exists()) mkdirs() }
+        return IOFile(tempFileFolder, displayName).apply { if (!exists()) createNewFile() }
     }
 
     private fun writeDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2023 Infomaniak Network SA
+  ~ Copyright (C) 2022-2024 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -542,8 +542,9 @@
     <string name="recentActivityMeTitle">Da parte mia</string>
     <string name="recentActivityMyTeam">Da parte del mio team</string>
     <string name="recentActivitySeeMore">Mostra più file recenti</string>
-    <string name="refreshTokenError">Sei stato disconnesso a causa di un problema. Riconnettiti</string>
+    <string name="refreshTokenError">Siete stati disconnessi</string>
     <string name="restrictedSharedLinkTitle">Link di condivisione limitato</string>
+    <string name="reviewAlertTitle">Ti piace kDrive?</string>
     <string name="saveExternalFileInputFileName">Nome del documento</string>
     <string name="saveExternalFileTitle">Salva su kDrive</string>
     <string name="searchFilterTitle">Tipi di file</string>
@@ -709,6 +710,7 @@
     <string name="uploadNetworkErrorWifiRequired">In attesa di connessione alla rete Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Insufficiente RAM disponibile</string>
     <string name="uploadPermissionError">Permessi aggiuntivi richiesti</string>
+    <string name="urlUserReportAndroid">https://feedback.userreport.com/761c3930-850f-4d5b-805a-703ff4b832aa/</string>
     <string name="userInviteByEmail">Invita tramite e-mail</string>
     <string name="userPermissionManage">Può gestire</string>
     <string name="userPermissionManageDescription">Modifica dei file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione dei file\nCondivisione con altri utenti</string>

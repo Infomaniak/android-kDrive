@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2023 Infomaniak Network SA
+ * Copyright (C) 2023-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,11 +33,11 @@ import com.infomaniak.lib.core.utils.FilePicker
 class UploadFilesHelper private constructor(
     private val context: Context,
     private val navController: NavController,
-    private val filePicker: FilePicker,
     private val onOpeningPicker: (() -> Unit)?,
     private val onResult: (() -> Unit)?,
 ) {
 
+    private lateinit var filePicker: FilePicker
     private lateinit var uploadFilesPermissions: DrivePermissions
     private lateinit var parentFolder: File
 
@@ -45,7 +45,10 @@ class UploadFilesHelper private constructor(
         fragment: Fragment,
         onOpeningPicker: () -> Unit,
         onResult: (() -> Unit)? = null,
-    ) : this(fragment.requireContext(), fragment.findNavController(), FilePicker(fragment), onOpeningPicker, onResult) {
+    ) : this(fragment.requireContext(), fragment.findNavController(), onOpeningPicker, onResult) {
+
+        filePicker = FilePicker(fragment).apply { initCallback(::initFilePicker) }
+
         uploadFilesPermissions = DrivePermissions().apply {
             registerPermissions(fragment) { authorized -> if (authorized) uploadFiles() }
         }
@@ -54,7 +57,10 @@ class UploadFilesHelper private constructor(
     constructor(
         activity: FragmentActivity,
         navController: NavController,
-    ) : this(activity, navController, FilePicker(activity), onOpeningPicker = null, onResult = null) {
+    ) : this(activity, navController, onOpeningPicker = null, onResult = null) {
+
+        filePicker = FilePicker(activity).apply { initCallback(::initFilePicker) }
+
         uploadFilesPermissions = DrivePermissions().apply {
             registerPermissions(activity) { authorized -> if (authorized) uploadFiles() }
         }
@@ -68,11 +74,13 @@ class UploadFilesHelper private constructor(
         ShortcutManagerCompat.reportShortcutUsed(context, Shortcuts.UPLOAD.name)
         if (uploadFilesPermissions.checkSyncPermissions()) {
             onOpeningPicker?.invoke()
-            filePicker.open { uris ->
-                onResult?.invoke()
-                onSelectFilesResult(uris)
-            }
+            filePicker.open()
         }
+    }
+
+    private fun initFilePicker(uris: List<Uri>) {
+        onResult?.invoke()
+        onSelectFilesResult(uris)
     }
 
     private fun onSelectFilesResult(uris: List<Uri>) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022 Infomaniak Network SA
+  ~ Copyright (C) 2022-2024 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -39,299 +39,76 @@
         android:layout_height="1dp"
         android:background="@color/divider" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/documentScanning"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_scan"
+        app:text="@string/buttonDocumentScanning" />
 
-        <ImageView
-            android:id="@+id/documentScanningIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_scan"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/documentScanningText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonDocumentScanning"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/documentScanningIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/openCamera"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_camera"
+        app:text="@string/buttonTakePhotoOrVideo" />
 
-        <ImageView
-            android:id="@+id/openCameraIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_camera"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/openCameraText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonTakePhotoOrVideo"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/openCameraIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/documentUpload"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_upload"
+        app:text="@string/buttonUpload" />
 
-        <ImageView
-            android:id="@+id/documentUploadIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_upload"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/documentUploadText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/buttonUpload"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/documentUploadIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/folderCreate"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
-
-        <ImageView
-            android:id="@+id/folderCreateIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_folder_filled"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/iconColor"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/folderCreateText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/allFolder"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/folderCreateIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_folder_filled"
+        app:iconTint="@color/iconColor"
+        app:text="@string/allFolder" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/docsCreate"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_file_text"
+        app:text="@string/allOfficeDocs" />
 
-        <ImageView
-            android:id="@+id/docsCreateIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_file_text"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/docsCreateText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/allOfficeDocs"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/docsCreateIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/gridsCreate"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_file_grids"
+        app:text="@string/allOfficeGrids" />
 
-        <ImageView
-            android:id="@+id/gridsCreateIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_file_grids"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/gridsCreateText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/allOfficeGrids"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/gridsCreateIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/pointsCreate"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
-
-        <ImageView
-            android:id="@+id/pointsCreateIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_file_presentation"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/pointsCreateText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/allOfficePoints"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/pointsCreateIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_file_presentation"
+        app:text="@string/allOfficePoints" />
 
     <!-- TODO We are waiting for the production -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/formCreate"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground"
-        android:visibility="gone">
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:icon="@drawable/ic_file_form"
+        app:text="@string/allOfficeForm" />
 
-        <ImageView
-            android:id="@+id/formCreateIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_file_form"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/formCreateText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/allOfficeForm"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/formCreateIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/noteCreate"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/buttonHeight"
-        android:background="?selectableItemBackground">
-
-        <ImageView
-            android:id="@+id/noteCreateIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:src="@drawable/ic_file_text"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/secondaryText"
-            tools:ignore="ContentDescription" />
-
-        <TextView
-            android:id="@+id/noteCreateText"
-            style="@style/Subtitle2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:text="@string/allOfficeNote"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/noteCreateIcon"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_file_text"
+        app:iconTint="@color/secondaryText"
+        app:text="@string/allOfficeNote" />
 
 </LinearLayout>
