@@ -33,7 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.Shareable.*
+import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.databinding.FragmentBottomSheetFileShareBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
@@ -164,7 +164,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                             background = getBackgroundColorBasedOnId(item.id)
                         )
                         val request = ImageRequest.Builder(this)
-                            .data(item.getUserAvatar())
+                            .data(item.avatar)
                             .transformations(CircleCropTransformation())
                             .fallback(fallback)
                             .error(fallback)

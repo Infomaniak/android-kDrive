@@ -73,7 +73,7 @@ class NewFolderFragment : Fragment() {
             DriveInfosController.getDrive(it.userId, it.driveId)
         } ?: AccountUtils.getCurrentDrive()
 
-        if (drive?.canCreateTeamFolder == true) {
+        if (drive?.capabilities?.useTeamSpace == true) {
             commonFolderDescription.text = getString(R.string.commonFolderDescription, drive.name)
             commonFolder.setOnClickListener {
                 safeNavigate(R.id.createCommonFolderFragment)
@@ -86,7 +86,7 @@ class NewFolderFragment : Fragment() {
     private fun initDropBoxFolder() {
         binding.dropBox.setOnClickListener {
             safeNavigate(
-                if (AccountUtils.getCurrentDrive()?.packFunctionality?.dropbox == true) R.id.createDropBoxFolderFragment
+                if (AccountUtils.getCurrentDrive()?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
                 else R.id.dropBoxBottomSheetDialog
             )
         }
