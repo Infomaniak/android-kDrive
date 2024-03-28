@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,27 @@ import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 
 @RealmClass(embedded = true)
-open class DrivePreferences(
-    @SerializedName("color")
-    private var _color: String = "#0098FF",
-    var hide: Boolean = false,
+open class DriveAccount(
+    var id: Int = 0,
+    var name: String = "",
+    @SerializedName("legal_entity_type")
+    private var _legalEntityType: String = LegalEntityType.UNKNOWN.value
 ) : RealmObject() {
 
-    val color get() = _color.ifEmpty { "#0098FF" } // TODO: To remove after migration to kotlinx serialization
+    val legalEntityType: LegalEntityType
+        get() = when (_legalEntityType) {
+            LegalEntityType.INDIVIDUAL.value -> LegalEntityType.INDIVIDUAL
+            LegalEntityType.PUBLIC_BODY.value -> LegalEntityType.PUBLIC_BODY
+            LegalEntityType.COMPANY.value -> LegalEntityType.COMPANY
+            LegalEntityType.RESTRICT.value -> LegalEntityType.RESTRICT
+            else -> LegalEntityType.UNKNOWN
+        }
+
+    enum class LegalEntityType(val value: String) {
+        INDIVIDUAL("individual"),
+        PUBLIC_BODY("publicBody"),
+        COMPANY("company"),
+        RESTRICT("restrict"),
+        UNKNOWN("unknown")
+    }
 }

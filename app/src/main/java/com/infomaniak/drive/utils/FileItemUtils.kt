@@ -168,7 +168,7 @@ fun getTintedDrawable(context: Context, icon: Int, tint: String): Drawable {
 }
 
 private fun ItemCategoriesLayoutBinding.displayCategories(file: File) = with(root) {
-    val canReadCategoryOnFile = DriveInfosController.getCategoryRights(file.driveId).canReadCategoryOnFile
+    val canReadCategoryOnFile = DriveInfosController.getCategoryRights(file.driveId).canReadOnFile
     val categories = file.getCategories()
 
     if (!canReadCategoryOnFile || categories.isEmpty()) {

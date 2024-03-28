@@ -81,9 +81,9 @@ class SelectCategoriesFragment : Fragment() {
         ).observe(viewLifecycleOwner) { isSuccess ->
             if (isSuccess) {
                 with(selectCategoriesViewModel.categoryRights) {
-                    setCategoriesAdapter(canEditCategory, canDeleteCategory)
-                    setAddCategoryButton(canCreateCategory)
-                    configureSearchView(canCreateCategory)
+                    setCategoriesAdapter(canEdit, canDelete)
+                    setAddCategoryButton(canCreate)
+                    configureSearchView(canCreate)
                 }
 
                 configureToolbar()

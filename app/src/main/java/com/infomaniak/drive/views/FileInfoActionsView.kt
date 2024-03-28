@@ -98,7 +98,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun updateCurrentFile(file: File) = with(binding) {
         currentFile = file
         refreshBottomSheetUi(currentFile)
-        manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutCategoryOnFile
+        manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
                 && !file.isDisabled()
 
         if (currentFile.isFromActivities) {

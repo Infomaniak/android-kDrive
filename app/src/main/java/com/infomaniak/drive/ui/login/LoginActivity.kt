@@ -221,7 +221,7 @@ class LoginActivity : AppCompatActivity() {
                             allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {
                                 return allDrivesDataResponse
                             }
-                            allDrivesDataResponse.data?.drives?.main?.isEmpty() == true -> {
+                            allDrivesDataResponse.data?.drives?.any { it.isDriveUser() } == false -> {
                                 return ApiResponse<DriveInfo>(
                                     result = ApiResponseStatus.ERROR,
                                     error = ApiError(code = ErrorCode.NO_DRIVE)
