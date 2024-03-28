@@ -114,7 +114,7 @@ object ApiRepository : ApiRepositoryCore() {
         forFileList: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
     ): CursorApiResponse<ArrayList<FileActivity>> {
-		val url = ApiRoutes.getFileActivities(file, forFileList, loadCursor(cursor))
+        val url = ApiRoutes.getFileActivities(file, forFileList, loadCursor(cursor))
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
