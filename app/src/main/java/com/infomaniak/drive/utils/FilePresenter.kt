@@ -50,7 +50,12 @@ import java.io.InputStreamReader
  */
 object FilePresenter {
 
-    fun Fragment.openFolder(file: File, shouldHideBottomNavigation: Boolean, shouldShowSmallFab: Boolean, fileListViewModel: FileListViewModel) {
+    fun Fragment.openFolder(
+        file: File,
+        shouldHideBottomNavigation: Boolean,
+        shouldShowSmallFab: Boolean,
+        fileListViewModel: FileListViewModel,
+    ) {
         if (file.isDisabled()) {
             safeNavigate(
                 R.id.accessDeniedBottomSheetFragment,
