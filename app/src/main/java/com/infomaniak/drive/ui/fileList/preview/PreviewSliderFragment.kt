@@ -29,7 +29,6 @@ import androidx.core.view.*
 import androidx.core.view.ViewCompat.getWindowInsetsController
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -41,6 +40,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
@@ -51,7 +51,8 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
-import com.infomaniak.drive.views.FileInfoActionsView
+import com.infomaniak.drive.views.FileInfoActionsViewController
+import com.infomaniak.drive.views.OnItemClickListener
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
 import io.sentry.Sentry
@@ -61,7 +62,7 @@ import kotlinx.coroutines.withContext
 import kotlin.collections.set
 import kotlin.math.max
 
-class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
+class PreviewSliderFragment : Fragment(), OnItemClickListener {
 
     private var _binding: FragmentPreviewSliderBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -77,6 +78,56 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override val ownerFragment = this
     override lateinit var currentFile: File
+
+    //TODO TO DELETE !!
+    override fun addFavoritesClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun cancelExternalImportClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun colorFolderClicked(color: String?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun downloadFileClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun dropBoxClicked(isDropBox: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun displayInfoClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun fileRightsClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun goToFolder() {
+        TODO("Not yet implemented")
+    }
+
+    override fun manageCategoriesClicked(fileId: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDeleteFile() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onCacheAddedToOffline() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDuplicateFile() {
+        TODO("Not yet implemented")
+    }
+    //TODO END TO DELETE
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -121,6 +172,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 ownerFragment = this@PreviewSliderFragment,
                 mainViewModel = mainViewModel,
                 onItemClickListener = this@PreviewSliderFragment,
+                fileInfoActionsViewController = getFileInfoActionsViewController(),
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = userDrive.sharedWithMe,
             )
@@ -315,7 +367,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         return peekHeight
     }
 
-    override fun displayInfoClicked() {
+    private fun displayFileDetailsFragment() {
         currentFile.apply {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileDetailsFragment(
@@ -326,12 +378,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun fileRightsClicked() {
+    private fun onFileRightsClicked() {
         safeNavigate(PreviewSliderFragmentDirections.actionPreviewSliderFragmentToFileShareDetailsFragment(currentFile.id))
-    }
-
-    override fun goToFolder() {
-        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
     override fun sharePublicLink(onActionFinished: () -> Unit) {
@@ -350,27 +398,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         )
     }
 
-    override fun addFavoritesClicked() {
-        super.addFavoritesClicked()
-        currentFile.apply {
-            val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    isFavorite = !isFavorite
-                    showFavoritesResultSnackbar()
-                    binding.bottomSheetFileInfos.refreshBottomSheetUi(this)
-                } else {
-                    showSnackbar(R.string.errorDelete)
-                }
-                toggleBottomSheet(shouldShow = true)
-            }
-            if (isFavorite) {
-                mainViewModel.deleteFileFromFavorites(this).observe(viewLifecycleOwner, observer)
-            } else {
-                mainViewModel.addFileToFavorites(this).observe(viewLifecycleOwner, observer)
-            }
-        }
-    }
-
     private fun toggleBottomSheet(shouldShow: Boolean) {
         binding.bottomSheetFileInfos.scrollToTop()
         bottomSheetBehavior.state = if (shouldShow) {
@@ -386,11 +413,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             val systemBars = WindowInsetsCompat.Type.systemBars()
             if (shouldShow) show(systemBars) else hide(systemBars)
         }
-    }
-
-    private fun File.showFavoritesResultSnackbar() {
-        val id = if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris
-        showSnackbar(getString(id, name))
     }
 
     override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) {
@@ -417,14 +439,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun downloadFileClicked() {
-        super.downloadFileClicked()
-        binding.bottomSheetFileInfos.downloadFile(drivePermissions) {
-            toggleBottomSheet(shouldShow = true)
-        }
-    }
-
-    override fun manageCategoriesClicked(fileId: Int) {
+    private fun onManageCategoriesClicked(fileId: Int) {
         safeNavigate(
             PreviewSliderFragmentDirections.actionPreviewSliderFragmentToSelectCategoriesFragment(
                 filesIds = intArrayOf(fileId),
@@ -434,20 +449,17 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         )
     }
 
-    override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        mainViewModel.duplicateFile(currentFile, result).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { file ->
-                    mainViewModel.currentPreviewFileList[file.id] = file
-                    previewSliderAdapter.addFile(file)
-                    showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
-                    toggleBottomSheet(shouldShow = true)
-                }
-            } else {
-                showSnackbar(R.string.errorDuplicate)
+    private fun onDuplicateFile(file: File, apiResponse: ApiResponse<File>, succeed: Boolean) {
+        if (succeed) {
+            apiResponse.data?.let {
+                mainViewModel.currentPreviewFileList[file.id] = file
+                previewSliderAdapter.addFile(file)
+                showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
                 toggleBottomSheet(shouldShow = true)
             }
-            onApiResponse()
+        } else {
+            showSnackbar(R.string.errorDuplicate)
+            toggleBottomSheet(shouldShow = true)
         }
     }
 
@@ -464,16 +476,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             })
     }
 
-    override fun onDeleteFile(onApiResponse: () -> Unit) {
-        mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
-            onApiResponse()
-            if (apiResponse.isSuccess()) {
-                removeFileInSlider()
-                showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, currentFile.name))
-                mainViewModel.deleteFileFromHome.value = true
-            } else {
-                showSnackbar(R.string.errorDelete)
-            }
+    private fun onFileDeleted(file: File, apiResponse: ApiResponse<CancellableAction>, success: Boolean) {
+        if (apiResponse.isSuccess()) {
+            removeFileInSlider()
+            showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, currentFile.name))
+            mainViewModel.deleteFileFromHome.value = true
+        } else {
+            showSnackbar(R.string.errorDelete)
         }
     }
 
@@ -514,6 +523,28 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         } else {
             toggleBottomSheet(shouldShow = true)
         }
+    }
+
+    private fun getFileInfoActionsViewController(): FileInfoActionsViewController {
+        return FileInfoActionsViewController(
+            this,
+            currentFile,
+            mainViewModel,
+            FileInfoActionsViewController.Callbacks(
+                getViewLifecycleOwner = { viewLifecycleOwner },
+                onFavoriteApiCallResult = { isSuccess, file ->
+                    if (isSuccess) binding.bottomSheetFileInfos.refreshBottomSheetUi(file)
+                    toggleBottomSheet(shouldShow = true)
+                },
+                getDrivePermissions = { drivePermissions },
+                onDisplayInfoClicked = ::displayFileDetailsFragment,
+                onFileDownloaded = { toggleBottomSheet(shouldShow = true) },
+                onFileRightsClicked = ::onFileRightsClicked,
+                onManageCategoriesClicked = ::onManageCategoriesClicked,
+                onFileDeleted = ::onFileDeleted,
+                onFileDuplicated = ::onDuplicateFile
+            )
+        )
     }
 
     companion object {

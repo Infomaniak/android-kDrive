@@ -36,12 +36,12 @@ import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.databinding.FragmentBottomSheetMultiSelectActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialog.Companion.openManageCategoriesBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.drive.views.FileInfoActionsViewController.Companion.openColorFolderBottomSheetDialog
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers

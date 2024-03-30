@@ -25,7 +25,6 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -38,24 +37,25 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
+import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_TITLE_KEY
-import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVORITE_FILE
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
-import com.infomaniak.drive.views.FileInfoActionsView
+import com.infomaniak.drive.views.FileInfoActionsViewController
+import com.infomaniak.drive.views.OnItemClickListener
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
+class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), OnItemClickListener {
 
     private var binding: FragmentBottomSheetFileInfoActionsBinding by safeBinding()
 
@@ -64,6 +64,59 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
     override lateinit var currentFile: File
+
+    //TODO TO DELETE !!
+
+    override fun addFavoritesClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun cancelExternalImportClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun colorFolderClicked(color: String?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun downloadFileClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun dropBoxClicked(isDropBox: Boolean) {
+        TODO("Not yet implemented")
+    }
+
+    override fun displayInfoClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun fileRightsClicked() {
+        TODO("Not yet implemented")
+    }
+
+    override fun goToFolder() {
+        TODO("Not yet implemented")
+    }
+
+    override fun manageCategoriesClicked(fileId: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onCacheAddedToOffline() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDeleteFile() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onDuplicateFile() {
+        TODO("Not yet implemented")
+    }
+
+    //TODO END TO DELETE !!
+
     override val ownerFragment = this
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
@@ -83,14 +136,17 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
 
         drivePermissions = DrivePermissions().apply {
-            registerPermissions(this@FileInfoActionsBottomSheetDialog) { authorized -> if (authorized) downloadFileClicked() }
+            registerPermissions(this@FileInfoActionsBottomSheetDialog) { authorized ->
+                if (authorized) currentFile.downloadFile(requireContext(), this)
+            }
         }
 
         binding.fileInfoActionsView.apply {
             init(
                 ownerFragment = this@FileInfoActionsBottomSheetDialog,
                 mainViewModel = mainViewModel,
-                onItemClickListener = this@FileInfoActionsBottomSheetDialog,
+                onItemClickListener = getFileInfoActionsViewController(),
+                fileInfoActionsViewController = getFileInfoActionsViewController(),
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = navigationArgs.userDrive.sharedWithMe,
             )
@@ -146,7 +202,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         super.editDocumentClicked()
     }
 
-    override fun displayInfoClicked() {
+    private fun displayFileDetailsFragment() {
         currentFile.apply {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToFileDetailsFragment(
@@ -157,37 +213,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun fileRightsClicked() {
+    private fun onFileRightsClicked() {
         safeNavigate(
             FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToFileShareDetailsFragment(
                 fileId = currentFile.id
             )
         )
-    }
-
-    override fun goToFolder() {
-        FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
-    }
-
-    override fun dropBoxClicked(isDropBox: Boolean) {
-        super.dropBoxClicked(isDropBox)
-        if (isDropBox) {
-            safeNavigate(
-                FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToManageDropboxFragment(
-                    fileId = currentFile.id,
-                    fileName = currentFile.name
-                )
-            )
-        } else {
-            if (AccountUtils.getCurrentDrive()?.packFunctionality?.dropbox == true) {
-                safeNavigate(
-                    FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToConvertToDropBoxFragment(
-                        fileId = currentFile.id,
-                        fileName = currentFile.name
-                    )
-                )
-            } else safeNavigate(R.id.dropBoxBottomSheetDialog)
-        }
     }
 
     override fun sharePublicLink(onActionFinished: () -> Unit) {
@@ -205,42 +236,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         )
     }
 
-    override fun downloadFileClicked() {
-        super.downloadFileClicked()
-        binding.fileInfoActionsView.downloadFile(drivePermissions) {
-            findNavController().popBackStack()
-        }
-    }
-
-    override fun manageCategoriesClicked(fileId: Int) {
+    private fun onManageCategoriesClicked(fileId: Int) {
         openManageCategoriesBottomSheetDialog(intArrayOf(fileId), navigationArgs.userDrive)
-    }
-
-    override fun colorFolderClicked(color: String?) {
-        super.colorFolderClicked(color)
-        openColorFolderBottomSheetDialog(color)
-    }
-
-    override fun addFavoritesClicked() {
-        super.addFavoritesClicked()
-        currentFile.apply {
-            val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    isFavorite = !isFavorite
-                    showFavoritesResultSnackbar()
-                    setBackNavigationResult(REFRESH_FAVORITE_FILE, currentFile.id)
-                } else {
-                    showSnackbar(R.string.errorAddFavorite, showAboveFab = true)
-                    findNavController().popBackStack()
-                }
-            }
-
-            if (isFavorite) {
-                mainViewModel.deleteFileFromFavorites(this, navigationArgs.userDrive).observe(viewLifecycleOwner, observer)
-            } else {
-                mainViewModel.addFileToFavorites(this, navigationArgs.userDrive).observe(viewLifecycleOwner, observer)
-            }
-        }
     }
 
     override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) {
@@ -259,25 +256,14 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun onCacheAddedToOffline() {
-        mainViewModel.updateOfflineFile.value = currentFile.id
-    }
-
-    override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        if (isResumed) {
-            mainViewModel.duplicateFile(currentFile, result).observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    apiResponse.data?.let {
-                        mainViewModel.refreshActivities.value = true
-                        transmitActionAndPopBack(getString(R.string.allFileDuplicate, currentFile.name))
-                    }
-                } else {
-                    transmitActionAndPopBack(getString(R.string.errorDuplicate))
-                }
-                onApiResponse()
+    private fun onDuplicateFile(apiResponse: ApiResponse<File>, succeed: Boolean) {
+        if (succeed) {
+            apiResponse.data?.let {
+                mainViewModel.refreshActivities.value = true
+                transmitActionAndPopBack(getString(R.string.allFileDuplicate, currentFile.name))
             }
         } else {
-            onApiResponse()
+            transmitActionAndPopBack(getString(R.string.errorDuplicate))
         }
     }
 
@@ -300,20 +286,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun onDeleteFile(onApiResponse: () -> Unit) {
-        if (isResumed) {
-            mainViewModel.deleteFile(currentFile, navigationArgs.userDrive).observe(viewLifecycleOwner) { apiResponse ->
-                onApiResponse()
-                if (apiResponse.isSuccess()) {
-                    mainViewModel.refreshActivities.value = true
-                    val title = getString(R.string.snackbarMoveTrashConfirmation, currentFile.name)
-                    transmitActionAndPopBack(title, apiResponse.data?.setDriveAndReturn(currentFile.driveId))
-                } else {
-                    transmitActionAndPopBack(getString(R.string.errorDelete))
-                }
-            }
+    private fun onDeleteFileResponse(file: File, apiResponse: ApiResponse<CancellableAction>, success: Boolean) {
+        if (success) {
+            mainViewModel.refreshActivities.value = true
+            val title = getString(R.string.snackbarMoveTrashConfirmation, file.name)
+            transmitActionAndPopBack(title, apiResponse.data?.setDriveAndReturn(currentFile.driveId))
         } else {
-            onApiResponse()
+            transmitActionAndPopBack(getString(R.string.errorDelete))
         }
     }
 
@@ -364,27 +343,35 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             }
     }
 
-    override fun cancelExternalImportClicked() {
-        super.cancelExternalImportClicked()
-
-        mainViewModel.cancelExternalImport(currentFile.externalImport!!.id).observe(viewLifecycleOwner) { apiResponse ->
-            if (!apiResponse.isSuccess()) {
-                showSnackbar(requireContext().getString(apiResponse.translatedError), showAboveFab = true)
-            }
-            findNavController().popBackStack()
-        }
-    }
-
-    private fun File.showFavoritesResultSnackbar() {
-        showSnackbar(
-            title = getString(if (isFavorite) R.string.allFileAddFavoris else R.string.allFileDeleteFavoris, name),
-            showAboveFab = true,
-        )
-    }
-
     private fun transmitActionAndPopBack(message: String, action: CancellableAction? = null) {
         val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action)
         setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
+    }
+
+    private fun getFileInfoActionsViewController(): FileInfoActionsViewController {
+        return FileInfoActionsViewController(
+            ownerFragment,
+            currentFile,
+            mainViewModel,
+            FileInfoActionsViewController.Callbacks(
+                getViewLifecycleOwner = { viewLifecycleOwner },
+                getUserDrive = { navigationArgs.userDrive },
+                getDrivePermissions = { drivePermissions },
+                onFavoriteApiCallResult = { isSuccess, _ ->
+                    if (isSuccess) {
+                        setBackNavigationResult(FileListFragment.REFRESH_FAVORITE_FILE, currentFile.id)
+                    } else {
+                        findNavController().popBackStack()
+                    }
+                },
+                onDisplayInfoClicked = ::displayFileDetailsFragment,
+                onFileDownloaded = { findNavController().popBackStack() },
+                onFileRightsClicked = ::onFileRightsClicked,
+                onManageCategoriesClicked = ::onManageCategoriesClicked,
+                onFileDeleted = ::onDeleteFileResponse,
+                onFileDuplicated = { _, apiResponse, success -> onDuplicateFile(apiResponse, success) }
+            )
+        )
     }
 
     companion object {
@@ -393,17 +380,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             val args = SelectCategoriesFragmentArgs(CategoriesUsageMode.MANAGED_CATEGORIES, filesIds, userDrive = userDrive)
 
             safeNavigate(R.id.selectCategoriesFragment, args.toBundle())
-        }
-
-        fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
-            if (AccountUtils.getCurrentDrive()?.isFreePack == true) {
-                safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
-            } else {
-                safeNavigate(
-                    R.id.colorFolderBottomSheetDialog,
-                    ColorFolderBottomSheetDialogArgs(color = color).toBundle()
-                )
-            }
         }
     }
 }

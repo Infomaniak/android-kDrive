@@ -55,6 +55,7 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
@@ -414,5 +415,13 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
         "$decimalSize"
     } else {
         Formatter.formatShortFileSize(this, decimalSize)
+    }
+}
+
+fun File.downloadFile(context: Context, drivePermissions: DrivePermissions, onSuccess: (() -> Unit)? = null) {
+    if (drivePermissions.checkWriteStoragePermission()) {
+        val fileName = if (isFolder()) "${name}.zip" else name
+        DownloadManagerUtils.scheduleDownload(context, ApiRoutes.downloadFile(this), fileName)
+        onSuccess?.invoke()
     }
 }
