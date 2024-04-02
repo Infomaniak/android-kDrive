@@ -314,8 +314,21 @@ class FileMigration : RealmMigration {
         }
 
         // Migrated to version 7
+        // - Migrate to ApiV3
         if (oldVersionTemp == 6L) {
             schema.get(File::class.java.simpleName)?.apply {
+                addField("uid", String::class.java, FieldAttribute.REQUIRED)
+                transform { realmObject ->
+                    val file = File(
+                        id = realmObject.getInt("id"),
+                        driveId = realmObject.getInt("driveId")
+                    ).apply {
+                        initUid()
+                    }
+                    realmObject.setString("uid", file.uid)
+                }
+                removePrimaryKey()
+                addPrimaryKey("uid")
                 addField("cursor", String::class.java)
                 addRealmListField("supportedBy", String::class.java)
                 removeField("hasThumbnail")
