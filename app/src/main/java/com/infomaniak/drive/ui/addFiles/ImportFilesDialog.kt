@@ -21,7 +21,6 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
 import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
@@ -45,15 +44,12 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.Date
 
 class ImportFilesDialog : DialogFragment() {
 
-    private val dialogBinding by lazy { DialogImportFilesBinding.inflate(LayoutInflater.from(context)) }
+    private val dialogBinding by lazy { DialogImportFilesBinding.inflate(layoutInflater) }
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navArgs: ImportFilesDialogArgs by navArgs()
     private val importCount by lazy { navArgs.uris.size }
@@ -88,19 +84,24 @@ class ImportFilesDialog : DialogFragment() {
 
     private suspend fun importFiles() {
         var errorCount = 0
+        val uploadFilesJobs = mutableListOf<Job>()
         navArgs.uris.forEach { uri ->
-            runCatching {
-                initUpload(uri)
-            }.onFailure {
-                it.printStackTrace()
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.ERROR
-                    scope.setExtra("uri", uri.toString())
-                    Sentry.captureException(it)
+            uploadFilesJobs.add(lifecycleScope.launch {
+                runCatching {
+                    initUpload(uri)
+                }.onFailure {
+                    it.printStackTrace()
+                    Sentry.withScope { scope ->
+                        scope.level = SentryLevel.ERROR
+                        scope.setExtra("uri", uri.toString())
+                        Sentry.captureException(it)
+                    }
+                    errorCount++
                 }
-                errorCount++
-            }
+            })
         }
+
+        uploadFilesJobs.joinAll()
 
         if (errorCount > 0) {
             withContext(Dispatchers.Main) {
@@ -110,7 +111,13 @@ class ImportFilesDialog : DialogFragment() {
                 )
             }
         }
-        lifecycleScope.launch { lifecycle.withResumed { findNavController().popBackStack() } }
+        lifecycleScope.launch {
+            lifecycle.withResumed {
+                findNavController().popBackStack(R.id.fileListFragment, false)
+            }
+        }
+
+        context?.syncImmediately()
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
@@ -125,23 +132,20 @@ class ImportFilesDialog : DialogFragment() {
                     }
                     else -> {
                         val outputFile = getOutputFile(uri, fileModifiedAt)
-
-                        if (isActive) {
-                            UploadFile(
-                                uri = outputFile.toUri().toString(),
-                                driveId = navArgs.driveId,
-                                fileCreatedAt = fileCreatedAt,
-                                fileModifiedAt = fileModifiedAt,
-                                fileName = fileName,
-                                fileSize = outputFile.length(),
-                                remoteFolder = navArgs.folderId,
-                                type = UploadFile.Type.UPLOAD.name,
-                                userId = AccountUtils.currentUserId,
-                            ).store()
-                            successCount++
-                            currentImportFile = null
-                            context?.syncImmediately()
-                        }
+                        ensureActive()
+                        UploadFile(
+                            uri = outputFile.toUri().toString(),
+                            driveId = navArgs.driveId,
+                            fileCreatedAt = fileCreatedAt,
+                            fileModifiedAt = fileModifiedAt,
+                            fileName = fileName,
+                            fileSize = outputFile.length(),
+                            remoteFolder = navArgs.folderId,
+                            type = UploadFile.Type.UPLOAD.name,
+                            userId = AccountUtils.currentUserId,
+                        ).store()
+                        successCount++
+                        currentImportFile = null
                     }
                 }
             }
