@@ -640,12 +640,13 @@ object FileController {
     }
 
     private fun keepSubFolderChildren(localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
-        val oldChildren = localFolderChildren?.filter { it.children.isNotEmpty() || it.isOffline }?.associateBy { it.id }
+        val oldChildren = localFolderChildren?.filter { it.isFolder() || it.isOffline }?.associateBy { it.id }
         remoteFolderChildren.forEach { newFile ->
             oldChildren?.get(newFile.id)?.let { oldFile ->
                 newFile.apply {
-                    if (oldFile.isFolder()) children = oldFile.children
+                    if (oldFile.isFolder()) keepOldLocalFilesData(oldFile, newFile)
                     isOffline = oldFile.isOffline
+
                 }
             }
 
@@ -753,6 +754,7 @@ object FileController {
     private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
         newFile.apply {
             children = oldFile.children
+            cursor = oldFile.cursor
             isComplete = oldFile.isComplete
             isOffline = oldFile.isOffline
             responseAt = oldFile.responseAt
