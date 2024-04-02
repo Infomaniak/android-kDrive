@@ -447,7 +447,7 @@ class MainActivity : BaseActivity() {
             binding.mainFab.isEnabled = parentFolder?.rights?.canCreateFile == true
 
             if (navigationArgs?.shortcutId == Shortcuts.UPLOAD.id && mustOpenUploadShortcut && parentFolder?.id == ROOT_ID) {
-                saveMustOpenUploadShortcut(false)
+                mainViewModel.mustOpenUploadShortcut = false
                 uploadFilesHelper?.apply {
                     setParentFolder(parentFolder)
                     uploadFiles()

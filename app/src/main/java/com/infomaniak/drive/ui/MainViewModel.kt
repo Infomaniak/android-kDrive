@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
+import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
@@ -80,10 +81,11 @@ class MainViewModel(
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
-    var mustOpenUploadShortcut: Boolean
+    var mustOpenUploadShortcut: Boolean = true
         get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: true
         set(value) {
             savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] = value
+            field = value
         }
 
     var ignoreSyncOffline = false
@@ -109,16 +111,11 @@ class MainViewModel(
             navController = navController,
             onOpeningPicker = {
                 fragmentActivity.trackNewElementEvent("uploadFile")
-                uploadFilesHelper?.let(::setParentFolder) ?: Sentry.captureMessage("UploadFilesHelper is null. It should not!")
+                uploadFilesHelper?.let { setParentFolder() } ?: Sentry.captureMessage("UploadFilesHelper is null. It should not!")
             },
-        ).apply {
-            initCurrentFolderFromRealm()
-            setParentFolder(uploadFilesHelper = this)
-        }
-    }
-
-    fun saveMustOpenUploadShortcut(mustOpenShortcut: Boolean) {
-        savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] = mustOpenShortcut
+        )
+        initCurrentFolderFromRealm()
+        setParentFolder()
     }
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {
@@ -452,14 +449,16 @@ class MainViewModel(
         else ioFile.delete()
     }
 
-    private fun setParentFolder(uploadFilesHelper: UploadFilesHelper) {
+    private fun saveCurrentFolder() {
+        saveCurrentFolderId()
+        uploadFilesHelper?.setParentFolder(currentFolder.value!!)
+    }
+
+    private fun setParentFolder() {
         currentFolder.value?.let {
-            saveCurrentFolderId()
-            uploadFilesHelper.setParentFolder(it)
-        } ?: {
+            saveCurrentFolder()
+        } ?: run {
             initCurrentFolderFromRealm()
-            saveCurrentFolderId()
-            uploadFilesHelper.setParentFolder(currentFolder.value!!)
         }
     }
 
@@ -467,7 +466,7 @@ class MainViewModel(
         files: List<File>,
         categoryId: Int,
         isAdding: Boolean,
-    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
+    ): ApiResponse<List<FeedbackAccessResource<Int, Unit>>> {
         return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
     }
 
@@ -478,9 +477,9 @@ class MainViewModel(
     private fun initCurrentFolderFromRealm() {
         val savedFolderId = savedStateHandle.get<Int>(SAVED_STATE_FOLDER_ID_KEY)
         if (currentFolder.value == null && savedFolderId != null) {
-            FileController.getFileById(savedStateHandle[SAVED_STATE_FOLDER_ID_KEY]!!)?.let {
+            FileController.getFileById(savedFolderId)?.let {
                 this.currentFolder.value = it
-                uploadFilesHelper?.setParentFolder(it)
+                saveCurrentFolder()
             }
         }
     }

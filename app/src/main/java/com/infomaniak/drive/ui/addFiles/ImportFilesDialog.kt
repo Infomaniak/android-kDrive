@@ -113,9 +113,7 @@ class ImportFilesDialog : DialogFragment() {
         }
         lifecycleScope.launch {
             lifecycle.withResumed {
-                with(findNavController()) {
-                    popBackStack(R.id.fileListFragment, false)
-                }
+                findNavController().popBackStack(R.id.fileListFragment, false)
             }
         }
 
