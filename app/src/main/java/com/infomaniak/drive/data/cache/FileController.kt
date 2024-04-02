@@ -52,11 +52,11 @@ object FileController {
     private const val GALLERY_FILE_ID = -3
     const val SHARED_WITH_ME_FILE_ID = -5
 
-    private val FAVORITES_FILE = File(FAVORITES_FILE_ID, name = "Favorites")
-    private val MY_SHARES_FILE = File(MY_SHARES_FILE_ID, name = "My Shares")
-    private val GALLERY_FILE = File(GALLERY_FILE_ID, name = "Gallery")
-    private val RECENT_CHANGES_FILE = File(RECENT_CHANGES_FILE_ID, name = "Recent changes")
-    val SHARED_WITH_ME_FILE = File(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me")
+    private val FAVORITES_FILE = File(id = FAVORITES_FILE_ID, name = "Favorites").apply { initUid() }
+    private val MY_SHARES_FILE = File(id = MY_SHARES_FILE_ID, name = "My Shares").apply { initUid() }
+    private val GALLERY_FILE = File(id = GALLERY_FILE_ID, name = "Gallery").apply { initUid() }
+    private val RECENT_CHANGES_FILE = File(id = RECENT_CHANGES_FILE_ID, name = "Recent changes").apply { initUid() }
+    val SHARED_WITH_ME_FILE = File(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me").apply { initUid() }
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
