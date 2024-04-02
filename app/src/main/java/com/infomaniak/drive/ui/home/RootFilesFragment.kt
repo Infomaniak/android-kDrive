@@ -147,7 +147,7 @@ class RootFilesFragment : Fragment() {
         val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
 
         fileListViewModel.getFiles(
-            parentId = Utils.ROOT_ID,
+            folderId = Utils.ROOT_ID,
             order = File.SortType.NAME_AZ,
             sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else ONLY_FROM_REMOTE,
             isNewSort = false,
