@@ -82,7 +82,7 @@ class MainViewModel(
     val updateVisibleFiles = MutableLiveData<Boolean>()
 
     var mustOpenUploadShortcut: Boolean = true
-        get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: true
+        get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: field
         set(value) {
             savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] = value
             field = value
@@ -475,7 +475,7 @@ class MainViewModel(
     }
 
     private fun initCurrentFolderFromRealm() {
-        val savedFolderId = savedStateHandle.get<Int>(SAVED_STATE_FOLDER_ID_KEY)
+        val savedFolderId: Int? = savedStateHandle[SAVED_STATE_FOLDER_ID_KEY]
         if (currentFolder.value == null && savedFolderId != null) {
             FileController.getFileById(savedFolderId)?.let {
                 this.currentFolder.value = it
