@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
-import android.app.Activity
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -47,10 +46,8 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVOR
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentDirections
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
-import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*

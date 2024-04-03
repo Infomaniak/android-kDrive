@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -51,7 +50,6 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.PreviewUtils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.utils.Utils.openWith
-import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.getBackNavigationResult
