@@ -457,7 +457,10 @@ class MainActivity : BaseActivity() {
         searchFab.isVisible = shouldShowSmallFab
     }
 
-    private fun handleShortcuts() = with(mainViewModel) {
+    /**
+     * Handle shortcuts, the [Shortcuts.UPLOAD] case is already handled in [observeCurrentFolder].
+     */
+    private fun handleShortcuts() {
         navigationArgs?.shortcutId?.let { shortcutId ->
             trackEvent("shortcuts", shortcutId)
 
@@ -468,7 +471,7 @@ class MainActivity : BaseActivity() {
                 }
                 Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
                 Shortcuts.FEEDBACK.id -> openSupport()
-                Shortcuts.UPLOAD.id -> Unit
+                Shortcuts.UPLOAD.id -> Unit // Already handled elsewhere, @see kdoc
             }
         }
     }
