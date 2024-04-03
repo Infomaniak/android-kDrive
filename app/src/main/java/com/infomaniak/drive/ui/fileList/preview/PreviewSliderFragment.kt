@@ -69,7 +69,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private val navigationArgs: PreviewSliderFragmentArgs by navArgs()
     private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
-    private val bottomSheetBehavior: BottomSheetBehavior<View> by lazy { BottomSheetBehavior.from(binding.bottomSheetFileInfos) }
+    private val bottomSheetBehavior: BottomSheetBehavior<View>
+        get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
+
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
     private lateinit var userDrive: UserDrive

@@ -54,7 +54,9 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     private val fileName: String by lazy { fileNameAndSize?.first ?: "" }
     private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
 
-    private val bottomSheetBehavior: BottomSheetBehavior<View> by lazy { BottomSheetBehavior.from(binding.bottomSheetFileInfos) }
+    private val bottomSheetBehavior: BottomSheetBehavior<View>
+        get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
+
     private var isOverlayShown = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,7 +112,7 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     fun toggleFullscreen() = with(bottomSheetBehavior) {
         binding.header.toggleVisibility(!isOverlayShown)
-        this?.state = if (isOverlayShown) BottomSheetBehavior.STATE_HIDDEN else BottomSheetBehavior.STATE_COLLAPSED
+        state = if (isOverlayShown) BottomSheetBehavior.STATE_HIDDEN else BottomSheetBehavior.STATE_COLLAPSED
         isOverlayShown = !isOverlayShown
         toggleSystemBar(isOverlayShown)
     }
