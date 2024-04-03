@@ -27,6 +27,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 class TrashViewModel : ViewModel() {
@@ -57,6 +58,8 @@ class TrashViewModel : ViewModel() {
         tailrec fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
             val apiResponse = ApiRepository.getTrashedFolderFiles(file, order, cursor)
             val apiResponseData = apiResponse.data
+            getDeletedFilesJob?.ensureActive()
+
             when {
                 apiResponseData.isNullOrEmpty() -> trashedFolderFilesResults.postValue(null)
                 apiResponse.hasMoreAndCursorExists -> {
@@ -69,6 +72,7 @@ class TrashViewModel : ViewModel() {
                             isNewSort = isNewSort,
                         )
                     )
+                    getDeletedFilesJob?.ensureActive()
                     recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                 }
                 else -> {
@@ -93,6 +97,7 @@ class TrashViewModel : ViewModel() {
         tailrec fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
             val apiResponse = ApiRepository.getDriveTrash(driveId, order, cursor)
             val apiResponseData = apiResponse.data
+            getDeletedFilesJob?.ensureActive()
             when {
                 apiResponseData.isNullOrEmpty() -> driveTrashResults.postValue(null)
                 apiResponse.hasMoreAndCursorExists -> {
@@ -104,6 +109,7 @@ class TrashViewModel : ViewModel() {
                             isNewSort = isNewSort,
                         )
                     )
+                    getDeletedFilesJob?.ensureActive()
                     recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                 }
                 else -> {
