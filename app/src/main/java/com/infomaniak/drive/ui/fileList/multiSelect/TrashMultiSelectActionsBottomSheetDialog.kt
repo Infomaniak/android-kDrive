@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.multiSelect
 
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.ui.menu.TrashFragment
 
 class TrashMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(TrashFragment.MATOMO_CATEGORY) {
