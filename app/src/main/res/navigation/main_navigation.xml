@@ -974,6 +974,9 @@
             android:name="folderId"
             app:argType="integer" />
         <argument
+            android:name="folderName"
+            app:argType="string" />
+        <argument
             android:name="driveId"
             app:argType="integer" />
         <argument

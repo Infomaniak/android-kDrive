@@ -43,7 +43,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
@@ -71,13 +70,13 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
-import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
+import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
@@ -163,6 +162,8 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
+
         checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
         downloadReceiver = DownloadReceiver(mainViewModel)
@@ -183,6 +184,7 @@ class MainActivity : BaseActivity() {
 
         initAppUpdateManager()
         initAppReviewManager()
+        observeCurrentFolder()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -464,23 +466,25 @@ class MainActivity : BaseActivity() {
                     ShortcutManagerCompat.reportShortcutUsed(this@MainActivity, Shortcuts.SEARCH.id)
                     navController.navigate(R.id.searchFragment)
                 }
-                Shortcuts.UPLOAD.id -> {
-                    var onCurrentFolderSet: Observer<File>? = null
-                    onCurrentFolderSet = Observer { parentFolder ->
-                        onCurrentFolderSet?.let { privateFolder.removeObserver(it) }
-
-                        UploadFilesHelper(this@MainActivity, navController).apply {
-                            initParentFolder(parentFolder)
-                            uploadFiles()
-                        }
-                    }
-
-                    // TODO : We need to find a way to handle the case where the app has never fetched the private folder and
-                    //  therefore can't find it in Realm
-                    privateFolder.observe(this@MainActivity, onCurrentFolderSet)
-                }
                 Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
                 Shortcuts.FEEDBACK.id -> openSupport()
+                Shortcuts.UPLOAD.id -> Unit
+            }
+        }
+    }
+
+    private fun observeCurrentFolder() = with(mainViewModel) {
+        currentFolder.observe(this@MainActivity) { parentFolder ->
+            binding.mainFab.isEnabled = parentFolder?.rights?.canCreateFile == true
+
+            // TODO : We need to find a way to handle the case where the app has never fetched the private folder and
+            //  therefore can't find it in Realm
+            if (navigationArgs?.shortcutId == Shortcuts.UPLOAD.id && mustOpenUploadShortcut && parentFolder?.id == ROOT_ID) {
+                mainViewModel.mustOpenUploadShortcut = false
+                uploadFilesHelper?.apply {
+                    setParentFolder(parentFolder)
+                    uploadFiles()
+                }
             }
         }
     }
