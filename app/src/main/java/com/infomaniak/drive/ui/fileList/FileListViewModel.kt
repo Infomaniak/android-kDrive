@@ -267,6 +267,13 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         cancelDownloadFiles()
     }
 
+    fun shouldDisplaySubtitle(folderId: Int, userDrive: UserDrive?): Boolean {
+        FileController.getFileById(folderId, userDrive)?.let {
+            return it.getVisibilityType() == File.VisibilityType.IS_TEAM_SPACE
+        }
+        return false
+    }
+
     private companion object {
         val mutex = Mutex()
     }

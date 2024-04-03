@@ -219,9 +219,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         with(binding) {
             swipeRefreshLayout.setOnRefreshListener(this@FileListFragment)
-            setToolbarTitle()
             ViewCompat.requestApplyInsets(fileListCoordinator) // Restore coordinator state
         }
+        setToolbarTitle()
+        setPublicFolderSubtitle()
 
         setupFileAdapter()
 
@@ -273,6 +274,23 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         fun MaterialToolbar.removeInsets() = setContentInsetsRelative(0, 0)
         binding.toolbar.removeInsets()
         multiSelectLayout?.toolbarMultiSelect?.removeInsets()
+    }
+
+    private fun setPublicFolderSubtitle() {
+        val driveName = AccountUtils.getCurrentDrive()?.driveAccount?.name
+        val folderId = folderId
+        val userDrive = userDrive
+
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val shouldDisplaySubtitle = fileListViewModel.shouldDisplaySubtitle(folderId, userDrive)
+
+            Dispatchers.Main {
+                binding.publicFolderSubtitle.apply {
+                    text = getString(R.string.commonDocumentsDescription, driveName)
+                    isVisible = shouldDisplaySubtitle && driveName != null
+                }
+            }
+        }
     }
 
     private fun setupBackActionHandler() {
