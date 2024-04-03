@@ -38,11 +38,10 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.PreviewUtils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.Utils.openWith
-import com.infomaniak.drive.views.ExternalFileInfoActionsView
+import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.utils.getFileNameAndSize
 
-class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnItemClickListener {
+class PreviewPDFActivity : AppCompatActivity(), FileInfoActionsView.OnItemClickListener {
 
     val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
 
@@ -59,6 +58,10 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
     private var isOverlayShown = true
 
+    override val ownerFragment = null
+    override val activity = this
+    override val currentFile = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -69,7 +72,7 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
 
             header.setup(
                 onBackClicked = { finish() },
-                onOpenWithClicked = { openPDFWith() },
+                onOpenWithClicked = { openWithClicked(fileUri = externalPDFUri) },
             )
         }
 
@@ -77,7 +80,7 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
     }
 
     private fun initBottomSheet() = with(binding) {
-        setupBottomSheetFileBehavior(bottomSheetBehavior, true)
+        setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
         bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
         bottomSheetFileInfos.setClickListener(this@PreviewPDFActivity)
     }
@@ -88,26 +91,26 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
         setupTransparentStatusBar()
     }
 
-    override fun openWithClicked(context: Context) {
-        super.openWithClicked(context)
-        openPDFWith()
+    override fun openWithClicked(fileUri: Uri?, onDownloadFile: (() -> Unit)?) {
+        super.openWithClicked(externalPDFUri, onDownloadFile)
     }
 
-    override fun shareFile(context: Context) {
-        super.shareFile(context)
+    override fun shareFile() {
+        super.shareFile()
         shareFile { externalPDFUri }
     }
 
-    override fun saveToKDriveClicked(context: Context) {
-        super.saveToKDriveClicked(context)
+    override fun saveToKDriveClicked() {
+        super.saveToKDriveClicked()
         saveToKDrive(externalPDFUri)
     }
 
-    override fun printClicked(context: Context) {
-        super.printClicked(context)
+    override fun printClicked() {
+        super.printClicked()
         val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
         val printAdapter = PDFDocumentAdapter(fileName, getFileForPrint(externalPDFUri))
         printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
+
     }
 
     fun toggleFullscreen() = with(bottomSheetBehavior) {
@@ -115,14 +118,6 @@ class PreviewPDFActivity : AppCompatActivity(), ExternalFileInfoActionsView.OnIt
         state = if (isOverlayShown) BottomSheetBehavior.STATE_HIDDEN else BottomSheetBehavior.STATE_COLLAPSED
         isOverlayShown = !isOverlayShown
         toggleSystemBar(isOverlayShown)
-    }
-
-    private fun openPDFWith() {
-        openWith(
-            externalPDFUri,
-            contentResolver.getType(externalPDFUri),
-            Intent.FLAG_GRANT_READ_URI_PERMISSION
-        )
     }
 
     // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)

@@ -26,12 +26,16 @@ import com.infomaniak.lib.core.utils.lightNavigationBar
 
 object PreviewUtils {
 
-    fun Activity.setupBottomSheetFileBehavior(bottomSheetBehavior: BottomSheetBehavior<View>, isDraggable: Boolean) {
+    fun Activity.setupBottomSheetFileBehavior(
+        bottomSheetBehavior: BottomSheetBehavior<View>,
+        isDraggable: Boolean,
+        isFitToContents: Boolean = false,
+        ) {
         setColorNavigationBar(true)
         bottomSheetBehavior.apply {
             isHideable = true
             this.isDraggable = isDraggable
-            isFitToContents = true
+            this.isFitToContents = isFitToContents
             addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     when (bottomSheetBehavior.state) {

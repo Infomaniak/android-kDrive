@@ -18,6 +18,8 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -78,6 +80,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private var isOverlayShown = false
 
     override val ownerFragment = this
+    override val activity = null
     override lateinit var currentFile: File
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
@@ -405,17 +408,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun openWithClicked() {
-        super.openWithClicked()
-        val packageManager = requireContext().packageManager
-        if (requireContext().openWithIntent(currentFile, userDrive).resolveActivity(packageManager) == null) {
-            showSnackbar(R.string.errorNoSupportingAppFound)
-        } else {
+    override fun openWithClicked(fileUri: Uri?, onDownloadFile: (() -> Unit)?) {
+        super.openWithClicked(fileUri) {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
                     fileId = currentFile.id,
                     fileName = currentFile.name,
-                    userDrive = userDrive
+                    userDrive = userDrive,
                 )
             )
         }

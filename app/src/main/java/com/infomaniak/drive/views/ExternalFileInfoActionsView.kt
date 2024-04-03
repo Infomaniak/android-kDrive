@@ -21,11 +21,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import com.infomaniak.drive.MatomoDrive.toFloat
-import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ViewExternalFileInfoActionsBinding
 import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 
 class ExternalFileInfoActionsView @JvmOverloads constructor(
     context: Context,
@@ -47,24 +46,9 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun initOnClickListeners() = with(binding) {
-        openWith.setOnClickListener { onItemClickListener.openWithClicked(context) }
-        shareFile.setOnClickListener { onItemClickListener.shareFile(context) }
-        saveToKDrive.setOnClickListener { onItemClickListener.saveToKDriveClicked(context) }
-        print.setOnClickListener { onItemClickListener.printClicked(context) }
-    }
-
-    interface OnItemClickListener {
-
-        private fun trackFileActionEvent(context: Context, name: String, value: Boolean? = null) {
-            context.trackFileActionEvent(name, value = value?.toFloat())
-        }
-
-        fun openWithClicked(context: Context) = trackFileActionEvent(context, "openWith")
-
-        fun shareFile(context: Context) = trackFileActionEvent(context, "sendFileCopy")
-
-        fun saveToKDriveClicked(context: Context) = trackFileActionEvent(context, "saveToKDrive")
-
-        fun printClicked(context: Context) = trackFileActionEvent(context, "print")
+        openWith.setOnClickListener { onItemClickListener.openWithClicked() }
+        shareFile.setOnClickListener { onItemClickListener.shareFile() }
+        saveToKDrive.setOnClickListener { onItemClickListener.saveToKDriveClicked() }
+        print.setOnClickListener { onItemClickListener.printClicked() }
     }
 }

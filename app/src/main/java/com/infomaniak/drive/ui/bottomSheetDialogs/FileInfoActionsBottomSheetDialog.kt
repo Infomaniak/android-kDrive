@@ -17,6 +17,8 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
+import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -45,6 +47,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVOR
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentDirections
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntent
@@ -65,6 +68,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override lateinit var currentFile: File
     override val ownerFragment = this
+    override val activity = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -317,17 +321,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun openWithClicked() {
-        super.openWithClicked()
-        if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
-            showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
-            findNavController().popBackStack()
-        } else {
+    override fun openWithClicked(fileUri: Uri?, onDownloadFile: (() -> Unit)?) {
+        super.openWithClicked(fileUri) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
                     fileId = currentFile.id,
                     fileName = currentFile.name,
-                    userDrive = navigationArgs.userDrive
+                    userDrive = navigationArgs.userDrive,
                 )
             )
         }
