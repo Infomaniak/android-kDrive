@@ -234,14 +234,17 @@ class MainActivity : BaseActivity() {
     private fun setupFabs() = with(binding) {
         setupFab(mainFab)
         setupFab(searchFab, shouldShowSmallFab = true)
+
+        mainViewModel.currentFolder.observe(this@MainActivity) { file ->
+            val canCreateFile = file?.rights?.canCreateFile == true
+            mainFab.isEnabled = canCreateFile
+            searchFab.isEnabled = canCreateFile
+        }
     }
 
     private fun setupFab(fab: FloatingActionButton, shouldShowSmallFab: Boolean = false) {
         val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
         fab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog, args) }
-        mainViewModel.currentFolder.observe(this@MainActivity) { file ->
-            fab.isEnabled = file?.rights?.canCreateFile == true
-        }
     }
 
     private fun setupDrivePermissions() {
