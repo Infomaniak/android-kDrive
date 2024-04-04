@@ -170,6 +170,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun dropBoxClicked(isDropBox: Boolean) {
+        super.dropBoxClicked(isDropBox)
         if (isDropBox) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToManageDropboxFragment(
