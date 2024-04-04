@@ -460,9 +460,9 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun shareFile() = trackFileActionEvent("shareFile")
         fun saveToKDriveClicked() = trackFileActionEvent("saveToKDrive")
         fun printClicked() = trackFileActionEvent("print")
-        fun addFavoritesClicked() = trackFileActionEvent("favorite", currentFile?.isFavorite == false)
+
         @CallSuper
-        fun addFavoritesClicked() = trackFileActionEvent("favorite", !currentFile.isFavorite)
+        fun addFavoritesClicked() = trackFileActionEvent("favorite", currentFile?.isFavorite == false)
 
         @CallSuper
         fun cancelExternalImportClicked() = trackFileActionEvent("cancelExternalImport")
