@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -66,6 +65,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override lateinit var currentFile: File
     override val ownerFragment = this
     override val activity = null
+    override val externalFileUri = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -318,8 +318,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun openWithClicked(fileUri: Uri?, onDownloadFile: (() -> Unit)?) {
-        super.openWithClicked(fileUri) {
+    override fun openWithClicked(onDownloadFile: (() -> Unit)?) {
+        super.openWithClicked {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
                     fileId = currentFile.id,

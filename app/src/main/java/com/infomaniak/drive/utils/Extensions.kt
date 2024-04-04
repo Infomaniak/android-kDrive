@@ -121,14 +121,9 @@ fun Cursor.uri(contentUri: Uri): Uri {
 
 fun Number.isPositive(): Boolean = toLong() > 0
 
-fun Activity.clearEdgeToEdge() {
-    toggleSystemBar(true)
-    window.toggleEdgeToEdge(false)
-}
-
-fun Activity.setupTransparentStatusBar() {
+fun Activity.setupStatusBarForPreview() {
     window?.apply {
-        statusBarColor = ContextCompat.getColor(this@setupTransparentStatusBar, R.color.previewBackgroundTransparent)
+        statusBarColor = ContextCompat.getColor(this@setupStatusBarForPreview, R.color.previewBackgroundTransparent)
 
         lightStatusBar(false)
         toggleEdgeToEdge(true)

@@ -52,6 +52,8 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.SaveExternalFilesActivity
+import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.moveFileClicked
@@ -450,6 +452,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         val ownerFragment: Fragment?
         val activity: Activity?
         val currentFile: File?
+        val externalFileUri: Uri?
 
         private val context: Context get() = ownerFragment?.requireContext() ?: activity!!
 
@@ -457,8 +460,24 @@ class FileInfoActionsView @JvmOverloads constructor(
             context.trackFileActionEvent(name, value = value?.toFloat())
         }
 
-        fun shareFile() = trackFileActionEvent("shareFile")
-        fun saveToKDriveClicked() = trackFileActionEvent("saveToKDrive")
+        fun shareFile() = Unit
+        fun saveToKDriveClicked() {
+            trackFileActionEvent("saveToKDrive")
+
+            Intent(context, SaveExternalFilesActivity::class.java).apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, externalFileUri)
+                putExtras(
+                    SaveExternalFilesActivityArgs(
+                        userId = AccountUtils.currentUserId,
+                        driveId = AccountUtils.currentDriveId,
+                    ).toBundle()
+                )
+                type = "/pdf"
+                context.startActivity(this)
+            }
+        }
+
         fun printClicked() = trackFileActionEvent("print")
 
         @CallSuper
@@ -488,22 +507,20 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
 
         @CallSuper
-        fun openWithClicked(fileUri: Uri? = null, onDownloadFile: (() -> Unit)? = null) {
+        fun openWithClicked(onDownloadFile: (() -> Unit)? = null) {
             trackFileActionEvent("openWith")
 
-            currentFile?.let { file ->
-                if (context.openWithIntent(file).resolveActivity(context.packageManager) == null) {
-                    ownerFragment?.showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
-                    ownerFragment?.findNavController()?.popBackStack()
+            ownerFragment?.apply {
+                if (requireContext().openWithIntent(currentFile!!).resolveActivity(requireContext().packageManager) == null) {
+                    showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
+                    findNavController().popBackStack()
                 } else {
                     onDownloadFile?.invoke()
                 }
             } ?: run {
-                context.openWith(
-                    fileUri!!,
-                    context.contentResolver.getType(fileUri),
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                )
+                externalFileUri?.apply {
+                    context.openWith(this, context.contentResolver.getType(this), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
             }
         }
 
@@ -559,63 +576,57 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         @CallSuper
-        fun duplicateFileClicked() {
-            currentFile?.apply {
-                Utils.createPromptNameDialog(
-                    context = context,
-                    title = R.string.buttonDuplicate,
-                    fieldName = R.string.fileInfoInputDuplicateFile,
-                    positiveButton = R.string.buttonCopy,
-                    fieldValue = name,
-                    selectedRange = getFileName().length
-                ) { dialog, name ->
-                    onDuplicateFile(name) {
-                        trackFileActionEvent("copy")
-                        dialog.dismiss()
-                    }
+        fun duplicateFileClicked() = currentFile?.apply {
+            Utils.createPromptNameDialog(
+                context = context,
+                title = R.string.buttonDuplicate,
+                fieldName = R.string.fileInfoInputDuplicateFile,
+                positiveButton = R.string.buttonCopy,
+                fieldValue = name,
+                selectedRange = getFileName().length
+            ) { dialog, name ->
+                onDuplicateFile(name) {
+                    trackFileActionEvent("copy")
+                    dialog.dismiss()
                 }
             }
         }
 
         @CallSuper
-        fun leaveShare() {
-            currentFile?.apply {
-                Utils.createConfirmation(
-                    context = context,
-                    title = context.getString(R.string.modalLeaveShareTitle),
-                    message = context.getString(R.string.modalLeaveShareDescription, name),
-                    autoDismiss = false
-                ) { dialog ->
-                    onLeaveShare {
-                        trackFileActionEvent("stopShare")
-                        dialog.dismiss()
-                    }
+        fun leaveShare() = currentFile?.apply {
+            Utils.createConfirmation(
+                context = context,
+                title = context.getString(R.string.modalLeaveShareTitle),
+                message = context.getString(R.string.modalLeaveShareDescription, name),
+                autoDismiss = false
+            ) { dialog ->
+                onLeaveShare {
+                    trackFileActionEvent("stopShare")
+                    dialog.dismiss()
                 }
             }
         }
 
         @CallSuper
-        fun renameFileClicked() {
-            currentFile?.apply {
-                Utils.createPromptNameDialog(
-                    context = context,
-                    title = R.string.buttonRename,
-                    fieldName = if (isFolder()) R.string.hintInputDirName else R.string.hintInputFileName,
-                    positiveButton = R.string.buttonSave,
-                    fieldValue = name,
-                    selectedRange = getFileName().length
-                ) { dialog, name ->
-                    onRenameFile(name) {
-                        trackFileActionEvent("rename")
-                        dialog.dismiss()
-                    }
+        fun renameFileClicked() = currentFile?.apply {
+            Utils.createPromptNameDialog(
+                context = context,
+                title = R.string.buttonRename,
+                fieldName = if (isFolder()) R.string.hintInputDirName else R.string.hintInputFileName,
+                positiveButton = R.string.buttonSave,
+                fieldValue = name,
+                selectedRange = getFileName().length
+            ) { dialog, name ->
+                onRenameFile(name) {
+                    trackFileActionEvent("rename")
+                    dialog.dismiss()
                 }
             }
         }
 
         @CallSuper
-        fun deleteFileClicked() = currentFile?.apply {
-            Utils.confirmFileDeletion(context, fileName = name) { dialog ->
+        fun deleteFileClicked() = currentFile?.let {
+            Utils.confirmFileDeletion(context, fileName = it.name) { dialog ->
                 onDeleteFile {
                     trackFileActionEvent("putInTrash")
                     dialog.dismiss()

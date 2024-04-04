@@ -63,7 +63,6 @@
     <declare-styleable name="MenuItemView">
         <attr name="icon" />
         <attr name="title" format="string" />
-        <attr name="withArrow" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="BottomSheetItemView">

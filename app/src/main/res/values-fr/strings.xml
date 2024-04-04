@@ -132,7 +132,6 @@
     <string name="buttonMove">Déplacer</string>
     <string name="buttonMoveTo">Déplacer vers</string>
     <string name="buttonNewPassword">Définir un nouveau mot de passe</string>
-    <string name="buttonNo">Non</string>
     <string name="buttonNoDriveAnotherUser">Utiliser un autre profil Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Tester gratuitement</string>
     <string name="buttonOpenDocument">Ouvrir le document</string>

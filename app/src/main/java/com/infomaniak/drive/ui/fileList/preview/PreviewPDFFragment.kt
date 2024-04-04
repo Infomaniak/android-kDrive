@@ -182,7 +182,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun getConfigurator(fileUri: Uri?, pdfFile: IOFile?): PDFView.Configurator {
-        return fileUri?.let { binding.pdfView.fromUri(fileUri) } ?: binding.pdfView.fromFile(pdfFile)
+        return if (isExternalPDF) binding.pdfView.fromUri(fileUri) else binding.pdfView.fromFile(pdfFile)
     }
 
     private fun onPdfPasswordError() {
@@ -275,8 +275,6 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     companion object {
-        const val TAG = "PreviewPDFFragment"
-
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
         private const val START_END_SPACING_DP = 200
         private const val MIN_ZOOM = 0.93f

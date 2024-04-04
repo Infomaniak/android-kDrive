@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.print.PrintAttributes
@@ -32,24 +31,29 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
-import com.infomaniak.drive.ui.SaveExternalFilesActivity
-import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewUtils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.views.FileInfoActionsView
+import com.infomaniak.drive.utils.setupStatusBarForPreview
+import com.infomaniak.drive.utils.shareFile
+import com.infomaniak.drive.utils.toggleSystemBar
+import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import com.infomaniak.lib.core.utils.getFileNameAndSize
 
-class PreviewPDFActivity : AppCompatActivity(), FileInfoActionsView.OnItemClickListener {
+class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
+
+    override val ownerFragment = null
+    override val activity = this
+    override val currentFile = null
+    override val externalFileUri by lazy { Uri.parse(intent.dataString) }
 
     private val navController by lazy { setupNavController() }
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
-    private val externalPDFUri: Uri by lazy { Uri.parse(intent.dataString) }
-    private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(externalPDFUri) }
+    private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(externalFileUri) }
     private val fileName: String by lazy { fileNameAndSize?.first ?: "" }
     private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
 
@@ -57,10 +61,6 @@ class PreviewPDFActivity : AppCompatActivity(), FileInfoActionsView.OnItemClickL
         get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
 
     private var isOverlayShown = true
-
-    override val ownerFragment = null
-    override val activity = this
-    override val currentFile = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +72,7 @@ class PreviewPDFActivity : AppCompatActivity(), FileInfoActionsView.OnItemClickL
 
             header.setup(
                 onBackClicked = { finish() },
-                onOpenWithClicked = { openWithClicked(fileUri = externalPDFUri) },
+                onOpenWithClicked = { openWithClicked() },
             )
         }
 
@@ -88,70 +88,18 @@ class PreviewPDFActivity : AppCompatActivity(), FileInfoActionsView.OnItemClickL
     override fun onStart() {
         super.onStart()
         binding.header.setupWindowInsetsListener(rootView = binding.root, bottomSheetView = binding.bottomSheetFileInfos)
-        setupTransparentStatusBar()
-    }
-
-    override fun openWithClicked(fileUri: Uri?, onDownloadFile: (() -> Unit)?) {
-        super.openWithClicked(externalPDFUri, onDownloadFile)
+        setupStatusBarForPreview()
     }
 
     override fun shareFile() {
-        super.shareFile()
-        shareFile { externalPDFUri }
-    }
-
-    override fun saveToKDriveClicked() {
-        super.saveToKDriveClicked()
-        saveToKDrive(externalPDFUri)
+        shareFile { externalFileUri }
     }
 
     override fun printClicked() {
         super.printClicked()
         val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
-        val printAdapter = PDFDocumentAdapter(fileName, getFileForPrint(externalPDFUri))
+        val printAdapter = PDFDocumentAdapter(fileName, getFileForPrint(externalFileUri))
         printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
-
-    }
-
-    fun toggleFullscreen() = with(bottomSheetBehavior) {
-        binding.header.toggleVisibility(!isOverlayShown)
-        state = if (isOverlayShown) BottomSheetBehavior.STATE_HIDDEN else BottomSheetBehavior.STATE_COLLAPSED
-        isOverlayShown = !isOverlayShown
-        toggleSystemBar(isOverlayShown)
-    }
-
-    // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
-    private fun getFakeFile(): File {
-        return File().apply {
-            name = fileName
-            size = fileSize
-            id = ROOT_ID
-            extensionType = ExtensionType.PDF.value
-            type = ""
-        }
-    }
-
-    private fun saveToKDrive(uri: Uri) {
-        Intent(this, SaveExternalFilesActivity::class.java).apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_STREAM, uri)
-            putExtras(
-                SaveExternalFilesActivityArgs(
-                    userId = AccountUtils.currentUserId,
-                    driveId = AccountUtils.currentDriveId,
-                ).toBundle()
-            )
-            type = "/pdf"
-            startActivity(this)
-        }
-    }
-
-    private fun setupNavController(): NavController {
-        return navHostFragment.navController.apply {
-            intent.dataString?.let { fileURI ->
-                setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileUri = Uri.parse(fileURI)).toBundle())
-            }
-        }
     }
 
     private fun getFileForPrint(uri: Uri): IOFile {
@@ -161,6 +109,30 @@ class PreviewPDFActivity : AppCompatActivity(), FileInfoActionsView.OnItemClickL
             contentResolver?.openInputStream(uri)?.use { inputStream ->
                 outputStream().use { inputStream.copyTo(it) }
             }
+        }
+    }
+
+    fun toggleFullscreen() {
+        isOverlayShown = !isOverlayShown
+        binding.header.toggleVisibility(isOverlayShown)
+        bottomSheetBehavior.state = if (isOverlayShown) BottomSheetBehavior.STATE_COLLAPSED else BottomSheetBehavior.STATE_HIDDEN
+        toggleSystemBar(isOverlayShown)
+    }
+
+    // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
+    private fun getFakeFile(): File {
+        return File(
+            name = fileName,
+            size = fileSize,
+            id = ROOT_ID,
+            extensionType = ExtensionType.PDF.value,
+            type = "",
+        )
+    }
+
+    private fun setupNavController(): NavController {
+        return navHostFragment.navController.apply {
+            setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileUri = externalFileUri).toBundle())
         }
     }
 }

@@ -18,7 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
-import android.net.Uri
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -54,6 +54,7 @@ import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -75,11 +76,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
     private lateinit var userDrive: UserDrive
-    private var isOverlayShown = false
+    private var isOverlayShown = true
 
     override val ownerFragment = this
     override val activity = null
     override lateinit var currentFile: File
+    override val externalFileUri = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -142,8 +144,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
                     currentFile = previewSliderAdapter.getFile(position)
                     with(header) {
-                        editButton.isVisible = currentFile.isOnlyOfficePreview()
-                        openWithButton.isGone = currentFile.isOnlyOfficePreview()
+                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
+                        toggleOpenWithVisibility(isVisible = currentFile.isOnlyOfficePreview())
                     }
                     bottomSheetFileInfos.openWith.isVisible = true
                     lifecycleScope.launchWhenResumed {
@@ -154,7 +156,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
-            if (!currentFile.isOnlyOfficePreview()) header.openWithButton.isGone = isDownloading
+            if (!currentFile.isOnlyOfficePreview()) binding.header.toggleOpenWithVisibility(isVisible = !isDownloading)
             bottomSheetFileInfos.openWith.isGone = isDownloading
         }
 
@@ -189,7 +191,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun onStart() {
         super.onStart()
-        requireActivity().setupTransparentStatusBar()
+        requireActivity().setupStatusBarForPreview()
     }
 
     override fun onResume() {
@@ -211,7 +213,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun onStop() {
-        requireActivity().clearEdgeToEdge()
+        clearEdgeToEdge()
         super.onStop()
     }
 
@@ -230,6 +232,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onDestroy()
     }
 
+    private fun clearEdgeToEdge() = with(requireActivity()) {
+        toggleSystemBar(true)
+        window.toggleEdgeToEdge(false)
+    }
+
     private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
 
     private fun setBackActionHandlers() {
@@ -242,13 +249,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    fun toggleFullscreen() {
-        _binding?.previewSliderParent?.apply {
-            _binding?.header?.toggleVisibility(isOverlayShown)
+    fun toggleFullscreen() = _binding?.let { binding ->
+        binding.previewSliderParent.apply {
+            isOverlayShown = !isOverlayShown
+            binding.header.toggleVisibility(isOverlayShown)
             toggleBottomSheet(shouldShow = isOverlayShown)
             requireActivity().toggleSystemBar(show = isOverlayShown)
-
-            isOverlayShown = !isOverlayShown
         }
     }
 
@@ -406,8 +412,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun openWithClicked(fileUri: Uri?, onDownloadFile: (() -> Unit)?) {
-        super.openWithClicked(fileUri) {
+    override fun openWithClicked(onDownloadFile: (() -> Unit)?) {
+        super.openWithClicked {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
                     fileId = currentFile.id,

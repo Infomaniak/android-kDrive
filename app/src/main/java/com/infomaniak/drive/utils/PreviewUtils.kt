@@ -30,7 +30,7 @@ object PreviewUtils {
         bottomSheetBehavior: BottomSheetBehavior<View>,
         isDraggable: Boolean,
         isFitToContents: Boolean = false,
-        ) {
+    ) {
         setColorNavigationBar(true)
         bottomSheetBehavior.apply {
             isHideable = true

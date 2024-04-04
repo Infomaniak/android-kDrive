@@ -47,7 +47,7 @@
 
     <com.infomaniak.drive.views.ExternalFileInfoActionsView
         android:id="@+id/bottomSheetFileInfos"
-        style="@style/ExternalFileBottomSheetStyle"
+        style="?attr/bottomSheetStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"

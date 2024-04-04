@@ -26,10 +26,10 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.PreviewHeaderViewBinding
@@ -44,12 +44,6 @@ class PreviewHeaderView @JvmOverloads constructor(
 
     val pageNumberChip: Chip
         get() = binding.pageNumberChip
-
-    val openWithButton: MaterialButton
-        get() = binding.openWithButton
-
-    val editButton: MaterialButton
-        get() = binding.editButton
 
     private val binding by lazy { PreviewHeaderViewBinding.inflate(LayoutInflater.from(context), this, true) }
 
@@ -68,6 +62,9 @@ class PreviewHeaderView @JvmOverloads constructor(
             connect(R.id.header, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         }
     }
+    // We only need to change the duration for the animation, that's why we use an AutoTransition
+    // This is because we try to match the animation duration of the BottomSheet when we toggle
+    // The fullscreen mode
     private val transition by lazy {
         AutoTransition().apply {
             duration = 125
@@ -116,6 +113,14 @@ class PreviewHeaderView @JvmOverloads constructor(
     fun toggleVisibility(isVisible: Boolean) {
         TransitionManager.beginDelayedTransition(parentConstraintLayout, transition)
         (if (isVisible) baseConstraintSet else collapsedConstraintSet).applyTo(parentConstraintLayout)
+    }
+
+    fun toggleOpenWithVisibility(isVisible: Boolean) {
+        binding.openWithButton.isVisible = isVisible
+    }
+
+    fun toggleEditVisibility(isVisible: Boolean) {
+        binding.editButton.isVisible = isVisible
     }
 
     private fun getTopOffset(bottomSheetView: View): Int {

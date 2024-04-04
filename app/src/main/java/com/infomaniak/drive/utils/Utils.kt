@@ -19,16 +19,19 @@ package com.infomaniak.drive.utils
 
 import android.app.Dialog
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -54,6 +57,7 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
+import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
@@ -266,23 +270,38 @@ object Utils {
             setDataAndType(uri, type)
         }
 
-        //We only do that when we try to openWith with a PDF because we have our own PDF reader
-        //Title in the chooser might not be displayed, at the discretion of the brand manufacturer
-        //So we keep the ACTION_VIEW for every type of files EXCEPT PDF files
+        // We only do that when we try to openWith with a PDF because we have our own PDF reader
+        // Title in the chooser might not be displayed, at the discretion of the brand manufacturer
+        // So we keep the ACTION_VIEW for every type of files EXCEPT PDF files
         return if (type == "application/pdf") {
-            val openWithIntentLists = mutableListOf<Intent>()
-            packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
-                val resInfoPackageName = resInfo.activityInfo.packageName
-                if (!resInfoPackageName.lowercase().contains(packageName)) {
-                    with(Intent(openWithIntent)) {
-                        setPackage(resInfoPackageName)
-                        openWithIntentLists.add(this)
+
+            @RequiresApi(Build.VERSION_CODES.N)
+            fun intentExcludingPdfReader(): Intent {
+                val components = arrayOf(ComponentName(applicationContext, PreviewPDFActivity::class.java))
+                return Intent.createChooser(openWithIntent, null).putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, components)
+            }
+
+            fun intentWithInitialComponent(): Intent {
+                val openWithIntentLists = mutableListOf<Intent>()
+                packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
+                    val resInfoPackageName = resInfo.activityInfo.packageName
+                    if (!resInfoPackageName.lowercase().contains(packageName)) {
+                        with(Intent(openWithIntent)) {
+                            setPackage(resInfoPackageName)
+                            openWithIntentLists.add(this)
+                        }
                     }
+                }
+
+                return Intent.createChooser(openWithIntentLists.removeAt(0), getString(R.string.openWith)).apply {
+                    putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
                 }
             }
 
-            Intent.createChooser(openWithIntentLists.removeAt(0), getString(R.string.openWith)).apply {
-                putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intentExcludingPdfReader()
+            } else {
+                intentWithInitialComponent()
             }
         } else {
             openWithIntent
