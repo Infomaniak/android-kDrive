@@ -487,7 +487,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onMoveFile(destinationFolder: File) = Unit
         fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
 
-		@CallSuper
+        @CallSuper
         fun openWithClicked(fileUri: Uri? = null, onDownloadFile: (() -> Unit)? = null) {
             trackFileActionEvent("openWith")
 
@@ -509,7 +509,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) = Unit
 
-		@CallSuper
+        @CallSuper
         fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent("shareLink")
 
         @CallSuper
@@ -613,7 +613,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
-		@CallSuper
+        @CallSuper
         fun deleteFileClicked() = currentFile?.apply {
             Utils.confirmFileDeletion(context, fileName = name) { dialog ->
                 onDeleteFile {
