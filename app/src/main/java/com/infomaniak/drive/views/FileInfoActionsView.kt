@@ -24,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.CallSuper
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -462,11 +463,21 @@ class FileInfoActionsView @JvmOverloads constructor(
             context.trackFileActionEvent(name, value = value?.toFloat())
         }
 
+        @CallSuper
         fun addFavoritesClicked() = trackFileActionEvent("favorite", !currentFile.isFavorite)
+
+        @CallSuper
         fun cancelExternalImportClicked() = trackFileActionEvent("cancelExternalImport")
+
+        @CallSuper
         fun colorFolderClicked(color: String?) = context.trackEvent("colorFolder", "switch")
+
         fun displayInfoClicked()
+
+        @CallSuper
         fun downloadFileClicked() = trackFileActionEvent("download")
+
+        @CallSuper
         fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
         fun fileRightsClicked()
         fun goToFolder()
@@ -477,10 +488,15 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onLeaveShare(onApiResponse: () -> Unit)
         fun onMoveFile(destinationFolder: File)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
+
+        @CallSuper
         fun openWithClicked() = trackFileActionEvent("openWith")
         fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
+
+        @CallSuper
         fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent("shareLink")
 
+        @CallSuper
         fun editDocumentClicked() {
             trackFileActionEvent("edit")
             ownerFragment.openOnlyOfficeDocument(currentFile)
@@ -494,6 +510,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
+        @CallSuper
         fun availableOfflineSwitched(fileInfoActionsView: FileInfoActionsView, isChecked: Boolean): Boolean {
             currentFile.apply {
                 when {
@@ -515,6 +532,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             return true
         }
 
+        @CallSuper
         fun moveFileClicked(
             folderId: Int?,
             selectFolderResultLauncher: ActivityResultLauncher<Intent>,
@@ -524,6 +542,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             context.moveFileClicked(folderId, selectFolderResultLauncher, mainViewModel)
         }
 
+        @CallSuper
         fun duplicateFileClicked() {
             currentFile.apply {
                 Utils.createPromptNameDialog(
@@ -542,6 +561,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
+        @CallSuper
         fun leaveShare() {
             currentFile.apply {
                 Utils.createConfirmation(
@@ -558,6 +578,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
+        @CallSuper
         fun renameFileClicked() {
             currentFile.apply {
                 Utils.createPromptNameDialog(
@@ -576,6 +597,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
 
+        @CallSuper
         fun deleteFileClicked() {
             Utils.confirmFileDeletion(context, fileName = currentFile.name) { dialog ->
                 onDeleteFile {
