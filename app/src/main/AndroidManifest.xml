@@ -85,7 +85,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
-        tools:targetApi="TIRAMISU">
+        tools:targetApi="TIRAMISU"
+        tools:replace="android:usesCleartextTraffic">
 
         <meta-data
             android:name="io.sentry.auto-init"
