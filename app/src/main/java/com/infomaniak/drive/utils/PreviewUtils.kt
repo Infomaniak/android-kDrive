@@ -32,7 +32,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.utils.Utils.openWith
-import com.infomaniak.drive.utils.Utils.openWithIntent
+import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
 import com.infomaniak.lib.core.utils.lightNavigationBar
 
 fun Activity.setupBottomSheetFileBehavior(
@@ -91,7 +91,7 @@ fun Context.openWith(
 
     ownerFragment?.apply {
         // Show only snackbar for fragment here because we need to do some check before displaying the snackbar for activities
-        if (requireContext().openWithIntent(currentFile!!).resolveActivity(requireContext().packageManager) == null) {
+        if (requireContext().openWithIntentExceptkDrive(currentFile!!).resolveActivity(requireContext().packageManager) == null) {
             showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
             findNavController().popBackStack()
         } else {
