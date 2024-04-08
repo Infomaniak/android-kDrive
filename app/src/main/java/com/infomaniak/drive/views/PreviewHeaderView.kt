@@ -30,7 +30,6 @@ import androidx.core.view.isVisible
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.chip.Chip
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.PreviewHeaderViewBinding
 import com.infomaniak.lib.core.utils.setMargins
@@ -41,9 +40,6 @@ class PreviewHeaderView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
-
-    val pageNumberChip: Chip
-        get() = binding.pageNumberChip
 
     private val binding by lazy { PreviewHeaderViewBinding.inflate(LayoutInflater.from(context), this, true) }
 
