@@ -62,10 +62,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
-    override lateinit var currentFile: File
     override val ownerFragment = this
-    override val activity = null
-    override val externalFileUri = null
+    override val currentContext = requireContext()
+    override lateinit var currentFile: File
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -318,8 +317,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun openWithClicked(onDownloadFile: (() -> Unit)?) {
-        super.openWithClicked {
+    override fun openWith() {
+        context?.openWith(ownerFragment = ownerFragment, currentFile = currentFile) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
                     fileId = currentFile.id,

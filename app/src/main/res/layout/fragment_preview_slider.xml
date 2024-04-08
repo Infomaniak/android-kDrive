@@ -24,6 +24,7 @@
     android:background="@color/previewBackground"
     tools:context="com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment">
 
+    <!-- Used to animate with ConstraintSet -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/pdfContainer"
         android:layout_width="match_parent"

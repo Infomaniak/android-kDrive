@@ -28,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.transition.AutoTransition
+import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.chip.Chip
@@ -66,7 +67,7 @@ class PreviewHeaderView @JvmOverloads constructor(
     // This is because we try to match the animation duration of the BottomSheet when we toggle
     // The fullscreen mode
     private val transition by lazy {
-        AutoTransition().apply {
+        ChangeBounds().apply {
             duration = 125
         }
     }
@@ -108,6 +109,14 @@ class PreviewHeaderView @JvmOverloads constructor(
 
             windowInsets
         }
+    }
+
+    fun setPageNumberVisibility(isVisible: Boolean) {
+        binding.pageNumberChip.isVisible = isVisible
+    }
+
+    fun setPageNumberValue(pageNumberValue: String) {
+        binding.pageNumberChip.text = pageNumberValue
     }
 
     fun toggleVisibility(isVisible: Boolean) {

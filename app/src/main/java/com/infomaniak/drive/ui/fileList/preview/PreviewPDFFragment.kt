@@ -34,7 +34,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.getPageNumberChip
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
@@ -175,7 +176,7 @@ class PreviewPDFFragment : PreviewFragment() {
                         load()
                     }
 
-                    getPageNumberChip()?.isVisible = true
+                    setPageNumberChipVisibility(isVisible = true)
                 }
             }
         }
@@ -218,7 +219,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
-        getPageNumberChip()?.text = getString(R.string.previewPdfPages, currentPage + 1, totalPage)
+        setPageNumber(getString(R.string.previewPdfPages, currentPage + 1, totalPage))
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {

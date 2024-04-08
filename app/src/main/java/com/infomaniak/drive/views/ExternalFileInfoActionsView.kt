@@ -34,21 +34,14 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
 
     private val binding by lazy { ViewExternalFileInfoActionsBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    private lateinit var onItemClickListener: OnItemClickListener
-
-    fun setClickListener(onItemClickListener: OnItemClickListener) {
-        this.onItemClickListener = onItemClickListener
-        initOnClickListeners()
-    }
-
     fun updateWithExternalFile(file: File) {
         binding.fileView.setFileItem(file)
     }
 
-    private fun initOnClickListeners() = with(binding) {
-        openWith.setOnClickListener { onItemClickListener.openWithClicked() }
+    fun initOnClickListener(onItemClickListener: OnItemClickListener) = with(binding) {
+        openWith.setOnClickListener { onItemClickListener.openWith() }
         shareFile.setOnClickListener { onItemClickListener.shareFile() }
-        saveToKDrive.setOnClickListener { onItemClickListener.saveToKDriveClicked() }
+        saveToKDrive.setOnClickListener { onItemClickListener.saveToKDrive() }
         print.setOnClickListener { onItemClickListener.printClicked() }
     }
 }

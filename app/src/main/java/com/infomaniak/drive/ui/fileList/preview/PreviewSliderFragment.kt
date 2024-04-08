@@ -18,7 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
-import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +36,6 @@ import androidx.navigation.navGraphViewModels
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.chip.Chip
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -48,9 +47,9 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.PreviewUtils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
+import com.infomaniak.drive.views.PreviewHeaderView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -79,9 +78,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private var isOverlayShown = true
 
     override val ownerFragment = this
-    override val activity = null
+    override val currentContext = requireContext()
     override lateinit var currentFile: File
-    override val externalFileUri = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -162,7 +160,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         binding.header.setup(
             onBackClicked = { findNavController().popBackStack() },
-            onOpenWithClicked = { openWithClicked() },
+            onOpenWithClicked = { openWith() },
             onEditClicked = { openOnlyOfficeDocument(currentFile) },
         )
 
@@ -412,8 +410,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun openWithClicked(onDownloadFile: (() -> Unit)?) {
-        super.openWithClicked {
+    override fun openWith() {
+        context?.openWith(ownerFragment = this, currentFile = currentFile) {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
                     fileId = currentFile.id,
@@ -449,9 +447,17 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     companion object {
 
-        fun Fragment.getPageNumberChip(): Chip? {
-            return (parentFragment as? PreviewSliderFragment)?._binding?.header?.pageNumberChip
-                ?: (activity as? PreviewPDFActivity)?.binding?.header?.pageNumberChip
+        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
+            getHeader()?.setPageNumberVisibility(isVisible)
+        }
+
+        fun Fragment.setPageNumber(value: String) {
+            getHeader()?.setPageNumberValue(value)
+        }
+
+        private fun Fragment.getHeader(): PreviewHeaderView? {
+            return (parentFragment as? PreviewSliderFragment)?._binding?.header
+                ?: (activity as? PreviewPDFActivity)?.binding?.header
         }
 
         fun Fragment.toggleFullscreen() {
@@ -460,7 +466,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         fun Fragment.openWithClicked() {
-            (parentFragment as? PreviewSliderFragment)?.openWithClicked()
+            (parentFragment as? PreviewSliderFragment)?.openWith()
         }
     }
 }

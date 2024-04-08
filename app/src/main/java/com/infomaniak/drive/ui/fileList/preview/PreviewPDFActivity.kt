@@ -31,28 +31,26 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
-import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.PreviewUtils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.setupStatusBarForPreview
-import com.infomaniak.drive.utils.shareFile
-import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.getFileNameAndSize
+import io.sentry.Sentry
 
 class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
 
     override val ownerFragment = null
-    override val activity = this
+    override val currentContext = this
     override val currentFile = null
-    override val externalFileUri by lazy { Uri.parse(intent.dataString) }
 
     private val navController by lazy { setupNavController() }
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
+    private val externalFileUri by lazy { Uri.parse(intent.dataString) }
     private val fileNameAndSize: Pair<String, Long>? by lazy { getFileNameAndSize(externalFileUri) }
     private val fileName: String by lazy { fileNameAndSize?.first ?: "" }
     private val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
@@ -72,7 +70,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
             header.setup(
                 onBackClicked = { finish() },
-                onOpenWithClicked = { openWithClicked() },
+                onOpenWithClicked = { openWith(externalFileUri = externalFileUri) },
             )
         }
 
@@ -82,7 +80,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     private fun initBottomSheet() = with(binding) {
         setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
         bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
-        bottomSheetFileInfos.setClickListener(this@PreviewPDFActivity)
+        bottomSheetFileInfos.initOnClickListener(this@PreviewPDFActivity)
     }
 
     override fun onStart() {
@@ -95,21 +93,36 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         shareFile { externalFileUri }
     }
 
-    override fun printClicked() {
-        super.printClicked()
-        val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
-        val printAdapter = PDFDocumentAdapter(fileName, getFileForPrint(externalFileUri))
-        printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
+    override fun saveToKDrive() {
+        saveToKDrive(externalFileUri)
     }
 
-    private fun getFileForPrint(uri: Uri): IOFile {
-        return IOFile(uploadFolder, uri.hashCode().toString()).apply {
-            if (exists()) delete()
-            createNewFile()
-            contentResolver?.openInputStream(uri)?.use { inputStream ->
-                outputStream().use { inputStream.copyTo(it) }
-            }
+    override fun openWith() {
+        openWith(externalFileUri = externalFileUri)
+    }
+
+    override fun printClicked() {
+        super.printClicked()
+        getFileForPrint(externalFileUri)?.let { fileToPrint ->
+            val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+            val printAdapter = PDFDocumentAdapter(fileName, fileToPrint)
+            printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
         }
+    }
+
+    private fun getFileForPrint(uri: Uri): IOFile? {
+        return runCatching {
+            IOFile(uploadFolder, uri.hashCode().toString()).apply {
+                if (exists()) delete()
+                createNewFile()
+                contentResolver?.openInputStream(uri)?.use { inputStream ->
+                    outputStream().use { inputStream.copyTo(it) }
+                }
+            }
+        }.onFailure {
+            showSnackbar(R.string.errorFileNotFound)
+            Sentry.captureException(it)
+        }.getOrNull()
     }
 
     fun toggleFullscreen() {
