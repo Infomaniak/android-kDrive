@@ -78,7 +78,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private var isOverlayShown = true
 
     override val ownerFragment = this
-    override val currentContext = requireContext()
+    override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
