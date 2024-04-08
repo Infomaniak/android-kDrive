@@ -472,11 +472,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private fun calculateFileSize(uri: Uri): Long? {
         return uri.calculateFileSize(contentResolver) ?: null.also {
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                scope.setExtra("uri", uri.toString())
-                Sentry.captureException(Exception("Cannot calculate the file size"))
-            }
+            SentryLog.i(TAG, "Cannot calculate the file size for uri $uri")
         }
     }
 

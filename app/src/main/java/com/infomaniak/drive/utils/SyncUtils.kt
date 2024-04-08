@@ -32,7 +32,6 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.MediaObserverService
 import com.infomaniak.drive.data.sync.MediaObserverWorker
 import com.infomaniak.lib.core.utils.SentryLog
-import io.sentry.Sentry
 import java.util.Date
 
 object SyncUtils {
@@ -42,6 +41,8 @@ object SyncUtils {
         else "datetaken"
 
     inline val Context.uploadFolder get() = IOFile(cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
+
+    private val TAG = SyncUtils::class.java.simpleName
 
     fun getFileDates(cursor: Cursor): Pair<Date?, Date> {
         val dateTakenIndex = cursor.getColumnIndex(DATE_TAKEN)
@@ -65,26 +66,7 @@ object SyncUtils {
 
         if (fileModifiedAt == null || fileModifiedAt.time == 0L) {
             fileModifiedAt = Date()
-            SentryLog.w("SyncUtils", "getFileDates> fileModifiedAt not found")
-            Sentry.withScope { scope ->
-                val noData = "No data"
-
-                val dateTakenValue = if (dateTakenIndex != -1) cursor.getLong(dateTakenIndex).toString() else noData
-                scope.setExtra("dateTaken", dateTakenValue)
-
-                val dateAddedValue = if (dateAddedIndex != -1) cursor.getLong(dateAddedIndex).toString() else noData
-                scope.setExtra("dateAdded", dateAddedValue)
-
-                val lastModifiedData = if (lastModifiedIndex != -1) cursor.getLong(lastModifiedIndex).toString() else noData
-                scope.setExtra("lastModified", lastModifiedData)
-
-                val dateModifiedData = if (dateModifiedIndex != -1) cursor.getLong(dateModifiedIndex).toString() else noData
-                scope.setExtra("dateModified", dateModifiedData)
-
-                scope.setExtra("columnNames", cursor.columnNames.joinToString())
-
-                Sentry.captureMessage("fileModifiedAt not found")
-            }
+            SentryLog.w(TAG, "getFileDates > fileModifiedAt not found")
         }
 
         return Pair(fileCreatedAt, fileModifiedAt)
