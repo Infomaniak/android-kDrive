@@ -44,7 +44,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     val binding: ActivityPreviewPdfBinding by lazy { ActivityPreviewPdfBinding.inflate(layoutInflater) }
 
     override val ownerFragment = null
-    override val currentContext = this
+    override val currentContext by lazy { this }
     override val currentFile = null
 
     private val navController by lazy { setupNavController() }

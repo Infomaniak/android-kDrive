@@ -63,7 +63,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
     override val ownerFragment = this
-    override val currentContext = requireContext()
+    override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
