@@ -454,6 +454,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun shareFile() = Unit
         fun saveToKDrive() = Unit
         fun openWith() = Unit
+
+        @CallSuper
         fun printClicked() = trackFileActionEvent("printPdf")
 
         @CallSuper
