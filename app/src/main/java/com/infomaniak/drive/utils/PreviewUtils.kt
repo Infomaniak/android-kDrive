@@ -92,7 +92,7 @@ fun Context.openWith(
     trackFileActionEvent("openWith")
 
     ownerFragment?.apply {
-        // Show only snackbar for fragment here because we need to do some check before displaying the snackbar for activities
+        // This is only for fragments. For activities, the snackbar is shown in the openWith method.
         if (requireContext().openWithIntentExceptkDrive(currentFile!!).resolveActivity(requireContext().packageManager) == null) {
             showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
             findNavController().popBackStack()
