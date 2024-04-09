@@ -44,7 +44,7 @@ class RecentSearchesAdapter(
             setOnClickListener { onSearchClicked(search) }
         }
         delete.setOnClickListener {
-            setItems(searches.filterIndexed { index, _ -> index != position })
+            setItems(searches.filter { it != search })
             if (searches.isEmpty()) onListEmpty()
         }
         searchResultText.text = search
