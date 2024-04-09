@@ -70,9 +70,11 @@ class RecentSearchesAdapter(
 
         override fun areContentsTheSame(oldIndex: Int, newIndex: Int): Boolean {
             return when {
-                oldIndex != newIndex -> false
-                oldList.size != newList.size -> false
-                else -> true
+                oldIndex == 0 && newIndex != 0 -> false // Remove top corners radius
+                oldIndex != 0 && newIndex == 0 -> false // Add top Corners radius
+                oldIndex == oldList.lastIndex && newIndex != newList.lastIndex -> false // Remove bottom corners radius
+                oldIndex != oldList.lastIndex && newIndex == newList.lastIndex -> false // Add bottom corners radius
+                else -> true // Don't update
             }
         }
     }
