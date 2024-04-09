@@ -268,10 +268,8 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun shouldDisplaySubtitle(folderId: Int, userDrive: UserDrive?): Boolean {
-        FileController.getFileById(folderId, userDrive)?.let {
-            return it.getVisibilityType() == File.VisibilityType.IS_TEAM_SPACE
-        }
-        return false
+        val folder = FileController.getFileById(folderId, userDrive) ?: return false
+        return folder.getVisibilityType() == File.VisibilityType.IS_TEAM_SPACE
     }
 
     private companion object {
