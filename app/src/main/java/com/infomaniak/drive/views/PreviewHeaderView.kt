@@ -58,8 +58,7 @@ class PreviewHeaderView @JvmOverloads constructor(
             connect(R.id.header, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         }
     }
-    // We only need to change the duration for the animation, that's why we use a ChangeBounds animation.
-    // This is because we try to match the animation duration of the BottomSheet when we toggle the fullscreen mode.
+    // We do this because we try to match the animation duration of the BottomSheet when we toggle the fullscreen mode.
     private val transition by lazy {
         ChangeBounds().apply {
             duration = 125
