@@ -54,7 +54,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     fun sortTypeIsInitialized() = ::sortType.isInitialized
 
     fun getFiles(
-        parentId: Int,
+        folderId: Int,
         order: SortType,
         sourceRestrictionType: FolderFilesProvider.SourceRestrictionType,
         userDrive: UserDrive? = null,
@@ -64,12 +64,12 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFolderActivitiesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            tailrec suspend fun recursiveDownload(parentId: Int, isFirstPage: Boolean) {
+            tailrec suspend fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
                 getFilesJob.ensureActive()
 
                 val folderFilesProviderResult = FolderFilesProvider.getFiles(
                     FolderFilesProvider.FolderFilesProviderArgs(
-                        folderId = parentId,
+                        folderId = folderId,
                         isFirstPage = isFirstPage,
                         order = order,
                         sourceRestrictionType = sourceRestrictionType,
@@ -102,11 +102,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                                 )
                             )
                         }
-                        recursiveDownload(parentId, isFirstPage = false)
+                        recursiveDownload(folderId, isFirstPage = false)
                     }
                 }
             }
-            recursiveDownload(parentId, isFirstPage = true)
+            recursiveDownload(folderId, isFirstPage = true)
         }
     }
 

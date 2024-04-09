@@ -267,7 +267,7 @@ object FileController {
         moreTransaction: (() -> Unit)? = null
     ) {
         realm.executeTransaction {
-            if (oldFile?.isUsable() == true) keepOldLocalFilesData(oldFile, newFile)
+            if (oldFile?.isUsable() == true) newFile.keepOldLocalFilesData(oldFile)
             moreTransaction?.invoke()
             it.insertOrUpdate(newFile)
         }
@@ -316,7 +316,7 @@ object FileController {
         }
     }
 
-    fun saveFiles(
+    private fun saveFiles(
         folder: File,
         files: List<File>,
         replaceOldData: Boolean = false,
@@ -519,7 +519,7 @@ object FileController {
                 }
                 files.forEach { file ->
                     realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.let { realmFile ->
-                        keepOldLocalFilesData(realmFile, file)
+                        file.keepOldLocalFilesData(realmFile)
                     }
                     folder.children.add(file)
                 }
@@ -535,7 +535,7 @@ object FileController {
                 fileActivity.file?.let { file ->
                     realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()
                 }?.let { localFile ->
-                    fileActivity.file?.let { keepOldLocalFilesData(localFile, it) }
+                    fileActivity.file?.keepOldLocalFilesData(localFile)
                 }
                 realm.insertOrUpdate(fileActivity)
             }
@@ -558,7 +558,7 @@ object FileController {
     private fun RealmList<File>.addAll(realm: Realm, files: List<File>) {
         files.forEach { file ->
             realm.where(File::class.java).equalTo(File::id.name, file.id).findFirst()?.also { managedFile ->
-                keepOldLocalFilesData(managedFile, file)
+                file.keepOldLocalFilesData(managedFile)
             }
             add(file)
         }
@@ -640,11 +640,11 @@ object FileController {
     }
 
     private fun keepSubFolderChildren(localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
-        val oldChildren = localFolderChildren?.filter { it.children.isNotEmpty() || it.isOffline }?.associateBy { it.id }
+        val oldChildren = localFolderChildren?.filter { it.isFolder() || it.isOffline }?.associateBy { it.id }
         remoteFolderChildren.forEach { newFile ->
             oldChildren?.get(newFile.id)?.let { oldFile ->
                 newFile.apply {
-                    if (oldFile.isFolder()) children = oldFile.children
+                    if (oldFile.isFolder()) newFile.keepOldLocalFilesData(oldFile)
                     isOffline = oldFile.isOffline
                 }
             }
@@ -750,14 +750,13 @@ object FileController {
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }
 
-    private fun keepOldLocalFilesData(oldFile: File, newFile: File) {
-        newFile.apply {
-            children = oldFile.children
-            isComplete = oldFile.isComplete
-            isOffline = oldFile.isOffline
-            responseAt = oldFile.responseAt
-            versionCode = oldFile.versionCode
-        }
+    private fun File.keepOldLocalFilesData(oldFile: File) {
+        children = oldFile.children
+        cursor = oldFile.cursor
+        isComplete = oldFile.isComplete
+        isOffline = oldFile.isOffline
+        responseAt = oldFile.responseAt
+        versionCode = oldFile.versionCode
     }
 
     private fun RealmQuery<File>.getSortQueryByOrder(order: SortType): RealmQuery<File> {
