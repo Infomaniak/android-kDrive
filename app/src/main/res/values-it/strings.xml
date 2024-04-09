@@ -181,6 +181,7 @@
     <string name="categoryWork">Lavoro</string>
     <string name="cloudStorageMissingPermissionNotifDescription">L’app non può essere eseguita in background a causa di un’autorizzazione mancante.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Impossibile effettuare la ricerca, non è stato selezionato nessun drive</string>
+    <string name="commonDocumentsDescription">Questo spazio appartiene a %s e centralizza i file comuni della vostra organizzazione.</string>
     <string name="commonFolderDescription">Condividi questa cartella con utenti del kDrive %s</string>
     <string name="commonFolderTitle">Cartella comune</string>
     <string name="contentDescriptionIsSelected">È selezionata</string>

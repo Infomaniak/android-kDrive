@@ -181,6 +181,7 @@
     <string name="categoryWork">Trabajo</string>
     <string name="cloudStorageMissingPermissionNotifDescription">La aplicación no se puede ejecutar en segundo plano porque falta un permiso.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">No se puede buscar. No se ha seleccionado ningún drive</string>
+    <string name="commonDocumentsDescription">Este espacio pertenece a %s y centraliza los archivos comunes de su organización.</string>
     <string name="commonFolderDescription">Comparte esta carpeta con los usuarios del kDrive %s</string>
     <string name="commonFolderTitle">Carpeta común</string>
     <string name="contentDescriptionIsSelected">Está seleccionado</string>

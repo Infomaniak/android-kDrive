@@ -219,9 +219,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         with(binding) {
             swipeRefreshLayout.setOnRefreshListener(this@FileListFragment)
-            setToolbarTitle()
             ViewCompat.requestApplyInsets(fileListCoordinator) // Restore coordinator state
         }
+        setToolbarTitle()
+        setPublicFolderSubtitle()
 
         setupFileAdapter()
 
@@ -504,6 +505,20 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
+
+    private fun setPublicFolderSubtitle() {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val shouldDisplaySubtitle = fileListViewModel.shouldDisplaySubtitle(folderId, userDrive)
+
+            val driveName = AccountUtils.getCurrentDrive()?.driveAccount?.name
+            Dispatchers.Main {
+                binding.publicFolderSubtitle.apply {
+                    isVisible = shouldDisplaySubtitle && driveName != null
+                    if (isVisible) text = getString(R.string.commonDocumentsDescription, driveName)
+                }
+            }
+        }
+    }
 
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(
