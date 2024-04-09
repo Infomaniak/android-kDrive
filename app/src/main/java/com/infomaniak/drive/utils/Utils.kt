@@ -263,6 +263,29 @@ object Utils {
         return openWithIntentExceptkDrive(uri, contentResolver.getType(cloudUri), flags)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun Context.intentExcludingPdfReader(openWithIntent: Intent): Intent {
+        val components = arrayOf(ComponentName(this, PreviewPDFActivity::class.java))
+        return Intent.createChooser(openWithIntent, null).putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, components)
+    }
+
+    private fun Context.intentWithInitialComponent(openWithIntent: Intent): Intent {
+        val openWithIntentLists = mutableListOf<Intent>()
+        packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
+            val resInfoPackageName = resInfo.activityInfo.packageName
+            if (!resInfoPackageName.lowercase().contains(packageName)) {
+                with(Intent(openWithIntent)) {
+                    setPackage(resInfoPackageName)
+                    openWithIntentLists.add(this)
+                }
+            }
+        }
+
+        return Intent.createChooser(openWithIntentLists.removeAt(0), getString(R.string.openWith)).apply {
+            putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
+        }
+    }
+
     fun Context.openWithIntentExceptkDrive(uri: Uri, type: String?, flags: Int): Intent {
         val openWithIntent = Intent().apply {
             action = Intent.ACTION_VIEW
@@ -274,34 +297,10 @@ object Utils {
         // Title in the chooser might not be displayed, at the discretion of the brand manufacturer
         // So we keep the ACTION_VIEW for every type of files EXCEPT PDF files
         return if (type == "application/pdf") {
-
-            @RequiresApi(Build.VERSION_CODES.N)
-            fun intentExcludingPdfReader(): Intent {
-                val components = arrayOf(ComponentName(applicationContext, PreviewPDFActivity::class.java))
-                return Intent.createChooser(openWithIntent, null).putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, components)
-            }
-
-            fun intentWithInitialComponent(): Intent {
-                val openWithIntentLists = mutableListOf<Intent>()
-                packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
-                    val resInfoPackageName = resInfo.activityInfo.packageName
-                    if (!resInfoPackageName.lowercase().contains(packageName)) {
-                        with(Intent(openWithIntent)) {
-                            setPackage(resInfoPackageName)
-                            openWithIntentLists.add(this)
-                        }
-                    }
-                }
-
-                return Intent.createChooser(openWithIntentLists.removeAt(0), getString(R.string.openWith)).apply {
-                    putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
-                }
-            }
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                intentExcludingPdfReader()
+                applicationContext.intentExcludingPdfReader(openWithIntent)
             } else {
-                intentWithInitialComponent()
+                applicationContext.intentWithInitialComponent(openWithIntent)
             }
         } else {
             openWithIntent
