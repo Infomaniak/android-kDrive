@@ -219,7 +219,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
-        setPageNumber(getString(R.string.previewPdfPages, currentPage + 1, totalPage))
+        setPageNumber(currentPage + 1, totalPage)
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {

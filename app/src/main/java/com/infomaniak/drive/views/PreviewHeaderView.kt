@@ -108,8 +108,8 @@ class PreviewHeaderView @JvmOverloads constructor(
         binding.pageNumberChip.isVisible = isVisible
     }
 
-    fun setPageNumberValue(pageNumberValue: String) {
-        binding.pageNumberChip.text = pageNumberValue
+    fun setPageNumberValue(currentPage: Int, totalPage: Int) {
+        binding.pageNumberChip.text = context.getString(R.string.previewPdfPages, currentPage, totalPage)
     }
 
     fun toggleVisibility(isVisible: Boolean) {

@@ -450,8 +450,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             getHeader()?.setPageNumberVisibility(isVisible)
         }
 
-        fun Fragment.setPageNumber(value: String) {
-            getHeader()?.setPageNumberValue(value)
+        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
+            getHeader()?.setPageNumberValue(currentPage, totalPage)
         }
 
         private fun Fragment.getHeader(): PreviewHeaderView? {
