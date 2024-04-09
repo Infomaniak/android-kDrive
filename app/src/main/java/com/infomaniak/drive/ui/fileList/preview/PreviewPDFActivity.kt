@@ -38,6 +38,7 @@ import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.getFileNameAndSize
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 
 class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
@@ -121,7 +122,11 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
             }
         }.onFailure {
             showSnackbar(R.string.errorFileNotFound)
-            Sentry.captureException(it)
+            Sentry.withScope { scope ->
+                scope.level = SentryLevel.ERROR
+                scope.setExtra("exception", it.stackTraceToString())
+                Sentry.captureMessage("Exception while printing a PDF")
+            }
         }.getOrNull()
     }
 
