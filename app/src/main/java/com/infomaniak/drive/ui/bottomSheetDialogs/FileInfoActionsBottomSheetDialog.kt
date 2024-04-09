@@ -383,6 +383,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
     }
 
+    override fun shareFile() = Unit
+    override fun saveToKDrive() = Unit
+
     companion object {
 
         fun Fragment.openManageCategoriesBottomSheetDialog(filesIds: IntArray, userDrive: UserDrive? = null) {

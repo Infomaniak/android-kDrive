@@ -148,4 +148,16 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
             setGraph(R.navigation.view_pdf, PreviewPDFFragmentArgs(fileUri = externalFileUri).toBundle())
         }
     }
+
+    override fun displayInfoClicked() = Unit
+    override fun fileRightsClicked() = Unit
+    override fun goToFolder() = Unit
+    override fun manageCategoriesClicked(fileId: Int) = Unit
+    override fun onCacheAddedToOffline() = Unit
+    override fun onDeleteFile(onApiResponse: () -> Unit) = Unit
+    override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) = Unit
+    override fun onLeaveShare(onApiResponse: () -> Unit) = Unit
+    override fun onMoveFile(destinationFolder: File) = Unit
+    override fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
+    override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) = Unit
 }

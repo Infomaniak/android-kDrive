@@ -451,9 +451,9 @@ class FileInfoActionsView @JvmOverloads constructor(
             currentContext.trackFileActionEvent(name, value = value?.toFloat())
         }
 
-        fun shareFile() = Unit
-        fun saveToKDrive() = Unit
-        fun openWith() = Unit
+        fun shareFile()
+        fun saveToKDrive()
+        fun openWith()
 
         @CallSuper
         fun printClicked() = trackFileActionEvent("printPdf")
@@ -467,24 +467,23 @@ class FileInfoActionsView @JvmOverloads constructor(
         @CallSuper
         fun colorFolderClicked(color: String?) = currentContext.trackEvent("colorFolder", "switch")
 
-        fun displayInfoClicked() = Unit
+        fun displayInfoClicked()
 
         @CallSuper
         fun downloadFileClicked() = trackFileActionEvent("download")
 
         @CallSuper
         fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
-        fun fileRightsClicked() = Unit
-        fun goToFolder() = Unit
-        fun manageCategoriesClicked(fileId: Int) = Unit
-        fun onCacheAddedToOffline() = Unit
-        fun onDeleteFile(onApiResponse: () -> Unit) = Unit
-        fun onDuplicateFile(result: String, onApiResponse: () -> Unit) = Unit
-        fun onLeaveShare(onApiResponse: () -> Unit) = Unit
-        fun onMoveFile(destinationFolder: File) = Unit
-        fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
-
-        fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) = Unit
+        fun fileRightsClicked()
+        fun goToFolder()
+        fun manageCategoriesClicked(fileId: Int)
+        fun onCacheAddedToOffline()
+        fun onDeleteFile(onApiResponse: () -> Unit)
+        fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
+        fun onLeaveShare(onApiResponse: () -> Unit)
+        fun onMoveFile(destinationFolder: File)
+        fun onRenameFile(newName: String, onApiResponse: () -> Unit)
+        fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
 
         @CallSuper
         fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent("shareLink")

@@ -444,6 +444,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
+    override fun shareFile() = Unit
+    override fun saveToKDrive() = Unit
+    override fun onCacheAddedToOffline() = Unit
+
     companion object {
 
         fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
