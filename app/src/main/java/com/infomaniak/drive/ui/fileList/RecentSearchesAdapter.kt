@@ -29,6 +29,7 @@ import com.infomaniak.drive.ui.fileList.RecentSearchesAdapter.RecentSearchesView
 class RecentSearchesAdapter(
     var searches: ArrayList<String>,
     private val onSearchClicked: (search: String) -> Unit,
+    private val onListEmpty: () -> Unit,
 ) : Adapter<RecentSearchesViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentSearchesViewHolder =
@@ -41,6 +42,10 @@ class RecentSearchesAdapter(
         searchResultCard.apply {
             setCorners(position, itemCount)
             setOnClickListener { onSearchClicked(search) }
+        }
+        delete.setOnClickListener {
+            setItems(searches.filterIndexed { index, _ -> index != position })
+            if (searches.isEmpty()) onListEmpty()
         }
         searchResultText.text = search
     }
@@ -65,11 +70,9 @@ class RecentSearchesAdapter(
 
         override fun areContentsTheSame(oldIndex: Int, newIndex: Int): Boolean {
             return when {
-                oldIndex == 0 && newIndex != 0 -> false // Remove top corners radius
-                oldIndex != 0 && newIndex == 0 -> false // Add top Corners radius
-                oldIndex == oldList.lastIndex && newIndex != newList.lastIndex -> false // Remove bottom corners radius
-                oldIndex != oldList.lastIndex && newIndex == newList.lastIndex -> false // Add bottom corners radius
-                else -> true // Don't update
+                oldIndex != newIndex -> false
+                oldList.size != newList.size -> false
+                else -> true
             }
         }
     }
