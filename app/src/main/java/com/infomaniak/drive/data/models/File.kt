@@ -24,6 +24,7 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -57,7 +58,10 @@ import java.util.Date
 
 @Parcelize
 open class File(
-    @PrimaryKey var id: Int = 0,
+    @PrimaryKey
+    @Expose(serialize = false, deserialize = false)
+    var uid: String = "", // Need migration for any update
+    var id: Int = 0,
     @SerializedName("parent_id")
     var parentId: Int = 0,
     @SerializedName("drive_id")
@@ -135,6 +139,10 @@ open class File(
 
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
+
+    fun initUid() {
+        this.uid = "${id}_$driveId"
+    }
 
     fun isManagedAndValidByRealm() = isManaged && isValid
 
