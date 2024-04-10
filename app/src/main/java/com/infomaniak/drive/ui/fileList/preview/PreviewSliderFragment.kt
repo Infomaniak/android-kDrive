@@ -244,6 +244,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             context?.openWith(currentFile, userDrive)
         }
 
+        getBackNavigationResult<Int>(DownloadProgressDialog.PRINT_PDF) {
+            requireContext().printPdf(file = currentFile.getCacheFile(requireContext()))
+        }
+
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
         }
@@ -256,6 +260,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             toggleBottomSheet(shouldShow = isOverlayShown)
             requireActivity().toggleSystemBar(show = isOverlayShown)
         }
+    }
+
+    fun onFilePreviewEvent(isPasswordProtected: Boolean) {
+        binding.bottomSheetFileInfos.isPrintingHidden(isPasswordProtected)
     }
 
     override fun displayInfoClicked() {
@@ -349,6 +357,20 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             } else {
                 showSnackbar(apiResponse.translatedError)
             }
+        }
+    }
+
+    override fun printClicked() {
+        super.printClicked()
+        requireContext().printPdf {
+            safeNavigate(
+                PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
+                    fileId = currentFile.id,
+                    fileName = currentFile.name,
+                    userDrive = userDrive,
+                    printPdf = true,
+                )
+            )
         }
     }
 
@@ -473,6 +495,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         fun Fragment.openWithClicked() {
             (parentFragment as? PreviewSliderFragment)?.openWith()
+        }
+
+        fun Fragment.onFilePreviewEvent(isPasswordProtected: Boolean) {
+            (parentFragment as? PreviewSliderFragment)?.onFilePreviewEvent(isPasswordProtected)
         }
     }
 }

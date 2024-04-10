@@ -21,6 +21,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.print.PrintAttributes
+import android.print.PrintManager
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -31,6 +33,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
+import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
 import com.infomaniak.lib.core.utils.lightNavigationBar
@@ -103,5 +106,19 @@ fun Context.openWith(
         externalFileUri?.apply {
             openWith(this, contentResolver.getType(this), Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
+    }
+}
+
+fun Context.printPdf(
+    file: IOFile? = null,
+    onDownloadFile: (() -> Unit)? = null,
+) {
+    onDownloadFile?.apply {
+        invoke()
+    } ?: run {
+        val fileName = file!!.name
+        val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+        val printAdapter = PDFDocumentAdapter(fileName, file)
+        printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
     }
 }

@@ -34,6 +34,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.onFilePreviewEvent
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
@@ -159,6 +160,7 @@ class PreviewPDFFragment : PreviewFragment() {
                         swipeHorizontal(false)
                         touchPriority(true)
                         onLoad { pageCount ->
+                            onFilePreviewEvent(isPasswordProtected = false)
                             binding.downloadLayout.root.isGone = true
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
@@ -192,6 +194,7 @@ class PreviewPDFFragment : PreviewFragment() {
     private fun onPdfPasswordError() {
         // This is to handle the case where we have opened a PDF with a password so in order
         // for the user to be able to open it, we display the error layout
+        onFilePreviewEvent(isPasswordProtected = true)
         binding.downloadLayout.root.isVisible = true
         isPasswordProtected = true
         if (passwordDialog.isAdded) onPDFLoadError() else displayError()

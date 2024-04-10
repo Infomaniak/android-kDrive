@@ -1004,6 +1004,10 @@
             android:name="isOpenBookmark"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="printPdf"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <dialog

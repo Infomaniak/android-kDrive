@@ -100,6 +100,10 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         setupBackActionHandler()
     }
 
+    fun isPrintingVisible(isVisible: Boolean) {
+        binding.fileInfoActionsView.isPrintingHidden(isVisible)
+    }
+
     private fun setupBackActionHandler() {
         getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
             context?.openWith(currentFile)
