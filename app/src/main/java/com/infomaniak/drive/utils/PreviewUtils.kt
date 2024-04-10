@@ -44,8 +44,8 @@ fun Activity.setupBottomSheetFileBehavior(
     bottomSheetBehavior.apply {
         isHideable = true
         this.isDraggable = isDraggable
-        // This need to be true for ExternalFileInfoActionsView, otherwise, the BottomSheet can go to
-        // the top of the screen (see Trello card eUJkzgDU). We need to remove this.
+        // TODO This need to be true for ExternalFileInfoActionsView, otherwise, the BottomSheet can go to the top of the screen
+        //  (see Trello card eUJkzgDU). We need to remove this.
         this.isFitToContents = isFitToContents
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
