@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.app.Application
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,16 +29,19 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.getPageNumberChip
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.pdfview.PDFView
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import com.shockwave.pdfium.PdfPasswordException
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +57,10 @@ class PreviewPDFFragment : PreviewFragment() {
     private val passwordDialog: PasswordDialogFragment by lazy {
         PasswordDialogFragment().apply { onPasswordEntered = ::showPdf }
     }
+
+    private val navigationArgs: PreviewPDFFragmentArgs by navArgs()
+
+    private val isExternalPDF by lazy { navigationArgs.fileUri != null }
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
@@ -75,13 +83,22 @@ class PreviewPDFFragment : PreviewFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (noCurrentFile()) return@with
+        if (noCurrentFile() && !isExternalPDF) return@with
 
-        container.layoutTransition?.setAnimateParentHierarchy(false)
+        if (isExternalPDF) {
+            showPdf()
+        } else {
+            container.layoutTransition?.setAnimateParentHierarchy(false)
 
-        fileIcon.setImageResource(file.getFileType().icon)
-        fileName.text = file.name
-        downloadProgress.isVisible = true
+            fileIcon.setImageResource(file.getFileType().icon)
+            fileName.text = file.name
+            downloadProgress.isVisible = true
+
+            previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
+                if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
+                downloadProgress.progress = progress
+            }
+        }
 
         previewDescription.apply {
             setText(R.string.previewDownloadIndication)
@@ -93,11 +110,6 @@ class PreviewPDFFragment : PreviewFragment() {
         bigOpenWithButton.apply {
             isGone = true
             setOnClickListener { showPasswordDialog() }
-        }
-
-        previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
-            if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
-            downloadProgress.progress = progress
         }
     }
 
@@ -130,7 +142,7 @@ class PreviewPDFFragment : PreviewFragment() {
         if (!binding.pdfView.isShown || isPasswordProtected) {
             lifecycleScope.launch {
                 withResumed {
-                    with(binding.pdfView.fromFile(pdfFile)) {
+                    with(getConfigurator(navigationArgs.fileUri, pdfFile)) {
                         password(password)
                         disableLongPress()
                         enableAnnotationRendering(true)
@@ -164,10 +176,14 @@ class PreviewPDFFragment : PreviewFragment() {
                         load()
                     }
 
-                    getPageNumberChip()?.isVisible = true
+                    setPageNumberChipVisibility(isVisible = true)
                 }
             }
         }
+    }
+
+    private fun getConfigurator(fileUri: Uri?, pdfFile: IOFile?): PDFView.Configurator {
+        return if (isExternalPDF) binding.pdfView.fromUri(fileUri) else binding.pdfView.fromFile(pdfFile)
     }
 
     private fun onPdfPasswordError() {
@@ -186,7 +202,7 @@ class PreviewPDFFragment : PreviewFragment() {
             bigOpenWithButton.isVisible = true
         }
 
-        previewSliderViewModel.pdfIsDownloading.value = false
+        if (!isExternalPDF) previewSliderViewModel.pdfIsDownloading.value = false
         isDownloading = false
     }
 
@@ -203,7 +219,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private fun updatePageNumber(currentPage: Int = 1, totalPage: Int) {
-        getPageNumberChip()?.text = getString(R.string.previewPdfPages, currentPage + 1, totalPage)
+        setPageNumber(currentPage + 1, totalPage)
     }
 
     private fun downloadPdf() = with(binding.downloadLayout) {

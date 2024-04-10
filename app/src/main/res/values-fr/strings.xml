@@ -25,6 +25,7 @@
     <string name="accessDeniedDescriptionIsAdmin">Souhaitez-vous modifier les droits de ce dossier pour y accéder ? Vous serez ajouté aux utilisateurs ayant accès à ce dosser. Les autres utilisateurs de ce dossier seront notifiés par e-mail.</string>
     <string name="accessDeniedDescriptionIsNotAdmin">Veuillez contacter un administrateur du kDrive pour modifier vos droits.</string>
     <string name="accessDeniedTitle">Vous n’avez pas l’autorisation d’accéder à ce dossier.</string>
+    <string name="actionPrint">Imprimer</string>
     <string name="addCategoriesTitle">Ajouter des catégories</string>
     <string name="addPassword">Protéger avec un mot de passe</string>
     <string name="alertRemoveUserDescription">Êtes vous sûr(e) de vouloir retirer l’utilisateur “%s” de cette application ?</string>
@@ -451,6 +452,7 @@
     <string name="homeTitle">Accueil</string>
     <string name="inputExpirationDate">Date d’expiration</string>
     <string name="inputExpirationTime">Heure d’expiration</string>
+    <string name="kDrivePdfViewer">Lecteur PDF de kDrive</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="locateButton">Localiser</string>
     <string name="manageCategoriesCreateTitle">Créer %s</string>

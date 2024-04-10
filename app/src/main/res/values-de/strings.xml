@@ -25,6 +25,7 @@
     <string name="accessDeniedDescriptionIsAdmin">Wollen Sie die Rechte dieses Ordners ändern, um darauf zuzugreifen? Sie werden zu den Benutzern hinzugefügt, die Zugang zu diesem Ordner besitzen. Die anderen Benutzer dieses Ordners werden per E-Mail benachrichtigt.</string>
     <string name="accessDeniedDescriptionIsNotAdmin">Bitte wenden Sie sich an einen Administrator des kDrive, um Ihre Rechte zu ändern.</string>
     <string name="accessDeniedTitle">Sie haben nicht die Berechtigung für den Zugriff auf diesen Ordner.</string>
+    <string name="actionPrint">Drucken</string>
     <string name="addCategoriesTitle">Kategorien hinzufügen</string>
     <string name="addPassword">Mit Passwort schützen</string>
     <string name="alertRemoveUserDescription">Sind Sie sicher, den Benutzer “%s” von dieser Anwendung entfernen zu wollen?</string>
@@ -451,6 +452,7 @@
     <string name="homeTitle">Start</string>
     <string name="inputExpirationDate">Ablaufdatum</string>
     <string name="inputExpirationTime">Verfallszeit</string>
+    <string name="kDrivePdfViewer">kDrive PDF-Betrachter</string>
     <string name="lastEditsTitle">Letzte Änderungen</string>
     <string name="locateButton">Finden Sie</string>
     <string name="manageCategoriesCreateTitle">%s erstellen</string>
