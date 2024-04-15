@@ -22,6 +22,7 @@ import android.app.ActivityManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
@@ -51,6 +52,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
 import coil.load
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -436,8 +439,7 @@ fun LayoutSwitchDriveBinding.setDriveHeader(currentDrive: Drive) {
     switchDriveButton.text = currentDrive.name
 }
 
-fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
-
+private fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
     AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
 
     if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
@@ -456,6 +458,26 @@ fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
             }
         },
     )
+}
+
+fun Fragment.setupDriveToolbar(
+    collapsingToolbarLayout: CollapsingToolbarLayout,
+    switchDriveLayout: LayoutSwitchDriveBinding,
+    appBar: AppBarLayout,
+) {
+    collapsingToolbarLayout.title = AccountUtils.getCurrentDrive()!!.name
+    switchDriveLayout.setupSwitchDriveButton(this)
+
+    appBar.addOnOffsetChangedListener { _, verticalOffset ->
+        val fullyExpanded = verticalOffset == 0
+        switchDriveLayout.root.isVisible = fullyExpanded
+
+        if (fullyExpanded) {
+            collapsingToolbarLayout.setExpandedTitleTextColor(ColorStateList.valueOf(Color.TRANSPARENT))
+        } else {
+            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarExpandedTitleTextAppearance)
+        }
+    }
 }
 
 fun Fragment.observeAndDisplayNetworkAvailability(
