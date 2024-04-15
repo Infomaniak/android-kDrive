@@ -28,6 +28,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
@@ -57,13 +58,16 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
         switchDriveLayout.setupSwitchDriveButton(this@HomeFragment)
 
-        searchViewCard.searchView.isGone = true
-        searchViewCard.searchViewText.isVisible = true
         ViewCompat.requestApplyInsets(homeCoordinator)
 
-        searchViewCard.root.setOnClickListener {
-            ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
-            safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.searchItem) {
+                ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
+                safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
+                true
+            } else {
+                false
+            }
         }
 
         mainViewModel.deleteFileFromHome.observe(viewLifecycleOwner) { fileDeleted -> mustRefreshUi = fileDeleted }
