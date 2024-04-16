@@ -188,13 +188,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                             val fileName: String = if (isExternalPDF) externalFileName else file.name
                             requireContext().printPdf(fileName = fileName, bitmaps = pagesAsBitmap)
                         }
-                        onError { exception ->
-                            if (exception is PdfPasswordException) {
-                                isFilePasswordProtected(true)
-                                shouldHidePrintOption(true)
-                                onPdfPasswordError()
-                            }
-                        }
+                        onError { exception -> handleException(exception) }
                         onAttach {
                             // This is to handle the case where we swipe in the ViewPager and we want to go back to
                             // a previously opened PDF. In that case, we want to display the default loader instead of
@@ -207,6 +201,14 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                     setPageNumberChipVisibility(isVisible = true)
                 }
             }
+        }
+    }
+
+    private fun handleException(exception: Throwable) {
+        if (exception is PdfPasswordException) {
+            isFilePasswordProtected(true)
+            shouldHidePrintOption(true)
+            onPdfPasswordError()
         }
     }
 

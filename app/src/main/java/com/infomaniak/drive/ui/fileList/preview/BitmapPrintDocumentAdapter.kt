@@ -30,7 +30,6 @@ import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.pdf.PrintedPdfDocument
 import java.io.FileOutputStream
-import java.io.IOException
 
 class BitmapPrintDocumentAdapter(
     private val context: Context,
