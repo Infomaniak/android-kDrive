@@ -219,6 +219,7 @@ class SearchFragment : FileListFragment() {
         recentSearchesAdapter = RecentSearchesAdapter(
             searches = ArrayList(recentSearches),
             onSearchClicked = searchViewCard.searchView::setText,
+            onListEmpty = { recentSearchesBinding.root.isGone = true }
         ).also {
             recentSearchesBinding.recentSearchesRecyclerView.adapter = it
             recentSearchesBinding.recentSearchesContainer.isGone = recentSearches.isEmpty()

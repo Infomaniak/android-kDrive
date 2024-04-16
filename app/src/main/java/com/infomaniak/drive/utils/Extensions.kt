@@ -30,7 +30,9 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
-import android.transition.*
+import android.transition.AutoTransition
+import android.transition.TransitionManager
+import android.transition.TransitionSet
 import android.util.Patterns
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -39,11 +41,9 @@ import android.widget.ImageView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.view.children
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle.*
+import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -58,6 +58,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
+import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -87,6 +88,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
+import io.sentry.Sentry
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -127,6 +129,23 @@ fun Cursor.uri(contentUri: Uri): Uri {
 }
 
 fun Number.isPositive(): Boolean = toLong() > 0
+
+fun Activity.setupStatusBarForPreview() {
+    window?.apply {
+        statusBarColor = ContextCompat.getColor(this@setupStatusBarForPreview, R.color.previewBackgroundTransparent)
+
+        lightStatusBar(false)
+        toggleEdgeToEdge(true)
+    }
+}
+
+fun Activity.toggleSystemBar(show: Boolean) {
+    ViewCompat.getWindowInsetsController(window.decorView)?.apply {
+        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        val systemBars = WindowInsetsCompat.Type.systemBars()
+        if (show) show(systemBars) else hide(systemBars)
+    }
+}
 
 fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -396,6 +415,22 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
     }
 }
 
+fun Context.shareFile(getUriToShare: () -> Uri?) {
+    trackFileActionEvent("sendFileCopy")
+
+    val shareIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        putExtra(Intent.EXTRA_STREAM, getUriToShare())
+        type = "*/*"
+    }
+
+    runCatching {
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.buttonSendCopy)))
+    }.onFailure {
+        Sentry.captureException(it)
+    }
+}
 
 fun LayoutSwitchDriveBinding.setDriveHeader(currentDrive: Drive) {
     switchDriveButton.text = currentDrive.name

@@ -44,13 +44,33 @@
             style="@style/Subtitle2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/marginStandardMedium"
+            android:layout_marginStart="@dimen/marginStandardMedium"
+            android:layout_marginEnd="@dimen/marginStandardSmall"
             android:ellipsize="end"
             android:maxLines="1"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/delete"
             app:layout_constraintStart_toEndOf="@id/searchResultIcon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Search test" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/delete"
+            style="@style/IconButton"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="@string/buttonClear"
+            android:insetLeft="@dimen/marginStandardSmall"
+            android:insetTop="@dimen/marginStandardSmall"
+            android:insetRight="@dimen/marginStandardSmall"
+            android:insetBottom="@dimen/marginStandardSmall"
+            app:icon="@drawable/ic_close"
+            app:iconSize="15dp"
+            app:iconTint="@color/iconColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -25,6 +25,7 @@
     <string name="accessDeniedDescriptionIsAdmin">¿Deseas cambiar los derechos de esta carpeta para acceder? Se te añadirá a los usuarios con acceso a esta carpeta. Se notificará por correo electrónico al resto de usuarios de esta carpeta.</string>
     <string name="accessDeniedDescriptionIsNotAdmin">Contacta con un administrador del kDrive para modificar tus derechos.</string>
     <string name="accessDeniedTitle">No tienes autorización para acceder a esta carpeta.</string>
+    <string name="actionPrint">Imprimir</string>
     <string name="addCategoriesTitle">Añadir categorías</string>
     <string name="addPassword">Proteger mediante contraseña</string>
     <string name="alertRemoveUserDescription">¿Estás seguro/a de que deseas retirar al usuario “%s” de esta aplicación?</string>
@@ -452,6 +453,7 @@
     <string name="homeTitle">Recepción</string>
     <string name="inputExpirationDate">Fecha de caducidad</string>
     <string name="inputExpirationTime">Tiempo de expiración</string>
+    <string name="kDrivePdfViewer">Visor de PDF kDrive</string>
     <string name="lastEditsTitle">Últimas modificaciones</string>
     <string name="localizedFilenamePrivateSpace">Mis archivos</string>
     <string name="localizedFilenameTeamSpace">Archivos de la organización</string>

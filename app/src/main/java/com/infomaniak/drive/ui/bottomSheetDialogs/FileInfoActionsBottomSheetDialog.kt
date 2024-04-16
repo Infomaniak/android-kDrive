@@ -47,7 +47,6 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
-import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
@@ -63,8 +62,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
-    override lateinit var currentFile: File
     override val ownerFragment = this
+    override val currentContext by lazy { requireContext() }
+    override lateinit var currentFile: File
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -317,17 +317,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun openWithClicked() {
-        super.openWithClicked()
-        if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
-            showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
-            findNavController().popBackStack()
-        } else {
+    override fun openWith() {
+        context?.openWith(ownerFragment = ownerFragment, currentFile = currentFile) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
                     fileId = currentFile.id,
                     fileName = currentFile.name,
-                    userDrive = navigationArgs.userDrive
+                    userDrive = navigationArgs.userDrive,
                 )
             )
         }
@@ -386,6 +382,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action)
         setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
     }
+
+    override fun shareFile() = Unit
+    override fun saveToKDrive() = Unit
 
     companion object {
 

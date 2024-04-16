@@ -94,7 +94,10 @@ android {
         }
     }
 
-    buildFeatures { viewBinding true }
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
 
     testOptions.unitTests.all {
         testLogging {
