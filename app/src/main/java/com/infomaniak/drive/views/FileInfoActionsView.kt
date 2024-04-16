@@ -137,7 +137,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 addFavorites.isVisible = rights?.canUseFavorite == true
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
                 deleteFile.isVisible = rights?.canDelete == true && !file.isImporting()
-                isPrintingHidden(file.extensionType == ExtensionType.PDF.value)
+                setPrintVisibility(isGone = file.extensionType != ExtensionType.PDF.value)
                 downloadFile.isVisible = rights?.canRead == true
                 duplicateFile.isGone = rights?.canRead == false
                         || isSharedWithMe
@@ -172,18 +172,18 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    fun isPrintingHidden(isGone: Boolean) {
+    fun setPrintVisibility(isGone: Boolean) {
         binding.print.isGone = isGone
+    }
+
+    fun scrollToTop() {
+        binding.scrollView.fullScroll(View.FOCUS_UP)
     }
 
     private fun isGoToFolderVisible(): Boolean {
         val previousDestinationId = ownerFragment.findNavController().previousBackStackEntry?.destination?.id
         val parentFile = FileController.getParentFile(currentFile.id)
         return previousDestinationId != R.id.fileListFragment && parentFile != null
-    }
-
-    fun scrollToTop() {
-        binding.scrollView.fullScroll(View.FOCUS_UP)
     }
 
     private fun openAddFileBottom() {

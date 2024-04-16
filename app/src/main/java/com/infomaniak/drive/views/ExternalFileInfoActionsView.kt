@@ -21,6 +21,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.view.isGone
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ViewExternalFileInfoActionsBinding
 import com.infomaniak.drive.utils.setFileItem
@@ -36,6 +37,10 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
 
     fun updateWithExternalFile(file: File) {
         binding.fileView.setFileItem(file)
+    }
+
+    fun isPrintingHidden(isGone: Boolean) {
+        binding.print.isGone = isGone
     }
 
     fun initOnClickListener(onItemClickListener: OnItemClickListener) = with(binding) {

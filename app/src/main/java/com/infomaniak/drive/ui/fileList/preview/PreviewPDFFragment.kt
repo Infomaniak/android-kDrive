@@ -34,6 +34,9 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.initPDFPrintListener
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.isFilePasswordProtected
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.shouldHidePrintOption
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.onFilePreviewEvent
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
@@ -41,6 +44,7 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
+import com.infomaniak.drive.utils.printPdf
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.pdfview.PDFView
@@ -50,7 +54,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class PreviewPDFFragment : PreviewFragment() {
+class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
@@ -75,6 +79,7 @@ class PreviewPDFFragment : PreviewFragment() {
     }
 
     private var pdfFile: IOFile? = null
+    private var externalFileName: String= ""
     private var isPasswordProtected = false
     private var isDownloading = false
 
@@ -133,6 +138,13 @@ class PreviewPDFFragment : PreviewFragment() {
         super.onPause()
     }
 
+    override fun generatePagesAsBitmaps(fileName: String) {
+        // When we try to generate bitmaps for a password protected file with the default PDF reader, we don't have a file
+        // So we need to pass the file name
+        externalFileName = fileName
+        binding.pdfView.loadPagesForPrinting()
+    }
+
     private fun initViewsForFullscreen(vararg views: View) {
         views.forEach { view ->
             with(view) {
@@ -160,10 +172,11 @@ class PreviewPDFFragment : PreviewFragment() {
                         swipeHorizontal(false)
                         touchPriority(true)
                         onLoad { pageCount ->
-                            onFilePreviewEvent(isPasswordProtected = false)
+                            shouldHidePrintOption(isPasswordProtected = false)
                             binding.downloadLayout.root.isGone = true
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
+                            initPDFPrintListener(this@PreviewPDFFragment)
                         }
                         onPageChange { currentPage, pageCount ->
                             updatePageNumber(
@@ -171,7 +184,17 @@ class PreviewPDFFragment : PreviewFragment() {
                                 totalPage = pageCount
                             )
                         }
-                        onError { exception -> if (exception is PdfPasswordException) onPdfPasswordError() }
+                        onReadyForPrinting { pagesAsBitmap ->
+                            val fileName: String = if (isExternalPDF) externalFileName else file.name
+                            requireContext().printPdf(fileName = fileName, bitmaps = pagesAsBitmap)
+                        }
+                        onError { exception ->
+                            if (exception is PdfPasswordException) {
+                                isFilePasswordProtected(true)
+                                shouldHidePrintOption(true)
+                                onPdfPasswordError()
+                            }
+                        }
                         onAttach {
                             // This is to handle the case where we swipe in the ViewPager and we want to go back to
                             // a previously opened PDF. In that case, we want to display the default loader instead of
@@ -194,7 +217,7 @@ class PreviewPDFFragment : PreviewFragment() {
     private fun onPdfPasswordError() {
         // This is to handle the case where we have opened a PDF with a password so in order
         // for the user to be able to open it, we display the error layout
-        onFilePreviewEvent(isPasswordProtected = true)
+        shouldHidePrintOption(isPasswordProtected = true)
         binding.downloadLayout.root.isVisible = true
         isPasswordProtected = true
         if (passwordDialog.isAdded) onPDFLoadError() else displayError()
@@ -292,4 +315,8 @@ class PreviewPDFFragment : PreviewFragment() {
         private const val HANDLE_PAGE_PDF_PADDING_TOP_DP = 120
         private const val HANDLE_PAGE_PDF_PADDING_BOTTOM_DP = 130
     }
+}
+
+interface PDFPrintListener {
+    fun generatePagesAsBitmaps(fileName: String)
 }

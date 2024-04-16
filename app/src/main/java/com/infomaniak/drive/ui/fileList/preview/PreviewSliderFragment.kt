@@ -72,10 +72,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
     private lateinit var userDrive: UserDrive
     private var isOverlayShown = true
+    private var isFilePasswordProtected = false
 
     override val ownerFragment = this
     override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
+
+    var pdfViewPrintListener: PDFPrintListener? = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -262,8 +265,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    fun onFilePreviewEvent(isPasswordProtected: Boolean) {
-        binding.bottomSheetFileInfos.isPrintingHidden(isPasswordProtected)
+    fun shouldHidePrintOption(isPasswordProtected: Boolean) {
+        binding.bottomSheetFileInfos.setPrintVisibility(isGone = isPasswordProtected)
+    }
+
+    fun isFilePasswordProtected(isPasswordProtected: Boolean) {
+        isFilePasswordProtected = isPasswordProtected
     }
 
     override fun displayInfoClicked() {
@@ -362,15 +369,19 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun printClicked() {
         super.printClicked()
-        requireContext().printPdf {
-            safeNavigate(
-                PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
-                    fileId = currentFile.id,
-                    fileName = currentFile.name,
-                    userDrive = userDrive,
-                    printPdf = true,
+        if (isFilePasswordProtected) {
+            pdfViewPrintListener?.generatePagesAsBitmaps(currentFile.name)
+        } else {
+            requireContext().printPdf {
+                safeNavigate(
+                    PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
+                        fileId = currentFile.id,
+                        fileName = currentFile.name,
+                        userDrive = userDrive,
+                        printPdf = true,
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -497,8 +508,19 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             (parentFragment as? PreviewSliderFragment)?.openWith()
         }
 
-        fun Fragment.onFilePreviewEvent(isPasswordProtected: Boolean) {
-            (parentFragment as? PreviewSliderFragment)?.onFilePreviewEvent(isPasswordProtected)
+        fun Fragment.shouldHidePrintOption(isPasswordProtected: Boolean) {
+            (parentFragment as? PreviewSliderFragment)?.shouldHidePrintOption(isPasswordProtected)
+            (activity as? PreviewPDFActivity)?.shouldHidePrintOption(isPasswordProtected)
+        }
+
+        fun Fragment.initPDFPrintListener(printListener: PDFPrintListener) {
+            (parentFragment as? PreviewSliderFragment)?.pdfViewPrintListener = printListener
+            (activity as? PreviewPDFActivity)?.pdfViewPrintListener = printListener
+        }
+
+        fun Fragment.isFilePasswordProtected(isPasswordProtected: Boolean) {
+            (parentFragment as? PreviewSliderFragment)?.isFilePasswordProtected(isPasswordProtected)
+            (activity as? PreviewPDFActivity)?.isFilePasswordProtected(isPasswordProtected)
         }
     }
 }

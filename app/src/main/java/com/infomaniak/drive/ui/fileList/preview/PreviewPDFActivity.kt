@@ -49,6 +49,8 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     override val currentContext by lazy { this }
     override val currentFile = null
 
+    var pdfViewPrintListener: PDFPrintListener? = null
+
     private val navController by lazy { setupNavController() }
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
 
@@ -61,6 +63,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
 
     private var isOverlayShown = true
+    private var isPdfPasswordProtected = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +80,14 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         }
 
         initBottomSheet()
+    }
+
+    fun isFilePasswordProtected(isPasswordProtected: Boolean) {
+        isPdfPasswordProtected = isPasswordProtected
+    }
+
+    fun shouldHidePrintOption(isPasswordProtected: Boolean) {
+        binding.bottomSheetFileInfos.isPrintingHidden(isPasswordProtected)
     }
 
     private fun initBottomSheet() = with(binding) {
@@ -113,10 +124,14 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     override fun printClicked() {
         super.printClicked()
-        getFileForPrint(externalFileUri)?.let { fileToPrint ->
-            val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
-            val printAdapter = PDFDocumentAdapter(fileName, fileToPrint)
-            printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
+        if (isPdfPasswordProtected) {
+            pdfViewPrintListener?.generatePagesAsBitmaps(fileName)
+        } else {
+            getFileForPrint(externalFileUri)?.let { fileToPrint ->
+                val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+                val printAdapter = PDFDocumentAdapter(fileName, fileToPrint)
+                printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
+            }
         }
     }
 
