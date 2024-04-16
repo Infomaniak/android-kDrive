@@ -30,6 +30,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Position
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -52,6 +53,32 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     var lastItemCount: FileCount? = null
 
     fun sortTypeIsInitialized() = ::sortType.isInitialized
+
+    private val _rootFiles = MutableLiveData<Map<File.VisibilityType, File>>()
+    val rootFiles: LiveData<Map<File.VisibilityType, File>> = _rootFiles
+
+    fun loadRootFiles(
+        order: SortType,
+        sourceRestrictionType: FolderFilesProvider.SourceRestrictionType,
+    ) {
+        getFilesJob.cancel()
+        getFolderActivitiesJob.cancel()
+        getFilesJob = Job()
+        viewModelScope.launch(Dispatchers.IO) {
+
+            val files = FolderFilesProvider.getFiles(
+                FolderFilesProvider.FolderFilesProviderArgs(
+                    folderId = Utils.ROOT_ID,
+                    isFirstPage = true,
+                    order = order,
+                    sourceRestrictionType = sourceRestrictionType,
+                    userDrive = UserDrive(),
+                )
+            )?.folderFiles
+
+            _rootFiles.postValue(files?.associateBy(File::getVisibilityType))
+        }
+    }
 
     fun getFiles(
         folderId: Int,
