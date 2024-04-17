@@ -250,7 +250,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun querySearchDocuments(rootId: String, query: String, projection: Array<out String>?): Cursor {
-        SentryLog.d(TAG, "querySearchDocuments(), rootId=$rootId, query=$query, projection=$projection, $currentParentDocumentId")
+        SentryLog.d(TAG, "querySearchDocuments(), rootId=$rootId, projectionSize=${projection?.size}, $currentParentDocumentId")
 
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
 

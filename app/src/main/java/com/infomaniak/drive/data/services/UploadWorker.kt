@@ -337,10 +337,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             // Add log
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = BREADCRUMB_TAG
-                message = "sync ${mediaFolder.name}"
+                message = "sync ${mediaFolder.id}"
                 level = SentryLevel.DEBUG
             })
-            SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
+            SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id}")
 
             // Sync media folder
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
@@ -397,7 +397,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         runCatching {
             contentResolver.query(contentUri, null, selection, args, sortOrder)
                 ?.use { cursor ->
-                    val messageLog = "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found"
+                    val messageLog = "getLocalLastMediasAsync > from ${mediaFolder.id} ${cursor.count} found"
                     SentryLog.d(TAG, messageLog)
                     Sentry.addBreadcrumb(Breadcrumb().apply {
                         category = BREADCRUMB_TAG
@@ -431,7 +431,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val fileName = cursor.getFileName(contentUri)
         val fileSize = uri.getFileSize(cursor)
 
-        val messageLog = "localMediaFound > ${mediaFolder.name}/$fileName found"
+        val messageLog = "localMediaFound > ${mediaFolder.id}/$fileName found"
         SentryLog.d(TAG, messageLog)
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = BREADCRUMB_TAG
@@ -483,7 +483,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 scope.level = SentryLevel.ERROR
                 val volumeNames = MediaStore.getExternalVolumeNames(applicationContext).joinToString()
                 scope.setExtra("uri", contentUri.toString())
-                scope.setExtra("folder", mediaFolder.name)
+                scope.setExtra("folder", mediaFolder.id.toString())
                 scope.setExtra("volume names", volumeNames)
                 scope.setExtra("exception", exception.toString())
                 Sentry.captureMessage("getLocalLastMediasAsync() ERROR")

@@ -29,7 +29,7 @@ class DriveMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         if (remoteMessage.data.isNotEmpty()) {
-            SentryLog.d("onMessageReceived", "Message data payload: " + remoteMessage.data)
+            SentryLog.d("onMessageReceived", "Message data payload size: " + remoteMessage.data.size)
         }
     }
 }
