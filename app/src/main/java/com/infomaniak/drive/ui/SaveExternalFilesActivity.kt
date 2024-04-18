@@ -415,8 +415,6 @@ class SaveExternalFilesActivity : BaseActivity() {
             exception.printStackTrace()
             showSnackbar(R.string.anErrorHasOccurred)
             Sentry.withScope { scope ->
-                val fileName = fileNameEdit.text.toString().trim()
-                scope.setExtra("fileName", fileName)
                 scope.setExtra("lifecycleState", lifecycle.currentState.name)
                 scope.setExtra("sharedFolderExists", sharedFolder.exists().toString())
                 scope.level = SentryLevel.WARNING

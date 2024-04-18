@@ -345,7 +345,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
-        SentryLog.d(TAG, "createDocument(), parentId=$parentDocumentId, mimeType=$mimeType, name=$displayName")
+        SentryLog.d(TAG, "createDocument(), parentId=$parentDocumentId, mimeType=$mimeType")
 
         return if (mimeType.equals(DocumentsContract.Document.MIME_TYPE_DIR, true)) {
             createNewFolder(parentDocumentId, displayName) // If we want to create a new folder
@@ -381,7 +381,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun renameDocument(documentId: String, displayName: String): String? {
-        SentryLog.d(TAG, "renameDocument(), id=$documentId, name=$displayName")
+        SentryLog.d(TAG, "renameDocument(), id=$documentId")
 
         FileController.getRealmInstance(createUserDrive(documentId)).use { realm ->
             FileController.getFileProxyById(getFileIdFromDocumentId(documentId), customRealm = realm)?.let { file ->
@@ -545,7 +545,6 @@ class CloudStorageProvider : DocumentsProvider() {
                 exception.printStackTrace()
                 Sentry.withScope { scope ->
                     scope.level = SentryLevel.INFO
-                    scope.setExtra("tempFile path", tempFile.path)
                     Sentry.captureException(exception)
                 }
             }

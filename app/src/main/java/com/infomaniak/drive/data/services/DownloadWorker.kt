@@ -233,7 +233,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : Corouti
             outputStream: AutoCloseOutputStream? = null,
             onFinish: (() -> Unit)? = null
         ) {
-            SentryLog.d(TAG, "save remote data to ${outputFile?.path}")
+            SentryLog.d(TAG, "save remote data")
             BufferedInputStream(response.body?.byteStream()).use { input ->
                 val stream = outputStream ?: outputFile?.outputStream()
                 stream?.use { output ->

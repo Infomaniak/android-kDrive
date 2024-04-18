@@ -113,7 +113,7 @@ class UploadInProgressFragment : FileListFragment() {
                 }
             }
 
-            SentryLog.d("uploadInProgress", "$fileName $progress%")
+            SentryLog.d("uploadInProgress", "$progress%")
         }
     }
 

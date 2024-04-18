@@ -155,9 +155,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             notificationManagerCompat.notifyCompat(this@MainApplication, hashCode, build())
         }
         Sentry.withScope { scope ->
-            scope.level = SentryLevel.ERROR
             scope.setExtra("userId", "${user.id}")
-            Sentry.captureMessage("Refresh Token Error")
+            Sentry.captureMessage("Refresh Token Error", SentryLevel.ERROR)
         }
 
         CoroutineScope(Dispatchers.IO).launch {
