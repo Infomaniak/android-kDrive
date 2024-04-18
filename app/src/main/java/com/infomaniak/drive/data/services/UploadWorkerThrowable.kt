@@ -104,7 +104,6 @@ object UploadWorkerThrowable {
                 currentUploadFile?.exceptionNotification(applicationContext)
                 Sentry.withScope { scope ->
                     scope.level = SentryLevel.WARNING
-                    scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
                     scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
                     scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
                     Sentry.captureException(exception)

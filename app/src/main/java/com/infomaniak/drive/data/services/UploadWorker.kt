@@ -273,9 +273,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         } else {
             deleteIfExists()
-            SentryLog.d("kDrive", "$TAG > $fileName deleted size:$size")
+            SentryLog.d("kDrive", "$TAG > $fileName deleted size: 0")
             Sentry.withScope { scope ->
-                scope.setExtra("data", ApiController.gson.toJson(this))
                 scope.setExtra("fileName", fileName)
                 Sentry.captureMessage("Deleted file with size 0")
             }
@@ -302,7 +301,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 if (fileModifiedAt < Date(1660736262000) && exception.message?.contains("ACTION_OPEN_DOCUMENT") == true) return
 
                 Sentry.withScope { scope ->
-                    scope.setExtra("data", ApiController.gson.toJson(this))
                     if (exception is IllegalStateException) {
                         Sentry.captureMessage("The file is either partially downloaded or corrupted")
                     } else {

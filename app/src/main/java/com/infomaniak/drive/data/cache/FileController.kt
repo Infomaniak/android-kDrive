@@ -810,7 +810,7 @@ object FileController {
                     updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
                 } else {
                     Sentry.withScope { scope ->
-                        scope.setExtra("data", apiResponse.toString())
+                        scope.setExtra("Api responseAt", apiResponse.responseAt.toString())
                         Sentry.captureMessage("response at is null")
                     }
                 }
@@ -822,7 +822,7 @@ object FileController {
                 updateFile(folder.id, realm) { file -> file.responseAt = apiResponse.responseAt }
             } else {
                 Sentry.withScope { scope ->
-                    scope.setExtra("data", apiResponse.toString())
+                    scope.setExtra("Api responseAt", apiResponse.responseAt.toString())
                     Sentry.captureMessage("response at is null")
                 }
             }

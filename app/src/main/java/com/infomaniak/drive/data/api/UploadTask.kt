@@ -109,7 +109,6 @@ class UploadTask(
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
-                scope.setExtra("data", gson.toJson(uploadFile))
                 Sentry.captureException(exception)
             }
         } catch (exception: Exception) {
@@ -292,15 +291,6 @@ class UploadTask(
 
         if (previousChunkBytesWritten > uploadFile.fileSize) {
             uploadFile.resetUploadTokenAndCancelSession()
-            Sentry.withScope { scope ->
-                scope.setExtra("data", gson.toJson(uploadFile))
-                scope.setExtra("file size", "${uploadFile.fileSize}")
-                scope.setExtra("uploaded size", "$previousChunkBytesWritten")
-                scope.setExtra("bytesWritten", "$bytesWritten")
-                scope.setExtra("contentLength", "$contentLength")
-                scope.setExtra("chunk size", "$chunkSize")
-                Sentry.captureMessage("Chunk total size exceed fileSize 😢")
-            }
             SentryLog.d(
                 "UploadWorker",
                 "progress >> ${uploadFile.fileName} exceed with ${uploadFile.fileSize}/${previousChunkBytesWritten}"
