@@ -54,47 +54,24 @@ object GeniusScanUtils : IGeniusScanUtils {
     private const val ERROR_KEY = "ERROR_KEY"
 
     private val supportedLanguages by lazy {
-        mutableMapOf(
-            "fra" to R.raw.fra,
-            "deu" to R.raw.deu,
-            "eng" to R.raw.eng,
+        mutableListOf("fr-FR", "de-DE", "en-US",
         ).apply {
             Utils.getPreferredLocaleList().forEach {
                 when (it.language) {
-                    "it" -> put("ita", R.raw.ita)
-                    "es" -> put("spa", R.raw.spa)
+                    "it" -> add("it-IT")
+                    "es" -> add("es-ES")
                 }
             }
         }
     }
 
-    private fun Context.getOcrConfiguration(): OcrConfiguration {
-        copyOcrDataFiles()
+    private fun getOcrConfiguration(): OcrConfiguration {
 
         return OcrConfiguration().apply {
             outputFormats = EnumSet.of(OcrOutputFormat.TEXT_LAYER_IN_PDF)
-            languages = supportedLanguages.keys.toList()
-            languagesDirectory = getOCRdataDirectory()
+            languages = supportedLanguages
         }
     }
-
-    private fun Context.copyOcrDataFiles() {
-        getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
-
-        val ocrDirectory = getOCRdataDirectory()
-        if (ocrDirectory.exists()) return
-        ocrDirectory.mkdir()
-
-        supportedLanguages.forEach { (lang, res) ->
-            resources?.openRawResource(res).use { inputStream ->
-                FileOutputStream(IOFile(ocrDirectory, "$lang.traineddata")).use {
-                    inputStream?.copyTo(it)
-                }
-            }
-        }
-    }
-
-    private fun Context.getOCRdataDirectory() = IOFile(getExternalFilesDir(null), "ocr_dir")
 
     private fun Context.removeOldScanFiles() {
         getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
