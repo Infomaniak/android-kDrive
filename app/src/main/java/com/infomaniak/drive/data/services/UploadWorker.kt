@@ -256,7 +256,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return if (size != 0L) {
             if (fileSize != size) updateFileSize(size)
 
-            SentryLog.d(TAG, "startUploadFile: file - size: ($fileSize)")
+            SentryLog.d(TAG, "startUploadFile (size: $fileSize)")
 
             UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker).run {
                 currentUploadTask = this

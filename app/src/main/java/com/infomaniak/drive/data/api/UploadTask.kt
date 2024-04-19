@@ -159,7 +159,7 @@ class UploadTask(
                         continue
                     }
 
-                    SentryLog.i("kDrive", "Upload > File chunks number :$chunkNumber has permission")
+                    SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
                     var data = ByteArray(chunkSize)
                     val count = input.read(data, 0, chunkSize)
                     if (count == -1) {
@@ -170,7 +170,7 @@ class UploadTask(
                     data = if (count == chunkSize) data else data.copyOf(count)
 
                     val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count)
-                    SentryLog.d("kDrive", "Upload > Start upload file to $url data size:${data.size}")
+                    SentryLog.d("kDrive", "Upload > Start upload file to $url (data size:${data.size})")
 
                     @Suppress("DeferredResultUnused")
                     coroutineScope.async(chunkParentJob) {
