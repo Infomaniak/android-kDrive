@@ -92,6 +92,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         AccountUtils.getAllUsersSync().forEach { user ->
             cursor.addRoot(user.id.toString(), user.id.toString(), user.email)
+
             cloudScope.launch {
                 context?.let {
                     val okHttpClient = AccountUtils.getHttpClient(user.id)
@@ -235,7 +236,10 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     private fun DocumentCursor.addFiles(parentDocumentId: String, uri: Uri): (files: ArrayList<File>) -> Unit = { files ->
-        files.forEach { file -> this.addFile(file, createFileDocumentId(parentDocumentId, file.id)) }
+        files.forEach { file ->
+            this.addFile(file, createFileDocumentId(parentDocumentId, file.id))
+            job.ensureActive()
+        }
         context?.contentResolver?.notifyChange(uri, null)
     }
 
