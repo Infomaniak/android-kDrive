@@ -43,7 +43,6 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
-import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import java.util.Date
 
@@ -91,11 +90,8 @@ class ImportFilesDialog : DialogFragment() {
                     initUpload(uri)
                 }.onFailure {
                     it.printStackTrace()
-                    Sentry.withScope { scope ->
-                        scope.level = SentryLevel.ERROR
-                        scope.setExtra("uri", uri.toString())
-                        Sentry.captureException(it)
-                    }
+                    Sentry.captureException(it)
+
                     errorCount++
                 }
             })

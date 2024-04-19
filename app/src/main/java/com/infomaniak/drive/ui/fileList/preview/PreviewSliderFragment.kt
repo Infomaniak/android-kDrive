@@ -170,8 +170,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 viewPager.setCurrentItem(position, false)
             }.onFailure {
                 Sentry.withScope { scope ->
-                    scope.setExtra("currentFile", "id: ${currentFile.id} name: ${currentFile.name}")
-                    scope.setExtra("files.values", files.values.joinToString { "id: ${it.id} name: ${it.name}" })
+                    scope.setExtra("currentFile", "id: ${currentFile.id}")
+                    scope.setExtra("files.values", files.values.joinToString { "id: ${it.id}" })
                     Sentry.captureException(it)
                 }
                 currentFile = files.values.first()
