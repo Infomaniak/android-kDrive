@@ -49,6 +49,9 @@ class SelectFolderActivity : BaseActivity() {
     private val navigationIds = mutableListOf<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+
         val userId = navigationArgs.userId
         val driveId = navigationArgs.driveId
         val customArgs = navigationArgs.customArgs
@@ -64,8 +67,6 @@ class SelectFolderActivity : BaseActivity() {
             disableSelectedFolderId = disabledFolderId
         }
 
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
         setSaveButton(customArgs)
 
         currentFolderId?.let { folderId ->
