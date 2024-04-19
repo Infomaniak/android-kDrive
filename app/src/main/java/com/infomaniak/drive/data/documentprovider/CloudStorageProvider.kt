@@ -59,10 +59,7 @@ import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.IOException
@@ -73,7 +70,7 @@ import java.util.UUID
 class CloudStorageProvider : DocumentsProvider() {
 
     private lateinit var cacheDir: IOFile
-    private val cloudScope = CoroutineScope(Dispatchers.IO)
+    private val cloudScope = CoroutineScope(Dispatchers.IO + CoroutineName("CloudStorage"))
 
     override fun onCreate(): Boolean {
         SentryLog.d(TAG, "onCreate")
