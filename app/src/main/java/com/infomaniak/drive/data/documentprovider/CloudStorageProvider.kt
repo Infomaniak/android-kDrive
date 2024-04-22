@@ -142,26 +142,21 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor {
-        SentryLog.d(TAG, "queryChildDocuments(), parentDocumentId=$parentDocumentId, sort=$sortOrder")
-
-        val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
+        val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION, isAutoCloseableJob = false)
 
         val uri = DocumentCursor.createUri(context, parentDocumentId)
         val isNewJob = uri != oldQueryChildUri || needRefresh
-        val isLoading = uri == oldQueryChildUri && oldQueryChildCursor?.job?.isCompleted == false || isNewJob
 
-        SentryLog.i(TAG, "queryChildDocuments(), isLoading=$isLoading, isNew=$isNewJob")
+        SentryLog.d(TAG, "queryChildDocuments(), parentDocumentId=$parentDocumentId, sort=$sortOrder, isNew=$isNewJob")
 
-        cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to isLoading)
-        cursor.setNotificationUri(context?.contentResolver, uri)
-
-        if (isNewJob) {
-            oldQueryChildCursor?.close()
+        if (isNewJob || oldQueryChildCursor == null) {
+            oldQueryChildCursor?.cancelJob()
             oldQueryChildUri = uri
             oldQueryChildCursor = cursor
             currentParentDocumentId = parentDocumentId
             needRefresh = false
         } else {
+            SentryLog.i(TAG, "Restore old cursor")
             cursor.restore(oldQueryChildCursor!!)
             cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to false)
             cursor.setNotificationUri(context?.contentResolver, uri)
@@ -230,7 +225,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
         }
 
-        cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to false)
+        cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to true)
         cursor.setNotificationUri(context?.contentResolver, uri)
         return cursor
     }
