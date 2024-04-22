@@ -709,7 +709,7 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun MatrixCursor.restore(cursor: MatrixCursor) {
+    private fun DocumentCursor.restore(cursor: DocumentCursor) {
         var position = 0
         while (cursor.moveToPosition(position)) {
             newRow().apply {
@@ -728,6 +728,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
             position++
         }
+        job = cursor.job
     }
 
     private data class DriveDocument(val name: String, val id: Int)
