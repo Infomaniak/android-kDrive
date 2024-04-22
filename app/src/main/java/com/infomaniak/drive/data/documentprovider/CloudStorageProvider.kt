@@ -231,6 +231,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     private fun DocumentCursor.addFiles(parentDocumentId: String, uri: Uri): (files: ArrayList<File>) -> Unit = { files ->
+        job.ensureActive()
         files.forEach { file ->
             this.addFile(file, createFileDocumentId(parentDocumentId, file.id))
             job.ensureActive()
@@ -260,7 +261,7 @@ class CloudStorageProvider : DocumentsProvider() {
     override fun querySearchDocuments(rootId: String, query: String, projection: Array<out String>?): Cursor {
         SentryLog.d(TAG, "querySearchDocuments(), rootId=$rootId, projectionSize=${projection?.size}, $currentParentDocumentId")
 
-        val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION)
+        val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION, isAutoCloseableJob = false)
 
         if (currentParentDocumentId == null ||
             currentParentDocumentId == getUserId(currentParentDocumentId!!) ||
@@ -276,10 +277,6 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val uri = DocumentCursor.createUri(context, "$rootId/search/$query")
         val isNewSearch = uri != oldSearchUri
-        val isLoading = uri == oldSearchUri && oldSearchCursor?.job?.isCompleted == false || isNewSearch
-
-        cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to isLoading)
-        cursor.setNotificationUri(context?.contentResolver, uri)
 
         if (isNewSearch) {
             oldSearchCursor?.close()
@@ -287,6 +284,8 @@ class CloudStorageProvider : DocumentsProvider() {
             oldSearchCursor = cursor
         } else {
             cursor.restore(oldSearchCursor!!)
+            cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to false)
+            cursor.setNotificationUri(context?.contentResolver, uri)
             return cursor
         }
 
@@ -296,11 +295,17 @@ class CloudStorageProvider : DocumentsProvider() {
 
         cloudScope.launch(cursor.job) {
             FileController.cloudStorageSearch(userDrive, query, onResponse = { files ->
-                files.forEach { file -> cursor.addFile(file, createFileDocumentId(parentDocumentId, file.id)) }
+                cursor.job.ensureActive()
+                files.forEach { file ->
+                    cursor.addFile(file, createFileDocumentId(parentDocumentId, file.id))
+                    cursor.job.ensureActive()
+                }
                 if (files.isNotEmpty()) context?.contentResolver?.notifyChange(uri, null)
             })
         }
 
+        cursor.extras = bundleOf(DocumentsContract.EXTRA_LOADING to true)
+        cursor.setNotificationUri(context?.contentResolver, uri)
         return cursor
     }
 
