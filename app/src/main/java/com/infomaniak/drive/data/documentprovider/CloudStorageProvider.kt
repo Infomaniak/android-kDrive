@@ -172,7 +172,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val driveId = getDriveFromDocId(parentDocumentId).id
         val sortType = getSortType(sortOrder)
 
-        val userDrive = UserDrive(userId, driveId)
+        val userDrive = UserDrive(userId, driveId, sharedWithMe = parentDocumentId.contains("$SHARED_WITHME_FOLDER_ID"))
 
         when {
             isRootFolder -> {
@@ -188,26 +188,26 @@ class CloudStorageProvider : DocumentsProvider() {
                     cursor.addFile(null, documentId, name)
                 }
             }
-            isSharedWithMeFolder -> cursor.addRootDrives(userId, SHARED_WITHME_FOLDER_ID, true)
-            isMySharesFolder -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
-            isSharedUri(parentDocumentId) && fileFolderId == Utils.ROOT_ID -> {
-                cloudScope.launch(cursor.job) {
-                    if (parentDocumentId.contains(MY_SHARES_FOLDER_ID.toString())) {
-                        FileController.getMySharedFiles(
-                            userDrive = UserDrive(userId, driveId),
+            isSharedWithMeFolder -> {
+                cloudScope.launch {
+                    FileController.getRealmInstance(userDrive).use { realm ->
+                        FolderFilesProvider.getCloudStorageFiles(
+                            realm = realm,
+                            folderId = Utils.ROOT_ID,
+                            userDrive = UserDrive(AccountUtils.currentUserId, AccountUtils.currentDriveId, sharedWithMe = true),
                             sortType = sortType,
-                            transaction = { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) })
-                    } else {
-                        FileController.getRealmInstance(userDrive).use { realm ->
-                            FolderFilesProvider.getCloudStorageFiles(
-                                realm = realm,
-                                folderId = fileFolderId,
-                                userDrive = UserDrive(userId, driveId, sharedWithMe = true),
-                                sortType = sortType,
-                                transaction = cursor.addFiles(parentDocumentId, uri)
-                            )
-                        }
+                            transaction = cursor.addFiles(parentDocumentId, uri, isSharedWithMeFolder = true)
+                        )
                     }
+                }
+            }
+            isMySharesFolder -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
+            isSharedUri(parentDocumentId) && fileFolderId == Utils.ROOT_ID && parentDocumentId.contains("$MY_SHARES_FOLDER_ID") -> {
+                cloudScope.launch(cursor.job) {
+                    FileController.getMySharedFiles(
+                        userDrive = UserDrive(userId, driveId),
+                        sortType = sortType,
+                        transaction = { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) })
                 }
             }
             else -> {
@@ -230,10 +230,18 @@ class CloudStorageProvider : DocumentsProvider() {
         return cursor
     }
 
-    private fun DocumentCursor.addFiles(parentDocumentId: String, uri: Uri): (files: ArrayList<File>) -> Unit = { files ->
+    private fun DocumentCursor.addFiles(
+        parentDocumentId: String,
+        uri: Uri,
+        isSharedWithMeFolder: Boolean = false,
+    ): (files: ArrayList<File>) -> Unit = { files ->
         job.ensureActive()
         files.forEach { file ->
-            this.addFile(file, createFileDocumentId(parentDocumentId, file.id))
+            val sharedWithMePath = StringBuilder(SHARED_WITHME_FOLDER_ID.toString())
+                .append(SEPARATOR)
+                .append("${file.name}$DRIVE_SEPARATOR${file.driveId}")
+            val drivePath = if (isSharedWithMeFolder) sharedWithMePath.toString() else ""
+            this.addFile(file, createFileDocumentId(parentDocumentId, file.id, parent = drivePath))
             job.ensureActive()
         }
         context?.contentResolver?.notifyChange(uri, null)
@@ -790,8 +798,9 @@ class CloudStorageProvider : DocumentsProvider() {
 
         private fun getFileIdFromDocumentId(documentId: String) = documentId.substringAfterLast(SEPARATOR).toInt()
 
-        private fun createFileDocumentId(parentDocumentId: String, fileId: Int): String {
-            return parentDocumentId.substringBeforeLast(SEPARATOR) + SEPARATOR + fileId.toString()
+        private fun createFileDocumentId(parentDocumentId: String, fileId: Int, parent: String = ""): String {
+            val parentPath = if (parent.isEmpty()) "" else "$parent$SEPARATOR"
+            return parentDocumentId.substringBeforeLast(SEPARATOR) + SEPARATOR + parentPath + fileId.toString()
         }
 
         private fun isSharedUri(documentId: String) = documentId.matches(SHARED_URI_REGEX)
