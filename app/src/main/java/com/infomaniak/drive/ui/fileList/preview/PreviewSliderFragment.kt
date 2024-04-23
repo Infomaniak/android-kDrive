@@ -142,7 +142,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     currentFile = previewSliderAdapter.getFile(position)
                     with(header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
-                        toggleOpenWithVisibility(isVisible = currentFile.isOnlyOfficePreview())
+                        toggleOpenWithVisibility(isVisible = !currentFile.isOnlyOfficePreview())
                     }
                     bottomSheetFileInfos.openWith.isVisible = true
                     lifecycleScope.launchWhenResumed {
