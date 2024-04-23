@@ -186,7 +186,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     private fun initOnClickListeners() = with(binding) {
-        editDocument.setOnClickListener { onItemClickListener.editDocumentClicked() }
+        editDocument.setOnClickListener { onItemClickListener.editDocumentClicked(mainViewModel) }
         displayInfo.setOnClickListener { onItemClickListener.displayInfoClicked() }
         fileRights.setOnClickListener { onItemClickListener.fileRightsClicked() }
         sendCopy.setOnClickListener { shareFile() }
@@ -489,9 +489,13 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent("shareLink")
 
         @CallSuper
-        fun editDocumentClicked() {
+        fun editDocumentClicked(mainViewModel: MainViewModel) {
             trackFileActionEvent("edit")
-            currentFile?.let { ownerFragment?.openOnlyOfficeDocument(it) }
+            currentFile?.let {
+                mainViewModel.isInternetAvailable.value?.let { isConnected ->
+                    ownerFragment?.openOnlyOfficeDocument(it, isConnected)
+                }
+            }
         }
 
         fun onSelectFolderResult(data: Intent?) {

@@ -36,6 +36,7 @@ import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -259,14 +260,18 @@ fun Fragment.showSnackbar(
     }
 }
 
-fun Fragment.openOnlyOfficeDocument(file: File) {
-    if (file.conversion?.whenOnlyoffice == true) {
-        findNavController().navigate(
-            R.id.notSupportedExtensionBottomSheetDialog,
-            NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
-        )
+fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable:  Boolean) {
+    if (isInternetAvailable) {
+        if (file.conversion?.whenOnlyoffice == true) {
+            findNavController().navigate(
+                R.id.notSupportedExtensionBottomSheetDialog,
+                NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
+            )
+        } else {
+            requireContext().openOnlyOfficeActivity(file)
+        }
     } else {
-        requireContext().openOnlyOfficeActivity(file)
+        Toast.makeText(requireContext(),getString(R.string.noConnection),Toast.LENGTH_LONG).show()
     }
 }
 
