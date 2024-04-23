@@ -149,7 +149,7 @@ object FolderFilesProvider {
         sortType: File.SortType,
         isFirstPage: Boolean = true,
         transaction: (files: ArrayList<File>) -> Unit,
-        okHttpClient: OkHttpClient? = null
+        okHttpClient: OkHttpClient? = null,
     ) {
         val folderProxy = FileController.getFileById(realm, folderId)
         val folderFilesProviderArgs = FolderFilesProviderArgs(

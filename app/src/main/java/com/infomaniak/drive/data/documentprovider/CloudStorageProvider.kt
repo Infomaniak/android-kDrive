@@ -189,7 +189,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 }
             }
             isSharedWithMeFolder -> {
-                cloudScope.launch {
+                cloudScope.launch(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
                             realm = realm,
