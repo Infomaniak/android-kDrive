@@ -209,8 +209,8 @@ object FolderFilesProvider {
                     okHttpClient = okHttpClient,
                     driveId = driveId,
                     parentId = folderFilesProviderArgs.folderId,
-                    cursor = folderProxy?.cursor,
-                    order = folderFilesProviderArgs.order
+                    cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
+                    order = folderFilesProviderArgs.order,
                 )
 
             }
@@ -220,7 +220,7 @@ object FolderFilesProvider {
                     driveId = driveId,
                     parentId = folderFilesProviderArgs.folderId,
                     cursor = null,
-                    order = folderFilesProviderArgs.order
+                    order = folderFilesProviderArgs.order,
                 ).let {
                     CursorApiResponse(
                         result = it.result,
@@ -251,7 +251,7 @@ object FolderFilesProvider {
             folderFilesProviderArgs.folderId == ROOT_ID && userDrive.sharedWithMe -> {
                 ApiRepository.getSharedWithMeFiles(
                     order = folderFilesProviderArgs.order,
-                    cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor
+                    cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
                 )
             }
             else -> {
@@ -259,8 +259,8 @@ object FolderFilesProvider {
                     okHttpClient = okHttpClient,
                     driveId = userDrive.driveId,
                     parentId = folderFilesProviderArgs.folderId,
-                    cursor = folderProxy?.cursor,
-                    order = folderFilesProviderArgs.order
+                    cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
+                    order = folderFilesProviderArgs.order,
                 )
 
             }
