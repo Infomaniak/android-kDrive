@@ -32,7 +32,7 @@ import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.views.LoaderAdapter
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 class FileActivitiesAdapter(val isFolder: Boolean) : LoaderAdapter<FileActivity>() {
 
