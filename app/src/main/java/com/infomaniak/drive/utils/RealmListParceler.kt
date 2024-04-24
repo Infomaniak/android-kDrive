@@ -44,7 +44,6 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
                 } catch (exception: Exception) {
                     Sentry.withScope { scope ->
                         scope.level = SentryLevel.WARNING
-                        scope.setExtra("data", list.toString())
                         Sentry.captureException(exception)
                     }
                 }

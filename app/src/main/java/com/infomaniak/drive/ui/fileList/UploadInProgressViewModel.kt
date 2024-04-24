@@ -137,8 +137,6 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
 
                     Sentry.withScope { scope ->
                         scope.level = SentryLevel.WARNING
-                        scope.setExtra("fileName", uploadFile.fileName)
-                        scope.setExtra("uri", uploadFile.uri)
                         Sentry.captureException(exception)
                     }
                 }

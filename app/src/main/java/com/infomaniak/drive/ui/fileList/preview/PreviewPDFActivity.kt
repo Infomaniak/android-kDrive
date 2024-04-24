@@ -123,9 +123,8 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         }.onFailure {
             showSnackbar(R.string.errorFileNotFound)
             Sentry.withScope { scope ->
-                scope.level = SentryLevel.ERROR
                 scope.setExtra("exception", it.stackTraceToString())
-                Sentry.captureMessage("Exception while printing a PDF")
+                Sentry.captureMessage("Exception while printing a PDF", SentryLevel.ERROR)
             }
         }.getOrNull()
     }

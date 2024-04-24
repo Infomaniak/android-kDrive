@@ -81,7 +81,7 @@ class PreviewHeaderView @JvmOverloads constructor(
     fun setupWindowInsetsListener(
         rootView: View,
         bottomSheetView: View,
-    ) = with(binding.header) {
+    ) {
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, windowInsets ->
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {

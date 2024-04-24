@@ -91,10 +91,8 @@ class UploadTask(
             SentryLog.w(TAG, "file not found", exception)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
-                scope.setExtra("data", gson.toJson(uploadFile))
                 Sentry.captureException(exception)
             }
-
         } catch (exception: TotalChunksExceededException) {
             SentryLog.w(TAG, "total chunks exceeded", exception)
             Sentry.withScope { scope ->
@@ -109,7 +107,6 @@ class UploadTask(
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
-                scope.setExtra("data", gson.toJson(uploadFile))
                 Sentry.captureException(exception)
             }
         } catch (exception: Exception) {
@@ -163,7 +160,7 @@ class UploadTask(
                         continue
                     }
 
-                    SentryLog.i("kDrive", "Upload > ${uploadFile.fileName} chunk:$chunkNumber has permission")
+                    SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
                     var data = ByteArray(chunkSize)
                     val count = input.read(data, 0, chunkSize)
                     if (count == -1) {
@@ -211,12 +208,8 @@ class UploadTask(
         requestBody: RequestBody,
         url: String,
     ) {
-        val uploadRequestBody = ProgressRequestBody(requestBody) { currentBytes, bytesWritten, contentLength ->
-            runBlocking {
-                progressMutex.withLock {
-                    updateProgress(currentBytes, bytesWritten, contentLength)
-                }
-            }
+        val uploadRequestBody = ProgressRequestBody(requestBody) { currentBytes, _, _ ->
+            runBlocking { progressMutex.withLock { updateProgress(currentBytes) } }
         }
 
         val request = Request.Builder().url(url)
@@ -285,7 +278,7 @@ class UploadTask(
         }
     }
 
-    private fun CoroutineScope.updateProgress(currentBytes: Int, bytesWritten: Long, contentLength: Long) {
+    private fun CoroutineScope.updateProgress(currentBytes: Int) {
         val totalBytesWritten = currentBytes + previousChunkBytesWritten
         val progress = ((totalBytesWritten.toDouble() / uploadFile.fileSize.toDouble()) * 100).toInt()
         currentProgress = progress
@@ -293,18 +286,9 @@ class UploadTask(
 
         if (previousChunkBytesWritten > uploadFile.fileSize) {
             uploadFile.resetUploadTokenAndCancelSession()
-            Sentry.withScope { scope ->
-                scope.setExtra("data", gson.toJson(uploadFile))
-                scope.setExtra("file size", "${uploadFile.fileSize}")
-                scope.setExtra("uploaded size", "$previousChunkBytesWritten")
-                scope.setExtra("bytesWritten", "$bytesWritten")
-                scope.setExtra("contentLength", "$contentLength")
-                scope.setExtra("chunk size", "$chunkSize")
-                Sentry.captureMessage("Chunk total size exceed fileSize 😢")
-            }
             SentryLog.d(
                 "UploadWorker",
-                "progress >> ${uploadFile.fileName} exceed with ${uploadFile.fileSize}/${previousChunkBytesWritten}"
+                "progress >> file exceed with ${uploadFile.fileSize}/${previousChunkBytesWritten}"
             )
             throw WrittenBytesExceededException()
         }

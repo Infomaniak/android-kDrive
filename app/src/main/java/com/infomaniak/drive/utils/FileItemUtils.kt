@@ -268,10 +268,7 @@ private fun Context.getThumbnailUntilAndroidPie(file: File, fileUri: Uri, thumbn
 private fun Context.getExternalRealPath(fileUri: Uri, isSchemeFile: Boolean, localFile: IOFile?): String {
     return when {
         !isSchemeFile && localFile?.exists() == true -> {
-            Sentry.withScope { scope -> // Get more information in uri with absolute path
-                scope.setExtra("uri", "$fileUri")
-                Sentry.captureMessage("Uri contains absolute path")
-            }
+            Sentry.captureMessage("Uri contains absolute path")
             localFile.absolutePath
         }
         fileUri.authority == "com.android.externalstorage.documents" -> {

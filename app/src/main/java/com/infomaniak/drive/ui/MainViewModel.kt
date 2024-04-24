@@ -460,8 +460,6 @@ class MainViewModel(
                         } catch (nullPointerException: NullPointerException) {
                             Sentry.withScope { scope ->
                                 scope.setExtra("columnIndex", columnIndex.toString())
-                                scope.setExtra("pathname", pathname.toString())
-                                scope.setExtra("uploadFileUri", uploadFile.uri)
                                 Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
                             }
                         } finally {
