@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
@@ -51,6 +52,8 @@ class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var extrasMainActivity: Bundle? = null
+
+    private var isHelpShortcutPressed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,6 +100,7 @@ class LaunchActivity : AppCompatActivity() {
         } else {
             val intent = Intent(this, destinationClass).apply {
                 if (destinationClass == MainActivity::class.java) extrasMainActivity?.let(::putExtras)
+                if (destinationClass == LoginActivity::class.java) putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
             }
 
             startActivity(intent)
@@ -184,7 +188,11 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun handleShortcuts() {
-        intent.extras?.getString(SHORTCUTS_TAG)?.let { extrasMainActivity = MainActivityArgs(shortcutId = it).toBundle() }
+        intent.extras?.getString(SHORTCUTS_TAG)?.let {
+            extrasMainActivity = MainActivityArgs(shortcutId = it).toBundle()
+            if (it == Utils.Shortcuts.FEEDBACK.id)
+                isHelpShortcutPressed = true
+        }
     }
 
     companion object {
