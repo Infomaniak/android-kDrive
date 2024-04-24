@@ -28,7 +28,8 @@ import com.geniusscansdk.core.GeniusScanSDK
 import com.geniusscansdk.core.LicenseException
 import com.geniusscansdk.scanflow.ScanActivity
 import com.geniusscansdk.scanflow.ScanConfiguration
-import com.geniusscansdk.scanflow.ScanConfiguration.*
+import com.geniusscansdk.scanflow.ScanConfiguration.OcrConfiguration
+import com.geniusscansdk.scanflow.ScanConfiguration.OcrOutputFormat
 import com.geniusscansdk.scanflow.ScanResult
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
@@ -43,7 +44,6 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
-import java.io.FileOutputStream
 import java.util.Date
 import java.util.EnumSet
 
@@ -54,7 +54,10 @@ object GeniusScanUtils : IGeniusScanUtils {
     private const val ERROR_KEY = "ERROR_KEY"
 
     private val supportedLanguages by lazy {
-        mutableListOf("fr-FR", "de-DE", "en-US",
+        mutableListOf(
+            "fr-FR",
+            "de-DE",
+            "en-US",
         ).apply {
             Utils.getPreferredLocaleList().forEach {
                 when (it.language) {
@@ -65,12 +68,9 @@ object GeniusScanUtils : IGeniusScanUtils {
         }
     }
 
-    private fun getOcrConfiguration(): OcrConfiguration {
-
-        return OcrConfiguration().apply {
-            outputFormats = EnumSet.of(OcrOutputFormat.TEXT_LAYER_IN_PDF)
-            languages = supportedLanguages
-        }
+    private fun getOcrConfiguration() = OcrConfiguration().apply {
+        outputFormats = EnumSet.of(OcrOutputFormat.TEXT_LAYER_IN_PDF)
+        languages = supportedLanguages
     }
 
     private fun Context.removeOldScanFiles() {
