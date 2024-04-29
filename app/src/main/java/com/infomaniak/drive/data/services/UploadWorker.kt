@@ -327,6 +327,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             it.executeTransaction { realm ->
 
                 MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
+                    ensureActive()
                     // Add log
                     Sentry.addBreadcrumb(Breadcrumb().apply {
                         category = BREADCRUMB_TAG
@@ -340,6 +341,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     customArgs = args + mediaFolder.id.toString()
 
                     fetchRecentLocalMediasToSync(
+                        coroutineScope = this,
                         realm = realm,
                         syncSettings = syncSettings,
                         contentUri = MediaFoldersProvider.imagesExternalUri,
@@ -352,6 +354,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                         customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
 
                         fetchRecentLocalMediasToSync(
+                            coroutineScope = this,
                             realm = realm,
                             syncSettings = syncSettings,
                             contentUri = MediaFoldersProvider.videosExternalUri,
@@ -372,6 +375,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private fun fetchRecentLocalMediasToSync(
+        coroutineScope: CoroutineScope,
         realm: Realm,
         syncSettings: SyncSettings,
         contentUri: Uri,
@@ -396,6 +400,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     })
 
                     while (cursor.moveToNext()) {
+                        coroutineScope.ensureActive()
                         processFoundLocalMedia(realm, cursor, contentUri, mediaFolder, syncSettings)
                     }
                 }
