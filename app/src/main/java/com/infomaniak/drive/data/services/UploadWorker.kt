@@ -323,37 +323,44 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         SentryLog.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
-        MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
-            // Add log
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = BREADCRUMB_TAG
-                message = "sync ${mediaFolder.id}"
-                level = SentryLevel.DEBUG
-            })
-            SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
+        UploadFile.getRealmInstance().use {
+            it.executeTransaction { realm ->
 
-            // Sync media folder
-            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
-            customArgs = args + mediaFolder.id.toString()
+                MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
+                    // Add log
+                    Sentry.addBreadcrumb(Breadcrumb().apply {
+                        category = BREADCRUMB_TAG
+                        message = "sync ${mediaFolder.id}"
+                        level = SentryLevel.DEBUG
+                    })
+                    SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
 
-            fetchRecentLocalMediasToSync(
-                syncSettings = syncSettings,
-                contentUri = MediaFoldersProvider.imagesExternalUri,
-                selection = customSelection,
-                args = customArgs,
-                mediaFolder = mediaFolder,
-            )
+                    // Sync media folder
+                    customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
+                    customArgs = args + mediaFolder.id.toString()
 
-            if (syncSettings.syncVideo) {
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
+                    fetchRecentLocalMediasToSync(
+                        realm = realm,
+                        syncSettings = syncSettings,
+                        contentUri = MediaFoldersProvider.imagesExternalUri,
+                        selection = customSelection,
+                        args = customArgs,
+                        mediaFolder = mediaFolder,
+                    )
 
-                fetchRecentLocalMediasToSync(
-                    syncSettings = syncSettings,
-                    contentUri = MediaFoldersProvider.videosExternalUri,
-                    selection = customSelection,
-                    args = customArgs,
-                    mediaFolder = mediaFolder,
-                )
+                    if (syncSettings.syncVideo) {
+                        customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
+
+                        fetchRecentLocalMediasToSync(
+                            realm = realm,
+                            syncSettings = syncSettings,
+                            contentUri = MediaFoldersProvider.videosExternalUri,
+                            selection = customSelection,
+                            args = customArgs,
+                            mediaFolder = mediaFolder,
+                        )
+                    }
+                }
             }
         }
     }
@@ -365,6 +372,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private fun fetchRecentLocalMediasToSync(
+        realm: Realm,
         syncSettings: SyncSettings,
         contentUri: Uri,
         selection: String,
@@ -387,12 +395,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                         level = SentryLevel.INFO
                     })
 
-                    UploadFile.getRealmInstance().use {
-                        it.executeTransaction { realm ->
-                            while (cursor.moveToNext()) {
-                                processFoundLocalMedia(realm, cursor, contentUri, mediaFolder, syncSettings)
-                            }
-                        }
+                    while (cursor.moveToNext()) {
+                        processFoundLocalMedia(realm, cursor, contentUri, mediaFolder, syncSettings)
                     }
                 }
         }.onFailure { exception -> syncMediaFolderFailure(exception, mediaFolder) }
