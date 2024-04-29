@@ -336,7 +336,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
             customArgs = args + mediaFolder.id.toString()
 
-            getLocalLastMedias(
+            fetchRecentLocalMediasToSync(
                 syncSettings = syncSettings,
                 contentUri = MediaFoldersProvider.imagesExternalUri,
                 selection = customSelection,
@@ -347,7 +347,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             if (syncSettings.syncVideo) {
                 customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
 
-                getLocalLastMedias(
+                fetchRecentLocalMediasToSync(
                     syncSettings = syncSettings,
                     contentUri = MediaFoldersProvider.videosExternalUri,
                     selection = customSelection,
@@ -364,12 +364,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         else -> ""
     }
 
-    private fun getLocalLastMedias(
+    private fun fetchRecentLocalMediasToSync(
         syncSettings: SyncSettings,
         contentUri: Uri,
         selection: String,
         args: Array<String>,
-        mediaFolder: MediaFolder
+        mediaFolder: MediaFolder,
     ) {
 
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " +
@@ -390,7 +390,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     UploadFile.getRealmInstance().use {
                         it.executeTransaction { realm ->
                             while (cursor.moveToNext()) {
-                                localMediaFound(realm, cursor, contentUri, mediaFolder, syncSettings)
+                                processFoundLocalMedia(realm, cursor, contentUri, mediaFolder, syncSettings)
                             }
                         }
                     }
@@ -398,7 +398,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }.onFailure { exception -> syncMediaFolderFailure(exception, mediaFolder) }
     }
 
-    private fun localMediaFound(
+    private fun processFoundLocalMedia(
         realm: Realm,
         cursor: Cursor,
         contentUri: Uri,
