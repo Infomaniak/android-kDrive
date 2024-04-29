@@ -80,15 +80,17 @@ object MediaFoldersProvider {
      * Need Write permission if is called from [Fragment] or [Activity]
      */
     fun getAllMediaFolders(realm: Realm, contentResolver: ContentResolver, coroutineScope: Job? = null): List<MediaFolder> {
-        val mediaFolders = getImageFolders(realm, contentResolver, coroutineScope)
-        mediaFolders.putAll(getVideoFolders(realm, contentResolver, coroutineScope) as Map<Long, MediaFolder>)
+        val enableAutoSync = !AccountUtils.isEnableAppSync()
+        val mediaFolders = getImageFolders(realm, contentResolver, coroutineScope, enableAutoSync)
+        mediaFolders.putAll(getVideoFolders(realm, contentResolver, coroutineScope, enableAutoSync) as Map<Long, MediaFolder>)
         return mediaFolders.values.sortedBy { it.name }
     }
 
     private fun getImageFolders(
         realm: Realm,
         contentResolver: ContentResolver,
-        coroutineScope: Job?
+        coroutineScope: Job?,
+        enableAutoSync: Boolean,
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
 
@@ -99,7 +101,14 @@ object MediaFoldersProvider {
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_ID))
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
-                        getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)?.let { folders[folderId] = it }
+                        getLocalMediaFolder(
+                            realm = realm,
+                            enableAutoSync = enableAutoSync,
+                            folderId = folderId,
+                            folderName = folderName,
+                            path = path,
+                            coroutineScope = coroutineScope,
+                        )?.let { folders[folderId] = it }
                     }
                 }
             }
@@ -109,7 +118,8 @@ object MediaFoldersProvider {
     private fun getVideoFolders(
         realm: Realm,
         contentResolver: ContentResolver,
-        coroutineScope: Job?
+        coroutineScope: Job?,
+        enableAutoSync: Boolean,
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
 
@@ -120,7 +130,14 @@ object MediaFoldersProvider {
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_ID))
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
-                        getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)?.let { folders[folderId] = it }
+                        getLocalMediaFolder(
+                            realm = realm,
+                            enableAutoSync = enableAutoSync,
+                            folderId = folderId,
+                            folderName = folderName,
+                            path = path,
+                            coroutineScope = coroutineScope,
+                        )?.let { folders[folderId] = it }
                     }
                 }
             }
@@ -129,10 +146,11 @@ object MediaFoldersProvider {
 
     private fun getLocalMediaFolder(
         realm: Realm,
+        enableAutoSync: Boolean,
         folderId: Long,
         folderName: String,
         path: String,
-        coroutineScope: Job?
+        coroutineScope: Job?,
     ): MediaFolder? {
         coroutineScope?.ensureActive()
         if (path.startsWith("Android/media/${BuildConfig.APPLICATION_ID}")) return null
@@ -140,7 +158,7 @@ object MediaFoldersProvider {
             mediaFolder.apply { if (mediaFolder.name != folderName) mediaFolder.storeOrUpdate() }
         } ?: let {
             val isSynced = path.contains("${Environment.DIRECTORY_DCIM}/")
-            MediaFolder(folderId, folderName, isSynced).apply { storeOrUpdate() }
+            MediaFolder(folderId, folderName, enableAutoSync && isSynced).apply { storeOrUpdate() }
         }
     }
 }
