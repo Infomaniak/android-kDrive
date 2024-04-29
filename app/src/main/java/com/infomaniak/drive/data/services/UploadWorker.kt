@@ -318,53 +318,51 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
-        val parentJob = Job()
         var customSelection: String
         var customArgs: Array<String>
 
         SentryLog.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
-        MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
-            // Add log
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = BREADCRUMB_TAG
-                message = "sync ${mediaFolder.id}"
-                level = SentryLevel.DEBUG
-            })
-            SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id}")
+        UploadFile.getRealmInstance().use {
+            it.executeTransaction { realm ->
 
-            // Sync media folder
-            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
-            customArgs = args + mediaFolder.id.toString()
+                MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
+                    // Add log
+                    Sentry.addBreadcrumb(Breadcrumb().apply {
+                        category = BREADCRUMB_TAG
+                        message = "sync ${mediaFolder.id}"
+                        level = SentryLevel.DEBUG
+                    })
+                    SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
 
-            @Suppress("DeferredResultUnused")
-            async(parentJob) {
-                getLocalLastMedias(
-                    syncSettings = syncSettings,
-                    contentUri = MediaFoldersProvider.imagesExternalUri,
-                    selection = customSelection,
-                    args = customArgs,
-                    mediaFolder = mediaFolder,
-                )
-            }
+                    // Sync media folder
+                    customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
+                    customArgs = args + mediaFolder.id.toString()
 
-            if (syncSettings.syncVideo) {
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
-
-                @Suppress("DeferredResultUnused")
-                async(parentJob) {
-                    getLocalLastMedias(
+                    fetchRecentLocalMediasToSync(
+                        realm = realm,
                         syncSettings = syncSettings,
-                        contentUri = MediaFoldersProvider.videosExternalUri,
+                        contentUri = MediaFoldersProvider.imagesExternalUri,
                         selection = customSelection,
                         args = customArgs,
                         mediaFolder = mediaFolder,
                     )
+
+                    if (syncSettings.syncVideo) {
+                        customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
+
+                        fetchRecentLocalMediasToSync(
+                            realm = realm,
+                            syncSettings = syncSettings,
+                            contentUri = MediaFoldersProvider.videosExternalUri,
+                            selection = customSelection,
+                            args = customArgs,
+                            mediaFolder = mediaFolder,
+                        )
+                    }
                 }
             }
         }
-        parentJob.complete()
-        parentJob.join()
     }
 
     private fun moreCustomConditions(): String = when {
@@ -373,12 +371,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         else -> ""
     }
 
-    private fun getLocalLastMedias(
+    private fun fetchRecentLocalMediasToSync(
+        realm: Realm,
         syncSettings: SyncSettings,
         contentUri: Uri,
         selection: String,
         args: Array<String>,
-        mediaFolder: MediaFolder
+        mediaFolder: MediaFolder,
     ) {
 
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " +
@@ -388,7 +387,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         runCatching {
             contentResolver.query(contentUri, null, selection, args, sortOrder)
                 ?.use { cursor ->
-                    val messageLog = "getLocalLastMediasAsync > from ${mediaFolder.id} ${cursor.count} found"
+                    val messageLog = "getLocalLastMediasAsync > $contentUri from ${mediaFolder.name} ${cursor.count} found"
                     SentryLog.d(TAG, messageLog)
                     Sentry.addBreadcrumb(Breadcrumb().apply {
                         category = BREADCRUMB_TAG
@@ -396,18 +395,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                         level = SentryLevel.INFO
                     })
 
-                    UploadFile.getRealmInstance().use {
-                        it.executeTransaction { realm ->
-                            while (cursor.moveToNext()) {
-                                localMediaFound(realm, cursor, contentUri, mediaFolder, syncSettings)
-                            }
-                        }
+                    while (cursor.moveToNext()) {
+                        processFoundLocalMedia(realm, cursor, contentUri, mediaFolder, syncSettings)
                     }
                 }
         }.onFailure { exception -> syncMediaFolderFailure(exception, mediaFolder) }
     }
 
-    private fun localMediaFound(
+    private fun processFoundLocalMedia(
         realm: Realm,
         cursor: Cursor,
         contentUri: Uri,
@@ -420,7 +415,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val fileName = cursor.getFileName(contentUri)
         val fileSize = uri.getFileSize(cursor)
 
-        val messageLog = "localMediaFound > file found in folder ${mediaFolder.id}"
+        val messageLog = "localMediaFound > $fileName found in folder ${mediaFolder.name}"
         SentryLog.d(TAG, messageLog)
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = BREADCRUMB_TAG
@@ -442,7 +437,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 deleteIfExists(makeTransaction = false, customRealm = realm)
                 createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
                 realm.insertOrUpdate(this)
-                SentryLog.i(TAG, "localMediaFound> file saved in realm")
+                SentryLog.i(TAG, "localMediaFound> $fileName saved in realm")
             }
 
             UploadFile.setAppSyncSettings(
@@ -453,7 +448,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 },
             )
         } else {
-            SentryLog.w(TAG, "localMediaFound> Cannot upload file, size=$fileSize")
+            SentryLog.w(TAG, "localMediaFound> Cannot upload $fileName, size=$fileSize")
         }
     }
 
