@@ -88,7 +88,7 @@ object MediaFoldersProvider {
     private fun getImageFolders(
         realm: Realm,
         contentResolver: ContentResolver,
-        coroutineScope: Job?
+        coroutineScope: Job?,
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
 
@@ -99,7 +99,13 @@ object MediaFoldersProvider {
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(IMAGES_BUCKET_ID))
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
-                        getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)?.let { folders[folderId] = it }
+                        getLocalMediaFolder(
+                            realm = realm,
+                            folderId = folderId,
+                            folderName = folderName,
+                            path = path,
+                            coroutineScope = coroutineScope,
+                        )?.let { folders[folderId] = it }
                     }
                 }
             }
@@ -109,7 +115,7 @@ object MediaFoldersProvider {
     private fun getVideoFolders(
         realm: Realm,
         contentResolver: ContentResolver,
-        coroutineScope: Job?
+        coroutineScope: Job?,
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
 
@@ -120,7 +126,13 @@ object MediaFoldersProvider {
                     val folderName = cursor.getString(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_DISPLAY_NAME)) ?: ""
                     val folderId = cursor.getLong(cursor.getColumnIndexOrThrow(VIDEO_BUCKET_ID))
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
-                        getLocalMediaFolder(realm, folderId, folderName, path, coroutineScope)?.let { folders[folderId] = it }
+                        getLocalMediaFolder(
+                            realm = realm,
+                            folderId = folderId,
+                            folderName = folderName,
+                            path = path,
+                            coroutineScope = coroutineScope,
+                        )?.let { folders[folderId] = it }
                     }
                 }
             }
@@ -132,14 +144,15 @@ object MediaFoldersProvider {
         folderId: Long,
         folderName: String,
         path: String,
-        coroutineScope: Job?
+        coroutineScope: Job?,
     ): MediaFolder? {
         coroutineScope?.ensureActive()
         if (path.startsWith("Android/media/${BuildConfig.APPLICATION_ID}")) return null
         return MediaFolder.findById(realm, folderId)?.let { mediaFolder ->
             mediaFolder.apply { if (mediaFolder.name != folderName) mediaFolder.storeOrUpdate() }
         } ?: let {
-            val isSynced = path.contains("${Environment.DIRECTORY_DCIM}/")
+            val isFirstConfiguration = !AccountUtils.isEnableAppSync()
+            val isSynced = isFirstConfiguration && path.contains("${Environment.DIRECTORY_DCIM}/")
             MediaFolder(folderId, folderName, isSynced).apply { storeOrUpdate() }
         }
     }
