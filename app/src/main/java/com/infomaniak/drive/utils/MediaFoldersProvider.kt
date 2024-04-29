@@ -80,9 +80,8 @@ object MediaFoldersProvider {
      * Need Write permission if is called from [Fragment] or [Activity]
      */
     fun getAllMediaFolders(realm: Realm, contentResolver: ContentResolver, coroutineScope: Job? = null): List<MediaFolder> {
-        val enableAutoSync = !AccountUtils.isEnableAppSync()
-        val mediaFolders = getImageFolders(realm, contentResolver, coroutineScope, enableAutoSync)
-        mediaFolders.putAll(getVideoFolders(realm, contentResolver, coroutineScope, enableAutoSync) as Map<Long, MediaFolder>)
+        val mediaFolders = getImageFolders(realm, contentResolver, coroutineScope)
+        mediaFolders.putAll(getVideoFolders(realm, contentResolver, coroutineScope) as Map<Long, MediaFolder>)
         return mediaFolders.values.sortedBy { it.name }
     }
 
@@ -90,7 +89,6 @@ object MediaFoldersProvider {
         realm: Realm,
         contentResolver: ContentResolver,
         coroutineScope: Job?,
-        enableAutoSync: Boolean,
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
 
@@ -103,7 +101,6 @@ object MediaFoldersProvider {
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
                         getLocalMediaFolder(
                             realm = realm,
-                            enableAutoSync = enableAutoSync,
                             folderId = folderId,
                             folderName = folderName,
                             path = path,
@@ -119,7 +116,6 @@ object MediaFoldersProvider {
         realm: Realm,
         contentResolver: ContentResolver,
         coroutineScope: Job?,
-        enableAutoSync: Boolean,
     ): ArrayMap<Long, MediaFolder> {
         val folders = arrayMapOf<Long, MediaFolder>()
 
@@ -132,7 +128,6 @@ object MediaFoldersProvider {
                     cursor.getString(cursor.getColumnIndexOrThrow(MEDIA_PATH_COLUMN))?.let { path ->
                         getLocalMediaFolder(
                             realm = realm,
-                            enableAutoSync = enableAutoSync,
                             folderId = folderId,
                             folderName = folderName,
                             path = path,
@@ -146,7 +141,6 @@ object MediaFoldersProvider {
 
     private fun getLocalMediaFolder(
         realm: Realm,
-        enableAutoSync: Boolean,
         folderId: Long,
         folderName: String,
         path: String,
@@ -157,8 +151,9 @@ object MediaFoldersProvider {
         return MediaFolder.findById(realm, folderId)?.let { mediaFolder ->
             mediaFolder.apply { if (mediaFolder.name != folderName) mediaFolder.storeOrUpdate() }
         } ?: let {
-            val isSynced = path.contains("${Environment.DIRECTORY_DCIM}/")
-            MediaFolder(folderId, folderName, enableAutoSync && isSynced).apply { storeOrUpdate() }
+            val isFirstConfiguration = !AccountUtils.isEnableAppSync()
+            val isSynced = isFirstConfiguration && path.contains("${Environment.DIRECTORY_DCIM}/")
+            MediaFolder(folderId, folderName, isSynced).apply { storeOrUpdate() }
         }
     }
 }
