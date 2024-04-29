@@ -25,6 +25,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.fragment.app.FragmentActivity
 import androidx.work.*
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.PeriodicUploadWorker
@@ -161,6 +162,7 @@ object SyncUtils {
 
     fun Context.disableAutoSync() {
         UploadFile.removeAppSyncSettings()
+        MediaFolder.deleteAll()
         cancelContentObserver()
         cancelPeriodicSync()
     }

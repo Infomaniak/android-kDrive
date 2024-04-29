@@ -87,5 +87,13 @@ open class MediaFolder(
         fun delete(realm: Realm, mediaFolderId: Long) {
             realm.mediaFolderTable.equalTo(MediaFolder::id.name, mediaFolderId).findFirst()?.deleteFromRealm()
         }
+
+        fun deleteAll() {
+            return getRealmInstance().use {
+                it.executeTransaction { realm ->
+                    realm.delete(MediaFolder::class.java)
+                }
+            }
+        }
     }
 }
