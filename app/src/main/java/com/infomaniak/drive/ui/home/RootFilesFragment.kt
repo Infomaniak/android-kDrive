@@ -17,8 +17,6 @@
  */
 package com.infomaniak.drive.ui.home
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -60,7 +58,7 @@ class RootFilesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupDriveToolbar()
+        setupDriveToolbar(collapsingToolbarLayout, switchDriveLayout, appBar)
 
         toolbar.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == R.id.searchItem) {
@@ -84,22 +82,6 @@ class RootFilesFragment : Fragment() {
         )
 
         setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, rootFilesUploadFileInProgressView)
-    }
-
-    private fun setupDriveToolbar() = with(binding) {
-        collapsingToolbarLayout.title = AccountUtils.getCurrentDrive()!!.name
-        switchDriveLayout.setupSwitchDriveButton(this@RootFilesFragment)
-
-        appBar.addOnOffsetChangedListener { _, verticalOffset ->
-            val fullyExpanded = verticalOffset == 0
-            switchDriveLayout.root.isVisible = fullyExpanded
-
-            if (fullyExpanded) {
-                collapsingToolbarLayout.setExpandedTitleTextColor(ColorStateList.valueOf(Color.TRANSPARENT))
-            } else {
-                collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarExpandedTitleTextAppearance)
-            }
-        }
     }
 
     private fun setupItems() = with(binding) {

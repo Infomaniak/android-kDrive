@@ -24,17 +24,17 @@ import android.view.ViewGroup
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.setDriveHeader
+import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
-import com.infomaniak.drive.utils.setupSwitchDriveButton
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -55,15 +55,18 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
             noNetworkCard.root.isGone = isInternetAvailable
         }
-        switchDriveLayout.setupSwitchDriveButton(this@HomeFragment)
+        setupDriveToolbar(collapsingToolbarLayout, switchDriveLayout, appBarLayout)
 
-        searchViewCard.searchView.isGone = true
-        searchViewCard.searchViewText.isVisible = true
         ViewCompat.requestApplyInsets(homeCoordinator)
 
-        searchViewCard.root.setOnClickListener {
-            ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
-            safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            if (menuItem.itemId == R.id.searchItem) {
+                ShortcutManagerCompat.reportShortcutUsed(requireContext(), Shortcuts.SEARCH.id)
+                safeNavigate(HomeFragmentDirections.actionHomeFragmentToSearchFragment())
+                true
+            } else {
+                false
+            }
         }
 
         mainViewModel.deleteFileFromHome.observe(viewLifecycleOwner) { fileDeleted -> mustRefreshUi = fileDeleted }
