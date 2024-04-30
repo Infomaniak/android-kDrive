@@ -66,11 +66,14 @@ import java.io.IOException
 import java.net.URLEncoder
 import java.util.Date
 import java.util.UUID
+import java.util.concurrent.Executors
 
 class CloudStorageProvider : DocumentsProvider() {
 
     private lateinit var cacheDir: IOFile
-    private val cloudScope = CoroutineScope(Dispatchers.IO + CoroutineName("CloudStorage"))
+    private val cloudScope = CoroutineScope(
+        Dispatchers.IO + CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    )
 
     override fun onCreate(): Boolean {
         SentryLog.d(TAG, "onCreate")
