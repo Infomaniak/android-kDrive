@@ -710,7 +710,7 @@ class CloudStorageProvider : DocumentsProvider() {
         newRow().apply {
             add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, documentId)
             add(DocumentsContract.Document.COLUMN_MIME_TYPE, mimetype)
-            add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, file?.name ?: name)
+            add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, context?.let { file?.getDisplayName(it) } ?: name)
             add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file?.lastModifiedAt?.times(1000))
             add(DocumentsContract.Document.COLUMN_SIZE, file?.size)
             add(DocumentsContract.Document.COLUMN_FLAGS, flags)
