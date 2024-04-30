@@ -70,12 +70,8 @@ open class MediaFolder(
             } ?: arrayListOf()
         }
 
-        fun getAllSyncedFolders(): ArrayList<MediaFolder> {
-            return getRealmInstance().use { realm ->
-                realm.mediaFolderTable.equalTo(MediaFolder::isSynced.name, true).findAll()?.let { results ->
-                    ArrayList(realm.copyFromRealm(results, 0))
-                } ?: arrayListOf()
-            }
+        fun getAllSyncedFolders(realm: Realm): List<MediaFolder> {
+            return realm.mediaFolderTable.equalTo(MediaFolder::isSynced.name, true).findAll().freeze() ?: emptyList()
         }
 
         fun getAllSyncedFoldersCount(): Long {
@@ -90,6 +86,14 @@ open class MediaFolder(
 
         fun delete(realm: Realm, mediaFolderId: Long) {
             realm.mediaFolderTable.equalTo(MediaFolder::id.name, mediaFolderId).findFirst()?.deleteFromRealm()
+        }
+
+        fun deleteAll() {
+            return getRealmInstance().use {
+                it.executeTransaction { realm ->
+                    realm.delete(MediaFolder::class.java)
+                }
+            }
         }
     }
 }
