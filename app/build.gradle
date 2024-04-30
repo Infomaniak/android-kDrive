@@ -70,10 +70,7 @@ android {
             getIsDefault().set(true)
 
             dependencies {
-                def geniusscansdk_version = '4.21.1'
-                implementation "com.geniusscansdk:gssdk-core:$geniusscansdk_version"
-                implementation "com.geniusscansdk:gssdk-ocr:$geniusscansdk_version"
-                implementation "com.geniusscansdk:gssdk-scanflow:$geniusscansdk_version"
+                implementation "com.geniusscansdk:gssdk:5.0.5"
             }
         }
         fdroid { dimension 'distribution' }

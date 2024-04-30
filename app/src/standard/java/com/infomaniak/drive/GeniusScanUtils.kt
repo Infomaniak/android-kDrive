@@ -28,7 +28,8 @@ import com.geniusscansdk.core.GeniusScanSDK
 import com.geniusscansdk.core.LicenseException
 import com.geniusscansdk.scanflow.ScanActivity
 import com.geniusscansdk.scanflow.ScanConfiguration
-import com.geniusscansdk.scanflow.ScanConfiguration.*
+import com.geniusscansdk.scanflow.ScanConfiguration.OcrConfiguration
+import com.geniusscansdk.scanflow.ScanConfiguration.OcrOutputFormat
 import com.geniusscansdk.scanflow.ScanResult
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
@@ -43,7 +44,6 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils
 import com.infomaniak.lib.core.utils.format
 import io.sentry.Sentry
-import java.io.FileOutputStream
 import java.util.Date
 import java.util.EnumSet
 
@@ -54,47 +54,24 @@ object GeniusScanUtils : IGeniusScanUtils {
     private const val ERROR_KEY = "ERROR_KEY"
 
     private val supportedLanguages by lazy {
-        mutableMapOf(
-            "fra" to R.raw.fra,
-            "deu" to R.raw.deu,
-            "eng" to R.raw.eng,
+        mutableListOf(
+            "fr-FR",
+            "de-DE",
+            "en-US",
         ).apply {
             Utils.getPreferredLocaleList().forEach {
                 when (it.language) {
-                    "it" -> put("ita", R.raw.ita)
-                    "es" -> put("spa", R.raw.spa)
+                    "it" -> add("it-IT")
+                    "es" -> add("es-ES")
                 }
             }
         }
     }
 
-    private fun Context.getOcrConfiguration(): OcrConfiguration {
-        copyOcrDataFiles()
-
-        return OcrConfiguration().apply {
-            outputFormats = EnumSet.of(OcrOutputFormat.TEXT_LAYER_IN_PDF)
-            languages = supportedLanguages.keys.toList()
-            languagesDirectory = getOCRdataDirectory()
-        }
+    private fun getOcrConfiguration() = OcrConfiguration().apply {
+        outputFormats = EnumSet.of(OcrOutputFormat.TEXT_LAYER_IN_PDF)
+        languages = supportedLanguages
     }
-
-    private fun Context.copyOcrDataFiles() {
-        getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
-
-        val ocrDirectory = getOCRdataDirectory()
-        if (ocrDirectory.exists()) return
-        ocrDirectory.mkdir()
-
-        supportedLanguages.forEach { (lang, res) ->
-            resources?.openRawResource(res).use { inputStream ->
-                FileOutputStream(IOFile(ocrDirectory, "$lang.traineddata")).use {
-                    inputStream?.copyTo(it)
-                }
-            }
-        }
-    }
-
-    private fun Context.getOCRdataDirectory() = IOFile(getExternalFilesDir(null), "ocr_dir")
 
     private fun Context.removeOldScanFiles() {
         getExternalFilesDir(null)?.listFiles()?.forEach { if (it.isFile) it.delete() }
