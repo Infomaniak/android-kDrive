@@ -262,14 +262,12 @@ object FolderFilesProvider {
                     cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
                     order = folderFilesProviderArgs.order,
                 )
-
             }
         }
 
         ensureActive()
 
         handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy)
-
     }
 
     private fun handleRemoteFiles(

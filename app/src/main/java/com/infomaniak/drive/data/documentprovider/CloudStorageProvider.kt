@@ -243,7 +243,7 @@ class CloudStorageProvider : DocumentsProvider() {
             val sharedWithMePath = StringBuilder(SHARED_WITHME_FOLDER_ID.toString())
                 .append(SEPARATOR)
                 .append("${file.name}$DRIVE_SEPARATOR${file.driveId}")
-            val drivePath = if (isSharedWithMeFolder) sharedWithMePath.toString() else ""
+            val drivePath = if (isSharedWithMeFolder) sharedWithMePath.toString() else null
             this.addFile(file, createFileDocumentId(parentDocumentId, file.id, parent = drivePath))
             job.ensureActive()
         }
@@ -806,8 +806,8 @@ class CloudStorageProvider : DocumentsProvider() {
 
         private fun getFileIdFromDocumentId(documentId: String) = documentId.substringAfterLast(SEPARATOR).toInt()
 
-        private fun createFileDocumentId(parentDocumentId: String, fileId: Int, parent: String = ""): String {
-            val parentPath = if (parent.isEmpty()) "" else "$parent$SEPARATOR"
+        private fun createFileDocumentId(parentDocumentId: String, fileId: Int, parent: String? = null): String {
+            val parentPath = if (parent == null) "" else "$parent$SEPARATOR"
             return parentDocumentId.substringBeforeLast(SEPARATOR) + SEPARATOR + parentPath + fileId.toString()
         }
 
