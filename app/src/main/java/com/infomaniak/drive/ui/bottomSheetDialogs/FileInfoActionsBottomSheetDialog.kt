@@ -141,9 +141,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         binding.fileInfoActionsView.removeOfflineObservations(this)
     }
 
-    override fun editDocumentClicked() {
+    override fun editDocumentClicked(mainViewModel: MainViewModel) {
         findNavController().popBackStack()
-        super.editDocumentClicked()
+        super.editDocumentClicked(mainViewModel)
     }
 
     override fun displayInfoClicked() {
