@@ -63,7 +63,7 @@ class UploadFilesHelper private constructor(
     }
 
     private fun onSelectFilesResult(uris: List<Uri>) {
-        parentFolder?.let {
+        parentFolder.let {
             navController.navigate(
                 resId = R.id.importFileDialog,
                 args = ImportFilesDialogArgs(it.id, it.name, it.driveId, uris.toTypedArray()).toBundle(),
