@@ -26,7 +26,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
@@ -109,7 +108,7 @@ class ImportFilesDialog : DialogFragment() {
         }
         lifecycleScope.launch {
             lifecycle.withResumed {
-                findNavController().popBackStack(R.id.fileListFragment, false)
+                dismiss()
             }
         }
 
