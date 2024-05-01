@@ -332,6 +332,7 @@ open class File(
     }
 
     fun getVisibilityType(): VisibilityType {
+        if (dropbox != null) return VisibilityType.IS_DROPBOX
         return when (visibility) {
             "is_root" -> VisibilityType.ROOT
             "is_team_space" -> VisibilityType.IS_TEAM_SPACE
@@ -341,13 +342,7 @@ open class File(
             "is_in_shared_space" -> VisibilityType.IS_IN_SHARED_SPACE
             "is_in_private_space" -> VisibilityType.IS_IN_PRIVATE_SPACE
             IS_PRIVATE_SPACE -> VisibilityType.IS_PRIVATE
-            else -> {
-                when {
-                    dropbox != null -> VisibilityType.IS_DROPBOX
-                    users.size > 1 -> VisibilityType.IS_SHARED
-                    else -> VisibilityType.UNKNOWN
-                }
-            }
+            else -> VisibilityType.UNKNOWN
         }
     }
 
@@ -407,7 +402,6 @@ open class File(
         ROOT,
         IS_PRIVATE,
         IS_DROPBOX,
-        IS_SHARED,
         IS_SHARED_SPACE,
         IS_TEAM_SPACE,
         IS_TEAM_SPACE_FOLDER,
