@@ -512,7 +512,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
             val driveName = AccountUtils.getCurrentDrive()?.driveAccount?.name
             Dispatchers.Main {
-                binding.publicFolderSubtitle.apply {
+                _binding?.publicFolderSubtitle?.apply {
                     isVisible = shouldDisplaySubtitle && driveName != null
                     if (isVisible) text = getString(R.string.commonDocumentsDescription, driveName)
                 }
