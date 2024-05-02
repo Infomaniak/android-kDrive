@@ -62,11 +62,11 @@ class UploadFilesHelper private constructor(
         }
     }
 
-    private fun onSelectFilesResult(uris: List<Uri>) {
-        parentFolder?.let {
+    private fun onSelectFilesResult(uris: List<Uri>) = with(parentFolder) {
+        if (uris.isNotEmpty()) {
             navController.navigate(
                 resId = R.id.importFileDialog,
-                args = ImportFilesDialogArgs(it.id, it.name, it.driveId, uris.toTypedArray()).toBundle(),
+                args = ImportFilesDialogArgs(id, name, driveId, uris.toTypedArray()).toBundle(),
             )
         }
     }
