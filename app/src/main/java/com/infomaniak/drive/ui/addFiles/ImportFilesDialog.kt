@@ -106,12 +106,10 @@ class ImportFilesDialog : DialogFragment() {
                 )
             }
         }
-        lifecycleScope.launch {
-            lifecycle.withResumed {
-                dismiss()
-            }
-        }
 
+        lifecycle.withResumed {
+            dismiss()
+        }
         context?.syncImmediately()
     }
 
