@@ -62,15 +62,17 @@ class UploadFilesHelper private constructor(
         }
     }
 
-    private fun onSelectFilesResult(uris: List<Uri>) {
-        navController.navigate(
-            resId = R.id.importFileDialog,
-            args = ImportFilesDialogArgs(
-                folderId = parentFolder.id,
-                folderName = parentFolder.name,
-                driveId = parentFolder.driveId,
-                uris = uris.toTypedArray()
-            ).toBundle(),
-        )
+    private fun onSelectFilesResult(uris: List<Uri>) = with(parentFolder) {
+        if (uris.isNotEmpty()) {
+            navController.navigate(
+                resId = R.id.importFileDialog,
+                args = ImportFilesDialogArgs(
+                    folderId = parentFolder.id,
+                    folderName = parentFolder.name,
+                    driveId = parentFolder.driveId,
+                    uris = uris.toTypedArray()
+                ).toBundle(),
+            )
+        }
     }
 }

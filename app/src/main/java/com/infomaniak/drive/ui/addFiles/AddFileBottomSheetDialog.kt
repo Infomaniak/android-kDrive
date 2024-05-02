@@ -111,7 +111,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         openCamera.setOnClickListener { openCamera() }
-        documentUpload.setOnClickListener { mainViewModel.uploadFilesHelper?.uploadFiles() }
+        documentUpload.setOnClickListener {
+            mainViewModel.uploadFilesHelper?.uploadFiles()
+            dismiss()
+        }
         documentScanning.setOnClickListener { scanDocuments() }
         folderCreate.setOnClickListener { createFolder() }
         docsCreate.setOnClickListener { createFile(Office.DOCS) }
