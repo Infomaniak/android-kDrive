@@ -42,7 +42,10 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Date
 
 class ImportFilesDialog : DialogFragment() {
@@ -82,21 +85,16 @@ class ImportFilesDialog : DialogFragment() {
 
     private suspend fun importFiles() {
         var errorCount = 0
-        val uploadFilesJobs = mutableListOf<Job>()
         navArgs.uris.forEach { uri ->
-            uploadFilesJobs.add(lifecycleScope.launch {
-                runCatching {
-                    initUpload(uri)
-                }.onFailure {
-                    it.printStackTrace()
-                    Sentry.captureException(it)
+            runCatching {
+                initUpload(uri)
+            }.onFailure {
+                it.printStackTrace()
+                Sentry.captureException(it)
 
-                    errorCount++
-                }
-            })
+                errorCount++
+            }
         }
-
-        uploadFilesJobs.joinAll()
 
         if (errorCount > 0) {
             withContext(Dispatchers.Main) {
