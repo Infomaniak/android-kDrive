@@ -50,10 +50,7 @@ import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.PreviewHeaderView
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.toggleEdgeToEdge
-import com.infomaniak.lib.core.utils.whenResultIsOk
+import com.infomaniak.lib.core.utils.*
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -187,7 +184,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         binding.header.setupWindowInsetsListener(
             rootView = root,
             bottomSheetView = binding.bottomSheetFileInfos,
-        )
+        ) {
+            binding.pdfContainer.setMargins(right = it?.right ?: 0)
+        }
     }
 
     override fun onStart() {

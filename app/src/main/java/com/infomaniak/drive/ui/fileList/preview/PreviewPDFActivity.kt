@@ -37,6 +37,7 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.getFileNameAndSize
+import com.infomaniak.lib.core.utils.setMargins
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 
@@ -86,7 +87,12 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     override fun onStart() {
         super.onStart()
-        binding.header.setupWindowInsetsListener(rootView = binding.root, bottomSheetView = binding.bottomSheetFileInfos)
+        binding.header.setupWindowInsetsListener(
+            rootView = binding.root,
+            bottomSheetView = binding.bottomSheetFileInfos
+        ) {
+            binding.pdfContainer.setMargins(right = it?.right ?: 0)
+        }
         setupStatusBarForPreview()
     }
 
