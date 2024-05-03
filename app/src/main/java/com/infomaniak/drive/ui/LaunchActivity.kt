@@ -51,7 +51,7 @@ import kotlinx.coroutines.withContext
 class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
-    private var extrasMainActivity: Bundle? = null
+    private var mainActivityExtras: Bundle? = null
 
     private var isHelpShortcutPressed = false
 
@@ -95,15 +95,15 @@ class LaunchActivity : AppCompatActivity() {
             LockActivity.startAppLockActivity(
                 context = this,
                 destinationClass = MainActivity::class.java,
-                destinationClassArgs = extrasMainActivity
+                destinationClassArgs = mainActivityExtras
             )
         } else {
-            val intent = Intent(this, destinationClass).apply {
-                if (destinationClass == MainActivity::class.java) extrasMainActivity?.let(::putExtras)
-                if (destinationClass == LoginActivity::class.java) putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
-            }
-
-            startActivity(intent)
+            Intent(this, destinationClass).apply {
+                when (destinationClass) {
+                    MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
+                    LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                }
+            }.also(::startActivity)
         }
     }
 
@@ -175,7 +175,7 @@ class LaunchActivity : AppCompatActivity() {
     private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int) {
         if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
         if (driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
-        extrasMainActivity = MainActivityArgs(destinationFileId = fileId).toBundle()
+        mainActivityExtras = MainActivityArgs(destinationFileId = fileId).toBundle()
     }
 
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {
@@ -188,10 +188,9 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun handleShortcuts() {
-        intent.extras?.getString(SHORTCUTS_TAG)?.let {
-            extrasMainActivity = MainActivityArgs(shortcutId = it).toBundle()
-            if (it == Utils.Shortcuts.FEEDBACK.id)
-                isHelpShortcutPressed = true
+        intent.extras?.getString(SHORTCUTS_TAG)?.let { shortcutTag ->
+            mainActivityExtras = MainActivityArgs(shortcutId = shortcutTag).toBundle()
+            if (shortcutTag == Utils.Shortcuts.FEEDBACK.id) isHelpShortcutPressed = true
         }
     }
 

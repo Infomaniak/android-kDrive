@@ -63,7 +63,7 @@ class LoginActivity : AppCompatActivity() {
 
     private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
-    private val navigationArgs: LoginActivityArgs? by lazy { intent?.extras?.let { LoginActivityArgs.fromBundle(it) } }
+    private val navigationArgs: LoginActivityArgs? by lazy { intent?.extras?.let(LoginActivityArgs::fromBundle) }
 
     private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         with(result) {
@@ -204,9 +204,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleHelpShortcut() {
-        navigationArgs?.isHelpShortcutPressed?.let { isHelpShortcutPressed ->
-            if (isHelpShortcutPressed) openSupport()
-        }
+        if (navigationArgs?.isHelpShortcutPressed == true) openSupport()
     }
 
     companion object {
