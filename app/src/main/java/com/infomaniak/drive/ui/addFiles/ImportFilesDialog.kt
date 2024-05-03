@@ -88,9 +88,9 @@ class ImportFilesDialog : DialogFragment() {
         navArgs.uris.forEach { uri ->
             runCatching {
                 initUpload(uri)
-            }.onFailure {
-                it.printStackTrace()
-                Sentry.captureException(it)
+            }.onFailure { exception ->
+                exception.printStackTrace()
+                Sentry.captureException(exception)
 
                 errorCount++
             }
