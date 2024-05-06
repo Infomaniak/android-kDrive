@@ -85,14 +85,17 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         bottomSheetFileInfos.initOnClickListener(this@PreviewPDFActivity)
     }
 
-    override fun onStart() {
+    override fun onStart() = with(binding) {
+
         super.onStart()
-        binding.header.setupWindowInsetsListener(
-            rootView = binding.root,
-            bottomSheetView = binding.bottomSheetFileInfos
+
+        header.setupWindowInsetsListener(
+            rootView = root,
+            bottomSheetView = bottomSheetFileInfos,
         ) {
-            binding.pdfContainer.setMargins(right = it?.right ?: 0)
+            pdfContainer.setMargins(right = it?.right ?: 0)
         }
+
         setupStatusBarForPreview()
     }
 
