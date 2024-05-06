@@ -29,8 +29,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_LOCAL
-import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -72,7 +70,6 @@ class RootFilesFragment : Fragment() {
 
         setupItems()
 
-        loadFiles()
         observeFiles()
         observeNavigateFileListTo()
         observeAndDisplayNetworkAvailability(
@@ -124,15 +121,6 @@ class RootFilesFragment : Fragment() {
         trashbin.setOnClickListener {
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
         }
-    }
-
-    private fun loadFiles() {
-        val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
-
-        fileListViewModel.loadRootFiles(
-            order = File.SortType.NAME_AZ,
-            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else ONLY_FROM_REMOTE,
-        )
     }
 
     private fun observeFiles() {
