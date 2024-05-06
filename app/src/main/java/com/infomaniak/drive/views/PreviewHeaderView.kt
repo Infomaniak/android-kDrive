@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
@@ -81,11 +82,13 @@ class PreviewHeaderView @JvmOverloads constructor(
     fun setupWindowInsetsListener(
         rootView: View,
         bottomSheetView: View,
+        callback: ((insets: Insets?) -> Unit)? = null,
     ) {
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, windowInsets ->
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                setMargins(left = left, top = top, right = right)
+                // We add the same margins here on the left and right to have the view centered
+                setMargins(left = left + right, top = top, right = left + right)
                 val topOffset = getTopOffset(bottomSheetView)
                 bottomSheetBehavior.apply {
                     peekHeight = getDefaultPeekHeight() + bottom
@@ -98,6 +101,7 @@ class PreviewHeaderView @JvmOverloads constructor(
                 // Add padding to the bottom to allow the last element of the
                 // list to be displayed right over the android navigation bar
                 bottomSheetView.setPadding(0, 0, 0, bottom)
+                callback?.invoke(this)
             }
 
             windowInsets
