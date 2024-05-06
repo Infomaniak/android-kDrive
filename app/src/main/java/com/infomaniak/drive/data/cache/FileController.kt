@@ -35,9 +35,11 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import io.realm.*
 import io.realm.kotlin.oneOf
+import io.realm.kotlin.toFlow
 import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -138,6 +140,13 @@ object FileController {
                 .equalTo(File::isOffline.name, true)
                 .count()
         }
+    }
+
+    fun getFolderFilesFlow(realm: Realm, folderId: Int): Flow<RealmResults<File>> {
+        return realm.where(File::class.java)
+            .equalTo(File::parentId.name, folderId)
+            .findAllAsync()
+            .toFlow()
     }
 
     fun removeFile(
