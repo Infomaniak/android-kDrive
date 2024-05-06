@@ -33,12 +33,16 @@ import com.infomaniak.drive.utils.Position
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 class FileListViewModel(application: Application) : AndroidViewModel(application) {
 
     private inline val context get() = getApplication<MainApplication>().applicationContext
+
+    private val realm = FileController.getRealmInstance()
 
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
@@ -54,31 +58,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     fun sortTypeIsInitialized() = ::sortType.isInitialized
 
-    private val _rootFiles = MutableLiveData<Map<File.VisibilityType, File>>()
-    val rootFiles: LiveData<Map<File.VisibilityType, File>> = _rootFiles
-
-    fun loadRootFiles(
-        order: SortType,
-        sourceRestrictionType: FolderFilesProvider.SourceRestrictionType,
-    ) {
-        getFilesJob.cancel()
-        getFolderActivitiesJob.cancel()
-        getFilesJob = Job()
-        viewModelScope.launch(Dispatchers.IO) {
-
-            val files = FolderFilesProvider.getFiles(
-                FolderFilesProvider.FolderFilesProviderArgs(
-                    folderId = Utils.ROOT_ID,
-                    isFirstPage = true,
-                    order = order,
-                    sourceRestrictionType = sourceRestrictionType,
-                    userDrive = UserDrive(),
-                )
-            )?.folderFiles
-
-            _rootFiles.postValue(files?.associateBy(File::getVisibilityType))
-        }
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val rootFiles = FileController.getFolderFilesFlow(realm, Utils.ROOT_ID)
+        .mapLatest { it.associateBy(File::getVisibilityType) }
+        .cancellable()
+        .asLiveData(viewModelScope.coroutineContext)
 
     fun getFiles(
         folderId: Int,
@@ -291,6 +275,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     override fun onCleared() {
         super.onCleared()
+        runCatching { realm.close() }
         cancelDownloadFiles()
     }
 

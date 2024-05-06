@@ -33,7 +33,10 @@ import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
@@ -98,6 +101,7 @@ class MainViewModel(
 
     var uploadFilesHelper: UploadFilesHelper? = null
 
+    private var rootFilesJob: Job = Job()
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
     private var setCurrentFolderJob = Job()
@@ -139,6 +143,25 @@ class MainViewModel(
         )
         initCurrentFolderFromRealm()
         setParentFolder()
+    }
+
+    fun loadRootFiles() {
+        rootFilesJob.cancel()
+        rootFilesJob = Job()
+        viewModelScope.launch(Dispatchers.IO) {
+
+            if (isInternetAvailable.value == true) {
+                FolderFilesProvider.getFiles(
+                    FolderFilesProvider.FolderFilesProviderArgs(
+                        folderId = Utils.ROOT_ID,
+                        isFirstPage = true,
+                        order = SortType.NAME_AZ,
+                        sourceRestrictionType = ONLY_FROM_REMOTE,
+                        userDrive = UserDrive(),
+                    )
+                )
+            }
+        }
     }
 
     fun navigateFileListTo(navController: NavController, fileId: Int) {

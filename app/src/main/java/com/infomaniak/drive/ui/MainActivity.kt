@@ -187,6 +187,11 @@ class MainActivity : BaseActivity() {
         observeCurrentFolder()
     }
 
+    override fun onStart() {
+        super.onStart()
+        mainViewModel.loadRootFiles()
+    }
+
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
 
     private fun setupNavController(): NavController {
