@@ -383,6 +383,17 @@
             app:argType="integer" />
     </activity>
 
+    <activity
+        android:id="@+id/loginActivity"
+        android:name="com.infomaniak.drive.ui.login.LoginActivity"
+        android:label="LoginActivity"
+        tools:layout="@layout/activity_login">
+        <argument
+            android:name="isHelpShortcutPressed"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </activity>
+
     <dialog
         android:id="@+id/addFileBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialog"
