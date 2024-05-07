@@ -212,7 +212,7 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun configureRecentSearches() = with(binding) {
-        fileListLayout.addView(recentSearchesBinding.root, 1)
+        fileListLayout.addView(recentSearchesBinding.root, 2)
 
         val recentSearches = UiSettings(requireContext()).recentSearches
 
