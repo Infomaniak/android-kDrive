@@ -410,18 +410,15 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             val newListMode = !UiSettings(requireContext()).listMode
             trackEvent("displayStyle", if (newListMode) "viewList" else "viewGrid")
             UiSettings(requireContext()).listMode = newListMode
-            fileListViewModel.isListMode.value = setListMode(newListMode)
+            fileListViewModel.isListMode.value = getListMode(newListMode)
         }
     }
 
     private fun setupListMode() {
-        fileListViewModel.isListMode.apply {
-            observe(viewLifecycleOwner, ::setupDisplayMode)
-            value = setListMode(UiSettings(requireContext()).listMode)
-        }
+        fileListViewModel.isListMode.observe(viewLifecycleOwner, ::setupDisplayMode)
     }
 
-    private fun setListMode(newListMode: Boolean) = newListMode || this@FileListFragment is UploadInProgressFragment
+    private fun getListMode(newListMode: Boolean) = newListMode || this@FileListFragment is UploadInProgressFragment
 
     private fun setupSortButton() {
         binding.sortButton.apply {
