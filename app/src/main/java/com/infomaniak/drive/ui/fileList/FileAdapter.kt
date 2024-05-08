@@ -61,7 +61,6 @@ open class FileAdapter(
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
     var onStopUploadButtonClicked: ((index: Int, fileName: String) -> Unit)? = null
 
-    var offlineMode = false
     var selectFolder = false
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
@@ -71,6 +70,7 @@ open class FileAdapter(
     var isComplete = false
     var isHomeOffline = false
 
+    private var offlineMode = false
     private var pendingWifiConnection = false
     private var showLoading = false
     private var fileAdapterObserver: AdapterDataObserver? = null
