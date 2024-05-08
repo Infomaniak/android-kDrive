@@ -330,7 +330,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         fileListViewModel.isListMode.value?.let { isListMode ->
-            if (!isListMode) fileRecyclerView?.layoutManager = createLayoutManager(isListMode)
+            if (!isListMode) fileRecyclerView?.layoutManager = createLayoutManager(isListMode = false)
         }
     }
 
@@ -410,16 +410,15 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             val newListMode = !UiSettings(requireContext()).listMode
             trackEvent("displayStyle", if (newListMode) "viewList" else "viewGrid")
             UiSettings(requireContext()).listMode = newListMode
-            fileListViewModel.isListMode.value = newListMode
+            fileListViewModel.isListMode.value = getListMode(newListMode)
         }
     }
 
     private fun setupListMode() {
-        fileListViewModel.isListMode.apply {
-            observe(viewLifecycleOwner) { setupDisplayMode(it) }
-            value = UiSettings(requireContext()).listMode
-        }
+        fileListViewModel.isListMode.observe(viewLifecycleOwner, ::setupDisplayMode)
     }
+
+    private fun getListMode(newListMode: Boolean) = newListMode || this@FileListFragment is UploadInProgressFragment
 
     private fun setupSortButton() {
         binding.sortButton.apply {
