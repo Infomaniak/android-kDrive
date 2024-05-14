@@ -27,9 +27,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentNewFolderBinding
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -58,8 +57,11 @@ class NewFolderFragment : Fragment() {
         }
 
         initPrivateFolder()
-        initCommonFolder()
-        initDropBoxFolder()
+
+        newFolderViewModel.currentDriveLiveData().observe(viewLifecycleOwner) { drive ->
+            initCommonFolder(drive)
+            initDropBoxFolder(drive)
+        }
     }
 
     private fun initPrivateFolder() {
@@ -68,11 +70,7 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initCommonFolder() = with(binding) {
-        val drive = newFolderViewModel.userDrive?.let {
-            DriveInfosController.getDrive(it.userId, it.driveId)
-        } ?: AccountUtils.getCurrentDrive()
-
+    private fun initCommonFolder(drive: Drive?) = with(binding) {
         if (drive?.capabilities?.useTeamSpace == true) {
             commonFolderDescription.text = getString(R.string.commonFolderDescription, drive.name)
             commonFolder.setOnClickListener {
@@ -83,10 +81,10 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initDropBoxFolder() {
+    private fun initDropBoxFolder(drive: Drive?) {
         binding.dropBox.setOnClickListener {
             safeNavigate(
-                if (AccountUtils.getCurrentDrive()?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
+                if (drive?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
                 else R.id.dropBoxBottomSheetDialog
             )
         }
