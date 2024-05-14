@@ -40,7 +40,7 @@ object DriveInfosController {
         .modules(RealmModules.DriveFilesModule())
         .build()
 
-    private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
+    fun getRealmInstance() = Realm.getInstance(realmConfiguration)
 
     private fun ArrayList<Drive>.initDriveForRealm(
         drive: Drive,
@@ -130,11 +130,15 @@ object DriveInfosController {
         userId: Int? = null,
         driveId: Int? = null,
         sharedWithMe: Boolean? = null,
-        maintenance: Boolean? = null
+        maintenance: Boolean? = null,
+        customRealm: Realm? = null,
     ): Drive? {
-        return getRealmInstance().use { realm ->
-            realm.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).findFirst()?.let { realm.copyFromRealm(it, 1) }
+        val block: (Realm) -> Drive? = { realm ->
+            realm.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).findFirst()?.let {
+                if (customRealm == null) realm.copyFromRealm(it, 1) else it
+            }
         }
+        return customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun getDrivesCount(
