@@ -97,6 +97,13 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
+            <include
+                android:id="@+id/recent_search_layout"
+                layout="@layout/recent_searches"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
             <com.github.rubensousa.gravitysnaphelper.GravitySnapRecyclerView
                 android:id="@+id/filtersRecyclerView"
                 android:layout_width="match_parent"
