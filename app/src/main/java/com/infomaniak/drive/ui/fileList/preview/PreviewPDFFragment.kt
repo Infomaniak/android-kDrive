@@ -34,6 +34,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
@@ -109,7 +110,9 @@ class PreviewPDFFragment : PreviewFragment() {
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener { showPasswordDialog() }
+            setOnClickListener {
+                if (isPasswordProtected) showPasswordDialog() else openWithClicked()
+            }
         }
     }
 

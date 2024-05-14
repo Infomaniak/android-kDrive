@@ -135,8 +135,8 @@ dependencies {
 
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
     implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
-    implementation 'androidx.viewpager2:viewpager2:1.1.0-beta02'
-    implementation 'androidx.webkit:webkit:1.10.0'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0-rc01'
+    implementation 'androidx.webkit:webkit:1.11.0'
 
     def exoplayer_version = '2.19.1'
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
@@ -153,7 +153,7 @@ dependencies {
 
     implementation 'io.realm:android-adapters:4.0.0'
 
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:24.0.0'
 
     implementation 'com.googlecode.plist:dd-plist:1.28'
 
