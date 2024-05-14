@@ -36,11 +36,10 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.initPDFPrintListener
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.isFilePasswordProtected
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.shouldHidePrintOption
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.onFilePreviewEvent
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.shouldHidePrintOption
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
@@ -79,7 +78,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     }
 
     private var pdfFile: IOFile? = null
-    private var externalFileName: String= ""
+    private var externalFileName: String = ""
     private var isPasswordProtected = false
     private var isDownloading = false
 
