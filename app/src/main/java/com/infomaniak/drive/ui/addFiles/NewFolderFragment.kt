@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -81,8 +82,9 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initDropBoxFolder(drive: Drive?) {
-        binding.dropBox.setOnClickListener {
+    private fun initDropBoxFolder(drive: Drive?) = binding.dropBox.apply {
+        isVisible = drive?.sharedWithMe != true
+        setOnClickListener {
             safeNavigate(
                 if (drive?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
                 else R.id.dropBoxBottomSheetDialog
