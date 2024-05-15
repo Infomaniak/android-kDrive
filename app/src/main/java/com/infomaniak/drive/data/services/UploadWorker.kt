@@ -295,11 +295,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 // If is an ACTION_OPEN_DOCUMENT exception and the file is older than August 17, 2022 we ignore sentry
                 if (fileModifiedAt < Date(1660736262000) && exception.message?.contains("ACTION_OPEN_DOCUMENT") == true) return
 
-                if (exception is IllegalStateException) {
-                    Sentry.captureMessage("The file is either partially downloaded or corrupted")
-                } else {
-                    Sentry.captureException(exception)
-                }
+                if (exception !is IllegalStateException) Sentry.captureException(exception)
             }
             else -> throw exception
         }
