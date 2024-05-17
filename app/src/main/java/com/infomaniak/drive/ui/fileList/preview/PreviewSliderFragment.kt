@@ -55,7 +55,6 @@ import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.collections.set
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
@@ -72,13 +71,17 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
     private lateinit var userDrive: UserDrive
     private var isOverlayShown = true
-    private var isFilePasswordProtected = false
 
     override val ownerFragment = this
     override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
 
-    var pdfViewPrintListener: PDFPrintListener? = null
+    val previewPDFHandler by lazy {
+        PreviewPDFHandler(
+            context = requireContext(),
+            setPrintVisibility = { isGone -> binding.bottomSheetFileInfos.setPrintVisibility(isGone) },
+        )
+    }
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -265,14 +268,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    fun shouldHidePrintOption(isPasswordProtected: Boolean) {
-        binding.bottomSheetFileInfos.setPrintVisibility(isGone = isPasswordProtected)
-    }
-
-    fun isFilePasswordProtected(isPasswordProtected: Boolean) {
-        isFilePasswordProtected = isPasswordProtected
-    }
-
     override fun displayInfoClicked() {
         currentFile.apply {
             safeNavigate(
@@ -369,8 +364,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun printClicked() {
         super.printClicked()
-        if (isFilePasswordProtected) {
-            pdfViewPrintListener?.generatePagesAsBitmaps(currentFile.name)
+        if (previewPDFHandler.isPdfPasswordProtected) {
+            previewPDFHandler.pdfViewPrintListener?.generatePagesAsBitmaps(currentFile.name)
         } else {
             requireContext().printPdf {
                 safeNavigate(
@@ -486,14 +481,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     companion object {
 
-        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
-            getHeader()?.setPageNumberVisibility(isVisible)
-        }
-
-        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
-            getHeader()?.setPageNumberValue(currentPage, totalPage)
-        }
-
         private fun Fragment.getHeader(): PreviewHeaderView? {
             return (parentFragment as? PreviewSliderFragment)?._binding?.header
                 ?: (activity as? PreviewPDFActivity)?.binding?.header
@@ -508,19 +495,29 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             (parentFragment as? PreviewSliderFragment)?.openWith()
         }
 
-        fun Fragment.shouldHidePrintOption(isPasswordProtected: Boolean) {
-            (parentFragment as? PreviewSliderFragment)?.shouldHidePrintOption(isPasswordProtected)
-            (activity as? PreviewPDFActivity)?.shouldHidePrintOption(isPasswordProtected)
+        //region PDF Preview
+        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
+            getHeader()?.setPageNumberVisibility(isVisible)
+        }
+
+        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
+            getHeader()?.setPageNumberValue(currentPage, totalPage)
+        }
+
+        fun Fragment.shouldHidePrintOption(isGone: Boolean) {
+            (parentFragment as? PreviewSliderFragment)?.previewPDFHandler?.shouldHidePrintOption(isGone)
+            (activity as? PreviewPDFActivity)?.previewPDFHandler?.shouldHidePrintOption(isGone)
         }
 
         fun Fragment.initPDFPrintListener(printListener: PDFPrintListener) {
-            (parentFragment as? PreviewSliderFragment)?.pdfViewPrintListener = printListener
-            (activity as? PreviewPDFActivity)?.pdfViewPrintListener = printListener
+            (parentFragment as? PreviewSliderFragment)?.previewPDFHandler?.pdfViewPrintListener = printListener
+            (activity as? PreviewPDFActivity)?.previewPDFHandler?.pdfViewPrintListener = printListener
         }
 
-        fun Fragment.isFilePasswordProtected(isPasswordProtected: Boolean) {
-            (parentFragment as? PreviewSliderFragment)?.isFilePasswordProtected(isPasswordProtected)
-            (activity as? PreviewPDFActivity)?.isFilePasswordProtected(isPasswordProtected)
+        fun Fragment.pdfIsPasswordProtected() {
+            (parentFragment as? PreviewSliderFragment)?.previewPDFHandler?.isPdfPasswordProtected = true
+            (activity as? PreviewPDFActivity)?.previewPDFHandler?.isPdfPasswordProtected = true
         }
+        //endregion
     }
 }
