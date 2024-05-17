@@ -37,7 +37,7 @@ class PreviewPDFHandler(
     val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
 
     var pdfViewPrintListener: PDFPrintListener? = null
-    var isPdfPasswordProtected = false
+    var isPasswordProtected = false
 
     private val fileNameAndSize: Pair<String, Long>? by lazy {
         externalFileUri?.let { context.getFileNameAndSize(it) }
@@ -48,7 +48,7 @@ class PreviewPDFHandler(
     }
 
     fun printClicked(context: Context, onError: () -> Unit) {
-        if (isPdfPasswordProtected) {
+        if (isPasswordProtected) {
             pdfViewPrintListener?.generatePagesAsBitmaps(fileName)
         } else {
             externalFileUri?.let {

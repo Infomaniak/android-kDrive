@@ -364,7 +364,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun printClicked() {
         super.printClicked()
-        if (previewPDFHandler.isPdfPasswordProtected) {
+        if (previewPDFHandler.isPasswordProtected) {
             previewPDFHandler.pdfViewPrintListener?.generatePagesAsBitmaps(currentFile.name)
         } else {
             requireContext().printPdf {
@@ -515,8 +515,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         fun Fragment.pdfIsPasswordProtected() {
-            (parentFragment as? PreviewSliderFragment)?.previewPDFHandler?.isPdfPasswordProtected = true
-            (activity as? PreviewPDFActivity)?.previewPDFHandler?.isPdfPasswordProtected = true
+            (parentFragment as? PreviewSliderFragment)?.previewPDFHandler?.isPasswordProtected = true
+            (activity as? PreviewPDFActivity)?.previewPDFHandler?.isPasswordProtected = true
         }
         //endregion
     }
