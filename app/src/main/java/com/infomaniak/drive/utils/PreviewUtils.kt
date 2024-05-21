@@ -144,8 +144,8 @@ private fun Context.printPdf(
     bitmaps: List<Bitmap>? = null,
     onDownloadFile: (() -> Unit)? = null,
 ) {
-    val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
-    val printAttributes = PrintAttributes.Builder().build()
+    val printManager by lazy { getSystemService(Context.PRINT_SERVICE) as PrintManager }
+    val printAttributes by lazy { PrintAttributes.Builder().build() }
 
     fun printFile() = file?.apply {
         val printAdapter = PDFDocumentAdapter(name, file)
@@ -158,7 +158,7 @@ private fun Context.printPdf(
     }
 
     when {
-        onDownloadFile != null -> onDownloadFile.invoke()
+        onDownloadFile != null -> onDownloadFile()
         bitmaps.isNullOrEmpty().not() -> printBitmaps()
         file != null -> printFile()
     }

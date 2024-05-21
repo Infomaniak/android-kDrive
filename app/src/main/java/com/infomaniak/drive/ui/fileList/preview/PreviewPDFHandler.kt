@@ -33,7 +33,6 @@ class PreviewPDFHandler(
     private val setPrintVisibility: (isGone: Boolean) -> Unit,
 ) {
 
-    val fileName: String by lazy { fileNameAndSize?.first ?: "" }
     val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
 
     var pdfViewPrintListener: PDFPrintListener? = null
@@ -43,23 +42,30 @@ class PreviewPDFHandler(
         externalFileUri?.let { context.getFileNameAndSize(it) }
     }
 
+    var fileName: String = fileNameAndSize?.first ?: ""
+
     fun shouldHidePrintOption(isGone: Boolean) {
         setPrintVisibility(isGone)
     }
 
-    fun printClicked(context: Context, onError: () -> Unit) {
-        if (isPasswordProtected) {
-            pdfViewPrintListener?.generatePagesAsBitmaps(fileName)
-        } else {
-            externalFileUri?.let {
-                getFileForPrint(context, it, onError)?.let { fileToPrint ->
-                    val printManager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
-                    val printAdapter = PDFDocumentAdapter(fileName, fileToPrint)
-                    printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
-                }
+    fun printClicked(
+        context: Context,
+        onDefaultCase: (() -> Unit)? = null,
+        onError: () -> Unit
+    ) {
+        when {
+            isPasswordProtected -> pdfViewPrintListener?.generatePagesAsBitmaps(fileName)
+            externalFileUri != null -> {
+                val fileToPrint = getFileForPrint(context, externalFileUri, onError) ?: return
+                val printManager = context.getSystemService(Context.PRINT_SERVICE) as PrintManager
+                val printAdapter = PDFDocumentAdapter(fileName, fileToPrint)
+                printManager.print(fileName, printAdapter, PrintAttributes.Builder().build())
             }
+            else -> onDefaultCase?.invoke()
         }
     }
+
+    fun isExternalFile() = externalFileUri != null
 
     private fun getFileForPrint(context: Context, uri: Uri, onError: () -> Unit): IOFile? {
         return runCatching {

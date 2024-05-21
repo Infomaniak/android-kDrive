@@ -51,6 +51,7 @@ import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.PreviewHeaderView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -364,20 +365,24 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     override fun printClicked() {
         super.printClicked()
-        if (previewPDFHandler.isPasswordProtected) {
-            previewPDFHandler.pdfViewPrintListener?.generatePagesAsBitmaps(currentFile.name)
-        } else {
-            requireContext().printPdf {
-                safeNavigate(
-                    PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
-                        fileId = currentFile.id,
-                        fileName = currentFile.name,
-                        userDrive = userDrive,
-                        printPdf = true,
+        previewPDFHandler.printClicked(
+            context = requireContext(),
+            onDefaultCase = {
+                requireContext().printPdf {
+                    safeNavigate(
+                        PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
+                            fileId = currentFile.id,
+                            fileName = currentFile.name,
+                            userDrive = userDrive,
+                            printPdf = true,
+                        )
                     )
-                )
+                }
+            },
+            onError = {
+                showSnackbar(R.string.errorFileNotFound)
             }
-        }
+        )
     }
 
     override fun downloadFileClicked() {
@@ -504,19 +509,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             getHeader()?.setPageNumberValue(currentPage, totalPage)
         }
 
-        fun Fragment.shouldHidePrintOption(isGone: Boolean) {
-            (parentFragment as? PreviewSliderFragment)?.previewPDFHandler?.shouldHidePrintOption(isGone)
-            (activity as? PreviewPDFActivity)?.previewPDFHandler?.shouldHidePrintOption(isGone)
-        }
-
-        fun Fragment.initPDFPrintListener(printListener: PDFPrintListener) {
-            (parentFragment as? PreviewSliderFragment)?.previewPDFHandler?.pdfViewPrintListener = printListener
-            (activity as? PreviewPDFActivity)?.previewPDFHandler?.pdfViewPrintListener = printListener
-        }
-
-        fun Fragment.pdfIsPasswordProtected() {
-            (parentFragment as? PreviewSliderFragment)?.previewPDFHandler?.isPasswordProtected = true
-            (activity as? PreviewPDFActivity)?.previewPDFHandler?.isPasswordProtected = true
+        fun Fragment.getPreviewPDFHandler(): PreviewPDFHandler {
+            return (parentFragment as? PreviewSliderFragment)?.previewPDFHandler
+                ?: (activity as? PreviewPDFActivity)!!.previewPDFHandler
         }
         //endregion
     }

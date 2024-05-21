@@ -136,9 +136,12 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     override fun printClicked() {
         super.printClicked()
-        previewPDFHandler.printClicked(this) {
-            showSnackbar(R.string.errorFileNotFound)
-        }
+        previewPDFHandler.printClicked(
+            context = this,
+            onError = {
+                showSnackbar(R.string.errorFileNotFound)
+            }
+        )
     }
 
     override fun displayInfoClicked() = Unit

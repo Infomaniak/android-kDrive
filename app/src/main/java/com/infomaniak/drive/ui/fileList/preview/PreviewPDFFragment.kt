@@ -31,15 +31,14 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.initPDFPrintListener
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.pdfIsPasswordProtected
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.getPreviewPDFHandler
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.shouldHidePrintOption
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
@@ -65,7 +64,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     private val navigationArgs: PreviewPDFFragmentArgs by navArgs()
 
-    private val isExternalPDF by lazy { navigationArgs.fileUri != null }
+    private val previewPDFHandler by lazy { getPreviewPDFHandler() }
 
     private val scrollHandle by lazy {
         DefaultScrollHandle(requireContext()).apply {
@@ -78,8 +77,6 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     }
 
     private var pdfFile: IOFile? = null
-    private var externalFileName: String = ""
-    private var isPasswordProtected = false
     private var isDownloading = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -89,9 +86,11 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding.downloadLayout) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (noCurrentFile() && !isExternalPDF) return@with
+        if (noCurrentFile() && !previewPDFHandler.isExternalFile()) return@with
 
-        if (isExternalPDF) {
+        if (previewPDFHandler.isExternalFile()) {
+            fileIcon.setImageResource(ExtensionType.PDF.icon)
+            fileName.text = previewPDFHandler.fileName
             showPdf()
         } else {
             container.layoutTransition?.setAnimateParentHierarchy(false)
@@ -116,7 +115,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         bigOpenWithButton.apply {
             isGone = true
             setOnClickListener {
-                if (isPasswordProtected) showPasswordDialog() else openWithClicked()
+                if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked()
             }
         }
     }
@@ -140,7 +139,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     override fun generatePagesAsBitmaps(fileName: String) {
         // When we try to generate bitmaps for a password protected file with the default PDF reader, we don't have a file
         // So we need to pass the file name
-        externalFileName = fileName
+        previewPDFHandler.fileName = fileName
         binding.pdfView.loadPagesForPrinting()
     }
 
@@ -153,7 +152,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         }
     }
 
-    private fun showPdf(password: String? = null) {
+    private fun showPdf(password: String? = null) = with(previewPDFHandler) {
         if (!binding.pdfView.isShown || isPasswordProtected) {
             lifecycleScope.launch {
                 withResumed {
@@ -175,7 +174,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                             binding.downloadLayout.root.isGone = true
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
-                            initPDFPrintListener(this@PreviewPDFFragment)
+                            pdfViewPrintListener = this@PreviewPDFFragment
                         }
                         onPageChange { currentPage, pageCount ->
                             updatePageNumber(
@@ -184,7 +183,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                             )
                         }
                         onReadyForPrinting { pagesAsBitmap ->
-                            val fileName: String = if (isExternalPDF) externalFileName else file.name
+                            val fileName = if (isExternalFile()) fileName else file.name
                             requireContext().printPdf(fileName = fileName, bitmaps = pagesAsBitmap)
                         }
                         onError { exception -> handleException(exception) }
@@ -203,24 +202,24 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         }
     }
 
-    private fun handleException(exception: Throwable) {
+    private fun handleException(exception: Throwable) = with(previewPDFHandler) {
         if (exception is PdfPasswordException) {
-            pdfIsPasswordProtected()
+            isPasswordProtected = true
             shouldHidePrintOption(isGone = true)
             onPdfPasswordError()
         }
     }
 
-    private fun getConfigurator(fileUri: Uri?, pdfFile: IOFile?): PDFView.Configurator {
-        return if (isExternalPDF) binding.pdfView.fromUri(fileUri) else binding.pdfView.fromFile(pdfFile)
+    private fun getConfigurator(fileUri: Uri?, pdfFile: IOFile?): PDFView.Configurator = with(binding.pdfView) {
+        return if (previewPDFHandler.isExternalFile()) fromUri(fileUri) else fromFile(pdfFile)
     }
 
-    private fun onPdfPasswordError() {
+    private fun onPdfPasswordError() = with(previewPDFHandler) {
         // This is to handle the case where we have opened a PDF with a password so in order
         // for the user to be able to open it, we display the error layout
         shouldHidePrintOption(isGone = true)
-        binding.downloadLayout.root.isVisible = true
         isPasswordProtected = true
+        binding.downloadLayout.root.isVisible = true
         if (passwordDialog.isAdded) onPDFLoadError() else displayError()
     }
 
@@ -232,7 +231,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
             bigOpenWithButton.isVisible = true
         }
 
-        if (!isExternalPDF) previewSliderViewModel.pdfIsDownloading.value = false
+        if (!previewPDFHandler.isExternalFile()) previewSliderViewModel.pdfIsDownloading.value = false
         isDownloading = false
     }
 
