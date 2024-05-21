@@ -114,9 +114,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
         bigOpenWithButton.apply {
             isGone = true
-            setOnClickListener {
-                if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked()
-            }
+            setOnClickListener { if (previewPDFHandler.isPasswordProtected) showPasswordDialog() else openWithClicked() }
         }
     }
 
@@ -179,14 +177,14 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         onPageChange { currentPage, pageCount ->
                             updatePageNumber(
                                 currentPage = currentPage,
-                                totalPage = pageCount
+                                totalPage = pageCount,
                             )
                         }
                         onReadyForPrinting { pagesAsBitmap ->
                             val fileName = if (isExternalFile()) fileName else file.name
                             requireContext().printPdf(fileName = fileName, bitmaps = pagesAsBitmap)
                         }
-                        onError { exception -> handleException(exception) }
+                        onError(::handleException)
                         onAttach {
                             // This is to handle the case where we swipe in the ViewPager and we want to go back to
                             // a previously opened PDF. In that case, we want to display the default loader instead of

@@ -80,7 +80,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     val previewPDFHandler by lazy {
         PreviewPDFHandler(
             context = requireContext(),
-            setPrintVisibility = { isGone -> binding.bottomSheetFileInfos.setPrintVisibility(isGone) },
+            setPrintVisibility = binding.bottomSheetFileInfos::setPrintVisibility,
         )
     }
 
@@ -379,9 +379,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     )
                 }
             },
-            onError = {
-                showSnackbar(R.string.errorFileNotFound)
-            }
+            onError = { showSnackbar(R.string.errorFileNotFound) },
         )
     }
 

@@ -46,7 +46,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         PreviewPDFHandler(
             context = this,
             externalFileUri = Uri.parse(intent.dataString),
-            setPrintVisibility = { isGone -> binding.bottomSheetFileInfos.isPrintingHidden(isGone) },
+            setPrintVisibility = binding.bottomSheetFileInfos::isPrintingHidden,
         )
     }
 
@@ -117,7 +117,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         return navHostFragment.navController.apply {
             setGraph(
                 R.navigation.view_pdf,
-                PreviewPDFFragmentArgs(fileUri = previewPDFHandler.externalFileUri).toBundle()
+                PreviewPDFFragmentArgs(fileUri = previewPDFHandler.externalFileUri).toBundle(),
             )
         }
     }
@@ -127,7 +127,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     override fun saveToKDrive() {
-        previewPDFHandler.externalFileUri?.let { saveToKDrive(it) }
+        previewPDFHandler.externalFileUri?.let(::saveToKDrive)
     }
 
     override fun openWith() {
@@ -138,9 +138,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         super.printClicked()
         previewPDFHandler.printClicked(
             context = this,
-            onError = {
-                showSnackbar(R.string.errorFileNotFound)
-            }
+            onError = { showSnackbar(R.string.errorFileNotFound) },
         )
     }
 

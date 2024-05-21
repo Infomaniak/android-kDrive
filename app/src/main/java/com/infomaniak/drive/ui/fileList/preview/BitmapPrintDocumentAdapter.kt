@@ -34,11 +34,11 @@ import java.io.FileOutputStream
 class BitmapPrintDocumentAdapter(
     private val context: Context,
     private val fileName: String,
-    private val bitmaps: List<Bitmap>
+    private val bitmaps: List<Bitmap>,
 ) : PrintDocumentAdapter() {
 
-    private var pageHeight: Int = 0
-    private var pageWidth: Int = 0
+    private var pageHeight = 0
+    private var pageWidth = 0
     private var pdfDocument: PrintedPdfDocument? = null
 
     override fun onLayout(
@@ -46,7 +46,7 @@ class BitmapPrintDocumentAdapter(
         newAttributes: PrintAttributes?,
         cancellationSignal: CancellationSignal?,
         callback: LayoutResultCallback?,
-        extras: Bundle?
+        extras: Bundle?,
     ) {
         if (cancellationSignal?.isCanceled == true) {
             callback?.onLayoutCancelled()
@@ -70,7 +70,7 @@ class BitmapPrintDocumentAdapter(
         pages: Array<PageRange>?,
         destination: ParcelFileDescriptor?,
         cancellationSignal: CancellationSignal?,
-        callback: WriteResultCallback?
+        callback: WriteResultCallback?,
     ) {
         if (cancellationSignal?.isCanceled == true) {
             callback?.onWriteCancelled()
@@ -88,12 +88,12 @@ class BitmapPrintDocumentAdapter(
             }
         }
 
-        runCatching {
+        try {
             pdfDocument?.writeTo(FileOutputStream(destination?.fileDescriptor))
-        }.onFailure { exception ->
+        } catch (exception: Exception) {
             callback?.onWriteFailed(exception.toString())
             return
-        }.getOrElse {
+        } finally {
             pdfDocument?.close()
             pdfDocument = null
         }
@@ -106,8 +106,8 @@ class BitmapPrintDocumentAdapter(
 
         postScale(scale, scale)
 
-        val translateX = ((content.width() - imageWidth * scale) / 2)
-        val translateY = ((content.height() - imageHeight * scale) / 2)
+        val translateX = ((content.width() - imageWidth * scale) / 2.0f)
+        val translateY = ((content.height() - imageHeight * scale) / 2.0f)
         postTranslate(translateX, translateY)
 
         return this

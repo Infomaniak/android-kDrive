@@ -33,13 +33,13 @@ class PreviewPDFHandler(
     private val setPrintVisibility: (isGone: Boolean) -> Unit,
 ) {
 
-    val fileSize: Long by lazy { fileNameAndSize?.second ?: 0 }
+    val fileSize: Long by lazy { fileNameAndSize?.second ?: 0L }
 
     var pdfViewPrintListener: PDFPrintListener? = null
     var isPasswordProtected = false
 
     private val fileNameAndSize: Pair<String, Long>? by lazy {
-        externalFileUri?.let { context.getFileNameAndSize(it) }
+        externalFileUri?.let(context::getFileNameAndSize)
     }
 
     var fileName: String = fileNameAndSize?.first ?: ""
@@ -51,7 +51,7 @@ class PreviewPDFHandler(
     fun printClicked(
         context: Context,
         onDefaultCase: (() -> Unit)? = null,
-        onError: () -> Unit
+        onError: () -> Unit,
     ) {
         when {
             isPasswordProtected -> pdfViewPrintListener?.generatePagesAsBitmaps(fileName)
@@ -73,7 +73,7 @@ class PreviewPDFHandler(
                 if (exists()) delete()
                 createNewFile()
                 context.contentResolver?.openInputStream(uri)?.use { inputStream ->
-                    outputStream().use { inputStream.copyTo(it) }
+                    outputStream().use(inputStream::copyTo)
                 }
             }
         }.onFailure {
