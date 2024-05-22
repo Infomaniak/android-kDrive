@@ -19,9 +19,7 @@ package com.infomaniak.drive.ui.fileList
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.annotation.StringRes
@@ -37,12 +35,10 @@ import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.drive.data.models.SearchFilter.FilterKey
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.databinding.RecentSearchesBinding
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
-import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setPagination
 
@@ -58,14 +54,8 @@ class SearchFragment : FileListFragment() {
 
     private lateinit var filtersAdapter: SearchFiltersAdapter
     private lateinit var recentSearchesAdapter: RecentSearchesAdapter
-    private var recentSearchesBinding: RecentSearchesBinding by safeBinding()
 
     private var isDownloading = false
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        RecentSearchesBinding.inflate(inflater, container, false).also { recentSearchesBinding = it }.root
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
 
     @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -212,17 +202,17 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun configureRecentSearches() = with(binding) {
-        fileListLayout.addView(recentSearchesBinding.root, 1)
+        recentSearchLayout.root.isVisible = true
 
         val recentSearches = UiSettings(requireContext()).recentSearches
 
         recentSearchesAdapter = RecentSearchesAdapter(
             searches = ArrayList(recentSearches),
             onSearchClicked = searchViewCard.searchView::setText,
-            onListEmpty = { recentSearchesBinding.root.isGone = true }
+            onListEmpty = { recentSearchLayout.root.isGone = true }
         ).also {
-            recentSearchesBinding.recentSearchesRecyclerView.adapter = it
-            recentSearchesBinding.recentSearchesContainer.isGone = recentSearches.isEmpty()
+            recentSearchLayout.recentSearchesRecyclerView.adapter = it
+            recentSearchLayout.recentSearchesContainer.isGone = recentSearches.isEmpty()
         }
     }
 
@@ -308,8 +298,8 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun updateMostRecentSearches() {
-        val newSearch = binding.searchViewCard.searchView.text.toString().trim()
+    private fun updateMostRecentSearches(): Unit = with(binding) {
+        val newSearch = searchViewCard.searchView.text.toString().trim()
         if (newSearch.isEmpty()) return
 
         val newSearches = (listOf(newSearch) + recentSearchesAdapter.searches)
@@ -317,7 +307,7 @@ class SearchFragment : FileListFragment() {
             .take(MAX_MOST_RECENT_SEARCHES)
             .also(recentSearchesAdapter::setItems)
 
-        recentSearchesBinding.recentSearchesContainer.isGone = newSearches.isEmpty()
+        recentSearchLayout.recentSearchesContainer.isGone = newSearches.isEmpty()
     }
 
     private fun triggerSearch() {
@@ -356,7 +346,7 @@ class SearchFragment : FileListFragment() {
     private fun updateUi(mode: VisibilityMode) = with(binding) {
 
         fun displayRecentSearches() {
-            recentSearchesBinding.root.isVisible = true
+            recentSearchLayout.root.isVisible = true
             filtersRecyclerView.isGone = true
             noFilesLayout.isGone = true
             sortLayout.isGone = true
@@ -364,7 +354,7 @@ class SearchFragment : FileListFragment() {
         }
 
         fun displayLoadingView() {
-            recentSearchesBinding.root.isGone = true
+            recentSearchLayout.root.isGone = true
             filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
             noFilesLayout.isGone = true
             sortLayout.isGone = true
@@ -372,7 +362,7 @@ class SearchFragment : FileListFragment() {
         }
 
         fun displaySearchResult(mode: VisibilityMode) {
-            recentSearchesBinding.root.isGone = true
+            recentSearchLayout.root.isGone = true
             filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
             changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, changeControlsVisibility = false)
         }
