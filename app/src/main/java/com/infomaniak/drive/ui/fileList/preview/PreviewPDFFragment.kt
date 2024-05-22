@@ -208,13 +208,17 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     private fun handleException(exception: Throwable) = with(previewPDFHandler) {
         shouldHidePrintOption(isGone = true)
 
-        if (exception is PdfPasswordException) {
-            isPasswordProtected = true
-            onPDFPasswordError()
-        } else if (exception is IOException && fileSize == 0L) {
-            displayError(isEmptyFileError = true)
-        } else {
-            displayError()
+        when {
+            exception is PdfPasswordException -> {
+                isPasswordProtected = true
+                onPDFPasswordError()
+            }
+            exception is IOException && fileSize == 0L -> {
+                displayError(isEmptyFileError = true)
+            }
+            else -> {
+                displayError()
+            }
         }
     }
 
