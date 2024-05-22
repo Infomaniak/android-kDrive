@@ -259,21 +259,16 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         mainViewModel.updateOfflineFile.value = currentFile.id
     }
 
-    override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        if (isResumed) {
-            mainViewModel.duplicateFile(currentFile, result).observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    apiResponse.data?.let {
-                        mainViewModel.refreshActivities.value = true
-                        transmitActionAndPopBack(getString(R.string.allFileDuplicate, currentFile.name))
-                    }
-                } else {
-                    transmitActionAndPopBack(getString(R.string.errorDuplicate))
-                }
-                onApiResponse()
+    override fun onDuplicateFile(destinationFolder: File) {
+        mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { apiResponse ->
+            val snackbarMessage = if (apiResponse.isSuccess()) {
+                mainViewModel.refreshActivities.value = true
+                getString(R.string.allFileDuplicate, currentFile.name)
+            } else {
+                getString(R.string.errorDuplicate)
             }
-        } else {
-            onApiResponse()
+
+            transmitActionAndPopBack(snackbarMessage)
         }
     }
 

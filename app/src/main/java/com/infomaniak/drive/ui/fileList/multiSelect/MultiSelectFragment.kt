@@ -48,6 +48,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSele
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
+import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -185,17 +186,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     fun duplicateFiles() {
-        Intent(requireContext(), SelectFolderActivity::class.java).apply {
-            putExtras(
-                SelectFolderActivityArgs(
-                    userId = AccountUtils.currentUserId,
-                    driveId = AccountUtils.currentDriveId,
-                    folderId = mainViewModel.currentFolder.value?.id ?: -1,
-                    customArgs = bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
-                ).toBundle()
-            )
-            selectFolderResultLauncher.launch(this)
-        }
+        requireContext().duplicateFilesClicked(selectFolderResultLauncher, mainViewModel)
     }
 
     fun restoreIn() {
@@ -350,10 +341,9 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
             BulkOperationType.COPY -> {
                 mediator.addSource(
-                    copyFile(
+                    duplicateFile(
                         file = file,
                         destinationId = destinationFolder!!.id,
-                        copyName = file.name,
                         onSuccess = { it.data?.let { file -> onIndividualActionSuccess(type, file) } },
                     ),
                     updateMultiSelectMediator(mediator),
