@@ -28,6 +28,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
@@ -52,8 +53,8 @@ object FilePresenter {
                     fileId = file.id,
                     fileName = file.name,
                     userDrive = UserDrive(),
-                    isOpenBookmark = true
-                ).toBundle()
+                    action = DownloadAction.OPEN_BOOKMARK,
+                ).toBundle(),
             )
         }
     }

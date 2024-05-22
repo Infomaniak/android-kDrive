@@ -395,6 +395,16 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <com.infomaniak.drive.views.BottomSheetItemView
+                android:id="@+id/print"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_print"
+                app:iconTint="@color/iconColor"
+                app:text="@string/actionPrint"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/downloadFile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

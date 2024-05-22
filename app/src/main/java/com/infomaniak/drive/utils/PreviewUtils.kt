@@ -20,7 +20,10 @@ package com.infomaniak.drive.utils
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
+import android.print.PrintAttributes
+import android.print.PrintManager
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -31,6 +34,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
+import com.infomaniak.drive.ui.fileList.preview.BitmapPrintDocumentAdapter
+import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
 import com.infomaniak.lib.core.utils.lightNavigationBar
@@ -103,5 +108,58 @@ fun Context.openWith(
         externalFileUri?.apply {
             openWith(this, contentResolver.getType(this), Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
+    }
+}
+
+fun Context.printPdf(fileName: String, bitmaps: List<Bitmap>) {
+    printPdf(
+        file = null,
+        fileName = fileName,
+        bitmaps = bitmaps,
+        onDownloadFile = null,
+    )
+}
+
+fun Context.printPdf(file: IOFile) {
+    printPdf(
+        file = file,
+        fileName = null,
+        bitmaps = null,
+        onDownloadFile = null,
+    )
+}
+
+fun Context.printPdf(onDownloadFile: (() -> Unit)) {
+    printPdf(
+        file = null,
+        fileName = null,
+        bitmaps = null,
+        onDownloadFile = onDownloadFile,
+    )
+}
+
+private fun Context.printPdf(
+    file: IOFile?,
+    fileName: String?,
+    bitmaps: List<Bitmap>?,
+    onDownloadFile: (() -> Unit)?,
+) {
+    val printManager by lazy { getSystemService(Context.PRINT_SERVICE) as PrintManager }
+    val printAttributes by lazy { PrintAttributes.Builder().build() }
+
+    fun printFile() = file?.apply {
+        val printAdapter = PDFDocumentAdapter(name, file)
+        printManager.print(name, printAdapter, printAttributes)
+    }
+
+    fun printBitmaps() = bitmaps?.apply {
+        val printAdapter = BitmapPrintDocumentAdapter(applicationContext, fileName = fileName!!, bitmaps = this)
+        printManager.print(fileName, printAdapter, printAttributes)
+    }
+
+    when {
+        onDownloadFile != null -> onDownloadFile()
+        bitmaps.isNullOrEmpty().not() -> printBitmaps()
+        file != null -> printFile()
     }
 }
