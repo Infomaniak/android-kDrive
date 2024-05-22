@@ -248,6 +248,7 @@
     <string name="dropboxSharedLinkTitle">Dropbox sharing link</string>
     <string name="editCategoryInfoDescription">The modification will be visible to all kDrive users who have access to the categories.</string>
     <string name="editCategoryTitle">Edit a category</string>
+    <string name="emptyFilePreviewError">No preview available. File is empty.</string>
     <string name="errorAddComment">Error when adding comment</string>
     <string name="errorAddFavorite">Error when adding to favorites</string>
     <string name="errorCache">Caching error</string>

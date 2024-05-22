@@ -51,6 +51,7 @@ import com.shockwave.pdfium.PdfPasswordException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import okio.IOException
 
 class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
@@ -150,6 +151,10 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         }
     }
 
+    private fun getConfigurator(fileUri: Uri?, pdfFile: IOFile?): PDFView.Configurator = with(binding.pdfView) {
+        return if (previewPDFHandler.isExternalFile()) fromUri(fileUri) else fromFile(pdfFile)
+    }
+
     private fun showPdf(password: String? = null) = with(previewPDFHandler) {
         if (!binding.pdfView.isShown || isPasswordProtected) {
             lifecycleScope.launch {
@@ -201,32 +206,45 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     }
 
     private fun handleException(exception: Throwable) = with(previewPDFHandler) {
-        if (exception is PdfPasswordException) {
-            isPasswordProtected = true
-            shouldHidePrintOption(isGone = true)
-            onPdfPasswordError()
+        shouldHidePrintOption(isGone = true)
+
+        when {
+            exception is PdfPasswordException -> {
+                isPasswordProtected = true
+                onPDFPasswordError()
+            }
+            exception is IOException && fileSize == 0L -> {
+                displayError(isEmptyFileError = true)
+            }
+            else -> {
+                displayError()
+            }
         }
     }
 
-    private fun getConfigurator(fileUri: Uri?, pdfFile: IOFile?): PDFView.Configurator = with(binding.pdfView) {
-        return if (previewPDFHandler.isExternalFile()) fromUri(fileUri) else fromFile(pdfFile)
-    }
-
-    private fun onPdfPasswordError() = with(previewPDFHandler) {
+    private fun onPDFPasswordError() = with(previewPDFHandler) {
         // This is to handle the case where we have opened a PDF with a password so in order
         // for the user to be able to open it, we display the error layout
-        shouldHidePrintOption(isGone = true)
         isPasswordProtected = true
         binding.downloadLayout.root.isVisible = true
-        if (passwordDialog.isAdded) onPDFLoadError() else displayError()
+        if (passwordDialog.isAdded) onPDFLoadError() else displayError(isPasswordError = true)
     }
 
-    private fun displayError() {
+    private fun getErrorString(isPasswordError: Boolean, isEmptyFileError: Boolean): Int {
+        return when {
+            isPasswordError -> R.string.previewFileProtectedError
+            isEmptyFileError -> R.string.emptyFilePreviewError
+            else -> R.string.previewLoadError
+        }
+    }
+
+    private fun displayError(isPasswordError: Boolean = false, isEmptyFileError: Boolean = false) {
         binding.downloadLayout.apply {
             downloadProgress.isGone = true
-            previewDescription.setText(R.string.previewFileProtectedError)
-            bigOpenWithButton.text = resources.getString(R.string.buttonUnlock)
-            bigOpenWithButton.isVisible = true
+            previewDescription.setText(getErrorString(isPasswordError, isEmptyFileError))
+
+            if (isPasswordError) bigOpenWithButton.text = resources.getString(R.string.buttonUnlock)
+            bigOpenWithButton.isVisible = isPasswordError
         }
 
         if (!previewPDFHandler.isExternalFile()) previewSliderViewModel.pdfIsDownloading.value = false
