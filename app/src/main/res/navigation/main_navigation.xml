@@ -1001,13 +1001,9 @@
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <argument
-            android:name="isOpenBookmark"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="printPdf"
-            android:defaultValue="false"
-            app:argType="boolean" />
+            android:name="action"
+            android:defaultValue="OPEN_WITH"
+            app:argType="com.infomaniak.drive.ui.fileList.DownloadProgressDialog$DownloadAction" />
     </dialog>
 
     <dialog

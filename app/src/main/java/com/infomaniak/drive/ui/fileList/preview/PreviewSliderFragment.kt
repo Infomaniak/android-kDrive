@@ -42,7 +42,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
@@ -247,11 +247,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
 
     private fun setBackActionHandlers() {
-        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
-            context?.openWith(currentFile, userDrive)
-        }
+        getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile, userDrive) }
 
-        getBackNavigationResult<Int>(DownloadProgressDialog.PRINT_PDF) {
+        getBackNavigationResult<Int>(DownloadAction.PRINT_PDF.value) {
             requireContext().printPdf(file = currentFile.getCacheFile(requireContext()))
         }
 
@@ -374,8 +372,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                             fileId = currentFile.id,
                             fileName = currentFile.name,
                             userDrive = userDrive,
-                            printPdf = true,
-                        )
+                            action = DownloadAction.PRINT_PDF,
+                        ),
                     )
                 }
             },

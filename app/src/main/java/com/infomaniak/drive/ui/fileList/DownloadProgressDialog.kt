@@ -74,12 +74,7 @@ class DownloadProgressDialog : DialogFragment() {
         downloadViewModel.downloadFile(requireContext(), file, userDrive).observe(this@DownloadProgressDialog) {
             it?.let { (progress, isComplete) ->
                 if (isComplete) {
-                    val result = when {
-                        isOpenBookmark -> OPEN_BOOKMARK
-                        printPdf -> PRINT_PDF
-                        else -> OPEN_WITH
-                    }
-                    setBackNavigationResult(result, fileId)
+                    setBackNavigationResult(action.value, fileId)
                 } else {
                     binding.downloadProgress.progress = progress
                 }
@@ -124,9 +119,9 @@ class DownloadProgressDialog : DialogFragment() {
         }
     }
 
-    companion object {
-        const val OPEN_WITH = "open_with"
-        const val OPEN_BOOKMARK = "open_bookmark"
-        const val PRINT_PDF = "print_pdf"
+    enum class DownloadAction(val value: String) {
+        OPEN_WITH("open_with"),
+        OPEN_BOOKMARK("open_bookmark"),
+        PRINT_PDF("print_pdf"),
     }
 }
