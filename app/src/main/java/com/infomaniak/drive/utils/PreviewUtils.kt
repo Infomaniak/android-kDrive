@@ -139,10 +139,10 @@ fun Context.printPdf(onDownloadFile: (() -> Unit)) {
 }
 
 private fun Context.printPdf(
-    file: IOFile? = null,
-    fileName: String? = null,
-    bitmaps: List<Bitmap>? = null,
-    onDownloadFile: (() -> Unit)? = null,
+    file: IOFile?,
+    fileName: String?,
+    bitmaps: List<Bitmap>?,
+    onDownloadFile: (() -> Unit)?,
 ) {
     val printManager by lazy { getSystemService(Context.PRINT_SERVICE) as PrintManager }
     val printAttributes by lazy { PrintAttributes.Builder().build() }
