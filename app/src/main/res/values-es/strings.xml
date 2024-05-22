@@ -237,6 +237,7 @@
     <string name="dropboxSharedLinkTitle">Enlace para compartir en el buzón de depósito</string>
     <string name="editCategoryInfoDescription">El cambio será visible para todos los usuarios del kDrive con acceso a las categorías.</string>
     <string name="editCategoryTitle">Modificar una categoría</string>
+    <string name="emptyFilePreviewError">No hay vista previa disponible. El archivo está vacío.</string>
     <string name="errorAddComment">Error al agregar el comentario</string>
     <string name="errorAddFavorite">Error al añadir a favoritos</string>
     <string name="errorCache">Error al almacenar en caché</string>
