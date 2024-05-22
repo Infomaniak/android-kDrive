@@ -238,6 +238,7 @@
     <string name="dropboxSharedLinkTitle">Dropbox-Freigabelink</string>
     <string name="editCategoryInfoDescription">Die Änderung ist für alle Benutzer des kDrive sichtbar, die Zugriff auf die Kategorien besitzen.</string>
     <string name="editCategoryTitle">Kategorie bearbeiten</string>
+    <string name="emptyFilePreviewError">Keine Vorschau verfügbar. Die Datei ist leer.</string>
     <string name="errorAddComment">Fehler beim Hinzufügen des Kommentars</string>
     <string name="errorAddFavorite">Fehler beim Hinzufügen zu den Favoriten</string>
     <string name="errorCache">Fehler bei der Zwischenspeicherung</string>

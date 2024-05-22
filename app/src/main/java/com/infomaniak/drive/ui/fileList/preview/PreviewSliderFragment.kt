@@ -42,7 +42,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
@@ -51,11 +51,11 @@ import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.PreviewHeaderView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.collections.set
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
@@ -76,6 +76,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     override val ownerFragment = this
     override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
+
+    val previewPDFHandler by lazy {
+        PreviewPDFHandler(
+            context = requireContext(),
+            setPrintVisibility = binding.bottomSheetFileInfos::setPrintVisibility,
+        )
+    }
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -240,8 +247,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
 
     private fun setBackActionHandlers() {
-        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
-            context?.openWith(currentFile, userDrive)
+        getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile, userDrive) }
+
+        getBackNavigationResult<Int>(DownloadAction.PRINT_PDF.value) {
+            requireContext().printPdf(file = currentFile.getCacheFile(requireContext()))
         }
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
@@ -352,6 +361,26 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
+    override fun printClicked() {
+        super.printClicked()
+        previewPDFHandler.printClicked(
+            context = requireContext(),
+            onDefaultCase = {
+                requireContext().printPdf {
+                    safeNavigate(
+                        PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
+                            fileId = currentFile.id,
+                            fileName = currentFile.name,
+                            userDrive = userDrive,
+                            action = DownloadAction.PRINT_PDF,
+                        ),
+                    )
+                }
+            },
+            onError = { showSnackbar(R.string.errorFileNotFound) },
+        )
+    }
+
     override fun downloadFileClicked() {
         super.downloadFileClicked()
         binding.bottomSheetFileInfos.downloadFile(drivePermissions) {
@@ -453,14 +482,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     companion object {
 
-        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
-            getHeader()?.setPageNumberVisibility(isVisible)
-        }
-
-        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
-            getHeader()?.setPageNumberValue(currentPage, totalPage)
-        }
-
         private fun Fragment.getHeader(): PreviewHeaderView? {
             return (parentFragment as? PreviewSliderFragment)?._binding?.header
                 ?: (activity as? PreviewPDFActivity)?.binding?.header
@@ -474,5 +495,20 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         fun Fragment.openWithClicked() {
             (parentFragment as? PreviewSliderFragment)?.openWith()
         }
+
+        //region PDF Preview
+        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
+            getHeader()?.setPageNumberVisibility(isVisible)
+        }
+
+        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
+            getHeader()?.setPageNumberValue(currentPage, totalPage)
+        }
+
+        fun Fragment.getPreviewPDFHandler(): PreviewPDFHandler {
+            return (parentFragment as? PreviewSliderFragment)?.previewPDFHandler
+                ?: (activity as? PreviewPDFActivity)!!.previewPDFHandler
+        }
+        //endregion
     }
 }

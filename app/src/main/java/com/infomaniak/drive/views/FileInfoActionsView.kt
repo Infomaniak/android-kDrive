@@ -43,6 +43,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
@@ -136,6 +137,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 addFavorites.isVisible = rights?.canUseFavorite == true
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
                 deleteFile.isVisible = rights?.canDelete == true && !file.isImporting()
+                setPrintVisibility(isGone = file.extensionType != ExtensionType.PDF.value)
                 downloadFile.isVisible = rights?.canRead == true
                 duplicateFile.isGone = rights?.canRead == false
                         || isSharedWithMe
@@ -170,14 +172,18 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
     }
 
-    private fun isGoToFolderVisible(): Boolean {
-        val previousDestinationId = ownerFragment.findNavController().previousBackStackEntry?.destination?.id
-        val parentFile = FileController.getParentFile(currentFile.id)
-        return previousDestinationId != R.id.fileListFragment && parentFile != null
+    fun setPrintVisibility(isGone: Boolean) {
+        binding.print.isGone = isGone
     }
 
     fun scrollToTop() {
         binding.scrollView.fullScroll(View.FOCUS_UP)
+    }
+
+    private fun isGoToFolderVisible(): Boolean {
+        val previousDestinationId = ownerFragment.findNavController().previousBackStackEntry?.destination?.id
+        val parentFile = FileController.getParentFile(currentFile.id)
+        return previousDestinationId != R.id.fileListFragment && parentFile != null
     }
 
     private fun openAddFileBottom() {
@@ -195,7 +201,6 @@ class FileInfoActionsView @JvmOverloads constructor(
             onItemClickListener.sharePublicLink { view.isClickable = true }
         }
         openWith.setOnClickListener { onItemClickListener.openWith() }
-        downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         manageCategories.setOnClickListener { onItemClickListener.manageCategoriesClicked(currentFile.id) }
         coloredFolder.setOnClickListener { onItemClickListener.colorFolderClicked(currentFile.color) }
         addFavorites.setOnClickListener {
@@ -229,6 +234,8 @@ class FileInfoActionsView @JvmOverloads constructor(
             }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }
+        print.setOnClickListener { onItemClickListener.printClicked() }
+        downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         moveFile.setOnClickListener {
             onItemClickListener.moveFileClicked(currentFile.parentId, selectFolderResultLauncher, mainViewModel)
         }

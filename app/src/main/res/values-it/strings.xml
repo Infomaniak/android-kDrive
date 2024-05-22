@@ -238,6 +238,7 @@
     <string name="dropboxSharedLinkTitle">Link di condivisione Dropbox</string>
     <string name="editCategoryInfoDescription">La modifica sarà visibile a tutti gli utenti del kDrive che hanno accesso alle categorie.</string>
     <string name="editCategoryTitle">Modifica una categoria</string>
+    <string name="emptyFilePreviewError">Nessuna anteprima disponibile. Il file è vuoto.</string>
     <string name="errorAddComment">Errore durante l’aggiunta del commento</string>
     <string name="errorAddFavorite">Errore durante l’aggiunta ai preferiti</string>
     <string name="errorCache">Errore durante la memorizzazione nella cache</string>
