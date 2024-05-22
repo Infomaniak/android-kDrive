@@ -298,8 +298,8 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun updateMostRecentSearches() {
-        val newSearch = binding.searchViewCard.searchView.text.toString().trim()
+    private fun updateMostRecentSearches(): Unit = with(binding) {
+        val newSearch = searchViewCard.searchView.text.toString().trim()
         if (newSearch.isEmpty()) return
 
         val newSearches = (listOf(newSearch) + recentSearchesAdapter.searches)
@@ -307,7 +307,7 @@ class SearchFragment : FileListFragment() {
             .take(MAX_MOST_RECENT_SEARCHES)
             .also(recentSearchesAdapter::setItems)
 
-        binding.recentSearchLayout.recentSearchesContainer.isGone = newSearches.isEmpty()
+        recentSearchLayout.recentSearchesContainer.isGone = newSearches.isEmpty()
     }
 
     private fun triggerSearch() {
