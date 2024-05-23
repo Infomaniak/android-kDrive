@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.distinctUntilChanged
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -135,7 +136,8 @@ class HomeActivitiesFragment : Fragment() {
             homeViewModel.restoreActivitiesIfNeeded()
         }
 
-        homeViewModel.lastActivitiesResult.observe(viewLifecycleOwner) { lastActivityResult ->
+        homeViewModel.lastActivitiesResult.distinctUntilChanged().observe(viewLifecycleOwner) { lastActivityResult ->
+
             with(lastActivitiesAdapter) {
                 stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 
