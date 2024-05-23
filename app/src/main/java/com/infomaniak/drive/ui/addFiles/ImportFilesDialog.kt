@@ -74,8 +74,12 @@ class ImportFilesDialog : DialogFragment() {
         val errorCount = importCount - successCount
 
         if (errorCount > 0) {
-            val errorMessage = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
-            showSnackbar(errorMessage, showAboveFab = true)
+            if (isLowMemory()) {
+                showSnackbar(R.string.uploadOutOfMemoryError, showAboveFab = true)
+            } else {
+                val errorMessage = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
+                showSnackbar(errorMessage, showAboveFab = true)
+            }
         }
 
         if (successCount > 0) mainViewModel.refreshActivities.value = true
@@ -113,32 +117,27 @@ class ImportFilesDialog : DialogFragment() {
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (isLowMemory()) return@withContext
+            
             if (cursor.moveToFirst()) {
                 val fileName = cursor.getFileName(uri)
                 val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
 
-                when {
-                    isLowMemory() -> withContext(Dispatchers.Main) {
-                        showSnackbar(R.string.uploadOutOfMemoryError, showAboveFab = true)
-                    }
-                    else -> {
-                        val outputFile = getOutputFile(uri, fileModifiedAt)
-                        ensureActive()
-                        UploadFile(
-                            uri = outputFile.toUri().toString(),
-                            driveId = navArgs.driveId,
-                            fileCreatedAt = fileCreatedAt,
-                            fileModifiedAt = fileModifiedAt,
-                            fileName = fileName,
-                            fileSize = outputFile.length(),
-                            remoteFolder = navArgs.folderId,
-                            type = UploadFile.Type.UPLOAD.name,
-                            userId = AccountUtils.currentUserId,
-                        ).store()
-                        successCount++
-                        currentImportFile = null
-                    }
-                }
+                val outputFile = getOutputFile(uri, fileModifiedAt)
+                ensureActive()
+                UploadFile(
+                    uri = outputFile.toUri().toString(),
+                    driveId = navArgs.driveId,
+                    fileCreatedAt = fileCreatedAt,
+                    fileModifiedAt = fileModifiedAt,
+                    fileName = fileName,
+                    fileSize = outputFile.length(),
+                    remoteFolder = navArgs.folderId,
+                    type = UploadFile.Type.UPLOAD.name,
+                    userId = AccountUtils.currentUserId,
+                ).store()
+                successCount++
+                currentImportFile = null
             }
         }
     }
