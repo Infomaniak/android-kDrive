@@ -58,6 +58,8 @@ class ImportFilesDialog : DialogFragment() {
     private var currentImportFile: IOFile? = null
     private var successCount = 0
 
+    private var isMemoryError: Boolean = false
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val countMessage = requireContext().resources.getQuantityString(R.plurals.preparingToUpload, importCount, importCount)
         dialogBinding.description.text = countMessage
@@ -74,7 +76,7 @@ class ImportFilesDialog : DialogFragment() {
         val errorCount = importCount - successCount
 
         if (errorCount > 0) {
-            val errorMessage = if (isLowMemory()) {
+            val errorMessage = if (isMemoryError) {
                 getString(R.string.uploadOutOfMemoryError)
             } else {
                 resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
@@ -95,7 +97,12 @@ class ImportFilesDialog : DialogFragment() {
                 initUpload(uri)
             }.onFailure { exception ->
                 exception.printStackTrace()
-                Sentry.captureException(exception)
+
+                if (exception is NotEnoughRamException) {
+                    isMemoryError = true
+                } else {
+                    Sentry.captureException(exception)
+                }
 
                 errorCount++
             }
@@ -109,7 +116,7 @@ class ImportFilesDialog : DialogFragment() {
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-            if (isLowMemory()) return@withContext
+            if (isLowMemory()) throw NotEnoughRamException()
 
             if (cursor.moveToFirst()) {
                 val fileName = cursor.getFileName(uri)
@@ -150,4 +157,6 @@ class ImportFilesDialog : DialogFragment() {
             }
         }
     }
+
+    private class NotEnoughRamException : Exception("Low device memory.")
 }
