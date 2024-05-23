@@ -74,12 +74,13 @@ class ImportFilesDialog : DialogFragment() {
         val errorCount = importCount - successCount
 
         if (errorCount > 0) {
-            if (isLowMemory()) {
-                showSnackbar(R.string.uploadOutOfMemoryError, showAboveFab = true)
+            val errorMessage = if (isLowMemory()) {
+                getString(R.string.uploadOutOfMemoryError)
             } else {
-                val errorMessage = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
-                showSnackbar(errorMessage, showAboveFab = true)
+                resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
             }
+
+            showSnackbar(errorMessage, showAboveFab = true)
         }
 
         if (successCount > 0) mainViewModel.refreshActivities.value = true
@@ -100,15 +101,6 @@ class ImportFilesDialog : DialogFragment() {
             }
         }
 
-        if (errorCount > 0) {
-            withContext(Dispatchers.Main) {
-                showSnackbar(
-                    title = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount),
-                    showAboveFab = true,
-                )
-            }
-        }
-
         lifecycle.withResumed {
             dismiss()
         }
@@ -118,7 +110,7 @@ class ImportFilesDialog : DialogFragment() {
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (isLowMemory()) return@withContext
-            
+
             if (cursor.moveToFirst()) {
                 val fileName = cursor.getFileName(uri)
                 val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
