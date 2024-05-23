@@ -370,21 +370,18 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         @Test
-        @DisplayName("Copy the test file to root folder")
+        @DisplayName("Duplicate the test file to root folder")
         fun duplicateFile() {
-            val copyName = "testCopy-$randomSuffix"
-            val copyFile = duplicateFile(testFile, copyName).let {
+            val copyFile = duplicateFile(testFile, testFile.parentId).let {
                 assertApiResponseData(it)
-                assertEquals(copyName, it.data?.name, "The copy name should be equal to $copyName")
                 assertNotEquals(testFile.id, it.data?.id, "The id should be different from the original file")
                 assertEquals(testFile.driveColor, it.data?.driveColor)
                 it.data!!
             }
 
-            // Duplicate one more time with same name and location
-            with(duplicateFile(testFile, copyName)) {
+            // Duplicate one more time with location
+            with(duplicateFile(testFile, testFile.parentId)) {
                 assertApiResponseData(this)
-                assertEquals("$copyName (1)", data?.name, "The copy name should be equal to $copyName (1)")
                 deleteTestFile(data!!)
             }
 
@@ -566,6 +563,22 @@ class ApiRepositoryTest : KDriveTest() {
                     assertEquals(data?.parentId, id, "The file should be contained in the test folder")
                 }
             }
+        }
+
+        @Test
+        @DisplayName("Duplicate the test file to another folder")
+        fun duplicateFileToAnotherFolder() {
+            val file = createFileForTest()
+
+            val copyFile = duplicateFile(file, file.parentId).let {
+                assertApiResponseData(it)
+                assertNotEquals(file.id, it.data?.id, "The id should be different from the original file")
+                assertEquals(file.driveColor, it.data?.driveColor)
+                it.data!!
+            }
+
+            // Delete the copy
+            deleteTestFile(copyFile)
         }
 
         @Test

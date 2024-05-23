@@ -411,10 +411,9 @@ class CloudStorageProvider : DocumentsProvider() {
             val fileId = getFileIdFromDocumentId(sourceDocumentId)
             val file =
                 FileController.getFileProxyById(fileId, customRealm = realm) ?: throw IllegalStateException("File not found")
-            val copyName = file.name
             val targetParentFileId = getFileIdFromDocumentId(targetParentDocumentId)
 
-            val apiResponse = ApiRepository.copyFile(file, copyName, targetParentFileId)
+            val apiResponse = ApiRepository.duplicateFile(file, targetParentFileId)
 
             if (apiResponse.isSuccess()) {
 

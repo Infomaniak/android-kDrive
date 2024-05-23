@@ -398,12 +398,15 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         )
     }
 
-    override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        mainViewModel.duplicateFile(currentFile, result).observe(viewLifecycleOwner) { apiResponse ->
+    override fun onDuplicateFile(destinationFolder: File) {
+        mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { file ->
-                    mainViewModel.currentPreviewFileList[file.id] = file
-                    previewSliderAdapter.addFile(file)
+                    if (currentFile.parentId == destinationFolder.id) {
+                        mainViewModel.currentPreviewFileList[file.id] = file
+                        previewSliderAdapter.addFile(file)
+                    }
+
                     showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
                     toggleBottomSheet(shouldShow = true)
                 }
@@ -411,7 +414,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 showSnackbar(R.string.errorDuplicate)
                 toggleBottomSheet(shouldShow = true)
             }
-            onApiResponse()
         }
     }
 
