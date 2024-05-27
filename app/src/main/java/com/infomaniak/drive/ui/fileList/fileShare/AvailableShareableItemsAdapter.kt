@@ -46,6 +46,7 @@ class AvailableShareableItemsAdapter(
     private var itemList: ArrayList<Shareable>,
     var notShareableIds: ArrayList<Int> = arrayListOf(),
     var notShareableEmails: ArrayList<String> = arrayListOf(),
+    private val getCurrentText: () -> CharSequence,
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
 
@@ -154,6 +155,8 @@ class AvailableShareableItemsAdapter(
                 values = finalUserList
                 count = finalUserList.size
             }
+
+            override fun convertResultToString(resultValue: Any?): CharSequence = getCurrentText()
         }
 
         override fun publishResults(constraint: CharSequence?, results: FilterResults) {

@@ -217,17 +217,18 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     itemList: List<Shareable>,
     notShareableIds: ArrayList<Int> = arrayListOf(),
     notShareableEmails: ArrayList<String> = arrayListOf(),
-    onDataPassed: (item: Shareable) -> Unit
+    onDataPassed: (item: Shareable) -> Unit,
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
     val availableUsersAdapter = AvailableShareableItemsAdapter(
         context = context,
         itemList = ArrayList(itemList),
         notShareableIds = notShareableIds,
-        notShareableEmails = notShareableEmails
-    ) { item ->
-        onDataPassed(item)
-    }
+        getCurrentText = { text },
+        notShareableEmails = notShareableEmails,
+        onItemClick = onDataPassed,
+    )
+
     setAdapter(availableUsersAdapter)
     handleActionDone { if (text.isNotBlank()) !availableUsersAdapter.addFirstAvailableItem() }
 
