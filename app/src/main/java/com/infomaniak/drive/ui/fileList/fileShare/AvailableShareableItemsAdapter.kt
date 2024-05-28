@@ -132,7 +132,15 @@ class AvailableShareableItemsAdapter(
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
-                val searchTerm = constraint?.standardize() ?: ""
+                if (constraint.isNullOrBlank()) {
+                    return FilterResults().apply {
+                        values = arrayListOf<Shareable>()
+                        count = 0
+                    }
+                }
+
+                val searchTerm = constraint.standardize()
+
                 val finalUserList = initialList
                     .filter {
                         it.getFilterValue().standardize()

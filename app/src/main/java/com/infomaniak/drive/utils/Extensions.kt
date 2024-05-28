@@ -229,7 +229,7 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
         onDataPassed(item)
     }
     setAdapter(availableUsersAdapter)
-    handleActionDone { !availableUsersAdapter.addFirstAvailableItem() }
+    handleActionDone { if (text.isNotBlank()) !availableUsersAdapter.addFirstAvailableItem() }
 
     return availableUsersAdapter
 }
