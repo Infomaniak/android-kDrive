@@ -224,8 +224,8 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
         context = context,
         itemList = ArrayList(itemList),
         notShareableIds = notShareableIds,
-        getCurrentText = { text },
         notShareableEmails = notShareableEmails,
+        getCurrentText = { text },
         onItemClick = onDataPassed,
     )
 
