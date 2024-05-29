@@ -155,8 +155,6 @@ class AvailableShareableItemsAdapter(
                 values = finalUserList
                 count = finalUserList.size
             }
-
-            override fun convertResultToString(resultValue: Any?): CharSequence = getCurrentText()
         }
 
         override fun publishResults(constraint: CharSequence?, results: FilterResults) {
@@ -174,6 +172,8 @@ class AvailableShareableItemsAdapter(
 
             notifyDataSetChanged()
         }
+
+        override fun convertResultToString(resultValue: Any?): CharSequence = getCurrentText()
     }
 
     private fun CharSequence.standardize(): String = this.toString().trim().lowercase()
