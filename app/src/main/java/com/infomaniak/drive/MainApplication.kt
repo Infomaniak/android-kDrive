@@ -138,7 +138,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
                 tokenInterceptorListener = tokenInterceptorListener,
                 previousApiCall = uiSettings.accessTokenApiCallRecord,
                 updateLastApiCall = { uiSettings.accessTokenApiCallRecord = it },
-            )
+            ),
         )
         HttpClient.init(tokenInterceptorListener)
         MqttClientWrapper.init(applicationContext)
@@ -184,8 +184,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             refreshTokenError(AccountUtils.currentUser!!)
         }
 
-        override suspend fun getApiToken(): ApiToken? {
-            return AccountUtils.currentUser?.apiToken
-        }
+        override suspend fun getApiToken(): ApiToken? = AccountUtils.currentUser?.apiToken
     }
 }
