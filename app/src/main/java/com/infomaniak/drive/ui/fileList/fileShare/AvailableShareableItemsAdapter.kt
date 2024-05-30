@@ -46,6 +46,7 @@ class AvailableShareableItemsAdapter(
     private var itemList: ArrayList<Shareable>,
     var notShareableIds: ArrayList<Int> = arrayListOf(),
     var notShareableEmails: ArrayList<String> = arrayListOf(),
+    private val getCurrentText: () -> CharSequence,
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
 
@@ -171,6 +172,8 @@ class AvailableShareableItemsAdapter(
 
             notifyDataSetChanged()
         }
+
+        override fun convertResultToString(resultValue: Any?): CharSequence = getCurrentText()
     }
 
     private fun CharSequence.standardize(): String = this.toString().trim().lowercase()
