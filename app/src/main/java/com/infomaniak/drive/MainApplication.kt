@@ -185,5 +185,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         }
 
         override suspend fun getApiToken(): ApiToken? = AccountUtils.currentUser?.apiToken
+
+        override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
 }
