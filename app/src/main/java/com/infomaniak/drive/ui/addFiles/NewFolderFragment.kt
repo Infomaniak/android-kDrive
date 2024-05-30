@@ -82,13 +82,15 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initDropBoxFolder(drive: Drive?) = binding.dropBox.apply {
-        isVisible = drive?.sharedWithMe != true
-        setOnClickListener {
-            safeNavigate(
-                if (drive?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
-                else R.id.dropBoxBottomSheetDialog
-            )
+    private fun initDropBoxFolder(drive: Drive?) {
+        binding.dropBox.apply {
+            isVisible = drive?.sharedWithMe != true
+            setOnClickListener {
+                safeNavigate(
+                    if (drive?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
+                    else R.id.dropBoxBottomSheetDialog
+                )
+            }
         }
     }
 }
