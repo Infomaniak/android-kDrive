@@ -53,6 +53,7 @@ import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
@@ -239,7 +240,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         moveFile.setOnClickListener {
             onItemClickListener.moveFileClicked(currentFile.parentId, selectFolderResultLauncher, mainViewModel)
         }
-        duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked() }
+        duplicateFile.setOnClickListener { onItemClickListener.duplicateFileClicked(selectFolderResultLauncher, mainViewModel) }
         renameFile.setOnClickListener { onItemClickListener.renameFileClicked() }
         deleteFile.setOnClickListener { onItemClickListener.deleteFileClicked() }
         goToFolder.setOnClickListener { onItemClickListener.goToFolder() }
@@ -486,8 +487,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun manageCategoriesClicked(fileId: Int)
         fun onCacheAddedToOffline()
         fun onDeleteFile(onApiResponse: () -> Unit)
-        fun onDuplicateFile(result: String, onApiResponse: () -> Unit)
         fun onLeaveShare(onApiResponse: () -> Unit)
+        fun onDuplicateFile(destinationFolder: File)
         fun onMoveFile(destinationFolder: File)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
@@ -508,7 +509,12 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onSelectFolderResult(data: Intent?) {
             data?.extras?.let { bundle ->
                 SelectFolderActivityArgs.fromBundle(bundle).apply {
-                    onMoveFile(File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId))
+                    val file = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
+                    when (customArgs?.getString(SINGLE_OPERATION_CUSTOM_TAG)) {
+                        SingleOperation.COPY.name -> onDuplicateFile(file)
+                        SingleOperation.MOVE.name -> onMoveFile(file)
+                        else -> Unit
+                    }
                 }
             }
         }
@@ -546,20 +552,10 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         @CallSuper
-        fun duplicateFileClicked() = currentFile?.apply {
-            Utils.createPromptNameDialog(
-                context = currentContext,
-                title = R.string.buttonDuplicate,
-                fieldName = R.string.fileInfoInputDuplicateFile,
-                positiveButton = R.string.buttonCopy,
-                fieldValue = name,
-                selectedRange = getFileName().length
-            ) { dialog, name ->
-                onDuplicateFile(name) {
-                    trackFileActionEvent("copy")
-                    dialog.dismiss()
-                }
-            }
+        fun duplicateFileClicked(selectFolderResultLauncher: ActivityResultLauncher<Intent>, mainViewModel: MainViewModel) {
+            trackFileActionEvent("copy")
+            mainViewModel.ignoreSyncOffline = true
+            currentContext.duplicateFilesClicked(selectFolderResultLauncher, mainViewModel)
         }
 
         @CallSuper
@@ -603,5 +599,9 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
             }
         }
+    }
+
+    companion object {
+        const val SINGLE_OPERATION_CUSTOM_TAG = "single_operation"
     }
 }

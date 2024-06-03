@@ -156,7 +156,9 @@
                 style="@style/CardViewInfomaniak"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/marginStandard">
+                android:layout_margin="@dimen/marginStandard"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"

@@ -217,14 +217,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color))
     }
 
-    fun copyFile(file: File, copyName: String?, destinationId: Int): ApiResponse<File> {
-        val body = if (copyName == null) mapOf() else mapOf("name" to copyName)
-        return callApi(ApiRoutes.copyFile(file, destinationId), POST, body)
-    }
-
-    fun duplicateFile(file: File, duplicateName: String?): ApiResponse<File> {
-        val body = if (duplicateName == null) mapOf() else mapOf("name" to duplicateName)
-        return callApi(ApiRoutes.duplicateFile(file), POST, body)
+    fun duplicateFile(file: File, destinationId: Int): ApiResponse<File> {
+        return callApi(ApiRoutes.duplicateFile(file, destinationId), POST)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {

@@ -1,0 +1,3 @@
+- Correction de l'ajout de contacts lorsque l'on clique plusieurs fois sur « Terminé » lors du partage d'un dossier
+- Correction de la tabulation insérant le « toString » des objets au lieu de l'autocomplétion lors du partage d'un dossier
+- Correction de la déconnexion de l'utilisateur lors de la création d'une boîte de dépôt à partir d'un dossier « Partagé avec moi ».

@@ -23,6 +23,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.networking.AccessTokenUsageInterceptor.ApiCallRecord
 import com.infomaniak.lib.core.utils.SharedValues
 import com.infomaniak.lib.core.utils.sharedValue
 import com.infomaniak.lib.core.utils.transaction
@@ -58,6 +59,7 @@ class UiSettings(context: Context) : SharedValues {
     var nightMode by sharedValue("nightMode", MODE_NIGHT_FOLLOW_SYSTEM)
     var recentSearches by sharedValue("recentSearches", emptyList())
     var sortType by sharedValue("sortType", SortType.NAME_AZ)
+    var accessTokenApiCallRecord by sharedValue<ApiCallRecord>("accessTokenApiCallRecord", null)
 
     data class SaveExternalFilesData(
         val userId: Int,

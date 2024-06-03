@@ -1,0 +1,3 @@
+- Fix contacts being added when “Done” is clicked repeatedly when sharing a folder
+- Fix tabulation inserting the "toString" of objects instead of autocompletion when sharing a folder
+- Fix the logout of user when creating a drop box from a "Shared with me"

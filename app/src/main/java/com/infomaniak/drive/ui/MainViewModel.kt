@@ -381,24 +381,12 @@ class MainViewModel(
         }
     }
 
-    fun copyFile(
-        file: File,
-        destinationId: Int,
-        copyName: String?,
-        onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
-    ) = liveData(Dispatchers.IO) {
-        ApiRepository.copyFile(file, copyName, destinationId).let { apiResponse ->
-            if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(apiResponse)
-        }
-    }
-
     fun duplicateFile(
         file: File,
-        copyName: String?,
+        destinationId: Int? = null,
         onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
     ) = liveData(Dispatchers.IO) {
-        ApiRepository.duplicateFile(file, copyName).let { apiResponse ->
+        ApiRepository.duplicateFile(file, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
             emit(apiResponse)
         }

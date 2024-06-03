@@ -49,7 +49,9 @@ import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.user.User
+import com.infomaniak.lib.core.networking.AccessTokenUsageInterceptor
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.networking.HttpClientConfig
 import com.infomaniak.lib.core.utils.CoilUtils
 import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
 import com.infomaniak.lib.core.utils.clearStack
@@ -80,7 +82,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
-        AppCompatDelegate.setDefaultNightMode(UiSettings(this).nightMode)
+        val uiSettings = UiSettings(this)
+        AppCompatDelegate.setDefaultNightMode(uiSettings.nightMode)
 
         if (BuildConfig.DEBUG) {
             Stetho.initializeWithDefaults(this)
@@ -134,7 +137,15 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
         AccountUtils.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
-        HttpClient.init(tokenInterceptorListener())
+        val tokenInterceptorListener = tokenInterceptorListener()
+        HttpClientConfig.customInterceptors = listOf(
+            AccessTokenUsageInterceptor(
+                tokenInterceptorListener = tokenInterceptorListener,
+                previousApiCall = uiSettings.accessTokenApiCallRecord,
+                updateLastApiCall = { uiSettings.accessTokenApiCallRecord = it },
+            ),
+        )
+        HttpClient.init(tokenInterceptorListener)
         MqttClientWrapper.init(applicationContext)
     }
 
@@ -178,8 +189,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             refreshTokenError(AccountUtils.currentUser!!)
         }
 
-        override suspend fun getApiToken(): ApiToken {
-            return AccountUtils.currentUser!!.apiToken
-        }
+        override suspend fun getApiToken(): ApiToken? = AccountUtils.currentUser?.apiToken
+
+        override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
 }

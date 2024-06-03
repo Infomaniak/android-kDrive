@@ -58,6 +58,8 @@ class ImportFilesDialog : DialogFragment() {
     private var currentImportFile: IOFile? = null
     private var successCount = 0
 
+    private var isMemoryError: Boolean = false
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val countMessage = requireContext().resources.getQuantityString(R.plurals.preparingToUpload, importCount, importCount)
         dialogBinding.description.text = countMessage
@@ -74,7 +76,12 @@ class ImportFilesDialog : DialogFragment() {
         val errorCount = importCount - successCount
 
         if (errorCount > 0) {
-            val errorMessage = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
+            val errorMessage = if (isMemoryError) {
+                getString(R.string.uploadOutOfMemoryError)
+            } else {
+                resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
+            }
+
             showSnackbar(errorMessage, showAboveFab = true)
         }
 
@@ -90,18 +97,14 @@ class ImportFilesDialog : DialogFragment() {
                 initUpload(uri)
             }.onFailure { exception ->
                 exception.printStackTrace()
-                Sentry.captureException(exception)
+
+                if (exception is NotEnoughRamException) {
+                    isMemoryError = true
+                } else {
+                    Sentry.captureException(exception)
+                }
 
                 errorCount++
-            }
-        }
-
-        if (errorCount > 0) {
-            withContext(Dispatchers.Main) {
-                showSnackbar(
-                    title = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount),
-                    showAboveFab = true,
-                )
             }
         }
 
@@ -113,32 +116,27 @@ class ImportFilesDialog : DialogFragment() {
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (isLowMemory()) throw NotEnoughRamException()
+
             if (cursor.moveToFirst()) {
                 val fileName = cursor.getFileName(uri)
                 val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
 
-                when {
-                    isLowMemory() -> withContext(Dispatchers.Main) {
-                        showSnackbar(R.string.uploadOutOfMemoryError, showAboveFab = true)
-                    }
-                    else -> {
-                        val outputFile = getOutputFile(uri, fileModifiedAt)
-                        ensureActive()
-                        UploadFile(
-                            uri = outputFile.toUri().toString(),
-                            driveId = navArgs.driveId,
-                            fileCreatedAt = fileCreatedAt,
-                            fileModifiedAt = fileModifiedAt,
-                            fileName = fileName,
-                            fileSize = outputFile.length(),
-                            remoteFolder = navArgs.folderId,
-                            type = UploadFile.Type.UPLOAD.name,
-                            userId = AccountUtils.currentUserId,
-                        ).store()
-                        successCount++
-                        currentImportFile = null
-                    }
-                }
+                val outputFile = getOutputFile(uri, fileModifiedAt)
+                ensureActive()
+                UploadFile(
+                    uri = outputFile.toUri().toString(),
+                    driveId = navArgs.driveId,
+                    fileCreatedAt = fileCreatedAt,
+                    fileModifiedAt = fileModifiedAt,
+                    fileName = fileName,
+                    fileSize = outputFile.length(),
+                    remoteFolder = navArgs.folderId,
+                    type = UploadFile.Type.UPLOAD.name,
+                    userId = AccountUtils.currentUserId,
+                ).store()
+                successCount++
+                currentImportFile = null
             }
         }
     }
@@ -159,4 +157,6 @@ class ImportFilesDialog : DialogFragment() {
             }
         }
     }
+
+    private class NotEnoughRamException : Exception("Low device memory.")
 }

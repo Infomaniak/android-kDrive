@@ -225,9 +225,7 @@ object ApiRoutes {
 
     fun moveFile(file: File, newParentId: Int) = "${fileURL(file)}/move/$newParentId"
 
-    fun duplicateFile(file: File) = "${fileURL(file)}/duplicate?$fileWithQuery"
-
-    fun copyFile(file: File, destinationId: Int) = "${fileURL(file)}/copy/$destinationId?$fileWithQuery"
+    fun duplicateFile(file: File, destinationId: Int) = "${fileURL(file)}/copy/$destinationId?$fileWithQuery"
 
     fun renameFile(file: File) = "${fileURLV2(file)}/rename"
 

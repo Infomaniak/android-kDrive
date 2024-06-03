@@ -60,6 +60,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
+import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.showKeyboard
 import com.infomaniak.lib.core.utils.showToast
@@ -222,7 +223,7 @@ object Utils {
     fun Context.moveFileClicked(
         disabledFolderId: Int?,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
-        mainViewModel: MainViewModel
+        mainViewModel: MainViewModel,
     ) {
         mainViewModel.ignoreSyncOffline = true
         Intent(this, SelectFolderActivity::class.java).apply {
@@ -232,11 +233,32 @@ object Utils {
                     driveId = AccountUtils.currentDriveId,
                     folderId = disabledFolderId ?: -1,
                     disabledFolderId = disabledFolderId ?: -1,
-                    customArgs = bundleOf(MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
-                ).toBundle()
+                    customArgs = bundleOf(
+                        MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE,
+                        SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.MOVE.name,
+                    ),
+                ).toBundle(),
             )
-            selectFolderResultLauncher.launch(this)
-        }
+        }.also(selectFolderResultLauncher::launch)
+    }
+
+    fun Context.duplicateFilesClicked(
+        selectFolderResultLauncher: ActivityResultLauncher<Intent>,
+        mainViewModel: MainViewModel,
+    ) {
+        Intent(this, SelectFolderActivity::class.java).apply {
+            putExtras(
+                SelectFolderActivityArgs(
+                    userId = AccountUtils.currentUserId,
+                    driveId = AccountUtils.currentDriveId,
+                    folderId = mainViewModel.currentFolder.value?.id ?: -1,
+                    customArgs = bundleOf(
+                        MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY,
+                        SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.COPY.name,
+                    ),
+                ).toBundle(),
+            )
+        }.also(selectFolderResultLauncher::launch)
     }
 
     fun Context.openWith(uri: Uri, type: String?, flags: Int) {
