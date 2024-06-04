@@ -25,7 +25,7 @@ import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
@@ -357,7 +357,7 @@ class UploadTask(
             "lock_error" -> throw LockErrorException()
             "not_authorized" -> throw NotAuthorizedException()
             "product_maintenance" -> {
-                if (error?.contextGson?.getAsJsonPrimitive("reason")?.asString == Drive.MaintenanceReason.TECHNICAL.value) {
+                if (error?.contextGson?.getAsJsonPrimitive("reason")?.asString == MaintenanceReason.TECHNICAL.value) {
                     throw ProductMaintenanceException()
                 } else {
                     throw ProductBlockedException()
