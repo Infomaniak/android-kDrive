@@ -36,11 +36,15 @@ import java.util.Date
 @RealmClass(embedded = true)
 open class ShareLink(
     var url: String = "",
+    @SerializedName("file_id")
+    var fileId: Int? = null,
     @SerializedName("right")
     var _right: String = ShareLinkFilePermission.RESTRICTED.name,
     @SerializedName("valid_until")
     var validUntil: Date? = null,
     var capabilities: ShareLinkCapabilities? = null,
+    @SerializedName("access_blocked")
+    var accessBlocked: Boolean = false,
 ) : RealmObject(), Parcelable {
 
     inline var right
