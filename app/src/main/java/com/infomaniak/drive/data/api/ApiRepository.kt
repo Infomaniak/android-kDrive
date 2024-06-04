@@ -302,6 +302,10 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.shareLink(file), DELETE)
     }
 
+    fun getShareLinkInfo(driveId: String, linkUuid: String): ApiResponse<ShareLink> {
+        return callApi(ApiRoutes.getShareLinkInfo(driveId, linkUuid), GET)
+    }
+
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
         return callApi(ApiRoutes.checkFileShare(file), POST, body)
     }

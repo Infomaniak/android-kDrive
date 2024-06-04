@@ -181,6 +181,7 @@
                 <data android:pathPattern="/app/drive/.*/files/.*/preview/./..*" />
                 <data android:pathPattern="/app/drive/.*/redirect/..*" />
                 <data android:pathPattern="/app/office/.*/..*" />
+                <data android:pathPattern="/app/share/.*/..*" />
             </intent-filter>
 
             <meta-data
