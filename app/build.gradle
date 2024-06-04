@@ -132,7 +132,7 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
-    implementation 'androidx.lifecycle:lifecycle-process:2.8.0'
+    implementation 'androidx.lifecycle:lifecycle-process:2.8.1'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
     implementation 'androidx.webkit:webkit:1.11.0'
 
@@ -142,7 +142,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:6.4.0'
+    implementation 'com.airbnb.android:lottie:6.4.1'
     implementation 'com.github.infomaniak:android-pdfview:3.2.9'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.5'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
