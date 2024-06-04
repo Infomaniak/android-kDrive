@@ -215,6 +215,10 @@
             android:name="com.infomaniak.lib.stores.updaterequired.UpdateRequiredActivity"
             android:theme="@style/AppTheme.RequiredUpdate" />
 
+        <activity
+            android:name=".ui.fileShared.FileSharedActivity"
+            android:noHistory="true" />
+
         <service android:name=".data.sync.MediaObserverService" />
 
         <receiver
