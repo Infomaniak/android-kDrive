@@ -146,7 +146,7 @@
     <string name="buttonRename">Umbenennen</string>
     <string name="buttonRenew">Erneuern</string>
     <string name="buttonRetry">Erneut versuchen</string>
-    <string name="buttonSave">Aufnehmen</string>
+    <string name="buttonSave">Speichern</string>
     <string name="buttonSeeFolder">Ordner anzeigen</string>
     <string name="buttonSelectAll">Alles auswählen</string>
     <string name="buttonSend">Versenden</string>
@@ -636,7 +636,7 @@
     <string name="syncConfigureDescription">Ihre Fotos, Videos und Screenshots werden automatisch in Ihrem kDrive %s gespeichert.</string>
     <string name="syncConfigureTitle">Speichern Sie Ihre Erinnerungen an einem sicheren Ort</string>
     <string name="syncSettingsButtonActiveSync">Automatische Sicherung aktivieren</string>
-    <string name="syncSettingsButtonSaveDate">Aufnehmen</string>
+    <string name="syncSettingsButtonSaveDate">Speichern</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisierung</string>
     <string name="syncSettingsButtonSyncPicture">Fotos importieren (DCIM)</string>
     <string name="syncSettingsButtonSyncScreenshot">Screenshots importieren</string>
@@ -649,7 +649,7 @@
     <string name="syncSettingsSaveDateFromDateValue2">Ab einem Datum</string>
     <string name="syncSettingsSaveDateNowValue">ab jetzt</string>
     <string name="syncSettingsSaveDateNowValue2">Nur neue Fotos (ab jetzt)</string>
-    <string name="syncSettingsSaveOn">Aufnehmen auf</string>
+    <string name="syncSettingsSaveOn">Speichern auf</string>
     <string name="syncSettingsSyncPeriodicityFourHoursValue">Alle 4 Stunden</string>
     <string name="syncSettingsSyncPeriodicityInstantValue">Sofort</string>
     <string name="syncSettingsSyncPeriodicityOneHourValue">Stündlich</string>
