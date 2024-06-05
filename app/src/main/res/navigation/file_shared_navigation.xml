@@ -24,7 +24,14 @@
     <activity
         android:id="@+id/fileSharedActivity"
         android:name="com.infomaniak.drive.ui.fileShared.FileSharedActivity"
-        tools:layout="@layout/activity_file_shared"/>
+        tools:layout="@layout/activity_file_shared">
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+        <argument
+            android:name="fileSharedLinkUuid"
+            app:argType="string" />
+    </activity>
 
     <fragment
         android:id="@+id/fileSharedPasswordFragment"
