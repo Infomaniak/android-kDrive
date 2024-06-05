@@ -302,7 +302,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.shareLink(file), DELETE)
     }
 
-    fun getShareLinkInfo(driveId: String, linkUuid: String): ApiResponse<ShareLink> {
+    fun getShareLinkInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
         return callApi(ApiRoutes.getShareLinkInfo(driveId, linkUuid), GET)
     }
 
