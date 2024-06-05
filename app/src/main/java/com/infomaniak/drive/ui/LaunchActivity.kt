@@ -24,7 +24,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
@@ -168,7 +168,7 @@ class LaunchActivity : AppCompatActivity() {
                 message = "DeepLink: $path"
                 level = SentryLevel.INFO
             })
-            trackEvent("deepLink", path)
+            trackDeepLink("internal")
         }
     }
 

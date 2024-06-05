@@ -64,4 +64,8 @@ object MatomoDrive : MatomoCore {
     fun Activity.trackInAppReview(name: String) {
         trackEvent("inAppReview", name)
     }
+
+    fun Activity.trackDeepLink(name: String) {
+        trackEvent("deepLink", name)
+    }
 }
