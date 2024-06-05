@@ -27,10 +27,12 @@
         tools:layout="@layout/activity_file_shared">
         <argument
             android:name="driveId"
-            app:argType="integer" />
+            app:argType="integer"
+            android:defaultValue="-1" />
         <argument
             android:name="fileSharedLinkUuid"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue="" />
     </activity>
 
     <fragment
