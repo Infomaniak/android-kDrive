@@ -32,6 +32,8 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.ui.fileShared.FileSharedActivity
+import com.infomaniak.drive.ui.fileShared.FileSharedActivityArgs
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
@@ -52,6 +54,7 @@ class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
+    private var fileSharedActivityExtras: Bundle? = null
 
     private var isHelpShortcutPressed = false
 
@@ -102,16 +105,17 @@ class LaunchActivity : AppCompatActivity() {
                 when (destinationClass) {
                     MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
                     LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                    FileSharedActivity::class.java -> fileSharedActivityExtras?.let(::putExtras)
                 }
             }.also(::startActivity)
         }
     }
 
     private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
-        if (AccountUtils.requestCurrentUser() == null) {
-            LoginActivity::class.java
-        } else {
-            loggedUserDestination()
+        when {
+            fileSharedActivityExtras != null -> FileSharedActivity::class.java
+            AccountUtils.requestCurrentUser() == null -> LoginActivity::class.java
+            else -> loggedUserDestination()
         }
     }
 
@@ -157,22 +161,33 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun processDeepLink(path: String) {
-        Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
-            val (pathDriveId, pathFolderId, pathFileId) = match.destructured
-            val driveId = pathDriveId.toInt()
-            val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
-
-            DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
-                setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
+        var trackerValue = ""
+        if (path.contains("/app/share/")) {
+            Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
+                val (driveId, fileSharedLinkUuid) = match.destructured
+                fileSharedActivityExtras = FileSharedActivityArgs(driveId.toInt(), fileSharedLinkUuid).toBundle()
+                trackerValue = "external"
             }
+        } else {
+            Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
+                val (pathDriveId, pathFolderId, pathFileId) = match.destructured
+                val driveId = pathDriveId.toInt()
+                val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = UploadWorker.BREADCRUMB_TAG
-                message = "DeepLink: $path"
-                level = SentryLevel.INFO
-            })
-            trackDeepLink("internal")
+                DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
+                    setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
+                }
+                trackerValue = "internal"
+            }
         }
+
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = UploadWorker.BREADCRUMB_TAG
+            message = "DeepLink: $path"
+            level = SentryLevel.INFO
+        })
+
+        trackDeepLink(trackerValue)
     }
 
     private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int, isSharedWithMe: Boolean) {
