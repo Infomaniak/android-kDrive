@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.FileId
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.*
 import com.infomaniak.lib.core.api.ApiController.callApi
@@ -304,6 +305,10 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun getShareLinkInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
         return callApi(ApiRoutes.getShareLinkInfo(driveId, linkUuid), GET)
+    }
+
+    fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
+        return callApi(ApiRoutes.getShareLinkFile(driveId, linkUuid, fileId), GET)
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
