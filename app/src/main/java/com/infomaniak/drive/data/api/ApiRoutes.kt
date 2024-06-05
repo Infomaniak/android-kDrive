@@ -252,6 +252,8 @@ object ApiRoutes {
     fun shareLink(file: File) = "${fileURLV2(file)}/link"
 
     fun getShareLinkInfo(driveId: Int, linkUuid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid/init"
+
+    fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) = "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId"
     //endregion
 
     /** External import */
