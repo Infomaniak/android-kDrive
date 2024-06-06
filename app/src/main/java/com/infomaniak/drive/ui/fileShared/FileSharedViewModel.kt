@@ -37,15 +37,15 @@ class FileSharedViewModel(application: Application, private val savedStateHandle
 
     private val fileSharedLinkUuid: String
         inline get() = savedStateHandle.get<String>(FileSharedActivityArgs::fileSharedLinkUuid.name) ?: ""
+    
+    private val fileId: Int
+        inline get() = savedStateHandle.get<Int>(FileSharedActivityArgs::fileId.name) ?: ERROR_ID
 
     fun downloadSharedFile() = liveData(Dispatchers.IO) {
-        val apiResponse = ApiRepository.getShareLinkInfo(driveId, fileSharedLinkUuid)
+        val apiResponse = ApiRepository.getShareLinkFile(driveId, fileSharedLinkUuid, fileId)
         if (apiResponse.isSuccess() && apiResponse.data != null) {
-            val shareLink = apiResponse.data!!
-            if (apiResponse.data?.validUntil?.before(Date()) == true) {
-                Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
-            }
-            Log.e("TOTO", "downloadSharedFile: ${shareLink.fileId} | ${shareLink._right}")
+            val file = apiResponse.data!!
+            Log.e("TOTO", "downloadSharedFile: ${file.name} ${file.parentId}")
             emit("tptp")
         } else {
             Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
