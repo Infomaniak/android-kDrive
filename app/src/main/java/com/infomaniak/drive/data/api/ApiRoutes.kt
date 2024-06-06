@@ -258,6 +258,10 @@ object ApiRoutes {
     fun getShareLinkInfo(driveId: Int, linkUuid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid/init"
 
     fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) = "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId"
+
+    fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId/files"
+    }
     //endregion
 
     /** External import */
