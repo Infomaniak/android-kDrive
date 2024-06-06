@@ -18,35 +18,97 @@
 package com.infomaniak.drive.ui.fileShared
 
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
+import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
-import com.infomaniak.drive.databinding.FragmentFileSharedListBinding
-import com.infomaniak.lib.core.utils.safeBinding
+import androidx.navigation.fragment.navArgs
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.utils.FilePresenter.displayFile
+import com.infomaniak.drive.utils.FilePresenter.openBookmark
+import com.infomaniak.drive.utils.FilePresenter.openFolder
 
-class FileSharedListFragment : Fragment() {
 
-    private var binding: FragmentFileSharedListBinding by safeBinding()
+class FileSharedListFragment : FileListFragment() {
+
     private val fileShareViewModel: FileSharedViewModel by activityViewModels()
 
-    private val fileSharedActivityArgs by lazy {
+    private val activityNavigationArgs by lazy {
         // When opening this fragment via deeplink, it can happen that the navigation
         // extras aren't yet initialized, so we don't use the `navArgs` here.
         requireActivity().intent?.extras?.let(FileSharedActivityArgs::fromBundle) ?: FileSharedActivityArgs()
     }
+    private val navigationArgs: FileSharedListFragmentArgs by navArgs()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentFileSharedListBinding.inflate(inflater, container, false).also { binding = it }.root
-    }
+
+    override var enabledMultiSelectMode: Boolean = true
+    override var hideBackButtonWhenRoot: Boolean = false
+
+    override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        downloadFiles = DownloadFiles()
+        binding.uploadFileInProgressView.isGone = true
+
+        fileListViewModel.isSharedWithMe = true
         super.onViewCreated(view, savedInstanceState)
 
-        fileShareViewModel.downloadSharedFile().observe(viewLifecycleOwner) {
-            Log.e("TOTO", "onViewCreated: in Observer")
+        binding.collapsingToolbarLayout.title = navigationArgs.fileName.ifBlank { activityNavigationArgs.fileId.toString() }
+
+        fileAdapter.initAsyncListDiffer()
+        fileAdapter.onFileClicked = { file ->
+            if (file.isUsable()) {
+                when {
+                    file.isFolder() -> {
+                        openFolder(
+                            file = file,
+                            shouldHideBottomNavigation = true,
+                            shouldShowSmallFab = false,
+                            fileListViewModel = fileListViewModel,
+                            isSharedFile = true,
+                        )
+                    }
+                    file.isBookmark() -> openBookmark(file)
+                    else -> displayFile(file, mainViewModel, fileAdapter)
+                }
+            }
+        }
+
+        fileShareViewModel.childrenLiveData.observe(viewLifecycleOwner) { files ->
+            populateFileList(files)
+        }
+
+        setupMultiSelectLayout()
+    }
+
+    private fun populateFileList(files: List<File>) {
+        fileAdapter.setFiles(files)
+        fileAdapter.isComplete = true
+        showLoadingTimer.cancel()
+        binding.swipeRefreshLayout.isRefreshing = false
+
+        changeNoFilesLayoutVisibility(files.isEmpty(), changeControlsVisibility = true, ignoreOffline = false)
+    }
+
+    private fun setupMultiSelectLayout() {
+        multiSelectLayout?.root?.isGone = true
+    }
+
+    companion object {
+        const val MATOMO_CATEGORY = "FileSharedListAction"
+    }
+
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
+
+        override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
+            if (ignoreCache && !fileAdapter.fileList.isManaged) fileAdapter.setFiles(arrayListOf())
+            showLoadingTimer.start()
+            fileAdapter.isComplete = false
+
+            with(fileShareViewModel) {
+                rootSharedFile?.let { downloadSharedFileChildren(navigationArgs.fileId) } ?: downloadSharedFile()
+            }
         }
     }
 }

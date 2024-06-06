@@ -50,11 +50,22 @@
         tools:layout="@layout/fragment_file_shared_list">
 
         <argument
-            android:name="fileUri"
-            app:argType="android.net.Uri"
-            app:nullable="true"
-            android:defaultValue="@null"/>
+            android:name="fileId"
+            app:argType="integer"
+            android:defaultValue="1" />
 
+        <argument
+            android:name="fileName"
+            app:argType="string"
+            android:defaultValue="" />
+
+        <action
+            android:id="@+id/fileSharedListFragmentToFileSharedListFragment"
+            app:destination="@id/fileSharedListFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
     </fragment>
 
 </navigation>

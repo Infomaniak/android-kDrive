@@ -37,6 +37,7 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
 import com.infomaniak.drive.ui.fileList.FileAdapter
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.FileListViewModel
+import com.infomaniak.drive.ui.fileShared.FileSharedListFragmentArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -56,8 +57,9 @@ object FilePresenter {
         shouldHideBottomNavigation: Boolean,
         shouldShowSmallFab: Boolean,
         fileListViewModel: FileListViewModel,
+        isSharedFile: Boolean = false
     ) {
-        if (file.isDisabled()) {
+        if (file.isDisabled() && !isSharedFile) {
             safeNavigate(
                 R.id.accessDeniedBottomSheetFragment,
                 AccessDeniedBottomSheetDialogArgs(
@@ -68,15 +70,18 @@ object FilePresenter {
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
-            safeNavigate(
-                R.id.fileListFragment,
-                FileListFragmentArgs(
+            if (isSharedFile) {
+                val args = FileSharedListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
+                safeNavigate(R.id.fileSharedListFragment, args.toBundle())
+            } else {
+                val args = FileListFragmentArgs(
                     folderId = file.id,
                     folderName = file.getDisplayName(requireContext()),
                     shouldHideBottomNavigation = shouldHideBottomNavigation,
                     shouldShowSmallFab = shouldShowSmallFab,
-                ).toBundle()
-            )
+                )
+                safeNavigate(R.id.fileListFragment, args.toBundle())
+            }
         }
     }
 
