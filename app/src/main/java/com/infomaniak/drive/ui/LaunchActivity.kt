@@ -21,6 +21,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.BuildConfig
@@ -28,6 +29,7 @@ import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
@@ -42,6 +44,8 @@ import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.extensions.keepSplashscreenVisibleWhileLoading
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
+import com.infomaniak.lib.core.models.ApiResponseStatus
+import com.infomaniak.lib.core.utils.SingleLiveEvent
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -49,6 +53,7 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : AppCompatActivity() {
@@ -56,6 +61,8 @@ class LaunchActivity : AppCompatActivity() {
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
     private var fileSharedActivityExtras: Bundle? = null
+
+    private val canFinishActivity: SingleLiveEvent<Boolean> = SingleLiveEvent()
 
     private var isHelpShortcutPressed = false
 
@@ -67,21 +74,17 @@ class LaunchActivity : AppCompatActivity() {
         setDefaultLocaleIfNeeded()
 
         checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
+        trackScreen()
 
         lifecycleScope.launch {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
             handleNotificationDestinationIntent()
-            handleDeeplink()
             handleShortcuts()
-
-            startApp()
-
-            // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
-            // so that even when we return, the activity will still be closed.
-            finish()
+            handleDeeplink()
         }
-        trackScreen()
+
+        observeToFinishActivity()
     }
 
     override fun onPause() {
@@ -90,6 +93,19 @@ class LaunchActivity : AppCompatActivity() {
             overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, android.R.anim.fade_in, android.R.anim.fade_out)
         } else {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
+    }
+
+    private fun observeToFinishActivity() {
+        canFinishActivity.observe(this@LaunchActivity) { canFinish ->
+            if (canFinish) {
+                lifecycleScope.launch {
+                    startApp()
+                    // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
+                    // so that even when we return, the activity will still be closed.
+                    finish()
+                }
+            }
         }
     }
 
@@ -159,8 +175,9 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDeeplink() {
+    private fun handleDeeplink() = lifecycleScope.launch(Dispatchers.IO) {
         intent.data?.let { uri -> uri.path?.let { path -> processDeepLink(path) } }
+        canFinishActivity.postValue(true)
     }
 
     private fun processDeepLink(path: String) {
@@ -168,20 +185,30 @@ class LaunchActivity : AppCompatActivity() {
         if (path.contains("/app/share/")) {
             Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
                 val (driveId, fileSharedLinkUuid) = match.destructured
-                fileSharedActivityExtras = FileSharedActivityArgs(driveId.toInt(), fileSharedLinkUuid).toBundle()
-                trackerValue = "external"
+
+                val apiResponse = ApiRepository.getShareLinkInfo(driveId.toInt(), fileSharedLinkUuid)
+                when (apiResponse.result) {
+                    ApiResponseStatus.SUCCESS -> {
+                        val shareLink = apiResponse.data!!
+                        if (apiResponse.data?.validUntil?.before(Date()) == true) {
+                            Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
+                        }
+                        Log.e("TOTO", "downloadSharedFile: ${shareLink.fileId} | ${shareLink._right}")
+                        fileSharedActivityExtras = FileSharedActivityArgs(
+                            driveId = driveId.toInt(),
+                            fileSharedLinkUuid = fileSharedLinkUuid,
+                            fileId = shareLink.fileId ?: -1,
+                        ).toBundle()
+                        trackerValue = "external"
+                    }
+                    ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
+                    else -> {
+                        Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
+                    }
+                }
             }
         } else {
-            Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
-                val (pathDriveId, pathFolderId, pathFileId) = match.destructured
-                val driveId = pathDriveId.toInt()
-                val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
-
-                DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
-                    setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
-                }
-                trackerValue = "internal"
-            }
+            trackerValue = processInternalLink(path)
         }
 
         Sentry.addBreadcrumb(Breadcrumb().apply {
@@ -191,6 +218,22 @@ class LaunchActivity : AppCompatActivity() {
         })
 
         trackDeepLink(trackerValue)
+    }
+
+    private fun processInternalLink(path: String): String {
+        Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
+            val (pathDriveId, pathFolderId, pathFileId) = match.destructured
+            val driveId = pathDriveId.toInt()
+            val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
+
+            DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
+                setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
+            }
+
+            return "internal"
+        }
+
+        return ""
     }
 
     private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int, isSharedWithMe: Boolean) {
