@@ -33,6 +33,10 @@
             android:name="fileSharedLinkUuid"
             app:argType="string"
             android:defaultValue="" />
+        <argument
+            android:name="fileId"
+            app:argType="integer"
+            android:defaultValue="-1" />
     </activity>
 
     <fragment
