@@ -20,17 +20,22 @@ package com.infomaniak.drive.ui.fileShared
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
-import java.util.Date
+import kotlinx.coroutines.launch
 
 class FileSharedViewModel(application: Application, private val savedStateHandle: SavedStateHandle) :
     AndroidViewModel(application) {
 
     val appContext = getApplication<MainApplication>()
+    var rootSharedFile: File? = null
+    val childrenLiveData = SingleLiveEvent<List<File>>()
 
     private val driveId: Int
         inline get() = savedStateHandle.get<Int>(FileSharedActivityArgs::driveId.name) ?: ERROR_ID
@@ -41,18 +46,27 @@ class FileSharedViewModel(application: Application, private val savedStateHandle
     private val fileId: Int
         inline get() = savedStateHandle.get<Int>(FileSharedActivityArgs::fileId.name) ?: ERROR_ID
 
-    fun downloadSharedFile() = liveData(Dispatchers.IO) {
+    fun downloadSharedFile() = viewModelScope.launch(Dispatchers.IO) {
         val apiResponse = ApiRepository.getShareLinkFile(driveId, fileSharedLinkUuid, fileId)
         if (apiResponse.isSuccess() && apiResponse.data != null) {
-            val file = apiResponse.data!!
-            Log.e("TOTO", "downloadSharedFile: ${file.name} ${file.parentId}")
-            emit("tptp")
+            val sharedFile = apiResponse.data!!
+            rootSharedFile = sharedFile
+            childrenLiveData.postValue(listOf(sharedFile))
         } else {
             Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
-            emit(null)
         }
     }
 
+    fun downloadSharedFileChildren(folderId: Int) = viewModelScope.launch(Dispatchers.IO) {
+        val apiResponse = ApiRepository.getShareLinkFileChildren(driveId, fileSharedLinkUuid, folderId)
+        Log.e("TOTO", "downloadSharedFile: ${apiResponse.isSuccess()}")
+        if (apiResponse.isSuccess() && apiResponse.data != null) {
+            Log.e("TOTO", "downloadSharedFile: ")
+            childrenLiveData.postValue(apiResponse.data!!)
+        } else {
+            Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
+        }
+    }
 
     companion object {
         const val ERROR_ID = -1
