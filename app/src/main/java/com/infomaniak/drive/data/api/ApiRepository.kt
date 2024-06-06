@@ -311,6 +311,10 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getShareLinkFile(driveId, linkUuid, fileId), GET)
     }
 
+    fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<List<File>> {
+        return callApi(ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, fileId), GET)
+    }
+
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
         return callApi(ApiRoutes.checkFileShare(file), POST, body)
     }
