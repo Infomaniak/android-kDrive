@@ -52,7 +52,7 @@
         <argument
             android:name="fileId"
             app:argType="integer"
-            android:defaultValue="1" />
+            android:defaultValue="-1" />
 
         <argument
             android:name="fileName"

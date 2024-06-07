@@ -23,7 +23,8 @@ import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
@@ -33,14 +34,7 @@ import com.infomaniak.drive.utils.FilePresenter.openFolder
 class FileSharedListFragment : FileListFragment() {
 
     private val fileShareViewModel: FileSharedViewModel by activityViewModels()
-
-    private val activityNavigationArgs by lazy {
-        // When opening this fragment via deeplink, it can happen that the navigation
-        // extras aren't yet initialized, so we don't use the `navArgs` here.
-        requireActivity().intent?.extras?.let(FileSharedActivityArgs::fromBundle) ?: FileSharedActivityArgs()
-    }
     private val navigationArgs: FileSharedListFragmentArgs by navArgs()
-
 
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
@@ -49,12 +43,11 @@ class FileSharedListFragment : FileListFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
-        binding.uploadFileInProgressView.isGone = true
 
-        fileListViewModel.isSharedWithMe = true
         super.onViewCreated(view, savedInstanceState)
 
-        binding.collapsingToolbarLayout.title = navigationArgs.fileName.ifBlank { activityNavigationArgs.fileId.toString() }
+        binding.collapsingToolbarLayout.title = navigationArgs.fileName.ifBlank { getString(R.string.sharedWithMeTitle) }
+        binding.uploadFileInProgressView.isGone = true
 
         fileAdapter.initAsyncListDiffer()
         fileAdapter.onFileClicked = { file ->
@@ -102,12 +95,15 @@ class FileSharedListFragment : FileListFragment() {
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
 
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
-            if (ignoreCache && !fileAdapter.fileList.isManaged) fileAdapter.setFiles(arrayListOf())
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
             with(fileShareViewModel) {
-                rootSharedFile?.let { downloadSharedFileChildren(navigationArgs.fileId) } ?: downloadSharedFile()
+                if (navigationArgs.fileId == FileSharedViewModel.ERROR_ID || rootSharedFile == null) {
+                    downloadSharedFile()
+                } else {
+                    downloadSharedFileChildren(navigationArgs.fileId)
+                }
             }
         }
     }
