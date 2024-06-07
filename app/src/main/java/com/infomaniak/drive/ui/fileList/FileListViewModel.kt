@@ -46,7 +46,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     var isSharedWithMe = false
 
-    val isListMode = SingleLiveEvent(UiSettings(context).listMode)
+    val isListMode = SingleLiveEvent<Boolean>()
 
     var lastItemCount: FileCount? = null
 
