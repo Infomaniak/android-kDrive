@@ -25,6 +25,7 @@ import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.*
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,15 +64,15 @@ class FileSharedViewModel(application: Application, private val savedStateHandle
         childrenLiveData.postValue(files)
     }
 
-    fun downloadSharedFileChildren(folderId: Int) = viewModelScope.launch(Dispatchers.IO) {
-        val apiResponse = ApiRepository.getShareLinkFileChildren(driveId, fileSharedLinkUuid, folderId)
+    fun downloadSharedFileChildren(folderId: Int, sortType: SortType) = viewModelScope.launch(Dispatchers.IO) {
+        val apiResponse = ApiRepository.getShareLinkFileChildren(driveId, fileSharedLinkUuid, folderId, sortType)
         Log.e("TOTO", "downloadSharedFile: ${apiResponse.isSuccess()}")
         if (apiResponse.isSuccess() && apiResponse.data != null) {
             Log.e("TOTO", "downloadSharedFile: ")
             childrenLiveData.postValue(apiResponse.data!!)
         } else {
             Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
-            childrenLiveData.postValue(emptyList<File>())
+            childrenLiveData.postValue(emptyList())
         }
     }
 
