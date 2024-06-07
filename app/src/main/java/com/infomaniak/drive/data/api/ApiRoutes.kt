@@ -257,8 +257,8 @@ object ApiRoutes {
 
     fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) = "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId"
 
-    fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId/files"
+    fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
+        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId/files?order_by=${sortType.orderBy}&order=${sortType.order}"
     }
     //endregion
 
