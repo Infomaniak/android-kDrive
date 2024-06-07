@@ -17,37 +17,33 @@
  */
 package com.infomaniak.drive.ui.fileShared
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class FileSharedViewModel(application: Application, private val savedStateHandle: SavedStateHandle) :
-    AndroidViewModel(application) {
+class FileSharedViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    val appContext = getApplication<MainApplication>()
     var rootSharedFile: File? = null
     val childrenLiveData = SingleLiveEvent<List<File>>()
 
     private val driveId: Int
-        inline get() = savedStateHandle.get<Int>(FileSharedActivityArgs::driveId.name) ?: ERROR_ID
+        inline get() = savedStateHandle.get<Int>(FileSharedActivityArgs::driveId.name) ?: ROOT_SHARED_FILE_ID
 
     private val fileSharedLinkUuid: String
         inline get() = savedStateHandle.get<String>(FileSharedActivityArgs::fileSharedLinkUuid.name) ?: ""
 
     private val fileId: Int
-        inline get() = savedStateHandle.get<Int>(FileSharedActivityArgs::fileId.name) ?: ERROR_ID
+        inline get() = savedStateHandle.get<Int>(FileSharedActivityArgs::fileId.name) ?: ROOT_SHARED_FILE_ID
 
     fun downloadSharedFile() = viewModelScope.launch(Dispatchers.IO) {
-        val files = if (fileId == ERROR_ID) {
+        val files = if (fileId == ROOT_SHARED_FILE_ID) {
             rootSharedFile?.let(::listOf) ?: listOf()
         } else {
             val apiResponse = ApiRepository.getShareLinkFile(driveId, fileSharedLinkUuid, fileId)
@@ -66,9 +62,7 @@ class FileSharedViewModel(application: Application, private val savedStateHandle
 
     fun downloadSharedFileChildren(folderId: Int, sortType: SortType) = viewModelScope.launch(Dispatchers.IO) {
         val apiResponse = ApiRepository.getShareLinkFileChildren(driveId, fileSharedLinkUuid, folderId, sortType)
-        Log.e("TOTO", "downloadSharedFile: ${apiResponse.isSuccess()}")
         if (apiResponse.isSuccess() && apiResponse.data != null) {
-            Log.e("TOTO", "downloadSharedFile: ")
             childrenLiveData.postValue(apiResponse.data!!)
         } else {
             Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
@@ -77,6 +71,6 @@ class FileSharedViewModel(application: Application, private val savedStateHandle
     }
 
     companion object {
-        const val ERROR_ID = -1
+        const val ROOT_SHARED_FILE_ID = 1
     }
 }
