@@ -102,7 +102,7 @@ class FileSharedListFragment : FileListFragment() {
                 if (navigationArgs.fileId == FileSharedViewModel.ERROR_ID || rootSharedFile == null) {
                     downloadSharedFile()
                 } else {
-                    downloadSharedFileChildren(navigationArgs.fileId)
+                    downloadSharedFileChildren(navigationArgs.fileId, fileListViewModel.sortType)
                 }
             }
         }
