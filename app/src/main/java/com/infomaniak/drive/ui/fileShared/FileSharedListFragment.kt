@@ -18,14 +18,18 @@
 package com.infomaniak.drive.ui.fileShared
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import androidx.activity.addCallback
 import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.ui.fileShared.FileSharedViewModel.Companion.ROOT_SHARED_FILE_ID
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openFolder
@@ -42,11 +46,13 @@ class FileSharedListFragment : FileListFragment() {
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        folderName = navigationArgs.fileName
+        folderId = navigationArgs.fileId
         downloadFiles = DownloadFiles()
 
         super.onViewCreated(view, savedInstanceState)
 
-        binding.collapsingToolbarLayout.title = navigationArgs.fileName.ifBlank { getString(R.string.sharedWithMeTitle) }
+        setToolbarTitle(R.string.sharedWithMeTitle)
         binding.uploadFileInProgressView.isGone = true
 
         fileAdapter.initAsyncListDiffer()
@@ -68,11 +74,12 @@ class FileSharedListFragment : FileListFragment() {
             }
         }
 
-        fileShareViewModel.childrenLiveData.observe(viewLifecycleOwner) { files ->
-            populateFileList(files)
-        }
+        fileShareViewModel.childrenLiveData.observe(viewLifecycleOwner, ::populateFileList)
 
         setupMultiSelectLayout()
+
+        binding.toolbar.setNavigationOnClickListener { onBackPressed() }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
     }
 
     private fun populateFileList(files: List<File>) {
@@ -88,6 +95,10 @@ class FileSharedListFragment : FileListFragment() {
         multiSelectLayout?.root?.isGone = true
     }
 
+    private fun onBackPressed() {
+        if (folderId == ROOT_SHARED_FILE_ID) requireActivity().finish() else findNavController().popBackStack()
+    }
+
     companion object {
         const val MATOMO_CATEGORY = "FileSharedListAction"
     }
@@ -99,10 +110,10 @@ class FileSharedListFragment : FileListFragment() {
             fileAdapter.isComplete = false
 
             with(fileShareViewModel) {
-                if (navigationArgs.fileId == FileSharedViewModel.ERROR_ID || rootSharedFile == null) {
+                if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile == null) {
                     downloadSharedFile()
                 } else {
-                    downloadSharedFileChildren(navigationArgs.fileId, fileListViewModel.sortType)
+                    downloadSharedFileChildren(folderId, fileListViewModel.sortType)
                 }
             }
         }
