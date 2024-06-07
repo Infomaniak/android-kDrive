@@ -30,6 +30,4 @@ class FileSharedActivity: AppCompatActivity() {
 
         setContentView(binding.root)
     }
-
-
 }
