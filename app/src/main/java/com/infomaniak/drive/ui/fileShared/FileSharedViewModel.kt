@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.fileShared
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.MainApplication
@@ -42,19 +41,26 @@ class FileSharedViewModel(application: Application, private val savedStateHandle
 
     private val fileSharedLinkUuid: String
         inline get() = savedStateHandle.get<String>(FileSharedActivityArgs::fileSharedLinkUuid.name) ?: ""
-    
+
     private val fileId: Int
         inline get() = savedStateHandle.get<Int>(FileSharedActivityArgs::fileId.name) ?: ERROR_ID
 
     fun downloadSharedFile() = viewModelScope.launch(Dispatchers.IO) {
-        val apiResponse = ApiRepository.getShareLinkFile(driveId, fileSharedLinkUuid, fileId)
-        if (apiResponse.isSuccess() && apiResponse.data != null) {
-            val sharedFile = apiResponse.data!!
-            rootSharedFile = sharedFile
-            childrenLiveData.postValue(listOf(sharedFile))
+        val files = if (fileId == ERROR_ID) {
+            rootSharedFile?.let(::listOf) ?: listOf()
         } else {
-            Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
+            val apiResponse = ApiRepository.getShareLinkFile(driveId, fileSharedLinkUuid, fileId)
+            if (apiResponse.isSuccess() && apiResponse.data != null) {
+                val sharedFile = apiResponse.data!!
+                rootSharedFile = sharedFile
+                listOf(sharedFile)
+            } else {
+                Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
+                listOf()
+            }
         }
+
+        childrenLiveData.postValue(files)
     }
 
     fun downloadSharedFileChildren(folderId: Int) = viewModelScope.launch(Dispatchers.IO) {
@@ -65,6 +71,7 @@ class FileSharedViewModel(application: Application, private val savedStateHandle
             childrenLiveData.postValue(apiResponse.data!!)
         } else {
             Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
+            childrenLiveData.postValue(emptyList<File>())
         }
     }
 
