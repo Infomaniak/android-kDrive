@@ -24,12 +24,17 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileActivityType
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.file.FileLastActivityBody
+import com.infomaniak.drive.data.models.file.LastFileAction
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
+import io.sentry.Sentry
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.ensureActive
 import java.util.Date
@@ -41,49 +46,87 @@ object SyncOfflineUtils {
             val userDrive = UserDrive(driveId = drive.id)
 
             FileController.getRealmInstance(userDrive).use { realm ->
-                FileController.getOfflineFiles(order = null, customRealm = realm).forEach loopFiles@{ file ->
-                    syncOfflineFilesJob.ensureActive()
-                    if (file.isPendingOffline(context)) return@loopFiles
+                val localFilesMap = FileController.getOfflineFiles(order = null, customRealm = realm).associateBy { it.id }
+                syncOfflineFilesJob.ensureActive()
 
-                    file.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
-                        migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
+                if (localFilesMap.isNotEmpty()) {
+                    val fileActionsBody = localFilesMap.values.mapNotNull { file ->
+                        FileLastActivityBody.FileActionBody(
+                            id = file.id,
+                            fromDate = file.lastActionAt.takeIf { it > 0 } ?: file.lastModifiedAt
+                        )
+                    }
+                    val lastFilesActions = ApiRepository.getFilesLastActivities(
+                        driveId = drive.id,
+                        body = FileLastActivityBody(files = fileActionsBody),
+                    ).data
 
-                        val apiResponse = ApiRepository.getFileDetails(file)
-                        apiResponse.data?.let { remoteFile ->
-                            remoteFile.isOffline = true
-                            updateFile(offlineFile, file, context, remoteFile, userDrive, realm)
-
-                        } ?: let {
-                            if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
-                        }
+                    lastFilesActions?.forEach { fileAction ->
+                        syncOfflineFilesJob.ensureActive()
+                        handleFileAction(context, fileAction, localFilesMap, userDrive, realm)
                     }
                 }
             }
         }
     }
 
-    private fun updateFile(
-        offlineFile: IOFile,
-        file: File,
+    private fun handleFileAction(
         context: Context,
-        remoteFile: File,
+        fileAction: LastFileAction,
+        localFilesMap: Map<Int, File>,
         userDrive: UserDrive,
         realm: Realm,
     ) {
-        if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
-            uploadFile(context, file, remoteFile, offlineFile, userDrive, realm)
-        } else {
-            downloadOfflineFile(context, file, remoteFile, offlineFile, userDrive, realm)
+        val localFile = localFilesMap[fileAction.fileId]
+        val ioFile = localFile?.getOfflineFile(context, userDrive.userId) ?: return
+        when (fileAction.lastAction) {
+            FileActivityType.FILE_DELETE, FileActivityType.FILE_TRASH -> ioFile.delete()
+            FileActivityType.FILE_MOVE_OUT -> Unit
+            FileActivityType.FILE_RENAME -> fileAction.file?.getOfflineFile(context)?.let { ioFile.renameTo(it) }
+            else -> updateFile(ioFile, localFile, context, fileAction, userDrive, realm)
+        }
+
+        migrateOfflineIfNeeded(context, localFile, ioFile, userDrive)
+    }
+
+    private fun updateFile(
+        ioFile: IOFile,
+        localFile: File,
+        context: Context,
+        fileAction: LastFileAction,
+        userDrive: UserDrive,
+        realm: Realm,
+    ) {
+        val remoteFile = fileAction.file
+        when {
+            remoteFile == null -> {
+                Sentry.withScope { scope ->
+                    scope.setExtra("fileAction", "${fileAction.lastAction}")
+                    SentryLog.e("SyncOffline", "Expect remote file instead of null file")
+                }
+                return
+            }
+            ioFile.lastModified() > localFile.getLastModifiedInMilliSecond() -> {
+                remoteFile.isOffline = true
+                uploadFile(context, localFile, remoteFile, ioFile, userDrive, realm)
+            }
+            else -> {
+                downloadOfflineFile(context, localFile, remoteFile, ioFile, userDrive, realm)
+            }
+        }
+
+        FileController.updateFile(localFile.id, realm) { mutableFile ->
+            mutableFile.lastActionAt = fileAction.lastActionAt ?: 0
         }
     }
 
     /**
      * Migrate old offline files to the new offline structure
      */
-    private fun migrateOfflineIfNeeded(context: Context, file: File, offlineFile: IOFile, userDrive: UserDrive) {
+    private fun migrateOfflineIfNeeded(context: Context, file: File, ioFile: IOFile, userDrive: UserDrive) {
         val offlineDir = context.getString(R.string.EXPOSED_OFFLINE_DIR)
         val oldPath = IOFile(context.filesDir, "$offlineDir/${userDrive.userId}/${userDrive.driveId}/${file.id}")
-        if (oldPath.exists()) oldPath.renameTo(offlineFile)
+        if (oldPath.exists()) oldPath.renameTo(ioFile)
     }
 
     /**
