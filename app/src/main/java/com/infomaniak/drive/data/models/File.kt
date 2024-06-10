@@ -125,6 +125,7 @@ open class File(
     var isOffline: Boolean = false,
     var responseAt: Long = 0,
     var versionCode: Int = 0,
+    var lastActionAt: Long = 0,
 
     ) : RealmObject(), Parcelable {
 

@@ -330,6 +330,7 @@ class FileMigration : RealmMigration {
                 removePrimaryKey()
                 addPrimaryKey("uid")
                 addField("cursor", String::class.java)
+                addField("lastActionAt", Long::class.java)
                 addRealmListField("supportedBy", String::class.java)
                 removeField("hasThumbnail")
                 removeField("hasOnlyoffice")
