@@ -80,7 +80,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     val previewPDFHandler by lazy {
         PreviewPDFHandler(
             context = requireContext(),
-            setPrintVisibility = binding.bottomSheetFileInfos::setPrintVisibility,
+            setPrintVisibility = { _binding?.bottomSheetFileInfos?.setPrintVisibility(it) },
         )
     }
 
