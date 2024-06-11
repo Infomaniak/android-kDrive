@@ -401,7 +401,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     }
                 }
         }.onFailure { exception ->
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && exception !is IllegalArgumentException) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || exception !is IllegalArgumentException) {
                 throw exception
             }
         }
