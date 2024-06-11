@@ -400,7 +400,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                         processFoundLocalMedia(realm, cursor, contentUri, mediaFolder, syncSettings)
                     }
                 }
-        }.onFailure { exception -> syncMediaFolderFailure(exception, mediaFolder) }
+        }.onFailure { exception ->
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || exception !is IllegalArgumentException) {
+                throw exception
+            }
+        }
     }
 
     private fun processFoundLocalMedia(
@@ -458,21 +462,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun calculateFileSize(uri: Uri): Long? {
         return uri.calculateFileSize(contentResolver) ?: null.also {
             SentryLog.i(TAG, "Cannot calculate the file size from uri")
-        }
-    }
-
-    private fun syncMediaFolderFailure(exception: Throwable, mediaFolder: MediaFolder) {
-        // Catch Api>=29 for exception {Volume external_primary not found}, Adding logs to get more information
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && exception is IllegalArgumentException) {
-            Sentry.withScope { scope ->
-                val volumeNames = MediaStore.getExternalVolumeNames(applicationContext).joinToString()
-                scope.setExtra("folder", mediaFolder.id.toString())
-                scope.setExtra("volume names", volumeNames)
-                scope.setExtra("exception", exception.toString())
-                Sentry.captureMessage("getLocalLastMediasAsync() ERROR", SentryLevel.ERROR)
-            }
-        } else {
-            throw exception
         }
     }
 
