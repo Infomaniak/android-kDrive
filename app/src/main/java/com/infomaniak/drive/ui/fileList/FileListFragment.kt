@@ -415,7 +415,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun setupListMode() {
-        fileListViewModel.isListMode.observe(viewLifecycleOwner, ::setupDisplayMode)
+        fileListViewModel.isListMode.apply {
+            observe(viewLifecycleOwner, ::setupDisplayMode)
+            value = getListMode(UiSettings(requireContext()).listMode)
+        }
     }
 
     private fun getListMode(newListMode: Boolean) = newListMode || this@FileListFragment is UploadInProgressFragment

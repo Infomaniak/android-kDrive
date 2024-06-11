@@ -1,0 +1,2 @@
+- Update wordings in german to fix the wrong utilization of Aufnehmen
+- Fix grid mode disabling when browsing folders

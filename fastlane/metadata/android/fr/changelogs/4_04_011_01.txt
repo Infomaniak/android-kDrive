@@ -1,0 +1,2 @@
+- Mise à jour des libellés en allemand pour corriger la mauvaise utilisation de Aufnehmen
+- Correction de la désactivation du mode grille lors de la navigation dans les dossiers
