@@ -19,12 +19,28 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.widget.FrameLayout
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.safeNavigate
+import com.google.android.material.R as RMaterial
 
 class SyncConfigureBottomSheetDialog : InformationBottomSheetDialog() {
+
+    private val onGlobalLayoutListener = OnGlobalLayoutListener {
+        (dialog as BottomSheetDialog?)?.let { bottomSheetDialog ->
+            bottomSheetDialog.findViewById<FrameLayout>(RMaterial.id.design_bottom_sheet)?.let { bottomSheetView ->
+                BottomSheetBehavior.from(bottomSheetView).apply {
+                    state = BottomSheetBehavior.STATE_EXPANDED
+                    peekHeight = 0
+                }
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
@@ -33,11 +49,20 @@ class SyncConfigureBottomSheetDialog : InformationBottomSheetDialog() {
 
         illu.setAnimation(R.raw.illu_photos)
 
-        actionButton.setText(R.string.buttonConfigure)
-        actionButton.setOnClickListener {
-            trackEvent("syncModal", "configure")
-            safeNavigate(R.id.syncSettingsActivity)
-            dismiss()
+        actionButton.apply {
+            setText(R.string.buttonConfigure)
+            setOnClickListener {
+                trackEvent("syncModal", "configure")
+                safeNavigate(R.id.syncSettingsActivity)
+                dismiss()
+            }
         }
+
+        view.viewTreeObserver.addOnGlobalLayoutListener(onGlobalLayoutListener)
+    }
+
+    override fun onDestroyView() {
+        view?.viewTreeObserver?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
+        super.onDestroyView()
     }
 }
