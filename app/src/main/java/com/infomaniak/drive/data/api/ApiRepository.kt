@@ -121,7 +121,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getFilesLastActivities(driveId: Int, body: FileLastActivityBody): ApiResponse<List<LastFileAction>> {
-        val url = ApiRoutes.getFilesLastActivities(driveId)
+        val url = "${ApiRoutes.getFilesLastActivities(driveId)}?with=file"
         return callApi(url, POST, body)
     }
 
