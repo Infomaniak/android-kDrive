@@ -181,6 +181,5 @@ dependencies {
     androidTestImplementation "de.mannodermaus.junit5:android-test-core:$junit_version"
     androidTestRuntimeOnly "de.mannodermaus.junit5:android-test-runner:$junit_version"
 
-    def coilVersion = '2.6.0'
-    api "io.coil-kt:coil-gif:$coilVersion"
+    implementation 'io.coil-kt:coil-gif:2.6.0'
 }
