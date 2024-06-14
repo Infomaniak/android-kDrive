@@ -115,6 +115,12 @@ open class File(
     var conversion: FileConversion? = null,
 
     /**
+     * OFFLINE
+     */
+    @SerializedName("revised_at")
+    var revisedAt: Long = 0,
+
+    /**
      * LOCAL
      */
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
@@ -140,6 +146,8 @@ open class File(
 
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
+
+    val revisedAtInMillis: Long inline get() = revisedAt * 1000
 
     fun initUid() {
         this.uid = "${id}_$driveId"
