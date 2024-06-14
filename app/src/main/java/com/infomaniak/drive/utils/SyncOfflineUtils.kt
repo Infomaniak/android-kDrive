@@ -43,6 +43,7 @@ import java.util.Date
 
 object SyncOfflineUtils {
 
+    /** Maximum number of files that can be sent to the api */
     private const val API_LIMIT_FILES_ACTION_BODY = 500
 
     fun startSyncOffline(context: Context, syncOfflineFilesJob: CompletableJob) {
@@ -53,6 +54,8 @@ object SyncOfflineUtils {
             FileController.getRealmInstance(userDrive).use { realm ->
                 val localFiles = FileController.getOfflineFiles(order = null, customRealm = realm)
 
+                // The api doesn't support sending a list of files that exceeds a certain limit,
+                // so we chunk the files in relation to this limit.
                 localFiles.chunked(API_LIMIT_FILES_ACTION_BODY).forEach {
                     syncOfflineFilesJob.ensureActive()
                     processChunk(
