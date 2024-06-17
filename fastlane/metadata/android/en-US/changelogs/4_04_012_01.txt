@@ -1,0 +1,2 @@
+- Fixed an issue where a message indicating no Internet connection could appear incorrectly.
+- Removed an empty space between bottom sheets and the bottom of the screen.
