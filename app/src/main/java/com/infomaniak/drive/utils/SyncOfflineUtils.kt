@@ -59,9 +59,10 @@ object SyncOfflineUtils {
                 localFiles.chunked(API_LIMIT_FILES_ACTION_BODY).forEach {
                     syncOfflineFilesJob.ensureActive()
                     processChunk(
-                        syncOfflineFilesJob = syncOfflineFilesJob,
                         context = context,
-                        userDrive = userDrive, localFilesMap = it.associateBy { file -> file.id },
+                        syncOfflineFilesJob = syncOfflineFilesJob,
+                        userDrive = userDrive,
+                        localFilesMap = it.associateBy { file -> file.id },
                         realm = realm,
                     )
                 }
@@ -70,8 +71,8 @@ object SyncOfflineUtils {
     }
 
     private fun processChunk(
-        syncOfflineFilesJob: CompletableJob,
         context: Context,
+        syncOfflineFilesJob: CompletableJob,
         userDrive: UserDrive,
         localFilesMap: Map<Int, File>,
         realm: Realm,
