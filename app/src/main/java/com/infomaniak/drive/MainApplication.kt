@@ -31,6 +31,8 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.MatomoDrive.buildTracker
@@ -154,7 +156,15 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         super.onStop(owner)
     }
 
-    override fun newImageLoader(): ImageLoader = CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), true)
+    override fun newImageLoader(): ImageLoader {
+        val factory = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoderDecoder.Factory()
+        } else {
+            GifDecoder.Factory()
+        }
+
+        return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), customFactories = listOf(factory))
+    }
 
     private val refreshTokenError: (User) -> Unit = { user ->
         val hashCode = UUID.randomUUID().hashCode()
