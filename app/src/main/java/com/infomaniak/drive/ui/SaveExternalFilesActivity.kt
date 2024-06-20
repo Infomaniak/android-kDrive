@@ -23,6 +23,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import android.provider.MediaStore.MediaColumns
 import android.text.InputFilter
 import android.text.Spanned
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -42,7 +43,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.data.models.UiSettings.*
+import com.infomaniak.drive.data.models.UiSettings.SaveExternalFilesData
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
@@ -466,7 +467,8 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                val lastModifiedDateFromUri = intent.getLongExtra(MediaColumns.DATE_MODIFIED, -1L)
+                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor, lastModifiedDateFromUri)
 
                 try {
                     if (fileName == null) return false
@@ -516,5 +518,6 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     companion object {
         const val SHARED_FILE_FOLDER = "shared_files"
+        const val LAST_MODIFIED_URI_KEY = "last_modified"
     }
 }
