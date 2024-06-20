@@ -119,6 +119,8 @@ open class File(
      */
     @SerializedName("revised_at")
     var revisedAt: Long = 0,
+    @SerializedName("updated_at")
+    var updatedAt: Long = 0,
 
     /**
      * LOCAL

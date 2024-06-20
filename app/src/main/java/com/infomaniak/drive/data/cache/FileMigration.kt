@@ -331,6 +331,7 @@ class FileMigration : RealmMigration {
                 addPrimaryKey("uid")
                 addField("cursor", String::class.java)
                 addField("revisedAt", Long::class.java)
+                addField("updatedAt", Long::class.java)
                 addField("lastActionAt", Long::class.java)
                 addRealmListField("supportedBy", String::class.java)
                 removeField("hasThumbnail")

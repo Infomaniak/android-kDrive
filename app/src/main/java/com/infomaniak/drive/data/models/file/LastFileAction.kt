@@ -28,7 +28,7 @@ data class LastFileAction(
     @SerializedName("file_id")
     val fileId: Int,
     @SerializedName("last_action")
-    val lastAction: FileActivityType,
+    val lastAction: FileActivityType? = null,
     @SerializedName("last_action_at")
     val lastActionAt: Long? = null,
     val file: File? = null

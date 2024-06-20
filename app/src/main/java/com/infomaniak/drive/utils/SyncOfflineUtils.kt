@@ -46,6 +46,8 @@ object SyncOfflineUtils {
     /** Maximum number of files that can be sent to the api */
     private const val API_LIMIT_FILES_ACTION_BODY = 500
 
+    private val renameActions = setOf(FILE_RENAME, FILE_MOVE_OUT)
+
     fun startSyncOffline(context: Context, syncOfflineFilesJob: CompletableJob) {
         DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
             syncOfflineFilesJob.ensureActive()
@@ -81,7 +83,7 @@ object SyncOfflineUtils {
             val fileActionsBody = localFilesMap.values.map { file ->
                 FileLastActivityBody.FileActionBody(
                     id = file.id,
-                    fromDate = file.lastActionAt.takeIf { it > 0 } ?: file.lastModifiedAt
+                    fromDate = file.lastActionAt.takeIf { it > 0 } ?: file.updatedAt,
                 )
             }
             val lastFilesActions = ApiRepository.getFilesLastActivities(
@@ -110,14 +112,14 @@ object SyncOfflineUtils {
 
         when (fileAction.lastAction) {
             FileActivityType.FILE_DELETE, FileActivityType.FILE_TRASH -> ioFile.delete()
-            else -> updateFile(ioFile, localFile, context, fileAction, userDrive, realm)
+            else -> updateFile(context, ioFile, localFile, fileAction, userDrive, realm)
         }
     }
 
     private fun updateFile(
+        context: Context,
         ioFile: IOFile,
         localFile: File,
-        context: Context,
         fileAction: LastFileAction,
         userDrive: UserDrive,
         realm: Realm,
@@ -139,7 +141,7 @@ object SyncOfflineUtils {
             ioFileLastModified < remoteFile.revisedAtInMillis -> {
                 downloadOfflineFile(context, localFile, remoteFile, ioFile, userDrive, realm)
             }
-            fileAction.lastAction in arrayOf(FILE_RENAME, FILE_MOVE_OUT) -> {
+            fileAction.lastAction in renameActions -> {
                 remoteFile.getOfflineFile(context)?.let { ioFile.renameTo(it) }
             }
         }
