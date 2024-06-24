@@ -43,7 +43,6 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.CancellableAction
-import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
@@ -138,7 +137,6 @@ class FileInfoActionsView @JvmOverloads constructor(
                 addFavorites.isVisible = rights?.canUseFavorite == true
                 availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
                 deleteFile.isVisible = rights?.canDelete == true && !file.isImporting()
-                setPrintVisibility(isGone = file.extensionType != ExtensionType.PDF.value)
                 downloadFile.isVisible = rights?.canRead == true
                 duplicateFile.isGone = rights?.canRead == false
                         || isSharedWithMe
