@@ -341,7 +341,7 @@ object Utils {
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {
         val workManager = WorkManager.getInstance(context)
 
-        if (file.isPendingOffline(context)) workManager.cancelAllWorkByTag(file.getWorkerTag())
+        if (file.isMarkedAsOffline) workManager.cancelAllWorkByTag(file.getWorkerTag())
         val inputData = workDataOf(
             DownloadWorker.FILE_ID to file.id,
             DownloadWorker.FILE_NAME to file.name,

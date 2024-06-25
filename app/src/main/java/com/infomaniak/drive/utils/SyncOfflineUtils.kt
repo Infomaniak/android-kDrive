@@ -43,7 +43,7 @@ object SyncOfflineUtils {
             FileController.getRealmInstance(userDrive).use { realm ->
                 FileController.getOfflineFiles(order = null, customRealm = realm).forEach loopFiles@{ file ->
                     syncOfflineFilesJob.ensureActive()
-                    if (file.isPendingOffline(context)) return@loopFiles
+                    if (file.isMarkedAsOffline) return@loopFiles
 
                     file.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
                         migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
@@ -139,7 +139,7 @@ object SyncOfflineUtils {
             offlineFile.delete()
         }
 
-        if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
+        if (!file.isMarkedAsOffline && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
             FileController.updateExistingFile(newFile = remoteFile, realm = realm)
             Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
         }

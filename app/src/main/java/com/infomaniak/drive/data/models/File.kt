@@ -22,8 +22,6 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
@@ -315,21 +313,11 @@ open class File(
 
     fun getWorkerTag() = "${id}_$driveId"
 
-    fun isPendingOffline(context: Context): Boolean {
-        val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get()
-        return get.any {
-            it.state == WorkInfo.State.ENQUEUED
-                    || it.state == WorkInfo.State.RUNNING
-                    || it.state == WorkInfo.State.BLOCKED
-        }
-    }
-
     fun getMimeType(): String = name.guessMimeType()
 
     enum class Type(val value: String) {
         FILE("file"),
         DIRECTORY("dir"),
-        DRIVE("drive");
     }
 
     fun getVisibilityType(): VisibilityType {
