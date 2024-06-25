@@ -794,6 +794,7 @@ object FileController {
         isOffline = oldFile.isOffline
         responseAt = oldFile.responseAt
         versionCode = oldFile.versionCode
+        isMarkedAsOffline = oldFile.isMarkedAsOffline
     }
 
     private fun RealmQuery<File>.getSortQueryByOrder(order: SortType): RealmQuery<File> {
