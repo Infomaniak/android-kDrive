@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.showSnackbar
@@ -73,7 +74,7 @@ class DownloadProgressDialog : DialogFragment() {
         downloadViewModel.downloadFile(requireContext(), file, userDrive).observe(this@DownloadProgressDialog) {
             it?.let { (progress, isComplete) ->
                 if (isComplete) {
-                    setBackNavigationResult(if (isOpenBookmark) OPEN_BOOKMARK else OPEN_WITH, fileId)
+                    setBackNavigationResult(action.value, fileId)
                 } else {
                     binding.downloadProgress.progress = progress
                 }
@@ -112,11 +113,7 @@ class DownloadProgressDialog : DialogFragment() {
             }
         }
 
-        private fun LiveDataScope<Pair<Int, IsComplete>?>.saveData(
-            file: File,
-            outputFile: java.io.File,
-            response: Response
-        ) {
+        private fun LiveDataScope<Pair<Int, IsComplete>?>.saveData(file: File, outputFile: IOFile, response: Response) {
             if (outputFile.exists()) outputFile.delete()
             DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
                 runBlocking { emit(100 to true) }
@@ -125,9 +122,13 @@ class DownloadProgressDialog : DialogFragment() {
         }
     }
 
+    enum class DownloadAction(val value: String) {
+        OPEN_WITH("open_with"),
+        OPEN_BOOKMARK("open_bookmark"),
+        PRINT_PDF("print_pdf"),
+    }
+
     companion object {
-        const val OPEN_WITH = "open_with"
-        const val OPEN_BOOKMARK = "open_bookmark"
         private const val TAG = "DownloadProgressDialog"
     }
 }

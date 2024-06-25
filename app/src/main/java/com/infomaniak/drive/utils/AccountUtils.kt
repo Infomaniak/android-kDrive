@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,18 +157,18 @@ object AccountUtils : CredentialManager() {
         }
     }
 
-    private fun reloadAppIfNeeded(fromMaintenance: Boolean, driveInfo: DriveInfo) {
+    private suspend fun reloadAppIfNeeded(fromMaintenance: Boolean, driveInfo: DriveInfo) {
+
+        suspend fun reloadApp() = Dispatchers.Main { reloadApp?.invoke(bundleOf()) }
+
+        val internalDrives = driveInfo.drives.filter { it.isDriveUser() }
         if (fromMaintenance) {
-            if (driveInfo.drives.main.any { drive -> !drive.maintenance }) {
-                GlobalScope.launch(Dispatchers.Main) {
-                    reloadApp?.invoke(bundleOf())
-                }
+            if (internalDrives.any { drive -> !drive.maintenance }) {
+                reloadApp()
             }
-        } else if (driveInfo.drives.main.all { drive -> drive.maintenance } ||
-            driveInfo.drives.main.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
-            GlobalScope.launch(Dispatchers.Main) {
-                reloadApp?.invoke(bundleOf())
-            }
+        } else if (internalDrives.none { drive -> !drive.maintenance } ||
+            internalDrives.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
+            reloadApp()
         }
     }
 

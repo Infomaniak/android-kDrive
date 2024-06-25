@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.getFileSize
 import io.realm.Realm
 import io.realm.RealmResults
@@ -138,8 +137,6 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
 
                     Sentry.withScope { scope ->
                         scope.level = SentryLevel.WARNING
-                        scope.setExtra("fileName", uploadFile.fileName)
-                        scope.setExtra("uri", uploadFile.uri)
                         Sentry.captureException(exception)
                     }
                 }
@@ -164,17 +161,11 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
             ?: FileController.getFileDetails(fileId, userDrive)
             ?: return null
 
-        val (name, type) = if (fileId == Utils.ROOT_ID) {
-            Utils.getRootName(context) to File.Type.DRIVE.value
-        } else {
-            folder.name to File.Type.DIRECTORY.value
-        }
-
         return File(
             id = fileId,
-            name = name,
+            name = folder.name,
             path = folder.getRemotePath(userDrive),
-            type = type,
+            type = folder.type,
             isFromUploads = true
         )
     }

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotificat
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
-import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Breadcrumb
@@ -104,7 +103,6 @@ object UploadWorkerThrowable {
                 currentUploadFile?.exceptionNotification(applicationContext)
                 Sentry.withScope { scope ->
                     scope.level = SentryLevel.WARNING
-                    scope.setExtra("uploadFile", ApiController.gson.toJson(currentUploadFile ?: ""))
                     scope.setExtra("previousChunkBytesWritten", "${currentUploadTask?.previousChunkBytesWritten()}")
                     scope.setExtra("lastProgress", "${currentUploadTask?.lastProgress()}")
                     Sentry.captureException(exception)

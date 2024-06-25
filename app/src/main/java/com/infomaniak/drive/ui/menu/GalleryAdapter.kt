@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,6 +149,9 @@ class GalleryAdapter(
         updateMultiSelect?.invoke()
     }
 
+    /**
+     * TODO: Move to viewModel
+     */
     fun formatList(newGalleryList: ArrayList<File>): ArrayList<Any> {
         galleryList.addAll(newGalleryList)
         val addItemList: ArrayList<Any> = arrayListOf()

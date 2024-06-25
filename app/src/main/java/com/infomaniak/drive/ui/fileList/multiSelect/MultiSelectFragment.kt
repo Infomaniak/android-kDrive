@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,15 @@
  */
 package com.infomaniak.drive.ui.fileList.multiSelect
 
+import android.Manifest
 import android.app.Dialog
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.os.BuildCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -34,6 +37,7 @@ import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -49,8 +53,11 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
+import com.infomaniak.drive.utils.DrivePermissions.Companion.resultPermissions
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
+import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.Utils.downloadAsOfflineFiles
+import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -91,6 +98,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     abstract fun getAllSelectedFilesCount(): Int?
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+        mainViewModel.notificationPermission.registerPermissions(this)
 
         multiSelectLayout = initMultiSelectLayout()
         multiSelectToolbar = initMultiSelectToolbar()
@@ -189,17 +198,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     fun duplicateFiles() {
-        Intent(requireContext(), SelectFolderActivity::class.java).apply {
-            putExtras(
-                SelectFolderActivityArgs(
-                    userId = AccountUtils.currentUserId,
-                    driveId = AccountUtils.currentDriveId,
-                    folderId = mainViewModel.currentFolder.value?.id ?: -1,
-                    customArgs = bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
-                ).toBundle()
-            )
-            selectFolderResultLauncher.launch(this)
-        }
+        requireContext().duplicateFilesClicked(selectFolderResultLauncher, mainViewModel)
     }
 
     fun restoreIn() {
@@ -330,6 +329,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         mediator: MediatorLiveData<Pair<Int, Int>>,
     ) {
         if (folderId != null && type == BulkOperationType.ADD_OFFLINE) {
+            mainViewModel.notificationPermission.checkNotificationPermission(requestPermission = true)
             mediator.addSource(
                 downloadAsOfflineFiles(
                     context = requireContext(),
@@ -388,10 +388,9 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
             BulkOperationType.COPY -> {
                 mediator.addSource(
-                    copyFile(
+                    duplicateFile(
                         file = file,
                         destinationId = destinationFolder!!.id,
-                        copyName = file.name,
                         onSuccess = { it.data?.let { file -> onIndividualActionSuccess(type, file) } },
                     ),
                     updateMultiSelectMediator(mediator),
@@ -538,7 +537,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 it.buildGeneralNotification(
                     title = getString(R.string.anErrorHasOccurred),
                     description = getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name)
-                ).apply { NotificationManagerCompat.from(it).notify(UUID.randomUUID().hashCode(), build()) }
+                ).apply { NotificationManagerCompat.from(it).notifyCompat(it, UUID.randomUUID().hashCode(), build()) }
             }
         }
     }

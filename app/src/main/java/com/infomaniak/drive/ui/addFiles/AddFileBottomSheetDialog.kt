@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@ import com.infomaniak.drive.data.models.File.Office
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetAddFileBinding
-import com.infomaniak.drive.ui.LaunchActivity.*
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
@@ -67,8 +66,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private lateinit var openCameraWritePermissions: DrivePermissions
     private lateinit var openCameraPermissions: CameraPermissions
-
-    private lateinit var uploadFilesHelper: UploadFilesHelper
 
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
@@ -113,17 +110,11 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
         }
 
-        uploadFilesHelper = UploadFilesHelper(
-            fragment = this@AddFileBottomSheetDialog,
-            onOpeningPicker = {
-                trackNewElement("uploadFile")
-                binding.documentUpload.isEnabled = false
-            },
-            onResult = { findNavController().popBackStack() },
-        ).apply { initParentFolder(currentFolderFile) }
-
         openCamera.setOnClickListener { openCamera() }
-        documentUpload.setOnClickListener { uploadFilesHelper.uploadFiles() }
+        documentUpload.setOnClickListener {
+            mainViewModel.uploadFilesHelper?.uploadFiles()
+            dismiss()
+        }
         documentScanning.setOnClickListener { scanDocuments() }
         folderCreate.setOnClickListener { createFolder() }
         docsCreate.setOnClickListener { createFile(Office.DOCS) }
@@ -213,7 +204,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun onCaptureMediaResult() {
         try {
-            val file = with(java.io.File(mediaPhotoPath)) { if (length() != 0L) this else java.io.File(mediaVideoPath) }
+            val file = IOFile(mediaPhotoPath).takeIf { it.length() != 0L } ?: IOFile(mediaVideoPath)
             val fileModifiedAt = Date(file.lastModified())
             val applicationContext = context?.applicationContext
             lifecycleScope.launch(Dispatchers.IO) {
@@ -243,7 +234,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         val timeStamp: String = date.format(FORMAT_NEW_FILE)
         val fileName = "${timeStamp}.${if (isVideo) "mp4" else "jpg"}"
 
-        val fileData = java.io.File(createExposedTempUploadDir(), fileName).apply {
+        val fileData = IOFile(createExposedTempUploadDir(), fileName).apply {
             if (exists()) delete()
             createNewFile()
             setLastModified(date.time)
@@ -253,13 +244,13 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         return FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), fileData)
     }
 
-    private fun createExposedTempUploadDir(): java.io.File {
+    private fun createExposedTempUploadDir(): IOFile {
         val directory = getString(R.string.EXPOSED_UPLOAD_DIR)
-        return java.io.File(requireContext().cacheDir, directory).apply { if (!exists()) mkdirs() }
+        return IOFile(requireContext().cacheDir, directory).apply { if (!exists()) mkdirs() }
     }
 
     private fun deleteExposedTempUploadDir() {
-        java.io.File(requireContext().cacheDir, getString(R.string.EXPOSED_UPLOAD_DIR)).apply {
+        IOFile(requireContext().cacheDir, getString(R.string.EXPOSED_UPLOAD_DIR)).apply {
             if (exists()) deleteRecursively()
         }
     }

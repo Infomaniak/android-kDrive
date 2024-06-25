@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -313,9 +313,27 @@ class FileMigration : RealmMigration {
             oldVersionTemp++
         }
 
+        // Migrated to version 7
+        // - Migrate to ApiV3
         if (oldVersionTemp == 6L) {
             schema.get(File::class.java.simpleName)?.apply {
+                addField("uid", String::class.java, FieldAttribute.REQUIRED)
+                transform { realmObject ->
+                    val file = File(
+                        id = realmObject.getInt("id"),
+                        driveId = realmObject.getInt("driveId")
+                    ).apply {
+                        initUid()
+                    }
+                    realmObject.setString("uid", file.uid)
+                }
+                removePrimaryKey()
+                addPrimaryKey("uid")
+                addField("cursor", String::class.java)
+                addRealmListField("supportedBy", String::class.java)
                 addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                removeField("hasThumbnail")
+                removeField("hasOnlyoffice")
             }
 
             oldVersionTemp++

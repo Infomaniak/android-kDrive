@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,8 +86,8 @@ class SearchFiltersFragment : Fragment() {
     }
 
     private fun handleCategoryRights() = with(binding) {
-        categoriesTitle.isVisible = categoryRights.canReadCategoryOnFile
-        chooseCategoriesFilter.isVisible = categoryRights.canReadCategoryOnFile
+        categoriesTitle.isVisible = categoryRights.canReadOnFile
+        chooseCategoriesFilter.isVisible = categoryRights.canReadOnFile
     }
 
     private fun setToolbar() {
@@ -177,7 +177,7 @@ class SearchFiltersFragment : Fragment() {
         val categories = searchFiltersViewModel.categories ?: emptyList()
         binding.categoriesContainer.setup(
             categories = categories,
-            canPutCategoryOnFile = categoryRights.canPutCategoryOnFile,
+            canPutCategoryOnFile = categoryRights.canPutOnFile,
             layoutInflater = layoutInflater,
             onClicked = {
                 safeNavigate(

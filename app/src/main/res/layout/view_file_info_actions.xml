@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022 Infomaniak Network SA
+  ~ Copyright (C) 2022-2024 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -281,227 +281,57 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/openWith"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_open_with"
+                app:text="@string/openWith" />
 
-                <ImageView
-                    android:id="@+id/openWithIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_open_with"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/openWithText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/openWith"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/openWithIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/editDocument"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_edit_document"
+                app:text="@string/buttonEdit" />
 
-                <ImageView
-                    android:id="@+id/editDocumentIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_edit_document"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/editDocumentText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonEdit"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/editDocumentIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/manageCategories"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_category"
+                app:text="@string/manageCategoriesTitle" />
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/manageCategoriesIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_category"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/manageCategoriesText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/manageCategoriesTitle"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/manageCategoriesIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/addFavorites"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_star_filled"
+                app:iconTint="@color/star_favorites"
+                app:text="@string/buttonAddFavorites" />
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/addFavoritesIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_star_filled"
-                    android:tint="@color/star_favorites"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/addFavoritesText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonAddFavorites"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/addFavoritesIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/coloredFolder"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_color_bucket"
+                app:text="@string/buttonChangeFolderColor" />
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/coloredFolderIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_color_bucket"
-                    android:tint="@color/iconColor"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/coloredFolderText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonChangeFolderColor"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/coloredFolderIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/dropBox"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_folder_dropbox"
+                app:iconTint="@color/iconColor"
+                app:text="@string/buttonConvertToDropBox" />
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/dropBoxIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_folder_dropbox"
-                    android:tint="@color/iconColor"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/dropBoxText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonConvertToDropBox"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/dropBoxIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/goToFolder"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/goToFolderIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_folder_filled"
-                    android:tint="@color/iconColor"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/goToFolderText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonSeeFolder"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/goToFolderIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_folder_filled"
+                app:iconTint="@color/iconColor"
+                app:text="@string/buttonSeeFolder" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/availableOffline"
@@ -564,227 +394,66 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
+                android:id="@+id/print"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_print"
+                app:iconTint="@color/iconColor"
+                app:text="@string/actionPrint"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/downloadFile"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_download"
+                app:text="@string/buttonDownload" />
 
-                <ImageView
-                    android:id="@+id/downloadFileIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_download"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/downloadFileText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonDownload"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/downloadFileIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/moveFile"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_folder_select"
+                app:text="@string/buttonMoveTo" />
 
-                <ImageView
-                    android:id="@+id/moveFileIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_folder_select"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/moveFileText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonMoveTo"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/moveFileIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/duplicateFile"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_duplicate"
+                app:text="@string/buttonDuplicate" />
 
-                <ImageView
-                    android:id="@+id/duplicateFileIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_duplicate"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/duplicateFileText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonDuplicate"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/duplicateFileIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/renameFile"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_edit"
+                app:text="@string/buttonRename" />
 
-                <ImageView
-                    android:id="@+id/renameFileIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_edit"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/renameFileText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonRename"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/renameFileIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/leaveShare"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_link_broken"
+                app:text="@string/buttonLeaveShare" />
 
-                <ImageView
-                    android:id="@+id/leaveShareIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_link_broken"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/leaveShareText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonLeaveShare"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/leaveShareIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/deleteFile"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_delete"
+                app:text="@string/modalMoveTrashTitle" />
 
-                <ImageView
-                    android:id="@+id/deleteFileIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_delete"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/deleteFileText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/modalMoveTrashTitle"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/deleteFileIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/cancelExternalImport"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/buttonHeight"
-                android:background="?selectableItemBackground"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_remove"
+                app:iconTint="@color/red_error"
+                app:text="@string/buttonCancelImport" />
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/cancelExternalImportIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandard"
-                    android:src="@drawable/ic_remove"
-                    android:tint="@color/red_error"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/cancelExternalImportText"
-                    style="@style/Subtitle2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardMedium"
-                    android:layout_marginEnd="@dimen/marginStandard"
-                    android:text="@string/buttonCancelImport"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/cancelExternalImportIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

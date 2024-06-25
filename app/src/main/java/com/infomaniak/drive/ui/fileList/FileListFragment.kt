@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@ import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.*
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
@@ -57,12 +59,15 @@ import com.infomaniak.drive.databinding.FragmentFileListBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
+import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -102,7 +107,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected open var hideBackButtonWhenRoot: Boolean = true
     protected open var showPendingFiles = true
     protected open var allowCancellation = true
-    protected open var sortTypeUsage = SortTypeUsage.FILE_LIST
+    protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
     private val noItemsFoldersTitle: Int by lazy {
         if (mainViewModel.currentFolder.value?.rights?.canCreateFile == true
@@ -142,7 +147,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         folderId = navigationArgs.folderId
-        folderName = if (folderId == ROOT_ID) AccountUtils.getCurrentDrive()?.name ?: "/" else navigationArgs.folderName
+        folderName = navigationArgs.folderName
         _binding = FragmentFileListBinding.inflate(inflater, container, false)
 
         return binding.root
@@ -165,10 +170,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 isUploading = false
                 if (isResumed) refreshActivities()
             }
-        }
-
-        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
-            if (file.isFolder()) file.openFolder() else file.displayFile(withCurrentFiles = false)
         }
 
         mainViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
@@ -220,9 +221,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         with(binding) {
             swipeRefreshLayout.setOnRefreshListener(this@FileListFragment)
-            setToolbarTitle()
             ViewCompat.requestApplyInsets(fileListCoordinator) // Restore coordinator state
         }
+        setToolbarTitle()
+        setPublicFolderSubtitle()
 
         setupFileAdapter()
 
@@ -300,7 +302,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             mainViewModel.refreshActivities.value = true
         }
 
-        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_BOOKMARK) { fileId ->
+        getBackNavigationResult<Int>(DownloadAction.OPEN_BOOKMARK.value) { fileId ->
             FileController.getFileProxyById(fileId, customRealm = mainViewModel.realm)?.let {
                 openBookmarkIntent(it)
             }
@@ -332,7 +334,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         fileListViewModel.isListMode.value?.let { isListMode ->
-            if (!isListMode) fileRecyclerView?.layoutManager = createLayoutManager(isListMode)
+            if (!isListMode) fileRecyclerView?.layoutManager = createLayoutManager(isListMode = false)
         }
     }
 
@@ -402,9 +404,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         setupToggleDisplayButton()
         setupListMode()
         setupSortButton()
-        binding.uploadFileInProgress.setUploadFileInProgress(R.string.uploadInThisFolderTitle) {
-            goToUploadInProgress(folderId)
-        }
+        binding.uploadFileInProgressView.setUploadFileInProgress(this, folderId)
     }
 
     private fun setupToggleDisplayButton() {
@@ -412,16 +412,18 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             val newListMode = !UiSettings(requireContext()).listMode
             trackEvent("displayStyle", if (newListMode) "viewList" else "viewGrid")
             UiSettings(requireContext()).listMode = newListMode
-            fileListViewModel.isListMode.value = newListMode
+            fileListViewModel.isListMode.value = getListMode(newListMode)
         }
     }
 
     private fun setupListMode() {
         fileListViewModel.isListMode.apply {
-            observe(viewLifecycleOwner) { setupDisplayMode(it) }
-            value = UiSettings(requireContext()).listMode
+            observe(viewLifecycleOwner, ::setupDisplayMode)
+            value = getListMode(UiSettings(requireContext()).listMode)
         }
     }
+
+    private fun getListMode(newListMode: Boolean) = newListMode || this@FileListFragment is UploadInProgressFragment
 
     private fun setupSortButton() {
         binding.sortButton.apply {
@@ -438,10 +440,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     protected open fun setupFileAdapter() {
-        mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-            fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable)
-            binding.noNetwork.isGone = isInternetAvailable
-        }
+        observeAndDisplayNetworkAvailability(
+            mainViewModel = mainViewModel,
+            noNetworkBinding = binding.noNetworkInclude,
+            noNetworkBindingDirectParent = binding.fileListLayout,
+            additionalChanges = { isInternetAvailable -> fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable) }
+        )
 
         multiSelectManager.apply {
             openMultiSelect = { openMultiSelect() }
@@ -457,9 +461,14 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             onFileClicked = { file ->
                 if (file.isUsable()) {
                     when {
-                        file.isFolder() -> file.openFolder()
+                        file.isFolder() -> openFolder(
+                            file,
+                            navigationArgs.shouldHideBottomNavigation,
+                            navigationArgs.shouldShowSmallFab,
+                            fileListViewModel,
+                        )
                         file.isBookmark() -> openBookmark(file)
-                        else -> file.displayFile()
+                        else -> displayFile(file, mainViewModel, fileAdapter)
                     }
                 } else {
                     refreshActivities()
@@ -471,6 +480,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 val bundle = FileInfoActionsBottomSheetDialogArgs(
                     fileId = fileObject.id,
                     userDrive = UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe),
+                    shouldShowSmallFab = navigationArgs.shouldShowSmallFab,
                 ).toBundle()
                 safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())
             }
@@ -501,37 +511,24 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun isCurrentFolderRoot() = folderId == ROOT_ID || folderId == OTHER_ROOT_ID
 
-    private fun File.openFolder() {
-        if (isDisabled()) {
-            safeNavigate(
-                FileListFragmentDirections.actionFileListFragmentToAccessDeniedBottomSheetFragment(
-                    isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
-                    folderId = id,
-                    folderName = name
-                )
-            )
-        } else {
-            fileListViewModel.cancelDownloadFiles()
-            safeNavigate(
-                FileListFragmentDirections.fileListFragmentToFileListFragment(
-                    folderId = id,
-                    folderName = name,
-                    shouldHideBottomNavigation = navigationArgs.shouldHideBottomNavigation,
-                )
-            )
-        }
-    }
+    private fun setPublicFolderSubtitle() {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val shouldDisplaySubtitle = fileListViewModel.shouldDisplaySubtitle(folderId, userDrive)
 
-    private fun File.displayFile(withCurrentFiles: Boolean = true) {
-        trackEvent("preview", "preview${getFileType().value.capitalizeFirstChar()}")
-        val fileList = if (withCurrentFiles) fileAdapter.getFileObjectsList(mainViewModel.realm) else listOf(this)
-        Utils.displayFile(mainViewModel, findNavController(), this, fileList)
+            val driveName = AccountUtils.getCurrentDrive()?.driveAccount?.name
+            Dispatchers.Main {
+                _binding?.publicFolderSubtitle?.apply {
+                    isVisible = shouldDisplaySubtitle && driveName != null
+                    if (isVisible) text = getString(R.string.commonDocumentsDescription, driveName)
+                }
+            }
+        }
     }
 
     private fun checkIfNoFiles() {
         changeNoFilesLayoutVisibility(
             hideFileList = fileAdapter.itemCount == 0,
-            changeControlsVisibility = !isCurrentFolderRoot(),
+            changeControlsVisibility = true,
             ignoreOffline = true
         )
     }
@@ -539,7 +536,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun refreshActivities() {
         val isUploadInProgressNavigation = findNavController().currentDestination?.id == R.id.uploadInProgressFragment
 
-        if (folderId == OTHER_ROOT_ID || isUploadInProgressNavigation || !fileAdapter.isComplete) return
+        if (folderId <= ROOT_ID || isUploadInProgressNavigation || !fileAdapter.isComplete) return
 
         if (isLoadingActivities) {
             retryLoadingActivities = true
@@ -612,15 +609,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
         if (!showPendingFiles || isNotCurrentDriveRoot) return
         fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
-            binding.uploadFileInProgress.updateUploadFileInProgress(pendingFilesCount, binding.uploadFileInProgressLayout)
+            binding.uploadFileInProgressView.updateUploadFileInProgress(pendingFilesCount)
         }
-    }
-
-    private fun goToUploadInProgress(folderId: Int) {
-        safeNavigate(
-            R.id.uploadInProgressFragment,
-            FileListFragmentArgs(folderId = folderId, folderName = getString(R.string.uploadInProgressTitle)).toBundle(),
-        )
     }
 
     private fun setupDisplayMode(isListMode: Boolean) = with(binding) {
@@ -669,12 +659,13 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         fileListViewModel.getFolderActivities(updatedFolder, userDrive).observe(viewLifecycleOwner) { isNotEmpty ->
             if (isNotEmpty == true) {
                 getFolderFiles(
-                    ignoreCache = false,
+                    sourceRestrictionType = ONLY_FROM_LOCAL,
+                    isNewSort = false,
                     onFinish = {
                         it?.let { (_, files, _) ->
                             changeNoFilesLayoutVisibility(
                                 hideFileList = files.isEmpty(),
-                                changeControlsVisibility = !updatedFolder.isRoot(),
+                                changeControlsVisibility = true,
                             )
                         }
                     },
@@ -683,14 +674,21 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun getFolderFiles(ignoreCache: Boolean, onFinish: ((FolderFilesResult?) -> Unit)? = null) {
+    private fun getFolderFiles(
+        sourceRestrictionType: SourceRestrictionType,
+        isNewSort: Boolean,
+        onFinish: ((FolderFilesResult?) -> Unit)? = null,
+    ) {
         showPendingFiles()
+
+        val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
+
         fileListViewModel.getFiles(
             folderId,
-            ignoreCache = ignoreCache,
-            ignoreCloud = mainViewModel.isInternetAvailable.value == false,
             order = fileListViewModel.sortType,
-            userDrive = userDrive
+            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else sourceRestrictionType,
+            userDrive = userDrive,
+            isNewSort = isNewSort,
         ).observe(viewLifecycleOwner) {
             onFinish?.invoke(it)
         }
@@ -784,10 +782,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             isDownloading = true
             fileAdapter.isComplete = false
 
-            getFolderFiles(ignoreCache, onFinish = {
+            val sourceRestrictionType = if (ignoreCache) ONLY_FROM_REMOTE else UNRESTRICTED
+
+            getFolderFiles(sourceRestrictionType, isNewSort, onFinish = {
                 it?.let { result ->
 
-                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+                    if (fileAdapter.itemCount == 0 || !result.isFirstPage || isNewSort) {
 
                         FileController.getRealmLiveFiles(
                             parentId = folderId,
@@ -795,16 +795,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                             realm = mainViewModel.realm
                         ).apply { fileAdapter.updateFileList(this) }
 
-                        multiSelectManager.currentFolder = if (result.parentFolder?.id == ROOT_ID) {
-                            AccountUtils.getCurrentDrive()?.convertToFile(Utils.getRootName(requireContext()))
-                        } else {
-                            result.parentFolder
-                        }
+                        multiSelectManager.currentFolder = result.parentFolder
 
-                        mainViewModel.currentFolder.value = multiSelectManager.currentFolder
+                        mainViewModel.setCurrentFolder(multiSelectManager.currentFolder)
                         changeNoFilesLayoutVisibility(
                             hideFileList = fileAdapter.fileList.isEmpty(),
-                            changeControlsVisibility = result.parentFolder?.isRoot() == false
+                            changeControlsVisibility = result.parentFolder != null
                         )
                     }
 
@@ -816,7 +812,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 } ?: run {
                     changeNoFilesLayoutVisibility(
                         hideFileList = fileAdapter.itemCount == 0,
-                        changeControlsVisibility = folderId != ROOT_ID
+                        changeControlsVisibility = true
                     )
                     fileAdapter.isComplete = true
                 }
@@ -831,7 +827,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         val parentFolder: File? = null,
         val files: ArrayList<File>,
         val isComplete: Boolean,
-        val page: Int
+        val isFirstPage: Boolean,
+        val isNewSort: Boolean,
+        @StringRes val errorRes: Int? = null,
     )
 
     /**
@@ -842,7 +840,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
      */
     internal fun changeNoFilesLayoutVisibility(
         hideFileList: Boolean,
-        changeControlsVisibility: Boolean = true,
+        changeControlsVisibility: Boolean,
         ignoreOffline: Boolean = false
     ) {
         if (_binding == null) return
@@ -855,7 +853,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
             if (changeControlsVisibility) {
                 val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
-                noNetwork.isVisible = hasFilesAndIsOffline
+                noNetworkInclude.noNetwork.isVisible = hasFilesAndIsOffline
                 toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
             }
 

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,16 +42,15 @@ class MediaObserverWorker(appContext: Context, params: WorkerParameters) : Corou
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         SentryLog.d("MediaContentJob", "$TAG> JOB STARTED!")
 
-        triggeredContentAuthorities.ifEmpty { null }?.let {
-            if (!applicationContext.isSyncActive()) {
-                when {
-                    MediaFolder.getAllSyncedFoldersCount() > 0 -> applicationContext.syncImmediately()
-                    else -> applicationContext.showSyncConfigNotification()
-                }
+        if (!applicationContext.isSyncActive()) {
+            when {
+                MediaFolder.getAllSyncedFoldersCount() > 0 -> applicationContext.syncImmediately()
+                else -> applicationContext.showSyncConfigNotification()
             }
         }
 
         nextScheduleWork(applicationContext)
+        SentryLog.d("MediaContentJob", "$TAG> JOB FINISHED!")
         Result.success()
     }
 

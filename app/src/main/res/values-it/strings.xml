@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2023 Infomaniak Network SA
+  ~ Copyright (C) 2022-2024 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
     <string name="accessDeniedDescriptionIsAdmin">Vuoi modificare i diritti di questa cartella per potervi accedere? Verrai aggiunto agli utenti con diritti di accesso a questa cartella. Gli altri utenti della cartella riceveranno una notifica tramite e-mail.</string>
     <string name="accessDeniedDescriptionIsNotAdmin">Contatta l’amministratore del kDrive per modificare i tuoi diritti.</string>
     <string name="accessDeniedTitle">Non si dispone dell’autorizzazione necessaria per accedere alla cartella.</string>
+    <string name="actionPrint">Stampa</string>
     <string name="addCategoriesTitle">Aggiungi categorie</string>
     <string name="addPassword">Proteggi con una password</string>
     <string name="alertRemoveUserDescription">Rimuovere veramente l’utente “%s” da questa applicazione?</string>
@@ -187,6 +188,7 @@
     <string name="categoryWork">Lavoro</string>
     <string name="cloudStorageMissingPermissionNotifDescription">L’app non può essere eseguita in background a causa di un’autorizzazione mancante.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Impossibile effettuare la ricerca, non è stato selezionato nessun drive</string>
+    <string name="commonDocumentsDescription">Questo spazio appartiene a %s e centralizza i file comuni della vostra organizzazione.</string>
     <string name="commonFolderDescription">Condividi questa cartella con utenti del kDrive %s</string>
     <string name="commonFolderTitle">Cartella comune</string>
     <string name="contentDescriptionIsSelected">È selezionata</string>
@@ -242,6 +244,7 @@
     <string name="dropboxSharedLinkTitle">Link di condivisione Dropbox</string>
     <string name="editCategoryInfoDescription">La modifica sarà visibile a tutti gli utenti del kDrive che hanno accesso alle categorie.</string>
     <string name="editCategoryTitle">Modifica una categoria</string>
+    <string name="emptyFilePreviewError">Nessuna anteprima disponibile. Il file è vuoto.</string>
     <string name="errorAddComment">Errore durante l’aggiunta del commento</string>
     <string name="errorAddFavorite">Errore durante l’aggiunta ai preferiti</string>
     <string name="errorCache">Errore durante la memorizzazione nella cache</string>
@@ -457,9 +460,10 @@
     <string name="homeTitle">Home</string>
     <string name="inputExpirationDate">Data di scadenza</string>
     <string name="inputExpirationTime">Tempo di scadenza</string>
+    <string name="kDrivePdfViewer">Visualizzatore di PDF kDrive</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
     <string name="localizedFilenamePrivateSpace">I miei file</string>
-    <string name="localizedFilenameTeamSpace">File dell\'organizzazione</string>
+    <string name="localizedFilenameTeamSpace">File dell’organizzazione</string>
     <string name="locateButton">Localizzare</string>
     <string name="manageCategoriesCreateTitle">Crea %s</string>
     <string name="manageCategoriesNoCategory">Nessuna categoria</string>
@@ -548,8 +552,9 @@
     <string name="recentActivityMeTitle">Da parte mia</string>
     <string name="recentActivityMyTeam">Da parte del mio team</string>
     <string name="recentActivitySeeMore">Mostra più file recenti</string>
-    <string name="refreshTokenError">Sei stato disconnesso a causa di un problema. Riconnettiti</string>
+    <string name="refreshTokenError">Siete stati disconnessi</string>
     <string name="restrictedSharedLinkTitle">Link di condivisione limitato</string>
+    <string name="reviewAlertTitle">Ti piace kDrive?</string>
     <string name="saveExternalFileInputFileName">Nome del documento</string>
     <string name="saveExternalFileTitle">Salva su kDrive</string>
     <string name="searchFilterTitle">Tipi di file</string>
@@ -623,8 +628,10 @@
     <string name="sortBigger">Più grande</string>
     <string name="sortDay">Per giorno</string>
     <string name="sortExtension">Estensione</string>
+    <string name="sortLeastRelevant">Meno rilevante</string>
     <string name="sortMonth">Per mese</string>
     <string name="sortMostRecentAdded">Aggiunte più recenti</string>
+    <string name="sortMostRelevant">Più rilevante</string>
     <string name="sortNameAZ">Nome: dalla A alla Z</string>
     <string name="sortNameZA">Nome: dalla Z alla A</string>
     <string name="sortOlder">Più vecchio</string>
@@ -713,6 +720,7 @@
     <string name="uploadNetworkErrorWifiRequired">In attesa di connessione alla rete Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Insufficiente RAM disponibile</string>
     <string name="uploadPermissionError">Permessi aggiuntivi richiesti</string>
+    <string name="urlUserReportAndroid">https://feedback.userreport.com/761c3930-850f-4d5b-805a-703ff4b832aa/</string>
     <string name="userInviteByEmail">Invita tramite e-mail</string>
     <string name="userPermissionManage">Può gestire</string>
     <string name="userPermissionManageDescription">Modifica dei file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione dei file\nCondivisione con altri utenti</string>

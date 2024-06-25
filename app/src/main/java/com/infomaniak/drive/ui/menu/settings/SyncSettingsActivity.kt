@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,7 +119,6 @@ class SyncSettingsActivity : BaseActivity() {
                         userId = selectDriveViewModel.selectedUserId.value!!,
                         driveId = selectDriveViewModel.selectedDrive.value?.id!!,
                         folderId = syncSettingsViewModel.syncFolder.value ?: -1,
-                        disabledFolderId = Utils.ROOT_ID,
                     ).toBundle()
                 )
                 selectFolderResultLauncher.launch(this)

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,9 +46,11 @@ class AvailableShareableItemsAdapter(
     private var itemList: ArrayList<Shareable>,
     var notShareableIds: ArrayList<Int> = arrayListOf(),
     var notShareableEmails: ArrayList<String> = arrayListOf(),
+    private val getCurrentText: () -> CharSequence,
     private val onItemClick: (item: Shareable) -> Unit,
 ) : ArrayAdapter<Shareable>(context, R.layout.item_user, itemList), Filterable {
-    var initialList: ArrayList<Shareable> = ArrayList()
+
+    private var initialList: ArrayList<Shareable> = ArrayList()
 
     init {
         cleanItemList()
@@ -129,50 +131,61 @@ class AvailableShareableItemsAdapter(
 
     override fun getCount() = itemList.size
 
-    override fun getFilter(): Filter {
-        return object : Filter() {
-            override fun performFiltering(constraint: CharSequence?): FilterResults {
-                val searchTerm = constraint?.standardize() ?: ""
-                val finalUserList = initialList
-                    .filter {
-                        it.getFilterValue().standardize()
-                            .contains(searchTerm) || ((it is DriveUser) && it.email.standardize().contains(searchTerm))
-                    }.filterNot { displayedItem ->
-                        notShareableIds.any { it == displayedItem.id } ||
-                                notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
-                    }
+    override fun getFilter(): Filter = object : Filter() {
+
+        override fun performFiltering(constraint: CharSequence?): FilterResults {
+            if (constraint.isNullOrBlank()) {
                 return FilterResults().apply {
-                    values = finalUserList
-                    count = finalUserList.size
+                    values = arrayListOf<Shareable>()
+                    count = 0
                 }
             }
 
-            override fun publishResults(constraint: CharSequence?, results: FilterResults) {
-                val searchTerm = constraint?.standardize()
-                if (searchTerm?.isEmail() == true && !searchTerm.existsInAvailableItems()) {
-                    itemList = if (!notShareableEmails.contains(searchTerm)) {
-                        arrayListOf(Invitation(email = searchTerm, status = context.getString(R.string.userInviteByEmail)))
-                    } else arrayListOf()
-                    notifyDataSetChanged()
-                } else {
-                    itemList = results.values as ArrayList<Shareable> // Normal warning
-                    notifyDataSetChanged()
+            val searchTerm = constraint.standardize()
+            val finalUserList = initialList
+                .filter {
+                    it.getFilterValue().standardize().contains(searchTerm) ||
+                            ((it is DriveUser) && it.email.standardize().contains(searchTerm))
+                }.filterNot { displayedItem ->
+                    notShareableIds.any { it == displayedItem.id } ||
+                            notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
                 }
+
+            return FilterResults().apply {
+                values = finalUserList
+                count = finalUserList.size
             }
         }
+
+        override fun publishResults(constraint: CharSequence?, results: FilterResults) {
+            val searchTerm = constraint?.standardize()
+
+            itemList = if (searchTerm?.isEmail() == true && !searchTerm.existsInAvailableItems()) {
+                if (!notShareableEmails.contains(searchTerm)) {
+                    arrayListOf(Invitation(email = searchTerm, status = context.getString(R.string.userInviteByEmail)))
+                } else {
+                    arrayListOf()
+                }
+            } else {
+                results.values as ArrayList<Shareable> // Normal warning
+            }
+
+            notifyDataSetChanged()
+        }
+
+        override fun convertResultToString(resultValue: Any?): CharSequence = getCurrentText()
     }
 
     private fun CharSequence.standardize(): String = this.toString().trim().lowercase()
 
-    private fun String.existsInAvailableItems(): Boolean =
-        initialList.any { availableItem -> availableItem is DriveUser && availableItem.email.standardize() == this }
+    private fun String.existsInAvailableItems(): Boolean = initialList.any { availableItem ->
+        availableItem is DriveUser && availableItem.email.standardize() == this
+    }
 
-    private fun Shareable.isShareable(): Boolean {
-        return when (this) {
-            is DriveUser -> !notShareableIds.contains(this.id) && !notShareableEmails.contains(this.email)
-            is Invitation -> !notShareableIds.contains(this.user?.id) && !notShareableEmails.contains(this.email)
-            is Team -> !notShareableIds.contains(this.id)
-            else -> true
-        }
+    private fun Shareable.isShareable(): Boolean = when (this) {
+        is DriveUser -> !notShareableIds.contains(this.id) && !notShareableEmails.contains(this.email)
+        is Invitation -> !notShareableIds.contains(this.user?.id) && !notShareableEmails.contains(this.email)
+        is Team -> !notShareableIds.contains(this.id)
+        else -> true
     }
 }

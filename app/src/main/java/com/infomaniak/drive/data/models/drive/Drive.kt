@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,12 @@
 package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.Rights
-import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import java.util.*
+import java.util.Date
 
 open class Drive(
 
@@ -35,19 +34,18 @@ open class Drive(
      */
     @SerializedName("account_admin")
     var accountAdmin: Boolean = false,
-    @SerializedName("can_add_user")
-    var canAddUser: Boolean = false,
-    @SerializedName("can_create_team_folder")
-    var canCreateTeamFolder: Boolean = false,
-    @SerializedName("has_technical_right")
-    var hasTechnicalRight: Boolean = false,
+    @SerializedName("rights")
+    private var _rights: DriveRights? = DriveRights(),
     var name: String = "",
     @SerializedName("preferences")
     private var _preferences: DrivePreferences? = DrivePreferences(),
-    private var role: String = "",
+    @SerializedName("role")
+    private var _role: String = "",
+    @SerializedName("capabilities")
+    private var _capabilities: DriveCapabilities? = DriveCapabilities(),
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
-    @SerializedName("category_rights")
+    @SerializedName("categories_permissions")
     private var _categoryRights: CategoryRights? = CategoryRights(),
 
     /**
@@ -55,6 +53,8 @@ open class Drive(
      */
     @SerializedName("account_id")
     var accountId: Int = -1,
+    @SerializedName("account")
+    private var _driveAccount: DriveAccount? = null,
     @SerializedName("created_at")
     var createdAt: Long = 0,
     @SerializedName("updated_at")
@@ -62,10 +62,11 @@ open class Drive(
     @SerializedName("used_size")
     var usedSize: Long = 0,
     var id: Int = -1,
+    @SerializedName("in_maintenance")
     var maintenance: Boolean = false,
     @SerializedName("maintenance_reason")
     var maintenanceReason: String = "",
-    var pack: String = "",
+    var pack: DrivePack? = DrivePack(),
     var size: Long = 0,
     var version: String = "",
     @SerializedName("pack_functionality")
@@ -77,11 +78,17 @@ open class Drive(
     var categories: RealmList<Category> = RealmList(),
 ) : RealmObject() {
 
+    val driveAccount: DriveAccount
+        get() = _driveAccount ?: DriveAccount()
+
     val packFunctionality: DrivePackFunctionality
         get() = _packFunctionality ?: DrivePackFunctionality()
 
     val preferences: DrivePreferences
         get() = _preferences ?: DrivePreferences()
+
+    val capabilities: DriveCapabilities
+        get() = _capabilities ?: DriveCapabilities()
 
     val categoryRights: CategoryRights
         get() = _categoryRights ?: CategoryRights()
@@ -92,22 +99,19 @@ open class Drive(
     val teams: DriveTeamsCategories
         get() = _teams ?: DriveTeamsCategories()
 
-    inline val isFreePack get() = pack == DrivePack.FREE.value
+    val rights: DriveRights
+        get() = _rights ?: DriveRights()
+
+    val role: DriveUser.Role?
+        get() = enumValueOfOrNull<DriveUser.Role>(_role)
+
+    inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
-    fun convertToFile(rootName: String? = null): File {
-        return File(
-            id = if (rootName == null) id else Utils.ROOT_ID,
-            driveId = id,
-            name = rootName ?: name,
-            type = File.Type.DRIVE.value,
-            lastModifiedAt = createdAt,
-            rights = Rights(canCreateFile = true)
-        ).apply { driveColor = preferences.color }
-    }
+    fun isUserAdmin(): Boolean = role == DriveUser.Role.ADMIN
 
-    fun isUserAdmin(): Boolean = role == "admin"
+    fun isDriveUser(): Boolean = role != DriveUser.Role.NONE && role != DriveUser.Role.EXTERNAL
 
     fun getUpdatedAt(): Date = Date(updatedAt * 1000)
 
@@ -120,16 +124,6 @@ open class Drive(
     }
 
     override fun hashCode(): Int = objectId.hashCode()
-
-    enum class DrivePack(val value: String) {
-        FREE("free"),
-        SOLO("solo"),
-        TEAM("team"),
-        PRO("pro"),
-        KSUITE_STANDARD("ksuite_standard"),
-        KSUITE_PRO("ksuite_pro"),
-        KSUITE_ENTREPRISE("ksuite_entreprise"),
-    }
 
     enum class MaintenanceReason(val value: String) {
         NOT_RENEW("not_renew"),

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ import io.realm.Realm
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.ensureActive
 import java.util.Date
-import java.io.File as IOFile
 
 object SyncOfflineUtils {
 
@@ -42,18 +41,18 @@ object SyncOfflineUtils {
             val userDrive = UserDrive(driveId = drive.id)
 
             FileController.getRealmInstance(userDrive).use { realm ->
-                FileController.getOfflineFiles(null, customRealm = realm).forEach loopFiles@{ offlineRealmFile ->
+                FileController.getOfflineFiles(order = null, customRealm = realm).forEach loopFiles@{ file ->
                     syncOfflineFilesJob.ensureActive()
-                    if (offlineRealmFile.isPendingOffline(context)) return@loopFiles
+                    if (file.isPendingOffline(context)) return@loopFiles
 
-                    offlineRealmFile.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
-                        migrateOfflineIfNeeded(context, offlineRealmFile, offlineFile, userDrive)
+                    file.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
+                        migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
 
-                        val apiResponse = ApiRepository.getFileDetails(offlineRealmFile)
+                        val apiResponse = ApiRepository.getFileDetails(file)
                         syncOfflineFilesJob.ensureActive()
                         apiResponse.data?.let { remoteFile ->
                             remoteFile.isOffline = true
-                            updateFile(offlineFile, offlineRealmFile, context, remoteFile, userDrive, realm)
+                            updateFile(offlineFile, file, context, remoteFile, userDrive, realm)
 
                         } ?: let {
                             if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()
@@ -70,7 +69,7 @@ object SyncOfflineUtils {
         context: Context,
         remoteFile: File,
         userDrive: UserDrive,
-        realm: Realm
+        realm: Realm,
     ) {
         if (offlineFile.lastModified() > file.getLastModifiedInMilliSecond()) {
             uploadFile(context, file, remoteFile, offlineFile, userDrive, realm)
@@ -97,7 +96,7 @@ object SyncOfflineUtils {
         remoteFile: File,
         offlineFile: IOFile,
         userDrive: UserDrive,
-        realm: Realm
+        realm: Realm,
     ) {
         val uri = Uri.fromFile(offlineFile)
         val fileModifiedAt = Date(offlineFile.lastModified())
@@ -130,7 +129,7 @@ object SyncOfflineUtils {
         remoteFile: File,
         offlineFile: IOFile,
         userDrive: UserDrive,
-        realm: Realm
+        realm: Realm,
     ) {
         val remoteOfflineFile = remoteFile.getOfflineFile(context, userDrive.userId) ?: return
         val pathChanged = offlineFile.path != remoteOfflineFile.path
@@ -145,5 +144,4 @@ object SyncOfflineUtils {
             Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
         }
     }
-
 }

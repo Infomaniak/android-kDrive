@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,10 +90,10 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun handleRights() = with(binding) {
         val categoryRights = DriveInfosController.getCategoryRights()
-        disabledEditCategory.isGone = categoryRights.canEditCategory
-        editCategory.isEnabled = categoryRights.canEditCategory
+        disabledEditCategory.isGone = categoryRights.canEdit
+        editCategory.isEnabled = categoryRights.canEdit
 
-        with(categoryRights.canDeleteCategory && !navigationArgs.categoryIsPredefined) {
+        with(categoryRights.canDelete && !navigationArgs.categoryIsPredefined) {
             disabledDeleteCategory.isGone = this
             deleteCategory.isEnabled = this
         }

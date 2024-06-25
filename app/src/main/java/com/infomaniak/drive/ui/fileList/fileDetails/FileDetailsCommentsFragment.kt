@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,10 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
 import com.infomaniak.drive.databinding.FragmentFileDetailsCommentsBinding
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.openOnlyOfficeDocument
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.safeBinding
 
@@ -61,7 +64,12 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
         noCommentsLayout.iNoItemsLayoutView = this@FileDetailsCommentsFragment
         if (currentFile.isOnlyOfficePreview()) {
             noCommentsLayout.toggleVisibility(isVisible = true)
-            onClickAddCommentButton = { openOnlyOfficeDocument(currentFile) }
+
+            onClickAddCommentButton = {
+                mainViewModel.isInternetAvailable.value?.let { isConnected ->
+                    openOnlyOfficeDocument(currentFile, isConnected)
+                }
+            }
         } else {
             noItemsTitle = R.string.fileDetailsNoComments
             setCommentsAdapter()
@@ -105,7 +113,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
             fileDetailsViewModel.getFileComments(currentFile).observe(viewLifecycleOwner) { apiResponse ->
                 apiResponse?.data?.let { comments ->
                     addAll(comments)
-                    isComplete = apiResponse.isLastPage()
+                    isComplete = !apiResponse.hasMore
                 } ?: also {
                     isComplete = true
                 }

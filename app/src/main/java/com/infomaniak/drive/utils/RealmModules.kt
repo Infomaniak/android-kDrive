@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,8 @@ object RealmModules {
     @RealmModule(
         classes = [
             Drive::class, DrivePackFunctionality::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class,
-            Team::class, TeamDetails::class, DriveTeamsCategories::class, Category::class, CategoryRights::class
+            Team::class, TeamDetails::class, DriveTeamsCategories::class, Category::class, CategoryRights::class,
+            DriveCapabilities::class, DrivePack::class, DrivePackCapabilities::class, DriveRights::class, DriveAccount::class,
         ]
     )
     class DriveFilesModule

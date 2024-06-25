@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,14 @@ import io.realm.annotations.RealmClass
 
 @RealmClass(embedded = true)
 open class CategoryRights(
-    @SerializedName("can_create_category")
-    var canCreateCategory: Boolean = false,
-    @SerializedName("can_delete_category")
-    var canDeleteCategory: Boolean = false,
-    @SerializedName("can_edit_category")
-    var canEditCategory: Boolean = false,
-    @SerializedName("can_put_category_on_file")
-    var canPutCategoryOnFile: Boolean = false,
-    @SerializedName("can_read_category_on_file")
-    var canReadCategoryOnFile: Boolean = false,
+    @SerializedName("can_create")
+    var canCreate: Boolean = false,
+    @SerializedName("can_delete")
+    var canDelete: Boolean = false,
+    @SerializedName("can_edit")
+    var canEdit: Boolean = false,
+    @SerializedName("can_put_on_file")
+    var canPutOnFile: Boolean = false,
+    @SerializedName("can_read_on_file")
+    var canReadOnFile: Boolean = false,
 ) : RealmObject()

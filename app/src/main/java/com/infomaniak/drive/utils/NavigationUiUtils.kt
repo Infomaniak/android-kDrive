@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,13 @@ import androidx.core.view.forEach
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.get
 import androidx.navigation.ui.NavigationUI.onNavDestinationSelected
 import androidx.navigation.ui.onNavDestinationSelected
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.navigationrail.NavigationRailView
+import io.sentry.Sentry
 import java.lang.ref.WeakReference
 
 /**
@@ -63,8 +65,22 @@ object NavigationUiUtils {
      */
     private fun setupWithNavController(navigationBarView: NavigationBarView, navController: NavController) {
         navigationBarView.setOnItemSelectedListener { item ->
-            item.isChecked = true
-            onNavDestinationSelected(item, navController)
+            runCatching {
+                item.isChecked = true
+                onNavDestinationSelected(item, navController)
+            }.getOrElse { exception ->
+                Sentry.withScope { scope ->
+                    scope.setTag("ItemId", item.itemId.toString())
+                    scope.setTag("CurrentDestinationId", navController.currentDestination?.id.toString())
+                    scope.setExtra("ItemId", item.itemId.toString())
+                    scope.setExtra("Item isChecked", item.isChecked.toString())
+                    scope.setExtra("CurrentDestinationId", navController.currentDestination?.id.toString())
+                    scope.setExtra("ParentId", navController.currentDestination?.parent?.id.toString())
+                    scope.setExtra("Graph", navController.graph[item.itemId].route.toString())
+                    Sentry.captureException(exception)
+                }
+                false
+            }
         }
 
         val weakReference = WeakReference(navigationBarView)

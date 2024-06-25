@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 class FavoritesFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = true
+    override var hideBackButtonWhenRoot: Boolean = false
 
     override val noItemsRootIcon = R.drawable.ic_star_filled
     override val noItemsRootTitle = R.string.favoritesNoFile
@@ -120,9 +121,9 @@ class FavoritesFragment : FileListFragment() {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
-            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
+            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType, isNewSort).observe(viewLifecycleOwner) {
                 it?.let { result ->
-                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+                    if (fileAdapter.itemCount == 0 || result.isFirstPage || isNewSort) {
                         val realmFiles = FileController.getRealmLiveFiles(
                             isFavorite = true,
                             order = fileListViewModel.sortType,
@@ -131,11 +132,11 @@ class FavoritesFragment : FileListFragment() {
                             withVisibilitySort = false
                         )
                         fileAdapter.updateFileList(realmFiles)
-                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), false)
+                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), changeControlsVisibility = false)
                     }
                     fileAdapter.isComplete = result.isComplete
                 } ?: run {
-                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
+                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, changeControlsVisibility = false)
                     fileAdapter.isComplete = true
                 }
                 showLoadingTimer.cancel()

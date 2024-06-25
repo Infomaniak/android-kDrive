@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +23,10 @@ import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.addUser
 import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
-import com.infomaniak.drive.utils.DrivePermissions
-import com.infomaniak.drive.utils.Env
-import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
@@ -107,7 +104,7 @@ open class KDriveTest {
             try {
                 uiRealm = FileController.getRealmInstance(userDrive)
             } catch (realmFileException: RealmFileException) {
-                java.io.File(FileController.getRealmConfiguration(userDrive).path).apply {
+                IOFile(FileController.getRealmConfiguration(userDrive).path).apply {
                     if (exists()) {
                         delete()
                         uiRealm = FileController.getRealmInstance(userDrive)

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,6 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
                 } catch (exception: Exception) {
                     Sentry.withScope { scope ->
                         scope.level = SentryLevel.WARNING
-                        scope.setExtra("data", list.toString())
                         Sentry.captureException(exception)
                     }
                 }
@@ -81,5 +80,9 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
 
     object IntRealmListParceler : RealmListParceler<Int> {
         override var clazz: Class<Int> = Int::class.java
+    }
+
+    object StringRealmListParceler : RealmListParceler<String> {
+        override var clazz: Class<String> = String::class.java
     }
 }

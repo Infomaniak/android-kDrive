@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import android.app.Application
 import android.content.Context
 import android.provider.MediaStore
 import androidx.collection.arrayMapOf
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
@@ -28,14 +29,20 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
+import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
@@ -45,11 +52,18 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
+import io.realm.kotlin.toFlow
 import io.sentry.Sentry
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 import java.util.Date
 
-class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
+class MainViewModel(
+    appContext: Application,
+    private val savedStateHandle: SavedStateHandle,
+) : AndroidViewModel(appContext) {
 
     var selectFolderUserDrive: UserDrive? = null
     val realm: Realm by lazy {
@@ -58,12 +72,15 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         } ?: FileController.getRealmInstance()
     }
 
-    private val uiSettings by lazy { UiSettings(getApplication()) }
+    private val privateFolder = MutableLiveData<File>()
+    private val _currentFolder = MutableLiveData<File?>()
+    val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
 
-    val currentFolder = MutableLiveData<File>()
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
     val isInternetAvailable = MutableLiveData(true)
+
+    private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()
 
@@ -75,28 +92,97 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
-    var mustOpenShortcut: Boolean = true
+    var mustOpenUploadShortcut: Boolean = true
+        get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: field
+        set(value) {
+            savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] = value
+            field = value
+        }
+
     var ignoreSyncOffline = false
 
+    var uploadFilesHelper: UploadFilesHelper? = null
+
+    val notificationPermission by lazy { NotificationPermission() }
+
+    private var rootFilesJob: Job = Job()
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
+    private var setCurrentFolderJob = Job()
 
     private fun getContext() = getApplication<MainApplication>()
 
+    fun setCurrentFolder(folder: File?) {
+        folder?.let {
+            setCurrentFolderJob.cancel()
+            saveCurrentFolderId()
+            uploadFilesHelper?.setParentFolder(it)
+            _currentFolder.value = it
+        }
+    }
+
+    fun setCurrentFolderAsRoot(): Job {
+        setCurrentFolderJob.cancel()
+        setCurrentFolderJob = Job()
+        return viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
+            val file = privateFolder.value ?: FileController.getPrivateFolder().also { privateFolder.postValue(it) }
+            setCurrentFolderJob.ensureActive()
+            _currentFolder.postValue(file)
+        }
+    }
+
+    private fun postCurrentFolder(file: File?) {
+        setCurrentFolderJob.cancel()
+        _currentFolder.postValue(file)
+    }
+
+    fun initUploadFilesHelper(fragmentActivity: FragmentActivity, navController: NavController) {
+        uploadFilesHelper = UploadFilesHelper(
+            activity = fragmentActivity,
+            navController = navController,
+            onOpeningPicker = {
+                fragmentActivity.trackNewElementEvent("uploadFile")
+                uploadFilesHelper?.let { setParentFolder() } ?: Sentry.captureMessage("UploadFilesHelper is null. It should not!")
+            },
+        )
+        initCurrentFolderFromRealm()
+        setParentFolder()
+    }
+
+    fun loadRootFiles() {
+        rootFilesJob.cancel()
+        rootFilesJob = Job()
+        viewModelScope.launch(Dispatchers.IO) {
+
+            if (isInternetAvailable.value == true) {
+                FolderFilesProvider.getFiles(
+                    FolderFilesProvider.FolderFilesProviderArgs(
+                        folderId = Utils.ROOT_ID,
+                        isFirstPage = true,
+                        order = SortType.NAME_AZ,
+                        sourceRestrictionType = ONLY_FROM_REMOTE,
+                        userDrive = UserDrive(),
+                    )
+                )
+            }
+        }
+    }
+
     fun navigateFileListTo(navController: NavController, fileId: Int) {
         // Clear FileListFragment stack
-        with(navController) {
-            popBackStack(R.id.homeFragment, false)
-            navigate(R.id.fileListFragment)
-        }
+        navController.popBackStack(R.id.rootFilesFragment, false)
 
-        if (fileId == Utils.ROOT_ID) return
+        if (fileId <= Utils.ROOT_ID) return // Deeplinks could lead us to navigating to the true root
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
             val file = FileController.getFileById(fileId) ?: FileController.getFileDetails(fileId) ?: return@launch
-            if (fileId > Utils.ROOT_ID) navigateFileListTo.postValue(file)
+            navigateFileListTo.postValue(file)
         }
+    }
+
+    fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
+        postCurrentFolder(FileController.getFileById(folderId, userDrive))
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
@@ -253,11 +339,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         emit(FileResult(apiResponse.isSuccess()))
     }
 
-    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
-        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
-        else ioFile.delete()
-    }
-
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
         emit(FileController.renameFile(file, newName))
     }
@@ -285,18 +366,17 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    private fun manageCategoryApiCall(
-        files: List<File>,
-        categoryId: Int,
-        isAdding: Boolean,
-    ): ApiResponse<List<ShareableItems.FeedbackAccessResource<Int, Unit>>> {
-        return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
-    }
-
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess)) {
-                emit(FileResult(isSuccess = this.isSuccess(), data = this.data, errorCode = this.error?.code, errorResId = this.translatedError))
+                emit(
+                    FileResult(
+                        isSuccess = this.isSuccess(),
+                        data = this.data,
+                        errorCode = this.error?.code,
+                        errorResId = this.translatedError
+                    )
+                )
             }
         }
 
@@ -315,26 +395,14 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
     }
 
-    fun copyFile(
-        file: File,
-        destinationId: Int? = null,
-        copyName: String?,
-        onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
-    ) = liveData(Dispatchers.IO) {
-        ApiRepository.copyFile(file, copyName, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
-            if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(FileResult(apiResponse.isSuccess()))
-        }
-    }
-
     fun duplicateFile(
         file: File,
-        copyName: String?,
+        destinationId: Int? = null,
         onSuccess: ((apiResponse: ApiResponse<File>) -> Unit)? = null,
     ) = liveData(Dispatchers.IO) {
-        ApiRepository.duplicateFile(file, copyName).let { apiResponse ->
+        ApiRepository.duplicateFile(file, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(apiResponse)
+            emit(FileResult(isSuccess = apiResponse.isSuccess(), data = apiResponse.data))
         }
     }
 
@@ -351,6 +419,16 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         }
 
         emit(apiResponse)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pendingUploadsCount: LiveData<Int> = _pendingUploadsCount.switchMap { folderId ->
+        UploadFile.getCurrentUserPendingUploadFile(folderId)
+            .toFlow()
+            .mapLatest { list -> list.count() }
+            .distinctUntilChanged()
+            .cancellable()
+            .asLiveData()
     }
 
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
@@ -416,8 +494,6 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
                         } catch (nullPointerException: NullPointerException) {
                             Sentry.withScope { scope ->
                                 scope.setExtra("columnIndex", columnIndex.toString())
-                                scope.setExtra("pathname", pathname.toString())
-                                scope.setExtra("uploadFileUri", uploadFile.uri)
                                 Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
                             }
                         } finally {
@@ -438,7 +514,8 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         val isRunning = DownloadOfflineFileManager.checkWorkerDownloadStatus(
             context = getContext(),
             ignoreSyncOffline = ignoreSyncOffline,
-            workerName = BulkDownloadWorker.TAG)
+            workerName = BulkDownloadWorker.TAG
+        )
         isBulkDownloadRunning.value = isRunning
         ignoreSyncOffline = isRunning
     }
@@ -446,6 +523,46 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
     fun markFilesAsOffline(filesId: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
         FileController.getRealmInstance().use { realm ->
             FileController.setFilesAsOffline(customRealm = realm, filesId = filesId)
+        }
+    }
+
+    private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
+        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
+        else ioFile.delete()
+    }
+
+    private fun saveCurrentFolder() {
+        saveCurrentFolderId()
+        uploadFilesHelper?.setParentFolder(currentFolder.value!!)
+    }
+
+    private fun setParentFolder() {
+        currentFolder.value?.let {
+            saveCurrentFolder()
+        } ?: run {
+            initCurrentFolderFromRealm()
+        }
+    }
+
+    private fun manageCategoryApiCall(
+        files: List<File>,
+        categoryId: Int,
+        isAdding: Boolean,
+    ): ApiResponse<List<FeedbackAccessResource<Int, Unit>>> {
+        return if (isAdding) ApiRepository.addCategory(files, categoryId) else ApiRepository.removeCategory(files, categoryId)
+    }
+
+    private fun saveCurrentFolderId() {
+        currentFolder.value?.let { savedStateHandle[SAVED_STATE_FOLDER_ID_KEY] = it.id }
+    }
+
+    private fun initCurrentFolderFromRealm() {
+        val savedFolderId: Int? = savedStateHandle[SAVED_STATE_FOLDER_ID_KEY]
+        if (currentFolder.value == null && savedFolderId != null) {
+            FileController.getFileById(savedFolderId)?.let {
+                _currentFolder.value = it
+                saveCurrentFolder()
+            }
         }
     }
 
@@ -460,4 +577,9 @@ class MainViewModel(appContext: Application) : AndroidViewModel(appContext) {
         val data: Any? = null,
         val errorCode: String? = null
     )
+
+    companion object {
+        private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
+        private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
+    }
 }

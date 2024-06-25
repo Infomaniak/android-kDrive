@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MainViewModel.FileResult
-import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_TITLE_KEY
@@ -48,7 +48,6 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
-import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.lib.core.utils.*
 import kotlinx.coroutines.Dispatchers
@@ -63,8 +62,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
-    override lateinit var currentFile: File
     override val ownerFragment = this
+    override val currentContext by lazy { requireContext() }
+    override lateinit var currentFile: File
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -101,17 +101,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     private fun setupBackActionHandler() {
-        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
-            context?.openWith(currentFile)
-        }
+        getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile) }
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             lifecycleScope.launchWhenResumed { binding.fileInfoActionsView.refreshBottomSheetUi(currentFile) }
         }
 
-        getBackNavigationResult<String>(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY) {
-            updateFolderColor(it)
-        }
+        getBackNavigationResult(ColorFolderBottomSheetDialog.COLOR_FOLDER_NAV_KEY, ::updateFolderColor)
     }
 
     private fun updateFolderColor(color: String) {
@@ -141,9 +137,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         binding.fileInfoActionsView.removeOfflineObservations(this)
     }
 
-    override fun editDocumentClicked() {
+    override fun editDocumentClicked(mainViewModel: MainViewModel) {
         findNavController().popBackStack()
-        super.editDocumentClicked()
+        super.editDocumentClicked(mainViewModel)
     }
 
     override fun displayInfoClicked() {
@@ -170,6 +166,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun dropBoxClicked(isDropBox: Boolean) {
+        super.dropBoxClicked(isDropBox)
         if (isDropBox) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToManageDropboxFragment(
@@ -242,7 +239,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
+    override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) {
         lifecycleScope.launch {
             mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile)
             withContext(Dispatchers.Main) {
@@ -261,21 +258,16 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         mainViewModel.updateOfflineFile.value = currentFile.id
     }
 
-    override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        if (isResumed) {
-            mainViewModel.duplicateFile(currentFile, result).observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
-                    apiResponse.data?.let {
-                        mainViewModel.refreshActivities.value = true
-                        transmitActionAndPopBack(getString(R.string.allFileDuplicate, currentFile.name))
-                    }
-                } else {
-                    transmitActionAndPopBack(getString(R.string.errorDuplicate))
-                }
-                onApiResponse()
+    override fun onDuplicateFile(destinationFolder: File) {
+        mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { apiResponse ->
+            val snackbarMessage = if (apiResponse.isSuccess) {
+                mainViewModel.refreshActivities.value = true
+                getString(R.string.allFileDuplicate, currentFile.name)
+            } else {
+                getString(R.string.errorDuplicate)
             }
-        } else {
-            onApiResponse()
+
+            transmitActionAndPopBack(snackbarMessage)
         }
     }
 
@@ -316,17 +308,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun openWithClicked() {
-        super.openWithClicked()
-        if (requireContext().openWithIntent(currentFile).resolveActivity(requireContext().packageManager) == null) {
-            showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
-            findNavController().popBackStack()
-        } else {
+    override fun openWith() {
+        context?.openWith(ownerFragment = ownerFragment, currentFile = currentFile) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
                     fileId = currentFile.id,
                     fileName = currentFile.name,
-                    userDrive = navigationArgs.userDrive
+                    userDrive = navigationArgs.userDrive,
                 )
             )
         }
@@ -385,6 +373,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         val bundle = bundleOf(CANCELLABLE_TITLE_KEY to message, CANCELLABLE_ACTION_KEY to action)
         setBackNavigationResult(CANCELLABLE_MAIN_KEY, bundle)
     }
+
+    override fun shareFile() = Unit
+    override fun saveToKDrive() = Unit
 
     companion object {
 

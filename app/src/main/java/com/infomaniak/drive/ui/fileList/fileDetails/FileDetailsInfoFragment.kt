@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -234,13 +234,13 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setupCategoriesContainer(categories: List<Category>) = with(binding) {
         val rights = DriveInfosController.getCategoryRights(file.driveId)
 
-        if (file.id.isPositive() && rights.canReadCategoryOnFile) {
+        if (file.id.isPositive() && rights.canReadOnFile) {
             categoriesDivider.isVisible = true
             categoriesContainer.apply {
                 isVisible = true
                 setup(
                     categories = categories,
-                    canPutCategoryOnFile = !file.isDisabled() && rights.canPutCategoryOnFile,
+                    canPutCategoryOnFile = !file.isDisabled() && rights.canPutOnFile,
                     layoutInflater = layoutInflater,
                     onClicked = { onCategoriesClicked(file.id) },
                 )

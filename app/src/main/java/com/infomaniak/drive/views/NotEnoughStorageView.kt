@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.models.drive.DrivePack
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.formatShortBinarySize
@@ -52,8 +53,8 @@ class NotEnoughStorageView @JvmOverloads constructor(
                 progressIndicator.progress = (storagePercentage).toInt()
                 title.text = "$usedStorage / $totalStorage"
 
-                when (pack) {
-                    Drive.DrivePack.SOLO.value, Drive.DrivePack.FREE.value -> {
+                when (pack?.type) {
+                    DrivePack.DrivePackType.SOLO, DrivePack.DrivePackType.FREE -> {
                         description.setText(R.string.notEnoughStorageDescription1)
                         upgradeOffer.isVisible = true
                         upgradeOffer.setOnClickListener {

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import com.infomaniak.drive.ui.fileList.RecentSearchesAdapter.RecentSearchesView
 class RecentSearchesAdapter(
     var searches: ArrayList<String>,
     private val onSearchClicked: (search: String) -> Unit,
+    private val onListEmpty: () -> Unit,
 ) : Adapter<RecentSearchesViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentSearchesViewHolder =
@@ -41,6 +42,10 @@ class RecentSearchesAdapter(
         searchResultCard.apply {
             setCorners(position, itemCount)
             setOnClickListener { onSearchClicked(search) }
+        }
+        delete.setOnClickListener {
+            setItems(searches.filter { it != search })
+            if (searches.isEmpty()) onListEmpty()
         }
         searchResultText.text = search
     }
