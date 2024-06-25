@@ -1,0 +1,2 @@
+- Enhance GIF preview factory
+- Get last modified date for files coming from kMail attachment

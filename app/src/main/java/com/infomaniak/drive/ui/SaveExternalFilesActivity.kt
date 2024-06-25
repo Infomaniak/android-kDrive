@@ -23,6 +23,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import android.provider.MediaStore.Files.FileColumns
 import android.text.InputFilter
 import android.text.Spanned
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -461,7 +462,8 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                val lastModifiedDateFromUri = intent.getLongExtra(FileColumns.DATE_MODIFIED, -1L)
+                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor, lastModifiedDateFromUri)
 
                 try {
                     if (fileName == null) return false
@@ -511,5 +513,6 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     companion object {
         const val SHARED_FILE_FOLDER = "shared_files"
+        const val LAST_MODIFIED_URI_KEY = "last_modified"
     }
 }
