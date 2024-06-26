@@ -444,22 +444,50 @@ class MainViewModel(
         }
     }
 
+    fun removeSelectedFilesFromOffline(files: List<File>, onSuccess: (() -> Unit)? = null) = liveData {
+        val filesId = files.map { file ->
+            if (!file.isFolder()) {
+                val offlineFile = file.getOfflineFile(getApplication())
+                val cacheFile = file.getCacheFile(getApplication())
+                if (file.isOffline) {
+                    removeSelectedFileFromOffline(file, offlineFile, cacheFile)
+                }
+            }
+            file.id
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            FileController.updateIsOfflineForFiles(fileIds = filesId, isOffline = false)
+            onSuccess?.invoke()
+            emit(FileResult(isSuccess = true))
+        }
+    }
+
+    private fun removeSelectedFileFromOffline(
+        file: File,
+        offlineFile: java.io.File?,
+        cacheFile: java.io.File,
+        onFileRemovedFromOffline: (() -> Unit)? = null,
+    ) {
+        if (offlineFile != null) {
+            removeOfflineFile(file, offlineFile, cacheFile, onFileRemovedFromOffline = onFileRemovedFromOffline)
+        }
+    }
+
     fun removeOfflineFile(
         file: File,
         offlineFile: IOFile,
         cacheFile: IOFile,
-        userDrive: UserDrive = UserDrive()
+        userDrive: UserDrive = UserDrive(),
+        onFileRemovedFromOffline: (() -> Unit)? = null,
     ) {
-        viewModelScope.launch(Dispatchers.Default) {
-            async {
-                FileController.updateOfflineStatus(file.id, false)
-                if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
-            }.await()
-
+        viewModelScope.launch {
+            if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
             if (cacheFile.exists()) cacheFile.delete()
             if (offlineFile.exists()) {
                 offlineFile.delete()
             }
+            onFileRemovedFromOffline?.invoke()
         }
     }
 
@@ -520,9 +548,9 @@ class MainViewModel(
         ignoreSyncOffline = isRunning
     }
 
-    fun markFilesAsOffline(filesId: List<Int>) = viewModelScope.launch(Dispatchers.IO) {
+    fun isFilesMarkedAsOffline(filesId: List<Int>, isMarkedAsOffline: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         FileController.getRealmInstance().use { realm ->
-            FileController.setFilesAsOffline(customRealm = realm, filesId = filesId)
+            FileController.isFilesMarkedAsOffline(customRealm = realm, filesId = filesId, isMarkedAsOffline = isMarkedAsOffline)
         }
     }
 

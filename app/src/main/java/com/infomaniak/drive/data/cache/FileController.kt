@@ -21,7 +21,6 @@ import android.content.Context
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
-import com.infomaniak.drive.data.cache.FileController.getSortQueryByOrder
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.Companion.IS_PRIVATE_SPACE
 import com.infomaniak.drive.data.models.File.SortType
@@ -148,7 +147,7 @@ object FileController {
             .equalTo(File::parentId.name, folderId)
             .findAllAsync()
             .toFlow()
-	}
+    }
 
     fun getFolderOfflineFilesId(folderId: Int): List<Int> {
         return getRealmInstance().use { realm ->
@@ -163,19 +162,31 @@ object FileController {
         }
     }
 
-    fun setFilesAsOffline(customRealm: Realm = getRealmInstance(), filesId: List<Int>) {
+    fun isFilesMarkedAsOffline(customRealm: Realm = getRealmInstance(), filesId: List<Int>, isMarkedAsOffline: Boolean) {
         return customRealm.use { realm ->
             realm.executeTransaction {
                 filesId.forEach { fileId ->
                     realm.where(File::class.java)
                         .equalTo(File::id.name, fileId)
                         .findFirst()?.let { file ->
-                            file.isMarkedAsOffline = true
+                            file.isMarkedAsOffline = isMarkedAsOffline
                         }
                 }
             }
         }
-	}
+    }
+
+    fun isFileMarkedAsOffline(customRealm: Realm = getRealmInstance(), fileId: Int, isMarkedAsOffline: Boolean) {
+        return customRealm.use { realm ->
+            realm.executeTransaction {
+                realm.where(File::class.java)
+                    .equalTo(File::id.name, fileId)
+                    .findFirst()?.let { file ->
+                        file.isMarkedAsOffline = isMarkedAsOffline
+                    }
+            }
+        }
+    }
 
     fun removeFile(
         fileId: Int,
@@ -236,6 +247,31 @@ object FileController {
             onSuccess?.invoke(file.id)
         }
         return apiResponse
+    }
+
+    fun updateIsOfflineForFiles(
+        fileIds: List<Int>,
+        realm: Realm? = null,
+        userDrive: UserDrive? = null,
+        isOffline: Boolean,
+    ) {
+        try {
+            val block: (Realm) -> Unit? = { currentRealm ->
+                fileIds.forEach { fileId ->
+                currentRealm.executeTransaction {
+                        getFileById(currentRealm, fileId)?.let { file ->
+                            file.isOffline = isOffline
+                        }
+                    }
+                }
+            }
+            realm?.let(block) ?: getRealmInstance(userDrive).use(block)
+        } catch (exception: Exception) {
+            Sentry.withScope { scope ->
+                scope.setExtra("custom realm", "${realm != null}")
+                Sentry.captureException(exception)
+            }
+        }
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive? = null, transaction: (file: File) -> Unit) {

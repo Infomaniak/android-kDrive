@@ -60,8 +60,8 @@ class DownloadOfflineFileManager(
     private val downloadWorker: BaseDownloadWorker,
     private val notificationManagerCompat: NotificationManagerCompat
 ) {
-    var lastDownloadedFile: IOFile? = null
-    var filesDownloaded = 0
+    private var lastDownloadedFile: IOFile? = null
+    private var filesDownloaded = 0
 
     private var result: ListenableWorker.Result = ListenableWorker.Result.failure()
     private var lastUpdateProgressMillis = System.currentTimeMillis()
@@ -175,12 +175,13 @@ class DownloadOfflineFileManager(
         }
 
         if (response.isSuccessful) {
-            fileDownloaded(context)
+            fileDownloaded(context, file.id)
             ListenableWorker.Result.success()
         } else ListenableWorker.Result.failure()
     }
 
-    private fun fileDownloaded(context: Context) {
+    private fun fileDownloaded(context: Context, fileId: Int) {
+        FileController.isFileMarkedAsOffline(fileId = fileId, isMarkedAsOffline = false)
         lastUpdateProgressMillis = System.currentTimeMillis()
         filesDownloaded += 1
 
@@ -268,7 +269,7 @@ class DownloadOfflineFileManager(
             val request = Request.Builder().url(fileUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
 
             return okHttpClient.newBuilder().apply {
-                downloadInterceptor?.let {  interceptor -> addInterceptor(interceptor) }
+                downloadInterceptor?.let { interceptor -> addInterceptor(interceptor) }
             }.build().newCall(request).execute()
         }
 
