@@ -97,8 +97,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 appSyncSettings?.let {
                     SentryLog.i(TAG, "Check if need re-sync")
                     checkLocalLastMedias(it)
-                    syncNewPendingUploads = UploadFile.getAllPendingUploadsCount() > 0
                 }
+
+                syncNewPendingUploads = UploadFile.getAllPendingUploadsCount() > 0
 
                 // Update next iteration
                 retryError = if (currentUploadFile?.fileName == lastUploadFileName) retryError + 1 else 0
