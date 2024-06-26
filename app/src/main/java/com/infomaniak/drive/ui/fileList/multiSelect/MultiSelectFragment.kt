@@ -30,7 +30,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -43,7 +42,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
@@ -57,7 +55,6 @@ import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import kotlinx.coroutines.Dispatchers
 import java.util.UUID
 
 abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
@@ -496,19 +493,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         closeMultiSelect()
 
         onAllIndividualActionsFinished(type)
-    }
-
-    private fun addSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
-        if (!file.isFolder()) {
-            val offlineFile = file.getOfflineFile(requireContext())
-            val cacheFile = file.getCacheFile(requireContext())
-            if (!file.isOffline) {
-                addSelectedFileToOffline(file, offlineFile, cacheFile)
-            }
-        }
-
-        onSuccess?.invoke()
-        emit(FileResult(isSuccess = true))
     }
 
     private fun addSelectedFileToOffline(file: File, offlineFile: IOFile?, cacheFile: IOFile) {
