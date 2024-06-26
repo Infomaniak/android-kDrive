@@ -1,0 +1,2 @@
+- Correction d'un problème où un message indiquant une absence de connexion Internet pouvait apparaître à tort.
+- Suppression d'un espace vide entre le bas des feuilles inférieures et le bas de l'écran.

@@ -1,0 +1,2 @@
+- Amélioration de l'usine de prévisualisation des GIF
+- Obtention de la date de dernière modification pour les fichiers provenant d'une pièce jointe kMail

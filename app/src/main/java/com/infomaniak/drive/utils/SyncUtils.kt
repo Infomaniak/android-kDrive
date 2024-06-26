@@ -45,7 +45,7 @@ object SyncUtils {
 
     private val TAG = SyncUtils::class.java.simpleName
 
-    fun getFileDates(cursor: Cursor): Pair<Date?, Date> {
+    fun getFileDates(cursor: Cursor, lastModifiedDateFromUri : Long? = null): Pair<Date?, Date> {
         val dateTakenIndex = cursor.getColumnIndex(DATE_TAKEN)
         val dateAddedIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DATE_ADDED)
 
@@ -55,6 +55,7 @@ object SyncUtils {
         val fileCreatedAt = when {
             cursor.isValidDate(dateTakenIndex) -> Date(cursor.getLong(dateTakenIndex))
             cursor.isValidDate(dateAddedIndex) -> Date(cursor.getLong(dateAddedIndex) * 1000)
+            lastModifiedDateFromUri.isValidDate() -> Date(lastModifiedDateFromUri!!)
             else -> null
         }
 
@@ -74,6 +75,8 @@ object SyncUtils {
     }
 
     private fun Cursor.isValidDate(index: Int) = index != -1 && this.getLong(index) > 0
+
+    private fun Long?.isValidDate() = this != null && this > 0
 
     fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&

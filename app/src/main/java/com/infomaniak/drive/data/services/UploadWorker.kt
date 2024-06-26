@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UploadFile.Companion.getRealmInstance
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
@@ -149,12 +150,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
-        val uploadFiles = UploadFile.getAllPendingUploads()
-        pendingCount = uploadFiles.size
+        var uploadFiles: List<UploadFile>
 
-        if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
+        getRealmInstance().use { realm ->
+            uploadFiles = UploadFile.getAllPendingUploads(realm)
+            pendingCount = uploadFiles.size
 
-        checkUploadCountReliability()
+            if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
+
+            checkUploadCountReliability(realm)
+        }
 
         SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
 
@@ -184,10 +189,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         if (uploadedCount > 0) Result.success() else Result.failure()
     }
 
-    private fun checkUploadCountReliability() {
-        val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount()
+    private fun checkUploadCountReliability(realm: Realm) {
+        val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount(realm)
         if (allPendingUploadsCount != pendingCount) {
-            val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriority().count()
+            val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriorityCount(realm)
             Sentry.withScope { scope ->
                 scope.setExtra("uploadFiles pending count", "$pendingCount")
                 scope.setExtra("realmAllPendingUploadsCount", "$allPendingUploadsCount")
