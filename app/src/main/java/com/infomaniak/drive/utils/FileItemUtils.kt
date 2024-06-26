@@ -318,7 +318,7 @@ private fun Context.getBitmapFromFileId(fileUri: Uri, thumbnailSize: Int): Bitma
 
 fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean = false) {
     when {
-        !containsProgress && file.currentProgress == Utils.INDETERMINATE_PROGRESS && file.isMarkedAsOffline -> {
+        !containsProgress && file.isMarkedAsOffline -> {
             setIndeterminateProgress()
             isVisible = true
         }
