@@ -212,12 +212,8 @@ open class UploadFile(
             return customRealm?.let(block) ?: getRealmInstance().use(block)
         }
 
-        fun getAllPendingUploadsWithoutPriority(customRealm: Realm? = null): List<UploadFile> {
-            val block: (Realm) -> List<UploadFile> = { realm ->
-                pendingUploadsQuery(realm).findAll()
-            }
-
-            return customRealm?.let(block) ?: getRealmInstance().use(block)
+        fun getAllPendingUploadsWithoutPriorityCount(realm: Realm): Long {
+            return pendingUploadsQuery(realm).count()
         }
 
         fun getAllPendingPriorityFilesCount(): Long {
@@ -236,11 +232,13 @@ open class UploadFile(
             return pendingUploadsQuery(realm, folderId, true).findAll()
         }
 
-        fun getAllPendingUploadsCount(): Int {
-            return getRealmInstance().use { realm ->
+        fun getAllPendingUploadsCount(customRealm: Realm? = null): Int {
+            val block: (Realm) -> Int = { realm ->
                 realm.refresh() // TODO: (Realm kotlin) - Remove when we update to Realm Kotlin
                 pendingUploadsQuery(realm).count().toInt()
             }
+
+            return customRealm?.let(block) ?: getRealmInstance().use(block)
         }
 
         fun getCurrentUserPendingUploadsCount(folderId: Int? = null): Int {
