@@ -550,7 +550,7 @@ class MainViewModel(
 
     fun isFilesMarkedAsOffline(filesId: List<Int>, isMarkedAsOffline: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         FileController.getRealmInstance().use { realm ->
-            FileController.isFilesMarkedAsOffline(customRealm = realm, filesId = filesId, isMarkedAsOffline = isMarkedAsOffline)
+            FileController.markFilesAsOffline(customRealm = realm, filesId = filesId, isMarkedAsOffline = isMarkedAsOffline)
         }
     }
 

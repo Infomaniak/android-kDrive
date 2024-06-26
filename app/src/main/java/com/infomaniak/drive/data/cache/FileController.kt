@@ -162,28 +162,26 @@ object FileController {
         }
     }
 
-    fun isFilesMarkedAsOffline(customRealm: Realm = getRealmInstance(), filesId: List<Int>, isMarkedAsOffline: Boolean) {
+    private fun markFileAsOfflineQuery(realm: Realm, fileId: Int, isMarkedAsOffline: Boolean) {
+        realm.where(File::class.java)
+            .equalTo(File::id.name, fileId)
+            .findFirst()?.let { file ->
+                file.isMarkedAsOffline = isMarkedAsOffline
+            }
+    }
+
+    fun markFilesAsOffline(customRealm: Realm = getRealmInstance(), filesId: List<Int>, isMarkedAsOffline: Boolean) {
         return customRealm.use { realm ->
             realm.executeTransaction {
-                filesId.forEach { fileId ->
-                    realm.where(File::class.java)
-                        .equalTo(File::id.name, fileId)
-                        .findFirst()?.let { file ->
-                            file.isMarkedAsOffline = isMarkedAsOffline
-                        }
-                }
+                filesId.forEach { fileId -> markFileAsOfflineQuery(realm, fileId, isMarkedAsOffline) }
             }
         }
     }
 
-    fun isFileMarkedAsOffline(customRealm: Realm = getRealmInstance(), fileId: Int, isMarkedAsOffline: Boolean) {
+    fun markFileAsOffline(customRealm: Realm = getRealmInstance(), fileId: Int, isMarkedAsOffline: Boolean) {
         return customRealm.use { realm ->
             realm.executeTransaction {
-                realm.where(File::class.java)
-                    .equalTo(File::id.name, fileId)
-                    .findFirst()?.let { file ->
-                        file.isMarkedAsOffline = isMarkedAsOffline
-                    }
+                markFileAsOfflineQuery(realm, fileId, isMarkedAsOffline)
             }
         }
     }
@@ -258,7 +256,7 @@ object FileController {
         try {
             val block: (Realm) -> Unit? = { currentRealm ->
                 fileIds.forEach { fileId ->
-                currentRealm.executeTransaction {
+                    currentRealm.executeTransaction {
                         getFileById(currentRealm, fileId)?.let { file ->
                             file.isOffline = isOffline
                         }

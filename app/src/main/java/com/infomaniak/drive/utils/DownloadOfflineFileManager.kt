@@ -181,7 +181,7 @@ class DownloadOfflineFileManager(
     }
 
     private fun fileDownloaded(context: Context, fileId: Int) {
-        FileController.isFileMarkedAsOffline(fileId = fileId, isMarkedAsOffline = false)
+        FileController.markFileAsOffline(fileId = fileId, isMarkedAsOffline = false)
         lastUpdateProgressMillis = System.currentTimeMillis()
         filesDownloaded += 1
 
