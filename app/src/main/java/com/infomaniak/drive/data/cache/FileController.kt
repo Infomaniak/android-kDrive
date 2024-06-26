@@ -151,14 +151,12 @@ object FileController {
 
     fun getFolderOfflineFilesId(folderId: Int): List<Int> {
         return getRealmInstance().use { realm ->
-            realm.where(File::class.java)
+            val realmFiles = realm.where(File::class.java)
                 .equalTo(File::parentId.name, folderId)
                 .equalTo(File::isMarkedAsOffline.name, true)
                 .getSortQueryByOrder(SortType.NAME_AZ)
                 .findAll()
-                .let { realmFiles ->
-                    realmFiles.filter { !it.isFolder() }.map { it.id }
-                }
+            realmFiles.filter { !it.isFolder() }.map { it.id }
         }
     }
 
