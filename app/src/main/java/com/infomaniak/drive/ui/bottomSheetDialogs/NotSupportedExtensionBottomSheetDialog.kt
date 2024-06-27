@@ -29,7 +29,7 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.showProgressCatching
 import com.infomaniak.lib.core.utils.toPx
 
 class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
@@ -63,7 +63,7 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
                 initProgress(this@NotSupportedExtensionBottomSheetDialog)
                 text = getString(R.string.buttonCreateOnlyOfficeCopy, currentFile.conversion?.onlyofficeExtension)
                 setOnClickListener {
-                    showProgress()
+                    showProgressCatching()
                     mainViewModel.convertFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
                         when (apiResponse?.result) {
                             ApiResponseStatus.SUCCESS -> apiResponse.data?.let { newFile ->

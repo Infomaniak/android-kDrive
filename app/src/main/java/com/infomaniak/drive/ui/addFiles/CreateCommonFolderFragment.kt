@@ -34,9 +34,9 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideKeyboard
-import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.showProgressCatching
 
 class CreateCommonFolderFragment : CreateFolderFragment() {
 
@@ -65,7 +65,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
 
     private fun createCommonFolder() = with(binding) {
         folderNameValueInput.hideKeyboard()
-        createFolderButton.showProgress()
+        createFolderButton.showProgressCatching()
         trackNewElementEvent("createCommonFolder")
 
         newFolderViewModel.createCommonFolder(
@@ -81,7 +81,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
                 showSnackbar(apiResponse.translateError())
             }
 
-            createFolderButton.hideProgress(R.string.createFolderTitle)
+            createFolderButton.hideProgressCatching(R.string.createFolderTitle)
         }
     }
 

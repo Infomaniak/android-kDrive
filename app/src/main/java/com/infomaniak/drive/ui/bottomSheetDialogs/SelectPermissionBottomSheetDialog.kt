@@ -151,7 +151,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun updateShareLinkOfficePermission(file: File, permission: Permission?) = with(binding) {
         saveButton.initProgress(viewLifecycleOwner)
-        saveButton.showProgress()
+        saveButton.showProgressCatching()
         selectPermissionViewModel.editFileShareLinkOfficePermission(
             file, canEdit = (permission as EditPermission).apiValue
         ).observe(viewLifecycleOwner) { apiResponse ->
@@ -162,7 +162,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun updatePermission(file: File, shareableItem: Shareable?, permission: ShareablePermission? = null) = with(binding) {
         saveButton.initProgress(viewLifecycleOwner)
-        saveButton.showProgress()
+        saveButton.showProgressCatching()
         shareableItem?.let { shareable ->
             if (permission == ShareablePermission.DELETE || permission == null) {
                 trackShareRightsEvent("deleteUser")
@@ -199,7 +199,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         } else {
             SnackbarUtils.showSnackbar(requireView(), errorMessage)
         }
-        binding.saveButton.hideProgress(R.string.buttonSave)
+        binding.saveButton.hideProgressCatching(R.string.buttonSave)
     }
 
     internal class SelectPermissionViewModel : ViewModel() {

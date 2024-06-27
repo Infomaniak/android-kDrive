@@ -345,7 +345,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun saveSettings() = with(binding) {
-        saveButton.showProgress()
+        saveButton.showProgressCatching()
         lifecycleScope.launch(Dispatchers.IO) {
             val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
                 SavePicturesDate.SINCE_NOW -> Date()
