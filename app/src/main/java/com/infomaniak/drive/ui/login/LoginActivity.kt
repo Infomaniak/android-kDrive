@@ -76,7 +76,7 @@ class LoginActivity : AppCompatActivity() {
                     else -> showError(getString(R.string.anErrorHasOccurred))
                 }
             } else {
-                binding.connectButton.hideProgress(R.string.connect)
+                binding.connectButton.hideProgressCatching(R.string.connect)
                 binding.signInButton.isEnabled = true
             }
         }
@@ -112,7 +112,7 @@ class LoginActivity : AppCompatActivity() {
             initProgress(this@LoginActivity)
             setOnClickListener {
                 signInButton.isEnabled = false
-                showProgress()
+                showProgressCatching()
                 trackAccountEvent("openLoginWebview")
                 infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
             }
@@ -188,7 +188,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showError(error: String) = with(binding) {
         showSnackbar(error)
-        connectButton.hideProgress(R.string.connect)
+        connectButton.hideProgressCatching(R.string.connect)
         signInButton.isEnabled = true
         if (!connectButton.isEnabled) connectButton.isEnabled = true
     }
@@ -199,7 +199,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun launchNoDriveActivity() = with(binding) {
         Intent(this@LoginActivity, NoDriveActivity::class.java).apply { startActivity(this) }
-        connectButton.hideProgress(R.string.connect)
+        connectButton.hideProgressCatching(R.string.connect)
         signInButton.isEnabled = true
     }
 

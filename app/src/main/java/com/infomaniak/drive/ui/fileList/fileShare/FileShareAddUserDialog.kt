@@ -111,7 +111,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         shareButton.apply {
             initProgress(this@FileShareAddUserDialog)
             setOnClickListener {
-                showProgress()
+                showProgressCatching()
                 trackShareRightsEvent("inviteUser")
                 checkShare(selectedPermission) { file, body ->
                     createShareAndCloseDialog(file, body)
@@ -200,7 +200,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             } else {
                 SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
             }
-            binding.shareButton.hideProgress(R.string.buttonShare)
+            binding.shareButton.hideProgressCatching(R.string.buttonShare)
         }
     }
 
@@ -231,7 +231,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                     }
                 } else {
                     SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
-                    shareButton.hideProgress(R.string.buttonShare)
+                    shareButton.hideProgressCatching(R.string.buttonShare)
                 }
             }
         }

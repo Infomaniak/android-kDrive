@@ -43,10 +43,10 @@ import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.MatomoCore.TrackerAction
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.showProgressCatching
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Date
@@ -171,14 +171,14 @@ open class ManageDropboxFragment : Fragment() {
             initProgress(this@ManageDropboxFragment)
             setOnClickListener {
                 trackDropboxEvent("convertToFolder")
-                showProgress(ContextCompat.getColor(requireContext(), R.color.title))
+                showProgressCatching(ContextCompat.getColor(requireContext(), R.color.title))
                 mainViewModel.deleteDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
                         findNavController().popBackStack()
                     } else {
                         showSnackbar(R.string.errorDelete)
                     }
-                    hideProgress(R.string.buttonDisableDropBox)
+                    hideProgressCatching(R.string.buttonDisableDropBox)
                 }
             }
         }
@@ -196,14 +196,14 @@ open class ManageDropboxFragment : Fragment() {
                     null
                 }
                 currentDropBox?.let {
-                    showProgress()
+                    showProgressCatching()
                     mainViewModel.updateDropBox(file, it).observe(viewLifecycleOwner) { apiResponse ->
                         if (apiResponse.isSuccess()) {
                             findNavController().popBackStack()
                         } else {
                             showSnackbar(R.string.errorModification)
                         }
-                        hideProgress(R.string.buttonSave)
+                        hideProgressCatching(R.string.buttonSave)
                     }
                 }
             }

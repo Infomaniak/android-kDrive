@@ -27,9 +27,9 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.showProgressCatching
 
 class ConvertToDropBoxFragment : ManageDropboxFragment() {
 
@@ -58,7 +58,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
                     } else {
                         null
                     }
-                    saveButton.showProgress()
+                    saveButton.showProgressCatching()
                     mainViewModel.createDropBoxFolder(
                         file = file,
                         emailWhenFinished = emailWhenFinishedSwitch.isChecked,
@@ -72,7 +72,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
                         } else {
                             showSnackbar(apiResponse.translateError())
                         }
-                        saveButton.hideProgress(R.string.buttonSave)
+                        saveButton.hideProgressCatching(R.string.buttonSave)
                     }
                 }
             }

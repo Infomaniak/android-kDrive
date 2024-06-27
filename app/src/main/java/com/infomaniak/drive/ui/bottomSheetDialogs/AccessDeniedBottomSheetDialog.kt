@@ -57,7 +57,7 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
                 setText(R.string.buttonConfirmNotify)
                 setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red_error))
                 setOnClickListener {
-                    showProgress()
+                    showProgressCatching()
                     informationBottomSheetViewModel.forceFolderAccess(navigationArgs.folderId)
                         .observe(viewLifecycleOwner) { apiResponse ->
                             if (apiResponse.data == null) {
@@ -67,7 +67,7 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
                                     if (hasAccess) navigateToTargetFolder() else closeAndShowRightError()
                                 }
                             }
-                            hideProgress(R.string.buttonConfirmNotify)
+                            hideProgressCatching(R.string.buttonConfirmNotify)
                         }
                 }
             }
