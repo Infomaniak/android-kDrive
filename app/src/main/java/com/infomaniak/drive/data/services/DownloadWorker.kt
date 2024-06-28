@@ -19,9 +19,7 @@ package com.infomaniak.drive.data.services
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.NotificationManagerCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.infomaniak.drive.data.cache.FileController
@@ -48,14 +46,10 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
         DownloadOfflineFileManager(
             userDrive,
             0,
-            this,
+            downloadWorker = this,
             notificationManagerCompat
         )
     }
-    private val downloadProgressNotification by lazy {
-        DownloadOfflineFileManager.createDownloadNotification(applicationContext, id, fileName)
-    }
-    private var notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
 
     override fun downloadNotification(): DownloadNotification? {
         return file?.id?.let { notificationId ->
@@ -65,13 +59,9 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     override suspend fun downloadAction(): Result = downloadFile()
 
-    override fun isCanceled() {
+    override fun onFinish() {
         offlineFile?.let { if (it.exists() && file?.isIntactFile(it) == false) it.delete() }
         notifyDownloadCancelled()
-        Result.failure()
-    }
-
-    override fun isFinished() {
         file?.id?.let(notificationManagerCompat::cancel)
     }
 
@@ -79,12 +69,9 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     override fun workerTag() = TAG
 
-    override suspend fun getForegroundInfo(): ForegroundInfo {
-        return ForegroundInfo(
-            fileId,
-            DownloadOfflineFileManager.createDownloadNotification(applicationContext, id, fileName).build()
-        )
-    }
+    override val notificationTitle = fileName
+
+    override val notificationId = fileId
 
     private suspend fun downloadFile(): Result {
         val result = downloadOfflineFileManager.execute(applicationContext, fileId) { progress, downloadedFileId ->

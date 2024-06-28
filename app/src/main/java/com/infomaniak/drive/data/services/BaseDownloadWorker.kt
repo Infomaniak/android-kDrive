@@ -22,15 +22,30 @@ import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.infomaniak.drive.data.api.UploadTask
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.RemoteFileException
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
 
 abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
+
+    abstract val notificationId: Int
+    abstract val notificationTitle: String
+
+    protected val notificationManagerCompat: NotificationManagerCompat = NotificationManagerCompat.from(applicationContext)
+    protected val downloadProgressNotification by lazy {
+        DownloadOfflineFileManager.createDownloadNotification(
+            context = context,
+            id = id,
+            title = notificationTitle
+        )
+    }
 
     override suspend fun doWork(): Result {
         return runCatching {
@@ -48,7 +63,7 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
                     }
                 }
                 is UploadTask.NetworkException -> {
-                    Result.failure()
+                    Result.retry()
                 }
                 is RemoteFileException -> {
                     Sentry.captureException(exception)
@@ -60,7 +75,7 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
                 }
             }
         }.also {
-            isFinished()
+            onFinish()
             Log.i(workerTag(), "Work finished")
         }
     }
@@ -69,13 +84,14 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
 
     abstract suspend fun downloadAction(): Result
 
-    abstract fun isCanceled()
-
-    abstract fun isFinished()
+    // Flush data when success or failure
+    abstract fun onFinish()
 
     abstract fun isForOneFile(): Boolean
 
     abstract fun workerTag(): String
+
+    override suspend fun getForegroundInfo() = ForegroundInfo(notificationId, downloadProgressNotification.build())
 
     data class DownloadNotification(
         val titleResId: Int? = null,

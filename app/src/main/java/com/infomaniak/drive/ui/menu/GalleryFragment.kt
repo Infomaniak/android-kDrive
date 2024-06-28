@@ -265,10 +265,17 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
         // API doesn't support bulk operations for files originating from
         // different parent folders, so we repeat the action for each file.
         // Hence the `areAllFromTheSameFolder` set at false.
-        super.performBulkOperation(type, folderId, false, allSelectedFilesCount, destinationFolder, color)
+        super.performBulkOperation(
+            type,
+            folderId,
+            areAllFromTheSameFolder = false,
+            allSelectedFilesCount,
+            destinationFolder,
+            color
+        )
     }
 
-    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {
+    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any?) {
         when (type) {
             BulkOperationType.TRASH -> {
                 runBlocking(Dispatchers.Main) { galleryAdapter.deleteByFileId(data as Int) }

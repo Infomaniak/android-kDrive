@@ -233,8 +233,8 @@ class MainActivity : BaseActivity() {
             if (isAvailable) {
                 lifecycleScope.launch {
                     AccountUtils.updateCurrentUserAndDrives(this@MainActivity)
-                    mainViewModel.restartUploadWorkerIfNeeded()
                 }
+                mainViewModel.restartUploadWorkerIfNeeded()
             }
         }
     }
@@ -293,7 +293,9 @@ class MainActivity : BaseActivity() {
     }
 
     private fun observeBulkDownloadRunning() {
-        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (isRunning) launchSyncOffline() }
+        // We need to check if the bulk download is running to avoid any
+        // conflicts between the two ways of downloading offline files
+        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (!isRunning) launchSyncOffline() }
     }
 
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown

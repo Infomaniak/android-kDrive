@@ -32,7 +32,7 @@ class NotificationPermission {
     private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
 
-    fun registerPermissions(fragment: Fragment, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
+    fun registerPermission(fragment: Fragment, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         activity = fragment.requireActivity()
         registerForActivityResult =
             fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
@@ -54,6 +54,6 @@ class NotificationPermission {
     }
 
     companion object {
-        val notificationPermission = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+        private val notificationPermission = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
     }
 }

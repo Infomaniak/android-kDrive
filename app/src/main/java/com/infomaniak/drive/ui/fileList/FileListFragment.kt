@@ -729,7 +729,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {
+    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any?) {
         when (type) {
             BulkOperationType.TRASH,
             BulkOperationType.MOVE,

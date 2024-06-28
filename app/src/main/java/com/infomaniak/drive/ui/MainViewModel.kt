@@ -40,7 +40,6 @@ import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
-import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.*
@@ -438,19 +437,22 @@ class MainViewModel(
             .build()
     )
 
-    suspend fun restartUploadWorkerIfNeeded() = withContext(Dispatchers.IO) {
-        if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
-            getContext().syncImmediately()
+    fun restartUploadWorkerIfNeeded() {
+        viewModelScope.launch {
+            if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
+                getContext().syncImmediately()
+            }
         }
     }
 
     fun removeSelectedFilesFromOffline(files: List<File>, onSuccess: (() -> Unit)? = null) = liveData {
-        val filesId = files.map { file ->
+        val filesId = files.map {
+            val file: File = it.freeze()
             if (!file.isFolder()) {
                 val offlineFile = file.getOfflineFile(getApplication())
                 val cacheFile = file.getCacheFile(getApplication())
-                if (file.isOffline) {
-                    removeSelectedFileFromOffline(file, offlineFile, cacheFile)
+                if (file.isOffline && offlineFile != null) {
+                    deleteFile(file, offlineFile, cacheFile)
                 }
             }
             file.id
@@ -463,18 +465,21 @@ class MainViewModel(
         }
     }
 
-    private fun removeSelectedFileFromOffline(
+    fun removeOfflineFile(
         file: File,
-        offlineFile: java.io.File?,
-        cacheFile: java.io.File,
+        offlineFile: IOFile,
+        cacheFile: IOFile,
+        userDrive: UserDrive = UserDrive(),
         onFileRemovedFromOffline: (() -> Unit)? = null,
     ) {
-        if (offlineFile != null) {
-            removeOfflineFile(file, offlineFile, cacheFile, onFileRemovedFromOffline = onFileRemovedFromOffline)
+        // We need to call this method outside the UI thread
+        viewModelScope.launch(Dispatchers.IO) {
+            FileController.updateOfflineStatus(file.id, isOffline = false)
         }
+        deleteFile(file, offlineFile, cacheFile, userDrive, onFileRemovedFromOffline)
     }
 
-    fun removeOfflineFile(
+    private fun deleteFile(
         file: File,
         offlineFile: IOFile,
         cacheFile: IOFile,
@@ -539,16 +544,12 @@ class MainViewModel(
     }
 
     fun checkBulkDownloadStatus() = viewModelScope.launch {
-        val isRunning = DownloadOfflineFileManager.checkWorkerDownloadStatus(
-            context = getContext(),
-            ignoreSyncOffline = ignoreSyncOffline,
-            workerName = BulkDownloadWorker.TAG
-        )
+        val isRunning = DownloadOfflineFileManager.isBulkDownloadWorkerRunning(getContext())
         isBulkDownloadRunning.value = isRunning
         ignoreSyncOffline = isRunning
     }
 
-    fun isFilesMarkedAsOffline(filesId: List<Int>, isMarkedAsOffline: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+    fun markFilesAsOffline(filesId: List<Int>, isMarkedAsOffline: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         FileController.getRealmInstance().use { realm ->
             FileController.markFilesAsOffline(customRealm = realm, filesId = filesId, isMarkedAsOffline = isMarkedAsOffline)
         }

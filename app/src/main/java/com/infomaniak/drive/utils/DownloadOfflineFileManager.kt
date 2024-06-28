@@ -63,7 +63,6 @@ class DownloadOfflineFileManager(
     private var lastDownloadedFile: IOFile? = null
     private var filesDownloaded = 0
 
-    private var result: ListenableWorker.Result = ListenableWorker.Result.failure()
     private var lastUpdateProgressMillis = System.currentTimeMillis()
 
     suspend fun execute(
@@ -100,10 +99,9 @@ class DownloadOfflineFileManager(
             lastDownloadedFile = offlineFile
         }
 
-        result = file?.let {
+        return file?.let {
             startOfflineDownload(context = context, file = file, offlineFile = offlineFile!!, onProgress = onProgress)
         } ?: ListenableWorker.Result.failure()
-        return result
     }
 
     fun cleanLastDownloadedFile() {
@@ -232,19 +230,14 @@ class DownloadOfflineFileManager(
                 .build()
         )
 
-        suspend fun checkWorkerDownloadStatus(
-            context: Context,
-            ignoreSyncOffline: Boolean,
-            workerName: String,
-        ) = withContext(Dispatchers.Default) {
+        suspend fun isBulkDownloadWorkerRunning(context: Context): Boolean {
             val workQuery = WorkQuery.Builder
-                .fromUniqueWorkNames(arrayListOf(workerName))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED))
                 .build()
             val workInfoList = WorkManager.getInstance(context).getWorkInfos(workQuery).await()
-            val isRunning = workInfoList.isNotEmpty() && workInfoList.first().state == WorkInfo.State.RUNNING
 
-            !(!isRunning && !ignoreSyncOffline)
+            return workInfoList.isNotEmpty() && workInfoList.first().state == WorkInfo.State.RUNNING
         }
 
         fun createDownloadNotification(context: Context, id: UUID, title: String): NotificationCompat.Builder {
@@ -274,13 +267,13 @@ class DownloadOfflineFileManager(
         }
 
         fun saveRemoteData(
-            workerTag: String,
+            tag: String,
             response: Response,
             outputFile: java.io.File? = null,
             outputStream: ParcelFileDescriptor.AutoCloseOutputStream? = null,
             onFinish: (() -> Unit)? = null
         ) {
-            SentryLog.d(workerTag, "save remote data to ${outputFile?.path}")
+            SentryLog.d(tag, "save remote data to ${outputFile?.path}")
             response.body?.byteStream()?.buffered()?.use { input ->
                 val stream = outputStream ?: outputFile?.outputStream()
                 stream?.use { output ->

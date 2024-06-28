@@ -106,7 +106,7 @@ class FavoritesFragment : FileListFragment() {
         super.performBulkOperation(
             type,
             folderId,
-            false,
+            areAllFromTheSameFolder = false,
             allSelectedFilesCount,
             destinationFolder,
             color

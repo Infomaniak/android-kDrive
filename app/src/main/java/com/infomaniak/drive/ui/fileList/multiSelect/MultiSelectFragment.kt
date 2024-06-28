@@ -22,7 +22,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -35,7 +34,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
@@ -47,15 +45,12 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
-import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.Utils.downloadAsOfflineFiles
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import java.util.UUID
 
 abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
 
@@ -91,7 +86,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        mainViewModel.notificationPermission.registerPermissions(this)
+        mainViewModel.notificationPermission.registerPermission(this)
 
         multiSelectLayout = initMultiSelectLayout()
         multiSelectToolbar = initMultiSelectToolbar()
@@ -251,7 +246,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
             BulkOperationType.ADD_OFFLINE -> {
                 // Set all selected file as offline in order for BulkDownloadWorker to download them
-                mainViewModel.isFilesMarkedAsOffline(selectedFiles.map { selectedFile -> selectedFile.id }, true)
+                mainViewModel.markFilesAsOffline(selectedFiles.map { selectedFile -> selectedFile.id }, true)
                 sendActions(null)
             }
             else -> sendActions(null)
@@ -326,7 +321,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 downloadAsOfflineFiles(
                     context = requireContext(),
                     folderId = folderId,
-                    onSuccess = { onIndividualActionSuccess(type, Any()) }
+                    onSuccess = { onIndividualActionSuccess(type) }
                 ),
                 mainViewModel.updateMultiSelectMediator(mediator),
             )
@@ -341,7 +336,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         mediator.addSource(
             mainViewModel.removeSelectedFilesFromOffline(
                 files = selectedFiles,
-                onSuccess = { onIndividualActionSuccess(type, Any()) }
+                onSuccess = { onIndividualActionSuccess(type) }
             ),
             mainViewModel.updateMultiSelectMediator(mediator),
         )
@@ -493,33 +488,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         closeMultiSelect()
 
         onAllIndividualActionsFinished(type)
-    }
-
-    private fun addSelectedFileToOffline(file: File, offlineFile: IOFile?, cacheFile: IOFile) {
-        val invalidFileNameChar = Utils.getInvalidFileNameCharacter(file.name)
-        if (invalidFileNameChar == null) {
-            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-                FileController.updateOfflineStatus(file.id, true)
-                updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                    currentFile.apply {
-                        if (isNotManagedByRealm()) {
-                            isOffline = true
-                            currentProgress = 0
-                        }
-                    }
-                }
-            } else {
-                Utils.downloadAsOfflineFile(requireContext(), file)
-            }
-        } else {
-            context?.let {
-                it.buildGeneralNotification(
-                    title = getString(R.string.anErrorHasOccurred),
-                    description = getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name)
-                ).apply { NotificationManagerCompat.from(it).notifyCompat(it, UUID.randomUUID().hashCode(), build()) }
-            }
-        }
     }
 
     private fun trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
