@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
 import kotlinx.parcelize.Parcelize
-import java.util.*
+import java.util.Date
 
 @Parcelize
 @RealmClass(embedded = true)

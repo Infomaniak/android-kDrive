@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UploadFile.Companion.getRealmInstance
 import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
@@ -44,8 +45,8 @@ import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.utils.*
+import io.realm.Realm
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -94,6 +95,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
                 // Check if re-sync is needed
                 appSyncSettings?.let {
+                    SentryLog.i(TAG, "Check if need re-sync")
                     checkLocalLastMedias(it)
                     syncNewPendingUploads = UploadFile.getAllPendingUploadsCount() > 0
                 }
@@ -108,6 +110,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 SentryLog.wtf(TAG, "A file has been restarted several times")
                 result = Result.failure()
             }
+
+            SentryLog.d(TAG, "Work finished, result=$result || retryError=$retryError || lastUpload=$lastUploadFileName")
 
             result
         }
@@ -146,22 +150,28 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
-        val uploadFiles = UploadFile.getAllPendingUploads()
-        pendingCount = uploadFiles.size
+        var uploadFiles: List<UploadFile>
 
-        if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
+        getRealmInstance().use { realm ->
+            uploadFiles = UploadFile.getAllPendingUploads(realm)
+            pendingCount = uploadFiles.size
 
-        checkUploadCountReliability()
+            if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
+
+            checkUploadCountReliability(realm)
+        }
 
         SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
 
         for (uploadFile in uploadFiles) {
-            SentryLog.d(TAG, "startSyncFiles> upload ${uploadFile.fileName}")
+            SentryLog.d(TAG, "startSyncFiles> size: ${uploadFile.fileSize}")
 
             if (uploadFile.initUpload()) {
+                SentryLog.i(TAG, "startSyncFiles: file uploaded with success")
                 successNames.add(uploadFile.fileName)
                 successCount++
             } else {
+                SentryLog.i(TAG, "startSyncFiles: file upload failed")
                 failedNames.add(uploadFile.fileName)
                 failedCount++
             }
@@ -179,16 +189,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         if (uploadedCount > 0) Result.success() else Result.failure()
     }
 
-    private fun checkUploadCountReliability() {
-        val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount()
+    private fun checkUploadCountReliability(realm: Realm) {
+        val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount(realm)
         if (allPendingUploadsCount != pendingCount) {
-            val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriority().count()
+            val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriorityCount(realm)
             Sentry.withScope { scope ->
-                scope.level = SentryLevel.ERROR
-                scope.setExtra("uploadFiles", "$pendingCount")
+                scope.setExtra("uploadFiles pending count", "$pendingCount")
                 scope.setExtra("realmAllPendingUploadsCount", "$allPendingUploadsCount")
                 scope.setExtra("allPendingUploadsWithoutPriorityCount", "$allPendingUploadsWithoutPriorityCount")
-                Sentry.captureMessage("An upload count inconsistency has been detected")
+                Sentry.captureMessage("An upload count inconsistency has been detected", SentryLevel.ERROR)
             }
             if (pendingCount == 0) throw CancellationException("Stop several restart")
         }
@@ -208,14 +217,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 initUploadSchemeContent(uri)
             }
         } catch (exception: Exception) {
+            SentryLog.w(TAG, "initUpload: failed", exception)
             handleException(exception)
             false
         }
     }
 
     private suspend fun UploadFile.initUploadSchemeFile(uri: Uri): Boolean {
+        SentryLog.d(TAG, "initUploadSchemeFile: start")
         val cacheFile = uri.toFile().apply {
             if (!exists()) {
+                SentryLog.i(TAG, "initUploadSchemeFile: file doesn't exist")
                 deleteIfExists()
                 return false
             }
@@ -227,8 +239,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
-        return contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) startUploadFile(uri.getFileSize(cursor)) else false
+        SentryLog.d(TAG, "initUploadSchemeContent: start")
+        return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val columns = cursor.columnNames.joinToString { it }
+
+            if (cursor.moveToFirst()) {
+                if (!columns.contains(OpenableColumns.SIZE)) {
+                    SentryLog.e(TAG, "initUploadSchemeContent: size column doesn't exist ($columns)")
+                }
+                startUploadFile(uri.getFileSize(cursor))
+            } else {
+                val sentryMessage = "$fileName moveToFirst failed - count(${cursor.count}), columns($columns)"
+                SentryLog.w(TAG, "initUploadSchemeContent: $sentryMessage")
+                deleteIfExists(keepFile = isSync())
+                false
+            }
         } ?: false
     }
 
@@ -236,23 +261,23 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return if (size != 0L) {
             if (fileSize != size) updateFileSize(size)
 
-            currentUploadTask = UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker)
-            currentUploadTask!!.start().also { isUploaded ->
-                if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
-                    deleteIfExists(keepFile = isSync())
-                }
+            SentryLog.d(TAG, "startUploadFile (size: $fileSize)")
 
-                SentryLog.d(TAG, "startUploadFile> end upload $fileName")
+            UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker).run {
+                currentUploadTask = this
+                start().also { isUploaded ->
+                    if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
+                        deleteIfExists(keepFile = isSync())
+                    }
+
+                    SentryLog.d(TAG, "startUploadFile> end upload file")
+                }
             }
 
         } else {
             deleteIfExists()
-            SentryLog.d("kDrive", "$TAG > $fileName deleted size:$size")
-            Sentry.withScope { scope ->
-                scope.setExtra("data", ApiController.gson.toJson(this))
-                scope.setExtra("fileName", fileName)
-                Sentry.captureMessage("Deleted file with size 0")
-            }
+            SentryLog.d("kDrive", "$TAG > file deleted size: 0")
+            Sentry.captureMessage("Deleted file with size 0")
             false
         }
     }
@@ -270,19 +295,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun UploadFile.handleException(exception: Exception) {
         when (exception) {
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
-                deleteIfExists()
+                deleteIfExists(keepFile = isSync())
 
                 // If is an ACTION_OPEN_DOCUMENT exception and the file is older than August 17, 2022 we ignore sentry
                 if (fileModifiedAt < Date(1660736262000) && exception.message?.contains("ACTION_OPEN_DOCUMENT") == true) return
 
-                Sentry.withScope { scope ->
-                    scope.setExtra("data", ApiController.gson.toJson(this))
-                    if (exception is IllegalStateException) {
-                        Sentry.captureMessage("The file is either partially downloaded or corrupted")
-                    } else {
-                        Sentry.captureException(exception)
-                    }
-                }
+                if (exception !is IllegalStateException) Sentry.captureException(exception)
             }
             else -> throw exception
         }
@@ -301,53 +319,54 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
-        val parentJob = Job()
         var customSelection: String
         var customArgs: Array<String>
 
         SentryLog.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
-        MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
-            // Add log
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = BREADCRUMB_TAG
-                message = "sync ${mediaFolder.name}"
-                level = SentryLevel.DEBUG
-            })
-            SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.name}_${mediaFolder.id}")
+        UploadFile.getRealmInstance().use {
+            it.executeTransaction { realm ->
 
-            // Sync media folder
-            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
-            customArgs = args + mediaFolder.id.toString()
+                MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
+                    ensureActive()
+                    // Add log
+                    Sentry.addBreadcrumb(Breadcrumb().apply {
+                        category = BREADCRUMB_TAG
+                        message = "sync ${mediaFolder.id}"
+                        level = SentryLevel.DEBUG
+                    })
+                    SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
 
-            @Suppress("DeferredResultUnused")
-            async(parentJob) {
-                getLocalLastMedias(
-                    syncSettings = syncSettings,
-                    contentUri = MediaFoldersProvider.imagesExternalUri,
-                    selection = customSelection,
-                    args = customArgs,
-                    mediaFolder = mediaFolder,
-                )
-            }
+                    // Sync media folder
+                    customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
+                    customArgs = args + mediaFolder.id.toString()
 
-            if (syncSettings.syncVideo) {
-                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
-
-                @Suppress("DeferredResultUnused")
-                async(parentJob) {
-                    getLocalLastMedias(
+                    fetchRecentLocalMediasToSync(
+                        coroutineScope = this,
+                        realm = realm,
                         syncSettings = syncSettings,
-                        contentUri = MediaFoldersProvider.videosExternalUri,
+                        contentUri = MediaFoldersProvider.imagesExternalUri,
                         selection = customSelection,
                         args = customArgs,
                         mediaFolder = mediaFolder,
                     )
+
+                    if (syncSettings.syncVideo) {
+                        customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
+
+                        fetchRecentLocalMediasToSync(
+                            coroutineScope = this,
+                            realm = realm,
+                            syncSettings = syncSettings,
+                            contentUri = MediaFoldersProvider.videosExternalUri,
+                            selection = customSelection,
+                            args = customArgs,
+                            mediaFolder = mediaFolder,
+                        )
+                    }
                 }
             }
         }
-        parentJob.complete()
-        parentJob.join()
     }
 
     private fun moreCustomConditions(): String = when {
@@ -356,12 +375,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         else -> ""
     }
 
-    private fun getLocalLastMedias(
+    private fun fetchRecentLocalMediasToSync(
+        coroutineScope: CoroutineScope,
+        realm: Realm,
         syncSettings: SyncSettings,
         contentUri: Uri,
         selection: String,
         args: Array<String>,
-        mediaFolder: MediaFolder
+        mediaFolder: MediaFolder,
     ) {
 
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " +
@@ -371,7 +392,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         runCatching {
             contentResolver.query(contentUri, null, selection, args, sortOrder)
                 ?.use { cursor ->
-                    val messageLog = "getLocalLastMediasAsync > from ${mediaFolder.name} ${cursor.count} found"
+                    val messageLog = "getLocalLastMediasAsync > $contentUri from ${mediaFolder.name} ${cursor.count} found"
                     SentryLog.d(TAG, messageLog)
                     Sentry.addBreadcrumb(Breadcrumb().apply {
                         category = BREADCRUMB_TAG
@@ -380,22 +401,31 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     })
 
                     while (cursor.moveToNext()) {
-                        localMediaFound(cursor, contentUri, mediaFolder, syncSettings)
+                        coroutineScope.ensureActive()
+                        processFoundLocalMedia(realm, cursor, contentUri, mediaFolder, syncSettings)
                     }
                 }
         }.onFailure { exception ->
-            syncMediaFolderFailure(exception, contentUri, mediaFolder)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || exception !is IllegalArgumentException) {
+                throw exception
+            }
         }
     }
 
-    private fun localMediaFound(cursor: Cursor, contentUri: Uri, mediaFolder: MediaFolder, syncSettings: SyncSettings) {
+    private fun processFoundLocalMedia(
+        realm: Realm,
+        cursor: Cursor,
+        contentUri: Uri,
+        mediaFolder: MediaFolder,
+        syncSettings: SyncSettings
+    ) {
         val uri = cursor.uri(contentUri)
 
         val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
         val fileName = cursor.getFileName(contentUri)
         val fileSize = uri.getFileSize(cursor)
 
-        val messageLog = "localMediaFound > ${mediaFolder.name}/$fileName found"
+        val messageLog = "localMediaFound > $fileName found in folder ${mediaFolder.name}"
         SentryLog.d(TAG, messageLog)
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = BREADCRUMB_TAG
@@ -403,7 +433,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             level = SentryLevel.INFO
         })
 
-        if (UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
+        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
             UploadFile(
                 uri = uri.toString(),
                 driveId = syncSettings.driveId,
@@ -414,14 +444,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 remoteFolder = syncSettings.syncFolder,
                 userId = syncSettings.userId
             ).apply {
-                deleteIfExists()
+                deleteIfExists(makeTransaction = false, customRealm = realm)
                 createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
-                store()
+                realm.insertOrUpdate(this)
+                SentryLog.i(TAG, "localMediaFound> $fileName saved in realm")
             }
 
-            UploadFile.setAppSyncSettings(syncSettings.apply {
-                if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
-            })
+            UploadFile.setAppSyncSettings(
+                customRealm = realm,
+                makeTransaction = false,
+                syncSettings = syncSettings.apply {
+                    if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
+                },
+            )
+        } else {
+            SentryLog.w(TAG, "localMediaFound> Cannot upload $fileName, size=$fileSize")
         }
     }
 
@@ -429,28 +466,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private fun calculateFileSize(uri: Uri): Long? {
         return uri.calculateFileSize(contentResolver) ?: null.also {
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                scope.setExtra("uri", uri.toString())
-                Sentry.captureException(Exception("Cannot calculate the file size"))
-            }
-        }
-    }
-
-    private fun syncMediaFolderFailure(exception: Throwable, contentUri: Uri, mediaFolder: MediaFolder) {
-        // Catch Api>=29 for exception {Volume external_primary not found}, Adding logs to get more information
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && exception is IllegalArgumentException) {
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.ERROR
-                val volumeNames = MediaStore.getExternalVolumeNames(applicationContext).joinToString()
-                scope.setExtra("uri", contentUri.toString())
-                scope.setExtra("folder", mediaFolder.name)
-                scope.setExtra("volume names", volumeNames)
-                scope.setExtra("exception", exception.toString())
-                Sentry.captureMessage("getLocalLastMediasAsync() ERROR")
-            }
-        } else {
-            throw exception
+            SentryLog.i(TAG, "Cannot calculate the file size from uri")
         }
     }
 

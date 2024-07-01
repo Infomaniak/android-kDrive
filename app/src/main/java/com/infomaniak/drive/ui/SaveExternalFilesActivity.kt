@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import android.provider.MediaStore.Files.FileColumns
 import android.text.InputFilter
 import android.text.Spanned
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -42,7 +43,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.data.models.UiSettings.*
+import com.infomaniak.drive.data.models.UiSettings.SaveExternalFilesData
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
@@ -73,8 +74,8 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private lateinit var saveExternalUriAdapter: SaveExternalUriAdapter
 
-    private val sharedFolder: java.io.File by lazy {
-        java.io.File(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
+    private val sharedFolder: IOFile by lazy {
+        IOFile(cacheDir, SHARED_FILE_FOLDER).apply { if (!exists()) mkdirs() }
     }
 
     private val uiSettings by lazy { UiSettings(context = this) }
@@ -251,12 +252,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             }
 
             folder?.let {
-                val folderName = if (folder.isRoot()) {
-                    getString(R.string.allRootName, selectedDrive.value?.name)
-                } else {
-                    folder.name
-                }
-                binding.pathName.text = folderName
+                binding.pathName.text = folder.name
                 checkEnabledSaveButton()
             } ?: run {
                 binding.pathName.setText(R.string.selectFolderTitle)
@@ -352,7 +348,6 @@ class SaveExternalFilesActivity : BaseActivity() {
             *fileNameEdit.filters
         )
 
-
         val fileName = when {
             intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return
             intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
@@ -416,12 +411,8 @@ class SaveExternalFilesActivity : BaseActivity() {
             exception.printStackTrace()
             showSnackbar(R.string.anErrorHasOccurred)
             Sentry.withScope { scope ->
-                val fileName = fileNameEdit.text.toString().trim()
-                val outputFile = getOutputFile(fileName)
-                scope.setExtra("fileName", fileName)
                 scope.setExtra("lifecycleState", lifecycle.currentState.name)
                 scope.setExtra("sharedFolderExists", sharedFolder.exists().toString())
-                scope.setExtra("outputFile", outputFile.toString())
                 scope.level = SentryLevel.WARNING
                 Sentry.captureException(exception)
             }
@@ -466,12 +457,13 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
-    private fun getOutputFile(fileName: String) = java.io.File(sharedFolder, fileName).also { if (it.exists()) it.delete() }
+    private fun getOutputFile(fileName: String) = IOFile(sharedFolder, fileName).also { if (it.exists()) it.delete() }
 
     private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+                val lastModifiedDateFromUri = intent.getLongExtra(FileColumns.DATE_MODIFIED, -1L)
+                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor, lastModifiedDateFromUri)
 
                 try {
                     if (fileName == null) return false
@@ -521,5 +513,6 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     companion object {
         const val SHARED_FILE_FOLDER = "shared_files"
+        const val LAST_MODIFIED_URI_KEY = "last_modified"
     }
 }

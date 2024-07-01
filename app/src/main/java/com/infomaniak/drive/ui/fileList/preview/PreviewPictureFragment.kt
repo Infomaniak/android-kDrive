@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 class PreviewPictureFragment : PreviewFragment() {
 
@@ -111,7 +111,7 @@ class PreviewPictureFragment : PreviewFragment() {
             .build()
     }
 
-    private fun getOfflineFile(): File? {
+    private fun getOfflineFile(): IOFile? {
         return file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)?.let {
             if (file.isOfflineAndIntact(it)) it else null
         }

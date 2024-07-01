@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,9 @@ class SelectFolderActivity : BaseActivity() {
     private val navigationIds = mutableListOf<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(binding.root)
+
         val userId = navigationArgs.userId
         val driveId = navigationArgs.driveId
         val customArgs = navigationArgs.customArgs
@@ -64,8 +67,6 @@ class SelectFolderActivity : BaseActivity() {
             disableSelectedFolderId = disabledFolderId
         }
 
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
         setSaveButton(customArgs)
 
         currentFolderId?.let { folderId ->

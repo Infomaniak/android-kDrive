@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,6 @@ import com.infomaniak.drive.databinding.CardviewFolderGridBinding
 import com.infomaniak.drive.databinding.ItemCategoriesLayoutBinding
 import com.infomaniak.drive.databinding.ItemFileBinding
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
-import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.utils.context
@@ -63,7 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
@@ -74,7 +73,7 @@ fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
 }
 
 fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout)
@@ -83,16 +82,14 @@ fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
 }
 
 fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout, filePreview2)
     categoriesLayout.displayCategories(file)
 }
 
-
 private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
-    isVisible = file.id != ROOT_ID
     text = if (file.deletedAt.isPositive()) {
         file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
     } else {
@@ -172,7 +169,7 @@ fun getTintedDrawable(context: Context, icon: Int, tint: String): Drawable {
 }
 
 private fun ItemCategoriesLayoutBinding.displayCategories(file: File) = with(root) {
-    val canReadCategoryOnFile = DriveInfosController.getCategoryRights(file.driveId).canReadCategoryOnFile
+    val canReadCategoryOnFile = DriveInfosController.getCategoryRights(file.driveId).canReadOnFile
     val categories = file.getCategories()
 
     if (!canReadCategoryOnFile || categories.isEmpty()) {
@@ -258,7 +255,7 @@ private fun Context.getThumbnailAfterAndroidPie(file: File, fileUri: Uri, thumbn
 private fun Context.getThumbnailUntilAndroidPie(file: File, fileUri: Uri, thumbnailSize: Int): Bitmap? {
     val isSchemeFile = fileUri.scheme.equals(ContentResolver.SCHEME_FILE)
     val localFile = fileUri.lastPathSegment?.split(":")?.let { list ->
-        list.getOrNull(1)?.let { path -> java.io.File(path) }
+        list.getOrNull(1)?.let { path -> IOFile(path) }
     }
     val externalRealPath = getExternalRealPath(fileUri, isSchemeFile, localFile)
 
@@ -269,13 +266,10 @@ private fun Context.getThumbnailUntilAndroidPie(file: File, fileUri: Uri, thumbn
     }
 }
 
-private fun Context.getExternalRealPath(fileUri: Uri, isSchemeFile: Boolean, localFile: java.io.File?): String {
+private fun Context.getExternalRealPath(fileUri: Uri, isSchemeFile: Boolean, localFile: IOFile?): String {
     return when {
         !isSchemeFile && localFile?.exists() == true -> {
-            Sentry.withScope { scope -> // Get more information in uri with absolute path
-                scope.setExtra("uri", "$fileUri")
-                Sentry.captureMessage("Uri contains absolute path")
-            }
+            Sentry.captureMessage("Uri contains absolute path")
             localFile.absolutePath
         }
         fileUri.authority == "com.android.externalstorage.documents" -> {
@@ -325,7 +319,7 @@ private fun Context.getBitmapFromFileId(fileUri: Uri, thumbnailSize: Int): Bitma
 
 fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean = false) {
     when {
-        !containsProgress && file.currentProgress == Utils.INDETERMINATE_PROGRESS && file.isPendingOffline(context) -> {
+        !containsProgress && file.isMarkedAsOffline -> {
             setIndeterminateProgress()
             isVisible = true
         }

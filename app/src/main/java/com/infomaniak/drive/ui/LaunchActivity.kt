@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,18 +23,23 @@ import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
+import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
+import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -46,10 +51,17 @@ import kotlinx.coroutines.withContext
 class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
-    private var extrasMainActivity: Bundle? = null
+    private var mainActivityExtras: Bundle? = null
+
+    private var isHelpShortcutPressed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setDefaultLocaleIfNeeded()
+
+        checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
+
         lifecycleScope.launch {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
@@ -83,14 +95,15 @@ class LaunchActivity : AppCompatActivity() {
             LockActivity.startAppLockActivity(
                 context = this,
                 destinationClass = MainActivity::class.java,
-                destinationClassArgs = extrasMainActivity
+                destinationClassArgs = mainActivityExtras
             )
         } else {
-            val intent = Intent(this, destinationClass).apply {
-                if (destinationClass == MainActivity::class.java) extrasMainActivity?.let(::putExtras)
-            }
-
-            startActivity(intent)
+            Intent(this, destinationClass).apply {
+                when (destinationClass) {
+                    MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
+                    LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                }
+            }.also(::startActivity)
         }
     }
 
@@ -155,14 +168,14 @@ class LaunchActivity : AppCompatActivity() {
                 message = "DeepLink: $path"
                 level = SentryLevel.INFO
             })
-            trackEvent("deepLink", path)
+            trackDeepLink("internal")
         }
     }
 
     private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int) {
         if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
         if (driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
-        extrasMainActivity = MainActivityArgs(destinationFileId = fileId).toBundle()
+        mainActivityExtras = MainActivityArgs(destinationFileId = fileId).toBundle()
     }
 
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {
@@ -175,7 +188,10 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun handleShortcuts() {
-        intent.extras?.getString(SHORTCUTS_TAG)?.let { extrasMainActivity = MainActivityArgs(shortcutId = it).toBundle() }
+        intent.extras?.getString(SHORTCUTS_TAG)?.let { shortcutTag ->
+            mainActivityExtras = MainActivityArgs(shortcutId = shortcutTag).toBundle()
+            if (shortcutTag == Utils.Shortcuts.FEEDBACK.id) isHelpShortcutPressed = true
+        }
     }
 
     companion object {

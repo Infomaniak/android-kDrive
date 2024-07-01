@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -51,12 +52,14 @@ import androidx.navigation.fragment.NavHostFragment
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
@@ -66,7 +69,8 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
-import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
+import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
+import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
@@ -74,7 +78,6 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.drive.utils.Utils.getRootName
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
@@ -85,11 +88,10 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsAvailable
-import com.infomaniak.lib.stores.StoreUtils.initAppUpdateManager
-import com.infomaniak.lib.stores.StoreUtils.installDownloadedUpdate
+import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
-import com.infomaniak.lib.stores.StoreUtils.unregisterAppUpdateListener
+import com.infomaniak.lib.stores.reviewmanagers.InAppReviewManager
+import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -137,8 +139,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private var uploadFilesHelper: UploadFilesHelper? = null
-
     private val scanFlowResultLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
             activityResult.whenResultIsOk {
@@ -146,17 +146,25 @@ class MainActivity : BaseActivity() {
             }
         }
 
-    private val inAppUpdateResultLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
-        val isUserWantingUpdates = result.resultCode == RESULT_OK
-        uiSettings.isUserWantingUpdates = isUserWantingUpdates
-        trackInAppUpdate(if (isUserWantingUpdates) "discoverNow" else "discoverLater")
-    }
-
+    private val inAppUpdateManager by lazy { InAppUpdateManager(this, BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) }
     private var inAppUpdateSnackbar: Snackbar? = null
+
+    private val inAppReviewManager by lazy {
+        InAppReviewManager(
+            activity = this,
+            reviewDialogTheme = R.style.DialogStyle,
+            reviewDialogTitleResId = R.string.reviewAlertTitle,
+            feedbackUrlResId = R.string.urlUserReportAndroid,
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
+
+        checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
         downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
@@ -167,7 +175,7 @@ class MainActivity : BaseActivity() {
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
-        setupMainFab()
+        setupFabs()
         setupDrivePermissions()
         handleInAppReview()
         handleShortcuts()
@@ -175,13 +183,14 @@ class MainActivity : BaseActivity() {
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
         initAppUpdateManager()
-        observeAppUpdateDownload()
+        initAppReviewManager()
+        observeCurrentFolder()
         observeBulkDownloadRunning()
     }
 
     override fun onStart() {
         super.onStart()
-        handleUpdates()
+        mainViewModel.loadRootFiles()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -198,13 +207,7 @@ class MainActivity : BaseActivity() {
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
             selectedItemId = uiSettings.bottomNavigationSelectedItem
             setOnItemReselectedListener { item ->
-                when (item.itemId) {
-                    R.id.fileListFragment, R.id.favoritesFragment -> {
-                        navController.popBackStack(R.id.homeFragment, false)
-                        navController.navigate(item.itemId)
-                    }
-                    else -> navController.popBackStack(item.itemId, false)
-                }
+                navController.popBackStack(item.itemId, false)
             }
         }
     }
@@ -212,7 +215,7 @@ class MainActivity : BaseActivity() {
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
-                binding.bottomNavigation.findViewById<View>(R.id.fileListFragment).performClick()
+                clickOnBottomBarFolders()
                 mainViewModel.navigateFileListTo(navController, it.destinationFileId)
             }
         }
@@ -230,17 +233,26 @@ class MainActivity : BaseActivity() {
             if (isAvailable) {
                 lifecycleScope.launch {
                     AccountUtils.updateCurrentUserAndDrives(this@MainActivity)
-                    mainViewModel.restartUploadWorkerIfNeeded()
                 }
+                mainViewModel.restartUploadWorkerIfNeeded()
             }
         }
     }
 
-    private fun setupMainFab() = with(binding) {
-        mainFab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog) }
+    private fun setupFabs() = with(binding) {
+        setupFab(mainFab)
+        setupFab(searchFab, shouldShowSmallFab = true)
+
         mainViewModel.currentFolder.observe(this@MainActivity) { file ->
-            mainFab.isEnabled = file?.rights?.canCreateFile == true
+            val canCreateFile = file?.rights?.canCreateFile == true
+            mainFab.isEnabled = canCreateFile
+            searchFab.isEnabled = canCreateFile
         }
+    }
+
+    private fun setupFab(fab: FloatingActionButton, shouldShowSmallFab: Boolean = false) {
+        val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
+        fab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog, args) }
     }
 
     private fun setupDrivePermissions() {
@@ -253,62 +265,50 @@ class MainActivity : BaseActivity() {
         if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
     }
 
-
     //region In-App Updates
     private fun initAppUpdateManager() {
-        initAppUpdateManager(
-            context = this,
-            onUpdateDownloaded = { mainViewModel.toggleAppUpdateStatus(isUpdateDownloaded = true) },
-            onUpdateInstalled = { mainViewModel.toggleAppUpdateStatus(isUpdateDownloaded = false) },
-        )
-    }
-
-    private fun handleUpdates() {
-        if (uiSettings.isUserWantingUpdates || AppSettings.appLaunches % 10 == 0) {
-            checkUpdateIsAvailable(
-                appId = BuildConfig.APPLICATION_ID,
-                versionCode = BuildConfig.VERSION_CODE,
-                inAppResultLauncher = inAppUpdateResultLauncher,
-                onFDroidResult = { updateIsAvailable ->
-                    if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
-                },
-            )
-        }
-    }
-
-    private fun launchUpdateInstall() {
-        trackInAppUpdate("installUpdate")
-        mainViewModel.canInstallUpdate.value = false
-        uiSettings.hasAppUpdateDownloaded = false
-        installDownloadedUpdate(
-            onFailure = {
+        inAppUpdateManager.init(
+            onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) "discoverNow" else "discoverLater") },
+            onInstallStart = { trackInAppUpdate("installUpdate") },
+            onInstallFailure = {
                 Sentry.captureException(it)
-                uiSettings.resetUpdateSettings()
                 showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab())
+            },
+            onInAppUpdateUiChange = { isUpdateDownloaded ->
+                if (isUpdateDownloaded && canDisplayInAppSnackbar()) {
+                    inAppUpdateSnackbar = showIndefiniteSnackbar(
+                        title = R.string.updateReadyTitle,
+                        actionButtonTitle = R.string.updateInstallButton,
+                        anchor = getMainFab(),
+                        onActionClicked = inAppUpdateManager::installDownloadedUpdate,
+                    )
+                } else if (!isUpdateDownloaded) {
+                    inAppUpdateSnackbar?.dismiss()
+                }
+            },
+            onFDroidResult = { updateIsAvailable ->
+                if (updateIsAvailable) navController.navigate(R.id.updateAvailableBottomSheetDialog)
             },
         )
     }
 
-    private fun observeAppUpdateDownload() {
-        mainViewModel.canInstallUpdate.observe(this) { isUploadDownloaded ->
-            if (isUploadDownloaded && canDisplayInAppSnackbar()) {
-                inAppUpdateSnackbar = showIndefiniteSnackbar(
-                    title = R.string.updateReadyTitle,
-                    actionButtonTitle = R.string.updateInstallButton,
-                    anchor = getMainFab(),
-                    onActionClicked = ::launchUpdateInstall,
-                )
-            } else if (!isUploadDownloaded) {
-                inAppUpdateSnackbar?.dismiss()
-            }
-        }
-    }
-
     private fun observeBulkDownloadRunning() {
-        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (isRunning) launchSyncOffline() }
+        // We need to check if the bulk download is running to avoid any
+        // conflicts between the two ways of downloading offline files
+        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (!isRunning) launchSyncOffline() }
     }
 
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
+    //endregion
+
+    //region In-App Review
+    private fun initAppReviewManager() {
+        inAppReviewManager.init(
+            onDialogShown = { trackInAppReview("presentAlert") },
+            onUserWantToReview = { trackInAppReview("like") },
+            onUserWantToGiveFeedback = { trackInAppReview("dislike") },
+        )
+    }
     //endregion
 
     override fun onResume() {
@@ -334,8 +334,6 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         handleDeletionOfUploadedPhotos()
-
-        mainViewModel.checkAppUpdateStatus()
     }
 
     override fun onPause() {
@@ -378,9 +376,14 @@ class MainActivity : BaseActivity() {
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
         destination.addSentryBreadcrumb()
 
-        val shouldHideBottomNavigation = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation
+        val shouldHideBottomNavigation =
+            navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation ?: false
+        val shouldShowSmallFab = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
+            ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
+            ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
+            ?: false
 
-        handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation)
+        handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
 
         // TODO: Find a better way to do this. Currently, we need to put that
         //  here and not in the preview slider fragment because of APIs <= 27.
@@ -392,9 +395,15 @@ class MainActivity : BaseActivity() {
             R.id.favoritesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
-            R.id.mySharesFragment -> {
+            R.id.menuGalleryFragment,
+            R.id.mySharesFragment,
+            R.id.offlineFileFragment,
+            R.id.recentChangesFragment,
+            R.id.rootFilesFragment,
+            R.id.searchFragment,
+            R.id.trashFragment -> {
                 // Defining default root folder
-                mainViewModel.currentFolder.value = AccountUtils.getCurrentDrive()?.convertToFile(getRootName(this))
+                mainViewModel.setCurrentFolderAsRoot()
             }
         }
 
@@ -430,26 +439,40 @@ class MainActivity : BaseActivity() {
         trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
     }
 
-    private fun handleBottomNavigationVisibility(destinationId: Int, shouldHideBottomNavigation: Boolean?) = with(binding) {
+    private fun handleBottomNavigationVisibility(
+        destinationId: Int,
+        shouldHideBottomNavigation: Boolean,
+        shouldShowSmallFab: Boolean,
+    ) = with(binding) {
 
-        val isVisible = when (destinationId) {
+        val isGone = when (destinationId) {
             R.id.addFileBottomSheetDialog,
-            R.id.favoritesFragment,
             R.id.fileInfoActionsBottomSheetDialog,
-            R.id.fileListFragment,
+            R.id.fileListFragment -> shouldHideBottomNavigation || shouldShowSmallFab
+            R.id.favoritesFragment,
             R.id.homeFragment,
             R.id.menuFragment,
+            R.id.menuGalleryFragment,
             R.id.mySharesFragment,
-            R.id.sharedWithMeFragment -> shouldHideBottomNavigation != true
-            else -> false
+            R.id.offlineFileFragment,
+            R.id.recentChangesFragment,
+            R.id.rootFilesFragment,
+            R.id.sharedWithMeFragment,
+            R.id.trashFragment -> shouldHideBottomNavigation
+            else -> true
         }
 
-        mainFab.isVisible = isVisible
-        bottomNavigation.isVisible = isVisible
-        bottomNavigationBackgroundView.isVisible = isVisible
+        mainFab.isGone = isGone
+        bottomNavigation.isGone = isGone
+        bottomNavigationBackgroundView.isGone = isGone
+
+        searchFab.isVisible = shouldShowSmallFab
     }
 
-    private fun handleShortcuts() = with(mainViewModel) {
+    /**
+     * Handle shortcuts, the [Shortcuts.UPLOAD] case is already handled in [observeCurrentFolder].
+     */
+    private fun handleShortcuts() {
         navigationArgs?.shortcutId?.let { shortcutId ->
             trackEvent("shortcuts", shortcutId)
 
@@ -458,20 +481,25 @@ class MainActivity : BaseActivity() {
                     ShortcutManagerCompat.reportShortcutUsed(this@MainActivity, Shortcuts.SEARCH.id)
                     navController.navigate(R.id.searchFragment)
                 }
-                Shortcuts.UPLOAD.id -> {
-                    uploadFilesHelper = UploadFilesHelper(this@MainActivity, navController)
-                    currentFolder.observe(this@MainActivity) { parentFolder ->
-                        if (mustOpenShortcut && parentFolder?.id == ROOT_ID) {
-                            mustOpenShortcut = false
-                            uploadFilesHelper?.apply {
-                                initParentFolder(parentFolder)
-                                uploadFiles()
-                            }
-                        }
-                    }
-                }
                 Shortcuts.SCAN.id -> startScanFlow(scanFlowResultLauncher)
                 Shortcuts.FEEDBACK.id -> openSupport()
+                Shortcuts.UPLOAD.id -> Unit // Already handled elsewhere, @see kdoc
+            }
+        }
+    }
+
+    private fun observeCurrentFolder() = with(mainViewModel) {
+        currentFolder.observe(this@MainActivity) { parentFolder ->
+            binding.mainFab.isEnabled = parentFolder?.rights?.canCreateFile == true
+
+            // TODO : We need to find a way to handle the case where the app has never fetched the private folder and
+            //  therefore can't find it in Realm
+            if (navigationArgs?.shortcutId == Shortcuts.UPLOAD.id && mustOpenUploadShortcut && parentFolder?.id == ROOT_ID) {
+                mainViewModel.mustOpenUploadShortcut = false
+                uploadFilesHelper?.apply {
+                    setParentFolder(parentFolder)
+                    uploadFiles()
+                }
             }
         }
     }
@@ -481,7 +509,6 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onStop() {
-        unregisterAppUpdateListener()
         super.onStop()
         saveLastNavigationItemSelected()
     }
@@ -570,6 +597,10 @@ class MainActivity : BaseActivity() {
     fun getMainFab() = binding.mainFab
 
     fun getBottomNavigation() = binding.bottomNavigation
+
+    fun clickOnBottomBarFolders() {
+        binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
+    }
 
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10

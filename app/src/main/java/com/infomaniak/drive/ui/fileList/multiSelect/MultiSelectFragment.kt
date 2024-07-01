@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,20 +22,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
@@ -48,14 +47,12 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
-import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.Utils.downloadAsOfflineFiles
+import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import kotlinx.coroutines.Dispatchers
-import java.util.UUID
 
 abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
 
@@ -71,7 +68,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             data?.extras?.let { bundle ->
                 SelectFolderActivityArgs.fromBundle(bundle).apply {
                     val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
-                    val areAllFromTheSameFolder = customArgs.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true)
+                    val areAllFromTheSameFolder = customArgs?.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true) ?: true
 
                     performBulkOperation(
                         type = bulkOperationType,
@@ -90,6 +87,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     abstract fun getAllSelectedFilesCount(): Int?
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+
+        mainViewModel.notificationPermission.registerPermission(this)
 
         multiSelectLayout = initMultiSelectLayout()
         multiSelectToolbar = initMultiSelectToolbar()
@@ -184,17 +183,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     fun duplicateFiles() {
-        Intent(requireContext(), SelectFolderActivity::class.java).apply {
-            putExtras(
-                SelectFolderActivityArgs(
-                    userId = AccountUtils.currentUserId,
-                    driveId = AccountUtils.currentDriveId,
-                    folderId = mainViewModel.currentFolder.value?.id ?: -1,
-                    customArgs = bundleOf(BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY)
-                ).toBundle()
-            )
-            selectFolderResultLauncher.launch(this)
-        }
+        requireContext().duplicateFilesClicked(selectFolderResultLauncher, mainViewModel)
     }
 
     fun restoreIn() {
@@ -215,6 +204,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
     open fun performBulkOperation(
         type: BulkOperationType,
+        folderId: Int? = null,
         areAllFromTheSameFolder: Boolean = true,
         allSelectedFilesCount: Int? = null,
         destinationFolder: File? = null,
@@ -231,7 +221,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         trackBulkActionEvent(matomoCategory, type, fileCount)
 
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(
-            type, areAllFromTheSameFolder, fileCount, selectedFiles, destinationFolder, color
+            type, areAllFromTheSameFolder, folderId, fileCount, selectedFiles, destinationFolder, color
         )
 
         when (type) {
@@ -252,6 +242,11 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     onConfirmation = sendActions,
                 )
             }
+            BulkOperationType.ADD_OFFLINE -> {
+                // Set all selected file as offline in order for BulkDownloadWorker to download them
+                mainViewModel.markFilesAsOffline(selectedFiles.map { selectedFile -> selectedFile.id }, true)
+                sendActions(null)
+            }
             else -> sendActions(null)
         }
     }
@@ -259,6 +254,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     private fun sendActions(
         type: BulkOperationType,
         areAllFromTheSameFolder: Boolean,
+        folderId: Int?,
         fileCount: Int,
         selectedFiles: List<File>,
         destinationFolder: File?,
@@ -285,17 +281,17 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         } else {
             val mediator = mainViewModel.createMultiSelectMediator()
             enableMultiSelectButtons(false)
-            if (type == BulkOperationType.ADD_OFFLINE) {
-                sendAddOfflineAction(selectedFiles, type, mediator)
-            } else {
-                sendAllIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
+            when (type) {
+                BulkOperationType.ADD_OFFLINE -> sendAddOfflineAction(type, folderId, mediator)
+                BulkOperationType.REMOVE_OFFLINE -> sendRemoveOfflineAction(type, selectedFiles, mediator)
+                else -> sendAllIndividualActions(selectedFiles, type, mediator, destinationFolder, color)
             }
             observeMediator(mediator, fileCount, type, destinationFolder, dialog)
         }
     }
 
     private fun sendBulkAction(fileCount: Int = 0, bulkOperation: BulkOperation, dialog: Dialog? = null) {
-        MqttClientWrapper.start {
+        MqttClientWrapper.start(coroutineScope = viewLifecycleOwner.lifecycleScope) {
             multiSelectManager.performCancellableBulkOperation(bulkOperation).observe(viewLifecycleOwner) { apiResponse ->
                 dialog?.dismiss()
                 if (apiResponse.isSuccess()) {
@@ -313,23 +309,35 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun sendAddOfflineAction(
-        selectedFiles: List<File>,
         type: BulkOperationType,
+        folderId: Int?,
         mediator: MediatorLiveData<Pair<Int, Int>>,
     ) {
-        val realmFiles = selectedFiles.mapNotNull { selectedFile ->
-            if (!selectedFile.isFolder()) getFile(selectedFile) else null
-        }
-
-        if (type == BulkOperationType.ADD_OFFLINE) {
+        if (folderId != null) {
+            mainViewModel.notificationPermission.checkNotificationPermission(requestPermission = true)
             mediator.addSource(
                 downloadAsOfflineFiles(
                     context = requireContext(),
-                    files = realmFiles,
-                    onSuccess = { onIndividualActionSuccess(type, Any()) }),
+                    folderId = folderId,
+                    onSuccess = { onIndividualActionSuccess(type) }
+                ),
                 mainViewModel.updateMultiSelectMediator(mediator),
             )
         }
+    }
+
+    private fun sendRemoveOfflineAction(
+        type: BulkOperationType,
+        selectedFiles: List<File>,
+        mediator: MediatorLiveData<Pair<Int, Int>>,
+    ) {
+        mediator.addSource(
+            mainViewModel.removeSelectedFilesFromOffline(
+                files = selectedFiles,
+                onSuccess = { onIndividualActionSuccess(type) }
+            ),
+            mainViewModel.updateMultiSelectMediator(mediator),
+        )
     }
 
     private fun sendAllIndividualActions(
@@ -380,10 +388,9 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             }
             BulkOperationType.COPY -> {
                 mediator.addSource(
-                    copyFile(
+                    duplicateFile(
                         file = file,
                         destinationId = destinationFolder!!.id,
-                        copyName = file.name,
                         onSuccess = { it.data?.let { file -> onIndividualActionSuccess(type, file) } },
                     ),
                     updateMultiSelectMediator(mediator),
@@ -404,22 +411,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                     }
                 }
             }
-            BulkOperationType.ADD_OFFLINE -> {
-                mediator.addSource(
-                    addSelectedFileFromOffline(
-                        file = file,
-                        onSuccess = { onIndividualActionSuccess(type, file.id) }),
-                    updateMultiSelectMediator(mediator),
-                )
-            }
-            BulkOperationType.REMOVE_OFFLINE -> {
-                mediator.addSource(
-                    removeSelectedFileFromOffline(
-                        file = file,
-                        onSuccess = { onIndividualActionSuccess(type, file.id) }),
-                    updateMultiSelectMediator(mediator),
-                )
-            }
+            BulkOperationType.ADD_OFFLINE,
+            BulkOperationType.REMOVE_OFFLINE -> Unit
             BulkOperationType.ADD_FAVORITES -> {
                 mediator.addSource(
                     addFileToFavorites(
@@ -489,69 +482,10 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         } else {
             resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
         }
-        showSnackbar(title, true)
+        showSnackbar(title, showAboveFab = true)
         closeMultiSelect()
 
         onAllIndividualActionsFinished(type)
-    }
-
-    private fun addSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
-        if (!file.isFolder()) {
-            val offlineFile = file.getOfflineFile(requireContext())
-            val cacheFile = file.getCacheFile(requireContext())
-            if (!file.isOffline) {
-                addSelectedFileToOffline(file, offlineFile, cacheFile)
-            }
-        }
-
-        onSuccess?.invoke()
-        emit(FileResult(isSuccess = true))
-    }
-
-    private fun addSelectedFileToOffline(file: File, offlineFile: IOFile?, cacheFile: IOFile) {
-        val invalidFileNameChar = Utils.getInvalidFileNameCharacter(file.name)
-        if (invalidFileNameChar == null) {
-            if (offlineFile != null && !file.isObsoleteOrNotIntact(cacheFile)) {
-                Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-                FileController.updateOfflineStatus(file.id, true)
-                updateFileProgressByFileId(file.id, 100) { _, currentFile ->
-                    currentFile.apply {
-                        if (isNotManagedByRealm()) {
-                            isOffline = true
-                            currentProgress = 0
-                        }
-                    }
-                }
-            } else {
-                Utils.downloadAsOfflineFile(requireContext(), file)
-            }
-        } else {
-            context?.let {
-                it.buildGeneralNotification(
-                    title = getString(R.string.anErrorHasOccurred),
-                    description = getString(R.string.snackBarInvalidFileNameError, invalidFileNameChar, file.name)
-                ).apply { NotificationManagerCompat.from(it).notify(UUID.randomUUID().hashCode(), build()) }
-            }
-        }
-    }
-
-    private fun removeSelectedFileFromOffline(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
-        if (!file.isFolder()) {
-            val offlineFile = file.getOfflineFile(requireContext())
-            val cacheFile = file.getCacheFile(requireContext())
-            if (file.isOffline) {
-                removeSelectedFileFromOffline(file, offlineFile, cacheFile)
-            }
-        }
-        onSuccess?.invoke()
-        emit(FileResult(isSuccess = true))
-    }
-
-    private fun removeSelectedFileFromOffline(file: File, offlineFile: java.io.File?, cacheFile: java.io.File) {
-        if (offlineFile != null) {
-            mainViewModel.removeOfflineFile(file, offlineFile, cacheFile)
-        }
-        file.isOffline = false
     }
 
     private fun trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,10 +37,6 @@ object MatomoDrive : MatomoCore {
         trackEvent("fileAction", name, action, value)
     }
 
-    fun Fragment.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("newElement", name, action, value)
-    }
-
     fun Fragment.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         context?.trackShareRightsEvent(name, action, value)
     }
@@ -49,11 +45,27 @@ object MatomoDrive : MatomoCore {
         trackEvent("shareAndRights", name, action, value)
     }
 
+    fun Fragment.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        context?.trackNewElementEvent(name, action, value)
+    }
+
+    fun Context.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent("newElement", name, action, value)
+    }
+
     fun Fragment.trackTrashEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent("trash", name, action, value)
     }
 
     fun Activity.trackInAppUpdate(name: String) {
         trackEvent("inAppUpdate", name)
+    }
+
+    fun Activity.trackInAppReview(name: String) {
+        trackEvent("inAppReview", name)
+    }
+
+    fun Activity.trackDeepLink(name: String) {
+        trackEvent("deepLink", name)
     }
 }

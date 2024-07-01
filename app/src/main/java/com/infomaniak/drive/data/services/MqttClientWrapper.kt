@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.*
 
 object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
@@ -41,7 +44,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
     private lateinit var timer: CountDownTimer
     private var currentToken: IpsToken? = null
     private var isSubscribed: Boolean = false
-    private var runningExternalImportIds: MutableSet<Int> = mutableSetOf()
+    private val runningExternalImportIds: MutableSet<Int> = mutableSetOf()
 
     private const val MQTT_USER = "ips:ips-public"
     private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
@@ -76,34 +79,43 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         }
     }
 
-    fun start(externalImportId: Int? = null, completion: () -> Unit = {}) {
+    fun start(
+        externalImportId: Int? = null,
+        coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
+        completion: () -> Unit = {},
+    ) {
         externalImportId?.let { runningExternalImportIds.add(it) }
 
         // If we are already connected, just run the BulkOperation immediately
         if (client.isConnected) {
-            completion()
+            coroutineScope.launch {
+                completion()
+            }
             return
         }
 
         try {
-            client.connect(options, null, object : IMqttActionListener {
+            client.connect(options, userContext = null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken?) {
                     SentryLog.i("MQTT connection", "Success : true")
-                    currentToken?.let {
-                        subscribe(topicFor(it))
-                        completion()
-                    }
+                    coroutineScope.launch {
+                        currentToken?.let {
+                            subscribe(topicFor(it))
+                            completion()
 
-                    // If there is no more active worker, stop MQTT
-                    timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
-                        if (appContext.isBulkOperationActive() || runningExternalImportIds.size.isPositive()) {
-                            timer.start()
-                        } else {
-                            currentToken?.let { unsubscribe(topicFor(it)) }
-                            client.disconnect()
                         }
+
+                        // If there is no more active worker, stop MQTT
+                        timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
+                            if (appContext.isBulkOperationActive() || runningExternalImportIds.size.isPositive()) {
+                                timer.start()
+                            } else {
+                                currentToken?.let { unsubscribe(topicFor(it)) }
+                                client.disconnect()
+                            }
+                        }
+                        timer.start()
                     }
-                    timer.start()
                 }
 
                 override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
@@ -119,12 +131,12 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     // QoS 0 to have auto-delete queues
     private fun subscribe(topic: String, qos: Int = 0) {
-        client.subscribe(topic, qos, null, null)
+        client.subscribe(topic, qos, userContext = null, callback = null)
         isSubscribed = true
     }
 
     private fun unsubscribe(topic: String) {
-        client.unsubscribe(topic, null, null)
+        client.unsubscribe(topic, userContext = null, callback = null)
         isSubscribed = false
     }
 

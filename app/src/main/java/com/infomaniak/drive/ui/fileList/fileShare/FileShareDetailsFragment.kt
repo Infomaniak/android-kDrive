@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,8 +121,8 @@ class FileShareDetailsFragment : Fragment() {
         sharedItemsAdapter = SharedItemsAdapter(file) { shareable -> openSelectPermissionDialog(shareable) }
         sharedUsersRecyclerView.adapter = sharedItemsAdapter
 
-        mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) {
-            it.data?.let { share ->
+        mainViewModel.getFileShare(file.id).observe(viewLifecycleOwner) { apiResponse ->
+            apiResponse.data?.let { share ->
                 val itemList = if (file.rights?.canUseTeam == true) allUserList + allTeams else allUserList
                 fileShareViewModel.availableShareableItems.value = ArrayList(itemList)
 

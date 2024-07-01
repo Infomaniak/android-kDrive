@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,12 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.core.content.ContextCompat
-import androidx.core.view.*
-import androidx.core.view.ViewCompat.getWindowInsetsController
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -34,7 +32,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import androidx.transition.Slide
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -46,35 +43,46 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MainViewModel.FileResult
-import com.infomaniak.drive.ui.fileList.DownloadProgressDialog
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
-import com.infomaniak.drive.utils.Utils.openWithIntent
 import com.infomaniak.drive.views.FileInfoActionsView
+import com.infomaniak.drive.views.PreviewHeaderView
 import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.max
 
 class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
-    private var binding: FragmentPreviewSliderBinding by safeBinding()
+    private var _binding: FragmentPreviewSliderBinding? = null
+    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: PreviewSliderFragmentArgs by navArgs()
     private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
-    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private val bottomSheetBehavior: BottomSheetBehavior<View>
+        get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
+
     private lateinit var drivePermissions: DrivePermissions
     private lateinit var previewSliderAdapter: PreviewSliderAdapter
     private lateinit var userDrive: UserDrive
-    private var showUi = false
+    private var isOverlayShown = true
 
     override val ownerFragment = this
+    override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
+
+    val previewPDFHandler by lazy {
+        PreviewPDFHandler(
+            context = requireContext(),
+            setPrintVisibility = { _binding?.bottomSheetFileInfos?.setPrintVisibility(it) },
+        )
+    }
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
@@ -101,7 +109,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             userDrive = previewSliderViewModel.userDrive
         }
 
-        return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -136,8 +144,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
 
                     currentFile = previewSliderAdapter.getFile(position)
-                    editButton.isVisible = currentFile.isOnlyOfficePreview()
-                    openWithButton.isGone = currentFile.isOnlyOfficePreview()
+                    with(header) {
+                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
+                        toggleOpenWithVisibility(isVisible = !currentFile.isOnlyOfficePreview())
+                    }
                     bottomSheetFileInfos.openWith.isVisible = true
                     lifecycleScope.launchWhenResumed {
                         withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
@@ -147,13 +157,19 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
-            if (!currentFile.isOnlyOfficePreview()) openWithButton.isGone = isDownloading
+            if (!currentFile.isOnlyOfficePreview()) binding.header.toggleOpenWithVisibility(isVisible = !isDownloading)
             bottomSheetFileInfos.openWith.isGone = isDownloading
         }
 
-        editButton.setOnClickListener { openOnlyOfficeDocument(currentFile) }
-        openWithButton.setOnClickListener { openWithClicked() }
-        backButton.setOnClickListener { findNavController().popBackStack() }
+        binding.header.setup(
+            onBackClicked = { findNavController().popBackStack() },
+            onOpenWithClicked = { openWith() },
+            onEditClicked = {
+                mainViewModel.isInternetAvailable.value?.let { isConnected ->
+                    openOnlyOfficeDocument(currentFile, isConnected)
+                }
+            },
+        )
 
         mainViewModel.currentPreviewFileList.let { files ->
             previewSliderAdapter.setFiles(ArrayList(files.values))
@@ -162,8 +178,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 viewPager.setCurrentItem(position, false)
             }.onFailure {
                 Sentry.withScope { scope ->
-                    scope.setExtra("currentFile", "id: ${currentFile.id} name: ${currentFile.name}")
-                    scope.setExtra("files.values", files.values.joinToString { "id: ${it.id} name: ${it.name}" })
+                    scope.setExtra("currentFile", "id: ${currentFile.id}")
+                    scope.setExtra("files.values", files.values.joinToString { "id: ${it.id}" })
                     Sentry.captureException(it)
                 }
                 currentFile = files.values.first()
@@ -171,21 +187,28 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             }
         }
 
-        configureBottomSheetFileInfo()
-        setupWindowInsetsListener()
+        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
+        binding.header.setupWindowInsetsListener(
+            rootView = root,
+            bottomSheetView = binding.bottomSheetFileInfos,
+        ) {
+            binding.pdfContainer.setMargins(right = it?.right ?: 0)
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        setupTransparentStatusBar()
+        requireActivity().setupStatusBarForPreview()
     }
 
-    override fun onResume() = with(binding.bottomSheetFileInfos) {
+    override fun onResume() {
         super.onResume()
 
-        updateAvailableOfflineItem()
-        observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
-            previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+        _binding?.bottomSheetFileInfos?.let { fileInfoActionView ->
+            fileInfoActionView.updateAvailableOfflineItem()
+            fileInfoActionView.observeOfflineProgression(this@PreviewSliderFragment) { fileId ->
+                previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
+            }
         }
     }
 
@@ -193,12 +216,18 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onPause()
         if (noPreviewList()) return
         previewSliderViewModel.currentPreview = currentFile
-        binding.bottomSheetFileInfos.removeOfflineObservations(this)
+        _binding?.bottomSheetFileInfos?.removeOfflineObservations(this)
     }
 
     override fun onStop() {
         clearEdgeToEdge()
         super.onStop()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
+        _binding = null
     }
 
     override fun onDestroy() {
@@ -210,107 +239,32 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         super.onDestroy()
     }
 
-    private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
-
-    private fun clearEdgeToEdge() {
+    private fun clearEdgeToEdge() = with(requireActivity()) {
         toggleSystemBar(true)
-        requireActivity().window.toggleEdgeToEdge(false)
+        window.toggleEdgeToEdge(false)
     }
 
+    private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
+
     private fun setBackActionHandlers() {
-        getBackNavigationResult<Int>(DownloadProgressDialog.OPEN_WITH) {
-            context?.openWith(currentFile, userDrive)
+        getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile, userDrive) }
+
+        getBackNavigationResult<Int>(DownloadAction.PRINT_PDF.value) {
+            requireContext().printPdf(file = currentFile.getCacheFile(requireContext()))
         }
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
-            binding.bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
+            _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
         }
     }
 
-    fun toggleFullscreen() = with(binding) {
-        previewSliderParent.apply {
-            val transition = Slide(Gravity.TOP).apply {
-                duration = 200
-                addTarget(R.id.header)
-            }
-            TransitionManager.beginDelayedTransition(this, transition)
-            header.isVisible = showUi
-
-            toggleBottomSheet(showUi)
-            toggleSystemBar(showUi)
-
-            showUi = !showUi
+    fun toggleFullscreen() = _binding?.let { binding ->
+        binding.previewSliderParent.apply {
+            isOverlayShown = !isOverlayShown
+            binding.header.toggleVisibility(isOverlayShown)
+            toggleBottomSheet(shouldShow = isOverlayShown)
+            requireActivity().toggleSystemBar(show = isOverlayShown)
         }
-    }
-
-    private fun toggleSystemBar(show: Boolean) {
-        getWindowInsetsController(requireActivity().window.decorView)?.apply {
-            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            val systemBars = WindowInsetsCompat.Type.systemBars()
-            if (show) show(systemBars) else hide(systemBars)
-        }
-    }
-
-    private fun configureBottomSheetFileInfo() {
-        activity?.setColorNavigationBar(true)
-        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
-        bottomSheetBehavior.apply {
-            isHideable = true
-            isDraggable = !navigationArgs.hideActions
-            addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    when (bottomSheetBehavior.state) {
-                        BottomSheetBehavior.STATE_HIDDEN -> {
-                            activity?.window?.navigationBarColor =
-                                ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
-                            activity?.window?.lightNavigationBar(false)
-                        }
-                        else -> {
-                            activity?.setColorNavigationBar(true)
-                        }
-                    }
-                }
-
-                override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
-            })
-        }
-    }
-
-    private fun setupWindowInsetsListener() = with(binding) {
-        ViewCompat.setOnApplyWindowInsetsListener(root) { _, windowInsets ->
-            with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                header.setMargins(left = left, top = top, right = right)
-                val topOffset = max(top, root.height - bottomSheetFileInfos.height)
-                bottomSheetBehavior.apply {
-                    peekHeight = getDefaultPeekHeight() + bottom
-                    expandedOffset = topOffset
-                    maxHeight = root.height - topOffset
-                }
-                /* Add padding to the bottom to allow the last element of the list to be displayed right over the
-                 android navigation bar */
-                bottomSheetFileInfos.setPadding(0, 0, 0, bottom)
-            }
-
-            windowInsets
-        }
-    }
-
-    private fun setupTransparentStatusBar() {
-        activity?.window?.apply {
-            statusBarColor = ContextCompat.getColor(requireContext(), R.color.previewBackgroundTransparent)
-
-            lightStatusBar(false)
-            toggleEdgeToEdge(true)
-        }
-    }
-
-    private fun getDefaultPeekHeight(): Int {
-        val typedArray = requireContext().theme.obtainStyledAttributes(
-            R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
-        )
-        val peekHeight = typedArray.getDimensionPixelSize(0, 0)
-        typedArray.recycle()
-        return peekHeight
     }
 
     override fun displayInfoClicked() {
@@ -332,14 +286,20 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
-    override fun sharePublicLink() {
-        binding.bottomSheetFileInfos.createPublicShareLink(onSuccess = { sharelinkUrl ->
-            context?.shareText(sharelinkUrl)
-            toggleBottomSheet(true)
-        }, onError = { translatedError ->
-            showSnackbar(translatedError)
-            toggleBottomSheet(true)
-        })
+    override fun sharePublicLink(onActionFinished: () -> Unit) {
+        super.sharePublicLink(onActionFinished)
+        binding.bottomSheetFileInfos.createPublicShareLink(
+            onSuccess = { shareLinkUrl ->
+                context?.shareText(shareLinkUrl)
+                toggleBottomSheet(shouldShow = true)
+                onActionFinished()
+            },
+            onError = { translatedError ->
+                showSnackbar(translatedError)
+                toggleBottomSheet(shouldShow = true)
+                onActionFinished()
+            },
+        )
     }
 
     override fun addFavoritesClicked() {
@@ -353,7 +313,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 } else {
                     showSnackbar(R.string.errorDelete)
                 }
-                toggleBottomSheet(true)
+                toggleBottomSheet(shouldShow = true)
             }
             if (isFavorite) {
                 mainViewModel.deleteFileFromFavorites(this).observe(viewLifecycleOwner, observer)
@@ -363,9 +323,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    private fun toggleBottomSheet(show: Boolean) {
+    private fun toggleBottomSheet(shouldShow: Boolean) {
         binding.bottomSheetFileInfos.scrollToTop()
-        bottomSheetBehavior.state = if (show) {
+        bottomSheetBehavior.state = if (shouldShow) {
             BottomSheetBehavior.STATE_COLLAPSED
         } else {
             BottomSheetBehavior.STATE_HIDDEN
@@ -377,7 +337,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         showSnackbar(getString(id, name))
     }
 
-    override fun removeOfflineFile(offlineLocalPath: java.io.File, cacheFile: java.io.File) {
+    override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) {
         lifecycleScope.launch {
             mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile, userDrive)
             previewSliderAdapter.updateFile(currentFile.id) { file -> file.isOffline = false }
@@ -399,10 +359,30 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
+    override fun printClicked() {
+        super.printClicked()
+        previewPDFHandler.printClicked(
+            context = requireContext(),
+            onDefaultCase = {
+                requireContext().printPdf {
+                    safeNavigate(
+                        PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
+                            fileId = currentFile.id,
+                            fileName = currentFile.name,
+                            userDrive = userDrive,
+                            action = DownloadAction.PRINT_PDF,
+                        ),
+                    )
+                }
+            },
+            onError = { showSnackbar(R.string.errorFileNotFound) },
+        )
+    }
+
     override fun downloadFileClicked() {
         super.downloadFileClicked()
         binding.bottomSheetFileInfos.downloadFile(drivePermissions) {
-            toggleBottomSheet(true)
+            toggleBottomSheet(shouldShow = true)
         }
     }
 
@@ -416,31 +396,33 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         )
     }
 
-    override fun onDuplicateFile(result: String, onApiResponse: () -> Unit) {
-        mainViewModel.duplicateFile(currentFile, result).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                apiResponse.data?.let { file ->
-                    mainViewModel.currentPreviewFileList[file.id] = file
-                    previewSliderAdapter.addFile(file)
+    override fun onDuplicateFile(destinationFolder: File) {
+        mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { fileResult ->
+            if (fileResult.isSuccess) {
+                (fileResult.data as? File)?.let { file ->
+                    if (currentFile.parentId == destinationFolder.id) {
+                        mainViewModel.currentPreviewFileList[file.id] = file
+                        previewSliderAdapter.addFile(file)
+                    }
+
                     showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
-                    toggleBottomSheet(true)
+                    toggleBottomSheet(shouldShow = true)
                 }
             } else {
                 showSnackbar(R.string.errorDuplicate)
-                toggleBottomSheet(true)
+                toggleBottomSheet(shouldShow = true)
             }
-            onApiResponse()
         }
     }
 
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) {
         binding.bottomSheetFileInfos.onRenameFile(mainViewModel, newName,
             onSuccess = {
-                toggleBottomSheet(true)
+                toggleBottomSheet(shouldShow = true)
                 showSnackbar(getString(R.string.allFileRename, currentFile.name))
                 onApiResponse()
             }, onError = { translatedError ->
-                toggleBottomSheet(true)
+                toggleBottomSheet(shouldShow = true)
                 showSnackbar(translatedError)
                 onApiResponse()
             })
@@ -459,17 +441,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun openWithClicked() {
-        super.openWithClicked()
-        val packageManager = requireContext().packageManager
-        if (requireContext().openWithIntent(currentFile, userDrive).resolveActivity(packageManager) == null) {
-            showSnackbar(R.string.errorNoSupportingAppFound)
-        } else {
+    override fun openWith() {
+        context?.openWith(ownerFragment = this, currentFile = currentFile) {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
                     fileId = currentFile.id,
                     fileName = currentFile.name,
-                    userDrive = userDrive
+                    userDrive = userDrive,
                 )
             )
         }
@@ -494,20 +472,43 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         if (previewSliderAdapter.deleteFile(currentFile)) {
             findNavController().popBackStack()
         } else {
-            toggleBottomSheet(true)
+            toggleBottomSheet(shouldShow = true)
         }
     }
 
+    override fun shareFile() = Unit
+    override fun saveToKDrive() = Unit
+    override fun onCacheAddedToOffline() = Unit
+
     companion object {
 
-        fun Fragment.getPageNumberChip() = (parentFragment as? PreviewSliderFragment)?.binding?.pageNumberChip
+        private fun Fragment.getHeader(): PreviewHeaderView? {
+            return (parentFragment as? PreviewSliderFragment)?._binding?.header
+                ?: (activity as? PreviewPDFActivity)?.binding?.header
+        }
 
         fun Fragment.toggleFullscreen() {
             (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+            (activity as? PreviewPDFActivity)?.toggleFullscreen()
         }
 
         fun Fragment.openWithClicked() {
-            (parentFragment as? PreviewSliderFragment)?.openWithClicked()
+            (parentFragment as? PreviewSliderFragment)?.openWith()
         }
+
+        //region PDF Preview
+        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
+            getHeader()?.setPageNumberVisibility(isVisible)
+        }
+
+        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
+            getHeader()?.setPageNumberValue(currentPage, totalPage)
+        }
+
+        fun Fragment.getPreviewPDFHandler(): PreviewPDFHandler {
+            return (parentFragment as? PreviewSliderFragment)?.previewPDFHandler
+                ?: (activity as? PreviewPDFActivity)!!.previewPDFHandler
+        }
+        //endregion
     }
 }

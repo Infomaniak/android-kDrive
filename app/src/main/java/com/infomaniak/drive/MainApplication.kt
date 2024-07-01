@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ package com.infomaniak.drive
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Build
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
@@ -32,13 +31,16 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.MatomoDrive.buildTracker
 import com.infomaniak.drive.data.api.ErrorCode
+import com.infomaniak.drive.data.api.FileDeserialization
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.data.services.AppUpdateWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
@@ -46,13 +48,17 @@ import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.lib.core.InfomaniakCore
+import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.user.User
+import com.infomaniak.lib.core.networking.AccessTokenUsageInterceptor
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.networking.HttpClientConfig
 import com.infomaniak.lib.core.utils.CoilUtils
 import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
+import com.infomaniak.lib.stores.AppUpdateScheduler
 import io.sentry.Sentry
 import io.sentry.SentryEvent
 import io.sentry.SentryLevel
@@ -64,29 +70,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.matomo.sdk.Tracker
-import java.util.Locale
 import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
 
-    val matomoTracker: Tracker by lazy { buildTracker() }
+    val matomoTracker: Tracker by lazy { buildTracker(shouldOptOut = true) }
     var geniusScanIsReady = false
 
-    private val appUpdateWorkerScheduler by lazy { AppUpdateWorker.Scheduler(applicationContext) }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        setDefaultLocal()
-    }
+    private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
 
     override fun onCreate() {
         super<Application>.onCreate()
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
-        setDefaultLocal()
-
-        AppCompatDelegate.setDefaultNightMode(UiSettings(this).nightMode)
+        val uiSettings = UiSettings(this)
+        AppCompatDelegate.setDefaultNightMode(uiSettings.nightMode)
 
         if (BuildConfig.DEBUG) {
             Stetho.initializeWithDefaults(this)
@@ -104,6 +103,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             // For Microsoft Office app. Show File.getCloudAndFileUris()
             StrictMode.setVmPolicy(VmPolicy.Builder().build())
         }
+
+        ApiController.init(typeAdapterList = arrayListOf(File::class.java to FileDeserialization()))
 
         SentryAndroid.init(this) { options: SentryAndroidOptions ->
             // register the callback as an option
@@ -138,7 +139,15 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
         AccountUtils.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
-        HttpClient.init(tokenInterceptorListener())
+        val tokenInterceptorListener = tokenInterceptorListener()
+        HttpClientConfig.customInterceptors = listOf(
+            AccessTokenUsageInterceptor(
+                tokenInterceptorListener = tokenInterceptorListener,
+                previousApiCall = uiSettings.accessTokenApiCallRecord,
+                updateLastApiCall = { uiSettings.accessTokenApiCallRecord = it },
+            ),
+        )
+        HttpClient.init(tokenInterceptorListener)
         MqttClientWrapper.init(applicationContext)
     }
 
@@ -152,19 +161,15 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         super.onStop(owner)
     }
 
-    private fun setDefaultLocal() = with(resources) {
-        if (Locale.getDefault().language in acceptedLocale) return@with
-
-        Locale.setDefault(defaultLocale)
-        configuration.setLocale(defaultLocale)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            createConfigurationContext(configuration)
+    override fun newImageLoader(): ImageLoader {
+        val factory = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoderDecoder.Factory()
         } else {
-            updateConfiguration(configuration, displayMetrics)
+            GifDecoder.Factory()
         }
-    }
 
-    override fun newImageLoader(): ImageLoader = CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), true)
+        return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), customFactories = listOf(factory))
+    }
 
     private val refreshTokenError: (User) -> Unit = { user ->
         val hashCode = UUID.randomUUID().hashCode()
@@ -176,9 +181,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             notificationManagerCompat.notifyCompat(this@MainApplication, hashCode, build())
         }
         Sentry.withScope { scope ->
-            scope.level = SentryLevel.ERROR
             scope.setExtra("userId", "${user.id}")
-            Sentry.captureMessage("Refresh Token Error")
+            Sentry.captureMessage("Refresh Token Error", SentryLevel.ERROR)
         }
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -195,13 +199,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             refreshTokenError(AccountUtils.currentUser!!)
         }
 
-        override suspend fun getApiToken(): ApiToken {
-            return AccountUtils.currentUser!!.apiToken
-        }
-    }
+        override suspend fun getApiToken(): ApiToken? = AccountUtils.currentUser?.apiToken
 
-    private companion object {
-        private val acceptedLocale = arrayOf("fr", "de", "it", "en", "es")
-        private val defaultLocale = Locale.ENGLISH
+        override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
 }

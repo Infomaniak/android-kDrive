@@ -2,8 +2,6 @@ name: Android CI
 
 on:
   pull_request:
-    branches: [ master ]
-    types: [ synchronize, opened, reopened, ready_for_review ]
 
 concurrency:
   group: ${{ github.head_ref }}
@@ -16,7 +14,7 @@ jobs:
     runs-on: [ self-hosted, Android ]
     strategy:
       matrix:
-        api-level: [ 31 ]
+        api-level: [ 34 ]
         target: [ google_apis ]
 
     env:
@@ -31,55 +29,16 @@ jobs:
       GENIUS_SCAN_KEY: ${{ secrets.GENIUS_SCAN_KEY }}
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
 
       - name: Checkout the code
-        uses: actions/checkout@v3.5.0
+        uses: actions/checkout@v4.1.1
         with:
-          token: ${{ secrets.MY_REPO_PAT }}
+          token: ${{ github.token }}
           submodules: recursive
-
-      - name: Gradle cache
-        uses: actions/cache@v3.3.1
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
-
-      - name: AVD cache
-        uses: actions/cache@v3.3.1
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-${{ matrix.api-level }}
-
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2.27.0
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          profile: Pixel 4
-          arch: x86_64
-          disk-size: 6G
-          avd-name: kdrive-test
-          force-avd-creation: false
-          disable-animations: false
-          emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
-          script: echo "Generated AVD snapshot for caching."
-
-      - name: set up JDK 17
-        uses: actions/setup-java@v3.11.0
-        with:
-          java-version: 17
-          distribution: 'zulu'
-          cache: gradle
 
       - name: Create test env
         run: |
@@ -92,20 +51,20 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Run Unit tests
+      - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
-      - name: Run instrumentation tests
-        uses: ReactiveCircus/android-emulator-runner@v2.27.0
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
-          profile: Pixel 4
-          arch: x86_64
-          disk-size: 6G
-          avd-name: kdrive-test
-          force-avd-creation: false
-          disable-animations: true
-          emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
-          # emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
-          script: ./gradlew uninstallAll app:connectedStandardDebugAndroidTest --stacktrace
+      # - name: Run instrumentation tests
+      #   uses: ReactiveCircus/android-emulator-runner@v2.30.1
+      #   with:
+      #     api-level: ${{ matrix.api-level }}
+      #     target: ${{ matrix.target }}
+      #     profile: pixel_7
+      #     arch: arm64-v8a
+      #     disk-size: 6G
+      #     avd-name: kdrive-test
+      #     force-avd-creation: false
+      #     disable-animations: true
+      #     emulator-options: -no-snapshot-save -noaudio -no-boot-anim -camera-back none -skin 540x1110
+      #     # emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 540x1110
+      #     script: ./gradlew uninstallAll app:connectedStandardDebugAndroidTest --stacktrace

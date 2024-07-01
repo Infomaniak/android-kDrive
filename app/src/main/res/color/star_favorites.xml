@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022 Infomaniak Network SA
+  ~ Copyright (C) 2022-2024 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -16,6 +16,6 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="#FFC10A" android:state_enabled="true" />
-    <item android:color="@color/iconColor" android:state_enabled="false" />
+    <item android:color="#FFC10A" android:state_activated="true" />
+    <item android:color="@color/iconColor" android:state_activated="false" />
 </selector>

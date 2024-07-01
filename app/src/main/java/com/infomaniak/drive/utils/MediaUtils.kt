@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ object MediaUtils {
         return fileType == ExtensionType.IMAGE || fileType == ExtensionType.VIDEO || fileType == ExtensionType.AUDIO
     }
 
-    fun scanFile(context: Context, file: java.io.File) {
+    fun scanFile(context: Context, file: IOFile) {
         MediaScannerConnection.scanFile(context, arrayOf(file.path), null, null)
     }
 

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ object DriveInfosController {
         .modules(RealmModules.DriveFilesModule())
         .build()
 
-    private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
+    fun getRealmInstance() = Realm.getInstance(realmConfiguration)
 
     private fun ArrayList<Drive>.initDriveForRealm(
         drive: Drive,
@@ -72,11 +72,8 @@ object DriveInfosController {
 
     fun storeDriveInfos(userId: Int, driveInfo: DriveInfo): List<Drive> {
         val driveList = arrayListOf<Drive>()
-        for (drive in driveInfo.drives.main) {
-            driveList.initDriveForRealm(drive, userId, false)
-        }
-        for (drive in driveInfo.drives.sharedWithMe) {
-            driveList.initDriveForRealm(drive, userId, true)
+        for (drive in driveInfo.drives.filter { drive -> drive.role != DriveUser.Role.NONE }) {
+            driveList.initDriveForRealm(drive, userId, sharedWithMe = drive.role == DriveUser.Role.EXTERNAL)
         }
 
         val driveRemoved = getDrives(userId, sharedWithMe = null).filterNot { driveList.contains(it) }
@@ -91,9 +88,9 @@ object DriveInfosController {
 
                 realm.insertOrUpdate(driveList)
                 realm.delete(DriveUser::class.java)
-                realm.insertOrUpdate(driveInfo.users.values.toList())
+                realm.insertOrUpdate(driveInfo.users)
                 realm.delete(Team::class.java)
-                realm.insertOrUpdate(driveInfo.teams.toList())
+                realm.insertOrUpdate(driveInfo.teams)
             }
         }
 
@@ -133,11 +130,15 @@ object DriveInfosController {
         userId: Int? = null,
         driveId: Int? = null,
         sharedWithMe: Boolean? = null,
-        maintenance: Boolean? = null
+        maintenance: Boolean? = null,
+        customRealm: Realm? = null,
     ): Drive? {
-        return getRealmInstance().use { realm ->
-            realm.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).findFirst()?.let { realm.copyFromRealm(it, 1) }
+        val block: (Realm) -> Drive? = { realm ->
+            realm.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).findFirst()?.let {
+                if (customRealm == null) realm.copyFromRealm(it, 1) else it
+            }
         }
+        return customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     fun getDrivesCount(

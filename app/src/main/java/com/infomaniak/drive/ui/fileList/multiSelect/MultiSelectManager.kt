@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ class MultiSelectManager {
         return when (type) {
             BulkOperationType.ADD_FAVORITES -> selectedFiles.filter { !it.isFavorite }
             BulkOperationType.REMOVE_FAVORITES -> selectedFiles.filter { it.isFavorite }
+            BulkOperationType.ADD_OFFLINE -> selectedFiles.filter { !it.isFolder() && !it.isOffline }
             else -> selectedFiles
         }
     }
@@ -99,7 +100,7 @@ class MultiSelectManager {
     )
 
     interface MultiSelectResult {
-        fun onIndividualActionSuccess(type: BulkOperationType, data: Any)
+        fun onIndividualActionSuccess(type: BulkOperationType, data: Any? = null)
         fun onAllIndividualActionsFinished(type: BulkOperationType)
         fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null)
     }

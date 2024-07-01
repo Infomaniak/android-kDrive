@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2023 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ import com.infomaniak.drive.databinding.ActivityLoginBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
+import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
@@ -61,6 +62,8 @@ class LoginActivity : AppCompatActivity() {
     private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
 
     private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
+
+    private val navigationArgs: LoginActivityArgs? by lazy { intent?.extras?.let(LoginActivityArgs::fromBundle) }
 
     private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         with(result) {
@@ -128,6 +131,8 @@ class LoginActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback {
             if (introViewpager.currentItem == 0) finish() else introViewpager.currentItem -= 1
         }
+
+        handleHelpShortcut()
     }
 
     private fun ActivityResult.handleCreateAccountActivityResult() = with(binding) {
@@ -198,6 +203,10 @@ class LoginActivity : AppCompatActivity() {
         signInButton.isEnabled = true
     }
 
+    private fun handleHelpShortcut() {
+        if (navigationArgs?.isHelpShortcutPressed == true) openSupport()
+    }
+
     companion object {
         suspend fun authenticateUser(context: Context, apiToken: ApiToken): Any {
 
@@ -221,7 +230,7 @@ class LoginActivity : AppCompatActivity() {
                             allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {
                                 return allDrivesDataResponse
                             }
-                            allDrivesDataResponse.data?.drives?.main?.isEmpty() == true -> {
+                            allDrivesDataResponse.data?.drives?.any { it.isDriveUser() } == false -> {
                                 return ApiResponse<DriveInfo>(
                                     result = ApiResponseStatus.ERROR,
                                     error = ApiError(code = ErrorCode.NO_DRIVE)

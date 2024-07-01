@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import android.app.ActivityManager
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
@@ -30,24 +31,30 @@ import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.provider.MediaStore
 import android.text.format.Formatter
-import android.util.DisplayMetrics
+import android.transition.AutoTransition
+import android.transition.TransitionManager
+import android.transition.TransitionSet
 import android.util.Patterns
-import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle.Event
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
 import coil.load
-import coil.request.Disposable
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -55,6 +62,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
+import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -64,15 +72,18 @@ import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.ItemUserBinding
+import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
+import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.views.PendingFilesView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.utils.*
@@ -81,6 +92,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
+import io.sentry.Sentry
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -98,16 +110,16 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     }
 }
 
-fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image): Disposable {
-    return load(data) {
+fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image) {
+    load(data) {
         error(errorRes)
         fallback(errorRes)
         placeholder(R.drawable.placeholder)
     }
 }
 
-fun ImageView.loadAvatar(driveUser: DriveUser): Disposable {
-    return loadAvatar(driveUser.id, driveUser.getUserAvatar(), driveUser.getInitials())
+fun ImageView.loadAvatar(driveUser: DriveUser) {
+    loadAvatar(driveUser.id, driveUser.avatar, driveUser.getInitials())
 }
 
 fun TextInputEditText.showOrHideEmptyError(): Boolean {
@@ -121,6 +133,23 @@ fun Cursor.uri(contentUri: Uri): Uri {
 }
 
 fun Number.isPositive(): Boolean = toLong() > 0
+
+fun Activity.setupStatusBarForPreview() {
+    window?.apply {
+        statusBarColor = ContextCompat.getColor(this@setupStatusBarForPreview, R.color.previewBackgroundTransparent)
+
+        lightStatusBar(false)
+        toggleEdgeToEdge(true)
+    }
+}
+
+fun Activity.toggleSystemBar(show: Boolean) {
+    ViewCompat.getWindowInsetsController(window.decorView)?.apply {
+        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        val systemBars = WindowInsetsCompat.Type.systemBars()
+        if (show) show(systemBars) else hide(systemBars)
+    }
+}
 
 fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -168,17 +197,8 @@ fun ImageView.animateRotation(isDeployed: Boolean = false) {
  * Return the screen size in DPs
  */
 fun Activity.getScreenSizeInDp(): Point {
-    val displayMetrics = DisplayMetrics()
-    if (VERSION.SDK_INT >= VERSION_CODES.R) {
-        display?.apply {
-            getRealMetrics(displayMetrics)
-        }
-    } else {
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-    }
-
     val point = Point()
-    displayMetrics.apply {
+    application.resources.displayMetrics.apply {
         point.x = (widthPixels / density).roundToInt()
         point.y = (heightPixels / density).roundToInt()
     }
@@ -209,19 +229,20 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     itemList: List<Shareable>,
     notShareableIds: ArrayList<Int> = arrayListOf(),
     notShareableEmails: ArrayList<String> = arrayListOf(),
-    onDataPassed: (item: Shareable) -> Unit
+    onDataPassed: (item: Shareable) -> Unit,
 ): AvailableShareableItemsAdapter {
     setDropDownBackgroundResource(R.drawable.background_popup)
     val availableUsersAdapter = AvailableShareableItemsAdapter(
         context = context,
         itemList = ArrayList(itemList),
         notShareableIds = notShareableIds,
-        notShareableEmails = notShareableEmails
-    ) { item ->
-        onDataPassed(item)
-    }
+        notShareableEmails = notShareableEmails,
+        getCurrentText = { text },
+        onItemClick = onDataPassed,
+    )
+
     setAdapter(availableUsersAdapter)
-    handleActionDone { !availableUsersAdapter.addFirstAvailableItem() }
+    handleActionDone { if (text.isNotBlank()) !availableUsersAdapter.addFirstAvailableItem() }
 
     return availableUsersAdapter
 }
@@ -252,14 +273,18 @@ fun Fragment.showSnackbar(
     }
 }
 
-fun Fragment.openOnlyOfficeDocument(file: File) {
-    if (file.conversion?.whenOnlyoffice == true) {
-        findNavController().navigate(
-            R.id.notSupportedExtensionBottomSheetDialog,
-            NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
-        )
+fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable:  Boolean) {
+    if (isInternetAvailable) {
+        if (file.conversion?.whenOnlyoffice == true) {
+            findNavController().navigate(
+                R.id.notSupportedExtensionBottomSheetDialog,
+                NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
+            )
+        } else {
+            requireContext().openOnlyOfficeActivity(file)
+        }
     } else {
-        requireContext().openOnlyOfficeActivity(file)
+        Toast.makeText(requireContext(),getString(R.string.noConnection),Toast.LENGTH_LONG).show()
     }
 }
 
@@ -273,7 +298,7 @@ fun Context.openOnlyOfficeActivity(file: File) {
 fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
-        (requireActivity() as MainActivity).getBottomNavigation().findViewById<View>(R.id.fileListFragment).performClick()
+        (requireActivity() as MainActivity).clickOnBottomBarFolders()
         mainViewModel.navigateFileListTo(this, folderId)
     }
 }
@@ -291,35 +316,6 @@ fun Fragment.navigateToUploadView(folderId: Int, folderName: String? = null) {
 fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
-
-fun CardviewFileListBinding.setUploadFileInProgress(title: Int, onClickListener: () -> Unit) {
-    val radius = context.resources.getDimension(R.dimen.cardViewRadius)
-    root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
-        .setTopLeftCorner(CornerFamily.ROUNDED, radius)
-        .setTopRightCorner(CornerFamily.ROUNDED, radius)
-        .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-        .setBottomRightCorner(CornerFamily.ROUNDED, radius)
-        .build()
-
-    itemViewFile.fileName.setText(title)
-
-    root.setOnClickListener { onClickListener() }
-}
-
-fun CardviewFileListBinding.updateUploadFileInProgress(pendingFilesCount: Int, parentLayout: ViewGroup) = with(itemViewFile) {
-    if (pendingFilesCount > 0) {
-        fileSize.text = context.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingFilesCount,
-            pendingFilesCount
-        )
-        filePreview.isGone = true
-        fileProgression.isVisible = true
-        parentLayout.isVisible = true
-    } else {
-        parentLayout.isGone = true
-    }
-}
 
 fun Context.shareText(text: String) {
     trackShareRightsEvent("shareButton")
@@ -426,4 +422,89 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
     } else {
         Formatter.formatShortFileSize(this, decimalSize)
     }
+}
+
+fun Context.shareFile(getUriToShare: () -> Uri?) {
+    trackFileActionEvent("sendFileCopy")
+
+    val shareIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        putExtra(Intent.EXTRA_STREAM, getUriToShare())
+        type = "*/*"
+    }
+
+    runCatching {
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.buttonSendCopy)))
+    }.onFailure {
+        Sentry.captureException(it)
+    }
+}
+
+fun LayoutSwitchDriveBinding.setDriveHeader(currentDrive: Drive) {
+    switchDriveButton.text = currentDrive.name
+}
+
+private fun LayoutSwitchDriveBinding.setupSwitchDriveButton(fragment: Fragment) {
+    AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
+
+    if (DriveInfosController.hasSingleDrive(AccountUtils.currentUserId)) {
+        switchDriveButton.apply {
+            icon = null
+            isEnabled = false
+        }
+    } else {
+        offsetOverlayedRipple.setOnClickListener { fragment.safeNavigate(R.id.switchDriveDialog) }
+    }
+
+    fragment.viewLifecycleOwner.lifecycle.addObserver(
+        object : LifecycleEventObserver {
+            override fun onStateChanged(source: LifecycleOwner, event: Event) {
+                if (event == Event.ON_RESUME) AccountUtils.getCurrentDrive()?.let(::setDriveHeader)
+            }
+        },
+    )
+}
+
+fun Fragment.setupDriveToolbar(
+    collapsingToolbarLayout: CollapsingToolbarLayout,
+    switchDriveLayout: LayoutSwitchDriveBinding,
+    appBar: AppBarLayout,
+) {
+    collapsingToolbarLayout.title = AccountUtils.getCurrentDrive()!!.name
+    switchDriveLayout.setupSwitchDriveButton(this)
+
+    appBar.addOnOffsetChangedListener { _, verticalOffset ->
+        val fullyExpanded = verticalOffset == 0
+        switchDriveLayout.root.isVisible = fullyExpanded
+
+        if (fullyExpanded) {
+            collapsingToolbarLayout.setExpandedTitleTextColor(ColorStateList.valueOf(Color.TRANSPARENT))
+        } else {
+            collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarExpandedTitleTextAppearance)
+        }
+    }
+}
+
+fun Fragment.observeAndDisplayNetworkAvailability(
+    mainViewModel: MainViewModel,
+    noNetworkBinding: LayoutNoNetworkSmallBinding,
+    noNetworkBindingDirectParent: ViewGroup,
+    additionalChanges: ((isInternetAvailable: Boolean) -> Unit)? = null,
+) {
+    mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
+        val togetherAutoTransition = AutoTransition().apply { ordering = TransitionSet.ORDERING_TOGETHER }
+        with(togetherAutoTransition) {
+            noNetworkBindingDirectParent.children.forEach { child -> addTarget(child) }
+            TransitionManager.beginDelayedTransition(noNetworkBindingDirectParent, this)
+        }
+
+        noNetworkBinding.noNetwork.isGone = isInternetAvailable
+        additionalChanges?.invoke(isInternetAvailable)
+    }
+}
+
+fun Fragment.setupRootPendingFilesIndicator(countLiveData: LiveData<Int>, pendingFilesView: PendingFilesView) {
+    pendingFilesView.setUploadFileInProgress(this, OTHER_ROOT_ID)
+    countLiveData.observe(viewLifecycleOwner, pendingFilesView::updateUploadFileInProgress)
 }

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,21 +19,23 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
-import com.infomaniak.drive.data.api.ApiRoutes.activitiesWithExtraQuery
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.data.models.file.ListingFiles
 import com.infomaniak.drive.data.models.upload.UploadSegment.ChunkStatus
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.*
 import com.infomaniak.lib.core.api.ApiController.callApi
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
 import okhttp3.OkHttpClient
 
@@ -41,38 +43,21 @@ object ApiRepository : ApiRepositoryCore() {
 
     var PER_PAGE = 200
 
-    private const val ACTIONS = "&actions[]=file_create" +
-            "&actions[]=file_rename" +
-            "&actions[]=file_move" +
-            "&actions[]=file_move_out" +
-            "&actions[]=file_trash" +
-            "&actions[]=file_restore" +
-            "&actions[]=file_delete" +
-            "&actions[]=file_update" +
-            "&actions[]=file_favorite_create" +
-            "&actions[]=file_favorite_remove" +
-            "&actions[]=file_share_create" +
-            "&actions[]=file_share_update" +
-            "&actions[]=file_share_delete" +
-            "&actions[]=file_categorize" +
-            "&actions[]=file_uncategorize" +
-            "&actions[]=file_color_update" +
-            "&actions[]=file_color_delete" +
-            "&actions[]=share_link_create" +
-            "&actions[]=share_link_update" +
-            "&actions[]=share_link_delete" +
-            "&actions[]=collaborative_folder_create" +
-            "&actions[]=collaborative_folder_update" +
-            "&actions[]=collaborative_folder_delete"
-
-    private const val ADDITIONAL_ACTIONS = "&actions[]=file_access" +
-            "&actions[]=comment_create" +
-            "&actions[]=comment_update" +
-            "&actions[]=comment_delete" +
-            "&actions[]=comment_like" +
-            "&actions[]=comment_unlike" +
-            "&actions[]=comment_resolve" +
-            "&actions[]=share_link_show"
+    private inline fun <reified T> callApiWithCursor(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+    ): T {
+        return callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
+            CursorApiResponse<Any>(
+                result = ApiResponseStatus.ERROR,
+                error = apiError
+            ).apply {
+                translatedError = translatedErrorRes
+            } as T
+        })
+    }
 
     fun getAllDrivesData(
         okHttpClient: OkHttpClient
@@ -81,38 +66,56 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFavoriteFiles(driveId: Int, order: File.SortType, page: Int = 1): ApiResponse<ArrayList<File>> {
-        val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${pagination(page)}"
-        return callApi(url, GET)
+    fun getFavoriteFiles(driveId: Int, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+        val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
+    }
+
+    fun getSharedWithMeFiles(order: File.SortType, cursor: String?): CursorApiResponse<List<File>> {
+        return callApiWithCursor(
+            url = "${ApiRoutes.getSharedWithMeFiles(order)}&${loadCursor(cursor)}",
+            method = GET
+        )
     }
 
     fun postFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), POST)
 
     fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), DELETE)
 
-    fun getDirectoryFiles(
+    fun getFolderFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
         parentId: Int,
-        page: Int = 1,
+        cursor: String? = null,
         order: File.SortType
-    ): ApiResponse<List<File>> {
-        val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${pagination(page)}"
-        return callApi(url, GET, okHttpClient = okHttpClient)
+    ): CursorApiResponse<List<File>> {
+        val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
-    // Increase timeout for this api call because it can take more than 10s to process data
+    fun getListingFiles(
+        okHttpClient: OkHttpClient,
+        driveId: Int,
+        parentId: Int,
+        cursor: String? = null,
+        order: File.SortType
+    ): CursorApiResponse<ListingFiles> {
+        val url = when (cursor) {
+            null -> ApiRoutes.getListingFiles(driveId, parentId, order)
+            else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
+        }
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
+    }
+
+    // Increase timeout for this API call because it can take more than 10s to process data
     fun getFileActivities(
         file: File,
-        page: Int,
+        cursor: String?,
         forFileList: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
-    ): ApiResponse<ArrayList<FileActivity>> {
-        val queries = if (forFileList) "&depth=children&from_date=${file.responseAt}&$activitiesWithExtraQuery" else "&with=user"
-        val url = "${ApiRoutes.getFileActivities(file)}?${pagination(page)}$queries$ACTIONS" +
-                if (forFileList) "" else ADDITIONAL_ACTIONS
-
-        return callApi(url, GET, okHttpClient = okHttpClient)
+    ): CursorApiResponse<ArrayList<FileActivity>> {
+        val url = ApiRoutes.getFileActivities(file, forFileList, loadCursor(cursor))
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
     // For sync offline service
@@ -126,15 +129,15 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileActivities(driveId, formattedFileIds, fromDate), GET, okHttpClient = okHttpClient)
     }
 
-    fun getLastModifiedFiles(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
-        val url = "${ApiRoutes.getLastModifiedFiles(driveId)}&${pagination(page)}"
-        return callApi(url, GET)
+    fun getLastModifiedFiles(driveId: Int, cursor: String? = null): CursorApiResponse<ArrayList<File>> {
+        val url = "${ApiRoutes.getLastModifiedFiles(driveId)}&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
-    fun getLastGallery(driveId: Int, page: Int = 1): ApiResponse<ArrayList<File>> {
+    fun getLastGallery(driveId: Int, cursor: String?): CursorApiResponse<ArrayList<File>> {
         val types = "&types[]=${ExtensionType.IMAGE.value}&types[]=${ExtensionType.VIDEO.value}"
-        val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}$types&${pagination(page)}"
-        return callApi(url, GET)
+        val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}$types&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
     fun getValidChunks(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<ValidChunks> {
@@ -187,23 +190,23 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         query: String? = null,
         sortType: File.SortType,
-        page: Int,
+        cursor: String?,
         date: Pair<String, String>? = null,
         type: String? = null,
         categories: String? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient
-    ): ApiResponse<ArrayList<File>> {
-        var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${pagination(page)}"
+    ): CursorApiResponse<ArrayList<File>> {
+        var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${loadCursor(cursor)}"
         if (!query.isNullOrBlank()) url += "&query=$query"
-        if (date != null) url += "&modified_at=custom&from=${date.first}&until=${date.second}"
+        if (date != null) url += "&modified_at=custom&modified_after=${date.first}&modified_before=${date.second}"
         if (type != null) url += "&type=$type"
         if (categories != null) url += "&category=$categories"
 
-        return callApi(url, GET, okHttpClient = okHttpClient)
+        return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
     fun deleteFile(file: File): ApiResponse<CancellableAction> {
-        return callApi(ApiRoutes.fileURL(file), DELETE)
+        return callApi(ApiRoutes.fileURLV2(file), DELETE)
     }
 
     fun renameFile(file: File, newName: String): ApiResponse<CancellableAction> {
@@ -214,14 +217,8 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.updateFolderColor(file), POST, mapOf("color" to color))
     }
 
-    fun copyFile(file: File, copyName: String?, destinationId: Int): ApiResponse<File> {
-        val body = if (copyName == null) mapOf() else mapOf("name" to copyName)
-        return callApi(ApiRoutes.copyFile(file, destinationId), POST, body)
-    }
-
-    fun duplicateFile(file: File, duplicateName: String?): ApiResponse<File> {
-        val body = if (duplicateName == null) mapOf() else mapOf("name" to duplicateName)
-        return callApi(ApiRoutes.duplicateFile(file), POST, body)
+    fun duplicateFile(file: File, destinationId: Int): ApiResponse<File> {
+        return callApi(ApiRoutes.duplicateFile(file, destinationId), POST)
     }
 
     fun moveFile(file: File, newParent: File): ApiResponse<CancellableAction> {
@@ -240,9 +237,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileCount(file), GET)
     }
 
-    fun getFileComments(file: File, page: Int): ApiResponse<ArrayList<FileComment>> {
-        val url = "${ApiRoutes.fileComments(file)}&${pagination(page)}"
-        return callApi(url, GET)
+    fun getFileComments(file: File, cursor: String?): CursorApiResponse<ArrayList<FileComment>> {
+        val url = "${ApiRoutes.fileComments(file)}&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
     fun postFileComment(file: File, body: String): ApiResponse<FileComment> {
@@ -350,9 +347,9 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.fileCategory(driveId, categoryId), DELETE, mapOf("file_ids" to files.map { it.id }))
     }
 
-    fun getLastActivities(driveId: Int, page: Int): ApiResponse<ArrayList<FileActivity>> {
-        val url = ApiRoutes.getLastActivities(driveId) + "&${pagination(page)}"
-        return callApi(url, GET)
+    fun getLastActivities(driveId: Int, cursor: String?): CursorApiResponse<ArrayList<FileActivity>> {
+        val url = ApiRoutes.getLastActivities(driveId) + "&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
     fun forceFolderAccess(file: File): ApiResponse<Boolean> {
@@ -379,16 +376,16 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.convertFile(file), POST)
     }
 
-    fun getDriveTrash(driveId: Int, order: File.SortType, page: Int): ApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.driveTrash(driveId, order)}&${pagination(page)}", GET)
+    fun getDriveTrash(driveId: Int, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+        return callApiWithCursor("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
     }
 
     fun getTrashedFile(file: File): ApiResponse<File> {
         return callApi(ApiRoutes.trashedFile(file), GET)
     }
 
-    fun getTrashedFolderFiles(file: File, order: File.SortType, page: Int): ApiResponse<List<File>> {
-        return callApi("${ApiRoutes.trashedFolderFiles(file, order)}&${pagination(page)}", GET)
+    fun getTrashedFolderFiles(file: File, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+        return callApiWithCursor("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
     }
 
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
@@ -396,15 +393,19 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun emptyTrash(driveId: Int): ApiResponse<Boolean> = callApi(ApiRoutes.emptyTrash(driveId), DELETE)
 
-    fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURL(file), DELETE)
+    fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURLV2(file), DELETE)
 
     fun getMySharedFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
         sortType: File.SortType,
-        page: Int
-    ): ApiResponse<ArrayList<File>> {
-        return callApi("${ApiRoutes.getMySharedFiles(driveId, sortType)}&${pagination(page)}", GET, okHttpClient = okHttpClient)
+        cursor: String?
+    ): CursorApiResponse<ArrayList<File>> {
+        return callApiWithCursor(
+            url = "${ApiRoutes.getMySharedFiles(driveId, sortType)}&${loadCursor(cursor)}",
+            method = GET,
+            okHttpClient = okHttpClient,
+        )
     }
 
     fun undoAction(action: CancellableAction): ApiResponse<Boolean> {
@@ -424,4 +425,8 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"
+
+    private fun loadCursor(cursor: String?, perPage: Int = PER_PAGE): String {
+        return "limit=$perPage${if (cursor == null) "" else "&cursor=$cursor"}"
+    }
 }

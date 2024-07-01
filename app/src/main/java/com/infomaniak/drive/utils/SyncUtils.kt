@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.fragment.app.FragmentActivity
 import androidx.work.*
+import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.PeriodicUploadWorker
@@ -32,7 +33,6 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.MediaObserverService
 import com.infomaniak.drive.data.sync.MediaObserverWorker
 import com.infomaniak.lib.core.utils.SentryLog
-import io.sentry.Sentry
 import java.util.Date
 
 object SyncUtils {
@@ -41,9 +41,11 @@ object SyncUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
         else "datetaken"
 
-    inline val Context.uploadFolder get() = java.io.File(cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
+    inline val Context.uploadFolder get() = IOFile(cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
 
-    fun getFileDates(cursor: Cursor): Pair<Date?, Date> {
+    private val TAG = SyncUtils::class.java.simpleName
+
+    fun getFileDates(cursor: Cursor, lastModifiedDateFromUri : Long? = null): Pair<Date?, Date> {
         val dateTakenIndex = cursor.getColumnIndex(DATE_TAKEN)
         val dateAddedIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DATE_ADDED)
 
@@ -53,6 +55,7 @@ object SyncUtils {
         val fileCreatedAt = when {
             cursor.isValidDate(dateTakenIndex) -> Date(cursor.getLong(dateTakenIndex))
             cursor.isValidDate(dateAddedIndex) -> Date(cursor.getLong(dateAddedIndex) * 1000)
+            lastModifiedDateFromUri.isValidDate() -> Date(lastModifiedDateFromUri!!)
             else -> null
         }
 
@@ -65,32 +68,15 @@ object SyncUtils {
 
         if (fileModifiedAt == null || fileModifiedAt.time == 0L) {
             fileModifiedAt = Date()
-            SentryLog.w("SyncUtils", "getFileDates> fileModifiedAt not found")
-            Sentry.withScope { scope ->
-                val noData = "No data"
-
-                val dateTakenValue = if (dateTakenIndex != -1) cursor.getLong(dateTakenIndex).toString() else noData
-                scope.setExtra("dateTaken", dateTakenValue)
-
-                val dateAddedValue = if (dateAddedIndex != -1) cursor.getLong(dateAddedIndex).toString() else noData
-                scope.setExtra("dateAdded", dateAddedValue)
-
-                val lastModifiedData = if (lastModifiedIndex != -1) cursor.getLong(lastModifiedIndex).toString() else noData
-                scope.setExtra("lastModified", lastModifiedData)
-
-                val dateModifiedData = if (dateModifiedIndex != -1) cursor.getLong(dateModifiedIndex).toString() else noData
-                scope.setExtra("dateModified", dateModifiedData)
-
-                scope.setExtra("columnNames", cursor.columnNames.joinToString())
-
-                Sentry.captureMessage("fileModifiedAt not found")
-            }
+            SentryLog.w(TAG, "getFileDates > fileModifiedAt not found")
         }
 
         return Pair(fileCreatedAt, fileModifiedAt)
     }
 
     private fun Cursor.isValidDate(index: Int) = index != -1 && this.getLong(index) > 0
+
+    private fun Long?.isValidDate() = this != null && this > 0
 
     fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
@@ -179,6 +165,7 @@ object SyncUtils {
 
     fun Context.disableAutoSync() {
         UploadFile.removeAppSyncSettings()
+        MediaFolder.deleteAll()
         cancelContentObserver()
         cancelPeriodicSync()
     }

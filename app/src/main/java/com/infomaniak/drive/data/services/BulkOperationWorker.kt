@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,10 @@
  */
 package com.infomaniak.drive.data.services
 
+import android.app.Notification
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.CountDownTimer
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.app.NotificationCompat
@@ -27,6 +30,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.google.common.util.concurrent.ListenableFuture
+import com.infomaniak.drive.data.models.ActionProgress
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
@@ -58,7 +62,17 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
         bulkOperationNotification = bulkOperationType.getNotificationBuilder(applicationContext).apply {
             setContentTitle(applicationContext.getString(bulkOperationType.title, 0, totalFiles))
         }
-        setForegroundAsync(ForegroundInfo(notificationId, bulkOperationNotification.build()))
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val notification = createNotificationBuilder().apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
+                }
+            }.build()
+            setForegroundAsync(ForegroundInfo(notificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC))
+        } else {
+            setForegroundAsync(ForegroundInfo(notificationId, createNotificationBuilder().build()))
+        }
 
         lastReception = Date()
 
@@ -84,19 +98,26 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
                 if (notification.progress!!.todo == 0) {
                     onOperationFinished()
                 } else {
-                    bulkOperationNotification.apply {
-                        val string =
-                            applicationContext.getString(bulkOperationType.title, notification.progress.success, totalFiles)
-                        setContentTitle(string)
-                        setContentText("${notification.progress.percent}%")
-                        setProgress(100, notification.progress.percent, false)
-                        notificationManagerCompat.notifyCompat(applicationContext, notificationId, build())
-                    }
+                    notificationManagerCompat.notifyCompat(
+                        context = applicationContext,
+                        notificationId = notificationId,
+                        build = createNotificationBuilder(notification.progress).build()
+                    )
                 }
             }
         }
 
         MqttClientWrapper.observeForever(mqttNotificationsObserver!!)
+    }
+
+    private fun createNotificationBuilder(progress: ActionProgress? = null): NotificationCompat.Builder {
+        return bulkOperationNotification.apply {
+            val progressValue = progress?.success ?: 0
+            val contentTitle = applicationContext.getString(bulkOperationType.title, progressValue, totalFiles)
+            setContentTitle(contentTitle)
+            setContentText("${progress?.percent ?: 0}%")
+            setProgress(100, progress?.percent ?: 0, progress == null)
+        }
     }
 
     companion object {

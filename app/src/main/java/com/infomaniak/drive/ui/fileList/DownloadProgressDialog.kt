@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveDataScope
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -35,11 +33,13 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
-import com.infomaniak.drive.utils.DownloadWorkerUtils
+import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Response
 
@@ -54,7 +54,8 @@ class DownloadProgressDialog : DialogFragment() {
 
         FileController.getFileById(fileId, userDrive)?.let { file ->
             binding.icon.setImageResource(file.getFileType().icon)
-            observeDownloadedFile(file)
+            observeDownloadedFile()
+            startDownloadFile(file, userDrive)
         }
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
@@ -69,11 +70,15 @@ class DownloadProgressDialog : DialogFragment() {
             .create()
     }
 
-    private fun observeDownloadedFile(file: File) = with(navigationArgs) {
-        downloadViewModel.downloadFile(requireContext(), file, userDrive).observe(this@DownloadProgressDialog) {
-            it?.let { (progress, isComplete) ->
-                if (isComplete) {
-                    setBackNavigationResult(if (isOpenBookmark) OPEN_BOOKMARK else OPEN_WITH, fileId)
+    private fun startDownloadFile(file: File, userDrive: UserDrive) {
+        downloadViewModel.downloadFile(requireContext(), file, userDrive)
+    }
+
+    private fun observeDownloadedFile() = with(navigationArgs) {
+        downloadViewModel.downloadProgressLiveData.observe(viewLifecycleOwner) { progress ->
+            progress?.let {
+                if (it == DownloadViewModel.PROGRESS_COMPLETE) {
+                    setBackNavigationResult(action.value, fileId)
                 } else {
                     binding.downloadProgress.progress = progress
                 }
@@ -86,49 +91,56 @@ class DownloadProgressDialog : DialogFragment() {
 
     class DownloadViewModel : ViewModel() {
 
-        private val downloadWorkerUtils by lazy { DownloadWorkerUtils() }
+        val downloadProgressLiveData = MutableLiveData(0)
 
-        fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
+        fun downloadFile(context: Context, file: File, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
             val outputFile = file.getStoredFile(context, userDrive)
             if (outputFile == null) {
-                emit(null)
-                return@liveData
+                downloadProgressLiveData.postValue(null)
+                return@launch
             }
             if (file.isObsoleteOrNotIntact(outputFile)) {
                 try {
-                    val response = downloadWorkerUtils.downloadFileResponse(
+                    val response = DownloadOfflineFileManager.downloadFileResponse(
                         fileUrl = ApiRoutes.downloadFile(file),
-                        downloadInterceptor = downloadWorkerUtils.downloadProgressInterceptor { progress ->
-                            runBlocking { emit(progress to false) }
+                        downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor { progress ->
+                            downloadProgressLiveData.postValue(progress)
                         }
                     )
                     if (response.isSuccessful) {
                         saveData(file, outputFile, response)
-                    } else emit(null)
+                    } else {
+                        downloadProgressLiveData.postValue(null)
+                    }
                 } catch (exception: Exception) {
                     exception.printStackTrace()
-                    emit(null)
+                    downloadProgressLiveData.postValue(null)
                 }
             } else {
-                emit(100 to true)
+                downloadProgressLiveData.postValue(PROGRESS_COMPLETE)
             }
         }
 
-        private fun LiveDataScope<Pair<Int, IsComplete>?>.saveData(
-            file: File,
-            outputFile: java.io.File,
-            response: Response
-        ) {
+        private fun saveData(file: File, outputFile: IOFile, response: Response) {
             if (outputFile.exists()) outputFile.delete()
-            downloadWorkerUtils.saveRemoteData(response, outputFile) {
-                runBlocking { emit(100 to true) }
+            DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
+                downloadProgressLiveData.postValue(PROGRESS_COMPLETE)
             }
             outputFile.setLastModified(file.getLastModifiedInMilliSecond())
         }
+
+        companion object {
+            const val PROGRESS_COMPLETE = 100
+        }
+    }
+
+    enum class DownloadAction(val value: String) {
+        OPEN_WITH("open_with"),
+        OPEN_BOOKMARK("open_bookmark"),
+        PRINT_PDF("print_pdf"),
     }
 
     companion object {
-        const val OPEN_WITH = "open_with"
-        const val OPEN_BOOKMARK = "open_bookmark"
+        private const val TAG = "DownloadProgressDialog"
     }
 }

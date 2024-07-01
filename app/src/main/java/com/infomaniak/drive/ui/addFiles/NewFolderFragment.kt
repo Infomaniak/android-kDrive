@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentNewFolderBinding
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -58,8 +58,11 @@ class NewFolderFragment : Fragment() {
         }
 
         initPrivateFolder()
-        initCommonFolder()
-        initDropBoxFolder()
+
+        newFolderViewModel.currentDriveLiveData().observe(viewLifecycleOwner) { drive ->
+            initCommonFolder(drive)
+            initDropBoxFolder(drive)
+        }
     }
 
     private fun initPrivateFolder() {
@@ -68,12 +71,8 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initCommonFolder() = with(binding) {
-        val drive = newFolderViewModel.userDrive?.let {
-            DriveInfosController.getDrive(it.userId, it.driveId)
-        } ?: AccountUtils.getCurrentDrive()
-
-        if (drive?.canCreateTeamFolder == true) {
+    private fun initCommonFolder(drive: Drive?) = with(binding) {
+        if (drive?.capabilities?.useTeamSpace == true) {
             commonFolderDescription.text = getString(R.string.commonFolderDescription, drive.name)
             commonFolder.setOnClickListener {
                 safeNavigate(R.id.createCommonFolderFragment)
@@ -83,12 +82,15 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initDropBoxFolder() {
-        binding.dropBox.setOnClickListener {
-            safeNavigate(
-                if (AccountUtils.getCurrentDrive()?.packFunctionality?.dropbox == true) R.id.createDropBoxFolderFragment
-                else R.id.dropBoxBottomSheetDialog
-            )
+    private fun initDropBoxFolder(drive: Drive?) {
+        binding.dropBox.apply {
+            isVisible = drive?.sharedWithMe != true
+            setOnClickListener {
+                safeNavigate(
+                    if (drive?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
+                    else R.id.dropBoxBottomSheetDialog
+                )
+            }
         }
     }
 }

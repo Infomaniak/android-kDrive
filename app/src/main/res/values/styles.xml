@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022 Infomaniak Network SA
+  ~ Copyright (C) 2022-2024 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -80,6 +80,12 @@
 
     <style name="AppTheme.Lock" parent="AppTheme.LockBase" />
 
+    <style name="AppTheme.RequiredUpdate">
+        <item name="illustration">@drawable/illu_update_required</item>
+        <item name="titleStyle">@style/H2</item>
+        <item name="descriptionStyle">@color/secondaryText</item>
+    </style>
+
     <!--AppBar-->
 
     <style name="AppTheme.AppBarOverlay" parent="Widget.Design.AppBarLayout">
@@ -93,9 +99,11 @@
         <item name="expandedTitleGravity">bottom</item>
         <item name="expandedTitleMarginBottom">@dimen/marginStandardSmall</item>
         <item name="expandedTitleMarginStart">@dimen/marginStandard</item>
-        <item name="expandedTitleTextAppearance">@style/H1</item>
+        <item name="expandedTitleTextAppearance">@style/CollapsingToolbarExpandedTitleTextAppearance</item>
         <item name="maxLines">2</item>
     </style>
+
+    <style name="CollapsingToolbarExpandedTitleTextAppearance" parent="@style/H1" />
 
     <style name="AppTheme.ToolbarTheme" parent="Widget.MaterialComponents.Toolbar">
         <item name="contentInsetEnd">54dp</item>
@@ -113,7 +121,6 @@
         <item name="android:textColorPrimary">@color/title</item>
         <item name="android:textColorSecondary">@color/title</item>
     </style>
-
 
     <!--BottomSheetDialogTheme-->
 
@@ -167,7 +174,6 @@
         <item name="backgroundTint">@color/background</item>
     </style>
 
-
     <!--DialogTheme-->
 
     <style name="DialogStyle" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
@@ -206,7 +212,6 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
-
 
     <!--Text-->
 
@@ -258,7 +263,6 @@
         <item name="strokeWidth">1dp</item>
         <item name="strokeColor">@color/border</item>
     </style>
-
 
     <!--Button-->
 
@@ -343,7 +347,6 @@
         <item name="android:textColor">@color/title</item>
     </style>
 
-
     <!--Other-->
 
     <style name="ChipLink" parent="Widget.MaterialComponents.Chip.Action">
@@ -393,5 +396,13 @@
         <item name="android:background">@color/backgroundCardview</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
+    </style>
+
+    <style name="MainFab">
+        <item name="android:contentDescription">@string/buttonAdd</item>
+        <item name="android:src">@drawable/ic_plus</item>
+        <item name="backgroundTint">@color/icon_toolbar_button</item>
+        <item name="elevation">16dp</item>
+        <item name="tint">@color/white</item>
     </style>
 </resources>

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ open class KDriveUiTest : KDriveTest() {
         ).clickAndWaitForNewWindow()
 
         UiCollection(UiSelector().resourceId(getViewIdentifier("createFolderLayout"))).apply {
-            getChildByInstance(UiSelector().resourceId(getViewIdentifier("folderNameValueInput")), 0).text = folderName
+            getChildByInstance(UiSelector().resourceId(getViewIdentifier("folderNameValueInput")), 0).setText(folderName)
             val permissionsRecyclerView = UiScrollable(UiSelector().resourceId(getViewIdentifier("permissionsRecyclerView")))
             permissionsRecyclerView.getChildByText(
                 UiSelector().resourceId(getViewIdentifier("permissionCard")),
@@ -152,7 +152,6 @@ open class KDriveUiTest : KDriveTest() {
         }
     }
 
-
     fun closeBottomSheetInfoModalIfDisplayed() {
         try {
             onView(withId(R.id.secondaryActionButton)).perform(click())
@@ -215,7 +214,6 @@ open class KDriveUiTest : KDriveTest() {
             }
         }
     }
-
 
     private fun Matcher<View?>.first(): Matcher<View?> {
         return object : TypeSafeMatcher<View?>() {

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
 import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
@@ -44,22 +42,23 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
-import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
 
 class ImportFilesDialog : DialogFragment() {
 
-    private val dialogBinding by lazy { DialogImportFilesBinding.inflate(LayoutInflater.from(context)) }
+    private val dialogBinding by lazy { DialogImportFilesBinding.inflate(layoutInflater) }
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navArgs: ImportFilesDialogArgs by navArgs()
     private val importCount by lazy { navArgs.uris.size }
 
     private var currentImportFile: IOFile? = null
     private var successCount = 0
+
+    private var isMemoryError: Boolean = false
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val countMessage = requireContext().resources.getQuantityString(R.plurals.preparingToUpload, importCount, importCount)
@@ -77,8 +76,13 @@ class ImportFilesDialog : DialogFragment() {
         val errorCount = importCount - successCount
 
         if (errorCount > 0) {
-            val errorMessage = resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
-            showSnackbar(errorMessage, true)
+            val errorMessage = if (isMemoryError) {
+                getString(R.string.uploadOutOfMemoryError)
+            } else {
+                resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
+            }
+
+            showSnackbar(errorMessage, showAboveFab = true)
         }
 
         if (successCount > 0) mainViewModel.refreshActivities.value = true
@@ -91,56 +95,48 @@ class ImportFilesDialog : DialogFragment() {
         navArgs.uris.forEach { uri ->
             runCatching {
                 initUpload(uri)
-            }.onFailure {
-                it.printStackTrace()
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.ERROR
-                    scope.setExtra("uri", uri.toString())
-                    Sentry.captureException(it)
+            }.onFailure { exception ->
+                exception.printStackTrace()
+
+                if (exception is NotEnoughRamException) {
+                    isMemoryError = true
+                } else {
+                    Sentry.captureException(exception)
                 }
+
                 errorCount++
             }
         }
 
-        if (errorCount > 0) {
-            withContext(Dispatchers.Main) {
-                showSnackbar(resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount), true)
-            }
+        lifecycle.withResumed {
+            dismiss()
         }
-        lifecycleScope.launch { lifecycle.withResumed { findNavController().popBackStack() } }
+        context?.syncImmediately()
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (isLowMemory()) throw NotEnoughRamException()
+
             if (cursor.moveToFirst()) {
                 val fileName = cursor.getFileName(uri)
                 val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
 
-                when {
-                    isLowMemory() -> withContext(Dispatchers.Main) {
-                        showSnackbar(R.string.uploadOutOfMemoryError, true)
-                    }
-                    else -> {
-                        val outputFile = getOutputFile(uri, fileModifiedAt)
-
-                        if (isActive) {
-                            UploadFile(
-                                uri = outputFile.toUri().toString(),
-                                driveId = navArgs.driveId,
-                                fileCreatedAt = fileCreatedAt,
-                                fileModifiedAt = fileModifiedAt,
-                                fileName = fileName,
-                                fileSize = outputFile.length(),
-                                remoteFolder = navArgs.folderId,
-                                type = UploadFile.Type.UPLOAD.name,
-                                userId = AccountUtils.currentUserId,
-                            ).store()
-                            successCount++
-                            currentImportFile = null
-                            context?.syncImmediately()
-                        }
-                    }
-                }
+                val outputFile = getOutputFile(uri, fileModifiedAt)
+                ensureActive()
+                UploadFile(
+                    uri = outputFile.toUri().toString(),
+                    driveId = navArgs.driveId,
+                    fileCreatedAt = fileCreatedAt,
+                    fileModifiedAt = fileModifiedAt,
+                    fileName = fileName,
+                    fileSize = outputFile.length(),
+                    remoteFolder = navArgs.folderId,
+                    type = UploadFile.Type.UPLOAD.name,
+                    userId = AccountUtils.currentUserId,
+                ).store()
+                successCount++
+                currentImportFile = null
             }
         }
     }
@@ -161,4 +157,6 @@ class ImportFilesDialog : DialogFragment() {
             }
         }
     }
+
+    private class NotEnoughRamException : Exception("Low device memory.")
 }

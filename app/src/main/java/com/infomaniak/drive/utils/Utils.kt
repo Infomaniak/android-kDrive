@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2022-2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,16 +19,19 @@ package com.infomaniak.drive.utils
 
 import android.app.Dialog
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -53,11 +56,14 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
 import com.infomaniak.drive.databinding.DialogNamePromptBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
+import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
+import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.showKeyboard
 import com.infomaniak.lib.core.utils.showToast
@@ -220,7 +226,7 @@ object Utils {
     fun Context.moveFileClicked(
         disabledFolderId: Int?,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
-        mainViewModel: MainViewModel
+        mainViewModel: MainViewModel,
     ) {
         mainViewModel.ignoreSyncOffline = true
         Intent(this, SelectFolderActivity::class.java).apply {
@@ -230,33 +236,103 @@ object Utils {
                     driveId = AccountUtils.currentDriveId,
                     folderId = disabledFolderId ?: -1,
                     disabledFolderId = disabledFolderId ?: -1,
-                    customArgs = bundleOf(MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE)
-                ).toBundle()
+                    customArgs = bundleOf(
+                        MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.MOVE,
+                        SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.MOVE.name,
+                    ),
+                ).toBundle(),
             )
-            selectFolderResultLauncher.launch(this)
-        }
+        }.also(selectFolderResultLauncher::launch)
+    }
+
+    fun Context.duplicateFilesClicked(
+        selectFolderResultLauncher: ActivityResultLauncher<Intent>,
+        mainViewModel: MainViewModel,
+    ) {
+        Intent(this, SelectFolderActivity::class.java).apply {
+            putExtras(
+                SelectFolderActivityArgs(
+                    userId = AccountUtils.currentUserId,
+                    driveId = AccountUtils.currentDriveId,
+                    folderId = mainViewModel.currentFolder.value?.id ?: -1,
+                    customArgs = bundleOf(
+                        MultiSelectFragment.BULK_OPERATION_CUSTOM_TAG to BulkOperationType.COPY,
+                        SINGLE_OPERATION_CUSTOM_TAG to SingleOperation.COPY.name,
+                    ),
+                ).toBundle(),
+            )
+        }.also(selectFolderResultLauncher::launch)
+    }
+
+    fun Context.openWith(uri: Uri, type: String?, flags: Int) {
+        startActivityFor(openWithIntentExceptkDrive(uri, type, flags))
     }
 
     fun Context.openWith(file: File, userDrive: UserDrive = UserDrive()) {
+        startActivityFor(openWithIntentExceptkDrive(file, userDrive))
+    }
+
+    private fun Context.startActivityFor(openWithIntent: Intent) {
         try {
-            startActivity(openWithIntent(file, userDrive))
+            startActivity(openWithIntent)
         } catch (e: ActivityNotFoundException) {
             showToast(R.string.errorNoSupportingAppFound)
         }
     }
 
-    fun Context.openWithIntent(file: File, userDrive: UserDrive = UserDrive()): Intent {
+    fun Context.openWithIntentExceptkDrive(file: File, userDrive: UserDrive = UserDrive()): Intent {
         val (cloudUri, uri) = file.getCloudAndFileUris(this, userDrive)
-        return Intent().apply {
-            action = Intent.ACTION_VIEW
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
-                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-            setDataAndType(uri, contentResolver.getType(cloudUri))
+        val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+        return openWithIntentExceptkDrive(uri, contentResolver.getType(cloudUri), flags)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun Context.intentExcludingPdfReader(openWithIntent: Intent): Intent {
+        val components = arrayOf(ComponentName(this, PreviewPDFActivity::class.java))
+        return Intent.createChooser(openWithIntent, null).putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, components)
+    }
+
+    private fun Context.intentWithInitialComponent(openWithIntent: Intent): Intent {
+        val openWithIntentLists = mutableListOf<Intent>()
+        packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
+            val resInfoPackageName = resInfo.activityInfo.packageName
+            if (!resInfoPackageName.lowercase().contains(packageName)) {
+                with(Intent(openWithIntent)) {
+                    setPackage(resInfoPackageName)
+                    openWithIntentLists.add(this)
+                }
+            }
+        }
+
+        return Intent.createChooser(openWithIntentLists.removeAt(0), getString(R.string.openWith)).apply {
+            putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
         }
     }
 
-    fun moveCacheFileToOffline(file: File, cacheFile: java.io.File, offlineFile: java.io.File) {
+    fun Context.openWithIntentExceptkDrive(uri: Uri, type: String?, flags: Int): Intent {
+        val openWithIntent = Intent().apply {
+            action = Intent.ACTION_VIEW
+            this.flags = flags
+            setDataAndType(uri, type)
+        }
+
+        // We only do that when we try to openWith with a PDF because we have our own PDF reader
+        // Title in the chooser might not be displayed, at the discretion of the brand manufacturer
+        // So we keep the ACTION_VIEW for every type of files EXCEPT PDF files
+        return if (type == "application/pdf") {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                applicationContext.intentExcludingPdfReader(openWithIntent)
+            } else {
+                applicationContext.intentWithInitialComponent(openWithIntent)
+            }
+        } else {
+            openWithIntent
+        }
+    }
+
+    fun moveCacheFileToOffline(file: File, cacheFile: IOFile, offlineFile: IOFile) {
         if (offlineFile.exists()) offlineFile.delete()
         cacheFile.copyTo(offlineFile)
         cacheFile.delete()
@@ -266,7 +342,7 @@ object Utils {
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {
         val workManager = WorkManager.getInstance(context)
 
-        if (file.isPendingOffline(context)) workManager.cancelAllWorkByTag(file.getWorkerTag())
+        if (file.isMarkedAsOffline) workManager.cancelAllWorkByTag(file.getWorkerTag())
         val inputData = workDataOf(
             DownloadWorker.FILE_ID to file.id,
             DownloadWorker.FILE_NAME to file.name,
@@ -288,37 +364,36 @@ object Utils {
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
     }
 
-    fun downloadAsOfflineFiles(context: Context, files: List<File>, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) = liveData {
-        val workManager = WorkManager.getInstance(context)
+    fun downloadAsOfflineFiles(context: Context, folderId: Int, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) =
+        liveData {
+            val workManager = WorkManager.getInstance(context)
+            val inputData = workDataOf(
+                BulkDownloadWorker.FOLDER_ID to folderId,
+                BulkDownloadWorker.USER_ID to userDrive.userId,
+                BulkDownloadWorker.DRIVE_ID to userDrive.driveId,
+            )
+            val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(networkType)
+                .setRequiresStorageNotLow(true)
+                .build()
+            val downloadRequest = OneTimeWorkRequestBuilder<BulkDownloadWorker>()
+                .addTag(BulkDownloadWorker::class.java.toString())
+                .setInputData(inputData)
+                .setConstraints(constraints)
+                .setExpeditedIfAvailable()
+                .build()
 
-        if (files.any { it.isPendingOffline(context) }) workManager.cancelAllWorkByTag(BulkDownloadWorker.TAG)
-        val inputData = workDataOf(
-            BulkDownloadWorker.FILE_IDS to files.map { it.id }.toIntArray(),
-            BulkDownloadWorker.USER_ID to userDrive.userId,
-            BulkDownloadWorker.DRIVE_ID to userDrive.driveId,
-        )
-        val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(networkType)
-            .setRequiresStorageNotLow(true)
-            .build()
-        val downloadRequest = OneTimeWorkRequestBuilder<BulkDownloadWorker>()
-            .addTag(BulkDownloadWorker::class.java.toString())
-            .setInputData(inputData)
-            .setConstraints(constraints)
-            .setExpeditedIfAvailable()
-            .build()
+            workManager.enqueueUniqueWork(BulkDownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
 
-        workManager.enqueueUniqueWork(BulkDownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
-
-        onSuccess.invoke()
-        emit(MainViewModel.FileResult(isSuccess = true))
-    }
+            onSuccess.invoke()
+            emit(FileResult(isSuccess = true))
+        }
 
     fun getInvalidFileNameCharacter(fileName: String): String? = DownloadManagerUtils.regexInvalidSystemChar.find(fileName)?.value
 
-    fun copyDataToUploadCache(context: Context, file: java.io.File, fileModifiedAt: Date): Uri {
-        val outputFile = java.io.File(context.uploadFolder, file.toUri().hashCode().toString()).apply {
+    fun copyDataToUploadCache(context: Context, file: IOFile, fileModifiedAt: Date): Uri {
+        val outputFile = IOFile(context.uploadFolder, file.toUri().hashCode().toString()).apply {
             if (exists()) delete()
             setLastModified(fileModifiedAt.time)
         }
