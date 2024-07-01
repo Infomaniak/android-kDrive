@@ -110,14 +110,14 @@ object SyncOfflineUtils {
     private fun handleFilesWithoutActions(
         context: Context,
         localFilesMap: Map<Int, File>,
-        alreadyTreatedFileIds: MutableSet<Int>,
+        fileActionsIds: MutableSet<Int>,
         userDrive: UserDrive,
         realm: Realm,
         syncOfflineFilesJob: CompletableJob,
     ) {
         for (file in localFilesMap.values) {
             syncOfflineFilesJob.ensureActive()
-            if (alreadyTreatedFileIds.contains(file.id)) continue
+            if (fileActionsIds.contains(file.id)) continue
             val ioFile = file.getOfflineFile(context, userDrive.userId) ?: continue
             if (ioFile.lastModified() > file.revisedAtInMillis) {
                 uploadFile(
