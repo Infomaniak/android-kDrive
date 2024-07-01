@@ -51,7 +51,6 @@ import com.infomaniak.drive.databinding.CardviewFolderGridBinding
 import com.infomaniak.drive.databinding.ItemCategoriesLayoutBinding
 import com.infomaniak.drive.databinding.ItemFileBinding
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED_CATEGORIES
-import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.utils.context
@@ -63,7 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
@@ -74,7 +73,7 @@ fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
 }
 
 fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout)
@@ -83,7 +82,7 @@ fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
 }
 
 fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
-    fileName.text = file.name
+    fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout, filePreview2)
@@ -91,7 +90,6 @@ fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
 }
 
 private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
-    isVisible = file.id != ROOT_ID
     text = if (file.deletedAt.isPositive()) {
         file.getDeletedAt().format(context.getString(R.string.allDeletedFilePattern))
     } else {
@@ -320,7 +318,7 @@ private fun Context.getBitmapFromFileId(fileUri: Uri, thumbnailSize: Int): Bitma
 
 fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean = false) {
     when {
-        !containsProgress && file.currentProgress == Utils.INDETERMINATE_PROGRESS && file.isPendingOffline(context) -> {
+        !containsProgress && file.isMarkedAsOffline -> {
             setIndeterminateProgress()
             isVisible = true
         }
@@ -328,10 +326,12 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
             setProgress(file)
             isVisible = true
         }
-        file.isOfflineFile(context, checkLocalFile = false) -> {
+        file.isOfflineFile(context, checkLocalFile = false) && !file.isFolder() -> {
             hideProgress()
             isVisible = true
         }
-        else -> isGone = true
+        else -> {
+            isGone = true
+        }
     }
 }

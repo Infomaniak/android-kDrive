@@ -32,7 +32,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.getFileSize
 import io.realm.Realm
 import io.realm.RealmResults
@@ -162,17 +161,11 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
             ?: FileController.getFileDetails(fileId, userDrive)
             ?: return null
 
-        val (name, type) = if (fileId == Utils.ROOT_ID) {
-            Utils.getRootName(context) to File.Type.DRIVE.value
-        } else {
-            folder.name to File.Type.DIRECTORY.value
-        }
-
         return File(
             id = fileId,
-            name = name,
+            name = folder.name,
             path = folder.getRemotePath(userDrive),
-            type = type,
+            type = folder.type,
             isFromUploads = true
         )
     }

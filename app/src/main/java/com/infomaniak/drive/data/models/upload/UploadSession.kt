@@ -36,6 +36,8 @@ open class UploadSession(
         val directoryPath: String?,
         @SerializedName("file_name")
         val fileName: String?,
+        @SerializedName("upload_url")
+        val uploadHost: String,
         file: File,
         token: String,
         isSuccess: Boolean,

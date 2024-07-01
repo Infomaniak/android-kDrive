@@ -62,6 +62,10 @@
             android:name="shouldHideBottomNavigation"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="shouldShowSmallFab"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_fileListFragment_to_previewSliderFragment"
             app:destination="@id/previewSliderFragment" />
@@ -167,6 +171,10 @@
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="shouldShowSmallFab"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />
@@ -279,48 +287,6 @@
         <action
             android:id="@+id/action_menuFragment_to_settingsFragment"
             app:destination="@id/settingsFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_open_exit" />
-        <action
-            android:id="@+id/action_menuFragment_to_offlineFileFragment"
-            app:destination="@id/offlineFileFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_open_exit" />
-        <action
-            android:id="@+id/action_menuFragment_to_trashFragment"
-            app:destination="@id/trashFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_open_exit" />
-        <action
-            android:id="@+id/action_menuFragment_to_sharedWithMeFragment"
-            app:destination="@id/sharedWithMeFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_open_exit" />
-        <action
-            android:id="@+id/action_menuFragment_to_mySharesFragment"
-            app:destination="@id/mySharesFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_open_exit" />
-        <action
-            android:id="@+id/action_menuFragment_to_menuGalleryFragment"
-            app:destination="@id/menuGalleryFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_open_enter"
-            app:popExitAnim="@anim/fragment_open_exit" />
-        <action
-            android:id="@+id/action_menuFragment_to_recentChangesFragment"
-            app:destination="@id/recentChangesFragment"
             app:enterAnim="@anim/fragment_open_enter"
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
@@ -440,6 +406,10 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_open_enter"
             app:popExitAnim="@anim/fragment_open_exit" />
+        <argument
+            android:name="shouldShowSmallFab"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <fragment
@@ -1030,5 +1000,38 @@
         android:name="com.infomaniak.drive.ui.menu.MenuGalleryFragment"
         android:label="MenuGalleryFragment"
         tools:layout="@layout/fragment_menu_gallery" />
+
+    <fragment
+        android:id="@+id/rootFilesFragment"
+        android:name="com.infomaniak.drive.ui.home.RootFilesFragment"
+        android:label="RootFilesFragment"
+        tools:layout="@layout/fragment_root_files">
+        <action
+            android:id="@+id/action_filesFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit" />
+        <action
+            android:id="@+id/action_filesFragment_to_offlineFileFragment"
+            app:destination="@id/offlineFileFragment" />
+        <action
+            android:id="@+id/action_filesFragment_to_trashFragment"
+            app:destination="@id/trashFragment" />
+        <action
+            android:id="@+id/action_filesFragment_to_sharedWithMeFragment"
+            app:destination="@id/sharedWithMeFragment" />
+        <action
+            android:id="@+id/action_filesFragment_to_mySharesFragment"
+            app:destination="@id/mySharesFragment" />
+        <action
+            android:id="@+id/action_filesFragment_to_recentChangesFragment"
+            app:destination="@id/recentChangesFragment" />
+        <action
+            android:id="@+id/action_filesFragment_to_favoritesFragment"
+            app:destination="@id/favoritesFragment" />
+        <action
+            android:id="@+id/action_filesFragment_to_fileListFragment"
+            app:destination="@id/fileListFragment" />
+    </fragment>
 
 </navigation>

@@ -26,7 +26,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.RecentChangesMultiSelectActionsBottomSheetDialog
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.setPagination
 
@@ -50,14 +49,16 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         fileRecyclerView.apply {
             setPagination({
                 if (!fileAdapter.isComplete && !isDownloadingChanges) {
-                    recentChangesViewModel.currentPage++
-                    downloadFiles(false, false)
+                    startLoading()
+                    recentChangesViewModel.loadNextPage()
                 }
             })
         }
 
         sortButton.isGone = true
         setToolbarTitle(R.string.lastEditsTitle)
+
+        observeRecentChanges()
     }
 
     private fun initParams() {
@@ -75,6 +76,25 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         )
     }
 
+    private fun startLoading() {
+        showLoadingTimer.start()
+        isDownloadingChanges = true
+    }
+
+    private fun observeRecentChanges() {
+        recentChangesViewModel.recentChangesResults.observe(viewLifecycleOwner) { result ->
+            populateFileList(
+                files = result?.files ?: arrayListOf(),
+                folderId = FileController.RECENT_CHANGES_FILE_ID,
+                ignoreOffline = true,
+                isComplete = result?.isComplete ?: true,
+                realm = mainViewModel.realm,
+                isNewSort = recentChangesViewModel.isNewSort,
+            )
+            isDownloadingChanges = false
+        }
+    }
+
     companion object {
         const val MATOMO_CATEGORY = "recentChangesFileAction"
     }
@@ -82,21 +102,10 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
 
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
-            showLoadingTimer.start()
+            startLoading()
             fileAdapter.isComplete = false
-            isDownloadingChanges = true
 
-            recentChangesViewModel.getRecentChanges(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { result ->
-                populateFileList(
-                    files = result?.files ?: arrayListOf(),
-                    folderId = FileController.RECENT_CHANGES_FILE_ID,
-                    ignoreOffline = true,
-                    isComplete = result?.isComplete ?: true,
-                    realm = mainViewModel.realm,
-                    isNewSort = isNewSort,
-                )
-                isDownloadingChanges = false
-            }
+            recentChangesViewModel.loadRecentChanges(isNewSort)
         }
     }
 }

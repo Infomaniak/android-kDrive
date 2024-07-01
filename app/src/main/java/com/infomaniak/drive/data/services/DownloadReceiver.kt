@@ -25,7 +25,8 @@ import com.infomaniak.drive.ui.MainViewModel
 class DownloadReceiver(private val mainViewModel: MainViewModel) : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent) {
         val fileId = intent.getIntExtra(CANCELLED_FILE_ID, 0)
-        if (fileId > 0) {
+
+        if (fileId > 0 || intent.action == BulkDownloadWorker.TAG) {
             mainViewModel.updateVisibleFiles.value = true
         }
     }

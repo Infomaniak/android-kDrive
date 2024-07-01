@@ -91,6 +91,12 @@
     <string name="backgroundSyncTitle">Synchronisation en arrière-plan</string>
     <string name="belongToAllCategoriesFilterDescription">Les résultats doivent appartenir à toutes les catégories sélectionnées</string>
     <string name="belongToOneCategoryFilterDescription">Les résultats doivent appartenir à une des catégories sélectionnées</string>
+    <plurals name="bulkDownloadNotificationContent">
+        <item quantity="one">1 fichier téléchargé sur %2$d</item>
+        <item quantity="other">%1$d fichiers téléchargés sur %2$d</item>
+    </plurals>
+    <string name="bulkDownloadNotificationTitleNoProgress">Importation en cours</string>
+    <string name="bulkDownloadNotificationTitleWithProgress">Importation en cours (%1$d%%)</string>
     <string name="buttonAdd">Ajouter</string>
     <string name="buttonAddComment">Ajouter un commentaire</string>
     <string name="buttonAddFavorites">Ajouter aux favoris</string>
@@ -182,6 +188,7 @@
     <string name="categoryWork">Travail</string>
     <string name="cloudStorageMissingPermissionNotifDescription">L’app ne peut pas fonctionner en arrière-plan à cause d’une permission manquante.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Recherche impossible, aucun drive n’a été sélectionné</string>
+    <string name="commonDocumentsDescription">Cet espace appartient à %s et centralise les fichiers communs de votre organisation.</string>
     <string name="commonFolderDescription">Partagez ce dossier avec des utilisateurs du kDrive %s</string>
     <string name="commonFolderTitle">Dossier commun</string>
     <string name="contentDescriptionIsSelected">Est sélectionné</string>
@@ -455,6 +462,8 @@
     <string name="inputExpirationTime">Heure d’expiration</string>
     <string name="kDrivePdfViewer">Lecteur PDF de kDrive</string>
     <string name="lastEditsTitle">Dernières modifications</string>
+    <string name="localizedFilenamePrivateSpace">Mes fichiers</string>
+    <string name="localizedFilenameTeamSpace">Dossiers de l’organisation</string>
     <string name="locateButton">Localiser</string>
     <string name="manageCategoriesCreateTitle">Créer %s</string>
     <string name="manageCategoriesNoCategory">Aucune catégorie</string>
@@ -619,8 +628,10 @@
     <string name="sortBigger">Plus grand</string>
     <string name="sortDay">Par jour</string>
     <string name="sortExtension">Extension</string>
+    <string name="sortLeastRelevant">Moins pertinent</string>
     <string name="sortMonth">Par mois</string>
     <string name="sortMostRecentAdded">Plus récemment ajouté</string>
+    <string name="sortMostRelevant">Plus pertinent</string>
     <string name="sortNameAZ">Nom : de A à Z</string>
     <string name="sortNameZA">Nom : de Z à A</string>
     <string name="sortOlder">Plus ancien</string>

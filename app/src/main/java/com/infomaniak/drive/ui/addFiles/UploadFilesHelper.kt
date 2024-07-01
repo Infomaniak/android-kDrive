@@ -66,7 +66,12 @@ class UploadFilesHelper private constructor(
         if (uris.isNotEmpty()) {
             navController.navigate(
                 resId = R.id.importFileDialog,
-                args = ImportFilesDialogArgs(id, name, driveId, uris.toTypedArray()).toBundle(),
+                args = ImportFilesDialogArgs(
+                    folderId = parentFolder.id,
+                    folderName = parentFolder.name,
+                    driveId = parentFolder.driveId,
+                    uris = uris.toTypedArray()
+                ).toBundle(),
             )
         }
     }

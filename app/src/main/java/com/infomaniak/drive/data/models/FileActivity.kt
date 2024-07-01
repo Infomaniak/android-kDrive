@@ -26,7 +26,7 @@ import com.infomaniak.lib.core.utils.format
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
-import java.util.*
+import java.util.Date
 import java.util.concurrent.TimeUnit
 
 open class FileActivity(
@@ -140,40 +140,6 @@ open class FileActivity(
         FileActivityType.FILE_UNCATEGORIZE -> R.string.fileDetailsActivityFileUncategorize
         FileActivityType.FILE_COLOR_UPDATE -> R.string.fileDetailsActivityFileColorUpdate
         FileActivityType.FILE_COLOR_DELETE -> R.string.fileDetailsActivityFileColorDelete
-    }
-
-    enum class FileActivityType {
-        FILE_ACCESS,
-        FILE_CREATE,
-        FILE_RENAME,
-        FILE_MOVE_IN,
-        FILE_MOVE_OUT,
-        FILE_TRASH,
-        FILE_RESTORE,
-        FILE_DELETE,
-        FILE_UPDATE,
-        FILE_FAVORITE_CREATE,
-        FILE_FAVORITE_REMOVE,
-        FILE_SHARE_CREATE,
-        FILE_SHARE_UPDATE,
-        FILE_SHARE_DELETE,
-        FILE_CATEGORIZE,
-        FILE_UNCATEGORIZE,
-        FILE_COLOR_UPDATE,
-        FILE_COLOR_DELETE,
-        SHARE_LINK_CREATE,
-        SHARE_LINK_UPDATE,
-        SHARE_LINK_DELETE,
-        SHARE_LINK_SHOW,
-        COMMENT_CREATE,
-        COMMENT_UPDATE,
-        COMMENT_DELETE,
-        COMMENT_LIKE,
-        COMMENT_UNLIKE,
-        COMMENT_RESOLVE,
-        COLLABORATIVE_FOLDER_CREATE,
-        COLLABORATIVE_FOLDER_UPDATE,
-        COLLABORATIVE_FOLDER_DELETE,
     }
 
     fun getDay(context: Context): String {

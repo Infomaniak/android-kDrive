@@ -19,31 +19,26 @@ package com.infomaniak.drive.ui.fileList
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import androidx.annotation.StringRes
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.data.models.SearchFilter
 import com.infomaniak.drive.data.models.SearchFilter.FilterKey
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.databinding.RecentSearchesBinding
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setPagination
 
@@ -55,17 +50,12 @@ class SearchFragment : FileListFragment() {
 
     override val noItemsIcon = R.drawable.ic_search_grey
     override val noItemsTitle = R.string.searchNoFile
+    override val sortTypeUsage = SortTypeUsage.SEARCH
 
     private lateinit var filtersAdapter: SearchFiltersAdapter
     private lateinit var recentSearchesAdapter: RecentSearchesAdapter
-    private var recentSearchesBinding: RecentSearchesBinding by safeBinding()
 
     private var isDownloading = false
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        RecentSearchesBinding.inflate(inflater, container, false).also { recentSearchesBinding = it }.root
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
 
     @SuppressLint("InflateParams")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -187,7 +177,6 @@ class SearchFragment : FileListFragment() {
         binding.fileRecyclerView.setPagination({
             if (!fileAdapter.isComplete && !isDownloading) {
                 fileAdapter.showLoading()
-                searchViewModel.currentPage++
                 downloadFiles(true, false)
             }
         })
@@ -202,6 +191,7 @@ class SearchFragment : FileListFragment() {
                         folderId = file.id,
                         folderName = file.name,
                         shouldHideBottomNavigation = true,
+                        shouldShowSmallFab = true,
                     )
                 )
             } else {
@@ -212,17 +202,17 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun configureRecentSearches() = with(binding) {
-        fileListLayout.addView(recentSearchesBinding.root, 1)
+        recentSearchLayout.root.isVisible = true
 
         val recentSearches = UiSettings(requireContext()).recentSearches
 
         recentSearchesAdapter = RecentSearchesAdapter(
             searches = ArrayList(recentSearches),
             onSearchClicked = searchViewCard.searchView::setText,
-            onListEmpty = { recentSearchesBinding.root.isGone = true }
+            onListEmpty = { recentSearchLayout.root.isGone = true }
         ).also {
-            recentSearchesBinding.recentSearchesRecyclerView.adapter = it
-            recentSearchesBinding.recentSearchesContainer.isGone = recentSearches.isEmpty()
+            recentSearchLayout.recentSearchesRecyclerView.adapter = it
+            recentSearchLayout.recentSearchesContainer.isGone = recentSearches.isEmpty()
         }
     }
 
@@ -244,9 +234,9 @@ class SearchFragment : FileListFragment() {
             fileAdapter.isComplete = true
         }
 
-        fun handleApiCallFailure(apiResponse: ApiResponse<ArrayList<File>>) {
+        fun handleApiCallFailure(@StringRes errorRes: Int) {
             searchViewModel.visibilityMode.value = VisibilityMode.NO_RESULTS
-            showSnackbar(apiResponse.translateError())
+            showSnackbar(errorRes)
         }
 
         fun getSearchResults(data: ArrayList<File>?): ArrayList<File> {
@@ -283,20 +273,22 @@ class SearchFragment : FileListFragment() {
 
             if (!binding.swipeRefreshLayout.isRefreshing) return@observe
 
-            it?.let { apiResponse ->
+            it?.let { folderFilesResult ->
 
-                if (apiResponse.isSuccess()) {
+                if (folderFilesResult.errorRes == null) {
                     updateMostRecentSearches()
-                    val searchList = getSearchResults(apiResponse.data)
+                    val searchList = getSearchResults(folderFilesResult.files)
+
+                    fileAdapter.isComplete = folderFilesResult.isComplete
 
                     when {
-                        searchViewModel.currentPage == 1 -> handleFirstResult(searchList)
+                        folderFilesResult.isFirstPage -> handleFirstResult(searchList)
                         searchList.isEmpty() -> handleNoResult()
-                        searchList.size < ApiRepository.PER_PAGE -> handleLastPage(searchList)
+                        folderFilesResult.isComplete -> handleLastPage(searchList)
                         else -> handleNewPage(searchList)
                     }
                 } else {
-                    handleApiCallFailure(apiResponse)
+                    handleApiCallFailure(folderFilesResult.errorRes)
                 }
 
             } ?: handleLiveDataTriggerWhenInitialized()
@@ -306,8 +298,8 @@ class SearchFragment : FileListFragment() {
         }
     }
 
-    private fun updateMostRecentSearches() {
-        val newSearch = binding.searchViewCard.searchView.text.toString().trim()
+    private fun updateMostRecentSearches(): Unit = with(binding) {
+        val newSearch = searchViewCard.searchView.text.toString().trim()
         if (newSearch.isEmpty()) return
 
         val newSearches = (listOf(newSearch) + recentSearchesAdapter.searches)
@@ -315,11 +307,11 @@ class SearchFragment : FileListFragment() {
             .take(MAX_MOST_RECENT_SEARCHES)
             .also(recentSearchesAdapter::setItems)
 
-        recentSearchesBinding.recentSearchesContainer.isGone = newSearches.isEmpty()
+        recentSearchLayout.recentSearchesContainer.isGone = newSearches.isEmpty()
     }
 
     private fun triggerSearch() {
-        searchViewModel.currentPage = 1
+        searchViewModel.resetSearchPagination()
         downloadFiles(true, false)
     }
 
@@ -354,7 +346,7 @@ class SearchFragment : FileListFragment() {
     private fun updateUi(mode: VisibilityMode) = with(binding) {
 
         fun displayRecentSearches() {
-            recentSearchesBinding.root.isVisible = true
+            recentSearchLayout.root.isVisible = true
             filtersRecyclerView.isGone = true
             noFilesLayout.isGone = true
             sortLayout.isGone = true
@@ -362,7 +354,7 @@ class SearchFragment : FileListFragment() {
         }
 
         fun displayLoadingView() {
-            recentSearchesBinding.root.isGone = true
+            recentSearchLayout.root.isGone = true
             filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
             noFilesLayout.isGone = true
             sortLayout.isGone = true
@@ -370,9 +362,9 @@ class SearchFragment : FileListFragment() {
         }
 
         fun displaySearchResult(mode: VisibilityMode) {
-            recentSearchesBinding.root.isGone = true
+            recentSearchLayout.root.isGone = true
             filtersRecyclerView.isGone = filtersAdapter.filters.isEmpty()
-            changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, false)
+            changeNoFilesLayoutVisibility(mode == VisibilityMode.NO_RESULTS, changeControlsVisibility = false)
         }
 
         when (mode) {

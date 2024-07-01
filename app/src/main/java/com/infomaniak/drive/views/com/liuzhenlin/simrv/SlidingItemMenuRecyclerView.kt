@@ -39,7 +39,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
-import java.util.*
+import java.util.LinkedList
 import kotlin.math.abs
 import kotlin.math.roundToInt
 

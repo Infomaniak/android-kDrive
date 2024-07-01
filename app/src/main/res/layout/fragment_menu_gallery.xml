@@ -39,7 +39,9 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@null" />
+
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <include
@@ -57,11 +59,23 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/galleryFragmentView"
+        <LinearLayout
+            android:id="@+id/galleryContentLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="true" />
+            android:orientation="vertical">
 
+            <include
+                android:id="@+id/noNetworkInclude"
+                layout="@layout/layout_no_network_small" />
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/galleryFragmentView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="true"
+                tools:layout="@layout/fragment_gallery" />
+
+        </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

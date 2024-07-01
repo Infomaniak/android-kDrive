@@ -15,160 +15,99 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/homeCoordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/homeCoordinator"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <com.google.android.material.appbar.CollapsingToolbarLayout
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll|snap">
+            android:layout_height="wrap_content">
 
-            <LinearLayout
+            <com.google.android.material.appbar.CollapsingToolbarLayout
+                android:id="@+id/collapsingToolbarLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
+
+                <com.google.android.material.appbar.MaterialToolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    app:layout_collapseMode="pin"
+                    app:menu="@menu/file_list_menu"
+                    app:navigationIcon="@null" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="120.8dp"
-                    android:gravity="bottom">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/switchDriveButton"
-                        style="@style/TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="@dimen/marginStandard"
-                        android:contentDescription="@string/buttonSwitchDrive"
-                        android:ellipsize="end"
-                        android:fontFamily="@font/suisseintl_bold"
-                        android:gravity="start|center"
-                        android:lineSpacingMultiplier="1"
-                        android:maxWidth="1000000dp"
-                        android:maxLines="2"
-                        android:textColor="@color/title"
-                        android:textSize="28sp"
-                        app:icon="@drawable/ic_keyboard_arrow_down"
-                        app:iconGravity="end"
-                        app:iconSize="28dp"
-                        app:iconTint="@color/iconColor"
-                        tools:text="Drive de test dev infomaniak" />
-
-                </LinearLayout>
-
-                <include
-                    android:id="@+id/noNetworkCard"
-                    layout="@layout/view_network_unavailable_home"
-                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:layout_marginTop="@dimen/marginStandardMedium"
-                    android:layout_marginBottom="@dimen/marginStandardSmall"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
+                    android:orientation="vertical">
 
-                <include
-                    android:id="@+id/searchViewCard"
-                    layout="@layout/item_search_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:layout_marginTop="@dimen/marginStandardMedium"
-                    android:layout_marginBottom="@dimen/marginStandardMedium" />
-
-                <FrameLayout
-                    android:id="@+id/homeUploadFileInProgressLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone"
-                    tools:visibility="visible">
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="112.8dp" />
 
                     <include
-                        android:id="@+id/homeUploadFileInProgress"
-                        layout="@layout/cardview_file_list"
+                        android:id="@+id/noNetworkCard"
+                        layout="@layout/view_network_unavailable_home"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/marginStandard"
-                        android:layout_marginTop="@dimen/marginStandardSmall"
-                        android:layout_marginBottom="@dimen/marginStandardMedium" />
+                        android:layout_marginTop="@dimen/marginStandardMedium"
+                        android:layout_marginBottom="@dimen/marginStandardSmall"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
-                </FrameLayout>
-
-                <com.infomaniak.drive.views.NotEnoughStorageView
-                    android:id="@+id/notEnoughStorage"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/marginStandardMedium"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-                <com.google.android.material.button.MaterialButtonToggleGroup
-                    android:id="@+id/tabsHomeGroup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandard"
-                    android:orientation="horizontal"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/searchViewCard"
-                    app:selectionRequired="true"
-                    app:singleSelection="true">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/homeActivitiesButton"
-                        style="@style/ButtonToggleGroupAlternative"
-                        android:layout_width="0dp"
+                    <com.infomaniak.drive.views.PendingFilesView
+                        android:id="@+id/homeUploadFileInProgressView"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/fileDetailsActivitiesTitle" />
+                        android:layout_margin="@dimen/marginStandardMedium"
+                        android:visibility="gone"
+                        app:title="@string/uploadInProgressTitle"
+                        tools:visibility="visible" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/homeOfflineButton"
-                        style="@style/ButtonToggleGroupAlternative"
-                        android:layout_width="0dp"
+                    <com.infomaniak.drive.views.NotEnoughStorageView
+                        android:id="@+id/notEnoughStorage"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/offlineFileTitle" />
+                        android:layout_marginBottom="@dimen/marginStandardMedium"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/homeGalleryButton"
-                        style="@style/ButtonToggleGroupAlternative"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/galleryTitle" />
+                </LinearLayout>
 
-                </com.google.android.material.button.MaterialButtonToggleGroup>
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-            </LinearLayout>
+        </com.google.android.material.appbar.AppBarLayout>
 
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/homeSwipeRefreshLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/homeViewPager"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/homeSwipeRefreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:nestedScrollingEnabled="true" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/homeActivitiesFragment"
+                android:name="com.infomaniak.drive.ui.home.HomeActivitiesFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:layout="@layout/fragment_home_activities" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <include
+        android:id="@+id/switchDriveLayout"
+        layout="@layout/layout_switch_drive"
+        tools:visibility="gone" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

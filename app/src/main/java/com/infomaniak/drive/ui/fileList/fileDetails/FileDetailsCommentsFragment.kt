@@ -28,7 +28,10 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileComment
 import com.infomaniak.drive.databinding.FragmentFileDetailsCommentsBinding
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.openOnlyOfficeDocument
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.safeBinding
 
@@ -110,7 +113,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
             fileDetailsViewModel.getFileComments(currentFile).observe(viewLifecycleOwner) { apiResponse ->
                 apiResponse?.data?.let { comments ->
                     addAll(comments)
-                    isComplete = apiResponse.isLastPage()
+                    isComplete = !apiResponse.hasMore
                 } ?: also {
                     isComplete = true
                 }

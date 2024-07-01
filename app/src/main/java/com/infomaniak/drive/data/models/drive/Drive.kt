@@ -19,9 +19,6 @@ package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.data.models.DriveUser
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.Rights
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmList
 import io.realm.RealmObject
@@ -56,6 +53,7 @@ open class Drive(
      */
     @SerializedName("account_id")
     var accountId: Int = -1,
+    @SerializedName("account")
     private var _driveAccount: DriveAccount? = null,
     @SerializedName("created_at")
     var createdAt: Long = 0,
@@ -110,17 +108,6 @@ open class Drive(
     inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
-
-    fun convertToFile(rootName: String? = null): File {
-        return File(
-            id = if (rootName == null) id else Utils.ROOT_ID,
-            driveId = id,
-            name = rootName ?: name,
-            type = File.Type.DRIVE.value,
-            lastModifiedAt = createdAt,
-            rights = Rights(canCreateFile = true)
-        ).apply { driveColor = preferences.color }
-    }
 
     fun isUserAdmin(): Boolean = role == DriveUser.Role.ADMIN
 

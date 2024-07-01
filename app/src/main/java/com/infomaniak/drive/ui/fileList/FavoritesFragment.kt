@@ -36,6 +36,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 class FavoritesFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = true
+    override var hideBackButtonWhenRoot: Boolean = false
 
     override val noItemsRootIcon = R.drawable.ic_star_filled
     override val noItemsRootTitle = R.string.favoritesNoFile
@@ -93,6 +94,7 @@ class FavoritesFragment : FileListFragment() {
 
     override fun performBulkOperation(
         type: BulkOperationType,
+        folderId: Int?,
         areAllFromTheSameFolder: Boolean,
         allSelectedFilesCount: Int?,
         destinationFolder: File?,
@@ -101,7 +103,14 @@ class FavoritesFragment : FileListFragment() {
         // API doesn't support bulk operations for files originating from
         // different parent folders, so we repeat the action for each file.
         // Hence the `areAllFromTheSameFolder` set at false.
-        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
+        super.performBulkOperation(
+            type,
+            folderId,
+            areAllFromTheSameFolder = false,
+            allSelectedFilesCount,
+            destinationFolder,
+            color
+        )
     }
 
     companion object {
@@ -112,9 +121,9 @@ class FavoritesFragment : FileListFragment() {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
-            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
+            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType, isNewSort).observe(viewLifecycleOwner) {
                 it?.let { result ->
-                    if (fileAdapter.itemCount == 0 || result.page == 1 || isNewSort) {
+                    if (fileAdapter.itemCount == 0 || result.isFirstPage || isNewSort) {
                         val realmFiles = FileController.getRealmLiveFiles(
                             isFavorite = true,
                             order = fileListViewModel.sortType,
@@ -123,11 +132,11 @@ class FavoritesFragment : FileListFragment() {
                             withVisibilitySort = false
                         )
                         fileAdapter.updateFileList(realmFiles)
-                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), false)
+                        changeNoFilesLayoutVisibility(realmFiles.isEmpty(), changeControlsVisibility = false)
                     }
                     fileAdapter.isComplete = result.isComplete
                 } ?: run {
-                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, false)
+                    changeNoFilesLayoutVisibility(fileAdapter.itemCount == 0, changeControlsVisibility = false)
                     fileAdapter.isComplete = true
                 }
                 showLoadingTimer.cancel()

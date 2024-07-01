@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import androidx.viewbinding.ViewBinding
 import coil.load
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
@@ -34,6 +35,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivity
 import com.infomaniak.drive.databinding.CardviewHomeFileActivityBinding
 import com.infomaniak.drive.databinding.EmptyIconLayoutBinding
+import com.infomaniak.drive.databinding.ItemLastActivitiesSubtitleBinding
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.lib.core.utils.context
@@ -44,13 +46,26 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
     var onFileClicked: ((currentFile: File, validPreviewFiles: ArrayList<File>) -> Unit)? = null
     var onMoreFilesClicked: ((fileActivity: FileActivity, validPreviewFiles: ArrayList<File>) -> Unit)? = null
 
+    override fun getItemCount(): Int = super.getItemCount() + 1
+
+    override fun getItemViewType(position: Int): Int = if (position == 0) VIEW_TYPE_SUBTITLE else super.getItemViewType(position)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LastActivitiesViewHolder {
-        return LastActivitiesViewHolder(
-            CardviewHomeFileActivityBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        )
+        return when (viewType) {
+            VIEW_TYPE_SUBTITLE -> SubtitleViewHolder(
+                ItemLastActivitiesSubtitleBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            )
+            else -> ActivitiesViewHolder(
+                CardviewHomeFileActivityBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            )
+        }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int): Unit = with((holder as LastActivitiesViewHolder).binding) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        if (holder is ActivitiesViewHolder) holder.binding.bindActivity(position)
+    }
+
+    private fun CardviewHomeFileActivityBinding.bindActivity(position: Int) {
         if (getItemViewType(position) == VIEW_TYPE_LOADING) {
             root.startLoading()
             userName.resetLoader()
@@ -180,5 +195,11 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 
     private fun getFileTypeIcon(file: File?) = file?.getFileType()?.icon ?: R.drawable.ic_file
 
-    class LastActivitiesViewHolder(val binding: CardviewHomeFileActivityBinding) : ViewHolder(binding.root)
+    open class LastActivitiesViewHolder(open val binding: ViewBinding) : ViewHolder(binding.root)
+    class SubtitleViewHolder(override val binding: ItemLastActivitiesSubtitleBinding) : LastActivitiesViewHolder(binding)
+    class ActivitiesViewHolder(override val binding: CardviewHomeFileActivityBinding) : LastActivitiesViewHolder(binding)
+
+    companion object {
+        private const val VIEW_TYPE_SUBTITLE = 3
+    }
 }

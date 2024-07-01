@@ -54,7 +54,6 @@ class UiSettings(context: Context) : SharedValues {
 
     var bottomNavigationSelectedItem by sharedValue("bottomNavigationSelectedItem", R.id.hostFragment)
     var hasDisplayedSyncDialog by sharedValue("hasDisplayedSyncDialog", false)
-    var lastHomeSelectedTab by sharedValue("lastHomeSelectedTab", 0)
     var listMode by sharedValue("listMode", true)
     var mustDisplayBatteryDialog by sharedValue("mustDisplayBatteryDialog", manufacturerWarning)
     var nightMode by sharedValue("nightMode", MODE_NIGHT_FOLLOW_SYSTEM)

@@ -19,6 +19,7 @@
 
     <declare-styleable name="CommonAttributes">
         <attr name="icon" format="reference" />
+        <attr name="title" format="string" />
     </declare-styleable>
 
     <declare-styleable name="FabBottomNavigationView">
@@ -62,7 +63,12 @@
 
     <declare-styleable name="MenuItemView">
         <attr name="icon" />
-        <attr name="title" format="string" />
+        <attr name="iconColor" format="color" />
+        <attr name="title" />
+    </declare-styleable>
+
+    <declare-styleable name="PendingFilesView">
+        <attr name="title" />
     </declare-styleable>
 
     <declare-styleable name="BottomSheetItemView">
