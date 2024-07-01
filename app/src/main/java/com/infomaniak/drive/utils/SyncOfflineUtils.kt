@@ -92,7 +92,7 @@ object SyncOfflineUtils {
             ).data
 
             // When a local file changes without a corresponding fileAction, we need to synchronize it differently.
-            // We store the IDs of the processed fileActions to track what has already been handled,
+            // We store file IDs of the processed fileActions to track what has already been handled,
             // so we only need to process files that don't have a fileAction.
             val fileActionsIds = mutableSetOf<Int>()
 
