@@ -103,7 +103,7 @@ object SyncOfflineUtils {
             }
 
             // Check if any of the files that don't have fileActions require synchronization.
-            handleFilesWithoutActions(context, localFilesMap, fileActionsIds, userDrive, realm)
+            handleFilesWithoutActions(context, localFilesMap, fileActionsIds, userDrive, realm, syncOfflineFilesJob)
         }
     }
 
@@ -113,8 +113,10 @@ object SyncOfflineUtils {
         alreadyTreatedFileIds: MutableSet<Int>,
         userDrive: UserDrive,
         realm: Realm,
+        syncOfflineFilesJob: CompletableJob,
     ) {
         for (file in localFilesMap.values) {
+            syncOfflineFilesJob.ensureActive()
             if (alreadyTreatedFileIds.contains(file.id)) continue
             val ioFile = file.getOfflineFile(context, userDrive.userId) ?: continue
             if (ioFile.lastModified() > file.revisedAtInMillis) {
