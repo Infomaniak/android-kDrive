@@ -30,10 +30,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- Setting saveEnabled to false prevents the ViewPager2 from filling up endlessly the save state bundle, as the user
+        scrolls through the view pager, up to the point where it crashes the app -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:saveEnabled="false" />
 
         <com.infomaniak.drive.views.PreviewHeaderView
             android:id="@+id/header"
