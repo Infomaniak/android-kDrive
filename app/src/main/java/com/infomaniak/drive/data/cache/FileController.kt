@@ -58,7 +58,7 @@ object FileController {
     private val MY_SHARES_FILE = File(id = MY_SHARES_FILE_ID, name = "My Shares").apply { initUid() }
     private val GALLERY_FILE = File(id = GALLERY_FILE_ID, name = "Gallery").apply { initUid() }
     private val RECENT_CHANGES_FILE = File(id = RECENT_CHANGES_FILE_ID, name = "Recent changes").apply { initUid() }
-    val SHARED_WITH_ME_FILE = File(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me").apply { initUid() }
+    private val SHARED_WITH_ME_FILE = File(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me").apply { initUid() }
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
@@ -149,6 +149,44 @@ object FileController {
             .toFlow()
     }
 
+    fun getFolderOfflineFilesId(folderId: Int, sortType: SortType): List<Int> {
+        return getRealmInstance().use { realm ->
+            val realmFiles = realm.where(File::class.java)
+                .equalTo(File::parentId.name, folderId)
+                .equalTo(File::isMarkedAsOffline.name, true)
+                .getSortQueryByOrder(sortType)
+                .findAll()
+            realmFiles.filter { !it.isFolder() }.map { it.id }
+        }
+    }
+
+    private fun markFileAsOfflineQuery(realm: Realm, fileId: Int, isMarkedAsOffline: Boolean) {
+        realm.where(File::class.java)
+            .equalTo(File::id.name, fileId)
+            .findFirst()?.let { file ->
+                file.isMarkedAsOffline = isMarkedAsOffline
+            }
+    }
+
+    fun markFilesAsOffline(customRealm: Realm? = null, filesId: List<Int>, isMarkedAsOffline: Boolean) {
+        val block: (Realm) -> Unit? = { realm ->
+            realm.executeTransaction {
+                filesId.forEach { fileId -> markFileAsOfflineQuery(realm, fileId, isMarkedAsOffline) }
+            }
+        }
+
+        customRealm?.let(block) ?: getRealmInstance().use(block)
+    }
+
+    fun markFileAsOffline(customRealm: Realm? = null, fileId: Int, isMarkedAsOffline: Boolean) {
+        val block: (Realm) -> Unit? = { realm ->
+            realm.executeTransaction {
+                markFileAsOfflineQuery(realm, fileId, isMarkedAsOffline)
+            }
+        }
+        customRealm?.let(block) ?: getRealmInstance().use(block)
+    }
+
     fun removeFile(
         fileId: Int,
         keepFileCaches: ArrayList<Int> = arrayListOf(),
@@ -208,6 +246,24 @@ object FileController {
             onSuccess?.invoke(file.id)
         }
         return apiResponse
+    }
+
+    fun updateIsOfflineForFiles(
+        fileIds: List<Int>,
+        customRealm: Realm? = null,
+        userDrive: UserDrive? = null,
+        isOffline: Boolean,
+    ) {
+        val block: (Realm) -> Unit? = { currentRealm ->
+            fileIds.forEach { fileId ->
+                currentRealm.executeTransaction {
+                    getFileById(currentRealm, fileId)?.let { file ->
+                        file.isOffline = isOffline
+                    }
+                }
+            }
+        }
+        customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
     fun updateFile(fileId: Int, realm: Realm? = null, userDrive: UserDrive? = null, transaction: (file: File) -> Unit) {
@@ -766,6 +822,7 @@ object FileController {
         isOffline = oldFile.isOffline
         responseAt = oldFile.responseAt
         versionCode = oldFile.versionCode
+        isMarkedAsOffline = oldFile.isMarkedAsOffline
     }
 
     private fun RealmQuery<File>.getSortQueryByOrder(order: SortType): RealmQuery<File> {

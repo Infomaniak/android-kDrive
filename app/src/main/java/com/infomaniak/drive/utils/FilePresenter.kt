@@ -32,11 +32,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.AccessDeniedBottomSheetDialogArgs
-import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
-import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
-import com.infomaniak.drive.ui.fileList.FileAdapter
-import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
-import com.infomaniak.drive.ui.fileList.FileListViewModel
+import com.infomaniak.drive.ui.fileList.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -96,7 +92,7 @@ object FilePresenter {
                     fileId = file.id,
                     fileName = file.name,
                     userDrive = UserDrive(),
-                    action = DownloadAction.OPEN_BOOKMARK,
+                    action = DownloadProgressDialog.DownloadAction.OPEN_BOOKMARK,
                 ).toBundle(),
             )
         }

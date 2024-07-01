@@ -102,6 +102,12 @@
     <string name="backgroundSyncTitle">Background synchronization</string>
     <string name="belongToAllCategoriesFilterDescription">Results must belong to all selected categories</string>
     <string name="belongToOneCategoryFilterDescription">Results must belong to one of the selected categories</string>
+    <plurals name="bulkDownloadNotificationContent">
+        <item quantity="one">1 file downloaded out of %2$d</item>
+        <item quantity="other">%1$d files downloaded out of %2$d</item>
+    </plurals>
+    <string name="bulkDownloadNotificationTitleNoProgress">Import in progress</string>
+    <string name="bulkDownloadNotificationTitleWithProgress">Import in progress (%1$d%%)</string>
     <string name="buttonAdd">Add</string>
     <string name="buttonAddComment">Add a comment</string>
     <string name="buttonAddFavorites">Add to favorites</string>

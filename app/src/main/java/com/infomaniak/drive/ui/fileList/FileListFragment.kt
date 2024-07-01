@@ -49,6 +49,7 @@ import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
+import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -234,6 +235,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         if (!isDownloading) downloadFiles(false, false)
         observeOfflineDownloadProgress()
+        observeOfflineBulkDownloadProgress()
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
@@ -553,19 +555,32 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun observeOfflineDownloadProgress() {
         mainViewModel.observeDownloadOffline(requireContext().applicationContext).observe(viewLifecycleOwner) { workInfoList ->
-            if (workInfoList.isEmpty()) return@observe
+            updateFileStatus(workInfoList, DownloadWorker.FILE_ID, DownloadWorker.PROGRESS)
+        }
 
-            val workInfo = workInfoList.firstOrNull { it.state == WorkInfo.State.RUNNING }
+        mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {
+            updateVisibleProgresses()
+        }
+    }
 
-            if (workInfo == null) {
-                updateVisibleProgresses()
-                return@observe
+    private fun observeOfflineBulkDownloadProgress() {
+        DownloadOfflineFileManager.observeBulkDownloadOffline(requireContext().applicationContext)
+            .observe(viewLifecycleOwner) { workInfoList ->
+                updateFileStatus(workInfoList, BulkDownloadWorker.FILE_ID, BulkDownloadWorker.PROGRESS)
             }
+    }
 
-            val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
-            if (fileId == 0) return@observe
+    private fun updateFileStatus(workInfoList: List<WorkInfo>, fileIdKey: String, progressKey: String) {
+        if (workInfoList.isEmpty()) {
+            updateVisibleProgresses()
+            return
+        }
 
-            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
+        workInfoList.firstOrNull()?.let { workInfo ->
+            val fileId = workInfo.progress.getInt(fileIdKey, 0)
+            if (fileId == 0) return
+
+            val progress = workInfo.progress.getInt(progressKey, 100)
             binding.fileRecyclerView.post {
                 fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
                     val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
@@ -578,10 +593,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 }
             }
             SentryLog.i("isPendingOffline", "progress from fragment $progress% for file $fileId, state:${workInfo.state}")
-        }
-
-        mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {
-            updateVisibleProgresses()
         }
     }
 
@@ -632,7 +643,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             selectAllTimer.cancel()
 
             val textId = with(multiSelectManager) {
-                if (isSelectAllOn && exceptedItemsIds.isEmpty()) R.string.buttonDeselectAll else R.string.buttonSelectAll
+                val selectedItemsCount = selectedItemsIds.count() - exceptedItemsIds.count()
+                if (selectedItemsCount == fileAdapter.itemCount) R.string.buttonDeselectAll else R.string.buttonSelectAll
             }
 
             if (isClickable) setText(textId) else hideProgress(textId)
@@ -689,12 +701,20 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     override fun performBulkOperation(
         type: BulkOperationType,
+        folderId: Int?,
         areAllFromTheSameFolder: Boolean,
         allSelectedFilesCount: Int?,
         destinationFolder: File?,
         color: String?,
     ) {
-        super.performBulkOperation(type, areAllFromTheSameFolder, getAllSelectedFilesCount(), destinationFolder, color)
+        super.performBulkOperation(
+            type,
+            this.folderId,
+            areAllFromTheSameFolder,
+            getAllSelectedFilesCount(),
+            destinationFolder,
+            color
+        )
     }
 
     override fun getAllSelectedFilesCount(): Int? {
@@ -705,7 +725,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {
+    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any?) {
         when (type) {
             BulkOperationType.TRASH,
             BulkOperationType.MOVE,
@@ -719,11 +739,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                     fileAdapter.notifyFileChanged(data as Int) { file -> if (!file.isManaged) file.isFavorite = true }
                 }
             }
+            BulkOperationType.ADD_OFFLINE,
+            BulkOperationType.REMOVE_OFFLINE -> lifecycleScope.launch(Dispatchers.Main) { closeMultiSelect() }
             BulkOperationType.MANAGE_CATEGORIES,
             BulkOperationType.COPY,
             BulkOperationType.COLOR_FOLDER,
-            BulkOperationType.ADD_OFFLINE,
-            BulkOperationType.REMOVE_OFFLINE,
             BulkOperationType.REMOVE_FAVORITES -> Unit
         }
     }

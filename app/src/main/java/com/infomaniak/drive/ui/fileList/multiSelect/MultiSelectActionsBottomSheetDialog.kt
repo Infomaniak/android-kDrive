@@ -132,7 +132,6 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
 
         availableOffline.apply {
-            isGone = navigationArgs.isAllSelected
             setOnClickListener { selectOfflineDialogActionCallBack() }
         }
     }
