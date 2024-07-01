@@ -134,7 +134,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private val selectAllTimer: CountDownTimer by lazy {
         createRefreshTimer {
-            multiSelectLayout?.selectAllButton?.showProgress(ContextCompat.getColor(requireContext(), R.color.primary))
+            multiSelectLayout?.selectAllButton?.showProgressCatching(ContextCompat.getColor(requireContext(), R.color.primary))
         }
     }
 
@@ -647,7 +647,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 if (selectedItemsCount == fileAdapter.itemCount) R.string.buttonDeselectAll else R.string.buttonSelectAll
             }
 
-            if (isClickable) setText(textId) else hideProgress(textId)
+            if (isClickable) setText(textId) else hideProgressCatching(textId)
         }
     }
 

@@ -172,6 +172,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         zoom(MIN_ZOOM, MID_ZOOM, MAX_ZOOM)
                         swipeHorizontal(false)
                         touchPriority(true)
+                        thumbnailRatio(THUMBNAIL_RATIO)
                         onLoad { pageCount ->
                             shouldHidePrintOption(isGone = false)
                             binding.downloadLayout.root.isGone = true
@@ -330,6 +331,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         private const val HEIGHT_HANDLE_DP = 40
         private const val HANDLE_PAGE_PDF_PADDING_TOP_DP = 120
         private const val HANDLE_PAGE_PDF_PADDING_BOTTOM_DP = 130
+        private const val THUMBNAIL_RATIO = 0.5f
     }
 }
 

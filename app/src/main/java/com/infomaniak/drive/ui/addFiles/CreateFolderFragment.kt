@@ -41,9 +41,9 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideKeyboard
-import com.infomaniak.lib.core.utils.hideProgress
+import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgress
+import com.infomaniak.lib.core.utils.showProgressCatching
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
@@ -129,7 +129,7 @@ open class CreateFolderFragment : Fragment() {
         onFolderCreated: (file: File?, redirectToShareDetails: Boolean) -> Unit,
     ) = with(binding) {
         folderNameValueInput.hideKeyboard()
-        createFolderButton.showProgress()
+        createFolderButton.showProgressCatching()
         newFolderViewModel.currentFolderId.value?.let { parentId ->
             newFolderViewModel.createFolder(
                 folderNameValueInput.text.toString().trim(),
@@ -145,7 +145,7 @@ open class CreateFolderFragment : Fragment() {
                     }
                     showSnackbar(apiResponse.translateError())
                 }
-                createFolderButton.hideProgress(R.string.createFolderTitle)
+                createFolderButton.hideProgressCatching(R.string.createFolderTitle)
             }
         }
     }

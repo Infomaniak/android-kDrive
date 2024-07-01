@@ -264,7 +264,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         binding.saveButton.apply {
             initProgress(this@SaveExternalFilesActivity)
             setOnClickListener {
-                showProgress()
+                showProgressCatching()
                 if (drivePermissions.checkSyncPermissions()) {
                     val userId = selectedUserId.value!!
                     val driveId = selectedDrive.value?.id!!
@@ -278,7 +278,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                             finish()
                         } else {
                             withContext(Dispatchers.Main) {
-                                hideProgress(R.string.buttonSave)
+                                hideProgressCatching(R.string.buttonSave)
                                 showSnackbar(R.string.errorSave)
                             }
                         }
