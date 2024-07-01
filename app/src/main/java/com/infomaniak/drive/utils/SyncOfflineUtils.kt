@@ -212,7 +212,7 @@ object SyncOfflineUtils {
             offlineFile.delete()
         }
 
-        if (!file.isPendingOffline(context) && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
+        if (!file.isMarkedAsOffline && (!remoteFile.isOfflineAndIntact(remoteOfflineFile) || pathChanged)) {
             FileController.updateExistingFile(newFile = remoteFile, realm = realm)
             Utils.downloadAsOfflineFile(context, remoteFile, userDrive)
         }

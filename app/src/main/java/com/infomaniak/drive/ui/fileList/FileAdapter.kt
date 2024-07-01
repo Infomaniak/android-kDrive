@@ -267,7 +267,7 @@ open class FileAdapter(
         if (payloads.firstOrNull() is Int) {
             val progress = payloads.first() as Int
             val file = getFile(position).apply { currentProgress = progress }
-            if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(binding.context)) {
+            if (progress != Utils.INDETERMINATE_PROGRESS || !file.isMarkedAsOffline) {
                 progressLayoutView.setupFileProgress(file, true)
                 checkIfEnableFile(file)
             }
@@ -481,7 +481,6 @@ open class FileAdapter(
         }
 
     }
-
 
     companion object {
         fun MaterialCardView.setCorners(position: Int, itemCount: Int) {

@@ -135,7 +135,7 @@ class FileShareLinkSettingsFragment : Fragment() {
         saveButton.apply {
             initProgress(this@FileShareLinkSettingsFragment)
             setOnClickListener {
-                showProgress()
+                showProgressCatching()
                 trackShareRightsEvents(
                     protectWithPassword = addPasswordSwitch.isChecked,
                     expirationDate = addExpirationDateSwitch.isChecked,
@@ -143,7 +143,7 @@ class FileShareLinkSettingsFragment : Fragment() {
                 )
                 val isValid = checkPasswordStatus()
                 if (!isValid) {
-                    hideProgress(R.string.buttonSave)
+                    hideProgressCatching(R.string.buttonSave)
                 } else {
                     val file = File(id = navigationArgs.fileId, driveId = navigationArgs.driveId)
                     shareViewModel.editFileShareLink(file, shareLink).observe(viewLifecycleOwner) { apiResponse ->
@@ -152,7 +152,7 @@ class FileShareLinkSettingsFragment : Fragment() {
                         } else {
                             showSnackbar(R.string.errorModification)
                         }
-                        saveButton.hideProgress(R.string.buttonSave)
+                        saveButton.hideProgressCatching(R.string.buttonSave)
                     }
                 }
             }

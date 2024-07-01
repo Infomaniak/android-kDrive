@@ -334,13 +334,13 @@ class FileMigration : RealmMigration {
                 addField("updatedAt", Long::class.java)
                 addField("lastActionAt", Long::class.java)
                 addRealmListField("supportedBy", String::class.java)
+                addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 removeField("hasThumbnail")
                 removeField("hasOnlyoffice")
             }
 
             oldVersionTemp++
         }
-
     }
 
     override fun equals(other: Any?): Boolean {

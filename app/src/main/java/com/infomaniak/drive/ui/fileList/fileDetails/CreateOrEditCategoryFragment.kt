@@ -97,7 +97,7 @@ class CreateOrEditCategoryFragment : Fragment() {
             initProgress(this@CreateOrEditCategoryFragment)
             isEnabled = categoryIsPredefined || !isCreateCategory || categoryName.isNotEmpty()
             setOnClickListener {
-                showProgress()
+                showProgressCatching()
                 if (categoryId == CREATE_CATEGORY_ID) {
                     trackCategoriesEvent("add")
                     createCategory()
@@ -133,7 +133,7 @@ class CreateOrEditCategoryFragment : Fragment() {
                 if (isSuccess()) {
                     data?.id?.let(::addCategory)
                 } else {
-                    saveButton.hideProgress(R.string.buttonSave)
+                    saveButton.hideProgressCatching(R.string.buttonSave)
                     SnackbarUtils.showSnackbar(requireView(), translateError())
                 }
             }
@@ -150,7 +150,7 @@ class CreateOrEditCategoryFragment : Fragment() {
                 if (isSuccess()) {
                     findNavController().popBackStack()
                 } else {
-                    binding.saveButton.hideProgress(R.string.buttonSave)
+                    binding.saveButton.hideProgressCatching(R.string.buttonSave)
                     SnackbarUtils.showSnackbar(requireView(), translateError())
                 }
             }
@@ -167,7 +167,7 @@ class CreateOrEditCategoryFragment : Fragment() {
                 if (isSuccess()) {
                     findNavController().popBackStack()
                 } else {
-                    saveButton.hideProgress(R.string.buttonSave)
+                    saveButton.hideProgressCatching(R.string.buttonSave)
                     SnackbarUtils.showSnackbar(requireView(), translateError())
                 }
             }

@@ -185,6 +185,7 @@ class MainActivity : BaseActivity() {
         initAppUpdateManager()
         initAppReviewManager()
         observeCurrentFolder()
+        observeBulkDownloadRunning()
     }
 
     override fun onStart() {
@@ -232,8 +233,8 @@ class MainActivity : BaseActivity() {
             if (isAvailable) {
                 lifecycleScope.launch {
                     AccountUtils.updateCurrentUserAndDrives(this@MainActivity)
-                    mainViewModel.restartUploadWorkerIfNeeded()
                 }
+                mainViewModel.restartUploadWorkerIfNeeded()
             }
         }
     }
@@ -291,7 +292,13 @@ class MainActivity : BaseActivity() {
         )
     }
 
-    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true
+    private fun observeBulkDownloadRunning() {
+        // We need to check if the bulk download is running to avoid any
+        // conflicts between the two ways of downloading offline files
+        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (!isRunning) launchSyncOffline() }
+    }
+
+    private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
     //endregion
 
     //region In-App Review
@@ -317,7 +324,7 @@ class MainActivity : BaseActivity() {
 
         launchAllUpload(drivePermissions)
 
-        if (!mainViewModel.ignoreSyncOffline) launchSyncOffline() else mainViewModel.ignoreSyncOffline = false
+        mainViewModel.checkBulkDownloadStatus()
 
         AppSettings.appLaunches++
 
