@@ -91,9 +91,41 @@ object SyncOfflineUtils {
                 body = FileLastActivityBody(files = fileActionsBody),
             ).data
 
+            // When a local file changes without a corresponding fileAction, we need to synchronize it differently.
+            // We store the IDs of the processed fileActions to track what has already been handled,
+            // so we only need to process files that don't have a fileAction.
+            val fileActionsIds = mutableSetOf<Int>()
+
             lastFilesActions?.forEach { fileAction ->
                 syncOfflineFilesJob.ensureActive()
+                fileActionsIds.add(fileAction.fileId)
                 handleFileAction(context, fileAction, localFilesMap, userDrive, realm)
+            }
+
+            // Check if any of the files that don't have fileActions require synchronization.
+            handleFilesWithoutActions(context, localFilesMap, fileActionsIds, userDrive, realm)
+        }
+    }
+
+    private fun handleFilesWithoutActions(
+        context: Context,
+        localFilesMap: Map<Int, File>,
+        alreadyTreatedFileIds: MutableSet<Int>,
+        userDrive: UserDrive,
+        realm: Realm,
+    ) {
+        for (file in localFilesMap.values) {
+            if (alreadyTreatedFileIds.contains(file.id)) continue
+            val ioFile = file.getOfflineFile(context, userDrive.userId) ?: continue
+            if (ioFile.lastModified() > file.revisedAtInMillis) {
+                uploadFile(
+                    context = context,
+                    localFile = file,
+                    remoteFile = null,
+                    ioFile = ioFile,
+                    userDrive = userDrive,
+                    realm = realm
+                )
             }
         }
     }
@@ -165,26 +197,28 @@ object SyncOfflineUtils {
      */
     private fun uploadFile(
         context: Context,
-        file: File,
-        remoteFile: File,
-        offlineFile: IOFile,
+        localFile: File,
+        remoteFile: File?,
+        ioFile: IOFile,
         userDrive: UserDrive,
         realm: Realm,
     ) {
-        val uri = Uri.fromFile(offlineFile)
-        val fileModifiedAt = Date(offlineFile.lastModified())
+        val uri = Uri.fromFile(ioFile)
+        val fileModifiedAt = Date(ioFile.lastModified())
 
         if (UploadFile.canUpload(uri, fileModifiedAt)) {
-            remoteFile.lastModifiedAt = offlineFile.lastModified() / 1000
-            remoteFile.size = offlineFile.length()
-            FileController.updateExistingFile(newFile = remoteFile, realm = realm)
+            if (remoteFile != null) {
+                remoteFile.lastModifiedAt = ioFile.lastModified() / 1000
+                remoteFile.size = ioFile.length()
+                FileController.updateExistingFile(newFile = remoteFile, realm = realm)
+            }
             UploadFile(
                 uri = uri.toString(),
                 driveId = userDrive.driveId,
                 fileModifiedAt = fileModifiedAt,
-                fileName = file.name,
-                fileSize = offlineFile.length(),
-                remoteFolder = file.parentId,
+                fileName = localFile.name,
+                fileSize = ioFile.length(),
+                remoteFolder = localFile.parentId,
                 type = UploadFile.Type.SYNC_OFFLINE.name,
                 userId = userDrive.userId,
             ).store()
