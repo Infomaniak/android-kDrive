@@ -126,7 +126,7 @@ object SyncOfflineUtils {
                     remoteFile = null,
                     ioFile = ioFile,
                     userDrive = userDrive,
-                    realm = realm
+                    realm = realm,
                 )
             }
         }
@@ -169,7 +169,6 @@ object SyncOfflineUtils {
                 return
             }
             ioFileLastModified > remoteFile.revisedAtInMillis -> {
-                remoteFile.isOffline = true
                 uploadFile(context, localFile, remoteFile, ioFile, userDrive, realm)
             }
             ioFileLastModified < remoteFile.revisedAtInMillis -> {
