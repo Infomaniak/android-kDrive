@@ -328,7 +328,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         super.onResume()
         if (!isDownloading) refreshActivities()
         showPendingFiles()
-        updateVisibleProgresses()
+        updateVisibleFiles()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -452,7 +452,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             updateMultiSelect = { onUpdateMultiSelect() }
         }
 
-        fileAdapter = FileAdapter(multiSelectManager, FileController.emptyList(mainViewModel.realm)).apply {
+        fileAdapter = FileAdapter(multiSelectManager, FileController.getRealmLiveFiles(
+            parentId = folderId,
+            order = fileListViewModel.sortType,
+            realm = mainViewModel.realm
+        )).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             setHasStableIds(true)
 
@@ -559,7 +563,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
 
         mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {
-            updateVisibleProgresses()
+            updateVisibleFiles()
         }
     }
 
@@ -572,7 +576,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun updateFileStatus(workInfoList: List<WorkInfo>, fileIdKey: String, progressKey: String) {
         if (workInfoList.isEmpty()) {
-            updateVisibleProgresses()
+            updateVisibleFiles()
             return
         }
 
@@ -690,7 +694,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun updateVisibleProgresses() {
+    private fun updateVisibleFiles() {
         val layoutManager = binding.fileRecyclerView.layoutManager
         if (layoutManager is LinearLayoutManager) {
             val first = layoutManager.findFirstVisibleItemPosition()
@@ -756,6 +760,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         fileAdapter.updateFileProgressByFileId(fileId, progress, onComplete)
     }
 
+    override fun closeMultiSelect() {
+        fileAdapter.unselectSelectedItems()
+        super.closeMultiSelect()
+    }
+
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
@@ -785,11 +794,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
                     if (fileAdapter.itemCount == 0 || !result.isFirstPage || isNewSort) {
 
-                        FileController.getRealmLiveFiles(
+                        /*FileController.getRealmLiveFiles(
                             parentId = folderId,
                             order = fileListViewModel.sortType,
                             realm = mainViewModel.realm
-                        ).apply { fileAdapter.updateFileList(this) }
+                        ).apply { fileAdapter.updateFileList(this) }*/
 
                         multiSelectManager.currentFolder = result.parentFolder
 

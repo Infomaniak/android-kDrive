@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -40,6 +41,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
@@ -105,8 +107,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
 
         multiSelectManager.isMultiSelectOn = true
 
-        adapter?.apply { notifyItemRangeChanged(0, itemCount) }
-
         multiSelectToolbar?.isGone = true
         multiSelectLayout?.root?.isVisible = true
     }
@@ -145,8 +145,6 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 isSelectAllOn = false
                 isMultiSelectOn = false
             }
-
-            adapter?.apply { notifyItemRangeChanged(0, itemCount) }
 
             multiSelectToolbar?.isVisible = true
             multiSelectLayout?.root?.isGone = true

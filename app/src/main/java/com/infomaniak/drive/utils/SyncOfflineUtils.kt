@@ -41,18 +41,18 @@ object SyncOfflineUtils {
             val userDrive = UserDrive(driveId = drive.id)
 
             FileController.getRealmInstance(userDrive).use { realm ->
-                FileController.getOfflineFiles(order = null, customRealm = realm).forEach loopFiles@{ file ->
+                FileController.getOfflineFiles(order = null, customRealm = realm).forEach loopFiles@{ offlineRealmFile ->
                     syncOfflineFilesJob.ensureActive()
-                    if (file.isMarkedAsOffline) return@loopFiles
+                    if (offlineRealmFile.isMarkedAsOffline) return@loopFiles
 
-                    file.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
-                        migrateOfflineIfNeeded(context, file, offlineFile, userDrive)
+                    offlineRealmFile.getOfflineFile(context, userDrive.userId)?.let { offlineFile ->
+                        migrateOfflineIfNeeded(context, offlineRealmFile, offlineFile, userDrive)
 
-                        val apiResponse = ApiRepository.getFileDetails(file)
+                        val apiResponse = ApiRepository.getFileDetails(offlineRealmFile)
                         syncOfflineFilesJob.ensureActive()
                         apiResponse.data?.let { remoteFile ->
                             remoteFile.isOffline = true
-                            updateFile(offlineFile, file, context, remoteFile, userDrive, realm)
+                            updateFile(offlineFile, offlineRealmFile, context, remoteFile, userDrive, realm)
 
                         } ?: let {
                             if (apiResponse.error?.code?.equals("object_not_found") == true) offlineFile.delete()

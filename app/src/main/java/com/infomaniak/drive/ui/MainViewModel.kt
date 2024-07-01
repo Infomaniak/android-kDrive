@@ -40,6 +40,7 @@ import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
+import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.*
