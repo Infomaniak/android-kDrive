@@ -46,7 +46,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
     private val downloadOfflineFileManager by lazy {
         DownloadOfflineFileManager(
             userDrive,
-            fileIds.size,
+            filesCount = fileIds.size,
             downloadWorker = this,
             notificationManagerCompat
         )

@@ -343,8 +343,10 @@ class MainViewModel(
     }
 
     fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
-        val isSuccess = FileController.updateFolderColor(file, color).isSuccess()
-        emit(FileResult(isSuccess))
+        val fileResult = FileResult(
+            isSuccess = FileController.updateFolderColor(file, color).isSuccess()
+        )
+        emit(fileResult)
     }
 
     fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {

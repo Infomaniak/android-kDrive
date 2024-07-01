@@ -571,16 +571,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     private fun updateFileStatus(workInfoList: List<WorkInfo>, fileIdKey: String, progressKey: String) {
-        if (workInfoList.isEmpty()) return
-
-        val workInfos = workInfoList.filter { it.state == WorkInfo.State.RUNNING }
-
-        if (workInfos.isEmpty()) {
+        if (workInfoList.isEmpty()) {
             updateVisibleProgresses()
             return
         }
 
-        workInfos.firstOrNull()?.let { workInfo ->
+        workInfoList.firstOrNull()?.let { workInfo ->
             val fileId = workInfo.progress.getInt(fileIdKey, 0)
             if (fileId == 0) return
 

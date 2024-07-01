@@ -226,7 +226,7 @@ class DownloadOfflineFileManager(
         fun observeBulkDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
             WorkQuery.Builder
                 .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING, WorkInfo.State.SUCCEEDED))
+                .addStates(arrayListOf(WorkInfo.State.RUNNING))
                 .build()
         )
 
