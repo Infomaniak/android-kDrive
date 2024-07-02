@@ -505,7 +505,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun launchSyncOffline() {
-        if (drivePermissions.checkWriteStoragePermission(false)) mainViewModel.syncOfflineFiles()
+        mainViewModel.syncOfflineFiles()
     }
 
     override fun onStop() {

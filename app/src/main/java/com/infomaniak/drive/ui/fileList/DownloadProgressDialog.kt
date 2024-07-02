@@ -75,7 +75,7 @@ class DownloadProgressDialog : DialogFragment() {
     }
 
     private fun observeDownloadedFile() = with(navigationArgs) {
-        downloadViewModel.downloadProgressLiveData.observe(viewLifecycleOwner) { progress ->
+        downloadViewModel.downloadProgressLiveData.observe(this@DownloadProgressDialog) { progress ->
             progress?.let {
                 if (it == DownloadViewModel.PROGRESS_COMPLETE) {
                     setBackNavigationResult(action.value, fileId)

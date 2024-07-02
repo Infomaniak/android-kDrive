@@ -45,7 +45,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
     private val downloadOfflineFileManager by lazy {
         DownloadOfflineFileManager(
             userDrive,
-            filesCount = 0,
+            filesCount = 1,
             downloadWorker = this,
             notificationManagerCompat
         )
