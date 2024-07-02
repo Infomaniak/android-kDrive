@@ -61,6 +61,7 @@ class DownloadOfflineFileManager(
     private val notificationManagerCompat: NotificationManagerCompat
 ) {
     private var lastDownloadedFile: IOFile? = null
+    private var currentFile: File? = null
     private var filesDownloaded = 0
 
     private var lastUpdateProgressMillis = System.currentTimeMillis()
@@ -70,12 +71,12 @@ class DownloadOfflineFileManager(
         fileId: Int,
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
-        val file = FileController.getFileById(fileId, userDrive)
-        val offlineFile = file?.getOfflineFile(context, userDrive.userId)
-        val cacheFile = file?.getCacheFile(context, userDrive)
+        currentFile = FileController.getFileById(fileId, userDrive)
+        val offlineFile = currentFile?.getOfflineFile(context, userDrive.userId)
+        val cacheFile = currentFile?.getCacheFile(context, userDrive)
 
         offlineFile?.let {
-            if (file.isOfflineAndIntact(it)) {
+            if (currentFile?.isOfflineAndIntact(it) == true) {
                 // We can have this case for example when we try to put a lot of files at once in offline mode
                 // and for some reason, the worker is cancelled after a long time, the worker is restarted
                 filesDownloaded += 1
@@ -89,7 +90,7 @@ class DownloadOfflineFileManager(
         if (offlineFile?.exists() == true) offlineFile.delete()
         if (cacheFile?.exists() == true) cacheFile.delete()
 
-        if (file == null || offlineFile == null) {
+        if (currentFile == null || offlineFile == null) {
             getFileFromRemote(context, fileId, userDrive) { downloadedFile ->
                 downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { offlineFile ->
                     lastDownloadedFile = offlineFile
@@ -99,13 +100,15 @@ class DownloadOfflineFileManager(
             lastDownloadedFile = offlineFile
         }
 
-        return file?.let {
-            startOfflineDownload(context = context, file = file, offlineFile = offlineFile!!, onProgress = onProgress)
+        return currentFile?.let {
+            startOfflineDownload(context = context, file = it, offlineFile = offlineFile!!, onProgress = onProgress)
         } ?: ListenableWorker.Result.failure()
     }
 
     fun cleanLastDownloadedFile() {
-        if (lastDownloadedFile?.exists() == true) lastDownloadedFile?.delete()
+        lastDownloadedFile?.let {
+            if (it.exists() && currentFile?.isIntactFile(it) == false) it.delete()
+        }
     }
 
     private fun getFileFromRemote(
