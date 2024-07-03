@@ -43,15 +43,11 @@ import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.DownloadOfflineFileManager
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.NotificationUtilsCore
@@ -169,13 +165,17 @@ class CloudStorageProvider : DocumentsProvider() {
         val fileFolderId = getFileIdFromDocumentId(parentDocumentId)
         val isRootFolder = parentDocumentId == getUserId(parentDocumentId)
         val isSharedWithMeFolder = fileFolderId == SHARED_WITHME_FOLDER_ID
-        val isMySharesFolder = fileFolderId == MY_SHARES_FOLDER_ID
+        val isMySharesDrive = fileFolderId == MY_SHARES_FOLDER_ID
 
         val userId = getUserId(parentDocumentId).toInt()
         val driveId = getDriveFromDocId(parentDocumentId).id
         val sortType = getSortType(sortOrder)
 
         val userDrive = UserDrive(userId, driveId, sharedWithMe = parentDocumentId.contains("$SHARED_WITHME_FOLDER_ID"))
+
+        val isMySharesRoot = isSharedUri(parentDocumentId)
+                && fileFolderId == Utils.ROOT_ID
+                && parentDocumentId.contains("$MY_SHARES_FOLDER_ID")
 
         when {
             isRootFolder -> {
@@ -204,8 +204,8 @@ class CloudStorageProvider : DocumentsProvider() {
                     }
                 }
             }
-            isMySharesFolder -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
-            isSharedUri(parentDocumentId) && fileFolderId == Utils.ROOT_ID && parentDocumentId.contains("$MY_SHARES_FOLDER_ID") -> {
+            isMySharesDrive -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
+            isMySharesRoot -> {
                 cloudScope.launch(cursor.job) {
                     FileController.getMySharedFiles(
                         userDrive = UserDrive(userId, driveId),
@@ -279,8 +279,8 @@ class CloudStorageProvider : DocumentsProvider() {
             getFileIdFromDocumentId(currentParentDocumentId!!) == SHARED_WITHME_FOLDER_ID ||
             getFileIdFromDocumentId(currentParentDocumentId!!) == MY_SHARES_FOLDER_ID
         ) {
-            cursor.extras =
-                bundleOf(DocumentsContract.EXTRA_ERROR to context?.getString(R.string.cloudStorageQuerySearchImpossibleSelectDrive))
+            val errorText = context?.getString(R.string.cloudStorageQuerySearchImpossibleSelectDrive)
+            cursor.extras = bundleOf(DocumentsContract.EXTRA_ERROR to errorText)
             return cursor
         }
 
