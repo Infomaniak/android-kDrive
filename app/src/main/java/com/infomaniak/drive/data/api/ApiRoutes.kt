@@ -207,6 +207,8 @@ object ApiRoutes {
     fun getMoreListingFiles(driveId: Int, folderId: Int, order: SortType) =
         "${fileURL(driveId, folderId)}/listing/continue?$listingFilesWithQuery&${orderQuery(order)}"
 
+    fun getFilesLastActivities(driveId: Int) = "${filesURL(driveId)}/listing/partial"
+
     fun getSharedWithMeFiles(order: SortType) = "${DRIVE_API_V3}files/shared_with_me?$fileWithQuery&${orderQuery(order)}"
 
     fun getFileDetails(file: File) = "${fileURL(file)}?$fileExtraWithQuery"

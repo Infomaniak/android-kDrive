@@ -708,10 +708,7 @@ object FileController {
         val oldChildren = localFolderChildren?.filter { it.isFolder() || it.isOffline }?.associateBy { it.id }
         remoteFolderChildren.forEach { newFile ->
             oldChildren?.get(newFile.id)?.let { oldFile ->
-                newFile.apply {
-                    if (oldFile.isFolder()) newFile.keepOldLocalFilesData(oldFile)
-                    isOffline = oldFile.isOffline
-                }
+                newFile.keepOldLocalFilesData(oldFile)
             }
 
             // If the new file is an external import, start MQTT listening to receive its status updates.
@@ -821,6 +818,8 @@ object FileController {
         isComplete = oldFile.isComplete
         isOffline = oldFile.isOffline
         responseAt = oldFile.responseAt
+        revisedAt = oldFile.revisedAt
+        lastActionAt = oldFile.lastActionAt
         versionCode = oldFile.versionCode
         isMarkedAsOffline = oldFile.isMarkedAsOffline
     }

@@ -23,6 +23,8 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.data.models.file.FileLastActivityBody
+import com.infomaniak.drive.data.models.file.LastFileAction
 import com.infomaniak.drive.data.models.file.ListingFiles
 import com.infomaniak.drive.data.models.upload.UploadSegment.ChunkStatus
 import com.infomaniak.drive.data.models.upload.UploadSession
@@ -116,6 +118,11 @@ object ApiRepository : ApiRepositoryCore() {
     ): CursorApiResponse<ArrayList<FileActivity>> {
         val url = ApiRoutes.getFileActivities(file, forFileList, loadCursor(cursor))
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
+    }
+
+    fun getFilesLastActivities(driveId: Int, body: FileLastActivityBody): ApiResponse<List<LastFileAction>> {
+        val url = "${ApiRoutes.getFilesLastActivities(driveId)}?with=file"
+        return callApi(url, POST, body)
     }
 
     // For sync offline service
