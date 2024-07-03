@@ -33,14 +33,12 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
-import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
-import com.infomaniak.drive.utils.IsComplete
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import okhttp3.Response
 
 class DownloadProgressDialog : DialogFragment() {
