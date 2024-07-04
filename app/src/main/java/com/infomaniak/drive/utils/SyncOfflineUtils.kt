@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -139,6 +140,9 @@ object SyncOfflineUtils {
             migrateOfflineIfNeeded(context, file, ioFile, userDrive)
 
             if (ioFile.lastModified() > file.revisedAtInMillis) {
+                Log.i("DEBUG VINCENT", "handleFilesWithoutActions")
+                Log.i("DEBUG VINCENT", "ioFile.lastModified() = ${ioFile.lastModified()}")
+                Log.i("DEBUG VINCENT", "file.revisedAtInMillis = ${file.revisedAtInMillis}")
                 uploadFile(
                     context = context,
                     localFile = file,
@@ -188,6 +192,8 @@ object SyncOfflineUtils {
                 return
             }
             ioFileLastModified > remoteFile.revisedAtInMillis -> {
+                Log.i("DEBUG VINCENT", "ioFileLastModified = $ioFileLastModified")
+                Log.i("DEBUG VINCENT", "remoteFile.revisedAtInMillis = ${remoteFile.revisedAtInMillis}")
                 uploadFile(context, localFile, remoteFile, ioFile, userDrive, realm)
             }
             ioFileLastModified < remoteFile.revisedAtInMillis -> {
@@ -225,7 +231,10 @@ object SyncOfflineUtils {
     ) {
         val uri = Uri.fromFile(ioFile)
         val fileModifiedAt = Date(ioFile.lastModified())
-
+        
+        Log.i("DEBUG VINCENT", "uri = $uri")
+        Log.i("DEBUG VINCENT", "fileModifiedAt = $fileModifiedAt")
+        Log.i("DEBUG VINCENT", "canUpload = ${UploadFile.canUpload(uri, fileModifiedAt)}")
         if (UploadFile.canUpload(uri, fileModifiedAt)) {
             if (remoteFile != null) {
                 remoteFile.lastModifiedAt = ioFile.lastModified() / 1000
