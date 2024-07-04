@@ -119,6 +119,9 @@ object SyncOfflineUtils {
             syncOfflineFilesJob.ensureActive()
             if (fileActionsIds.contains(file.id)) continue
             val ioFile = file.getOfflineFile(context, userDrive.userId) ?: continue
+
+            migrateOfflineIfNeeded(context, file, ioFile, userDrive)
+
             if (ioFile.lastModified() > file.revisedAtInMillis) {
                 uploadFile(
                     context = context,
@@ -185,7 +188,7 @@ object SyncOfflineUtils {
     }
 
     /**
-     * Migrate old offline files to the new offline structure
+     * Migrate old V1 offline files to the V2 offline structure
      */
     private fun migrateOfflineIfNeeded(context: Context, file: File, ioFile: IOFile, userDrive: UserDrive) {
         val offlineDir = context.getString(R.string.EXPOSED_OFFLINE_DIR)

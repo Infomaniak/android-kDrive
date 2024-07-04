@@ -63,10 +63,7 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
@@ -186,6 +183,19 @@ class MainActivity : BaseActivity() {
         initAppReviewManager()
         observeCurrentFolder()
         observeBulkDownloadRunning()
+
+        deleteOldOfflineFolder()
+    }
+
+    // After the migration from API V2 to API V3, offline files were saved in a different folder called "Private". Because we
+    // cannot know if we're in a migration or not, we just delete old files and we marked previously isOffline files as
+    // isMarkedAsOffline to let the BulkDownloadWorker redownload files.
+    private fun deleteOldOfflineFolder() {
+        val userDrive = UserDrive()
+        val offlineFolder =  IOFile(File.getOfflineFolder(this), "${userDrive.userId}/${userDrive.driveId}")
+        offlineFolder.listFiles()?.forEach { file ->
+            if (file.name != "Private") file.deleteRecursively()
+        }
     }
 
     override fun onStart() {

@@ -17,7 +17,9 @@
  */
 package com.infomaniak.drive.data.cache
 
+import android.app.Activity
 import androidx.core.os.bundleOf
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileExternalImport
@@ -27,6 +29,7 @@ import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxValidity
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.IOFile
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
@@ -317,6 +320,7 @@ class FileMigration : RealmMigration {
         // - Migrate to ApiV3
         if (oldVersionTemp == 6L) {
             schema.get(File::class.java.simpleName)?.apply {
+                addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField("uid", String::class.java, FieldAttribute.REQUIRED)
                 transform { realmObject ->
                     val file = File(
@@ -326,6 +330,11 @@ class FileMigration : RealmMigration {
                         initUid()
                     }
                     realmObject.setString("uid", file.uid)
+                    val isOffline = realmObject.getBoolean("isOffline")
+                    if (isOffline) {
+                        realmObject.setBoolean("isOffline", false)
+                        realmObject.setBoolean("isMarkedAsOffline", true)
+                    }
                 }
                 removePrimaryKey()
                 addPrimaryKey("uid")
@@ -334,7 +343,6 @@ class FileMigration : RealmMigration {
                 addField("updatedAt", Long::class.java)
                 addField("lastActionAt", Long::class.java)
                 addRealmListField("supportedBy", String::class.java)
-                addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 removeField("hasThumbnail")
                 removeField("hasOnlyoffice")
             }
