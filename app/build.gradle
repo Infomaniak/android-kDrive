@@ -84,7 +84,7 @@ android {
 
     gradle.buildFinished { BuildResult buildResult ->
         try {
-            'say \"iOS\"'.execute()
+            'say \"Ok\"'.execute()
         } catch (Throwable ignored) {
         }
     }
