@@ -17,9 +17,7 @@
  */
 package com.infomaniak.drive.data.cache
 
-import android.app.Activity
 import androidx.core.os.bundleOf
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileExternalImport
@@ -29,7 +27,6 @@ import com.infomaniak.drive.data.models.file.dropbox.DropBoxSize
 import com.infomaniak.drive.data.models.file.dropbox.DropBoxValidity
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.IOFile
 import io.realm.DynamicRealm
 import io.realm.FieldAttribute
 import io.realm.RealmMigration
