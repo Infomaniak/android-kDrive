@@ -184,18 +184,7 @@ class MainActivity : BaseActivity() {
         observeCurrentFolder()
         observeBulkDownloadRunning()
 
-        deleteOldOfflineFolder()
-    }
-
-    // After the migration from API V2 to API V3, offline files were saved in a different folder called "Private". Because we
-    // cannot know if we're in a migration or not, we just delete old files and we marked previously isOffline files as
-    // isMarkedAsOffline to let the BulkDownloadWorker redownload files.
-    private fun deleteOldOfflineFolder() {
-        val userDrive = UserDrive()
-        val offlineFolder =  IOFile(File.getOfflineFolder(this), "${userDrive.userId}/${userDrive.driveId}")
-        offlineFolder.listFiles()?.forEach { file ->
-            if (file.name != "Private") file.deleteRecursively()
-        }
+        SyncOfflineUtils.deleteOldOfflineFolder(this)
     }
 
     override fun onStart() {

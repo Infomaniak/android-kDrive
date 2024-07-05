@@ -273,7 +273,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         setupBackActionHandler()
 
-        enqueueBulkDownloadWorker(requireContext(), folderId, userDrive ?: UserDrive())
+        fileListViewModel.enqueueBulkDownloadWorker(folderId)
     }
 
     private fun setupToolbars() {

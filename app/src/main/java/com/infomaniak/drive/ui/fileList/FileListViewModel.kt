@@ -273,6 +273,14 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFilesJob.cancelChildren()
     }
 
+    fun enqueueBulkDownloadWorker(folderId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (FileController.hasFilesMarkedAsOffline(folderId)) {
+                Utils.enqueueBulkDownloadWorker(context, folderId)
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         runCatching { realm.close() }

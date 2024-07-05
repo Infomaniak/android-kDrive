@@ -149,6 +149,17 @@ object FileController {
             .toFlow()
     }
 
+    //region isMarkedAsOffline
+    fun hasFilesMarkedAsOffline(folderId: Int): Boolean {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::parentId.name, folderId)
+                .equalTo(File::isMarkedAsOffline.name, true)
+                .notEqualTo(File::type.name, "dir")
+                .count() > 0
+        }
+    }
+
     fun getFolderOfflineFilesId(folderId: Int, sortType: SortType): List<Int> {
         return getRealmInstance().use { realm ->
             val realmFiles = realm.where(File::class.java)
@@ -186,6 +197,7 @@ object FileController {
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
+    //endregion
 
     fun removeFile(
         fileId: Int,
