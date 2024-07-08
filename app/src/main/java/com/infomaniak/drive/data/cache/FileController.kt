@@ -155,7 +155,7 @@ object FileController {
             realm.where(File::class.java)
                 .equalTo(File::parentId.name, folderId)
                 .equalTo(File::isMarkedAsOffline.name, true)
-                .notEqualTo(File::type.name, "dir")
+                .notEqualTo(File::type.name, Type.DIRECTORY.value)
                 .count() > 0
         }
     }

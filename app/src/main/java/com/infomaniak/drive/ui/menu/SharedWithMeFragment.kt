@@ -73,12 +73,13 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
             when {
-                file.isDrive() -> {
+                // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
+                // maintenance check on the folder type but we don't know if this is necessary
+                file.isFolder() -> {
                     DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
                         if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
                     }
                 }
-                file.isFolder() -> file.openSharedWithMeFolder()
                 else -> {
                     val fileList = fileAdapter.getFileObjectsList(sharedWithMeViewModel.sharedWithMeRealm)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)

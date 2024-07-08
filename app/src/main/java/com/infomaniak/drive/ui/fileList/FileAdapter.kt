@@ -236,7 +236,7 @@ open class FileAdapter(
                 DisplayType.LIST -> DisplayType.LIST.layout
                 else -> {
                     val file = getFile(position)
-                    if (file.isFolder() || file.isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
+                    if (file.isFolder()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
                 }
             }
         } else {
@@ -341,7 +341,6 @@ open class FileAdapter(
     private fun FileItemViewHolder.setupMenuButton(file: File) = menuButton.apply {
         isGone = uploadInProgress
                 || selectFolder
-                || file.isDrive()
                 || file.isFromActivities
                 || file.isFromSearch
                 || (offlineMode && !file.isOffline)
@@ -392,7 +391,7 @@ open class FileAdapter(
         }
         else -> {
             if (selectFolder || offlineMode) {
-                enabledFile(file.isFolder() || file.isDrive() || (offlineMode && file.isOffline))
+                enabledFile(file.isFolder() || (offlineMode && file.isOffline))
             } else {
                 enabledFile()
             }

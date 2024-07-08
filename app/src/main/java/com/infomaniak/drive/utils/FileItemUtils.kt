@@ -116,7 +116,6 @@ private fun ImageView.displayIcon(
     scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
     when {
         file.isFolder() -> displayFolderIcon(file)
-        file.isDrive() -> displayDriveIcon(file)
         else -> displayFileIcon(file, isGrid, progressLayout, filePreview)
     }
 }
@@ -124,10 +123,6 @@ private fun ImageView.displayIcon(
 private fun ImageView.displayFolderIcon(file: File) {
     val (icon, tint) = file.getFolderIcon()
     if (tint == null) load(icon) else load(getTintedDrawable(context, icon, tint))
-}
-
-private fun ImageView.displayDriveIcon(file: File) {
-    load(getTintedDrawable(context, R.drawable.ic_drive, file.driveColor))
 }
 
 private fun ImageView.displayFileIcon(

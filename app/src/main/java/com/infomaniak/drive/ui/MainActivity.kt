@@ -63,7 +63,10 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
@@ -183,8 +186,6 @@ class MainActivity : BaseActivity() {
         initAppReviewManager()
         observeCurrentFolder()
         observeBulkDownloadRunning()
-
-        SyncOfflineUtils.deleteOldOfflineFolder(this)
     }
 
     override fun onStart() {
@@ -294,7 +295,9 @@ class MainActivity : BaseActivity() {
     private fun observeBulkDownloadRunning() {
         // We need to check if the bulk download is running to avoid any
         // conflicts between the two ways of downloading offline files
-        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (!isRunning) launchSyncOffline() }
+        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning ->
+            if (!isRunning) mainViewModel.syncOfflineFiles()
+        }
     }
 
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
@@ -501,10 +504,6 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
-    }
-
-    private fun launchSyncOffline() {
-        mainViewModel.syncOfflineFiles()
     }
 
     override fun onStop() {

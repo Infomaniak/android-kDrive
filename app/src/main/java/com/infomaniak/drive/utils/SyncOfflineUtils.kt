@@ -50,6 +50,8 @@ object SyncOfflineUtils {
     private val renameActions = setOf(FILE_RENAME, FILE_MOVE_OUT)
 
     fun startSyncOffline(context: Context, syncOfflineFilesJob: CompletableJob) {
+        // Delete all offline storage files prior to APIv3. For more info, see deleteLegacyOfflineFolder kDoc
+        deleteLegacyOfflineFolder(context)
         DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
             syncOfflineFilesJob.ensureActive()
             val userDrive = UserDrive(driveId = drive.id)
@@ -73,10 +75,12 @@ object SyncOfflineUtils {
         }
     }
 
-    // After the migration from API V2 to API V3, offline files were saved in a different folder called "Private". Because we
-    // cannot know if we're in a migration or not, we just delete old files and we marked previously isOffline files as
-    // isMarkedAsOffline to let the BulkDownloadWorker redownload files.
-    fun deleteOldOfflineFolder(context: Context) {
+    /**
+     * After the migration from API V2 to API V3, offline files were saved in a different folder called "Private". Because we
+     * cannot know if we're in a migration or not, we just delete old files and we marked previously isOffline files as
+     * isMarkedAsOffline to let the BulkDownloadWorker redownload files.
+     */
+    private fun deleteLegacyOfflineFolder(context: Context) {
         val userDrive = UserDrive()
         val offlineFolder = IOFile(File.getOfflineFolder(context), "${userDrive.userId}/${userDrive.driveId}")
         offlineFolder.listFiles()?.forEach { file ->
