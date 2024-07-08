@@ -830,8 +830,9 @@ object FileController {
         isComplete = oldFile.isComplete
         isOffline = oldFile.isOffline
         responseAt = oldFile.responseAt
-        revisedAt = oldFile.revisedAt
-        lastActionAt = oldFile.lastActionAt
+        if (oldFile.revisedAt > revisedAt) revisedAt = oldFile.revisedAt
+        if (oldFile.lastActionAt > lastActionAt) lastActionAt = oldFile.lastActionAt
+        if (oldFile.updatedAt > updatedAt) updatedAt = oldFile.updatedAt
         versionCode = oldFile.versionCode
         isMarkedAsOffline = oldFile.isMarkedAsOffline
     }

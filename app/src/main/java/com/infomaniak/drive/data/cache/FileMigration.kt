@@ -319,6 +319,8 @@ class FileMigration : RealmMigration {
             schema.get(File::class.java.simpleName)?.apply {
                 addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField("uid", String::class.java, FieldAttribute.REQUIRED)
+                addField("revisedAt", Long::class.java)
+                addField("updatedAt", Long::class.java)
                 transform { realmObject ->
                     val file = File(
                         id = realmObject.getInt("id"),
@@ -327,6 +329,9 @@ class FileMigration : RealmMigration {
                         initUid()
                     }
                     realmObject.setString("uid", file.uid)
+                    val lastModified = realmObject.getLong("lastModifiedAt")
+                    realmObject.setLong("updatedAt", lastModified)
+                    realmObject.setLong("revisedAt", lastModified)
                     val isOffline = realmObject.getBoolean("isOffline")
                     if (isOffline) {
                         realmObject.setBoolean("isOffline", false)
@@ -336,8 +341,6 @@ class FileMigration : RealmMigration {
                 removePrimaryKey()
                 addPrimaryKey("uid")
                 addField("cursor", String::class.java)
-                addField("revisedAt", Long::class.java)
-                addField("updatedAt", Long::class.java)
                 addField("lastActionAt", Long::class.java)
                 addRealmListField("supportedBy", String::class.java)
                 removeField("hasThumbnail")
