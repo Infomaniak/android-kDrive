@@ -149,6 +149,9 @@ class GalleryAdapter(
         updateMultiSelect?.invoke()
     }
 
+    /**
+     * TODO: Move to viewModel
+     */
     fun formatList(newGalleryList: ArrayList<File>): ArrayList<Any> {
         galleryList.addAll(newGalleryList)
         val addItemList: ArrayList<Any> = arrayListOf()

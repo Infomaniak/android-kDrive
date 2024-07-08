@@ -32,6 +32,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentBottomSheetTrashedFileActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.TrashViewModel
@@ -39,9 +40,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiErrorCode
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.whenResultIsOk
 
@@ -59,8 +58,8 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
             data?.extras?.let { bundle ->
                 SelectFolderActivityArgs.fromBundle(bundle).apply {
                     mainViewModel.restoreTrashFile(currentTrashedFile, folderId)
-                        .observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
-                            restoreResult(apiResponse, originalPlace = false, folderName = folderName)
+                        .observe(this@TrashedFileActionsBottomSheetDialog) { fileRequest ->
+                            restoreResult(fileRequest, originalPlace = false, folderName = folderName)
                         }
                 }
             }
@@ -91,18 +90,18 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         restoreFileToOriginalPlace.setOnClickListener {
             trackTrashEvent("restoreOriginFolder")
-            mainViewModel.restoreTrashFile(currentTrashedFile).observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
-                restoreResult(apiResponse, originalPlace = true)
+            mainViewModel.restoreTrashFile(currentTrashedFile).observe(this@TrashedFileActionsBottomSheetDialog) { fileRequest ->
+                restoreResult(fileRequest, originalPlace = true)
             }
         }
 
         delete.setOnClickListener {
             Utils.confirmFileDeletion(requireContext(), fileName = currentTrashedFile.name, fromTrash = true) { dialog ->
                 mainViewModel.deleteTrashFile(currentTrashedFile)
-                    .observe(this@TrashedFileActionsBottomSheetDialog) { apiResponse ->
+                    .observe(this@TrashedFileActionsBottomSheetDialog) { fileRequest ->
                         trackTrashEvent("deleteFromTrash")
                         dialog.dismiss()
-                        if (apiResponse.data == true) {
+                        if (fileRequest.data == true) {
                             showSnackbar(getString(R.string.snackbarDeleteConfirmation, currentTrashedFile.name))
                             dismissAndRemoveFileFromList()
                         } else {
@@ -114,8 +113,8 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun restoreResult(apiResponse: ApiResponse<Any>, originalPlace: Boolean, folderName: String? = null) {
-        if (apiResponse.isSuccess()) {
+    private fun restoreResult(fileResult: FileResult, originalPlace: Boolean, folderName: String? = null) {
+        if (fileResult.isSuccess) {
             val title = if (originalPlace) R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess
             else R.plurals.trashedFileRestoreFileInSuccess
 
@@ -126,10 +125,10 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
             showSnackbar(resources.getQuantityString(title, 1, *args.toTypedArray()))
             dismissAndRemoveFileFromList()
         } else {
-            val title = if (apiResponse.error?.code == ApiErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore
-            else apiResponse.translateError()
+            val snackbarText = if (fileResult.errorCode == ApiErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore
+            else fileResult.errorResId
 
-            showSnackbar(title)
+            snackbarText?.let { text -> showSnackbar(text) }
             findNavController().popBackStack()
         }
     }

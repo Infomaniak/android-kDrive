@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_ACTION_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
@@ -48,7 +49,6 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
-import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -112,14 +112,14 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     private fun updateFolderColor(color: String) {
         if (isResumed) {
-            mainViewModel.updateFolderColor(currentFile, color).observe(viewLifecycleOwner) { apiResponse ->
+            mainViewModel.updateFolderColor(currentFile, color).observe(viewLifecycleOwner) { fileRequest ->
                 findNavController().popBackStack()
-                val text = if (apiResponse.isSuccess()) {
+                val snackbarText = if (fileRequest.isSuccess) {
                     resources.getQuantityString(R.plurals.fileListColorFolderConfirmationSnackbar, 1)
                 } else {
-                    getString(apiResponse.translatedError)
+                    fileRequest.errorResId?.let { getString(it) }
                 }
-                showSnackbar(text, showAboveFab = true)
+                snackbarText?.let { text -> showSnackbar(text, showAboveFab = true) }
             }
         }
     }
@@ -220,8 +220,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun addFavoritesClicked() {
         super.addFavoritesClicked()
         currentFile.apply {
-            val observer: Observer<ApiResponse<Boolean>> = Observer { apiResponse ->
-                if (apiResponse.isSuccess()) {
+            val observer: Observer<FileResult> = Observer { fileRequest ->
+                if (fileRequest.isSuccess) {
                     isFavorite = !isFavorite
                     showFavoritesResultSnackbar()
                     setBackNavigationResult(REFRESH_FAVORITE_FILE, currentFile.id)
@@ -242,7 +242,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) {
         lifecycleScope.launch {
             mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile)
-
             withContext(Dispatchers.Main) {
                 currentFile.isOffline = false
                 if (findNavController().previousBackStackEntry?.destination?.id == R.id.offlineFileFragment) {
@@ -261,7 +260,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onDuplicateFile(destinationFolder: File) {
         mainViewModel.duplicateFile(currentFile, destinationFolder.id).observe(viewLifecycleOwner) { apiResponse ->
-            val snackbarMessage = if (apiResponse.isSuccess()) {
+            val snackbarMessage = if (apiResponse.isSuccess) {
                 mainViewModel.refreshActivities.value = true
                 getString(R.string.allFileDuplicate, currentFile.name)
             } else {
@@ -293,12 +292,13 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
         if (isResumed) {
-            mainViewModel.deleteFile(currentFile, navigationArgs.userDrive).observe(viewLifecycleOwner) { apiResponse ->
+            mainViewModel.deleteFile(currentFile, navigationArgs.userDrive).observe(viewLifecycleOwner) { fileRequest ->
                 onApiResponse()
-                if (apiResponse.isSuccess()) {
+                if (fileRequest.isSuccess) {
                     mainViewModel.refreshActivities.value = true
                     val title = getString(R.string.snackbarMoveTrashConfirmation, currentFile.name)
-                    transmitActionAndPopBack(title, apiResponse.data?.setDriveAndReturn(currentFile.driveId))
+                    val cancellableAction = fileRequest.data as? CancellableAction
+                    transmitActionAndPopBack(title, cancellableAction?.setDriveAndReturn(currentFile.driveId))
                 } else {
                     transmitActionAndPopBack(getString(R.string.errorDelete))
                 }
@@ -322,9 +322,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
         if (isResumed) {
-            mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { apiResponse ->
+            mainViewModel.deleteFile(currentFile).observe(viewLifecycleOwner) { fileRequest ->
                 onApiResponse()
-                if (apiResponse.isSuccess()) {
+                if (fileRequest.isSuccess) {
                     transmitActionAndPopBack(getString(R.string.snackbarLeaveShareConfirmation))
                     mainViewModel.refreshActivities.value = true
                 } else {
@@ -338,12 +338,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onMoveFile(destinationFolder: File) {
         mainViewModel.moveFile(currentFile, destinationFolder)
-            .observe(viewLifecycleOwner) { apiResponse ->
-                if (apiResponse.isSuccess()) {
+            .observe(viewLifecycleOwner) { fileRequest ->
+                if (fileRequest.isSuccess) {
                     mainViewModel.refreshActivities.value = true
                     transmitActionAndPopBack(
                         getString(R.string.allFileMove, currentFile.name, destinationFolder.name),
-                        apiResponse.data?.setDriveAndReturn(currentFile.driveId)
+                        (fileRequest.data as? CancellableAction)?.setDriveAndReturn(currentFile.driveId)
                     )
                 } else {
                     transmitActionAndPopBack(getString(R.string.errorMove))

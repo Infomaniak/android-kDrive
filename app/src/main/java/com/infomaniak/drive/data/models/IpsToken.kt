@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
-import java.util.*
+import java.util.Date
 
 class IpsToken(
     val uuid: String,

@@ -22,8 +22,6 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.filters.LargeTest
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -44,42 +42,14 @@ class EspressoHomeUiTest : KDriveUiTest() {
         checkViewVisibility(false, R.id.notEnoughStorage)
         checkViewVisibility(true, R.id.switchDriveButton)
         checkViewVisibility(true, R.id.searchViewCard)
-        checkViewVisibility(true, R.id.tabsHomeGroup)
-        checkViewVisibility(true, R.id.homeViewPager)
+        checkViewVisibility(true, R.id.homeActivitiesFragment)
     }
 
     @DisplayName("Check the activity tabs is correctly displayed when selected")
     @Test
     fun activitiesTabIsDisplayed() {
-        clickOnHomeTabs(R.id.homeActivitiesButton)
         checkViewVisibility(true, R.id.userAvatar)
         checkViewVisibility(true, R.id.cardFilePreview1)
         checkViewVisibility(true, R.id.homeTabsTitle, R.string.homeLastActivities)
-    }
-
-    @DisplayName("Check the offline tabs is correctly displayed when selected")
-    @Test
-    fun offlineTabIsDisplayed() {
-        clickOnHomeTabs(R.id.homeOfflineButton)
-        val isOfflineFilesEmpty = FileController.getOfflineFiles(File.SortType.NAME_AZ, customRealm = uiRealm).isEmpty()
-        checkViewVisibility(isOfflineFilesEmpty, R.id.noFilesLayout)
-        checkViewVisibility(isOfflineFilesEmpty, stringRes = R.string.offlineFileNoFile)
-        checkViewVisibility(!isOfflineFilesEmpty, R.id.toggleDisplayButton)
-    }
-
-    @DisplayName("Check the pictures tabs is correctly displayed when selected")
-    @Test
-    fun picturesTabIsDisplayed() {
-        clickOnHomeTabs(R.id.homeGalleryButton)
-        try {
-            checkViewVisibility(true, R.id.preview)
-        } catch (error: Throwable) {
-            checkViewVisibility(true, stringRes = R.string.picturesNoFile)
-        }
-    }
-
-    private fun clickOnHomeTabs(tabId: Int) {
-        checkViewVisibility(true, tabId)
-        onView(withId(tabId)).perform(click())
     }
 }

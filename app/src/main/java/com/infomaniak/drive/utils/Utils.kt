@@ -40,6 +40,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.liveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.work.*
@@ -50,10 +51,12 @@ import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
 import com.infomaniak.drive.databinding.DialogNamePromptBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
@@ -339,7 +342,7 @@ object Utils {
     fun downloadAsOfflineFile(context: Context, file: File, userDrive: UserDrive = UserDrive()) {
         val workManager = WorkManager.getInstance(context)
 
-        if (file.isPendingOffline(context)) workManager.cancelAllWorkByTag(file.getWorkerTag())
+        if (file.isMarkedAsOffline) workManager.cancelAllWorkByTag(file.getWorkerTag())
         val inputData = workDataOf(
             DownloadWorker.FILE_ID to file.id,
             DownloadWorker.FILE_NAME to file.name,
@@ -359,6 +362,36 @@ object Utils {
             .build()
 
         workManager.enqueueUniqueWork(DownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
+    }
+
+    fun downloadAsOfflineFiles(context: Context, folderId: Int, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) =
+        liveData {
+            enqueueBulkDownloadWorker(context, folderId, userDrive)
+
+            onSuccess.invoke()
+            emit(FileResult(isSuccess = true))
+        }
+
+    fun enqueueBulkDownloadWorker(context: Context, folderId: Int, userDrive: UserDrive = UserDrive()) {
+        val workManager = WorkManager.getInstance(context)
+        val inputData = workDataOf(
+            BulkDownloadWorker.FOLDER_ID to folderId,
+            BulkDownloadWorker.USER_ID to userDrive.userId,
+            BulkDownloadWorker.DRIVE_ID to userDrive.driveId,
+        )
+        val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(networkType)
+            .setRequiresStorageNotLow(true)
+            .build()
+        val downloadRequest = OneTimeWorkRequestBuilder<BulkDownloadWorker>()
+            .addTag(BulkDownloadWorker::class.java.toString())
+            .setInputData(inputData)
+            .setConstraints(constraints)
+            .setExpeditedIfAvailable()
+            .build()
+
+        workManager.enqueueUniqueWork(BulkDownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
     }
 
     fun getInvalidFileNameCharacter(fileName: String): String? = DownloadManagerUtils.regexInvalidSystemChar.find(fileName)?.value

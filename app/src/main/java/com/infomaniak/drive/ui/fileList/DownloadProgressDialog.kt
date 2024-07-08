@@ -23,9 +23,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveDataScope
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -34,14 +32,13 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import okhttp3.Response
 
 class DownloadProgressDialog : DialogFragment() {
@@ -55,7 +52,8 @@ class DownloadProgressDialog : DialogFragment() {
 
         FileController.getFileById(fileId, userDrive)?.let { file ->
             binding.icon.setImageResource(file.getFileType().icon)
-            observeDownloadedFile(file)
+            observeDownloadedFile()
+            startDownloadFile(file, userDrive)
         }
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
@@ -70,10 +68,14 @@ class DownloadProgressDialog : DialogFragment() {
             .create()
     }
 
-    private fun observeDownloadedFile(file: File) = with(navigationArgs) {
-        downloadViewModel.downloadFile(requireContext(), file, userDrive).observe(this@DownloadProgressDialog) {
-            it?.let { (progress, isComplete) ->
-                if (isComplete) {
+    private fun startDownloadFile(file: File, userDrive: UserDrive) {
+        downloadViewModel.downloadFile(requireContext(), file, userDrive)
+    }
+
+    private fun observeDownloadedFile() = with(navigationArgs) {
+        downloadViewModel.downloadProgressLiveData.observe(this@DownloadProgressDialog) { progress ->
+            progress?.let {
+                if (it == DownloadViewModel.PROGRESS_COMPLETE) {
                     setBackNavigationResult(action.value, fileId)
                 } else {
                     binding.downloadProgress.progress = progress
@@ -87,35 +89,46 @@ class DownloadProgressDialog : DialogFragment() {
 
     class DownloadViewModel : ViewModel() {
 
-        fun downloadFile(context: Context, file: File, userDrive: UserDrive) = liveData(Dispatchers.IO) {
+        val downloadProgressLiveData = MutableLiveData(0)
+
+        fun downloadFile(context: Context, file: File, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
             val outputFile = file.getStoredFile(context, userDrive)
             if (outputFile == null) {
-                emit(null)
-                return@liveData
+                downloadProgressLiveData.postValue(null)
+                return@launch
             }
             if (file.isObsoleteOrNotIntact(outputFile)) {
                 try {
-                    val response = DownloadWorker.downloadFileResponse(ApiRoutes.downloadFile(file)) { progress ->
-                        runBlocking { emit(progress to false) }
-                    }
+                    val response = DownloadOfflineFileManager.downloadFileResponse(
+                        fileUrl = ApiRoutes.downloadFile(file),
+                        downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor { progress ->
+                            downloadProgressLiveData.postValue(progress)
+                        }
+                    )
                     if (response.isSuccessful) {
                         saveData(file, outputFile, response)
-                    } else emit(null)
+                    } else {
+                        downloadProgressLiveData.postValue(null)
+                    }
                 } catch (exception: Exception) {
                     exception.printStackTrace()
-                    emit(null)
+                    downloadProgressLiveData.postValue(null)
                 }
             } else {
-                emit(100 to true)
+                downloadProgressLiveData.postValue(PROGRESS_COMPLETE)
             }
         }
 
-        private fun LiveDataScope<Pair<Int, IsComplete>?>.saveData(file: File, outputFile: IOFile, response: Response) {
+        private fun saveData(file: File, outputFile: IOFile, response: Response) {
             if (outputFile.exists()) outputFile.delete()
-            DownloadWorker.saveRemoteData(response, outputFile) {
-                runBlocking { emit(100 to true) }
+            DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
+                downloadProgressLiveData.postValue(PROGRESS_COMPLETE)
             }
             outputFile.setLastModified(file.getLastModifiedInMilliSecond())
+        }
+
+        companion object {
+            const val PROGRESS_COMPLETE = 100
         }
     }
 
@@ -123,5 +136,9 @@ class DownloadProgressDialog : DialogFragment() {
         OPEN_WITH("open_with"),
         OPEN_BOOKMARK("open_bookmark"),
         PRINT_PDF("print_pdf"),
+    }
+
+    companion object {
+        private const val TAG = "DownloadProgressDialog"
     }
 }

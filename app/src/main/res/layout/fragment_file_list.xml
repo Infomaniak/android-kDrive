@@ -52,8 +52,8 @@
                     android:layout_marginEnd="@dimen/marginStandardSmall"
                     android:text="@string/buttonEmptyTrash"
                     android:visibility="gone" />
-            </com.google.android.material.appbar.MaterialToolbar>
 
+            </com.google.android.material.appbar.MaterialToolbar>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <include
@@ -77,6 +77,16 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/publicFolderSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginVertical="@dimen/marginStandardSmall"
+                android:text="@string/commonDocumentsDescription"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
             <include
                 android:id="@+id/searchViewCard"
                 layout="@layout/item_search_view"
@@ -86,6 +96,13 @@
                 android:layout_marginVertical="@dimen/marginStandardSmall"
                 android:visibility="gone"
                 tools:visibility="visible" />
+
+            <include
+                android:id="@+id/recent_search_layout"
+                layout="@layout/recent_searches"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
 
             <com.github.rubensousa.gravitysnaphelper.GravitySnapRecyclerView
                 android:id="@+id/filtersRecyclerView"
@@ -104,37 +121,18 @@
                 tools:listitem="@layout/item_search_filter_chip"
                 tools:visibility="visible" />
 
-            <FrameLayout
-                android:id="@+id/uploadFileInProgressLayout"
+            <com.infomaniak.drive.views.PendingFilesView
+                android:id="@+id/uploadFileInProgressView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="@dimen/marginStandardSmall"
                 android:visibility="gone"
-                tools:visibility="visible">
-
-                <include
-                    android:id="@+id/uploadFileInProgress"
-                    layout="@layout/cardview_file_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandardMedium"
-                    android:layout_marginVertical="@dimen/marginStandardSmall" />
-
-            </FrameLayout>
-
-            <TextView
-                android:id="@+id/noNetwork"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:layout_marginBottom="@dimen/marginStandardSmall"
-                android:drawablePadding="10dp"
-                android:gravity="center"
-                android:text="@string/allNoNetwork"
-                android:textColor="@color/primaryText"
-                android:textSize="13sp"
-                android:visibility="gone"
-                app:drawableStartCompat="@drawable/ic_no_network"
+                app:title="@string/uploadInThisFolderTitle"
                 tools:visibility="visible" />
+
+            <include
+                android:id="@+id/noNetworkInclude"
+                layout="@layout/layout_no_network_small" />
 
             <LinearLayout
                 android:id="@+id/currentActivity"

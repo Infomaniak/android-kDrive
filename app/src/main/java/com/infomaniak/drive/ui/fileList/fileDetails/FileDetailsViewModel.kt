@@ -19,9 +19,8 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.utils.isLastPage
-import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 
@@ -33,21 +32,23 @@ class FileDetailsViewModel : ViewModel() {
     private var getFileCommentsJob = Job()
     private var getFileActivitiesJob = Job()
 
-    fun getFileActivities(file: File): LiveData<ApiResponse<ArrayList<FileActivity>>?> {
+    fun getFileActivities(file: File): LiveData<CursorApiResponse<ArrayList<FileActivity>>?> {
         getFileActivitiesJob.cancel()
         getFileActivitiesJob = Job()
 
         return liveData(Dispatchers.IO + getFileActivitiesJob) {
-            manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileActivities(file, page, forFileList = false) }
+            manageRecursiveApiResponse(file) { file, cursor ->
+                ApiRepository.getFileActivities(file, cursor, forFileList = false)
+            }
         }
     }
 
-    fun getFileComments(file: File): LiveData<ApiResponse<ArrayList<FileComment>>?> {
+    fun getFileComments(file: File): LiveData<CursorApiResponse<ArrayList<FileComment>>?> {
         getFileCommentsJob.cancel()
         getFileCommentsJob = Job()
 
         return liveData(Dispatchers.IO + getFileCommentsJob) {
-            manageRecursiveApiResponse(file) { file, page -> ApiRepository.getFileComments(file, page) }
+            manageRecursiveApiResponse(file) { file, cursor -> ApiRepository.getFileComments(file, cursor) }
         }
     }
 
@@ -75,24 +76,24 @@ class FileDetailsViewModel : ViewModel() {
         emit(ApiRepository.postUnlikeComment(file, fileComment.id))
     }
 
-    private suspend fun <T> LiveDataScope<ApiResponse<ArrayList<T>>?>.manageRecursiveApiResponse(
+    private suspend fun <T> LiveDataScope<CursorApiResponse<ArrayList<T>>?>.manageRecursiveApiResponse(
         file: File,
-        apiResponseCallback: (file: File, page: Int) -> ApiResponse<ArrayList<T>>
+        apiResponseCallback: (file: File, cursor: String?) -> CursorApiResponse<ArrayList<T>>
     ) {
-        suspend fun recursive(page: Int) {
-            with(apiResponseCallback(file, page)) {
+        suspend fun recursive(cursor: String?) {
+            with(apiResponseCallback(file, cursor)) {
                 if (isSuccess()) {
                     when {
                         data.isNullOrEmpty() -> emit(null)
-                        isLastPage() -> emit(this)
-                        else -> {
+                        hasMore -> {
                             emit(this)
-                            recursive(page + 1)
+                            recursive(this.cursor)
                         }
+                        else -> emit(this)
                     }
                 }
             }
         }
-        recursive(1)
+        recursive(cursor = null)
     }
 }

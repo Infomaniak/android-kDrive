@@ -49,10 +49,13 @@ class MultiSelectManager {
     }
 
     fun getValidSelectedItems(type: BulkOperationType? = null): List<File> {
-        val selectedFiles = selectedItems.filter { it.isUsable() }
+        val selectedFiles = selectedItems.filter { selectedItem ->
+            selectedItem.isUsable() && !exceptedItemsIds.contains(selectedItem.id)
+        }
         return when (type) {
             BulkOperationType.ADD_FAVORITES -> selectedFiles.filter { !it.isFavorite }
             BulkOperationType.REMOVE_FAVORITES -> selectedFiles.filter { it.isFavorite }
+            BulkOperationType.ADD_OFFLINE -> selectedFiles.filter { !it.isFolder() && !it.isOffline }
             else -> selectedFiles
         }
     }
@@ -70,11 +73,11 @@ class MultiSelectManager {
     fun getMenuNavArgs(): MenuNavArgs {
         val fileIds = arrayListOf<Int>()
         var (onlyFolders, onlyFavorite, onlyOffline) = arrayOf(true, true, true)
-        getValidSelectedItems().forEach {
-            fileIds.add(it.id)
-            if (!it.isFolder()) onlyFolders = false
-            if (!it.isFavorite) onlyFavorite = false
-            if (!it.isOffline) onlyOffline = false
+        getValidSelectedItems().forEach { file ->
+            fileIds.add(file.id)
+            if (!file.isFolder()) onlyFolders = false
+            if (!file.isFavorite) onlyFavorite = false
+            if (!file.isOffline && !file.isFolder()) onlyOffline = false
         }
         return MenuNavArgs(
             fileIds = fileIds.toIntArray(),
@@ -97,7 +100,7 @@ class MultiSelectManager {
     )
 
     interface MultiSelectResult {
-        fun onIndividualActionSuccess(type: BulkOperationType, data: Any)
+        fun onIndividualActionSuccess(type: BulkOperationType, data: Any? = null)
         fun onAllIndividualActionsFinished(type: BulkOperationType)
         fun updateFileProgressByFileId(fileId: Int, progress: Int, onComplete: ((position: Int, file: File) -> Unit)? = null)
     }

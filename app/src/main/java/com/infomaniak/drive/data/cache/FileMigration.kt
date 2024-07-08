@@ -312,6 +312,43 @@ class FileMigration : RealmMigration {
 
             oldVersionTemp++
         }
+
+        // Migrated to version 7
+        // - Migrate to ApiV3
+        if (oldVersionTemp == 6L) {
+            schema.get(File::class.java.simpleName)?.apply {
+                addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                addField("uid", String::class.java, FieldAttribute.REQUIRED)
+                addField("revisedAt", Long::class.java)
+                addField("updatedAt", Long::class.java)
+                transform { realmObject ->
+                    val file = File(
+                        id = realmObject.getInt("id"),
+                        driveId = realmObject.getInt("driveId")
+                    ).apply {
+                        initUid()
+                    }
+                    realmObject.setString("uid", file.uid)
+                    val lastModified = realmObject.getLong("lastModifiedAt")
+                    realmObject.setLong("updatedAt", lastModified)
+                    realmObject.setLong("revisedAt", lastModified)
+                    val isOffline = realmObject.getBoolean("isOffline")
+                    if (isOffline) {
+                        realmObject.setBoolean("isOffline", false)
+                        realmObject.setBoolean("isMarkedAsOffline", true)
+                    }
+                }
+                removePrimaryKey()
+                addPrimaryKey("uid")
+                addField("cursor", String::class.java)
+                addField("lastActionAt", Long::class.java)
+                addRealmListField("supportedBy", String::class.java)
+                removeField("hasThumbnail")
+                removeField("hasOnlyoffice")
+            }
+
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -339,7 +376,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val dbVersion = 6L // Must be bumped when the schema changes
+        const val dbVersion = 7L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }

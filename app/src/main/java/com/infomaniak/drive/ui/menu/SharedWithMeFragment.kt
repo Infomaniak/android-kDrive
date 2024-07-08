@@ -19,17 +19,17 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isGone
 import androidx.core.view.isInvisible
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.SharedWithMeViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
@@ -37,12 +37,11 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.utils.safeNavigate
-import io.realm.Realm
 
 class SharedWithMeFragment : FileSubTypeListFragment() {
 
     private val navigationArgs: SharedWithMeFragmentArgs by navArgs()
-    private lateinit var realm: Realm
+    private val sharedWithMeViewModel: SharedWithMeViewModel by viewModels()
 
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
@@ -53,54 +52,50 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val inDriveList = folderId == ROOT_ID && !navigationArgs.driveId.isPositive()
-        val inDriveRoot = folderId == ROOT_ID && navigationArgs.driveId.isPositive()
-        mainViewModel.currentFolder.value = null
-        userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = true)
-        realm = FileController.getRealmInstance(userDrive)
-        downloadFiles = DownloadFiles(
-            when {
-                inDriveList -> {
-                    enabledMultiSelectMode = false
-                    null
-                }
-                inDriveRoot -> File(driveId = navigationArgs.driveId, type = File.Type.DRIVE.value)
-                else -> File(id = folderId, driveId = navigationArgs.driveId, name = folderName)
-            }
-        )
+        val isRoot = folderId == ROOT_ID && !navigationArgs.driveId.isPositive()
+        mainViewModel.setCurrentFolder(null)
+        userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = true).also {
+            mainViewModel.loadCurrentFolder(folderId, userDrive = it)
+        }
+
+        downloadFiles = DownloadFiles()
 
         fileListViewModel.isSharedWithMe = true
         super.onViewCreated(view, savedInstanceState)
 
-        binding.collapsingToolbarLayout.title = if (inDriveList) {
+        binding.collapsingToolbarLayout.title = if (isRoot) {
             getString(R.string.sharedWithMeTitle)
         } else {
             navigationArgs.folderName
         }
 
-        binding.sortButton.isGone = inDriveList
+        fileAdapter.initAsyncListDiffer()
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
             when {
-                file.isDrive() -> {
+                // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
+                // maintenance check on the folder type but we don't know if this is necessary
+                file.isFolder() -> {
                     DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
                         if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
                     }
                 }
-                file.isFolder() -> file.openSharedWithMeFolder()
                 else -> {
-                    val fileList = fileAdapter.getFileObjectsList(realm)
+                    val fileList = fileAdapter.getFileObjectsList(sharedWithMeViewModel.sharedWithMeRealm)
                     Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)
                 }
             }
         }
 
-        setupMultiSelectLayout()
-    }
+        sharedWithMeViewModel.sharedWithMeFiles.observe(viewLifecycleOwner) { files ->
+            populateFileList(
+                files = ArrayList(files),
+                isComplete = true,
+                isNewSort = true
+            )
+        }
 
-    override fun onDestroy() {
-        if (::realm.isInitialized) realm.close()
-        super.onDestroy()
+        setupMultiSelectLayout()
     }
 
     private fun openMaintenanceDialog(driveName: String) {
@@ -113,7 +108,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     private fun File.openSharedWithMeFolder() {
         safeNavigate(
             SharedWithMeFragmentDirections.actionSharedWithMeFragmentSelf(
-                folderId = if (isDrive()) ROOT_ID else id,
+                folderId = id,
                 folderName = name,
                 driveId = driveId,
             )
@@ -141,43 +136,19 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         const val MATOMO_CATEGORY = "sharedWithMeFileAction"
     }
 
-    private inner class DownloadFiles() : (Boolean, Boolean) -> Unit {
-        private var folder: File? = null
-
-        constructor(folder: File?) : this() {
-            this.folder = folder
-        }
+    private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
 
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             if (ignoreCache && !fileAdapter.fileList.isManaged) fileAdapter.setFiles(arrayListOf())
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            folder?.let { folder ->
-                fileListViewModel.getFiles(
-                    parentId = if (folder.isDrive()) ROOT_ID else folder.id,
-                    ignoreCache = true,
-                    order = fileListViewModel.sortType,
-                    userDrive = userDrive
-                ).observe(viewLifecycleOwner) {
-                    it?.let { (_, children, _) ->
-                        mainViewModel.setCurrentFolder(it.parentFolder)
-                        populateFileList(
-                            ArrayList(children),
-                            isComplete = true,
-                            realm = realm,
-                            isNewSort = isNewSort
-                        )
-                    }
-                }
-            } ?: run {
-                val driveList = DriveInfosController.getDrives(userId = AccountUtils.currentUserId, sharedWithMe = true)
-                populateFileList(
-                    ArrayList(driveList.map { drive -> drive.convertToFile() }),
-                    isComplete = true,
-                    isNewSort = isNewSort
-                )
-            }
+            sharedWithMeViewModel.loadSharedWithMeFiles(
+                parentId = folderId,
+                order = fileListViewModel.sortType,
+                userDrive = userDrive ?: UserDrive(sharedWithMe = true),
+                isNewSort = isNewSort,
+            )
         }
     }
 }

@@ -28,8 +28,7 @@ import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.ui.fileList.SearchFragment.VisibilityMode
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.models.ApiResponseStatus
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import io.realm.OrderedRealmCollection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,9 +41,10 @@ class SearchViewModel : ViewModel() {
 
     val visibilityMode = MutableLiveData(VisibilityMode.RECENT_SEARCHES)
 
+    private var currentCursor: String? = null
     val searchFileByName = MutableLiveData<Pair<String, SortType>>()
     val searchResults = searchFileByName.switchMap { (query, sortType) ->
-        searchFiles(query, sortType, currentPage)
+        searchFiles(query, sortType)
     }
 
     // Adding a TextChangedListener on an EditText makes it trigger immediately,
@@ -56,10 +56,13 @@ class SearchViewModel : ViewModel() {
     var categoriesFilter: List<Category>? = null
     var categoriesOwnershipFilter: SearchCategoriesOwnershipFilter? = null
 
-    var currentPage = 1
     var searchOldFileList: OrderedRealmCollection<File>? = null
 
-    private fun searchFiles(query: String, order: SortType, page: Int): LiveData<ApiResponse<ArrayList<File>>> {
+    fun resetSearchPagination() {
+        currentCursor = null
+    }
+
+    private fun searchFiles(query: String, order: SortType): LiveData<FileListFragment.FolderFilesResult> {
         searchFilesJob.cancel()
         searchFilesJob = Job()
         return liveData(Dispatchers.IO + searchFilesJob) {
@@ -67,17 +70,35 @@ class SearchViewModel : ViewModel() {
                 driveId = AccountUtils.currentDriveId,
                 query = query,
                 sortType = order,
-                page = page,
+                cursor = currentCursor,
                 date = formatDate(),
                 type = typeFilter?.value,
                 categories = formatCategories(),
             )
 
-            when {
-                apiResponse.isSuccess() -> emit(apiResponse)
-                page == 1 -> emit(ApiResponse(ApiResponseStatus.SUCCESS, FileController.searchFiles(query, order)))
-                else -> emit(apiResponse)
+            if (apiResponse.isSuccess() || currentCursor != null) {
+                emit(
+                    FileListFragment.FolderFilesResult(
+                        files = apiResponse.data ?: arrayListOf(),
+                        isComplete = !apiResponse.hasMore,
+                        isFirstPage = currentCursor == null,
+                        errorRes = if (apiResponse.isSuccess()) null else apiResponse.translateError(),
+                        isNewSort = false,
+                    )
+                )
+            } else {
+                emit(
+                    FileListFragment.FolderFilesResult(
+                        files = FileController.searchFiles(query, order),
+                        isComplete = true,
+                        isFirstPage = true,
+                        errorRes = null,
+                        isNewSort = false,
+                    )
+                )
             }
+
+            currentCursor = apiResponse.cursor
         }
     }
 

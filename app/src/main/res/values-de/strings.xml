@@ -91,6 +91,12 @@
     <string name="backgroundSyncTitle">Hintergrundsynchronisation</string>
     <string name="belongToAllCategoriesFilterDescription">Die Ergebnisse müssen allen ausgewählten Kategorien angehören</string>
     <string name="belongToOneCategoryFilterDescription">Die Ergebnisse müssen einer der ausgewählten Kategorien angehören</string>
+    <plurals name="bulkDownloadNotificationContent">
+        <item quantity="one">1 Datei aus %2$d heruntergeladen</item>
+        <item quantity="other">%1$d Dateien aus %2$d heruntergeladen</item>
+    </plurals>
+    <string name="bulkDownloadNotificationTitleNoProgress">Import in Arbeit</string>
+    <string name="bulkDownloadNotificationTitleWithProgress">Import in Arbeit (%1$d%%)</string>
     <string name="buttonAdd">Hinzufügen</string>
     <string name="buttonAddComment">Kommentar hinzufügen</string>
     <string name="buttonAddFavorites">Zu Favoriten hinzufügen</string>
@@ -182,6 +188,7 @@
     <string name="categoryWork">Arbeit</string>
     <string name="cloudStorageMissingPermissionNotifDescription">Die App kann aufgrund einer fehlenden Berechtigung nicht im Hintergrund ausgeführt werden.</string>
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Suche nicht möglich, es wurde kein Drive ausgewählt</string>
+    <string name="commonDocumentsDescription">Dieser Bereich gehört %s und zentralisiert die gemeinsamen Dateien Ihrer Organisation.</string>
     <string name="commonFolderDescription">Teilen Sie diesen Ordner mit den Benutzern des kDrive %s</string>
     <string name="commonFolderTitle">Gemeinsamer Ordner</string>
     <string name="contentDescriptionIsSelected">Wurde ausgewählt</string>
@@ -455,6 +462,8 @@
     <string name="inputExpirationTime">Verfallszeit</string>
     <string name="kDrivePdfViewer">kDrive PDF-Betrachter</string>
     <string name="lastEditsTitle">Letzte Änderungen</string>
+    <string name="localizedFilenamePrivateSpace">Meine Dateien</string>
+    <string name="localizedFilenameTeamSpace">Akten der Organisation</string>
     <string name="locateButton">Finden Sie</string>
     <string name="manageCategoriesCreateTitle">%s erstellen</string>
     <string name="manageCategoriesNoCategory">Keine Kategorie</string>
@@ -619,8 +628,10 @@
     <string name="sortBigger">Grösser</string>
     <string name="sortDay">Pro Tag</string>
     <string name="sortExtension">Erweiterung</string>
+    <string name="sortLeastRelevant">Am wenigsten relevant</string>
     <string name="sortMonth">Pro Monat</string>
     <string name="sortMostRecentAdded">Zuletzt hinzugefügt</string>
+    <string name="sortMostRelevant">Am wichtigsten</string>
     <string name="sortNameAZ">Name: von A bis Z</string>
     <string name="sortNameZA">Name: von Z bis A</string>
     <string name="sortOlder">Älter</string>

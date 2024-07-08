@@ -17,69 +17,108 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.IsComplete
-import com.infomaniak.drive.utils.isLastPage
-import com.infomaniak.lib.core.models.ApiResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class GalleryViewModel : ViewModel() {
-    private var getGalleryJob: Job = Job()
 
-    var lastGalleryPage = 1
-    var lastGalleryLastPage = 1
+    private var getGalleryJob: Job? = null
 
-    val loadMoreGallery = MutableLiveData<Pair<Int, Boolean>>()
-    val galleryApiResult = loadMoreGallery.switchMap { (driveId, ignoreCloud) ->
-        getLastGallery(driveId, ignoreCloud)
+    private var currentCursor: String? = null
+
+    private var lastGalleryFiles = arrayListOf<File>()
+
+    val galleryApiResult = MutableLiveData<Pair<ArrayList<File>, IsComplete>>()
+    val needToRestoreFiles get() = galleryApiResult.isInitialized
+
+    fun loadLastGallery(driveId: Int, ignoreCloud: Boolean) {
+        lastGalleryFiles = arrayListOf()
+        loadLastGallery(driveId, ignoreCloud, isFirstPage = true)
+    }
+
+    fun loadMoreGallery(driveId: Int, ignoreCloud: Boolean) {
+        currentCursor?.let {
+            loadLastGallery(driveId, ignoreCloud, isFirstPage = false, currentCursor)
+        }
+    }
+
+    fun restoreGalleryFiles() {
+        if (needToRestoreFiles) {
+            val isComplete = galleryApiResult.value?.second ?: true
+            galleryApiResult.value = lastGalleryFiles to isComplete
+        }
+    }
+
+    private fun loadLastGallery(
+        driveId: Int,
+        ignoreCloud: Boolean,
+        isFirstPage: Boolean,
+        cursor: String? = null,
+    ) {
+        getGalleryJob?.cancel()
+        getGalleryJob = viewModelScope.launch(Dispatchers.IO) {
+            val result = getLastGallery(driveId, ignoreCloud, isFirstPage, cursor)
+            galleryApiResult.postValue(result)
+            lastGalleryFiles.addAll(result.first)
+        }
     }
 
     private fun getLastGallery(
         driveId: Int,
-        ignoreCloud: Boolean = false,
-    ): LiveData<Pair<ArrayList<File>, IsComplete>?> {
-        getGalleryJob.cancel()
+        ignoreCloud: Boolean,
+        isFirstPage: Boolean,
+        cursor: String?,
+    ): Pair<ArrayList<File>, IsComplete> {
+        getGalleryJob?.cancel()
         getGalleryJob = Job()
 
-        return liveData(Dispatchers.IO + getGalleryJob) {
-            if (ignoreCloud) emitRealmGallery() else fetchApiGallery(driveId)
+        return if (ignoreCloud) emitRealmGallery() else fetchApiGallery(driveId, isFirstPage, cursor)
+    }
+
+    private fun emitRealmGallery(): Pair<ArrayList<File>, Boolean> {
+        currentCursor = null
+        return FileController.getGalleryDrive() to true
+    }
+
+    private fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<ArrayList<File>, Boolean> {
+        val apiResponse = ApiRepository.getLastGallery(driveId = driveId, cursor = cursor)
+        return if (apiResponse.isSuccess()) {
+            currentCursor = apiResponse.cursor
+            emitApiGallery(apiResponse, isFirstPage)
+        } else {
+            emitRealmGallery()
         }
     }
 
-    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.emitRealmGallery() {
-        emit(FileController.getGalleryDrive() to true)
-    }
-
-    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.fetchApiGallery(driveId: Int) {
-        val page = lastGalleryPage
-        val apiResponse = ApiRepository.getLastGallery(driveId = driveId, page = page)
-        if (apiResponse.isSuccess()) emitApiGallery(apiResponse, page) else emitRealmGallery()
-    }
-
-    private suspend fun LiveDataScope<Pair<ArrayList<File>, IsComplete>?>.emitApiGallery(
-        apiResponse: ApiResponse<ArrayList<File>>,
-        page: Int,
-    ) {
+    private fun emitApiGallery(
+        apiResponse: CursorApiResponse<ArrayList<File>>,
+        isFirstPage: Boolean,
+    ): Pair<ArrayList<File>, Boolean> {
         val data = apiResponse.data
-        val isFirstPage = page == 1
 
-        if (data.isNullOrEmpty()) {
-            emit(null)
+        val results = if (data.isNullOrEmpty()) {
+            arrayListOf<File>() to true
         } else {
             FileController.storeGalleryDrive(data, isFirstPage)
-            val isComplete = apiResponse.isLastPage()
-            emit(data to isComplete)
+            val isComplete = !apiResponse.hasMore
+            data to isComplete
         }
 
         if (isFirstPage) FileController.removeOrphanFiles()
+        return results
     }
 
     override fun onCleared() {
-        getGalleryJob.cancel()
+        getGalleryJob?.cancel()
         super.onCleared()
     }
 }

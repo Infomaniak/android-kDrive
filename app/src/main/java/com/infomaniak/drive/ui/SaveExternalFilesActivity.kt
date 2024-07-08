@@ -252,12 +252,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             }
 
             folder?.let {
-                val folderName = if (folder.isRoot()) {
-                    getString(R.string.allRootName, selectedDrive.value?.name)
-                } else {
-                    folder.name
-                }
-                binding.pathName.text = folderName
+                binding.pathName.text = folder.name
                 checkEnabledSaveButton()
             } ?: run {
                 binding.pathName.setText(R.string.selectFolderTitle)

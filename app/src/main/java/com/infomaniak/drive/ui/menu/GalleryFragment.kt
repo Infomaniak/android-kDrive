@@ -133,25 +133,42 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
         if (!isGalleryAdapterInitialized) {
             if (isCurrentlyInGallery) refreshTimer.start()
-            loadMoreGallery(AccountUtils.currentDriveId, true)
+            if (!galleryViewModel.needToRestoreFiles) {
+                loadGallery(AccountUtils.currentDriveId, isRefresh = true)
+            }
         }
 
         observeApiResultPagination()
     }
 
-    private fun observeApiResultPagination() = with(galleryAdapter) {
+    private fun observeApiResultPagination() {
+        var dataAlreadyLoaded = galleryViewModel.needToRestoreFiles
+
+        if (galleryViewModel.needToRestoreFiles && galleryAdapter.galleryList.isEmpty()) {
+            // When the activity is recreated, the old data needs to be restored.
+            // The livedata will return the last page, which is not what is needed.
+            // TODO: (Realm kotlin) - Should be improved with realm kotlin, the current problem will no longer exist
+            galleryViewModel.restoreGalleryFiles()
+            dataAlreadyLoaded = false
+        }
+
         galleryViewModel.galleryApiResult.observe(viewLifecycleOwner) {
             it?.let { (galleryFiles, isComplete) ->
-                stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
-                val galleryList = formatList(galleryFiles)
-                binding.galleryRecyclerView.post { addAll(galleryList) }
-                this.isComplete = isComplete
-                binding.noGalleryLayout.toggleVisibility(galleryList.isEmpty())
+                galleryAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+                if (dataAlreadyLoaded) {
+                    // When the data is still available after the fragment is recreated, there's no need to reload it again.
+                    dataAlreadyLoaded = false
+                    return@observe
+                }
+                galleryAdapter.isComplete = isComplete
+                val galleryList = galleryAdapter.formatList(galleryFiles)
+                if (galleryFiles.isNotEmpty()) galleryAdapter.addAll(galleryList)
+                binding.noGalleryLayout.toggleVisibility(galleryAdapter.galleryList.isEmpty())
             } ?: run {
-                isComplete = true
+                galleryAdapter.isComplete = true
                 binding.noGalleryLayout.toggleVisibility(
                     noNetwork = mainViewModel.isInternetAvailable.value == false,
-                    isVisible = galleryList.isEmpty(),
+                    isVisible = galleryAdapter.galleryList.isEmpty(),
                     showRefreshButton = true,
                 )
             }
@@ -168,10 +185,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             paginationListener = setPagination(
                 whenLoadMoreIsPossible = {
                     if (!galleryAdapter.isComplete && !isDownloadingGallery) {
-                        galleryViewModel.lastGalleryPage++
-                        galleryViewModel.lastGalleryLastPage++
-
-                        loadMoreGallery(AccountUtils.currentDriveId)
+                        loadGallery(AccountUtils.currentDriveId)
                     }
                 },
                 triggerOffset = 100
@@ -206,22 +220,17 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
         binding.galleryRecyclerView.layoutManager = gridLayoutManager
     }
 
-    private fun loadMoreGallery(driveId: Int, forceDownload: Boolean = false) {
+    private fun loadGallery(driveId: Int, isRefresh: Boolean = false) {
         galleryAdapter.apply {
-            if (forceDownload) {
-                galleryViewModel.apply {
-                    lastGalleryPage = 1
-                    lastGalleryLastPage = 1
-                }
-                clean()
-            }
+            if (isRefresh) clean()
 
             showLoading()
             isComplete = false
             isDownloadingGallery = true
 
-            val ignoreCloud = mainViewModel.isInternetAvailable.value == false
-            galleryViewModel.loadMoreGallery.value = driveId to ignoreCloud
+            val networkAvailable = mainViewModel.isInternetAvailable.value == true
+            if (isRefresh) galleryViewModel.loadLastGallery(driveId, ignoreCloud = !networkAvailable)
+            else if (networkAvailable) galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
         }
     }
 
@@ -235,7 +244,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
     fun onRefreshGallery() {
         if (isResumed) {
             galleryAdapter.clearGallery()
-            loadMoreGallery(AccountUtils.currentDriveId, true)
+            loadGallery(AccountUtils.currentDriveId, isRefresh = true)
         }
     }
 
@@ -247,6 +256,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
     override fun performBulkOperation(
         type: BulkOperationType,
+        folderId: Int?,
         areAllFromTheSameFolder: Boolean,
         allSelectedFilesCount: Int?,
         destinationFolder: File?,
@@ -255,10 +265,17 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
         // API doesn't support bulk operations for files originating from
         // different parent folders, so we repeat the action for each file.
         // Hence the `areAllFromTheSameFolder` set at false.
-        super.performBulkOperation(type, false, allSelectedFilesCount, destinationFolder, color)
+        super.performBulkOperation(
+            type,
+            folderId,
+            areAllFromTheSameFolder = false,
+            allSelectedFilesCount,
+            destinationFolder,
+            color
+        )
     }
 
-    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any) {
+    override fun onIndividualActionSuccess(type: BulkOperationType, data: Any?) {
         when (type) {
             BulkOperationType.TRASH -> {
                 runBlocking(Dispatchers.Main) { galleryAdapter.deleteByFileId(data as Int) }

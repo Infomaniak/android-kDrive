@@ -95,9 +95,17 @@ class UploadMigration : RealmMigration {
             oldVersionTemp++
         }
         //endregion
+
+        //region Migrate to version 6: Api v3 - Add uploadHost
+        if (oldVersionTemp == 5L) {
+            schema.get(UploadFile::class.java.simpleName)!!
+                .addField(UploadFile::uploadHost.name, String::class.java)
+            oldVersionTemp++
+        }
+
     }
 
     companion object {
-        const val dbVersion = 5L // Must be bumped when the schema changes
+        const val dbVersion = 6L // Must be bumped when the schema changes
     }
 }

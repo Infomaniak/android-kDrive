@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.models.upload
 
 import com.google.gson.annotations.SerializedName
-import java.util.*
+import java.util.Date
 
 data class UploadSegment(
     val number: Int,

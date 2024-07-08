@@ -22,8 +22,7 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
+import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -37,8 +36,7 @@ import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImpo
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
-import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
+import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.BuildConfig
@@ -58,7 +56,10 @@ import java.util.Date
 
 @Parcelize
 open class File(
-    @PrimaryKey var id: Int = 0,
+    @PrimaryKey
+    @Expose(serialize = false, deserialize = false)
+    var uid: String = "", // Need migration for any update
+    var id: Int = 0,
     @SerializedName("parent_id")
     var parentId: Int = 0,
     @SerializedName("drive_id")
@@ -89,6 +90,7 @@ open class File(
     @SerializedName("capabilities")
     var rights: Rights? = null,
     var categories: @RawValue RealmList<FileCategory> = RealmList(),
+    var cursor: String? = null,
 
     /**
      * DIRECTORY ONLY
@@ -102,15 +104,21 @@ open class File(
      * FILE ONLY
      */
     var size: Long? = null,
-    @SerializedName("has_thumbnail")
-    var hasThumbnail: Boolean = false,
-    @SerializedName("has_onlyoffice")
-    var hasOnlyoffice: Boolean = false,
+    @SerializedName("supported_by")
+    var supportedBy: @WriteWith<StringRealmListParceler> RealmList<String>? = null,
     @SerializedName("extension_type")
     var extensionType: String = "",
     var version: FileVersion? = null,
     @SerializedName("conversion_capabilities")
     var conversion: FileConversion? = null,
+
+    /**
+     * OFFLINE
+     */
+    @SerializedName("revised_at")
+    var revisedAt: Long = 0,
+    @SerializedName("updated_at")
+    var updatedAt: Long = 0,
 
     /**
      * LOCAL
@@ -120,11 +128,16 @@ open class File(
     var isFromActivities: Boolean = false,
     var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
+    var isMarkedAsOffline: Boolean = false,
     var isOffline: Boolean = false,
-    var versionCode: Int = 0,
     var responseAt: Long = 0,
+    var versionCode: Int = 0,
+    var lastActionAt: Long = 0,
 
     ) : RealmObject(), Parcelable {
+
+    val hasThumbnail inline get() = supportedBy?.contains(SupportedByType.THUMBNAIL.apiValue) ?: false
+    val hasOnlyoffice inline get() = supportedBy?.contains(SupportedByType.ONLYOFFICE.apiValue) ?: false
 
     @LinkingObjects("children")
     val localParent: RealmResults<File>? = null
@@ -135,6 +148,12 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
+    val revisedAtInMillis: Long inline get() = revisedAt * 1000
+
+    fun initUid() {
+        this.uid = "${id}_$driveId"
+    }
+
     fun isManagedAndValidByRealm() = isManaged && isValid
 
     fun isNotManagedByRealm() = !isManaged
@@ -143,10 +162,6 @@ open class File(
 
     fun isFolder(): Boolean {
         return type == "dir"
-    }
-
-    fun isDrive(): Boolean {
-        return type == "drive"
     }
 
     fun isOnlyOfficePreview(): Boolean {
@@ -227,7 +242,7 @@ open class File(
 
     fun isBookmark() = name.endsWith(".url") || name.endsWith(".webloc")
 
-    fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
+    fun isPendingUploadFolder() = isFromUploads && isFolder()
 
     fun isObsolete(dataFile: IOFile): Boolean {
         return (dataFile.lastModified() / 1000) < lastModifiedAt
@@ -303,27 +318,13 @@ open class File(
 
     fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
 
-    fun isRoot(): Boolean {
-        return id == ROOT_ID
-    }
-
     fun getWorkerTag() = "${id}_$driveId"
-
-    fun isPendingOffline(context: Context): Boolean {
-        val get = WorkManager.getInstance(context).getWorkInfosByTag(getWorkerTag()).get()
-        return get.any {
-            it.state == WorkInfo.State.ENQUEUED
-                    || it.state == WorkInfo.State.RUNNING
-                    || it.state == WorkInfo.State.BLOCKED
-        }
-    }
 
     fun getMimeType(): String = name.guessMimeType()
 
     enum class Type(val value: String) {
         FILE("file"),
         DIRECTORY("dir"),
-        DRIVE("drive");
     }
 
     fun getVisibilityType(): VisibilityType {
@@ -334,7 +335,18 @@ open class File(
             "is_team_space_folder" -> VisibilityType.IS_TEAM_SPACE_FOLDER
             "is_in_team_space_folder" -> VisibilityType.IS_IN_TEAM_SPACE_FOLDER
             "is_shared_space" -> VisibilityType.IS_SHARED_SPACE
-            else -> VisibilityType.IS_PRIVATE
+            "is_in_shared_space" -> VisibilityType.IS_IN_SHARED_SPACE
+            "is_in_private_space" -> VisibilityType.IS_IN_PRIVATE_SPACE
+            IS_PRIVATE_SPACE -> VisibilityType.IS_PRIVATE
+            else -> VisibilityType.UNKNOWN
+        }
+    }
+
+    fun getDisplayName(context: Context): String {
+        return when (getVisibilityType()) {
+            VisibilityType.IS_PRIVATE -> context.getString(R.string.localizedFilenamePrivateSpace)
+            VisibilityType.IS_TEAM_SPACE -> context.getString(R.string.localizedFilenameTeamSpace)
+            else -> name
         }
     }
 
@@ -389,7 +401,10 @@ open class File(
         IS_SHARED_SPACE,
         IS_TEAM_SPACE,
         IS_TEAM_SPACE_FOLDER,
-        IS_IN_TEAM_SPACE_FOLDER;
+        IS_IN_TEAM_SPACE_FOLDER,
+        IS_IN_SHARED_SPACE,
+        IS_IN_PRIVATE_SPACE,
+        UNKNOWN,
     }
 
     enum class Office(val extensionType: ExtensionType, val extension: String) {
@@ -401,20 +416,22 @@ open class File(
     }
 
     enum class SortType(val order: String, val orderBy: String, val translation: Int) {
-        NAME_AZ("asc", "path", R.string.sortNameAZ),
-        NAME_ZA("desc", "path", R.string.sortNameZA),
+        NAME_AZ("asc", "name", R.string.sortNameAZ),
+        NAME_ZA("desc", "name", R.string.sortNameZA),
         OLDER("asc", "last_modified_at", R.string.sortOlder),
         RECENT("desc", "last_modified_at", R.string.sortRecent),
-        OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
-        MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         OLDER_TRASHED("asc", "deleted_at", R.string.sortOlder),
         RECENT_TRASHED("desc", "deleted_at", R.string.sortRecent),
+        OLDEST_ADDED("asc", "added_at", R.string.sortOldestAdded),
+        MOST_RECENT_ADDED("desc", "added_at", R.string.sortMostRecentAdded),
         SMALLER("asc", "size", R.string.sortSmaller),
         BIGGER("desc", "size", R.string.sortBigger),
-        // EXTENSION("asc", "extension", R.string.sortExtension); // TODO: Awaiting API
+        LEAST_RELEVANT("asc", "relevance", R.string.sortLeastRelevant),
+        MOST_RELEVANT("desc", "relevance", R.string.sortMostRelevant),
+        // EXTENSION("asc", "extension", R.string.sortExtension), // TODO: Awaiting API
     }
 
-    enum class SortTypeUsage { FILE_LIST, TRASH }
+    enum class SortTypeUsage { FILE_LIST, TRASH, SEARCH }
 
     @Parcelize
     enum class FolderPermission(
@@ -444,7 +461,14 @@ open class File(
         )
     }
 
+    enum class SupportedByType(val apiValue: String) {
+        THUMBNAIL("thumbnail"),
+        ONLYOFFICE("onlyoffice"),
+        KMAIL("kmail")
+    }
+
     companion object {
+        const val IS_PRIVATE_SPACE = "is_private_space"
 
         /**
          * This method is here, and not directly a class method in the File class, because of a supposed Realm bug.

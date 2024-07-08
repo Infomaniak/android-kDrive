@@ -81,4 +81,8 @@ interface RealmListParceler<T> : Parceler<RealmList<T>?> {
     object IntRealmListParceler : RealmListParceler<Int> {
         override var clazz: Class<Int> = Int::class.java
     }
+
+    object StringRealmListParceler : RealmListParceler<String> {
+        override var clazz: Class<String> = String::class.java
+    }
 }

@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import com.infomaniak.drive.databinding.FragmentFileDetailsActivitiesBinding
-import com.infomaniak.drive.utils.isLastPage
 import com.infomaniak.lib.core.utils.safeBinding
 
 class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
@@ -45,7 +44,7 @@ class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
                 fileDetailsViewModel.getFileActivities(file).observe(viewLifecycleOwner) { apiResponse ->
                     apiResponse?.data?.let { activities ->
                         addAll(activities)
-                        isComplete = apiResponse.isLastPage()
+                        isComplete = !apiResponse.hasMore
                     } ?: also {
                         isComplete = true
                     }

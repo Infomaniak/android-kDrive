@@ -42,7 +42,10 @@
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:paddingBottom="@dimen/recyclerViewPaddingBottom"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            tools:itemCount="16"
+            tools:listitem="@layout/cardview_gallery"
+            tools:spanCount="3" />
 
     </com.infomaniak.drive.ui.menu.RecyclerViewFastScroller>
 

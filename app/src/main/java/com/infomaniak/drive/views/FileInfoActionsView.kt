@@ -271,7 +271,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
             } else {
                 Utils.downloadAsOfflineFile(context, this)
-                if (isPendingOffline(context)) mainViewModel.updateOfflineFile.value = id
+                if (isMarkedAsOffline) mainViewModel.updateOfflineFile.value = id
             }
             refreshBottomSheetUi(this)
         }
@@ -332,7 +332,7 @@ class FileInfoActionsView @JvmOverloads constructor(
      * To be called only in the [Lifecycle.Event.ON_RESUME].
      */
     fun updateAvailableOfflineItem() {
-        if (!binding.availableOffline.isEnabled && !currentFile.isPendingOffline(context)) {
+        if (!binding.availableOffline.isEnabled && !currentFile.isMarkedAsOffline) {
             currentFile.isOffline = true
             refreshBottomSheetUi(currentFile)
         }
@@ -396,7 +396,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         // Update file item progress
         if (isOfflineProgress) fileView.progressLayout.setupFileProgress(file) else fileView.setFileItem(file)
 
-        val isPendingOffline = file.isPendingOffline(context)
+        val isPendingOffline = file.isMarkedAsOffline
         val isItemInteractable = !isPendingOffline || file.currentProgress == 100
         enableAvailableOffline(isItemInteractable)
 

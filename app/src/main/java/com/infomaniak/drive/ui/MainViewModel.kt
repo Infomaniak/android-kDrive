@@ -33,7 +33,10 @@ import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
@@ -48,11 +51,12 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
+import io.realm.kotlin.toFlow
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 import java.util.Date
 
 class MainViewModel(
@@ -67,10 +71,15 @@ class MainViewModel(
         } ?: FileController.getRealmInstance()
     }
 
-    val currentFolder = MutableLiveData<File>()
+    private val privateFolder = MutableLiveData<File>()
+    private val _currentFolder = MutableLiveData<File?>()
+    val currentFolder: LiveData<File?> = _currentFolder // Use `setCurrentFolder` and `postCurrentFolder` to set value on it
+
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
     val isInternetAvailable = MutableLiveData(true)
+
+    private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
     val createDropBoxSuccess = SingleLiveEvent<DropBox>()
 
@@ -80,6 +89,7 @@ class MainViewModel(
     val refreshActivities = SingleLiveEvent<Boolean>()
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
+    val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
     var mustOpenUploadShortcut: Boolean = true
         get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: field
@@ -92,17 +102,37 @@ class MainViewModel(
 
     var uploadFilesHelper: UploadFilesHelper? = null
 
+    val notificationPermission by lazy { NotificationPermission() }
+
+    private var rootFilesJob: Job = Job()
     private var getFileDetailsJob = Job()
     private var syncOfflineFilesJob = Job()
+    private var setCurrentFolderJob = Job()
 
     private fun getContext() = getApplication<MainApplication>()
 
     fun setCurrentFolder(folder: File?) {
         folder?.let {
+            setCurrentFolderJob.cancel()
             saveCurrentFolderId()
             uploadFilesHelper?.setParentFolder(it)
-            currentFolder.value = it
+            _currentFolder.value = it
         }
+    }
+
+    fun setCurrentFolderAsRoot(): Job {
+        setCurrentFolderJob.cancel()
+        setCurrentFolderJob = Job()
+        return viewModelScope.launch(Dispatchers.IO + setCurrentFolderJob) {
+            val file = privateFolder.value ?: FileController.getPrivateFolder().also { privateFolder.postValue(it) }
+            setCurrentFolderJob.ensureActive()
+            _currentFolder.postValue(file)
+        }
+    }
+
+    private fun postCurrentFolder(file: File?) {
+        setCurrentFolderJob.cancel()
+        _currentFolder.postValue(file)
     }
 
     fun initUploadFilesHelper(fragmentActivity: FragmentActivity, navController: NavController) {
@@ -118,29 +148,49 @@ class MainViewModel(
         setParentFolder()
     }
 
+    fun loadRootFiles() {
+        rootFilesJob.cancel()
+        rootFilesJob = Job()
+        viewModelScope.launch(Dispatchers.IO) {
+
+            if (isInternetAvailable.value == true) {
+                FolderFilesProvider.getFiles(
+                    FolderFilesProvider.FolderFilesProviderArgs(
+                        folderId = Utils.ROOT_ID,
+                        isFirstPage = true,
+                        order = SortType.NAME_AZ,
+                        sourceRestrictionType = ONLY_FROM_REMOTE,
+                        userDrive = UserDrive(),
+                    )
+                )
+            }
+        }
+    }
+
     fun navigateFileListTo(navController: NavController, fileId: Int) {
         // Clear FileListFragment stack
-        with(navController) {
-            popBackStack(R.id.homeFragment, false)
-            navigate(R.id.fileListFragment)
-        }
+        navController.popBackStack(R.id.rootFilesFragment, false)
 
-        if (fileId == Utils.ROOT_ID) return
+        if (fileId <= Utils.ROOT_ID) return // Deeplinks could lead us to navigating to the true root
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
             val file = FileController.getFileById(fileId) ?: FileController.getFileDetails(fileId) ?: return@launch
-            if (fileId > Utils.ROOT_ID) navigateFileListTo.postValue(file)
+            navigateFileListTo.postValue(file)
         }
+    }
+
+    fun loadCurrentFolder(folderId: Int, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
+        postCurrentFolder(FileController.getFileById(folderId, userDrive))
     }
 
     fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
         return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
     }
 
-    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (ApiResponse<*>) -> Unit = { apiResponse ->
+    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (FileResult) -> Unit = { fileRequest ->
         val total = mediator.value!!.second + 1
-        mediator.value = if (apiResponse.isSuccess()) {
+        mediator.value = if (fileRequest.isSuccess) {
             mediator.value!!.first + 1 to total
         } else {
             mediator.value!!.first to total
@@ -231,7 +281,7 @@ class MainViewModel(
     fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.postFavoriteFile(file)) {
-                emit(this)
+                emit(FileResult(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -245,7 +295,7 @@ class MainViewModel(
     fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onSuccess: ((File) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
             with(ApiRepository.deleteFavoriteFile(file)) {
-                emit(this)
+                emit(FileResult(this.isSuccess()))
 
                 if (isSuccess()) {
                     FileController.updateFile(file.id, userDrive = userDrive) {
@@ -285,7 +335,7 @@ class MainViewModel(
 
             onSuccess?.invoke(file.id)
         }
-        emit(apiResponse)
+        emit(FileResult(apiResponse.isSuccess()))
     }
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
@@ -293,7 +343,10 @@ class MainViewModel(
     }
 
     fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
-        emit(FileController.updateFolderColor(file, color))
+        val fileResult = FileResult(
+            isSuccess = FileController.updateFolderColor(file, color).isSuccess()
+        )
+        emit(fileResult)
     }
 
     fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {
@@ -316,20 +369,29 @@ class MainViewModel(
 
     fun deleteFile(file: File, userDrive: UserDrive? = null, onSuccess: ((fileId: Int) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
-            emit(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess))
+            with(FileController.deleteFile(file, userDrive = userDrive, context = getContext(), onSuccess = onSuccess)) {
+                emit(
+                    FileResult(
+                        isSuccess = this.isSuccess(),
+                        data = this.data,
+                        errorCode = this.error?.code,
+                        errorResId = this.translatedError
+                    )
+                )
+            }
         }
 
     fun restoreTrashFile(file: File, newFolderId: Int? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         val body = newFolderId?.let { mapOf("destination_directory_id" to it) }
         with(ApiRepository.postRestoreTrashFile(file, body)) {
-            emit(this)
+            emit(FileResult(this.isSuccess(), errorCode = this.error?.code))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
 
     fun deleteTrashFile(file: File, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
         with(ApiRepository.deleteTrashFile(file)) {
-            emit(this)
+            emit(FileResult(this.isSuccess()))
             if (isSuccess()) onSuccess?.invoke()
         }
     }
@@ -341,7 +403,7 @@ class MainViewModel(
     ) = liveData(Dispatchers.IO) {
         ApiRepository.duplicateFile(file, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(apiResponse)
+            emit(FileResult(isSuccess = apiResponse.isSuccess(), data = apiResponse.data))
         }
     }
 
@@ -360,6 +422,16 @@ class MainViewModel(
         emit(apiResponse)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pendingUploadsCount: LiveData<Int> = _pendingUploadsCount.switchMap { folderId ->
+        UploadFile.getCurrentUserPendingUploadFile(folderId)
+            .toFlow()
+            .mapLatest { list -> list.count() }
+            .distinctUntilChanged()
+            .cancellable()
+            .asLiveData()
+    }
+
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
         WorkQuery.Builder
             .fromUniqueWorkNames(arrayListOf(DownloadWorker.TAG))
@@ -367,23 +439,62 @@ class MainViewModel(
             .build()
     )
 
-    suspend fun restartUploadWorkerIfNeeded() = withContext(Dispatchers.IO) {
-        if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
-            getContext().syncImmediately()
+    fun restartUploadWorkerIfNeeded() {
+        viewModelScope.launch {
+            if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
+                getContext().syncImmediately()
+            }
         }
     }
 
-    suspend fun removeOfflineFile(
+    fun removeSelectedFilesFromOffline(files: List<File>, onSuccess: (() -> Unit)? = null) = liveData {
+        val filesId = files.map {
+            val file: File = it.freeze()
+            if (!file.isFolder()) {
+                val offlineFile = file.getOfflineFile(getApplication())
+                val cacheFile = file.getCacheFile(getApplication())
+                if (file.isOffline && offlineFile != null) {
+                    deleteFile(file, offlineFile, cacheFile)
+                }
+            }
+            file.id
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            FileController.updateIsOfflineForFiles(fileIds = filesId, isOffline = false)
+            onSuccess?.invoke()
+            emit(FileResult(isSuccess = true))
+        }
+    }
+
+    fun removeOfflineFile(
         file: File,
         offlineFile: IOFile,
         cacheFile: IOFile,
-        userDrive: UserDrive = UserDrive()
-    ) = withContext(Dispatchers.IO) {
-        FileController.updateOfflineStatus(file.id, false)
-        if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
-        if (cacheFile.exists()) cacheFile.delete()
-        if (offlineFile.exists()) {
-            offlineFile.delete()
+        userDrive: UserDrive = UserDrive(),
+        onFileRemovedFromOffline: (() -> Unit)? = null,
+    ) {
+        // We need to call this method outside the UI thread
+        viewModelScope.launch(Dispatchers.IO) {
+            FileController.updateOfflineStatus(file.id, isOffline = false)
+        }
+        deleteFile(file, offlineFile, cacheFile, userDrive, onFileRemovedFromOffline)
+    }
+
+    private fun deleteFile(
+        file: File,
+        offlineFile: IOFile,
+        cacheFile: IOFile,
+        userDrive: UserDrive = UserDrive(),
+        onFileRemovedFromOffline: (() -> Unit)? = null,
+    ) {
+        viewModelScope.launch {
+            if (file.isMedia()) file.deleteInMediaScan(getContext(), userDrive)
+            if (cacheFile.exists()) cacheFile.delete()
+            if (offlineFile.exists()) {
+                offlineFile.delete()
+            }
+            onFileRemovedFromOffline?.invoke()
         }
     }
 
@@ -393,6 +504,10 @@ class MainViewModel(
         viewModelScope.launch(Dispatchers.IO + syncOfflineFilesJob) {
             SyncOfflineUtils.startSyncOffline(getContext(), syncOfflineFilesJob)
         }
+    }
+
+    fun cancelSyncOfflineFiles() {
+        syncOfflineFilesJob.cancel()
     }
 
     @Deprecated(message = "Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()")
@@ -430,6 +545,18 @@ class MainViewModel(
         UploadFile.deleteAll(fileDeleted)
     }
 
+    fun checkBulkDownloadStatus() = viewModelScope.launch {
+        val isRunning = DownloadOfflineFileManager.isBulkDownloadWorkerRunning(getContext())
+        isBulkDownloadRunning.value = isRunning
+        ignoreSyncOffline = isRunning
+    }
+
+    fun markFilesAsOffline(filesId: List<Int>, isMarkedAsOffline: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+        FileController.getRealmInstance().use { realm ->
+            FileController.markFilesAsOffline(customRealm = realm, filesId = filesId, isMarkedAsOffline = isMarkedAsOffline)
+        }
+    }
+
     private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
         if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
         else ioFile.delete()
@@ -464,7 +591,7 @@ class MainViewModel(
         val savedFolderId: Int? = savedStateHandle[SAVED_STATE_FOLDER_ID_KEY]
         if (currentFolder.value == null && savedFolderId != null) {
             FileController.getFileById(savedFolderId)?.let {
-                this.currentFolder.value = it
+                _currentFolder.value = it
                 saveCurrentFolder()
             }
         }
@@ -474,6 +601,13 @@ class MainViewModel(
         realm.close()
         super.onCleared()
     }
+
+    data class FileResult(
+        val isSuccess: Boolean,
+        val errorResId: Int? = null,
+        val data: Any? = null,
+        val errorCode: String? = null
+    )
 
     companion object {
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"

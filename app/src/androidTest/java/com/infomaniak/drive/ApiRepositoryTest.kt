@@ -155,7 +155,7 @@ class ApiRepositoryTest : KDriveTest() {
     @Test
     @DisplayName("Retrieve recent activities from remote")
     fun getLastActivity() {
-        with(getLastActivities(userDrive.driveId, 1)) {
+        with(getLastActivities(userDrive.driveId, null)) {
             assertApiResponseData(this)
             assertTrue(data!!.isNotEmpty(), "Last activities shouldn't be empty or null")
         }
@@ -179,7 +179,7 @@ class ApiRepositoryTest : KDriveTest() {
         // Create File to put it in trash
         val fileToDelete = putNewFileInTrash()
         // Get all trash Files
-        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
+        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, null)) {
             assertApiResponseData(this)
             assertTrue(data!!.isNotEmpty(), "Trash should not be empty")
             assertEquals(fileToDelete.id, data?.first()?.id, "First trash testFile's id should be ${fileToDelete.id}")
@@ -194,7 +194,7 @@ class ApiRepositoryTest : KDriveTest() {
         // Restore file from trash
         assertApiResponseData(postRestoreTrashFile(file, mapOf("destination_folder_id" to ROOT_ID)))
         // Get the trash files, the file restored should not be here
-        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, 1)) {
+        with(getDriveTrash(userDrive.driveId, File.SortType.RECENT, null)) {
             assertApiResponseData(this)
             if (data!!.isNotEmpty()) {
                 assertNotEquals(file.id, data?.first()?.id, "Last trash file's id should not be ${file.id}")
@@ -209,7 +209,7 @@ class ApiRepositoryTest : KDriveTest() {
     fun permanentlyDeleteFiles() {
         // Clean the trash to make sure nothing is left in
         assertApiResponseData(emptyTrash(userDrive.driveId))
-        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1)) {
+        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, null)) {
             assertApiResponseData(this)
             assertTrue(data!!.isEmpty(), "Trash should be empty")
         }
@@ -218,7 +218,7 @@ class ApiRepositoryTest : KDriveTest() {
         deleteTrashFile(putNewFileInTrash())
 
         // Trash should still be empty because new file has been deleted from trash
-        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, 1)) {
+        with(getDriveTrash(userDrive.driveId, File.SortType.NAME_ZA, null)) {
             assertApiResponseData(this)
             assertTrue(data!!.isEmpty(), "Trash should be empty")
         }
@@ -228,7 +228,7 @@ class ApiRepositoryTest : KDriveTest() {
     @DisplayName("Retrieve shared remote file")
     fun mySharedFileTest() {
         val order = File.SortType.BIGGER
-        assertApiResponseData(getMySharedFiles(okHttpClient, userDrive.driveId, order, 1))
+        assertApiResponseData(getMySharedFiles(okHttpClient, userDrive.driveId, order, null))
     }
 
     @Nested
@@ -273,7 +273,7 @@ class ApiRepositoryTest : KDriveTest() {
         @Test
         @DisplayName("Check if the file activities are correctly retrieved")
         fun getFileActivities() {
-            with(getFileActivities(testFile, 1, false)) {
+            with(getFileActivities(testFile, null, false)) {
                 if (isSuccess()) {
                     assertApiResponseData(this)
                 } else {
@@ -293,7 +293,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Gets comments
-            with(getFileComments(testFile, 1)) {
+            with(getFileComments(testFile, null)) {
                 assertApiResponseData(this)
                 assertTrue(data!!.isNotEmpty(), "Test file should have 1 comment")
                 assertEquals(commentBody, data!![0].body, "Comment body should be $commentBody")
@@ -314,7 +314,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Makes sure comment has been updated
-            with(getFileComments(testFile, 1)) {
+            with(getFileComments(testFile, null)) {
                 assertApiResponseData(this)
                 assertEquals("42", data!![0].body, "Comment body should be 42")
             }
@@ -328,7 +328,7 @@ class ApiRepositoryTest : KDriveTest() {
                 assertApiResponseData(this)
                 // Delete the comment
                 deleteFileComment(testFile, data!!.id)
-                assertTrue(getFileComments(testFile, 1).data.isNullOrEmpty(), "There should not be comment on the test file")
+                assertTrue(getFileComments(testFile, null).data.isNullOrEmpty(), "There should not be comment on the test file")
             }
         }
 
@@ -348,7 +348,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Gets the comment
-            with(getFileComments(testFile, 1)) {
+            with(getFileComments(testFile, null)) {
                 assertApiResponseData(this)
                 val comment = data!!.find { comment -> comment.id == commentID }
                 assertNotNull(comment, "Comment should not be null")
@@ -362,7 +362,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
 
             // Make sure data has been updated
-            with(getFileComments(testFile, 1)) {
+            with(getFileComments(testFile, null)) {
                 val comment = data?.find { commentRes -> commentRes.id == commentID }
                 assertNotNull(comment, "Comment should not be null")
                 assertFalse(comment?.liked ?: true, "Comment should not be liked anymore")

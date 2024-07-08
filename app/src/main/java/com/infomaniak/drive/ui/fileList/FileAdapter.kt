@@ -25,6 +25,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.google.android.material.card.MaterialCardView
@@ -55,6 +57,8 @@ open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
     var fileList: OrderedRealmCollection<File> = RealmList(),
 ) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true) {
+
+    private var fileAsyncListDiffer: AsyncListDiffer<File>? = null
 
     var onEmptyList: (() -> Unit)? = null
     var onFileClicked: ((file: File) -> Unit)? = null
@@ -132,6 +136,10 @@ open class FileAdapter(
         }
     }
 
+    fun initAsyncListDiffer() {
+        fileAsyncListDiffer = AsyncListDiffer(this, FileDiffCallback())
+    }
+
     fun addFileList(newFileList: ArrayList<File>) {
         val oldItemCount = itemCount
         addAll(newFileList)
@@ -156,7 +164,11 @@ open class FileAdapter(
     fun setFiles(newItemList: List<File>) {
         fileList = RealmList(*newItemList.toTypedArray())
         hideLoading()
-        notifyDataSetChanged()
+        if (fileAsyncListDiffer == null) {
+            notifyDataSetChanged()
+        } else {
+            fileAsyncListDiffer?.submitList(newItemList)
+        }
     }
 
     fun addAll(newItemList: ArrayList<File>) {
@@ -224,7 +236,7 @@ open class FileAdapter(
                 DisplayType.LIST -> DisplayType.LIST.layout
                 else -> {
                     val file = getFile(position)
-                    if (file.isFolder() || file.isDrive()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
+                    if (file.isFolder()) DisplayType.GRID_FOLDER.layout else DisplayType.GRID.layout
                 }
             }
         } else {
@@ -255,7 +267,7 @@ open class FileAdapter(
         if (payloads.firstOrNull() is Int) {
             val progress = payloads.first() as Int
             val file = getFile(position).apply { currentProgress = progress }
-            if (progress != Utils.INDETERMINATE_PROGRESS || !file.isPendingOffline(binding.context)) {
+            if (progress != Utils.INDETERMINATE_PROGRESS || !file.isMarkedAsOffline) {
                 progressLayoutView.setupFileProgress(file, true)
                 checkIfEnableFile(file)
             }
@@ -329,7 +341,6 @@ open class FileAdapter(
     private fun FileItemViewHolder.setupMenuButton(file: File) = menuButton.apply {
         isGone = uploadInProgress
                 || selectFolder
-                || file.isDrive()
                 || file.isFromActivities
                 || file.isFromSearch
                 || (offlineMode && !file.isOffline)
@@ -380,7 +391,7 @@ open class FileAdapter(
         }
         else -> {
             if (selectFolder || offlineMode) {
-                enabledFile(file.isFolder() || file.isDrive() || (offlineMode && file.isOffline))
+                enabledFile(file.isFolder() || (offlineMode && file.isOffline))
             } else {
                 enabledFile()
             }
@@ -453,6 +464,21 @@ open class FileAdapter(
         GRID(R.layout.cardview_file_grid),
         GRID_FOLDER(R.layout.cardview_folder_grid),
         LIST(R.layout.cardview_file_list)
+    }
+
+    class FileDiffCallback : DiffUtil.ItemCallback<File>() {
+        override fun areItemsTheSame(oldItem: File, newItem: File): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: File, newItem: File): Boolean {
+            return oldItem.name == newItem.name &&
+                    oldItem.isFavorite == newItem.isFavorite &&
+                    oldItem.isOffline == newItem.isOffline &&
+                    oldItem.lastModifiedAt == newItem.lastModifiedAt &&
+                    oldItem.size == newItem.size
+        }
+
     }
 
     companion object {
