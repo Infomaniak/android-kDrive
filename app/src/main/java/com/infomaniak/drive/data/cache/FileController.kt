@@ -149,6 +149,17 @@ object FileController {
             .toFlow()
     }
 
+    //region isMarkedAsOffline
+    fun hasFilesMarkedAsOffline(folderId: Int): Boolean {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::parentId.name, folderId)
+                .equalTo(File::isMarkedAsOffline.name, true)
+                .notEqualTo(File::type.name, Type.DIRECTORY.value)
+                .count() > 0
+        }
+    }
+
     fun getFolderOfflineFilesId(folderId: Int, sortType: SortType): List<Int> {
         return getRealmInstance().use { realm ->
             val realmFiles = realm.where(File::class.java)
@@ -186,6 +197,7 @@ object FileController {
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
     }
+    //endregion
 
     fun removeFile(
         fileId: Int,
@@ -685,12 +697,11 @@ object FileController {
         if (localFolderProxy == null && remoteFolder != null) {
             realm.executeTransaction { newLocalFolderProxy = it.copyToRealm(remoteFolder) }
         }
-
-        // Restore same children data
-        keepSubFolderChildren(localFolderProxy?.children, remoteFiles)
-        // Save to realm
-        (localFolderProxy ?: newLocalFolderProxy)?.let { folderProxy ->
-            realm.executeTransaction {
+        realm.executeTransaction {
+            // Restore same children data
+            keepSubFolderChildren(realm, localFolderProxy?.children, remoteFiles)
+            // Save to realm
+            (localFolderProxy ?: newLocalFolderProxy)?.let { folderProxy ->
                 // Remove old children
                 if (isFirstPage) folderProxy.children.clear()
                 // Add children
@@ -704,10 +715,11 @@ object FileController {
         }
     }
 
-    private fun keepSubFolderChildren(localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
-        val oldChildren = localFolderChildren?.filter { it.isFolder() || it.isOffline }?.associateBy { it.id }
+    private fun keepSubFolderChildren(realm: Realm, localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
+        val oldChildren = localFolderChildren?.associateBy { it.id }
         remoteFolderChildren.forEach { newFile ->
-            oldChildren?.get(newFile.id)?.let { oldFile ->
+            val oldChild = oldChildren?.get(newFile.id) ?: getFileById(realm, newFile.id)
+            oldChild?.let { oldFile ->
                 newFile.keepOldLocalFilesData(oldFile)
             }
 

@@ -72,6 +72,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.Utils.enqueueBulkDownloadWorker
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -271,6 +272,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
 
         setupBackActionHandler()
+
+        fileListViewModel.enqueueBulkDownloadWorker(folderId)
     }
 
     private fun setupToolbars() {

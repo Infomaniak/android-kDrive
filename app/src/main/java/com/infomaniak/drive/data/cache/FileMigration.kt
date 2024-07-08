@@ -317,6 +317,7 @@ class FileMigration : RealmMigration {
         // - Migrate to ApiV3
         if (oldVersionTemp == 6L) {
             schema.get(File::class.java.simpleName)?.apply {
+                addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField("uid", String::class.java, FieldAttribute.REQUIRED)
                 transform { realmObject ->
                     val file = File(
@@ -326,6 +327,11 @@ class FileMigration : RealmMigration {
                         initUid()
                     }
                     realmObject.setString("uid", file.uid)
+                    val isOffline = realmObject.getBoolean("isOffline")
+                    if (isOffline) {
+                        realmObject.setBoolean("isOffline", false)
+                        realmObject.setBoolean("isMarkedAsOffline", true)
+                    }
                 }
                 removePrimaryKey()
                 addPrimaryKey("uid")
@@ -334,7 +340,6 @@ class FileMigration : RealmMigration {
                 addField("updatedAt", Long::class.java)
                 addField("lastActionAt", Long::class.java)
                 addRealmListField("supportedBy", String::class.java)
-                addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 removeField("hasThumbnail")
                 removeField("hasOnlyoffice")
             }

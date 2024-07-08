@@ -295,7 +295,9 @@ class MainActivity : BaseActivity() {
     private fun observeBulkDownloadRunning() {
         // We need to check if the bulk download is running to avoid any
         // conflicts between the two ways of downloading offline files
-        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning -> if (!isRunning) launchSyncOffline() }
+        mainViewModel.isBulkDownloadRunning.observe(this) { isRunning ->
+            if (!isRunning) mainViewModel.syncOfflineFiles()
+        }
     }
 
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown
@@ -502,10 +504,6 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
-    }
-
-    private fun launchSyncOffline() {
-        mainViewModel.syncOfflineFiles()
     }
 
     override fun onStop() {

@@ -366,29 +366,33 @@ object Utils {
 
     fun downloadAsOfflineFiles(context: Context, folderId: Int, userDrive: UserDrive = UserDrive(), onSuccess: () -> Unit) =
         liveData {
-            val workManager = WorkManager.getInstance(context)
-            val inputData = workDataOf(
-                BulkDownloadWorker.FOLDER_ID to folderId,
-                BulkDownloadWorker.USER_ID to userDrive.userId,
-                BulkDownloadWorker.DRIVE_ID to userDrive.driveId,
-            )
-            val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(networkType)
-                .setRequiresStorageNotLow(true)
-                .build()
-            val downloadRequest = OneTimeWorkRequestBuilder<BulkDownloadWorker>()
-                .addTag(BulkDownloadWorker::class.java.toString())
-                .setInputData(inputData)
-                .setConstraints(constraints)
-                .setExpeditedIfAvailable()
-                .build()
-
-            workManager.enqueueUniqueWork(BulkDownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
+            enqueueBulkDownloadWorker(context, folderId, userDrive)
 
             onSuccess.invoke()
             emit(FileResult(isSuccess = true))
         }
+
+    fun enqueueBulkDownloadWorker(context: Context, folderId: Int, userDrive: UserDrive = UserDrive()) {
+        val workManager = WorkManager.getInstance(context)
+        val inputData = workDataOf(
+            BulkDownloadWorker.FOLDER_ID to folderId,
+            BulkDownloadWorker.USER_ID to userDrive.userId,
+            BulkDownloadWorker.DRIVE_ID to userDrive.driveId,
+        )
+        val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(networkType)
+            .setRequiresStorageNotLow(true)
+            .build()
+        val downloadRequest = OneTimeWorkRequestBuilder<BulkDownloadWorker>()
+            .addTag(BulkDownloadWorker::class.java.toString())
+            .setInputData(inputData)
+            .setConstraints(constraints)
+            .setExpeditedIfAvailable()
+            .build()
+
+        workManager.enqueueUniqueWork(BulkDownloadWorker.TAG, ExistingWorkPolicy.APPEND_OR_REPLACE, downloadRequest)
+    }
 
     fun getInvalidFileNameCharacter(fileName: String): String? = DownloadManagerUtils.regexInvalidSystemChar.find(fileName)?.value
 

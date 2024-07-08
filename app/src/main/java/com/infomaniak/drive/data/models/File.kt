@@ -164,10 +164,6 @@ open class File(
         return type == "dir"
     }
 
-    fun isDrive(): Boolean {
-        return type == "drive"
-    }
-
     fun isOnlyOfficePreview(): Boolean {
         return hasOnlyoffice || conversion?.whenOnlyoffice == true
     }
@@ -246,7 +242,7 @@ open class File(
 
     fun isBookmark() = name.endsWith(".url") || name.endsWith(".webloc")
 
-    fun isPendingUploadFolder() = isFromUploads && (isFolder() || isDrive())
+    fun isPendingUploadFolder() = isFromUploads && isFolder()
 
     fun isObsolete(dataFile: IOFile): Boolean {
         return (dataFile.lastModified() / 1000) < lastModifiedAt
