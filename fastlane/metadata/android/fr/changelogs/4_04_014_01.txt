@@ -1,0 +1,2 @@
+- Nouvelle interface utilisateur pour afficher les fichiers
+- Ajout de la possibilité de mettre les fichiers en mode hors ligne à l'aide du bouton "Sélectionner tout".

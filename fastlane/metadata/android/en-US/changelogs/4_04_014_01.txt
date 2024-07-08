@@ -1,0 +1,2 @@
+- New UI to display files
+- Add the possibility to put files into offline mode using the "Select all" button
