@@ -134,7 +134,7 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.2.0'
-    implementation 'androidx.lifecycle:lifecycle-process:2.8.2'
+    implementation 'androidx.lifecycle:lifecycle-process:2.8.3'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
     implementation 'androidx.webkit:webkit:1.11.0'
 
@@ -163,17 +163,17 @@ dependencies {
     testImplementation 'io.github.serpro69:kotlin-faker:1.16.0'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.3.0'
 
-    def espresso_version = '3.5.1'
+    def espresso_version = '3.6.1'
     androidTestImplementation("androidx.test.espresso:espresso-contrib:$espresso_version") {
         // WorkAround for dependencies issue (see https://github.com/android/android-test/issues/861)
         exclude group: 'org.checkerframework', module: 'checker'
     }
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
 
-    def androidx_test_version = '1.5.0'
+    def androidx_test_version = '1.6.1'
     implementation "androidx.test:core-ktx:$androidx_test_version"
     androidTestImplementation "androidx.test:rules:$androidx_test_version"
-    androidTestImplementation "androidx.test:runner:1.5.2"
+    androidTestImplementation "androidx.test:runner:1.6.1"
 
     def jupiter_version = '5.10.2'
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
