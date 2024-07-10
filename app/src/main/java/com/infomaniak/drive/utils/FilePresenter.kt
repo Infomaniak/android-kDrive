@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
@@ -32,8 +33,11 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.AccessDeniedBottomSheetDialogArgs
-import com.infomaniak.drive.ui.fileList.*
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
+import com.infomaniak.drive.ui.fileList.FileAdapter
+import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
+import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.fileShared.FileSharedListFragmentArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
@@ -62,12 +66,13 @@ object FilePresenter {
                 AccessDeniedBottomSheetDialogArgs(
                     isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
                     folderId = file.id,
-                    folderName = file.name
+                    folderName = file.name,
                 ).toBundle()
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
             if (isSharedFile) {
+                Log.e("TOTO", "openFolder: ${file.name} / ${file.id}")
                 val args = FileSharedListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
                 safeNavigate(R.id.fileSharedListFragment, args.toBundle())
             } else {
