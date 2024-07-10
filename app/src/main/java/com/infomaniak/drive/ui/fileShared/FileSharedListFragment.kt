@@ -48,7 +48,6 @@ class FileSharedListFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         folderName = navigationArgs.fileName
         folderId = navigationArgs.fileId
-        Log.e("TOTO", "onViewCreated: $folderId")
         downloadFiles = DownloadFiles()
 
         super.onViewCreated(view, savedInstanceState)
@@ -117,14 +116,7 @@ class FileSharedListFragment : FileListFragment() {
                 if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile == null) {
                     downloadSharedFile()
                 } else {
-                    Log.e("TOTO", "invoke: download")
-                    getFiles(folderId, fileListViewModel.sortType, isNewSort)
-//                        .observe(viewLifecycleOwner) { folderFilesResult ->
-//                        populateFileList(
-//                            files = folderFilesResult?.files ?: emptyList(),
-//                            shouldRefreshFiles = ignoreCache,
-//                        )
-//                    }
+                    getFiles(folderId, fileListViewModel.sortType)
                 }
             }
         }
