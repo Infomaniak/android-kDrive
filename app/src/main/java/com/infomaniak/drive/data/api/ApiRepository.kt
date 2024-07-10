@@ -22,7 +22,7 @@ import com.google.gson.JsonElement
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
-import com.infomaniak.drive.data.models.File.*
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.models.file.FileLastActivityBody
@@ -312,8 +312,14 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getShareLinkFile(driveId, linkUuid, fileId), GET)
     }
 
-    fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: FileId, sortType: SortType): ApiResponse<List<File>> {
-        return callApi(ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, fileId, sortType), GET)
+    fun getShareLinkFileChildren(
+        driveId: Int,
+        linkUuid: String,
+        fileId: FileId,
+        sortType: SortType,
+        cursor: String?,
+    ): CursorApiResponse<List<File>> {
+        return callApiWithCursor(ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, fileId, sortType, cursor), GET)
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
