@@ -140,7 +140,7 @@ open class FileAdapter(
         fileAsyncListDiffer = AsyncListDiffer(this, FileDiffCallback())
     }
 
-    fun addFileList(newFileList: ArrayList<File>) {
+    fun addFileList(newFileList: List<File>) {
         val oldItemCount = itemCount
         addAll(newFileList)
         if (oldItemCount > 0) {
@@ -171,7 +171,7 @@ open class FileAdapter(
         }
     }
 
-    fun addAll(newItemList: ArrayList<File>) {
+    fun addAll(newItemList: List<File>) {
         val beforeItemCount = itemCount
         val list = ArrayList(fileList).apply { addAll(newItemList) }
         fileList = RealmList(*list.toTypedArray())
