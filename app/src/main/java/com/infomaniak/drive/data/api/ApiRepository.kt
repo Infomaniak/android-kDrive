@@ -319,7 +319,8 @@ object ApiRepository : ApiRepositoryCore() {
         sortType: SortType,
         cursor: String?,
     ): CursorApiResponse<List<File>> {
-        return callApiWithCursor(ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, fileId, sortType, cursor), GET)
+        val url = ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, fileId, sortType) + "&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
