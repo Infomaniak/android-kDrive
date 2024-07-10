@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_marginHorizontal="@dimen/marginStandard"
         android:layout_marginBottom="@dimen/marginStandard"
-        android:text="@string/buttonValid"
+        android:text="@string/buttonAddToKDrive"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

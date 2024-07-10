@@ -111,6 +111,7 @@
     <string name="buttonAdd">Add</string>
     <string name="buttonAddComment">Add a comment</string>
     <string name="buttonAddFavorites">Add to favorites</string>
+    <string name="buttonAddToKDrive">Add to my kDrive</string>
     <string name="buttonAddUser">Add a user</string>
     <string name="buttonApplyFilters">Apply filters</string>
     <string name="buttonAuthorize">Authorise</string>
