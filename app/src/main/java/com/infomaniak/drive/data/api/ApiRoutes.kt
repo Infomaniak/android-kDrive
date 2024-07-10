@@ -255,10 +255,12 @@ object ApiRoutes {
 
     fun getShareLinkInfo(driveId: Int, linkUuid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid/init"
 
-    fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) = "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId"
+    fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) = "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId"
 
-    fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
-        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId/files?order_by=${sortType.orderBy}&order=${sortType.order}"
+    fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType, cursor: String?): String {
+        val orderQuery = "?order_by=${sortType.orderBy}&order=${sortType.order}"
+        val cursorQuery = cursor?.let { "&cursor=$cursor" } ?: ""
+        return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId/files$orderQuery$cursorQuery"
     }
     //endregion
 
