@@ -68,76 +68,35 @@ class FileSharedViewModel(private val savedStateHandle: SavedStateHandle) : View
         childrenLiveData.postValue((file?.let(::listOf) ?: listOf()) to true)
     }
 
-    fun downloadSharedFileChildren(folderId: Int, sortType: SortType) = viewModelScope.launch(Dispatchers.IO) {
-        val apiResponse = ApiRepository.getShareLinkFileChildren(driveId, fileSharedLinkUuid, folderId, sortType, currentCursor)
-        if (apiResponse.isSuccess() && apiResponse.data != null) {
-            childrenLiveData.postValue(apiResponse.data!! to true)
-        } else {
-            Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
-            childrenLiveData.postValue(emptyList<File>() to true)
-        }
-    }
-
-    fun getFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
+    fun getFiles(folderId: Int, sortType: SortType) {
         getSharedFilesJob.cancel()
         getSharedFilesJob = Job()
 
         viewModelScope.launch(Dispatchers.IO + getSharedFilesJob) {
 
-            tailrec suspend fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
-                Log.e("TOTO", "recursiveDownload: isFirstPage = $isFirstPage / currentCursor = $currentCursor")
+            tailrec fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
                 getSharedFilesJob.ensureActive()
 
                 val folderFilesProviderResult = loadFromRemote(
                     FolderFilesProviderArgs(folderId = folderId, isFirstPage = isFirstPage, order = sortType),
                 )
 
-                when {
-                    folderFilesProviderResult == null -> Unit
-                    folderFilesProviderResult.isComplete -> {
-                        Log.e("TOTO", "recursiveDownload: isComplete")
-                        childrenLiveData.postValue(
-                            ((childrenLiveData.value?.first ?: emptyList()) + folderFilesProviderResult.folderFiles) to true
-                        )
-//                        emit(
-//                            FolderFilesResult(
-//                                parentFolder = folderFilesProviderResult.folder,
-//                                files = folderFilesProviderResult.folderFiles,
-//                                isComplete = true,
-//                                isFirstPage = isFirstPage,
-//                                isNewSort = isNewSort,
-//                            )
-//                        )
-                    }
-                    else -> {
-                        if (isFirstPage) {
-                            Log.e("TOTO", "recursiveDownload: isFirstPage")
-                            childrenLiveData.postValue(
-                                ((childrenLiveData.value?.first ?: emptyList()) + folderFilesProviderResult.folderFiles) to true
-                            )
-//                            emit(
-//                                FolderFilesResult(
-//                                    parentFolder = folderFilesProviderResult.folder,
-//                                    files = folderFilesProviderResult.folderFiles,
-//                                    isComplete = true,
-//                                    isFirstPage = true,
-//                                    isNewSort = false,
-//                                )
-//                            )
-                        }
-                        recursiveDownload(folderId, isFirstPage = false)
-                    }
+                if (folderFilesProviderResult == null) return
+
+                val newFiles = mutableListOf<File>().apply {
+                    childrenLiveData.value?.first?.let(::addAll)
+                    addAll(folderFilesProviderResult.folderFiles)
                 }
+
+                childrenLiveData.postValue(newFiles to true)
+                if (!folderFilesProviderResult.isComplete) recursiveDownload(folderId, isFirstPage = false)
             }
 
             recursiveDownload(folderId, isFirstPage = true)
         }
     }
 
-    private fun loadFromRemote(
-        folderFilesProviderArgs: FolderFilesProviderArgs,
-    ): FolderFilesProviderResult? = with(Dispatchers.IO) {
-        Log.e("TOTO", "loadFromRemote: ${folderFilesProviderArgs.folderId} / fileId = $fileId")
+    private fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
         val apiResponse = ApiRepository.getShareLinkFileChildren(
             driveId = driveId,
             linkUuid = fileSharedLinkUuid,
@@ -155,27 +114,20 @@ class FileSharedViewModel(private val savedStateHandle: SavedStateHandle) : View
             )
         }
 
-        ensureActive()
+        getSharedFilesJob.ensureActive()
 
-        handleRemoteFiles(apiResponse)
+        return handleRemoteFiles(apiResponse)
     }
 
 
-    private fun handleRemoteFiles(apiResponse: CursorApiResponse<List<File>>): FolderFilesProviderResult? {
-        val apiResponseData = apiResponse.data
-
-        return when {
-            apiResponseData != null -> {
-                currentCursor = apiResponse.cursor
-                //TODO: Better management of this rootSharedFile value
-                FolderFilesProviderResult(
-                    folder = rootSharedFile!!,
-                    folderFiles = ArrayList(apiResponseData),
-                    isComplete = !apiResponse.hasMore
-                )
-            }
-            else -> null
-        }
+    private fun handleRemoteFiles(apiResponse: CursorApiResponse<List<File>>) = apiResponse.data?.let { remoteFiles ->
+        currentCursor = apiResponse.cursor
+        //TODO: Better management of this rootSharedFile value
+        FolderFilesProviderResult(
+            folder = rootSharedFile!!,
+            folderFiles = ArrayList(remoteFiles),
+            isComplete = !apiResponse.hasMore,
+        )
     }
 
     companion object {
