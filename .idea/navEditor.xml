@@ -30,6 +30,18 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
+                  <entry key="downloadProgressDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="fileSharedActivity">
                     <value>
                       <LayoutPositions>
@@ -47,18 +59,18 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="368" />
+                            <option name="x" value="32" />
+                            <option name="y" value="660" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_fileListFragment_to_previewSliderFragment">
+                            <entry key="action_fileListFragment_to_sortFilesBottomSheetDialog">
                               <value>
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_fileListFragment_to_sortFilesBottomSheetDialog">
+                            <entry key="action_fileSharedListFragment_to_fileSharedPreviewSliderFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -85,38 +97,44 @@
                       </LayoutPositions>
                     </value>
                   </entry>
-                  <entry key="previewSliderFragment">
+                  <entry key="fileSharedPreviewSliderFragment">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
+                            <option name="x" value="276" />
+                            <option name="y" value="724" />
                           </Point>
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_previewSliderFragment_to_downloadProgressDialog">
+                            <entry key="action_fileSharedPreviewSliderFragment_to_downloadProgressDialog">
                               <value>
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_previewSliderFragment_to_fileDetailsFragment">
+                            <entry key="action_fileSharedPreviewSliderFragment_to_previewFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
                             </entry>
-                            <entry key="action_previewSliderFragment_to_fileShareDetailsFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_previewSliderFragment_to_previewFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                            <entry key="action_previewSliderFragment_to_selectCategoriesFragment">
+                          </map>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="previewFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="520" />
+                            <option name="y" value="724" />
+                          </Point>
+                        </option>
+                        <option name="myPositions">
+                          <map>
+                            <entry key="action_previewFragment_to_fileDetailsFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -131,8 +149,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
+                            <option name="x" value="276" />
+                            <option name="y" value="368" />
                           </Point>
                         </option>
                       </LayoutPositions>
