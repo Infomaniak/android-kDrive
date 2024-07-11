@@ -32,13 +32,4 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/file_shared_navigation" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/mainFileShareButton"
-        style="@style/ButtonInfomaniak"
-        android:layout_width="match_parent"
-        android:layout_marginHorizontal="@dimen/marginStandard"
-        android:layout_marginBottom="@dimen/marginStandard"
-        android:text="@string/buttonAddToKDrive"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
