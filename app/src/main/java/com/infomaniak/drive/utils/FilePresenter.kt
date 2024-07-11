@@ -87,10 +87,15 @@ object FilePresenter {
         }
     }
 
-    fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?) {
+    fun Fragment.displayFile(
+        file: File,
+        mainViewModel: MainViewModel,
+        fileAdapter: FileAdapter?,
+        isExternalFileShare: Boolean = false,
+    ) {
         trackEvent("preview", "preview${file.getFileType().value.capitalizeFirstChar()}")
         val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
-        Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+        Utils.displayFile(mainViewModel, findNavController(), file, fileList, isExternalFileShare = isExternalFileShare)
     }
 
     fun Fragment.openBookmark(file: File) {

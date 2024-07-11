@@ -63,6 +63,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
+import com.infomaniak.drive.ui.fileShared.FileSharedPreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
@@ -206,19 +207,30 @@ object Utils {
         selectedFile: File,
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
+        isExternalFileShare: Boolean = false,
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
-        val bundle = PreviewSliderFragmentArgs(
-            fileId = selectedFile.id,
-            driveId = selectedFile.driveId,
-            isSharedWithMe = isSharedWithMe,
-            hideActions = selectedFile.isFromActivities
-        ).toBundle()
+
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
-        navController.navigate(R.id.previewSliderFragment, bundle, navOptions)
+
+        val (destinationClass, bundle) = if (isExternalFileShare) {
+            val args = FileSharedPreviewSliderFragmentArgs(fileId = selectedFile.id, driveId = selectedFile.driveId)
+            R.id.fileSharedPreviewSliderFragment to args.toBundle()
+        } else {
+            val args = PreviewSliderFragmentArgs(
+                fileId = selectedFile.id,
+                driveId = selectedFile.driveId,
+                isSharedWithMe = isSharedWithMe,
+                hideActions = selectedFile.isFromActivities
+            )
+
+            R.id.previewSliderFragment to args.toBundle()
+        }
+
+        navController.navigate(destinationClass, bundle, navOptions)
     }
 
     fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))
