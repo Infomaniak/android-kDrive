@@ -69,7 +69,7 @@ class FileSharedListFragment : FileListFragment() {
                         )
                     }
                     file.isBookmark() -> openBookmark(file)
-                    else -> displayFile(file, mainViewModel, fileAdapter)
+                    else -> displayFile(file, mainViewModel, fileAdapter, isExternalFileShare = true)
                 }
             }
         }

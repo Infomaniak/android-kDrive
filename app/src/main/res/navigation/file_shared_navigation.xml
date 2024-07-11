@@ -66,8 +66,39 @@
         <action
             android:id="@+id/action_fileListFragment_to_sortFilesBottomSheetDialog"
             app:destination="@id/sortFilesBottomSheetDialog" />
+        <action
+            android:id="@+id/action_fileSharedListFragment_to_fileSharedPreviewSliderFragment"
+            app:destination="@id/fileSharedPreviewSliderFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/fileSharedPreviewSliderFragment"
+        android:name="com.infomaniak.drive.ui.fileShared.FileSharedPreviewSliderFragment"
+        android:label="FileSharedPreviewSliderFragment"
+        tools:layout="@layout/fragment_preview_slider">
+        <action
+            android:id="@+id/action_fileSharedPreviewSliderFragment_to_previewFragment"
+            app:destination="@id/previewFragment" />
+        <action
+            android:id="@+id/action_fileSharedPreviewSliderFragment_to_downloadProgressDialog"
+            app:destination="@id/downloadProgressDialog" />
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/previewFragment"
+        android:name="com.infomaniak.drive.ui.fileList.preview.PreviewFragment"
+        android:label="fragment_preview"
+        tools:layout="@layout/fragment_preview_others">
+        <action
+            android:id="@+id/action_previewFragment_to_fileDetailsFragment"
+            app:destination="@id/fileDetailsFragment" />
+    </fragment>
 
     <dialog
         android:id="@+id/sortFilesBottomSheetDialog"
@@ -81,6 +112,26 @@
         <argument
             android:name="sortTypeUsage"
             app:argType="com.infomaniak.drive.data.models.File$SortTypeUsage" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/downloadProgressDialog"
+        android:name="com.infomaniak.drive.ui.fileList.DownloadProgressDialog"
+        android:label="DownloadProgressDialog"
+        tools:layout="@layout/dialog_download_progress">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="fileName"
+            app:argType="string" />
+        <argument
+            android:name="userDrive"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="action"
+            android:defaultValue="OPEN_WITH"
+            app:argType="com.infomaniak.drive.ui.fileList.DownloadProgressDialog$DownloadAction" />
     </dialog>
 
 </navigation>

@@ -15,19 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileShared
+package com.infomaniak.drive.ui.fileList.preview
 
-import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import com.infomaniak.drive.databinding.ActivityFileSharedBinding
+import androidx.lifecycle.ViewModel
+import com.infomaniak.drive.data.models.File
 
-class FileSharedActivity : AppCompatActivity() {
-
-    private val binding by lazy { ActivityFileSharedBinding.inflate(layoutInflater) }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContentView(binding.root)
-    }
+class PreviewViewModel : ViewModel() {
+    var currentFile: File? = null
 }
