@@ -22,8 +22,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.lib.core.utils.safeBinding
 
 class PreviewOtherFragment : PreviewFragment() {
