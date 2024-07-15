@@ -25,7 +25,11 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 
-class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(manager, lifecycle) {
+class PreviewSliderAdapter(
+    manager: FragmentManager,
+    lifecycle: Lifecycle,
+    private val shareLinkUuid: String = "",
+) : FragmentStateAdapter(manager, lifecycle) {
 
     private var files = ArrayList<File>()
     private var filePagesIds: ArrayList<Long> = ArrayList()
@@ -34,7 +38,10 @@ class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : Fra
 
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
-        val args = bundleOf(PreviewFragment.FILE_ID_TAG to file.id)
+        val args = bundleOf(
+            PreviewFragment.FILE_ID_TAG to file.id,
+            PreviewFragment.SHARE_LINK_UUID_TAG to shareLinkUuid,
+        )
         return when (file.getFileType()) {
             ExtensionType.IMAGE -> PreviewPictureFragment().apply { arguments = args }
             ExtensionType.VIDEO -> PreviewVideoFragment().apply { arguments = args }

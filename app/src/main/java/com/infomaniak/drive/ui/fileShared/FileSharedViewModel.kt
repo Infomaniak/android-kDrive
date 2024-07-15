@@ -33,7 +33,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
-class FileSharedViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
+class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() {
 
     var rootSharedFile: File? = null
     val childrenLiveData = SingleLiveEvent<Pair<List<File>, Boolean>>()
@@ -41,7 +41,7 @@ class FileSharedViewModel(private val savedStateHandle: SavedStateHandle) : View
     private val driveId: Int
         inline get() = savedStateHandle[FileSharedActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
 
-    private val fileSharedLinkUuid: String
+    val fileSharedLinkUuid: String
         inline get() = savedStateHandle[FileSharedActivityArgs::fileSharedLinkUuid.name] ?: ""
 
     private val fileId: Int

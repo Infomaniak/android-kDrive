@@ -26,4 +26,5 @@ class PreviewSliderViewModel : ViewModel() {
     val pdfIsDownloading = MutableLiveData<Boolean>()
     var currentPreview: File? = null
     var userDrive = UserDrive()
+    var shareLinkUuid = ""
 }

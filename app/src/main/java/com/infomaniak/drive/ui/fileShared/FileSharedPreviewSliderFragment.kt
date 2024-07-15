@@ -64,6 +64,8 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
             userDrive = previewSliderViewModel.userDrive
         }
 
+        previewSliderViewModel.shareLinkUuid = navigationArgs.shareLinkUuid
+
         return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
