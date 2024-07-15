@@ -24,9 +24,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.MainViewModel
@@ -45,6 +42,7 @@ open class PreviewFragment : Fragment() {
 
             arguments?.let {
                 val fileId = it.getInt(FILE_ID_TAG)
+                previewSliderViewModel.shareLinkUuid = it.getString(SHARE_LINK_UUID_TAG) ?: ""
                 if (fileId > 0) previewViewModel.currentFile = getCurrentFile(fileId)
             }
         }
@@ -75,5 +73,6 @@ open class PreviewFragment : Fragment() {
 
     companion object {
         const val FILE_ID_TAG = "file_id_tag"
+        const val SHARE_LINK_UUID_TAG = "share_link_uuid_tag"
     }
 }

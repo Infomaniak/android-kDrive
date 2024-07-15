@@ -207,7 +207,7 @@ object Utils {
         selectedFile: File,
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
-        isExternalFileShare: Boolean = false,
+        shareLinkUuid: String = "",
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
 
@@ -216,8 +216,12 @@ object Utils {
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
 
-        val (destinationClass, bundle) = if (isExternalFileShare) {
-            val args = FileSharedPreviewSliderFragmentArgs(fileId = selectedFile.id, driveId = selectedFile.driveId)
+        val (destinationClass, bundle) = if (shareLinkUuid.isNotBlank()) {
+            val args = FileSharedPreviewSliderFragmentArgs(
+                fileId = selectedFile.id,
+                driveId = selectedFile.driveId,
+                shareLinkUuid = shareLinkUuid,
+            )
             R.id.fileSharedPreviewSliderFragment to args.toBundle()
         } else {
             val args = PreviewSliderFragmentArgs(

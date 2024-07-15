@@ -27,16 +27,16 @@
         tools:layout="@layout/activity_file_shared">
         <argument
             android:name="driveId"
-            app:argType="integer"
-            android:defaultValue="-1" />
+            android:defaultValue="-1"
+            app:argType="integer" />
         <argument
             android:name="fileSharedLinkUuid"
-            app:argType="string"
-            android:defaultValue="" />
+            android:defaultValue=""
+            app:argType="string" />
         <argument
             android:name="fileId"
-            app:argType="integer"
-            android:defaultValue="1" />
+            android:defaultValue="1"
+            app:argType="integer" />
     </activity>
 
     <fragment
@@ -50,12 +50,12 @@
         tools:layout="@layout/fragment_file_shared_list">
         <argument
             android:name="fileId"
-            app:argType="integer"
-            android:defaultValue="1" />
+            android:defaultValue="1"
+            app:argType="integer" />
         <argument
             android:name="fileName"
-            app:argType="string"
-            android:defaultValue="" />
+            android:defaultValue=""
+            app:argType="string" />
         <action
             android:id="@+id/fileSharedListFragmentToFileSharedListFragment"
             app:destination="@id/fileSharedListFragment"
@@ -76,18 +76,22 @@
         android:name="com.infomaniak.drive.ui.fileShared.FileSharedPreviewSliderFragment"
         android:label="FileSharedPreviewSliderFragment"
         tools:layout="@layout/fragment_preview_slider">
-        <action
-            android:id="@+id/action_fileSharedPreviewSliderFragment_to_previewFragment"
-            app:destination="@id/previewFragment" />
-        <action
-            android:id="@+id/action_fileSharedPreviewSliderFragment_to_downloadProgressDialog"
-            app:destination="@id/downloadProgressDialog" />
         <argument
             android:name="fileId"
             app:argType="integer" />
         <argument
             android:name="driveId"
             app:argType="integer" />
+        <argument
+            android:name="shareLinkUuid"
+            app:argType="string"
+            android:defaultValue="" />
+        <action
+            android:id="@+id/action_fileSharedPreviewSliderFragment_to_previewFragment"
+            app:destination="@id/previewFragment" />
+        <action
+            android:id="@+id/action_fileSharedPreviewSliderFragment_to_downloadProgressDialog"
+            app:destination="@id/downloadProgressDialog" />
     </fragment>
 
     <fragment
