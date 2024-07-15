@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022 Infomaniak Network SA
+ * Copyright (C) 2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
@@ -34,9 +35,13 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDownloadWorker(context, workerParams) {
 
     private val folderId: Int by lazy { inputData.getInt(FOLDER_ID, 0) }
-    private val fileIds: List<Int> by lazy {
-        FileController.getFolderOfflineFilesId(folderId = folderId, UiSettings(context).sortType)
+    private val files: List<File> by lazy {
+        FileController.getFolderOfflineFilesId(folderId = folderId, UiSettings(context).sortType).map {
+            val file = FileController.getFileById(it, userDrive)!!
+            file
+        }
     }
+
     private val userDrive: UserDrive by lazy {
         UserDrive(
             userId = inputData.getInt(USER_ID, AccountUtils.currentUserId),
@@ -46,7 +51,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
     private val downloadOfflineFileManager by lazy {
         DownloadOfflineFileManager(
             userDrive,
-            filesCount = fileIds.size,
+            filesCount = files.size,
             downloadWorker = this,
             notificationManagerCompat
         )
@@ -64,6 +69,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
     override suspend fun downloadAction(): Result = downloadFiles()
 
     override fun onFinish() {
+        FileController.markFilesAsOffline(filesId = files.map { it.id }, isMarkedAsOffline = false)
         clearLastDownloadedFile()
         notifyDownloadCancelled()
         notificationManagerCompat.cancel(BULK_DOWNLOAD_ID)
@@ -77,13 +83,16 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
 
     override val notificationId = BULK_DOWNLOAD_ID
 
+    override fun getSizeOfDownload() = files.sumOf { it.size ?: 0L }
+
     private fun clearLastDownloadedFile() {
         downloadOfflineFileManager.cleanLastDownloadedFile()
     }
 
     private suspend fun downloadFiles(): Result {
         var result = Result.failure()
-        fileIds.forEach { fileId ->
+
+        files.forEach { fileId ->
             result = downloadOfflineFileManager.execute(applicationContext, fileId) { progress, downloadedFileId ->
                 setProgressAsync(workDataOf(PROGRESS to progress, FILE_ID to downloadedFileId))
             }
@@ -105,10 +114,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
 
     companion object {
         const val TAG = "BulkDownloadWorker"
-        const val DRIVE_ID = "drive_id"
-        const val FILE_ID = "file_id"
-        const val PROGRESS = "progress"
-        const val USER_ID = "user_id"
         const val FOLDER_ID = "folder_id"
     }
 }

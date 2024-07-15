@@ -526,6 +526,7 @@
     <string name="noSelectMediaFolders">No folder selected</string>
     <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
     <string name="noSyncFolderNotificationTitle">No folder selected for automatic backup</string>
+    <string name="notEnoughSpaceAfterDownload">The download has been canceled due to insufficient storage space on your device.</string>
     <string name="notEnoughStorageDescription1">Your kDrive storage space is almost full. Upgrade your plan and unlock new features.</string>
     <string name="notEnoughStorageDescription2">Your kDrive storage space is almost full. Contact your administrator so they can upgrade your plan.</string>
     <string name="notEnoughStorageUsed">used</string>

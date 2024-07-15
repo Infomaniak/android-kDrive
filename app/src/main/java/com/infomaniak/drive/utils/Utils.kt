@@ -51,6 +51,7 @@ import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
@@ -344,10 +345,10 @@ object Utils {
 
         if (file.isMarkedAsOffline) workManager.cancelAllWorkByTag(file.getWorkerTag())
         val inputData = workDataOf(
-            DownloadWorker.FILE_ID to file.id,
+            BaseDownloadWorker.FILE_ID to file.id,
             DownloadWorker.FILE_NAME to file.name,
-            DownloadWorker.USER_ID to userDrive.userId,
-            DownloadWorker.DRIVE_ID to userDrive.driveId,
+            BaseDownloadWorker.USER_ID to userDrive.userId,
+            BaseDownloadWorker.DRIVE_ID to userDrive.driveId,
         )
         val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
         val constraints = Constraints.Builder()
@@ -376,8 +377,8 @@ object Utils {
         val workManager = WorkManager.getInstance(context)
         val inputData = workDataOf(
             BulkDownloadWorker.FOLDER_ID to folderId,
-            BulkDownloadWorker.USER_ID to userDrive.userId,
-            BulkDownloadWorker.DRIVE_ID to userDrive.driveId,
+            BaseDownloadWorker.USER_ID to userDrive.userId,
+            BaseDownloadWorker.DRIVE_ID to userDrive.driveId,
         )
         val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
         val constraints = Constraints.Builder()

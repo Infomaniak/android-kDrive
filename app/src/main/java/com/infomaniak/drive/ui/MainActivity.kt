@@ -49,6 +49,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
@@ -67,6 +69,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
@@ -186,6 +189,7 @@ class MainActivity : BaseActivity() {
         initAppReviewManager()
         observeCurrentFolder()
         observeBulkDownloadRunning()
+        observeFailureDownloadWorkerOffline()
     }
 
     override fun onStart() {
@@ -298,6 +302,19 @@ class MainActivity : BaseActivity() {
         mainViewModel.isBulkDownloadRunning.observe(this) { isRunning ->
             if (!isRunning) mainViewModel.syncOfflineFiles()
         }
+    }
+
+    private fun observeFailureDownloadWorkerOffline() {
+        DownloadOfflineFileManager.observeFailureDownloadWorkerOffline(this)
+            .observe(this) { workInfoList ->
+                workInfoList.firstOrNull { it.state == WorkInfo.State.FAILED }?.let { failedWork ->
+                    val hasLeftSpaceAfterDownload = failedWork.outputData.getBoolean(HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY, true)
+                    if (!hasLeftSpaceAfterDownload) showSnackbar(R.string.notEnoughSpaceAfterDownload)
+                    // We have to clear previous works info because otherwise, next time we'll start the app,
+                    // we'll still have the previously failed result here.
+                    WorkManager.getInstance(this@MainActivity).pruneWork()
+                }
+            }
     }
 
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown

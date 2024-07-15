@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BulkDownloadWorker
+import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
@@ -68,10 +69,10 @@ class DownloadOfflineFileManager(
 
     suspend fun execute(
         context: Context,
-        fileId: Int,
+        file: File,
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
-        currentFile = FileController.getFileById(fileId, userDrive)
+        currentFile = file
         val offlineFile = currentFile?.getOfflineFile(context, userDrive.userId)
         val cacheFile = currentFile?.getCacheFile(context, userDrive)
 
@@ -85,13 +86,13 @@ class DownloadOfflineFileManager(
             }
         }
 
-        onProgress(0, fileId)
+        onProgress(0, file.id)
 
         if (offlineFile?.exists() == true) offlineFile.delete()
         if (cacheFile?.exists() == true) cacheFile.delete()
 
         if (currentFile == null || offlineFile == null) {
-            getFileFromRemote(context, fileId, userDrive) { downloadedFile ->
+            getFileFromRemote(context, file.id, userDrive) { downloadedFile ->
                 downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { offlineFile ->
                     lastDownloadedFile = offlineFile
                 }
@@ -226,10 +227,10 @@ class DownloadOfflineFileManager(
     companion object {
         private const val MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS = 1000L
 
-        fun observeBulkDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
+        fun observeFailureDownloadWorkerOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
             WorkQuery.Builder
-                .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG))
-                .addStates(arrayListOf(WorkInfo.State.RUNNING))
+                .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG, DownloadWorker.TAG))
+                .addStates(arrayListOf(WorkInfo.State.FAILED))
                 .build()
         )
 

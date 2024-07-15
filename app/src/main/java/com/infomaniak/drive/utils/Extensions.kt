@@ -29,6 +29,8 @@ import android.graphics.Point
 import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.os.Environment
+import android.os.StatFs
 import android.provider.MediaStore
 import android.text.format.Formatter
 import android.transition.AutoTransition
@@ -102,6 +104,10 @@ typealias FileId = Int
 typealias IOFile = java.io.File
 typealias IsComplete = Boolean
 typealias Position = Int
+
+fun getAvailableStorageInBytes(): Long = with(StatFs(Environment.getDataDirectory().path)) {
+    return availableBlocksLong * blockSizeLong
+}
 
 fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

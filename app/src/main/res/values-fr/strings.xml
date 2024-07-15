@@ -515,6 +515,7 @@
     <string name="noSelectMediaFolders">Aucun dossier sélectionné</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>
     <string name="noSyncFolderNotificationTitle">Aucun dossier sélectionné pour la sauvegarde automatique</string>
+    <string name="notEnoughSpaceAfterDownload">Le téléchargement a été annulé en raison d\'un espace de stockage insuffisant sur votre appareil.</string>
     <string name="notEnoughStorageDescription1">L’espace de stockage de votre kDrive est presque plein. Faites évoluer votre offre et débloquez de nouvelles fonctionnalités.</string>
     <string name="notEnoughStorageDescription2">L’espace de stockage de votre kDrive est presque plein. Contactez votre administrateur pour qu’il puisse faire évoluer votre offre.</string>
     <string name="notEnoughStorageUsed">utilisés</string>

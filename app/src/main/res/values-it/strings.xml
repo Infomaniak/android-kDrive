@@ -515,6 +515,7 @@
     <string name="noSelectMediaFolders">Nessuna cartella selezionata</string>
     <string name="noSyncFolderNotificationDescription">Clicca qui per configurare le cartelle da sincronizzare</string>
     <string name="noSyncFolderNotificationTitle">Nessuna cartella selezionata per il backup automatico</string>
+    <string name="notEnoughSpaceAfterDownload">Il download è stato annullato a causa di spazio di archiviazione insufficiente sul dispositivo.</string>
     <string name="notEnoughStorageDescription1">Lo spazio di archiviazione del kDrive è quasi esaurito. Fai evolvere la tua offerta e sblocca nuove funzionalità.</string>
     <string name="notEnoughStorageDescription2">Lo spazio di archiviazione del kDrive è quasi esaurito. Contatta il tuo amministratore per fare evolvere la tua offerta.</string>
     <string name="notEnoughStorageUsed">utilizzati</string>

@@ -515,6 +515,7 @@
     <string name="noSelectMediaFolders">Kein Ordner ausgewählt</string>
     <string name="noSyncFolderNotificationDescription">Klicken Sie hier, um die zu synchronisierenden Ordner zu konfigurieren</string>
     <string name="noSyncFolderNotificationTitle">Keine Ordner für die automatische Sicherung ausgewählt</string>
+    <string name="notEnoughSpaceAfterDownload">Der Download wurde wegen unzureichendem Speicherplatz auf Ihrem Gerät abgebrochen.</string>
     <string name="notEnoughStorageDescription1">Der Speicherplatz Ihres kDrive ist fast voll. Erweitern Sie Ihr Angebot und schalten Sie neue Funktionen frei.</string>
     <string name="notEnoughStorageDescription2">Der Speicherplatz Ihres kDrive ist fast voll. Wenden Sie sich an Ihren Administrator, damit er Ihr Angebot erweitern kann.</string>
     <string name="notEnoughStorageUsed">verwendet</string>

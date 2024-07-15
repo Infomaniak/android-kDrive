@@ -49,8 +49,7 @@ import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
-import com.infomaniak.drive.data.services.BulkDownloadWorker
-import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerProgress
@@ -72,7 +71,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.drive.utils.Utils.enqueueBulkDownloadWorker
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
@@ -236,7 +234,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         if (!isDownloading) downloadFiles(false, false)
         observeOfflineDownloadProgress()
-        observeOfflineBulkDownloadProgress()
 
         requireContext().trackUploadWorkerProgress().observe(viewLifecycleOwner) {
             val workInfo = it.firstOrNull() ?: return@observe
@@ -558,7 +555,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun observeOfflineDownloadProgress() {
         mainViewModel.observeDownloadOffline(requireContext().applicationContext).observe(viewLifecycleOwner) { workInfoList ->
-            updateFileStatus(workInfoList, DownloadWorker.FILE_ID, DownloadWorker.PROGRESS)
+            updateFileStatus(workInfoList)
         }
 
         mainViewModel.updateVisibleFiles.observe(viewLifecycleOwner) {
@@ -566,24 +563,17 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         }
     }
 
-    private fun observeOfflineBulkDownloadProgress() {
-        DownloadOfflineFileManager.observeBulkDownloadOffline(requireContext().applicationContext)
-            .observe(viewLifecycleOwner) { workInfoList ->
-                updateFileStatus(workInfoList, BulkDownloadWorker.FILE_ID, BulkDownloadWorker.PROGRESS)
-            }
-    }
-
-    private fun updateFileStatus(workInfoList: List<WorkInfo>, fileIdKey: String, progressKey: String) {
+    private fun updateFileStatus(workInfoList: List<WorkInfo>) {
         if (workInfoList.isEmpty()) {
             updateVisibleProgresses()
             return
         }
 
         workInfoList.firstOrNull()?.let { workInfo ->
-            val fileId = workInfo.progress.getInt(fileIdKey, 0)
+            val fileId = workInfo.progress.getInt(BaseDownloadWorker.FILE_ID, 0)
             if (fileId == 0) return
 
-            val progress = workInfo.progress.getInt(progressKey, 100)
+            val progress = workInfo.progress.getInt(BaseDownloadWorker.PROGRESS, 100)
             binding.fileRecyclerView.post {
                 fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
                     val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
