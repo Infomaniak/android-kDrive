@@ -225,7 +225,7 @@ object ApiRoutes {
 
     fun thumbnailFile(file: File) = "${fileURLV2(file)}/thumbnail?t=${file.lastModifiedAt}"
 
-    fun imagePreviewFile(file: File) = "${fileURLV2(file)}/preview?quality=80&t=${file.lastModifiedAt}"
+    fun imagePreviewFile(file: File) = "${fileURLV2(file)}/preview"
 
     fun downloadFile(file: File) = "${fileURLV2(file)}/download"
 
@@ -260,6 +260,14 @@ object ApiRoutes {
     fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
         val orderQuery = "?order_by=${sortType.orderBy}&order=${sortType.order}"
         return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId/files$orderQuery"
+    }
+
+    fun getShareLinkFileThumbnail(driveId: Int, linkUuid: String, file: File): String {
+        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}/thumbnail"
+    }
+
+    fun getShareLinkFilePreview(driveId: Int, linkUuid: String, file: File): String {
+        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}/preview"
     }
     //endregion
 

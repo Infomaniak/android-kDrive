@@ -99,7 +99,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             setOnTouchListener { _, _ -> true }
         }
 
-        previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle)
+        previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle, previewSliderViewModel.shareLinkUuid)
 
         viewPager.apply {
             adapter = previewSliderAdapter
