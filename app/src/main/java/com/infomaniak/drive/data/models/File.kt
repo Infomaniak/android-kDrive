@@ -174,12 +174,20 @@ open class File(
         return status?.contains("trash") == true
     }
 
-    fun thumbnail(): String {
-        return if (isTrashed()) ApiRoutes.thumbnailTrashFile(this) else ApiRoutes.thumbnailFile(this)
+    fun thumbnail(shareLinkUuid: String = "") = when {
+        shareLinkUuid.isNotBlank() -> ApiRoutes.getShareLinkFileThumbnail(driveId, shareLinkUuid, file = this)
+        isTrashed() -> ApiRoutes.thumbnailTrashFile(file = this)
+        else -> ApiRoutes.thumbnailFile(file = this)
     }
 
-    fun imagePreview(): String {
-        return "${ApiRoutes.imagePreviewFile(this)}&width=2500&height=1500&quality=80"
+    fun imagePreview(shareLinkUuid: String): String {
+        val url = if (shareLinkUuid.isNotBlank()) {
+            ApiRoutes.getShareLinkFilePreview(driveId, shareLinkUuid, file = this)
+        } else {
+            ApiRoutes.imagePreviewFile(this)
+        }
+
+        return "$url?width=2500&height=1500&quality=80"
     }
 
     fun isPDF() = getFileType() == ExtensionType.PDF
