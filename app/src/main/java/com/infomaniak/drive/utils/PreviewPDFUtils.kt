@@ -89,7 +89,11 @@ object PreviewPDFUtils {
         response.use {
             if (!it.isSuccessful) {
                 val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
-                if (errorCode == "password_protected_error") throw PasswordProtectedException() else throw Exception("Download error")
+                if (errorCode == "password_protected_error") {
+                    throw PasswordProtectedException()
+                } else {
+                    throw Exception("Download error")
+                }
             }
             when (it.body?.contentType()?.toString()) {
                 "application/pdf" -> createTempPdfFile(it, externalOutputFile)

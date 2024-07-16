@@ -335,6 +335,6 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     }
 }
 
-interface PDFPrintListener {
+fun interface PDFPrintListener {
     fun generatePagesAsBitmaps(fileName: String)
 }
