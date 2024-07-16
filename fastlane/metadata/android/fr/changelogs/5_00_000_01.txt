@@ -1,0 +1,1 @@
+- Retrait d'un Sentry inutile lors de la suppression d'un fichier d'une taille de 0

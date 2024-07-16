@@ -1,0 +1,1 @@
+- Remove useless Sentry when deleting a file with a size of 0
