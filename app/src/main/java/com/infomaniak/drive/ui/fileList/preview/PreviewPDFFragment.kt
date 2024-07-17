@@ -35,7 +35,7 @@ import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.getPreviewPDFHandler
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getPreviewPDFHandler
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked

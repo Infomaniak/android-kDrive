@@ -42,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.preview.*
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
+import com.infomaniak.drive.views.PreviewHeaderView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
@@ -251,6 +252,16 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
         fun Fragment.openWithClicked() {
             (parentFragment as? PreviewSliderFragment)?.openWith()
+        }
+
+        fun Fragment.getHeader(): PreviewHeaderView? {
+            return (parentFragment as? BasePreviewSliderFragment)?._binding?.header
+                ?: (activity as? PreviewPDFActivity)?.binding?.header
+        }
+
+        fun Fragment.getPreviewPDFHandler(): PreviewPDFHandler {
+            return (parentFragment as? BasePreviewSliderFragment)?.previewPDFHandler
+                ?: (activity as? PreviewPDFActivity)!!.previewPDFHandler
         }
     }
 }
