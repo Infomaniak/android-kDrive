@@ -307,11 +307,6 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
     companion object {
 
-        private fun Fragment.getHeader(): PreviewHeaderView? {
-            return (parentFragment as? PreviewSliderFragment)?._binding?.header
-                ?: (activity as? PreviewPDFActivity)?.binding?.header
-        }
-
         //region PDF Preview
         fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
             getHeader()?.setPageNumberVisibility(isVisible)
@@ -319,11 +314,6 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
         fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
             getHeader()?.setPageNumberValue(currentPage, totalPage)
-        }
-
-        fun Fragment.getPreviewPDFHandler(): PreviewPDFHandler {
-            return (parentFragment as? PreviewSliderFragment)?.previewPDFHandler
-                ?: (activity as? PreviewPDFActivity)!!.previewPDFHandler
         }
         //endregion
     }
