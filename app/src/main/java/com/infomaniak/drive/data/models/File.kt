@@ -49,6 +49,7 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import io.sentry.Sentry
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import kotlinx.parcelize.WriteWith
@@ -148,6 +149,11 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
+    @IgnoredOnParcel
+    @Ignore
+    @Transient
+    var externalShareLinkUuid: String = ""
+
     val revisedAtInMillis: Long inline get() = revisedAt * 1000
 
     fun initUid() {
@@ -174,8 +180,8 @@ open class File(
         return status?.contains("trash") == true
     }
 
-    fun thumbnail(shareLinkUuid: String = "") = when {
-        shareLinkUuid.isNotBlank() -> ApiRoutes.getShareLinkFileThumbnail(driveId, shareLinkUuid, file = this)
+    fun thumbnail() = when {
+        externalShareLinkUuid.isNotBlank() -> ApiRoutes.getShareLinkFileThumbnail(driveId, externalShareLinkUuid, file = this)
         isTrashed() -> ApiRoutes.thumbnailTrashFile(file = this)
         else -> ApiRoutes.thumbnailFile(file = this)
     }
