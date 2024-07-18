@@ -463,6 +463,7 @@
     <string name="kDrivePdfViewer">Lecteur PDF de kDrive</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="localizedFilenamePrivateSpace">Mes fichiers</string>
+    <string name="localizedFilenamePrivateTeamSpace">Mon dossier personnel</string>
     <string name="localizedFilenameTeamSpace">Dossiers de l’organisation</string>
     <string name="locateButton">Localiser</string>
     <string name="manageCategoriesCreateTitle">Créer %s</string>

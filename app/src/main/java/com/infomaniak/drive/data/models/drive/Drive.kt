@@ -107,6 +107,8 @@ open class Drive(
 
     inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
 
+    inline val isSoloPack get() = pack?.type == DrivePack.DrivePackType.SOLO
+
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
     fun isUserAdmin(): Boolean = role == DriveUser.Role.ADMIN
