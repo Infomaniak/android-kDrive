@@ -24,6 +24,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.MainViewModel
@@ -35,14 +36,25 @@ open class PreviewFragment : Fragment() {
     private val previewViewModel: PreviewViewModel by viewModels()
     protected val previewSliderViewModel: PreviewSliderViewModel by viewModels(ownerProducer = ::requireParentFragment)
 
+    protected val navigationArgs by lazy { arguments?.let(PreviewFragmentArgs.Companion::fromBundle) }
+
     protected lateinit var file: File
+
+    protected inline val fileDownloadUrl: String
+        get() = with(previewSliderViewModel) {
+            if (shareLinkUuid.isBlank()) {
+                ApiRoutes.downloadFile(file)
+            } else {
+                ApiRoutes.downloadShareLinkFile(userDrive.driveId, shareLinkUuid, file)
+            }
+        }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
-
-            arguments?.let {
-                val fileId = it.getInt(FILE_ID_TAG)
-                previewSliderViewModel.shareLinkUuid = it.getString(SHARE_LINK_UUID_TAG) ?: ""
+            navigationArgs?.let {
+                val fileId = it.fileId
+                previewSliderViewModel.shareLinkUuid = it.fileShareUuid
+                previewSliderViewModel.userDrive = it.userDrive
                 if (fileId > 0) previewViewModel.currentFile = getCurrentFile(fileId)
             }
         }
@@ -70,9 +82,4 @@ open class PreviewFragment : Fragment() {
     }
 
     protected fun noCurrentFile() = previewViewModel.currentFile == null
-
-    companion object {
-        const val FILE_ID_TAG = "file_id_tag"
-        const val SHARE_LINK_UUID_TAG = "share_link_uuid_tag"
-    }
 }

@@ -40,7 +40,6 @@ import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -209,11 +208,7 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
-        return if (offlineFile != null && offlineIsComplete) {
-            offlineFile.toUri()
-        } else {
-            Uri.parse(ApiRoutes.downloadFile(file))
-        }
+        return if (offlineFile != null && offlineIsComplete) offlineFile.toUri() else Uri.parse(fileDownloadUrl)
     }
 
     private fun trackMediaPlayerEvent(name: String, value: Float? = null) {

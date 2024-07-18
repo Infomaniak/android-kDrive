@@ -274,7 +274,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     SentryLog.d(TAG, "startUploadFile> end upload file")
                 }
             }
-
         } else {
             deleteIfExists()
             SentryLog.d("kDrive", "$TAG > file deleted size: 0")
