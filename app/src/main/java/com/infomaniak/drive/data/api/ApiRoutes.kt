@@ -263,11 +263,19 @@ object ApiRoutes {
     }
 
     fun getShareLinkFileThumbnail(driveId: Int, linkUuid: String, file: File): String {
-        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}/thumbnail"
+        return "${shareLinkFile(driveId, linkUuid, file)}/thumbnail"
     }
 
     fun getShareLinkFilePreview(driveId: Int, linkUuid: String, file: File): String {
-        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}/preview"
+        return "${shareLinkFile(driveId, linkUuid, file)}/preview"
+    }
+
+    fun downloadShareLinkFile(driveId: Int, linkUuid: String, file: File): String {
+        return "${shareLinkFile(driveId, linkUuid, file)}/download"
+    }
+
+    private fun shareLinkFile(driveId: Int, linkUuid: String, file: File): String {
+        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}"
     }
     //endregion
 

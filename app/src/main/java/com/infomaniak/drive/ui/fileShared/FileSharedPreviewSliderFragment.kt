@@ -58,7 +58,6 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
 
             previewSliderViewModel.currentPreview = currentFile
             previewSliderViewModel.userDrive = userDrive
-
         } else {
             previewSliderViewModel.currentPreview?.let { currentFile = it }
             userDrive = previewSliderViewModel.userDrive

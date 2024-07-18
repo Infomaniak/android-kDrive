@@ -39,12 +39,18 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.*
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.Utils.openWith
+import com.infomaniak.drive.utils.printPdf
+import com.infomaniak.drive.utils.setupStatusBarForPreview
+import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.PreviewHeaderView
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -100,7 +106,12 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             setOnTouchListener { _, _ -> true }
         }
 
-        previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle, previewSliderViewModel.shareLinkUuid)
+        previewSliderAdapter = PreviewSliderAdapter(
+            manager = childFragmentManager,
+            lifecycle = lifecycle,
+            shareLinkUuid = previewSliderViewModel.shareLinkUuid,
+            userDrive = previewSliderViewModel.userDrive,
+        )
 
         viewPager.apply {
             adapter = previewSliderAdapter

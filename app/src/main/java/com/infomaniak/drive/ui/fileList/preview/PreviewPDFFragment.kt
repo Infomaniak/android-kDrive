@@ -63,7 +63,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         PasswordDialogFragment().apply { onPasswordEntered = ::showPdf }
     }
 
-    private val navigationArgs: PreviewPDFFragmentArgs by navArgs()
+    private val pdfNavigationArgs: PreviewPDFFragmentArgs by navArgs()
 
     private val previewPDFHandler by lazy { getPreviewPDFHandler() }
 
@@ -159,7 +159,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         if (!binding.pdfView.isShown || isPasswordProtected) {
             lifecycleScope.launch {
                 withResumed {
-                    with(getConfigurator(navigationArgs.fileUri, pdfFile)) {
+                    with(getConfigurator(pdfNavigationArgs.fileUri, pdfFile)) {
                         password(password)
                         disableLongPress()
                         enableAnnotationRendering(true)
@@ -274,19 +274,23 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         if (pdfFile == null) {
             previewSliderViewModel.pdfIsDownloading.value = true
             isDownloading = true
-            previewPDFViewModel.downloadPdfFile(requireContext(), file, previewSliderViewModel.userDrive)
-                .observe(viewLifecycleOwner) { apiResponse ->
-                    apiResponse.data?.let { pdfFile ->
-                        this@PreviewPDFFragment.pdfFile = pdfFile
-                        showPdf()
-                    } ?: run {
-                        downloadProgressIndicator.isGone = true
-                        previewDescription.setText(apiResponse.translatedError)
-                        bigOpenWithButton.isVisible = true
-                    }
-                    previewSliderViewModel.pdfIsDownloading.value = false
-                    isDownloading = false
+            previewPDFViewModel.downloadPdfFile(
+                context = requireContext(),
+                file = file,
+                userDrive = previewSliderViewModel.userDrive,
+                shareLinkUuid = previewSliderViewModel.shareLinkUuid,
+            ).observe(viewLifecycleOwner) { apiResponse ->
+                apiResponse.data?.let { pdfFile ->
+                    this@PreviewPDFFragment.pdfFile = pdfFile
+                    showPdf()
+                } ?: run {
+                    downloadProgressIndicator.isGone = true
+                    previewDescription.setText(apiResponse.translatedError)
+                    bigOpenWithButton.isVisible = true
                 }
+                previewSliderViewModel.pdfIsDownloading.value = false
+                isDownloading = false
+            }
         } else {
             showPdf()
         }
@@ -297,12 +301,17 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
         private var pdfJob = Job()
 
-        fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<IOFile>> {
+        fun downloadPdfFile(
+            context: Context,
+            file: File,
+            userDrive: UserDrive,
+            shareLinkUuid: String,
+        ): LiveData<ApiResponse<IOFile>> {
             pdfJob.cancel()
             pdfJob = Job()
 
             return liveData(Dispatchers.IO + pdfJob) {
-                val pdfFile = PreviewPDFUtils.convertPdfFileToIOFile(context, file, userDrive) {
+                val pdfFile = PreviewPDFUtils.convertPdfFileToIOFile(context, file, userDrive, shareLinkUuid) {
                     viewModelScope.launch(Dispatchers.Main) {
                         downloadProgress.value = it
                     }
