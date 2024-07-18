@@ -20,6 +20,7 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -255,4 +256,12 @@ object AccountUtils : CredentialManager() {
     }
 
     fun isEnableAppSync(): Boolean = UploadFile.getAppSyncSettings() != null
+
+    fun getPersonalFolderTitle(context: Context): String {
+        return if (getCurrentDrive()?.isFreePack == true || getCurrentDrive()?.isSoloPack == true) {
+            context.getString(R.string.localizedFilenamePrivateSpace)
+        } else {
+            context.getString(R.string.localizedFilenamePrivateTeamSpace)
+        }
+    }
 }

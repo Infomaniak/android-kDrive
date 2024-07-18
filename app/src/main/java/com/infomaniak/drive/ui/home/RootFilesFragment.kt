@@ -68,14 +68,7 @@ class RootFilesFragment : Fragment() {
             }
         }
 
-        val personalFolderTitle =
-            if (AccountUtils.getCurrentDrive()?.isFreePack == true || AccountUtils.getCurrentDrive()?.isSoloPack == true) {
-                requireContext().getString(R.string.localizedFilenamePrivateSpace)
-            } else {
-                requireContext().getString(R.string.localizedFilenamePrivateTeamSpace)
-            }
-
-        personalFolder.setTitle(personalFolderTitle)
+        personalFolder.setTitle(AccountUtils.getPersonalFolderTitle(requireContext()))
 
         setupItems()
 
