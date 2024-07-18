@@ -38,7 +38,8 @@ object PreviewPDFUtils {
         context: Context,
         file: File,
         userDrive: UserDrive,
-        onProgress: (progress: Int) -> Unit
+        shareLinkUuid: String,
+        onProgress: (progress: Int) -> Unit,
     ): ApiResponse<IOFile> {
         return runCatching {
             val outputFile = when {
@@ -51,7 +52,7 @@ object PreviewPDFUtils {
             val pdfNeedDownload = !file.isOnlyOfficePreview() && file.isObsoleteOrNotIntact(outputFile)
 
             if (officePdfNeedDownload || pdfNeedDownload) {
-                downloadFile(outputFile, file, onProgress)
+                downloadFile(outputFile, file, userDrive, shareLinkUuid, onProgress)
                 outputFile.setLastModified(file.getLastModifiedInMilliSecond())
             }
 
@@ -73,13 +74,22 @@ object PreviewPDFUtils {
     private fun downloadFile(
         externalOutputFile: IOFile,
         fileModel: File,
-        onProgress: (progress: Int) -> Unit
+        userDrive: UserDrive,
+        shareLinkUuid: String,
+        onProgress: (progress: Int) -> Unit,
     ) {
         if (externalOutputFile.exists()) externalOutputFile.delete()
 
-        val downLoadUrl = ApiRoutes.downloadFile(fileModel) + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
+        val downLoadUrlBase = if (shareLinkUuid.isNotBlank()) {
+            ApiRoutes.downloadShareLinkFile(driveId = userDrive.driveId, linkUuid = shareLinkUuid, file = fileModel)
+        } else {
+            ApiRoutes.downloadFile(fileModel)
+        }
+        val downLoadUrl = downLoadUrlBase + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
+
         val request = Request.Builder().url(downLoadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
         val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
+
         val response = HttpClient.okHttpClient.newBuilder()
             .addNetworkInterceptor(downloadProgressInterceptor)
             .build()
