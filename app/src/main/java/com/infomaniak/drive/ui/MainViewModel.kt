@@ -49,10 +49,14 @@ import com.infomaniak.drive.utils.SyncUtils.isSyncScheduled
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
+import com.infomaniak.lib.core.utils.networkStatusFlow
 import io.realm.Realm
 import io.realm.kotlin.toFlow
+import io.sentry.Breadcrumb
 import io.sentry.Sentry
+import io.sentry.SentryLevel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -557,6 +561,22 @@ class MainViewModel(
     fun markFilesAsOffline(filesId: List<Int>, isMarkedAsOffline: Boolean) = viewModelScope.launch(Dispatchers.IO) {
         FileController.getRealmInstance().use { realm ->
             FileController.markFilesAsOffline(customRealm = realm, filesId = filesId, isMarkedAsOffline = isMarkedAsOffline)
+        }
+    }
+
+    fun observeNetworkStatus() = viewModelScope.launch(Dispatchers.IO) {
+        getContext().networkStatusFlow().collect { isAvailable ->
+            SentryLog.d("Internet availability", if (isAvailable) "Available" else "Unavailable")
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = "Network"
+                message = "Internet access is available : $isAvailable"
+                level = if (isAvailable) SentryLevel.INFO else SentryLevel.WARNING
+            })
+            isInternetAvailable.postValue(isAvailable)
+            if (isAvailable) {
+                AccountUtils.updateCurrentUserAndDrives(this@MainViewModel.getContext())
+                restartUploadWorkerIfNeeded()
+            }
         }
     }
 

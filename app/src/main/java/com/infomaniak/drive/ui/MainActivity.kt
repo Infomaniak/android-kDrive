@@ -83,9 +83,7 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
-import com.infomaniak.lib.core.networking.LiveDataNetworkStatus
 import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
@@ -174,7 +172,7 @@ class MainActivity : BaseActivity() {
 
         setupBottomNavigation()
         handleNavigateToDestinationFileId()
-        listenToNetworkStatus()
+        mainViewModel.observeNetworkStatus()
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
@@ -221,24 +219,6 @@ class MainActivity : BaseActivity() {
             if (it.destinationFileId > 0) {
                 clickOnBottomBarFolders()
                 mainViewModel.navigateFileListTo(navController, it.destinationFileId, it.isDestinationSharedWithMe)
-            }
-        }
-    }
-
-    private fun listenToNetworkStatus() {
-        LiveDataNetworkStatus(this).observe(this) { isAvailable ->
-            SentryLog.d("Internet availability", if (isAvailable) "Available" else "Unavailable")
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "Network"
-                message = "Internet access is available : $isAvailable"
-                level = if (isAvailable) SentryLevel.INFO else SentryLevel.WARNING
-            })
-            mainViewModel.isInternetAvailable.value = isAvailable
-            if (isAvailable) {
-                lifecycleScope.launch {
-                    AccountUtils.updateCurrentUserAndDrives(this@MainActivity)
-                }
-                mainViewModel.restartUploadWorkerIfNeeded()
             }
         }
     }
