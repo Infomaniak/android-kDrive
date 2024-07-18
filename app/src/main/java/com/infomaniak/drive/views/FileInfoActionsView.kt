@@ -46,6 +46,7 @@ import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
+import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
@@ -96,6 +97,50 @@ class FileInfoActionsView @JvmOverloads constructor(
         initOnClickListeners()
     }
 
+    // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
+    private fun computeFileRights(file: File, rights: Rights) = with(binding) {
+        val isOnline = mainViewModel.isInternetAvailable.value == true
+
+        displayInfo.isEnabled = isOnline
+        disabledInfo.isGone = isOnline
+
+        (rights.canShare && isOnline).let { rightsEnabled ->
+            fileRights.isEnabled = rightsEnabled
+            disabledFileRights.isGone = rightsEnabled
+        }
+
+        (rights.canBecomeShareLink && isOnline || currentFile.sharelink != null || !file.dropbox?.url.isNullOrBlank())
+            .let { publicLinkEnabled ->
+                sharePublicLink.isEnabled = publicLinkEnabled
+                disabledPublicLink.isGone = publicLinkEnabled
+
+                if (!file.dropbox?.url.isNullOrBlank()) {
+                    sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
+                }
+            }
+
+        ((file.isFolder() && rights.canCreateFile && rights.canCreateDirectory) || !file.isFolder()).let { sendCopyEnabled ->
+            sendCopy.isEnabled = sendCopyEnabled
+            disabledSendCopy.isGone = sendCopyEnabled
+        }
+
+        addFavorites.isVisible = rights.canUseFavorite == true
+        availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
+        deleteFile.isVisible = rights.canDelete == true && !file.isImporting()
+        downloadFile.isVisible = rights.canRead == true
+        duplicateFile.isGone = rights.canRead == false
+                || isSharedWithMe
+                || currentFile.getVisibilityType() == IS_TEAM_SPACE
+                || currentFile.getVisibilityType() == IS_SHARED_SPACE
+        editDocument.isVisible = (currentFile.hasOnlyoffice && rights.canWrite)
+                || (currentFile.conversion?.whenOnlyoffice == true)
+        leaveShare.isVisible = rights.canLeave == true
+        cancelExternalImport.isVisible = file.isImporting()
+        moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
+        renameFile.isVisible = rights.canRename == true && !isSharedWithMe && !file.isImporting()
+        goToFolder.isVisible = isGoToFolderVisible()
+    }
+
     fun updateCurrentFile(file: File) = with(binding) {
         currentFile = file
         refreshBottomSheetUi(currentFile)
@@ -105,69 +150,33 @@ class FileInfoActionsView @JvmOverloads constructor(
         if (currentFile.isFromActivities) {
             quickActionsLayout.isGone = true
             actionListLayout.isGone = true
+
+            return@with
+        }
+
+        quickActionsLayout.isVisible = true
+        actionListLayout.isVisible = true
+
+        currentFile.rights?.let { rights ->
+            computeFileRights(file, rights)
+        }
+
+        if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
+            dropBox.text = context.getString(
+                if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
+            )
+            dropBox.setOnClickListener { onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox()) }
+            dropBox.isVisible = true
         } else {
-            quickActionsLayout.isVisible = true
-            actionListLayout.isVisible = true
+            dropBox.isGone = true
+        }
 
-            // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
-            currentFile.rights.let { rights ->
-                val isOnline = mainViewModel.isInternetAvailable.value == true
-
-                displayInfo.isEnabled = isOnline
-                disabledInfo.isGone = isOnline
-
-                (rights?.canShare == true && isOnline).let { rightsEnabled ->
-                    fileRights.isEnabled = rightsEnabled
-                    disabledFileRights.isGone = rightsEnabled
-                }
-
-                (rights?.canBecomeShareLink == true && isOnline || currentFile.sharelink != null || !file.dropbox?.url.isNullOrBlank()).let { publicLinkEnabled ->
-                    sharePublicLink.isEnabled = publicLinkEnabled
-                    disabledPublicLink.isGone = publicLinkEnabled
-                    if (!file.dropbox?.url.isNullOrBlank()) {
-                        sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
-                    }
-                }
-
-                ((file.isFolder() && rights?.canCreateFile == true && rights.canCreateDirectory) || !file.isFolder()).let { sendCopyEnabled ->
-                    sendCopy.isEnabled = sendCopyEnabled
-                    disabledSendCopy.isGone = sendCopyEnabled
-                }
-
-                addFavorites.isVisible = rights?.canUseFavorite == true
-                availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
-                deleteFile.isVisible = rights?.canDelete == true && !file.isImporting()
-                downloadFile.isVisible = rights?.canRead == true
-                duplicateFile.isGone = rights?.canRead == false
-                        || isSharedWithMe
-                        || currentFile.getVisibilityType() == IS_TEAM_SPACE
-                        || currentFile.getVisibilityType() == IS_SHARED_SPACE
-                editDocument.isVisible = (currentFile.hasOnlyoffice && rights?.canWrite == true)
-                        || (currentFile.conversion?.whenOnlyoffice == true)
-                leaveShare.isVisible = rights?.canLeave == true
-                cancelExternalImport.isVisible = file.isImporting()
-                moveFile.isVisible = rights?.canMove == true && !isSharedWithMe && !file.isImporting()
-                renameFile.isVisible = rights?.canRename == true && !isSharedWithMe && !file.isImporting()
-                goToFolder.isVisible = isGoToFolderVisible()
-            }
-
-            if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
-                dropBox.text = context.getString(
-                    if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
-                )
-                dropBox.setOnClickListener { onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox()) }
-                dropBox.isVisible = true
-            } else {
-                dropBox.isGone = true
-            }
-
-            if (currentFile.isFolder()) {
-                sendCopyIcon.setImageResource(R.drawable.ic_add)
-                sendCopyText.setText(R.string.buttonAdd)
-                availableOffline.isGone = true
-                openWith.isGone = true
-                coloredFolder.isVisible = currentFile.isAllowedToBeColored()
-            }
+        if (currentFile.isFolder()) {
+            sendCopyIcon.setImageResource(R.drawable.ic_add)
+            sendCopyText.setText(R.string.buttonAdd)
+            availableOffline.isGone = true
+            openWith.isGone = true
+            coloredFolder.isVisible = currentFile.isAllowedToBeColored()
         }
     }
 

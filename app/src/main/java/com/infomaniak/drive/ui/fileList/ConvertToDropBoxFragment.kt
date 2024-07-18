@@ -44,36 +44,37 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
         shareLinkCardView.isGone = true
         disableButton.isGone = true
 
-        FileController.getFileById(navigationArgs.fileId)?.let { file ->
-            updateUi(file, null)
+        val file = FileController.getFileById(navigationArgs.fileId) ?: return
 
-            settings.expirationDateInput.init(fragmentManager = parentFragmentManager)
+        updateUi(file)
 
-            enableSaveButton()
-            saveButton.initProgress(viewLifecycleOwner)
-            saveButton.setOnClickListener {
-                settings.apply {
-                    val limitFileSize = if (limitStorageSwitch.isChecked) {
-                        limitStorageValue.text.toString().toDoubleOrNull()
+        settings.expirationDateInput.init(fragmentManager = parentFragmentManager)
+
+        enableSaveButton()
+        saveButton.initProgress(viewLifecycleOwner)
+        saveButton.setOnClickListener {
+            settings.apply {
+                val limitFileSize = if (limitStorageSwitch.isChecked) {
+                    limitStorageValue.text.toString().toDoubleOrNull()
+                } else {
+                    null
+                }
+
+                saveButton.showProgressCatching()
+                mainViewModel.createDropBoxFolder(
+                    file = file,
+                    emailWhenFinished = emailWhenFinishedSwitch.isChecked,
+                    password = if (passwordSwitch.isChecked) passwordTextInput.text?.toString() else null,
+                    limitFileSize = limitFileSize?.let { Utils.convertGigaByteToBytes(it) },
+                    validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
+                ).observe(viewLifecycleOwner) { apiResponse ->
+                    if (apiResponse.isSuccess()) {
+                        mainViewModel.createDropBoxSuccess.value = apiResponse.data
+                        findNavController().popBackStack()
                     } else {
-                        null
+                        showSnackbar(apiResponse.translateError())
                     }
-                    saveButton.showProgressCatching()
-                    mainViewModel.createDropBoxFolder(
-                        file = file,
-                        emailWhenFinished = emailWhenFinishedSwitch.isChecked,
-                        password = if (passwordSwitch.isChecked) passwordTextInput.text?.toString() else null,
-                        limitFileSize = limitFileSize?.let { Utils.convertGigaByteToBytes(it) },
-                        validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
-                    ).observe(viewLifecycleOwner) { apiResponse ->
-                        if (apiResponse.isSuccess()) {
-                            mainViewModel.createDropBoxSuccess.value = apiResponse.data
-                            findNavController().popBackStack()
-                        } else {
-                            showSnackbar(apiResponse.translateError())
-                        }
-                        saveButton.hideProgressCatching(R.string.buttonSave)
-                    }
+                    saveButton.hideProgressCatching(R.string.buttonSave)
                 }
             }
         }

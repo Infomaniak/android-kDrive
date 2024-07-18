@@ -108,7 +108,7 @@ open class ManageDropboxFragment : Fragment() {
         }
     }
 
-    protected fun updateUi(file: File, dropBox: DropBox?) = with(binding.settings) {
+    protected fun updateUi(file: File, dropBox: DropBox? = null) = with(binding.settings) {
         currentDropBox = dropBox?.apply { initLocalValue() }
 
         dropBox?.let {

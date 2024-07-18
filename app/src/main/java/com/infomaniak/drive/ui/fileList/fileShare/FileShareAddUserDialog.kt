@@ -154,30 +154,32 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
     private fun createChip(item: Shareable): Chip {
         val chip = layoutInflater.inflate(R.layout.chip_shared_elements, null) as Chip
 
-        when (item) {
-            is DriveUser -> {
-                chip.text = item.displayName
-                lifecycleScope.launch(Dispatchers.IO) {
-                    requireContext().apply {
-                        val fallback = generateInitialsAvatarDrawable(
-                            initials = item.getInitials(),
-                            background = getBackgroundColorBasedOnId(item.id)
-                        )
-                        val request = ImageRequest.Builder(this)
-                            .data(item.avatar)
-                            .transformations(CircleCropTransformation())
-                            .fallback(fallback)
-                            .error(fallback)
-                            .placeholder(R.drawable.ic_account)
-                            .build()
-                        simpleImageLoader.execute(request).drawable?.let {
-                            withContext(Dispatchers.Main) {
-                                chip.chipIcon = it
-                            }
+        fun computeDriveUser(driveUser: DriveUser) {
+            chip.text = driveUser.displayName
+            lifecycleScope.launch(Dispatchers.IO) {
+                requireContext().apply {
+                    val fallback = generateInitialsAvatarDrawable(
+                        initials = driveUser.getInitials(),
+                        background = getBackgroundColorBasedOnId(item.id)
+                    )
+                    val request = ImageRequest.Builder(this)
+                        .data(driveUser.avatar)
+                        .transformations(CircleCropTransformation())
+                        .fallback(fallback)
+                        .error(fallback)
+                        .placeholder(R.drawable.ic_account)
+                        .build()
+                    simpleImageLoader.execute(request).drawable?.let {
+                        withContext(Dispatchers.Main) {
+                            chip.chipIcon = it
                         }
                     }
                 }
             }
+        }
+
+        when (item) {
+            is DriveUser -> computeDriveUser(driveUser = item)
             is Invitation -> chip.apply {
                 text = item.email
                 setChipIconResource(R.drawable.ic_circle_send)

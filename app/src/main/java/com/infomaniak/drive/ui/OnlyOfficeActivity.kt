@@ -97,7 +97,9 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
     @SuppressLint("RequiresFeature")
     private fun setDarkMode() = with(binding) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)
+        ) {
             WebSettingsCompat.setAlgorithmicDarkeningAllowed(webView.settings, isNightModeEnabled())
         } else {
             if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) &&
