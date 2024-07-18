@@ -46,7 +46,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
 
         val file = FileController.getFileById(navigationArgs.fileId) ?: return
 
-        updateUi(file, dropBox = null)
+        updateUi(file)
 
         settings.expirationDateInput.init(fragmentManager = parentFragmentManager)
 
