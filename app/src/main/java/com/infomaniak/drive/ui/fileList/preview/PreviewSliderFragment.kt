@@ -89,9 +89,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             onBackClicked = { findNavController().popBackStack() },
             onOpenWithClicked = { openWith() },
             onEditClicked = {
-                mainViewModel.isInternetAvailable.value?.let { isConnected ->
-                    openOnlyOfficeDocument(currentFile, isConnected)
-                }
+                mainViewModel.isInternetAvailable.value?.let { isConnected -> openOnlyOfficeDocument(currentFile, isConnected) }
             },
         )
 
