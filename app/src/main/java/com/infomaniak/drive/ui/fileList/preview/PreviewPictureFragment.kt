@@ -76,7 +76,7 @@ class PreviewPictureFragment : PreviewFragment() {
     }
 
     private fun loadImage() = with(binding) {
-        val imageViewDisposable = imageView.load(file.thumbnail(previewSliderViewModel.shareLinkUuid)) { placeholder(R.drawable.coil_hack) }
+        val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
         val imageLoader = Coil.imageLoader(requireContext())
         val previewRequest = buildPreviewRequest()
 

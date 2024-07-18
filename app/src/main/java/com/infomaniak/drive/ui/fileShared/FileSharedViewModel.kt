@@ -85,7 +85,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
 
                 val newFiles = mutableListOf<File>().apply {
                     childrenLiveData.value?.first?.let(::addAll)
-                    addAll(folderFilesProviderResult.folderFiles)
+                    addAll(folderFilesProviderResult.folderFiles.addShareLinkUuid())
                 }
 
                 childrenLiveData.postValue(newFiles to true)
@@ -129,6 +129,8 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
             isComplete = !apiResponse.hasMore,
         )
     }
+
+    private fun List<File>.addShareLinkUuid() = map { it.apply { externalShareLinkUuid = fileSharedLinkUuid } }
 
     companion object {
         const val ROOT_SHARED_FILE_ID = 1
