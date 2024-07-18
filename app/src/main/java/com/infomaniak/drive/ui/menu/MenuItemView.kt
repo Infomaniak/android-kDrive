@@ -46,4 +46,8 @@ class MenuItemView @JvmOverloads constructor(
     }
 
     override fun setOnClickListener(listener: OnClickListener?) = binding.root.setOnClickListener(listener)
+
+    fun setTitle(title: String) {
+        binding.title.text = title
+    }
 }

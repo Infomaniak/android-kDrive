@@ -68,6 +68,8 @@ class RootFilesFragment : Fragment() {
             }
         }
 
+        personalFolder.setTitle(AccountUtils.getPersonalFolderTitle(requireContext()))
+
         setupItems()
 
         observeFiles()
