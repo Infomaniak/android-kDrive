@@ -68,34 +68,45 @@
             app:layout_constraintTop_toBottomOf="@id/userName"
             tools:text="thiago@silva.com" />
 
-        <TextView
-            android:id="@+id/driveName"
-            style="@style/Subtitle1"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/driveSwitchContainer"
+            style="@style/CardViewInfomaniak"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/marginStandardSmall"
-            android:drawablePadding="6dp"
-            android:gravity="center"
-            android:textColor="@color/title"
-            app:drawableStartCompat="@drawable/ic_drive"
+            app:cardBackgroundColor="@android:color/transparent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/userEmail"
-            tools:text="Westworld" />
+            app:layout_constraintTop_toBottomOf="@id/userEmail">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/driveIcon"
-            style="@style/IconButton"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="2dp"
-            android:contentDescription="@string/buttonSwitchDrive"
-            app:icon="@drawable/ic_switch_drive"
-            app:iconSize="18dp"
-            app:iconTint="@color/primaryText"
-            app:layout_constraintBottom_toBottomOf="@id/driveName"
-            app:layout_constraintStart_toEndOf="@id/driveName"
-            app:layout_constraintTop_toTopOf="@id/driveName" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/marginStandardSmall">
+
+                <TextView
+                    android:id="@+id/driveName"
+                    style="@style/Subtitle1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:drawablePadding="6dp"
+                    android:gravity="center"
+                    android:textColor="@color/title"
+                    app:drawableStartCompat="@drawable/ic_drive"
+                    tools:text="Westworld" />
+
+                <ImageView
+                    android:id="@+id/driveIcon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="6dp"
+                    android:contentDescription="@string/buttonSwitchDrive"
+                    android:src="@drawable/ic_switch_drive" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:id="@+id/driveStorageProgress"
@@ -105,7 +116,7 @@
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/driveName"
+            app:layout_constraintTop_toBottomOf="@id/driveSwitchContainer"
             app:layout_constraintWidth_percent="0.6">
 
             <com.google.android.material.progressindicator.LinearProgressIndicator

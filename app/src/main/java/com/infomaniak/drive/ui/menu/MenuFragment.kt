@@ -87,12 +87,10 @@ class MenuFragment : Fragment() {
 
             userImage.loadAvatar(currentUser)
 
-            driveIcon.apply {
-                if (DriveInfosController.hasSingleDrive(currentUser.id)) {
-                    isGone = true
-                } else {
-                    setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
-                }
+            if (DriveInfosController.hasSingleDrive(currentUser.id)) {
+                driveIcon.isGone = true
+            } else {
+                driveSwitchContainer.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
             }
 
             settings.setOnClickListener {
