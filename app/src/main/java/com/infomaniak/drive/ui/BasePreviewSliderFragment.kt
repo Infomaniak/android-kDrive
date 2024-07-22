@@ -39,11 +39,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.*
-import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
-import com.infomaniak.drive.utils.printPdf
-import com.infomaniak.drive.utils.setupStatusBarForPreview
-import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.PreviewHeaderView
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
@@ -84,13 +81,24 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         setBackActionHandlers()
 
         drivePermissions = DrivePermissions().apply {
             registerPermissions(this@BasePreviewSliderFragment) { authorized -> if (authorized) downloadFileClicked() }
+        }
+
+        header.apply {
+            setupWindowInsetsListener(rootView = root, bottomSheetView = bottomSheetFileInfos) {
+                pdfContainer.setMargins(right = it?.right ?: 0)
+            }
+            setup(
+                onBackClicked = findNavController()::popBackStack,
+                onOpenWithClicked = ::openWith,
+                onEditClicked = { openOnlyOfficeDocument(currentFile, mainViewModel.hasNetwork) },
+            )
         }
 
         bottomSheetFileInfos.apply {
@@ -123,7 +131,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     currentFile = previewSliderAdapter.getFile(position)
                     with(header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
-                        toggleOpenWithVisibility(isVisible = !currentFile.isOnlyOfficePreview())
+                        toggleOpenWithVisibility(isVisible = !isFileShare && !currentFile.isOnlyOfficePreview())
                     }
                     bottomSheetFileInfos.openWith.isVisible = true
                     bottomSheetFileInfos.setPrintVisibility(isGone = !currentFile.isPDF())
@@ -156,10 +164,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 currentFile = files.values.first()
                 viewPager.setCurrentItem(0, false)
             }
-        }
-
-        header.setupWindowInsetsListener(rootView = root, bottomSheetView = bottomSheetFileInfos) {
-            pdfContainer.setMargins(right = it?.right ?: 0)
         }
     }
 
@@ -257,12 +261,12 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     companion object {
         fun Fragment.toggleFullscreen() {
-            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
+            (parentFragment as? BasePreviewSliderFragment)?.toggleFullscreen()
             (activity as? PreviewPDFActivity)?.toggleFullscreen()
         }
 
         fun Fragment.openWithClicked() {
-            (parentFragment as? PreviewSliderFragment)?.openWith()
+            (parentFragment as? BasePreviewSliderFragment)?.openWith()
         }
 
         fun Fragment.getHeader(): PreviewHeaderView? {

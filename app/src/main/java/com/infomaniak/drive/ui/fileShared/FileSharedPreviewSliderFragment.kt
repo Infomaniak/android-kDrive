@@ -72,7 +72,6 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.header.setup(onBackClicked = findNavController()::popBackStack, onOpenWithClicked = ::openWith)
         requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = false, isFitToContents = true)
     }
 
