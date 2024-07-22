@@ -1,0 +1,2 @@
+- Add different labels for personal folders depending on subscription type
+- Make drive name clickable in MenuFragment to switch Drive

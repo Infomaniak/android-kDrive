@@ -1,0 +1,2 @@
+- Ajout d'étiquettes différentes pour les dossiers personnels en fonction du type d'abonnement
+- Le nom du drive est désormais cliquable dans l'écran pour changer de drive
