@@ -256,6 +256,7 @@
     <string name="errorDuplicate">Error al duplicar</string>
     <string name="errorFileCreate">Error al crear el archivo. Comprueba el nombre del archivo y tus derechos sobre la carpeta.</string>
     <string name="errorFileLocked">El archivo está actualmente abierto por un usuario y no puede ser modificado</string>
+    <string name="errorFilesLimitExceeded">Límite de archivos alcanzado en la carpeta</string>
     <string name="errorGetBookmarkURL">Enlace no recuperable</string>
     <string name="errorLeaveShare">Error al salir del uso compartido</string>
     <string name="errorLoadingOfficeEditor">Imposible cargar el editor del documento</string>

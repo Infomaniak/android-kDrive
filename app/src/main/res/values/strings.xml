@@ -267,6 +267,7 @@
     <string name="errorDuplicate">Duplication error</string>
     <string name="errorFileCreate">Error when creating file. Check the name of the file and your rights to the folder.</string>
     <string name="errorFileLocked">This file is currently opened by another user and cannot be modified</string>
+    <string name="errorFilesLimitExceeded">Limit of files in folder reached</string>
     <string name="errorGetBookmarkURL">Non-recoverable link</string>
     <string name="errorLeaveShare">Error when stopping sharing</string>
     <string name="errorLoadingOfficeEditor">Unable to load the document editor</string>

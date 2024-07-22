@@ -394,6 +394,7 @@ class UploadTask(
                 uploadFile.resetUploadTokenAndCancelSession()
                 throw UploadErrorException()
             }
+            "limit_exceeded_error" -> throw LimitExceededException()
             else -> {
                 if (error?.exception is ApiController.ServerErrorException) {
                     uploadFile.resetUploadTokenAndCancelSession()
@@ -438,6 +439,7 @@ class UploadTask(
     class UploadErrorException : Exception()
     class UploadNotTerminated(message: String) : Exception(message)
     class WrittenBytesExceededException : Exception()
+    class LimitExceededException : Exception()
 
     companion object {
         private val TAG = UploadTask::class.java.simpleName

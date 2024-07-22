@@ -265,6 +265,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             val snackbarMessage = if (apiResponse.isSuccess) {
                 mainViewModel.refreshActivities.value = true
                 getString(R.string.allFileDuplicate, currentFile.name)
+            } else if (apiResponse.errorCode == "limit_exceeded_error") {
+                getString(R.string.errorFilesLimitExceeded)
             } else {
                 getString(R.string.errorDuplicate)
             }
@@ -348,7 +350,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                         (fileRequest.data as? CancellableAction)?.setDriveAndReturn(currentFile.driveId)
                     )
                 } else {
-                    transmitActionAndPopBack(getString(R.string.errorMove))
+                    val resource = when (fileRequest.errorCode) {
+                        "limit_exceeded_error" -> R.string.errorFilesLimitExceeded
+                        else -> R.string.errorMove
+                    }
+
+                    transmitActionAndPopBack(getString(resource))
                 }
             }
     }

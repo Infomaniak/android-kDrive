@@ -145,6 +145,14 @@ object UploadNotifications {
         )
     }
 
+    fun UploadFile.limitExceededNotification(context: Context) {
+        uploadInterruptedNotification(
+            context = context,
+            titleRes = R.string.uploadErrorTitle,
+            messageRes = R.string.errorFilesLimitExceeded,
+        )
+    }
+
     fun UploadFile.exceptionNotification(context: Context) {
         uploadInterruptedNotification(
             context = context,

@@ -200,16 +200,24 @@ class MainViewModel(
         postCurrentFolder(FileController.getFileById(folderId, userDrive))
     }
 
-    fun createMultiSelectMediator(): MediatorLiveData<Pair<Int, Int>> {
-        return MediatorLiveData<Pair<Int, Int>>().apply { value = /*success*/0 to /*total*/0 }
+    fun createMultiSelectMediator(): MediatorLiveData<MultiSelectMediatorState> {
+        return MediatorLiveData<MultiSelectMediatorState>().apply {
+            value = MultiSelectMediatorState(numberOfSuccessfulActions = 0, totalOfActions = 0, errorCode = null)
+        }
     }
 
-    fun updateMultiSelectMediator(mediator: MediatorLiveData<Pair<Int, Int>>): (FileResult) -> Unit = { fileRequest ->
-        val total = mediator.value!!.second + 1
-        mediator.value = if (fileRequest.isSuccess) {
-            mediator.value!!.first + 1 to total
-        } else {
-            mediator.value!!.first to total
+    fun updateMultiSelectMediator(mediator: MediatorLiveData<MultiSelectMediatorState>): (FileResult) -> Unit = { fileRequest ->
+        var numberOfSuccessfulActions = mediator.value!!.numberOfSuccessfulActions
+        if (fileRequest.isSuccess) numberOfSuccessfulActions++
+
+        val totalOfActions = mediator.value!!.totalOfActions + 1
+
+        mediator.value = mediator.value?.let {
+            MultiSelectMediatorState(
+                numberOfSuccessfulActions,
+                totalOfActions,
+                fileRequest.errorCode,
+            )
         }
     }
 
@@ -351,7 +359,7 @@ class MainViewModel(
 
             onSuccess?.invoke(file.id)
         }
-        emit(FileResult(apiResponse.isSuccess()))
+        emit(FileResult(isSuccess = apiResponse.isSuccess(), errorCode = apiResponse.error?.code))
     }
 
     fun renameFile(file: File, newName: String) = liveData(Dispatchers.IO) {
@@ -419,7 +427,7 @@ class MainViewModel(
     ) = liveData(Dispatchers.IO) {
         ApiRepository.duplicateFile(file, destinationId ?: Utils.ROOT_ID).let { apiResponse ->
             if (apiResponse.isSuccess()) onSuccess?.invoke(apiResponse)
-            emit(FileResult(isSuccess = apiResponse.isSuccess(), data = apiResponse.data))
+            emit(FileResult(isSuccess = apiResponse.isSuccess(), data = apiResponse.data, errorCode = apiResponse.error?.code))
         }
     }
 
@@ -636,6 +644,12 @@ class MainViewModel(
         val errorResId: Int? = null,
         val data: Any? = null,
         val errorCode: String? = null
+    )
+
+    data class MultiSelectMediatorState(
+        var numberOfSuccessfulActions: Int,
+        var totalOfActions: Int,
+        var errorCode: String?,
     )
 
     companion object {

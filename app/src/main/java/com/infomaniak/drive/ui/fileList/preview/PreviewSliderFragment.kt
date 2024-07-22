@@ -407,6 +407,9 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
                     toggleBottomSheet(shouldShow = true)
                 }
+            } else if (fileResult.errorCode == "limit_exceeded_error") {
+                showSnackbar(R.string.errorFilesLimitExceeded)
+                toggleBottomSheet(shouldShow = true)
             } else {
                 showSnackbar(R.string.errorDuplicate)
                 toggleBottomSheet(shouldShow = true)
@@ -461,7 +464,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     mainViewModel.refreshActivities.value = true
                     showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
                 } else {
-                    showSnackbar(R.string.errorMove)
+                    when (fileRequest.errorCode) {
+                        "limit_exceeded_error" -> showSnackbar(R.string.errorFilesLimitExceeded)
+                        else -> showSnackbar(R.string.errorMove)
+                    }
                 }
             }
     }
