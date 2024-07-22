@@ -72,6 +72,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:contentDescription="@string/buttonEdit"
+            android:visibility="gone"
             app:backgroundTint="@color/previewBackgroundTransparent"
             app:icon="@drawable/ic_edit_document"
             app:iconSize="20dp"
