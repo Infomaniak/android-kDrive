@@ -72,7 +72,6 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
             previewSliderViewModel.currentPreview = currentFile
             previewSliderViewModel.userDrive = userDrive
-
         } else {
             previewSliderViewModel.currentPreview?.let { currentFile = it }
             userDrive = previewSliderViewModel.userDrive
@@ -84,14 +83,6 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.header.setup(
-            onBackClicked = { findNavController().popBackStack() },
-            onOpenWithClicked = { openWith() },
-            onEditClicked = {
-                mainViewModel.isInternetAvailable.value?.let { isConnected -> openOnlyOfficeDocument(currentFile, isConnected) }
-            },
-        )
 
         requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
     }
