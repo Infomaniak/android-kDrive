@@ -217,8 +217,7 @@
 
         <activity
             android:name=".ui.fileShared.FileSharedActivity"
-            android:configChanges="orientation|screenSize|layoutDirection"
-            android:noHistory="true" />
+            android:configChanges="orientation|screenSize|layoutDirection" />
 
         <service android:name=".data.sync.MediaObserverService" />
 
