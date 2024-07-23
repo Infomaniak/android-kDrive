@@ -135,11 +135,13 @@
             app:argType="integer" />
         <argument
             android:name="userDrive"
-            app:argType="com.infomaniak.drive.data.models.UserDrive" />
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
         <argument
             android:name="fileShareUuid"
-            app:argType="string"
-            android:defaultValue="" />
+            android:defaultValue=""
+            app:argType="string" />
         <action
             android:id="@+id/action_previewFragment_to_fileDetailsFragment"
             app:destination="@id/fileDetailsFragment" />
