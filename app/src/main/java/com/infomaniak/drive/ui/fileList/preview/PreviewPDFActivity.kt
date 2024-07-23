@@ -116,7 +116,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     private fun setupNavController(): NavController {
         return navHostFragment.navController.apply {
             setGraph(
-                R.navigation.view_pdf,
+                R.navigation.preview_pdf_navigation,
                 PreviewPDFFragmentArgs(fileUri = previewPDFHandler.externalFileUri).toBundle(),
             )
         }
