@@ -193,7 +193,6 @@ class LaunchActivity : AppCompatActivity() {
                         if (apiResponse.data?.validUntil?.before(Date()) == true) {
                             Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
                         }
-                        Log.e("TOTO", "downloadSharedFile: ${shareLink.fileId} | ${shareLink._right}")
                         fileSharedActivityExtras = FileSharedActivityArgs(
                             driveId = driveId.toInt(),
                             fileSharedLinkUuid = fileSharedLinkUuid,
