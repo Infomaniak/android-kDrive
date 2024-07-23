@@ -186,9 +186,9 @@ open class File(
         else -> ApiRoutes.thumbnailFile(file = this)
     }
 
-    fun imagePreview(shareLinkUuid: String): String {
-        val url = if (shareLinkUuid.isNotBlank()) {
-            ApiRoutes.getShareLinkFilePreview(driveId, shareLinkUuid, file = this)
+    fun imagePreview(): String {
+        val url = if (externalShareLinkUuid.isNotBlank()) {
+            ApiRoutes.getShareLinkFilePreview(driveId, externalShareLinkUuid, file = this)
         } else {
             ApiRoutes.imagePreviewFile(this)
         }
@@ -198,7 +198,11 @@ open class File(
 
     fun isPDF() = getFileType() == ExtensionType.PDF
 
-    fun onlyOfficeUrl() = "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
+    fun onlyOfficeUrl() = if (externalShareLinkUuid.isBlank()) {
+        "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
+    } else {
+        ApiRoutes.showOfficeShareLinkFile(driveId, externalShareLinkUuid, file = this)
+    }
 
     fun getFileType(): ExtensionType {
         return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {

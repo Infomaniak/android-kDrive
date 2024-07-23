@@ -34,6 +34,7 @@ android {
         buildConfigField 'String', 'DRIVE_API_V3', '"https://api.kdrive.infomaniak.com/3/drive/"'
         buildConfigField 'String', 'MANAGER_URL', '"https://manager.infomaniak.com/v3/"'
         buildConfigField 'String', 'OFFICE_URL', '"https://kdrive.infomaniak.com/app/office/"'
+        buildConfigField 'String', 'SHARE_URL_V1', '"https://kdrive.infomaniak.com/app/"'
         buildConfigField 'String', 'SHARE_URL_V2', '"https://kdrive.infomaniak.com/2/app/"'
         buildConfigField 'String', 'SHARE_URL_V3', '"https://kdrive.infomaniak.com/3/app/"'
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
