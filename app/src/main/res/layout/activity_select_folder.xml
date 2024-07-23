@@ -32,7 +32,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navGraph="@navigation/select_folder" />
+        app:navGraph="@navigation/select_folder_navigation" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"
