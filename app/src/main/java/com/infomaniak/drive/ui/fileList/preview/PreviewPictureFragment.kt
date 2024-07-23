@@ -93,7 +93,7 @@ class PreviewPictureFragment : PreviewFragment() {
         val offlineFile = if (file.isOffline) getOfflineFile() else null
 
         return ImageRequest.Builder(requireContext())
-            .data(offlineFile ?: file.imagePreview(previewSliderViewModel.shareLinkUuid))
+            .data(offlineFile ?: file.imagePreview())
             .listener(
                 onError = { _, _ ->
                     noThumbnailLayout.apply {

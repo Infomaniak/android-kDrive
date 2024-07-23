@@ -274,6 +274,10 @@ object ApiRoutes {
         return "${shareLinkFile(driveId, linkUuid, file)}/download"
     }
 
+    fun showOfficeShareLinkFile(driveId: Int, linkUuid: String, file: File): String {
+        return "${SHARE_URL_V1}share/$driveId/$linkUuid/preview/text/${file.id}"
+    }
+
     private fun shareLinkFile(driveId: Int, linkUuid: String, file: File): String {
         return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}"
     }
