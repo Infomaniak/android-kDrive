@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileShared
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
 import androidx.core.view.isGone
@@ -33,7 +32,6 @@ import com.infomaniak.drive.ui.fileShared.FileSharedViewModel.Companion.ROOT_SHA
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openFolder
-
 
 class FileSharedListFragment : FileListFragment() {
 
@@ -59,29 +57,20 @@ class FileSharedListFragment : FileListFragment() {
         fileAdapter.onFileClicked = { file ->
             if (file.isUsable()) {
                 when {
-                    file.isFolder() -> {
-                        openFolder(
-                            file = file,
-                            shouldHideBottomNavigation = true,
-                            shouldShowSmallFab = false,
-                            fileListViewModel = fileListViewModel,
-                            isSharedFile = true,
-                        )
-                    }
+                    file.isFolder() -> openFolder(file)
                     file.isBookmark() -> openBookmark(file)
                     else -> displayFile(file, mainViewModel, fileAdapter, shareLinkUuid = fileShareViewModel.fileSharedLinkUuid)
                 }
             }
         }
 
-        fileShareViewModel.childrenLiveData.observe(viewLifecycleOwner) { (files, shouldUpdate) ->
-            if (shouldUpdate) populateFileList(files)
-        }
-
         setupMultiSelectLayout()
 
         binding.toolbar.setNavigationOnClickListener { onBackPressed() }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
+
+        observeRootFile()
+        observeFiles()
     }
 
     private fun populateFileList(files: List<File>, shouldRefreshFiles: Boolean = true) {
@@ -98,7 +87,38 @@ class FileSharedListFragment : FileListFragment() {
     }
 
     private fun onBackPressed() {
-        if (folderId == ROOT_SHARED_FILE_ID) requireActivity().finish() else findNavController().popBackStack()
+        if (folderId == fileShareViewModel.rootSharedFile.value?.id || folderId == ROOT_SHARED_FILE_ID) {
+            requireActivity().finish()
+        } else {
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun observeFiles() {
+        fileShareViewModel.childrenLiveData.observe(viewLifecycleOwner) { (files, shouldUpdate) ->
+            if (shouldUpdate) populateFileList(files)
+        }
+    }
+
+    private fun observeRootFile() {
+        fileShareViewModel.rootSharedFile.observe(viewLifecycleOwner) { file ->
+            if (file?.isFolder() == true) {
+                openFolder(file)
+            } else {
+                val fileList = file?.let(::listOf) ?: listOf()
+                fileShareViewModel.childrenLiveData.postValue(fileList to true)
+            }
+        }
+    }
+
+    private fun openFolder(folder: File) {
+        openFolder(
+            file = folder,
+            shouldHideBottomNavigation = true,
+            shouldShowSmallFab = false,
+            fileListViewModel = fileListViewModel,
+            isSharedFile = true,
+        )
     }
 
     companion object {
@@ -113,7 +133,7 @@ class FileSharedListFragment : FileListFragment() {
             fileShareViewModel.childrenLiveData.value = emptyList<File>() to false
 
             with(fileShareViewModel) {
-                if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile == null) {
+                if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
                     downloadSharedFile()
                 } else {
                     getFiles(folderId, fileListViewModel.sortType)
