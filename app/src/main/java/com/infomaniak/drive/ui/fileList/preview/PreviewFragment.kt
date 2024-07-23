@@ -27,6 +27,7 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import io.sentry.Sentry
 
@@ -52,9 +53,9 @@ open class PreviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
             navigationArgs?.let {
-                val fileId = it.fileId
                 previewSliderViewModel.shareLinkUuid = it.fileShareUuid
-                previewSliderViewModel.userDrive = it.userDrive
+                previewSliderViewModel.userDrive = it.userDrive ?: UserDrive()
+                val fileId = it.fileId
                 if (fileId > 0) previewViewModel.currentFile = getCurrentFile(fileId)
             }
         }
