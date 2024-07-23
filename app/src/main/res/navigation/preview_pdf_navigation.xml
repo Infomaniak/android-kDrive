@@ -24,18 +24,30 @@
     <activity
         android:id="@+id/previewPDFActivity"
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity"
-        tools:layout="@layout/activity_preview_pdf"/>
+        tools:layout="@layout/activity_preview_pdf" />
 
     <fragment
         android:id="@+id/previewPDFFragment"
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewPDFFragment"
         tools:layout="@layout/fragment_preview_pdf">
-
+        <argument
+            android:name="fileId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="userDrive"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
+        <argument
+            android:name="fileShareUuid"
+            android:defaultValue=""
+            app:argType="string" />
         <argument
             android:name="fileUri"
+            android:defaultValue="@null"
             app:argType="android.net.Uri"
-            app:nullable="true"
-            android:defaultValue="@null"/>
+            app:nullable="true" />
 
     </fragment>
 
