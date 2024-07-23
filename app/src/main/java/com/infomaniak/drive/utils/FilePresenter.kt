@@ -19,7 +19,6 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
@@ -72,7 +71,6 @@ object FilePresenter {
         } else {
             fileListViewModel.cancelDownloadFiles()
             if (isSharedFile) {
-                Log.e("TOTO", "openFolder: ${file.name} / ${file.id}")
                 val args = FileSharedListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
                 safeNavigate(R.id.fileSharedListFragment, args.toBundle())
             } else {

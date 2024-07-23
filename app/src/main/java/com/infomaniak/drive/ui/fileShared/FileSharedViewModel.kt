@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileShared
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,6 +26,7 @@ import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderAr
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderResult
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
 
 class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    var rootSharedFile: File? = null
+    var rootSharedFile = SingleLiveEvent<File?>()
     val childrenLiveData = SingleLiveEvent<Pair<List<File>, Boolean>>()
 
     private val driveId: Int
@@ -52,20 +52,16 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
 
     fun downloadSharedFile() = viewModelScope.launch(Dispatchers.IO) {
         val file = if (fileId == ROOT_SHARED_FILE_ID) {
-            rootSharedFile
+            rootSharedFile.value
         } else {
             val apiResponse = ApiRepository.getShareLinkFile(driveId, fileSharedLinkUuid, fileId)
-            if (apiResponse.isSuccess() && apiResponse.data != null) {
-                val sharedFile = apiResponse.data!!
-                rootSharedFile = sharedFile
-                sharedFile
-            } else {
-                Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
-                null
+            if (!apiResponse.isSuccess()) {
+                SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
             }
+            apiResponse.data
         }
 
-        childrenLiveData.postValue((file?.let(::listOf) ?: listOf()) to true)
+        rootSharedFile.postValue(file)
     }
 
     fun getFiles(folderId: Int, sortType: SortType) {
@@ -124,7 +120,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
         currentCursor = apiResponse.cursor
         //TODO: Better management of this rootSharedFile value
         FolderFilesProviderResult(
-            folder = rootSharedFile!!,
+            folder = rootSharedFile.value!!,
             folderFiles = ArrayList(remoteFiles),
             isComplete = !apiResponse.hasMore,
         )
@@ -133,6 +129,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
     private fun List<File>.addShareLinkUuid() = map { it.apply { externalShareLinkUuid = fileSharedLinkUuid } }
 
     companion object {
+        const val TAG = "FileSharedViewModel"
         const val ROOT_SHARED_FILE_ID = 1
     }
 }
