@@ -219,7 +219,7 @@ object FolderFilesProvider {
                     okHttpClient = okHttpClient,
                     driveId = driveId,
                     parentId = folderFilesProviderArgs.folderId,
-                    cursor = null,
+                    cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
                     order = folderFilesProviderArgs.order,
                 ).let {
                     CursorApiResponse(
