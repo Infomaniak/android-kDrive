@@ -87,6 +87,7 @@ class FileSharedListFragment : FileListFragment() {
     }
 
     private fun onBackPressed() {
+        fileShareViewModel.cancelDownload()
         if (folderId == fileShareViewModel.rootSharedFile.value?.id || folderId == ROOT_SHARED_FILE_ID) {
             requireActivity().finish()
         } else {
