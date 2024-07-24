@@ -28,10 +28,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() {
 
@@ -65,19 +62,20 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
     }
 
     fun getFiles(folderId: Int, sortType: SortType) {
-        getSharedFilesJob.cancel()
+        cancelDownload()
         getSharedFilesJob = Job()
 
         viewModelScope.launch(Dispatchers.IO + getSharedFilesJob) {
 
             tailrec fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
-                getSharedFilesJob.ensureActive()
 
                 val folderFilesProviderResult = loadFromRemote(
                     FolderFilesProviderArgs(folderId = folderId, isFirstPage = isFirstPage, order = sortType),
                 )
 
                 if (folderFilesProviderResult == null) return
+
+                ensureActive()
 
                 val newFiles = mutableListOf<File>().apply {
                     childrenLiveData.value?.first?.let(::addAll)
@@ -90,6 +88,11 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
 
             recursiveDownload(folderId, isFirstPage = true)
         }
+    }
+
+    fun cancelDownload() {
+        getSharedFilesJob.cancel()
+        getSharedFilesJob.cancelChildren()
     }
 
     private fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
@@ -114,7 +117,6 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
 
         return handleRemoteFiles(apiResponse)
     }
-
 
     private fun handleRemoteFiles(apiResponse: CursorApiResponse<List<File>>) = apiResponse.data?.let { remoteFiles ->
         currentCursor = apiResponse.cursor
