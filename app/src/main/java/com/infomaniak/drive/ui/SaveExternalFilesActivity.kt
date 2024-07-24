@@ -380,7 +380,8 @@ class SaveExternalFilesActivity : BaseActivity() {
         return (isMultiple || !binding.fileNameEdit.showOrHideEmptyError()) &&
                 selectDriveViewModel.selectedUserId.value != null &&
                 selectDriveViewModel.selectedDrive.value != null &&
-                saveExternalFilesViewModel.folderId.value != null
+                saveExternalFilesViewModel.folderId.value != null &&
+                saveExternalFilesViewModel.folderId.value != -1
     }
 
     private fun activeSelectDrive() = with(binding) {
