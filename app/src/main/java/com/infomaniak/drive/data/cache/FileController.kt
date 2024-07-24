@@ -33,6 +33,7 @@ import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.utils.removeAccents
 import io.realm.*
 import io.realm.kotlin.oneOf
 import io.realm.kotlin.toFlow
@@ -718,6 +719,8 @@ object FileController {
     private fun keepSubFolderChildren(realm: Realm, localFolderChildren: List<File>?, remoteFolderChildren: List<File>) {
         val oldChildren = localFolderChildren?.associateBy { it.id }
         remoteFolderChildren.forEach { newFile ->
+            newFile.sortedName = newFile.sortedName.lowercase().removeAccents()
+
             val oldChild = oldChildren?.get(newFile.id) ?: getFileById(realm, newFile.id)
             oldChild?.let { oldFile ->
                 newFile.keepOldLocalFilesData(oldFile)
@@ -825,6 +828,8 @@ object FileController {
     }
 
     private fun File.keepOldLocalFilesData(oldFile: File) {
+        // We update the children here, as this method is called from different places in the app.
+        oldFile.children.forEach { it.sortedName = it.sortedName.lowercase().removeAccents() }
         children = oldFile.children
         cursor = oldFile.cursor
         isComplete = oldFile.isComplete
