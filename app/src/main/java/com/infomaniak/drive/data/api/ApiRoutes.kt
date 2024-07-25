@@ -282,7 +282,7 @@ object ApiRoutes {
 
     fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/finish"
 
-    fun uploadFile(driveId: Int) = "${driveURLV2(driveId)}/upload"
+    fun uploadFile(driveId: Int) = "${driveURL(driveId)}/upload"
     //endregion
 
     /** Root Directory */
