@@ -17,27 +17,25 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-import android.content.Context
+import android.content.ComponentName
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.google.android.exoplayer2.*
-import com.google.android.exoplayer2.audio.AudioAttributes
-import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSource
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.source.MediaSourceFactory
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.google.android.exoplayer2.upstream.FileDataSource
-import com.google.android.exoplayer2.util.EventLogger
-import com.google.android.exoplayer2.util.Util
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import androidx.media3.ui.PlayerView
+import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -45,15 +43,45 @@ import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
 
+@UnstableApi
 open class PreviewVideoFragment : PreviewFragment() {
 
     private var _binding: FragmentPreviewVideoBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
-    private var exoPlayer: ExoPlayer? = null
+    private var mediaControllerFuture: ListenableFuture<MediaController>? = null
+    private var mediaController: MediaController? = null
+
+    private val playerListener = object : Player.Listener {
+        override fun onIsPlayingChanged(isPlaying: Boolean) {
+            val flagKeepScreenOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            if (isPlaying) {
+                trackMediaPlayerEvent("play")
+                toggleFullscreen()
+                activity?.window?.addFlags(flagKeepScreenOn)
+            } else {
+                trackMediaPlayerEvent("pause")
+                activity?.window?.clearFlags(flagKeepScreenOn)
+            }
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+            error.printStackTrace()
+
+            _binding?.errorLayout?.let {
+                when (error.message) {
+                    "Source error" -> it.previewDescription.setText(R.string.previewVideoSourceError)
+                    else -> it.previewDescription.setText(R.string.previewLoadError)
+                }
+                it.bigOpenWithButton.isVisible = true
+                it.root.isVisible = true
+                it.previewDescription.isVisible = true
+            }
+            _binding?.playerView?.isGone = true
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewVideoBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -77,7 +105,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         }
 
         playerView.setOnClickListener {
-            if (playerView.isControllerFullyVisible) {
+            if ((it as PlayerView).isControllerFullyVisible) {
                 trackMediaPlayerEvent("toggleFullScreen")
                 toggleFullscreen()
             }
@@ -86,12 +114,7 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onResume() {
         super.onResume()
-        if (!noCurrentFile() && exoPlayer == null) initializePlayer()
-    }
-
-    override fun onPause() {
-        exoPlayer?.pause()
-        super.onPause()
+        if (!noCurrentFile() && mediaController == null) createPlayer()
     }
 
     override fun onDestroyView() {
@@ -100,113 +123,51 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     override fun onDestroy() {
-        exoPlayer?.apply {
-            // Compute the percentage of the video the user watched before exiting
-            trackMediaPlayerEvent("duration", currentPosition.times(100).div(contentDuration + 1).toFloat())
-            release()
+        mediaController?.let {
+            it.release()
+            it.removeListener(playerListener)
         }
+        mediaController = null
+
+        mediaControllerFuture?.let { MediaController.releaseFuture(it) }
+        mediaControllerFuture = null
         super.onDestroy()
     }
 
-    private fun initializePlayer() {
-        createPlayer()
-        addPlayerListeners()
+    private fun createPlayer() {
+        val offlineFile = getOfflineFile()
+        val offlineIsComplete = offlineFile?.let { file.isOfflineAndIntact(offlineFile) } ?: false
+        initMediaController(offlineFile, offlineIsComplete)
     }
 
-    private fun createPlayer() = with(binding) {
-        val context = requireContext()
-
-        val offlineFile = if (file.isOffline) {
-            val userId = previewSliderViewModel.userDrive.userId
-            file.getOfflineFile(requireContext(), userId)
+    private fun getOfflineFile(): IOFile? {
+        return if (file.isOffline) {
+            file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
         } else {
             null
         }
-        val offlineIsComplete = offlineFile?.let { file.isOfflineAndIntact(offlineFile) } ?: false
+    }
 
-        val trackSelector = getTrackSelector(context)
+    private fun initMediaController(offlineFile: IOFile?, offlineIsComplete: Boolean) = with(binding) {
+        val context = requireContext()
+        val playbackSessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
+        mediaControllerFuture = MediaController.Builder(context, playbackSessionToken).buildAsync()
+        mediaControllerFuture?.addListener({
+            mediaController = mediaControllerFuture?.get()
+            mediaController?.setMediaItem(getMediaItem(offlineFile, offlineIsComplete))
+            mediaController?.addListener(playerListener)
 
-        exoPlayer = ExoPlayer.Builder(context, getRenderersFactory(context.applicationContext))
-            .setMediaSourceFactory(getMediaSourceFactory(context, offlineIsComplete))
-            .setTrackSelector(trackSelector)
-            .build()
-
-        exoPlayer?.apply {
-            addAnalyticsListener(EventLogger(trackSelector))
-            setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
-            playWhenReady = false
-
-            playerView.player = this
-            playerView.controllerShowTimeoutMs = 1000
+            playerView.player = mediaController
+            playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
             playerView.controllerHideOnTouch = false
-
-            setMediaItem(MediaItem.fromUri(getUri(offlineFile, offlineIsComplete)))
-
-            prepare()
-        }
+        }, ContextCompat.getMainExecutor(context))
     }
 
-    private fun addPlayerListeners() {
-        exoPlayer?.addListener(object : Player.Listener {
 
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                val flagKeepScreenOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                if (isPlaying) {
-                    trackMediaPlayerEvent("play")
-                    toggleFullscreen()
-                    activity?.window?.addFlags(flagKeepScreenOn)
-                } else {
-                    trackMediaPlayerEvent("pause")
-                    activity?.window?.clearFlags(flagKeepScreenOn)
-                }
-            }
-
-            override fun onPlayerError(error: PlaybackException) {
-                super.onPlayerError(error)
-                error.printStackTrace()
-
-                _binding?.errorLayout?.let {
-                    when (error.message) {
-                        "Source error" -> it.previewDescription.setText(R.string.previewVideoSourceError)
-                        else -> it.previewDescription.setText(R.string.previewLoadError)
-                    }
-                    it.bigOpenWithButton.isVisible = true
-                    it.root.isVisible = true
-                    it.previewDescription.isVisible = true
-                }
-                _binding?.playerView?.isGone = true
-            }
-        })
-    }
-
-    private fun getTrackSelector(context: Context): DefaultTrackSelector {
-        return DefaultTrackSelector(context).apply {
-            setParameters(buildUponParameters().setMaxVideoSizeSd())
-        }
-    }
-
-    private fun getRenderersFactory(appContext: Context): RenderersFactory {
-        return DefaultRenderersFactory(appContext)
-            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-    }
-
-    private fun getMediaSourceFactory(context: Context, offlineIsComplete: Boolean): MediaSourceFactory {
-        val dataSourceFactory = if (offlineIsComplete) getOfflineDataSourceFactory() else getDataSourceFactory(context)
-        return DefaultMediaSourceFactory(dataSourceFactory)
-    }
-
-    private fun getOfflineDataSourceFactory(): DataSource.Factory {
-        return DataSource.Factory { FileDataSource() }
-    }
-
-    private fun getDataSourceFactory(context: Context): DataSource.Factory {
-        val appContext = context.applicationContext
-        val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
-        val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
-            setUserAgent(userAgent)
-            setDefaultRequestProperties(HttpUtils.getHeaders().toMap())
-        }
-        return DefaultDataSource.Factory(appContext, okHttpDataSource)
+    private fun getMediaItem(offlineFile: IOFile?, offlineIsComplete: Boolean): MediaItem {
+        return MediaItem.Builder()
+            .setUri(getUri(offlineFile, offlineIsComplete))
+            .build()
     }
 
     private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
@@ -219,5 +180,9 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
         trackEvent("mediaPlayer", name, value = value)
+    }
+
+    companion object {
+        private const val CONTROLLER_SHOW_TIMEOUT_MS = 2000
     }
 }
