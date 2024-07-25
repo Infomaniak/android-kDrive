@@ -259,26 +259,19 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun UploadFile.startUploadFile(size: Long): Boolean {
-        return if (size != 0L) {
-            if (fileSize != size) updateFileSize(size)
+        if (fileSize != size) updateFileSize(size)
 
-            SentryLog.d(TAG, "startUploadFile (size: $fileSize)")
+        SentryLog.d(TAG, "startUploadFile (size: $fileSize)")
 
-            UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker).run {
-                currentUploadTask = this
-                start().also { isUploaded ->
-                    if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
-                        deleteIfExists(keepFile = isSync())
-                    }
-
-                    SentryLog.d(TAG, "startUploadFile> end upload file")
+        return UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker).run {
+            currentUploadTask = this
+            start().also { isUploaded ->
+                if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
+                    deleteIfExists(keepFile = isSync())
                 }
-            }
 
-        } else {
-            deleteIfExists()
-            SentryLog.d("kDrive", "$TAG > file deleted size: 0")
-            false
+                SentryLog.d(TAG, "startUploadFile> end upload file")
+            }
         }
     }
 
@@ -324,7 +317,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         SentryLog.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
-        UploadFile.getRealmInstance().use {
+        getRealmInstance().use {
             it.executeTransaction { realm ->
 
                 MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
@@ -433,7 +426,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             level = SentryLevel.INFO
         })
 
-        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
+        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize >= 0) {
             UploadFile(
                 uri = uri.toString(),
                 driveId = syncSettings.driveId,
