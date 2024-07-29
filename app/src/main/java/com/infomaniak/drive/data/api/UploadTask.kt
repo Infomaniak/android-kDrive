@@ -24,14 +24,14 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
+import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
@@ -56,7 +56,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.BufferedInputStream
 import java.io.FileNotFoundException
-import java.net.URLEncoder
 import java.util.Date
 import kotlin.math.ceil
 
@@ -86,7 +85,7 @@ class UploadTask(
         }
 
         try {
-            if (uploadFile.fileSize == 0L) launchTaskEmptyFile() else launchTask(this)
+            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask(this)
             return@withContext true
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
@@ -172,7 +171,16 @@ class UploadTask(
 
                     data = if (count == chunkSize) data else data.copyOf(count)
 
-                    val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count, uploadHost = uploadHost)
+                    val url = with(uploadFile) {
+                        uploadChunkUrl(
+                            driveId = driveId,
+                            uploadToken = uploadToken,
+                            chunkNumber = chunkNumber,
+                            currentChunkSize = count,
+                            uploadHost = uploadHost,
+                        )
+                    }
+
                     SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
                     @Suppress("DeferredResultUnused")
@@ -187,14 +195,6 @@ class UploadTask(
 
         coroutineScope.ensureActive()
         onFinish(uri)
-    }
-
-    suspend fun launchTaskEmptyFile() = withContext(Dispatchers.IO) {
-        ApiController.callApi<ApiResponse<File>>(
-            uploadFile.uploadEmptyFileUrl(),
-            ApiController.ApiMethod.POST,
-            okHttpClient = runBlocking { AccountUtils.getHttpClient(uploadFile.userId, 120) }
-        )
     }
 
     private suspend fun onFinish(uri: Uri) = with(uploadFile) {
@@ -359,7 +359,9 @@ class UploadTask(
         return ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient).also {
             if (it.isSuccess()) it.data?.token?.let { uploadToken ->
                 uploadFile.updateUploadToken(uploadToken, it.data!!.uploadHost)
-            } else it.manageUploadErrors()
+            } else {
+                it.manageUploadErrors()
+            }
         }.data?.uploadHost
     }
 
@@ -412,28 +414,6 @@ class UploadTask(
                 if (data != null) resetUploadToken()
             }
         }
-    }
-
-    private fun UploadFile.uploadUrl(uploadHost: String, chunkNumber: Int, currentChunkSize: Int): String {
-        return ApiRoutes.addChunkToSession(
-            uploadHost,
-            driveId,
-            uploadToken!!
-        ) + "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
-    }
-
-    private fun UploadFile.uploadEmptyFileUrl(): String {
-        var route = ApiRoutes.uploadFile(driveId) +
-                "?directory_id=$remoteFolder" +
-                "&total_size=0" +
-                "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
-                "&conflict=" + UploadTask.Companion.ConflictOption.RENAME.toString()
-
-        remoteSubFolder?.let {
-            route += "&directory_path=$remoteSubFolder"
-        }
-
-        return route
     }
 
     /**

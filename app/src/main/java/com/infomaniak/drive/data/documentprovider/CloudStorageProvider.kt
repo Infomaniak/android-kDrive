@@ -36,7 +36,8 @@ import androidx.core.os.bundleOf
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.api.UploadTask
+import com.infomaniak.drive.data.api.ApiRoutes.uploadEmptyFileUrl
+import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
@@ -515,12 +516,13 @@ class CloudStorageProvider : DocumentsProvider() {
         val parentFolderId = getFileIdFromDocumentId(parentDocumentId)
         val userDrive = createUserDrive(parentDocumentId)
 
-        val uploadUrl = ApiRoutes.uploadFile(driveId) +
-                "?directory_id=$parentFolderId" +
-                "&total_size=0" +
-                "&file_name=${URLEncoder.encode(displayName, "UTF-8")}" +
-                "&last_modified_at=${Date().time / 1_000L}" +
-                "&conflict=" + UploadTask.Companion.ConflictOption.RENAME.toString()
+        val uploadUrl = uploadEmptyFileUrl(
+            driveId = driveId,
+            directoryId = parentFolderId,
+            fileName = displayName,
+            conflictOption = ConflictOption.RENAME,
+            lastModifiedAt = Date(),
+        )
 
         val apiResponse = ApiController.callApi<ApiResponse<File>>(
             uploadUrl,
