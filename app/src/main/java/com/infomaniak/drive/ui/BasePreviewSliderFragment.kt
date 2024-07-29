@@ -136,7 +136,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
                         toggleOpenWithVisibility(isVisible = !isFileShare && !currentFile.isOnlyOfficePreview())
                     }
-                    bottomSheetFileInfos.openWith.isVisible = true
+                    bottomSheetFileInfos.openWith.isGone = isFileShare
 
                     lifecycleScope.launch(Dispatchers.Main) {
                         repeatOnLifecycle(State.RESUMED) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
