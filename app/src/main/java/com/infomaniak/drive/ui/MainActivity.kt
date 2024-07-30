@@ -305,7 +305,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun observeFailureDownloadWorkerOffline() {
-        DownloadOfflineFileManager.observeFailureDownloadWorkerOffline(this)
+        DownloadOfflineFileManager.getFailedDownloadWorkerOffline(this)
             .observe(this) { workInfoList ->
                 workInfoList.firstOrNull { it.state == WorkInfo.State.FAILED }?.let { failedWork ->
                     val hasLeftSpaceAfterDownload = failedWork.outputData.getBoolean(HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY, true)

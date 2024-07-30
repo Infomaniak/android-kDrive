@@ -36,10 +36,8 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
 
     private val folderId: Int by lazy { inputData.getInt(FOLDER_ID, 0) }
     private val files: List<File> by lazy {
-        FileController.getFolderOfflineFilesId(folderId = folderId, UiSettings(context).sortType).map {
-            val file = FileController.getFileById(it, userDrive)!!
-            file
-        }
+        FileController.getFolderOfflineFilesId(folderId = folderId, sortType = UiSettings(context).sortType)
+            .map { FileController.getFileById(it, userDrive)!! }
     }
 
     private val userDrive: UserDrive by lazy {
@@ -92,8 +90,8 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
     private suspend fun downloadFiles(): Result {
         var result = Result.failure()
 
-        files.forEach { fileId ->
-            result = downloadOfflineFileManager.execute(applicationContext, fileId) { progress, downloadedFileId ->
+        files.forEach { file ->
+            result = downloadOfflineFileManager.execute(applicationContext, file) { progress, downloadedFileId ->
                 setProgressAsync(workDataOf(PROGRESS to progress, FILE_ID to downloadedFileId))
             }
         }

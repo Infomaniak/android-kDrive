@@ -73,11 +73,11 @@ class DownloadOfflineFileManager(
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
         currentFile = file
-        val offlineFile = currentFile?.getOfflineFile(context, userDrive.userId)
-        val cacheFile = currentFile?.getCacheFile(context, userDrive)
+        val offlineFile = file.getOfflineFile(context, userDrive.userId)
+        val cacheFile = file.getCacheFile(context, userDrive)
 
         offlineFile?.let {
-            if (currentFile?.isOfflineAndIntact(it) == true) {
+            if (file.isOfflineAndIntact(it)) {
                 // We can have this case for example when we try to put a lot of files at once in offline mode
                 // and for some reason, the worker is cancelled after a long time, the worker is restarted
                 filesDownloaded += 1
@@ -89,9 +89,9 @@ class DownloadOfflineFileManager(
         onProgress(0, file.id)
 
         if (offlineFile?.exists() == true) offlineFile.delete()
-        if (cacheFile?.exists() == true) cacheFile.delete()
+        if (cacheFile.exists()) cacheFile.delete()
 
-        if (currentFile == null || offlineFile == null) {
+        if (offlineFile == null) {
             getFileFromRemote(context, file.id, userDrive) { downloadedFile ->
                 downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { offlineFile ->
                     lastDownloadedFile = offlineFile
@@ -101,9 +101,7 @@ class DownloadOfflineFileManager(
             lastDownloadedFile = offlineFile
         }
 
-        return currentFile?.let {
-            startOfflineDownload(context = context, file = it, offlineFile = offlineFile!!, onProgress = onProgress)
-        } ?: ListenableWorker.Result.failure()
+        return startOfflineDownload(context = context, file = file, offlineFile = offlineFile!!, onProgress = onProgress)
     }
 
     fun cleanLastDownloadedFile() {
@@ -227,7 +225,7 @@ class DownloadOfflineFileManager(
     companion object {
         private const val MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS = 1000L
 
-        fun observeFailureDownloadWorkerOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
+        fun getFailedDownloadWorkerOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
             WorkQuery.Builder
                 .fromUniqueWorkNames(arrayListOf(BulkDownloadWorker.TAG, DownloadWorker.TAG))
                 .addStates(arrayListOf(WorkInfo.State.FAILED))

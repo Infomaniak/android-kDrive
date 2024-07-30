@@ -106,7 +106,7 @@ typealias IsComplete = Boolean
 typealias Position = Int
 
 fun getAvailableStorageInBytes(): Long = with(StatFs(Environment.getDataDirectory().path)) {
-    return availableBlocksLong * blockSizeLong
+    return@with availableBlocksLong * blockSizeLong
 }
 
 fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
