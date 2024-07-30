@@ -54,6 +54,7 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
 import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
@@ -380,7 +381,8 @@ class SaveExternalFilesActivity : BaseActivity() {
         return (isMultiple || !binding.fileNameEdit.showOrHideEmptyError()) &&
                 selectDriveViewModel.selectedUserId.value != null &&
                 selectDriveViewModel.selectedDrive.value != null &&
-                saveExternalFilesViewModel.folderId.value != null
+                saveExternalFilesViewModel.folderId.value != null &&
+                saveExternalFilesViewModel.folderId.value != OTHER_ROOT_ID
     }
 
     private fun activeSelectDrive() = with(binding) {
