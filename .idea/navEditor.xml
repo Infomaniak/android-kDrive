@@ -35,8 +35,20 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
+                            <option name="x" value="520" />
+                            <option name="y" value="368" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="fileSharedActionsBottomSheetDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="764" />
+                            <option name="y" value="724" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -60,7 +72,7 @@
                         <option name="myPosition">
                           <Point>
                             <option name="x" value="32" />
-                            <option name="y" value="660" />
+                            <option name="y" value="474" />
                           </Point>
                         </option>
                         <option name="myPositions">
@@ -103,7 +115,7 @@
                         <option name="myPosition">
                           <Point>
                             <option name="x" value="276" />
-                            <option name="y" value="724" />
+                            <option name="y" value="410" />
                           </Point>
                         </option>
                         <option name="myPositions">
@@ -134,7 +146,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_previewFragment_to_fileDetailsFragment">
+                            <entry key="action_previewFragment_to_fileSharedActionsBottomSheetDialog">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -150,7 +162,7 @@
                         <option name="myPosition">
                           <Point>
                             <option name="x" value="276" />
-                            <option name="y" value="368" />
+                            <option name="y" value="766" />
                           </Point>
                         </option>
                       </LayoutPositions>
