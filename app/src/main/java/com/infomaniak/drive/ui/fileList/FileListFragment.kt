@@ -75,6 +75,7 @@ import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.first
 
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
     NoItemsLayoutView.INoItemsLayoutView {
@@ -440,13 +441,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     protected open fun setupFileAdapter() {
-        observeAndDisplayNetworkAvailability(
-            mainViewModel = mainViewModel,
-            noNetworkBinding = binding.noNetworkInclude,
-            noNetworkBindingDirectParent = binding.fileListLayout,
-            additionalChanges = { isInternetAvailable -> fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable) }
-        )
-
         multiSelectManager.apply {
             openMultiSelect = { openMultiSelect() }
             updateMultiSelect = { onUpdateMultiSelect() }
@@ -500,6 +494,13 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 checkIfNoFiles()
             }
         }
+
+        observeAndDisplayNetworkAvailability(
+            mainViewModel = mainViewModel,
+            noNetworkBinding = binding.noNetworkInclude,
+            noNetworkBindingDirectParent = binding.fileListLayout,
+            additionalChanges = { isInternetAvailable -> fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable) }
+        )
     }
 
     protected open fun homeClassName(): String? = null
@@ -670,16 +671,19 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     ) {
         showPendingFiles()
 
-        val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
+        lifecycleScope.launch {
+            if (view == null) return@launch
 
-        fileListViewModel.getFiles(
-            folderId,
-            order = fileListViewModel.sortType,
-            sourceRestrictionType = if (isNetworkUnavailable) ONLY_FROM_LOCAL else sourceRestrictionType,
-            userDrive = userDrive,
-            isNewSort = isNewSort,
-        ).observe(viewLifecycleOwner) {
-            onFinish?.invoke(it)
+            val isNetworkAvailable = mainViewModel.isNetworkAvailable.first()
+            fileListViewModel.getFiles(
+                folderId,
+                order = fileListViewModel.sortType,
+                sourceRestrictionType = if (isNetworkAvailable) ONLY_FROM_LOCAL else sourceRestrictionType,
+                userDrive = userDrive,
+                isNewSort = isNewSort,
+            ).observe(viewLifecycleOwner) {
+                onFinish?.invoke(it)
+            }
         }
     }
 
@@ -832,26 +836,28 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         changeControlsVisibility: Boolean,
         ignoreOffline: Boolean = false
     ) {
-        if (_binding == null) return
+        lifecycleScope.launch {
+                if (_binding == null) return@launch
 
-        with(binding) {
-            val isOffline = mainViewModel.isInternetAvailable.value == false
-            val hasFilesAndIsOffline = !hideFileList && isOffline
+                with(binding) {
+                    val isNetworkAvailable = mainViewModel.isNetworkAvailable.first()
+                    val hasFilesAndIsOffline = !hideFileList && !isNetworkAvailable
 
-            sortLayout.isGone = hideFileList
+                    sortLayout.isGone = hideFileList
 
-            if (changeControlsVisibility) {
-                val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
-                noNetworkInclude.noNetwork.isVisible = hasFilesAndIsOffline
-                toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
+                    if (changeControlsVisibility) {
+                        val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
+                        noNetworkInclude.noNetwork.isVisible = hasFilesAndIsOffline
+                        toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
+                    }
+
+                    noFilesLayout.toggleVisibility(
+                        noNetwork = !isNetworkAvailable && !ignoreOffline,
+                        isVisible = hideFileList,
+                        showRefreshButton = changeControlsVisibility
+                    )
+                }
             }
-
-            noFilesLayout.toggleVisibility(
-                noNetwork = isOffline && !ignoreOffline,
-                isVisible = hideFileList,
-                showRefreshButton = changeControlsVisibility
-            )
-        }
     }
 
     open fun onRestartItemsClicked() = Unit

@@ -47,6 +47,7 @@ import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -166,11 +167,14 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
                 binding.noGalleryLayout.toggleVisibility(galleryAdapter.galleryList.isEmpty())
             } ?: run {
                 galleryAdapter.isComplete = true
-                binding.noGalleryLayout.toggleVisibility(
-                    noNetwork = mainViewModel.isInternetAvailable.value == false,
-                    isVisible = galleryAdapter.galleryList.isEmpty(),
-                    showRefreshButton = true,
-                )
+
+                lifecycleScope.launch {
+                    binding.noGalleryLayout.toggleVisibility(
+                        noNetwork = !mainViewModel.isNetworkAvailable.first(),
+                        isVisible = galleryAdapter.galleryList.isEmpty(),
+                        showRefreshButton = true,
+                    )
+                }
             }
 
             onDownloadFinished()
@@ -228,9 +232,11 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             isComplete = false
             isDownloadingGallery = true
 
-            val networkAvailable = mainViewModel.isInternetAvailable.value == true
-            if (isRefresh) galleryViewModel.loadLastGallery(driveId, ignoreCloud = !networkAvailable)
-            else if (networkAvailable) galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
+            lifecycleScope.launch {
+                val isNetworkAvailable = mainViewModel.isNetworkAvailable.first()
+                if (isRefresh) galleryViewModel.loadLastGallery(driveId, ignoreCloud = !isNetworkAvailable)
+                else if (isNetworkAvailable) galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
+            }
         }
     }
 

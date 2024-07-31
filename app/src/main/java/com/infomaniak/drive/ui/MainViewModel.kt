@@ -49,18 +49,16 @@ import com.infomaniak.drive.utils.SyncUtils.isSyncScheduled
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.networking.NetworkAvailability
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
-import com.infomaniak.lib.core.utils.networkStatusFlow
 import io.realm.Realm
 import io.realm.kotlin.toFlow
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.cancellable
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.*
 import java.util.Date
 
 class MainViewModel(
@@ -81,7 +79,6 @@ class MainViewModel(
 
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
-    val isInternetAvailable = MutableLiveData(true)
 
     private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
@@ -94,6 +91,19 @@ class MainViewModel(
     val updateOfflineFile = SingleLiveEvent<FileId>()
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val isNetworkAvailable = NetworkAvailability(this@MainViewModel.getContext()).isNetworkAvailable
+        .mapLatest {
+            onNetworkAvailabilityChanged(it)
+            it
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = TIMEOUT_MS_NETWORK_AVAILABILITY_MS),
+            initialValue = null
+        )
+        .filterNotNull()
 
     var mustOpenUploadShortcut: Boolean = true
         get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: field
@@ -155,9 +165,8 @@ class MainViewModel(
     fun loadRootFiles() {
         rootFilesJob.cancel()
         rootFilesJob = Job()
-        viewModelScope.launch(Dispatchers.IO) {
-
-            if (isInternetAvailable.value == true) {
+        viewModelScope.launch {
+            if (isNetworkAvailable.first()) {
                 FolderFilesProvider.getFiles(
                     FolderFilesProvider.FolderFilesProviderArgs(
                         folderId = Utils.ROOT_ID,
@@ -564,19 +573,16 @@ class MainViewModel(
         }
     }
 
-    fun observeNetworkStatus() = viewModelScope.launch(Dispatchers.IO) {
-        getContext().networkStatusFlow().collect { isAvailable ->
-            SentryLog.d("Internet availability", if (isAvailable) "Available" else "Unavailable")
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = "Network"
-                message = "Internet access is available : $isAvailable"
-                level = if (isAvailable) SentryLevel.INFO else SentryLevel.WARNING
-            })
-            isInternetAvailable.postValue(isAvailable)
-            if (isAvailable) {
-                AccountUtils.updateCurrentUserAndDrives(this@MainViewModel.getContext())
-                restartUploadWorkerIfNeeded()
-            }
+    private suspend fun onNetworkAvailabilityChanged(isNetworkAvailable: Boolean) {
+        SentryLog.d("Internet availability", if (isNetworkAvailable) "Available" else "Unavailable")
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = "Network"
+            message = "Internet access is available : $isNetworkAvailable"
+            level = if (isNetworkAvailable) SentryLevel.INFO else SentryLevel.WARNING
+        })
+        if (isNetworkAvailable) {
+            AccountUtils.updateCurrentUserAndDrives(this@MainViewModel.getContext())
+            restartUploadWorkerIfNeeded()
         }
     }
 
@@ -635,5 +641,6 @@ class MainViewModel(
     companion object {
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
+        private const val TIMEOUT_MS_NETWORK_AVAILABILITY_MS = 500L
     }
 }

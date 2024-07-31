@@ -26,6 +26,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeBinding
@@ -37,6 +38,7 @@ import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
@@ -52,9 +54,12 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-            noNetworkCard.root.isGone = isInternetAvailable
+        lifecycleScope.launch {
+            mainViewModel.isNetworkAvailable.collect { isNetworkAvailable ->
+                noNetworkCard.root.isGone = isNetworkAvailable
+            }
         }
+
         setupDriveToolbar(collapsingToolbarLayout, switchDriveLayout, appBarLayout)
 
         ViewCompat.requestApplyInsets(homeCoordinator)

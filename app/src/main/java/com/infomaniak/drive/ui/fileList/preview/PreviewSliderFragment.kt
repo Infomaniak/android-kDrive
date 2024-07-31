@@ -54,6 +54,7 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -165,8 +166,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             onBackClicked = { findNavController().popBackStack() },
             onOpenWithClicked = { openWith() },
             onEditClicked = {
-                mainViewModel.isInternetAvailable.value?.let { isConnected ->
-                    openOnlyOfficeDocument(currentFile, isConnected)
+                lifecycleScope.launch {
+                    openOnlyOfficeDocument(currentFile, mainViewModel.isNetworkAvailable.first())
                 }
             },
         )
