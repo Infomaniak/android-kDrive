@@ -94,7 +94,7 @@
     <fragment
         android:id="@+id/previewFragment"
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewFragment"
-        android:label="fragment_preview"
+        android:label="PreviewFragment"
         tools:layout="@layout/fragment_preview_others">
         <argument
             android:name="fileId"

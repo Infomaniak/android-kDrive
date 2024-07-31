@@ -46,11 +46,23 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <com.infomaniak.drive.views.ExternalFileInfoActionsView
+        android:id="@+id/fileSharedBottomSheetFileActions"
+        style="?attr/bottomSheetStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_behavior="@string/bottom_sheet_behavior" />
+
     <com.infomaniak.drive.views.FileInfoActionsView
         android:id="@+id/bottomSheetFileInfos"
         style="?attr/bottomSheetStyle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/bottom_sheet_behavior" />
+        android:visibility="gone"
+        app:layout_behavior="@string/bottom_sheet_behavior"
+        tools:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
