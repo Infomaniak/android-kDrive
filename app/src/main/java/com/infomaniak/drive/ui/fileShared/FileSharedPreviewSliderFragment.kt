@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -33,12 +34,18 @@ import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
 
 class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
 
     private val navigationArgs: FileSharedPreviewSliderFragmentArgs by navArgs()
     override val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.fileSharedPreviewSliderFragment)
+
+    override val bottomSheetView: ExternalFileInfoActionsView
+        get() = binding.fileSharedBottomSheetFileActions
+    override val bottomSheetBehavior: BottomSheetBehavior<View>
+        get() = BottomSheetBehavior.from(bottomSheetView)
 
     override val isFileShare = true
     override val ownerFragment = this
@@ -72,7 +79,13 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = false, isFitToContents = true)
+        initBottomSheet()
+    }
+
+    private fun initBottomSheet() = with(bottomSheetView) {
+        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
+        updateWithExternalFile(currentFile)
+        initOnClickListener(onItemClickListener = this@FileSharedPreviewSliderFragment)
     }
 
     override fun displayInfoClicked() = Unit
@@ -82,6 +95,11 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     override fun manageCategoriesClicked(fileId: Int) = Unit
     override fun shareFile() = Unit // TODO
     override fun saveToKDrive() = Unit // TODO
+    override fun downloadFileClicked() {
+        super<BasePreviewSliderFragment>.downloadFileClicked()
+        // TODO
+    }
+
     override fun openWith() = Unit
     override fun onCacheAddedToOffline() = Unit
     override fun onDeleteFile(onApiResponse: () -> Unit) = Unit
