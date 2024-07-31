@@ -690,6 +690,7 @@ object FileController {
         apiResponse: CursorApiResponse<List<File>>,
         isFirstPage: Boolean,
         isCompleteFolder: Boolean,
+        onFirstPageFetched: ((folder: File?) -> Unit)? = null,
     ) {
         val remoteFiles = apiResponse.data ?: return
 
@@ -712,6 +713,8 @@ object FileController {
                 folderProxy.responseAt = apiResponse.responseAt
                 folderProxy.cursor = apiResponse.cursor
                 folderProxy.versionCode = BuildConfig.VERSION_CODE
+
+                onFirstPageFetched?.invoke(folderProxy)
             }
         }
     }

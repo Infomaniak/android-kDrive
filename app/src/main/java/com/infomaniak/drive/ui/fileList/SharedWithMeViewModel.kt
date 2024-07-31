@@ -44,6 +44,7 @@ class SharedWithMeViewModel : ViewModel() {
         order: File.SortType,
         userDrive: UserDrive,
         isNewSort: Boolean,
+        onFirstPageFetched: (folder: File?) -> Unit,
     ) {
         sharedWithMeJob?.cancel()
         sharedWithMeJob = viewModelScope.launch(Dispatchers.IO) {
@@ -69,10 +70,11 @@ class SharedWithMeViewModel : ViewModel() {
                         order = order,
                         userDrive = userDrive,
                     ),
+                    onFirstPageFetched = onFirstPageFetched,
                     onRecursionStart = {
                         // Notify the first page is already loaded
                         if (dataNotAlreadyLoaded) notifyUiToLoadData()
-                    }
+                    },
                 )
                 // Notify finish with an error or success without recursion
                 if (dataNotAlreadyLoaded) notifyUiToLoadData()

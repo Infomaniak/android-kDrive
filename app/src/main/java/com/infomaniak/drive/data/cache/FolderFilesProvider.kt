@@ -75,6 +75,7 @@ object FolderFilesProvider {
 
     fun loadSharedWithMeFiles(
         folderFilesProviderArgs: FolderFilesProviderArgs,
+        onFirstPageFetched: (folder: File?) -> Unit,
         onRecursionStart: (() -> Unit)? = null,
     ) = with(folderFilesProviderArgs) {
         val block: (Realm) -> Unit = { realm ->
@@ -86,6 +87,7 @@ object FolderFilesProvider {
                 folderFilesProviderArgs = this,
                 isRoot = folderId == ROOT_ID,
                 rootFolder = rootFolder,
+                onFirstPageFetched = onFirstPageFetched,
                 onRecursionStart = onRecursionStart,
             )
         }
@@ -99,6 +101,7 @@ object FolderFilesProvider {
         folderFilesProviderArgs: FolderFilesProviderArgs,
         cursor: String? = null,
         rootFolder: File? = null,
+        onFirstPageFetched: (folder: File?) -> Unit,
         onRecursionStart: (() -> Unit)? = null,
     ) {
         val folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderFilesProviderArgs.folderId
@@ -121,7 +124,8 @@ object FolderFilesProvider {
             remoteFolder = if (folderFilesProviderArgs.folderId == ROOT_ID) rootFolder else folderProxy,
             apiResponse = apiResponse,
             isFirstPage = cursor == null,
-            isCompleteFolder = !apiResponse.hasMore
+            isCompleteFolder = !apiResponse.hasMore,
+            onFirstPageFetched = onFirstPageFetched,
         )
 
         when {
@@ -134,6 +138,7 @@ object FolderFilesProvider {
                     isRoot = isRoot,
                     folderFilesProviderArgs = folderFilesProviderArgs,
                     cursor = apiResponse.cursor,
+                    onFirstPageFetched = onFirstPageFetched
                 )
             }
             apiResponse.data?.isNotEmpty() == true -> {
@@ -293,7 +298,7 @@ object FolderFilesProvider {
                     remoteFolder = localFolder,
                     apiResponse = apiResponse,
                     isFirstPage = folderFilesProviderArgs.isFirstPage,
-                    isCompleteFolder = isCompleteFolder
+                    isCompleteFolder = isCompleteFolder,
                 )
                 val folderFiles = if (folderWithChildren) ArrayList(apiResponseData) else arrayListOf()
                 FolderFilesProviderResult(folder = localFolder, folderFiles = folderFiles, isComplete = isCompleteFolder)

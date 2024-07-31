@@ -143,12 +143,15 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
+            val userDriveOrDefault = userDrive ?: UserDrive(sharedWithMe = true)
             sharedWithMeViewModel.loadSharedWithMeFiles(
                 parentId = folderId,
                 order = fileListViewModel.sortType,
-                userDrive = userDrive ?: UserDrive(sharedWithMe = true),
+                userDrive = userDriveOrDefault,
                 isNewSort = isNewSort,
-            )
+            ) { parentFolder ->
+                mainViewModel.loadCurrentFolder(folderId = parentFolder?.id ?: folderId, userDriveOrDefault)
+            }
         }
     }
 }
