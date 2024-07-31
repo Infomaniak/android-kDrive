@@ -314,8 +314,10 @@
                 android:id="@+id/coloredFolder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:icon="@drawable/ic_color_bucket"
-                app:text="@string/buttonChangeFolderColor" />
+                app:text="@string/buttonChangeFolderColor"
+                tools:visibility="visible" />
 
             <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/dropBox"
@@ -398,11 +400,11 @@
                 android:id="@+id/print"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:icon="@drawable/ic_print"
                 app:iconTint="@color/iconColor"
                 app:text="@string/actionPrint"
-                android:visibility="gone"
-                tools:visibility="visible"/>
+                tools:visibility="visible" />
 
             <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/downloadFile"
