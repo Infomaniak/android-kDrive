@@ -440,13 +440,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     }
 
     protected open fun setupFileAdapter() {
-        observeAndDisplayNetworkAvailability(
-            mainViewModel = mainViewModel,
-            noNetworkBinding = binding.noNetworkInclude,
-            noNetworkBindingDirectParent = binding.fileListLayout,
-            additionalChanges = { isInternetAvailable -> fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable) }
-        )
-
         multiSelectManager.apply {
             openMultiSelect = { openMultiSelect() }
             updateMultiSelect = { onUpdateMultiSelect() }
@@ -500,6 +493,13 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 checkIfNoFiles()
             }
         }
+
+        observeAndDisplayNetworkAvailability(
+            mainViewModel = mainViewModel,
+            noNetworkBinding = binding.noNetworkInclude,
+            noNetworkBindingDirectParent = binding.fileListLayout,
+            additionalChanges = { isInternetAvailable -> fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable) }
+        )
     }
 
     protected open fun homeClassName(): String? = null
@@ -670,7 +670,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     ) {
         showPendingFiles()
 
-        val isNetworkUnavailable = mainViewModel.isInternetAvailable.value == false
+        val isNetworkUnavailable = mainViewModel.isNetworkAvailable.value == false
 
         fileListViewModel.getFiles(
             folderId,
@@ -835,7 +835,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         if (_binding == null) return
 
         with(binding) {
-            val isOffline = mainViewModel.isInternetAvailable.value == false
+            val isOffline = mainViewModel.isNetworkAvailable.value == false
             val hasFilesAndIsOffline = !hideFileList && isOffline
 
             sortLayout.isGone = hideFileList

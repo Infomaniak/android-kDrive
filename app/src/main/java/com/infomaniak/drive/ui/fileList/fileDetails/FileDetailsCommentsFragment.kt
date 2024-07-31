@@ -66,7 +66,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
             noCommentsLayout.toggleVisibility(isVisible = true)
 
             onClickAddCommentButton = {
-                mainViewModel.isInternetAvailable.value?.let { isConnected ->
+                mainViewModel.isNetworkAvailable.value?.let { isConnected ->
                     openOnlyOfficeDocument(currentFile, isConnected)
                 }
             }

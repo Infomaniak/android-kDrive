@@ -172,7 +172,6 @@ class MainActivity : BaseActivity() {
 
         setupBottomNavigation()
         handleNavigateToDestinationFileId()
-        mainViewModel.observeNetworkStatus()
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
