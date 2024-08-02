@@ -26,6 +26,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
@@ -35,7 +36,6 @@ import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActio
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.lib.core.utils.safeNavigate
 
 class SharedWithMeFragment : FileSubTypeListFragment() {
@@ -52,10 +52,13 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val isRoot = folderId == ROOT_ID && !navigationArgs.driveId.isPositive()
+        val isRoot = folderId == ROOT_ID
         mainViewModel.setCurrentFolder(null)
         userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = true).also {
-            mainViewModel.loadCurrentFolder(folderId, userDrive = it)
+            mainViewModel.loadCurrentFolder(
+                folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderId,
+                userDrive = it,
+            )
         }
 
         downloadFiles = DownloadFiles()
