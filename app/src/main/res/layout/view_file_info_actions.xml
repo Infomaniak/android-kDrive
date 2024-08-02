@@ -299,8 +299,10 @@
                 android:id="@+id/manageCategories"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:icon="@drawable/ic_category"
-                app:text="@string/manageCategoriesTitle" />
+                app:text="@string/manageCategoriesTitle"
+                tools:visibility="visible" />
 
             <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/addFavorites"
@@ -438,8 +440,10 @@
                 android:id="@+id/leaveShare"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:icon="@drawable/ic_link_broken"
-                app:text="@string/buttonLeaveShare" />
+                app:text="@string/buttonLeaveShare"
+                tools:visibility="visible" />
 
             <com.infomaniak.drive.views.BottomSheetItemView
                 android:id="@+id/deleteFile"
@@ -452,9 +456,11 @@
                 android:id="@+id/cancelExternalImport"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 app:icon="@drawable/ic_remove"
                 app:iconTint="@color/red_error"
-                app:text="@string/buttonCancelImport" />
+                app:text="@string/buttonCancelImport"
+                tools:visibility="visible" />
 
         </LinearLayout>
     </LinearLayout>
