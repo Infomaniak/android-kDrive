@@ -79,7 +79,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         PreviewPDFHandler(
             context = requireContext(),
             setPrintVisibility = { isGone ->
-                // TODO: make sure it won't crash because of null binding
+                if (_binding == null) return@PreviewPDFHandler
+
                 when (bottomSheetView) {
                     is FileInfoActionsView -> (bottomSheetView as FileInfoActionsView).setPrintVisibility(isGone)
                     is ExternalFileInfoActionsView -> (bottomSheetView as ExternalFileInfoActionsView).isPrintingHidden(isGone)
