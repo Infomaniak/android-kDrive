@@ -24,8 +24,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption.RENAME
-import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption.VERSION
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
@@ -40,7 +38,7 @@ import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.api.ApiController.ApiMethod.POST
+import com.infomaniak.lib.core.api.ApiController.ApiMethod
 import com.infomaniak.lib.core.api.ApiController.callApi
 import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
@@ -196,8 +194,8 @@ class UploadTask(
     private suspend fun launchTaskEmptyFile() = withContext(Dispatchers.IO) {
         callApi<ApiResponse<File>>(
             uploadFile.uploadEmptyFileUrl(),
-            POST,
-            okHttpClient = runBlocking { AccountUtils.getHttpClient(uploadFile.userId, timeout = 120) }
+            ApiMethod.POST,
+            okHttpClient = runBlocking { AccountUtils.getHttpClient(uploadFile.userId, timeout = 120) },
         )
     }
 
@@ -350,7 +348,7 @@ class UploadTask(
 
     private fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
         val sessionBody = UploadSession.StartSessionBody(
-            conflict = if (replaceOnConflict()) VERSION else RENAME,
+            conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
             directoryId = remoteFolder,
             fileName = fileName,
@@ -433,7 +431,7 @@ class UploadTask(
                 "?directory_id=$remoteFolder" +
                 "&total_size=0" +
                 "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
-                "&conflict=" + RENAME.toString()
+                "&conflict=" + ConflictOption.RENAME.toString()
 
         remoteSubFolder?.let {
             route += "&directory_path=$it"
