@@ -22,6 +22,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
@@ -33,9 +35,13 @@ import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.PreviewPDFUtils
+import com.infomaniak.drive.utils.saveToKDrive
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
 
@@ -94,7 +100,22 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     override fun goToFolder() = Unit
     override fun manageCategoriesClicked(fileId: Int) = Unit
     override fun shareFile() = Unit // TODO
-    override fun saveToKDrive() = Unit // TODO
+    override fun saveToKDrive() {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val apiResponse = PreviewPDFUtils.convertPdfFileToIOFile(requireContext(), currentFile, userDrive) {}
+
+            if (apiResponse.isSuccess()) {
+                val uri = FileProvider.getUriForFile(
+                    requireContext(),
+                    requireContext().getString(R.string.FILE_AUTHORITY),
+                    currentFile.getPublicShareCache(requireContext())
+                )
+
+                requireContext().saveToKDrive(uri)
+            }
+        }
+    }
+
     override fun downloadFileClicked() {
         super<BasePreviewSliderFragment>.downloadFileClicked()
         // TODO
