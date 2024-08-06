@@ -330,6 +330,12 @@ open class File(
         else getCacheFile(context).apply { if (exists()) delete() }
     }
 
+    fun getPublicShareCache(context: Context): IOFile {
+        val folder = IOFile(context.filesDir, context.getString(R.string.EXPOSED_PUBLIC_SHARE_DIR))
+        if (!folder.exists()) folder.mkdirs()
+        return IOFile(folder, name)
+    }
+
     fun isDisabled(): Boolean {
         return rights?.canRead == false && rights?.canShow == false
     }

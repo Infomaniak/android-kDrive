@@ -60,7 +60,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected abstract val previewSliderViewModel: PreviewSliderViewModel
 
-
     protected abstract val bottomSheetView: View
     protected abstract val bottomSheetBehavior: BottomSheetBehavior<View>
 
