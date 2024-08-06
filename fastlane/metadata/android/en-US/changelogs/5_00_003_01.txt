@@ -1,0 +1,3 @@
+- Fix of bug allowing a scan to be saved in invalid location
+- Fix the current folder from "Shared with me" root folder that was nullable
+- Fix default visibility of bottom sheet items

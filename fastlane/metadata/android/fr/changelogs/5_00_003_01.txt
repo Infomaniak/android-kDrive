@@ -1,0 +1,3 @@
+- Correction d'un bogue permettant d'enregistrer un scan dans un emplacement non valide
+- Correction du dossier actuel du dossier racine "Shared with me" qui était nullable
+- Correction de la visibilité par défaut des feuilles inférieures
