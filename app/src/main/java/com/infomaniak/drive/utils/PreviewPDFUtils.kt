@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import com.google.gson.JsonParser
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.lib.core.models.ApiResponse
@@ -38,7 +37,6 @@ object PreviewPDFUtils {
         context: Context,
         file: File,
         userDrive: UserDrive,
-        shareLinkUuid: String,
         onProgress: (progress: Int) -> Unit,
     ): ApiResponse<IOFile> {
         return runCatching {
@@ -52,7 +50,7 @@ object PreviewPDFUtils {
             val pdfNeedDownload = !file.isOnlyOfficePreview() && file.isObsoleteOrNotIntact(outputFile)
 
             if (officePdfNeedDownload || pdfNeedDownload) {
-                downloadFile(outputFile, file, userDrive, shareLinkUuid, onProgress)
+                downloadFile(outputFile, file, onProgress)
                 outputFile.setLastModified(file.getLastModifiedInMilliSecond())
             }
 
@@ -71,22 +69,10 @@ object PreviewPDFUtils {
         }
     }
 
-    private fun downloadFile(
-        externalOutputFile: IOFile,
-        fileModel: File,
-        userDrive: UserDrive,
-        shareLinkUuid: String,
-        onProgress: (progress: Int) -> Unit,
-    ) {
+    private fun downloadFile(externalOutputFile: IOFile, fileModel: File, onProgress: (progress: Int) -> Unit) {
         if (externalOutputFile.exists()) externalOutputFile.delete()
 
-        val downLoadUrlBase = if (shareLinkUuid.isNotBlank()) {
-            ApiRoutes.downloadShareLinkFile(driveId = userDrive.driveId, linkUuid = shareLinkUuid, file = fileModel)
-        } else {
-            ApiRoutes.downloadFile(fileModel)
-        }
-        val downLoadUrl = downLoadUrlBase + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
-
+        val downLoadUrl = fileModel.downloadUrl() + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
         val request = Request.Builder().url(downLoadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
         val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
 

@@ -208,7 +208,7 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
-        return if (offlineFile != null && offlineIsComplete) offlineFile.toUri() else Uri.parse(fileDownloadUrl)
+        return if (offlineFile != null && offlineIsComplete) offlineFile.toUri() else Uri.parse(file.downloadUrl())
     }
 
     private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
