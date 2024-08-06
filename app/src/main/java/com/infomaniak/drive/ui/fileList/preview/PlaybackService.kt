@@ -41,6 +41,9 @@ import com.infomaniak.lib.core.networking.HttpUtils
 @UnstableApi
 class PlaybackService : MediaSessionService() {
 
+    private var mediaSession: MediaSession? = null
+    private var exoPlayer: ExoPlayer? = null
+
     private val mediaSessionCallback = object : MediaSession.Callback {
 
         // When the user returns from the PreviewVideoFragment, we want to stop
@@ -51,9 +54,6 @@ class PlaybackService : MediaSessionService() {
             stopSelf()
         }
     }
-
-    private var mediaSession: MediaSession? = null
-    private var exoPlayer: ExoPlayer? = null
 
     override fun onCreate() {
         super.onCreate()
