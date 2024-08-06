@@ -34,15 +34,16 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
+import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
-import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.FileInfoActionsView
-import com.infomaniak.drive.views.PreviewHeaderView
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.launch
 
 class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {

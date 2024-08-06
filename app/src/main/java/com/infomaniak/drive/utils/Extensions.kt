@@ -279,7 +279,7 @@ fun Fragment.showSnackbar(
     }
 }
 
-fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable:  Boolean) {
+fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable: Boolean) {
     if (isInternetAvailable) {
         if (file.conversion?.whenOnlyoffice == true) {
             findNavController().navigate(
@@ -290,7 +290,7 @@ fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable:  Boolean) {
             requireContext().openOnlyOfficeActivity(file)
         }
     } else {
-        Toast.makeText(requireContext(),getString(R.string.noConnection),Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), getString(R.string.noConnection), Toast.LENGTH_LONG).show()
     }
 }
 
