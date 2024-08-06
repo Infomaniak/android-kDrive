@@ -278,7 +278,6 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                 context = requireContext(),
                 file = file,
                 userDrive = previewSliderViewModel.userDrive,
-                shareLinkUuid = previewSliderViewModel.shareLinkUuid,
             ).observe(viewLifecycleOwner) { apiResponse ->
                 apiResponse.data?.let { pdfFile ->
                     this@PreviewPDFFragment.pdfFile = pdfFile
@@ -301,17 +300,12 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
         private var pdfJob = Job()
 
-        fun downloadPdfFile(
-            context: Context,
-            file: File,
-            userDrive: UserDrive,
-            shareLinkUuid: String,
-        ): LiveData<ApiResponse<IOFile>> {
+        fun downloadPdfFile(context: Context, file: File, userDrive: UserDrive): LiveData<ApiResponse<IOFile>> {
             pdfJob.cancel()
             pdfJob = Job()
 
             return liveData(Dispatchers.IO + pdfJob) {
-                val pdfFile = PreviewPDFUtils.convertPdfFileToIOFile(context, file, userDrive, shareLinkUuid) {
+                val pdfFile = PreviewPDFUtils.convertPdfFileToIOFile(context, file, userDrive) {
                     viewModelScope.launch(Dispatchers.Main) {
                         downloadProgress.value = it
                     }
