@@ -140,7 +140,6 @@ dependencies {
 
     def exoplayer_version = '1.4.0'
     implementation "androidx.media3:media3-exoplayer:$exoplayer_version"
-    implementation "androidx.media3:media3-exoplayer-dash:$exoplayer_version"
     implementation "androidx.media3:media3-ui:$exoplayer_version"
     implementation "androidx.media3:media3-datasource-okhttp:$exoplayer_version"
     implementation "androidx.media3:media3-session:$exoplayer_version"
