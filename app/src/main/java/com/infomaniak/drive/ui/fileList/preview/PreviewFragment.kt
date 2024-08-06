@@ -41,15 +41,6 @@ open class PreviewFragment : Fragment() {
 
     protected lateinit var file: File
 
-    protected inline val fileDownloadUrl: String
-        get() = with(previewSliderViewModel) {
-            if (shareLinkUuid.isBlank()) {
-                ApiRoutes.downloadFile(file)
-            } else {
-                ApiRoutes.downloadShareLinkFile(userDrive.driveId, shareLinkUuid, file)
-            }
-        }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
             navigationArgs?.let {
