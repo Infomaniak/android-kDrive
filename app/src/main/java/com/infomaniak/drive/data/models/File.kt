@@ -204,6 +204,12 @@ open class File(
         ApiRoutes.showOfficeShareLinkFile(driveId, externalShareLinkUuid, file = this)
     }
 
+    fun downloadUrl() = if (externalShareLinkUuid.isBlank()) {
+        ApiRoutes.downloadFile(file = this)
+    } else {
+        ApiRoutes.downloadShareLinkFile(driveId, externalShareLinkUuid, file = this)
+    }
+
     fun getFileType(): ExtensionType {
         return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {
             ExtensionType.ARCHIVE.value -> ExtensionType.ARCHIVE
