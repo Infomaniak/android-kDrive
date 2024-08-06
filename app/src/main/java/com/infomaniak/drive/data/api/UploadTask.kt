@@ -24,6 +24,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
+import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFileUrl
+import com.infomaniak.drive.data.api.ApiRepository.uploadUrl
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
@@ -31,7 +33,6 @@ import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
@@ -58,7 +59,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import java.io.BufferedInputStream
 import java.io.FileNotFoundException
-import java.net.URLEncoder
 import java.util.Date
 import kotlin.math.ceil
 
@@ -192,10 +192,19 @@ class UploadTask(
     }
 
     private suspend fun launchTaskEmptyFile() = withContext(Dispatchers.IO) {
+        val uploadUrl = with(uploadFile) {
+            uploadEmptyFileUrl(
+                driveId = driveId,
+                directoryId = remoteFolder,
+                fileName = fileName,
+                conflictOption = ConflictOption.RENAME,
+                directoryPath = remoteSubFolder,
+            )
+        }
+
         callApi<ApiResponse<File>>(
-            uploadFile.uploadEmptyFileUrl(),
+            uploadUrl,
             ApiMethod.POST,
-            okHttpClient = runBlocking { AccountUtils.getHttpClient(uploadFile.userId, timeout = 120) },
         )
     }
 
@@ -416,28 +425,6 @@ class UploadTask(
                 if (data != null) resetUploadToken()
             }
         }
-    }
-
-    private fun UploadFile.uploadUrl(uploadHost: String, chunkNumber: Int, currentChunkSize: Int): String {
-        return ApiRoutes.addChunkToSession(
-            uploadHost,
-            driveId,
-            uploadToken!!
-        ) + "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
-    }
-
-    private fun UploadFile.uploadEmptyFileUrl(): String {
-        var route = ApiRoutes.uploadFile(driveId) +
-                "?directory_id=$remoteFolder" +
-                "&total_size=0" +
-                "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
-                "&conflict=" + ConflictOption.RENAME.toString()
-
-        remoteSubFolder?.let {
-            route += "&directory_path=$it"
-        }
-
-        return route
     }
 
     /**

@@ -426,7 +426,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             level = SentryLevel.INFO
         })
 
-        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize >= 0) {
+        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
             UploadFile(
                 uri = uri.toString(),
                 driveId = syncSettings.driveId,
