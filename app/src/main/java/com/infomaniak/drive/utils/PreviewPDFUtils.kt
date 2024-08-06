@@ -38,39 +38,30 @@ object PreviewPDFUtils {
         file: File,
         userDrive: UserDrive,
         onProgress: (progress: Int) -> Unit,
-    ): ApiResponse<IOFile> {
-        return runCatching {
-            val outputFile = when {
-                file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
-                file.isOffline -> file.getOfflineFile(context, userDrive.userId)!!
-                file.externalShareLinkUuid.isNotBlank() -> file.getPublicShareCache(context)
-                else -> file.getCacheFile(context, userDrive)
-            }
-
-            val officePdfNeedDownload = file.isOnlyOfficePreview() && (outputFile.lastModified() / 1000) < file.lastModifiedAt
-            val pdfNeedDownload = !file.isOnlyOfficePreview() && file.isObsoleteOrNotIntact(outputFile)
-
-            if (officePdfNeedDownload || pdfNeedDownload) {
-                downloadFile(outputFile, file, onProgress)
-                outputFile.setLastModified(file.getLastModifiedInMilliSecond())
-            }
-
-            ApiResponse(ApiResponseStatus.SUCCESS, outputFile)
-        }.getOrElse { exception ->
-            exception.printStackTrace()
-            val error = when (exception) {
-                is PasswordProtectedException -> R.string.previewFileProtectedError
-                else -> R.string.previewNoPreview
-            }
-            ApiResponse(
-                result = ApiResponseStatus.ERROR,
-                data = null,
-                translatedError = error,
-            )
+    ): ApiResponse<IOFile> = runCatching {
+        val outputFile = when {
+            file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
+            file.isOffline -> file.getOfflineFile(context, userDrive.userId)!!
+            file.externalShareLinkUuid.isNotBlank() -> file.getPublicShareCache(context)
+            else -> file.getCacheFile(context, userDrive)
         }
+
+        ApiResponse(ApiResponseStatus.SUCCESS, data = convertFileToIOFile(file, outputFile, shouldBePdf = true, onProgress))
+    }.getOrElse { exception ->
+        exception.printStackTrace()
+        val error = when (exception) {
+            is PasswordProtectedException -> R.string.previewFileProtectedError
+            else -> R.string.previewNoPreview
+        }
+        ApiResponse(result = ApiResponseStatus.ERROR, data = null, translatedError = error)
     }
 
-    private fun downloadFile(externalOutputFile: IOFile, fileModel: File, onProgress: (progress: Int) -> Unit) {
+    fun downloadFile(
+        externalOutputFile: IOFile,
+        fileModel: File,
+        shouldBePdf: Boolean,
+        onProgress: (progress: Int) -> Unit
+    ) {
         if (externalOutputFile.exists()) externalOutputFile.delete()
 
         val downloadUrl = fileModel.downloadUrl() + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
@@ -92,18 +83,18 @@ object PreviewPDFUtils {
                     throw Exception("Download error")
                 }
             }
-            when (it.body?.contentType()?.toString()) {
-                "application/pdf" -> createTempPdfFile(it, externalOutputFile)
-                else -> throw UnsupportedOperationException("File not supported")
+
+            if (shouldBePdf && it.body?.contentType()?.toString() != "application/pdf") {
+                throw UnsupportedOperationException("File not supported")
             }
+
+            createTempFile(it, externalOutputFile)
         }
     }
 
-    private fun createTempPdfFile(response: Response, file: IOFile) {
+    private fun createTempFile(response: Response, file: IOFile) {
         BufferedInputStream(response.body?.byteStream(), BUFFER_SIZE).use { input ->
-            file.outputStream().use { output ->
-                input.copyTo(output, BUFFER_SIZE)
-            }
+            file.outputStream().use { output -> input.copyTo(output, BUFFER_SIZE) }
         }
     }
 
