@@ -24,11 +24,13 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.RemoteFileException
+import com.infomaniak.drive.utils.getAvailableStorageInBytes
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
@@ -50,33 +52,53 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
     override suspend fun doWork(): Result {
         return runCatching {
             SentryLog.i(workerTag(), "Work started")
-            downloadAction()
-        }.getOrElse { exception ->
-            exception.printStackTrace()
-            when (exception) {
-                is CancellationException -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && stopReason == JobParameters.STOP_REASON_TIMEOUT) {
-                        SentryLog.e(workerTag(), "Stopped because a time out error", exception)
-                        Result.retry()
-                    } else {
-                        Result.failure()
-                    }
-                }
-                is UploadTask.NetworkException -> {
-                    Result.retry()
-                }
-                is RemoteFileException -> {
-                    Sentry.captureException(exception)
-                    Result.failure()
-                }
-                else -> {
-                    SentryLog.e(workerTag(), "Failure", exception)
-                    Result.failure()
-                }
+            val memoryLeftAfterDownload = (getAvailableStorageInBytes() - getSizeOfDownload()) / BYTES_TO_MB
+            val hasSpaceLeftAfterDownload = memoryLeftAfterDownload > MIN_SPACE_LEFT_AFTER_DOWNLOAD_MB
+            if (hasSpaceLeftAfterDownload) {
+                downloadAction()
+            } else {
+                SentryLog.i(
+                    workerTag(),
+                    "After the download of file(s), the device storage would have been below 500 MB so we cancel the download."
+                )
+                Result.failure(getNotEnoughSpaceOutputData())
             }
+        }.getOrElse { throwable ->
+            onWorkFailure(throwable)
         }.also {
             onFinish()
             Log.i(workerTag(), "Work finished")
+        }
+    }
+
+    private fun getNotEnoughSpaceOutputData(): Data {
+        return Data.Builder()
+            .putBoolean(HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY, false)
+            .build()
+    }
+
+    private fun onWorkFailure(throwable: Throwable): Result {
+        throwable.printStackTrace()
+        return when (throwable) {
+            is CancellationException -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && stopReason == JobParameters.STOP_REASON_TIMEOUT) {
+                    SentryLog.e(workerTag(), "Stopped because a time out error", throwable)
+                    Result.retry()
+                } else {
+                    Result.failure()
+                }
+            }
+            is UploadTask.NetworkException -> {
+                Result.retry()
+            }
+            is RemoteFileException -> {
+                Sentry.captureException(throwable)
+                Result.failure()
+            }
+            else -> {
+                SentryLog.e(workerTag(), "Failure", throwable)
+                Result.failure()
+            }
         }
     }
 
@@ -89,6 +111,8 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
 
     abstract fun isForOneFile(): Boolean
 
+    abstract fun getSizeOfDownload(): Long
+
     abstract fun workerTag(): String
 
     override suspend fun getForegroundInfo() = ForegroundInfo(notificationId, downloadProgressNotification.build())
@@ -99,4 +123,16 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
         val id: Int,
         val notification: NotificationCompat.Builder
     )
+
+    companion object {
+        const val HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY = "HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY"
+
+        const val DRIVE_ID = "drive_id"
+        const val FILE_ID = "file_id"
+        const val PROGRESS = "progress"
+        const val USER_ID = "user_id"
+
+        private const val MIN_SPACE_LEFT_AFTER_DOWNLOAD_MB = 500
+        private const val BYTES_TO_MB = 1_000_000
+    }
 }

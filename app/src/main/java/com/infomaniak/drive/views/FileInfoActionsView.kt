@@ -48,7 +48,7 @@ import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.ShareLink
-import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
@@ -365,7 +365,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             if (currentFile.getWorkerTag() != tag) return@observe
 
             val fileId: Int = currentFile.id
-            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
+            val progress = workInfo.progress.getInt(BaseDownloadWorker.PROGRESS, 100)
 
             SentryLog.d("FileInfoActionsView", "observeOfflineProgression> $progress% file:$fileId state:${workInfo.state}")
 

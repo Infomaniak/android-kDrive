@@ -73,15 +73,20 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     override val notificationId = fileId
 
-    private suspend fun downloadFile(): Result {
-        val result = downloadOfflineFileManager.execute(applicationContext, fileId) { progress, downloadedFileId ->
-            setProgressAsync(
-                workDataOf(BulkDownloadWorker.PROGRESS to progress, BulkDownloadWorker.FILE_ID to downloadedFileId)
-            )
-        }
+    override fun getSizeOfDownload() = file?.size ?: 0L
 
-        if (result == Result.success()) {
-            applicationContext.cancelNotification(fileId)
+    private suspend fun downloadFile(): Result {
+        var result = Result.failure()
+        file?.let {
+            result = downloadOfflineFileManager.execute(applicationContext, it) { progress, downloadedFileId ->
+                setProgressAsync(
+                    workDataOf(PROGRESS to progress, FILE_ID to downloadedFileId)
+                )
+            }
+
+            if (result == Result.success()) {
+                applicationContext.cancelNotification(fileId)
+            }
         }
 
         return result
@@ -97,10 +102,6 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     companion object {
         const val TAG = "DownloadWorker"
-        const val DRIVE_ID = "drive_id"
-        const val FILE_ID = "file_id"
         const val FILE_NAME = "file_name"
-        const val PROGRESS = "progress"
-        const val USER_ID = "user_id"
     }
 }

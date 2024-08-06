@@ -515,6 +515,7 @@
     <string name="noSelectMediaFolders">No hay carpeta seleccionada</string>
     <string name="noSyncFolderNotificationDescription">Pulse aquí para configurar las carpetas a sincronizar</string>
     <string name="noSyncFolderNotificationTitle">No hay carpetas seleccionadas para la copia de seguridad automática</string>
+    <string name="notEnoughSpaceAfterDownload">La descarga se ha cancelado debido a espacio de almacenamiento insuficiente en su dispositivo.</string>
     <string name="notEnoughStorageDescription1">Casi todo el espacio de almacenamiento de tu kDrive está ocupado. Mejora tu oferta y desbloquea nuevas funciones.</string>
     <string name="notEnoughStorageDescription2">Casi todo el espacio de almacenamiento de tu kDrive está ocupado. Ponte en contacto con tu administrador para que mejore tu oferta.</string>
     <string name="notEnoughStorageUsed">utilizados</string>

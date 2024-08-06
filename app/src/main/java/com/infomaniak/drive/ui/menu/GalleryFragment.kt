@@ -35,7 +35,7 @@ import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.services.DownloadWorker
+import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.FragmentGalleryBinding
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
@@ -124,10 +124,10 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
             val workInfo = workInfoList.firstOrNull { it.state == WorkInfo.State.RUNNING } ?: return@observe
 
-            val fileId: Int = workInfo.progress.getInt(DownloadWorker.FILE_ID, 0)
+            val fileId: Int = workInfo.progress.getInt(BaseDownloadWorker.FILE_ID, 0)
             if (fileId == 0) return@observe
 
-            val progress = workInfo.progress.getInt(DownloadWorker.PROGRESS, 100)
+            val progress = workInfo.progress.getInt(BaseDownloadWorker.PROGRESS, 100)
             if (progress == 100) galleryAdapter.updateOfflineStatus(fileId)
         }
 
