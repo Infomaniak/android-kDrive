@@ -29,6 +29,7 @@ import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -164,7 +165,12 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     private fun getMediaItem(offlineFile: IOFile?, offlineIsComplete: Boolean): MediaItem {
+        val mediaMetadata = MediaMetadata.Builder()
+            .setTitle(file.name)
+            .build()
         return MediaItem.Builder()
+            .setMediaId(file.id.toString())
+            .setMediaMetadata(mediaMetadata)
             .setUri(getUri(offlineFile, offlineIsComplete))
             .build()
     }
