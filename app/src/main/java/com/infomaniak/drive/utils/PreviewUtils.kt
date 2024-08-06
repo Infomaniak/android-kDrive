@@ -36,6 +36,7 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.preview.BitmapPrintDocumentAdapter
 import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
+import com.infomaniak.drive.utils.PreviewPDFUtils.downloadFile
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
 import com.infomaniak.lib.core.utils.lightNavigationBar
@@ -160,4 +161,24 @@ private fun Context.printPdf(
         bitmaps.isNullOrEmpty().not() -> printBitmaps()
         file != null -> printFile()
     }
+}
+
+fun convertFileToIOFile(
+    fileModel: File,
+    cacheFile: IOFile,
+    shouldBePdf: Boolean = false,
+    onProgress: (progress: Int) -> Unit,
+): IOFile {
+    val fileNeedDownload = if (fileModel.isOnlyOfficePreview()) {
+        fileModel.isObsolete(cacheFile)
+    } else {
+        fileModel.isObsoleteOrNotIntact(cacheFile)
+    }
+
+    if (fileNeedDownload) {
+        downloadFile(cacheFile, fileModel, shouldBePdf, onProgress)
+        cacheFile.setLastModified(fileModel.getLastModifiedInMilliSecond())
+    }
+
+    return cacheFile
 }
