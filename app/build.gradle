@@ -144,7 +144,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:6.4.1'
+    implementation 'com.airbnb.android:lottie:6.5.0'
     implementation 'com.github.Infomaniak:android-pdfview:3.2.10'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.5'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
