@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
-import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
@@ -41,8 +40,6 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
 import okhttp3.OkHttpClient
-import java.net.URLEncoder
-import java.util.Date
 
 object ApiRepository : ApiRepositoryCore() {
 
@@ -165,39 +162,6 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun cancelSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<Boolean> {
         return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE, okHttpClient = okHttpClient)
-    }
-
-    fun UploadFile.uploadUrl(uploadHost: String, chunkNumber: Int, currentChunkSize: Int): String {
-        return ApiRoutes.addChunkToSession(
-            uploadHost,
-            driveId,
-            uploadToken!!
-        ) + "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
-    }
-
-    fun uploadEmptyFileUrl(
-        driveId: Int,
-        directoryId: Int,
-        fileName: String,
-        conflictOption: ConflictOption,
-        directoryPath: String? = null,
-        lastModifiedAt: Date? = null,
-    ): String {
-        var route = ApiRoutes.uploadFile(driveId) +
-                "?directory_id=$directoryId" +
-                "&total_size=0" +
-                "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
-                "&conflict=" + conflictOption.toString()
-
-        directoryPath?.let {
-            route += "&directory_path=$it"
-        }
-
-        lastModifiedAt?.let {
-            route += "&last_modified_at=${it.time / 1_000L}"
-        }
-
-        return route
     }
 
     fun createFolder(

@@ -24,8 +24,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFileUrl
-import com.infomaniak.drive.data.api.ApiRepository.uploadUrl
+import com.infomaniak.drive.data.api.ApiRoutes.uploadEmptyFileUrl
+import com.infomaniak.drive.data.api.ApiRoutes.uploadUrl
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
@@ -174,7 +174,16 @@ class UploadTask(
 
                     data = if (count == chunkSize) data else data.copyOf(count)
 
-                    val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count, uploadHost = uploadHost)
+                    val url = with(uploadFile) {
+                        uploadUrl(
+                            driveId = driveId,
+                            uploadToken = uploadToken,
+                            chunkNumber = chunkNumber,
+                            currentChunkSize = count,
+                            uploadHost = uploadHost
+                        )
+                    }
+
                     SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
                     @Suppress("DeferredResultUnused")
@@ -191,7 +200,7 @@ class UploadTask(
         onFinish(uri)
     }
 
-    private suspend fun launchTaskEmptyFile() = withContext(Dispatchers.IO) {
+    private fun launchTaskEmptyFile() {
         val uploadUrl = with(uploadFile) {
             uploadEmptyFileUrl(
                 driveId = driveId,

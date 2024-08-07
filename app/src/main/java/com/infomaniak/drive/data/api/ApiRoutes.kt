@@ -18,9 +18,12 @@
 package com.infomaniak.drive.data.api
 
 import com.infomaniak.drive.BuildConfig.*
+import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.utils.FileId
+import java.net.URLEncoder
+import java.util.Date
 
 object ApiRoutes {
 
@@ -283,6 +286,39 @@ object ApiRoutes {
     fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/finish"
 
     fun uploadFile(driveId: Int) = "${driveURL(driveId)}/upload"
+
+    fun uploadUrl(uploadHost: String, driveId: Int, uploadToken: String?, chunkNumber: Int, currentChunkSize: Int): String {
+        return addChunkToSession(
+            uploadHost,
+            driveId,
+            uploadToken!!
+        ) + "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
+    }
+
+    fun uploadEmptyFileUrl(
+        driveId: Int,
+        directoryId: Int,
+        fileName: String,
+        conflictOption: ConflictOption,
+        directoryPath: String? = null,
+        lastModifiedAt: Date? = null
+    ): String {
+        var route = uploadFile(driveId) +
+                "?directory_id=$directoryId" +
+                "&total_size=0" +
+                "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
+                "&conflict=" + conflictOption.toString()
+
+        directoryPath?.let {
+            route += "&directory_path=$it"
+        }
+
+        lastModifiedAt?.let {
+            route += "&last_modified_at=${it.time / 1_000L}"
+        }
+
+        return route
+    }
     //endregion
 
     /** Root Directory */
