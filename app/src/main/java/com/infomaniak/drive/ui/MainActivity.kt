@@ -60,6 +60,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
+import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
@@ -96,6 +97,7 @@ import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -203,6 +205,26 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setupBottomNavigation() = with(binding) {
+        bottomNavigation.findViewById<View>(R.id.menuFragment).setOnLongClickListener {
+            navController.navigate(R.id.switchUserActivity)
+            true
+        }
+
+        bottomNavigation.findViewById<View>(R.id.menuFragment).setOnClickListener {
+            navController.navigate(R.id.menuFragment)
+
+            if (it.tag != null && Date().time - (it.tag as Date).time < DOUBLE_TAP_DELAY) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    trackAccountEvent("switch")
+                    AccountUtils.switchToNextUser()
+                }.also { navController.navigate(R.id.homeFragment) }
+
+                it.tag = null
+            } else {
+                it.tag = Date()
+            }
+        }
+
         bottomNavigation.apply {
             setupWithNavControllerCustom(navController)
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)
@@ -598,5 +620,6 @@ class MainActivity : BaseActivity() {
 
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
+        private const val DOUBLE_TAP_DELAY = 300L
     }
 }
