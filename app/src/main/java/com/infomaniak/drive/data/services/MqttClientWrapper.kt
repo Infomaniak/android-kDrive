@@ -145,7 +145,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
     }
 
     override fun connectionLost(cause: Throwable?) {
-        SentryLog.e("MQTT Error", "Connection has been lost. Stacktrace below.")
+        SentryLog.i("MQTT Error", "Connection has been lost. Stacktrace below.", cause)
         cause?.printStackTrace()
     }
 
