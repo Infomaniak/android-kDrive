@@ -35,7 +35,7 @@
         tools:ignore="ContentDescription" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/downloadProgress"
+        android:id="@+id/downloadProgressIndicator"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/marginStandardMedium"

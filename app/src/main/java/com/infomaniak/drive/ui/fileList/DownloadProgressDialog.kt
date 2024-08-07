@@ -78,7 +78,7 @@ class DownloadProgressDialog : DialogFragment() {
                 if (it == DownloadViewModel.PROGRESS_COMPLETE) {
                     setBackNavigationResult(action.value, fileId)
                 } else {
-                    binding.downloadProgress.progress = progress
+                    binding.downloadProgressIndicator.progress = progress
                 }
             } ?: run {
                 showSnackbar(R.string.anErrorHasOccurred)

@@ -62,7 +62,7 @@
         android:layout_marginVertical="36dp"
         android:gravity="center"
         android:textColor="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@id/downloadProgress"
+        app:layout_constraintBottom_toTopOf="@id/downloadProgressIndicator"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toEndOf="@id/start"
         app:layout_constraintTop_toBottomOf="@id/fileIcon"
@@ -70,7 +70,7 @@
         tools:text="guide-kdrive.doc" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/downloadProgress"
+        android:id="@+id/downloadProgressIndicator"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:visibility="gone"
@@ -95,7 +95,7 @@
         app:layout_constraintBottom_toTopOf="@id/bigOpenWithButton"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toEndOf="@id/start"
-        app:layout_constraintTop_toBottomOf="@id/downloadProgress"
+        app:layout_constraintTop_toBottomOf="@id/downloadProgressIndicator"
         app:layout_goneMarginTop="@dimen/marginStandardMedium" />
 
     <com.google.android.material.button.MaterialButton
