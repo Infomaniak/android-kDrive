@@ -451,7 +451,7 @@ object Utils {
             setCancelable(false)
             DialogDownloadProgressBinding.inflate(LayoutInflater.from(context)).apply {
                 icon.isGone = true
-                downloadProgress.isIndeterminate = true
+                downloadProgressIndicator.isIndeterminate = true
                 setView(root)
             }
         }.show()

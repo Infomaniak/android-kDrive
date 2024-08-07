@@ -98,11 +98,11 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
             fileIcon.setImageResource(file.getFileType().icon)
             fileName.text = file.name
-            downloadProgress.isVisible = true
+            downloadProgressIndicator.isVisible = true
 
             previewPDFViewModel.downloadProgress.observe(viewLifecycleOwner) { progress ->
                 if (progress >= 100 && previewPDFViewModel.isJobCancelled()) downloadPdf()
-                downloadProgress.progress = progress
+                downloadProgressIndicator.progress = progress
             }
         }
 
@@ -241,7 +241,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     private fun displayError(isPasswordError: Boolean = false, isEmptyFileError: Boolean = false) {
         binding.downloadLayout.apply {
-            downloadProgress.isGone = true
+            downloadProgressIndicator.isGone = true
             previewDescription.setText(getErrorString(isPasswordError, isEmptyFileError))
 
             if (isPasswordError) bigOpenWithButton.text = resources.getString(R.string.buttonUnlock)
@@ -278,7 +278,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         this@PreviewPDFFragment.pdfFile = pdfFile
                         showPdf()
                     } ?: run {
-                        downloadProgress.isGone = true
+                        downloadProgressIndicator.isGone = true
                         previewDescription.setText(apiResponse.translatedError)
                         bigOpenWithButton.isVisible = true
                     }
