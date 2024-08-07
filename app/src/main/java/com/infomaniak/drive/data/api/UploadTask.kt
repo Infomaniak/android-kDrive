@@ -24,8 +24,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
+import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
 import com.infomaniak.drive.data.api.ApiRoutes.uploadEmptyFileUrl
-import com.infomaniak.drive.data.api.ApiRoutes.uploadUrl
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
@@ -175,12 +175,12 @@ class UploadTask(
                     data = if (count == chunkSize) data else data.copyOf(count)
 
                     val url = with(uploadFile) {
-                        uploadUrl(
+                        uploadChunkUrl(
                             driveId = driveId,
                             uploadToken = uploadToken,
                             chunkNumber = chunkNumber,
                             currentChunkSize = count,
-                            uploadHost = uploadHost
+                            uploadHost = uploadHost,
                         )
                     }
 
