@@ -37,6 +37,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -407,7 +408,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     showSnackbar(getString(R.string.allFileDuplicate, currentFile.name))
                     toggleBottomSheet(shouldShow = true)
                 }
-            } else if (fileResult.errorCode == "limit_exceeded_error") {
+            } else if (fileResult.errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
                 showSnackbar(R.string.errorFilesLimitExceeded)
                 toggleBottomSheet(shouldShow = true)
             } else {
@@ -464,10 +465,13 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     mainViewModel.refreshActivities.value = true
                     showSnackbar(getString(R.string.allFileMove, currentFile.name, destinationFolder.name))
                 } else {
-                    when (fileRequest.errorCode) {
-                        "limit_exceeded_error" -> showSnackbar(R.string.errorFilesLimitExceeded)
-                        else -> showSnackbar(R.string.errorMove)
+                    val messageRes = if (fileRequest.errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
+                        R.string.errorFilesLimitExceeded
+                    } else {
+                        R.string.errorMove
                     }
+
+                    showSnackbar(messageRes)
                 }
             }
     }

@@ -31,6 +31,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
@@ -265,7 +266,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             val snackbarMessage = if (apiResponse.isSuccess) {
                 mainViewModel.refreshActivities.value = true
                 getString(R.string.allFileDuplicate, currentFile.name)
-            } else if (apiResponse.errorCode == "limit_exceeded_error") {
+            } else if (apiResponse.errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
                 getString(R.string.errorFilesLimitExceeded)
             } else {
                 getString(R.string.errorDuplicate)
@@ -350,9 +351,10 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                         (fileRequest.data as? CancellableAction)?.setDriveAndReturn(currentFile.driveId)
                     )
                 } else {
-                    val resource = when (fileRequest.errorCode) {
-                        "limit_exceeded_error" -> R.string.errorFilesLimitExceeded
-                        else -> R.string.errorMove
+                    val resource = if (fileRequest.errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
+                        R.string.errorFilesLimitExceeded
+                    } else {
+                        R.string.errorMove
                     }
 
                     transmitActionAndPopBack(getString(resource))

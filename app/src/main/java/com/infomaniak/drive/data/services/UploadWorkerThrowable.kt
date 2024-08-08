@@ -22,7 +22,6 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.limitExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
@@ -99,7 +98,7 @@ object UploadWorkerThrowable {
             }
 
             exception is UploadTask.LimitExceededException -> {
-                currentUploadFile?.limitExceededNotification(applicationContext)
+                currentUploadFile?.exceptionNotification(applicationContext, isLimitExceeded = true)
                 Result.failure()
             }
 

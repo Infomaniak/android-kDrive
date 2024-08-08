@@ -200,11 +200,10 @@ class MainViewModel(
         postCurrentFolder(FileController.getFileById(folderId, userDrive))
     }
 
-    fun createMultiSelectMediator(): MediatorLiveData<MultiSelectMediatorState> {
-        return MediatorLiveData<MultiSelectMediatorState>().apply {
+    fun createMultiSelectMediator(): MediatorLiveData<MultiSelectMediatorState> =
+        MediatorLiveData<MultiSelectMediatorState>().apply {
             value = MultiSelectMediatorState(numberOfSuccessfulActions = 0, totalOfActions = 0, errorCode = null)
         }
-    }
 
     fun updateMultiSelectMediator(mediator: MediatorLiveData<MultiSelectMediatorState>): (FileResult) -> Unit = { fileRequest ->
         var numberOfSuccessfulActions = mediator.value!!.numberOfSuccessfulActions
@@ -212,13 +211,11 @@ class MainViewModel(
 
         val totalOfActions = mediator.value!!.totalOfActions + 1
 
-        mediator.value = mediator.value?.let {
-            MultiSelectMediatorState(
-                numberOfSuccessfulActions,
-                totalOfActions,
-                fileRequest.errorCode,
-            )
-        }
+        mediator.value = MultiSelectMediatorState(
+            numberOfSuccessfulActions,
+            totalOfActions,
+            fileRequest.errorCode,
+        )
     }
 
     fun createShareLink(file: File) = liveData(Dispatchers.IO) {
@@ -359,6 +356,7 @@ class MainViewModel(
 
             onSuccess?.invoke(file.id)
         }
+
         emit(FileResult(isSuccess = apiResponse.isSuccess(), errorCode = apiResponse.error?.code))
     }
 

@@ -34,6 +34,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
@@ -307,11 +308,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         )
                     }
                 } else {
-                    if (apiResponse.error?.code == "limit_exceeded_error") {
-                        showSnackbar(R.string.errorFilesLimitExceeded)
+                    val messageRes = if (apiResponse.error?.code == LIMIT_EXCEEDED_ERROR_CODE) {
+                        R.string.errorFilesLimitExceeded
                     } else {
-                        showSnackbar(apiResponse.translateError())
+                        apiResponse.translateError()
                     }
+
+                    showSnackbar(messageRes)
                 }
                 closeMultiSelect()
             }
@@ -488,16 +491,15 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         success: Int,
         errorCode: String?,
         type: BulkOperationType,
-        destinationFolder: File?
+        destinationFolder: File?,
     ) {
-        val title = when (errorCode) {
-            "limit_exceeded_error" -> getString(R.string.errorFilesLimitExceeded)
-            else -> {
-                if (success == 0) {
-                    getString(R.string.anErrorHasOccurred)
-                } else {
-                    resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
-                }
+        val title = if (errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
+            getString(R.string.errorFilesLimitExceeded)
+        } else {
+            if (success == 0) {
+                getString(R.string.anErrorHasOccurred)
+            } else {
+                resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
             }
         }
 
