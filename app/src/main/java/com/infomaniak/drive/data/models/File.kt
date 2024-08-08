@@ -180,14 +180,16 @@ open class File(
         return status?.contains("trash") == true
     }
 
+    fun isPublicShared() = externalShareLinkUuid.isNotBlank()
+
     fun thumbnail() = when {
-        externalShareLinkUuid.isNotBlank() -> ApiRoutes.getShareLinkFileThumbnail(driveId, externalShareLinkUuid, file = this)
+        isPublicShared() -> ApiRoutes.getShareLinkFileThumbnail(driveId, externalShareLinkUuid, file = this)
         isTrashed() -> ApiRoutes.thumbnailTrashFile(file = this)
         else -> ApiRoutes.thumbnailFile(file = this)
     }
 
     fun imagePreview(): String {
-        val url = if (externalShareLinkUuid.isNotBlank()) {
+        val url = if (isPublicShared()) {
             ApiRoutes.getShareLinkFilePreview(driveId, externalShareLinkUuid, file = this)
         } else {
             ApiRoutes.imagePreviewFile(this)
@@ -198,16 +200,16 @@ open class File(
 
     fun isPDF() = getFileType() == ExtensionType.PDF
 
-    fun onlyOfficeUrl() = if (externalShareLinkUuid.isBlank()) {
-        "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
-    } else {
+    fun onlyOfficeUrl() = if (isPublicShared()) {
         ApiRoutes.showOfficeShareLinkFile(driveId, externalShareLinkUuid, file = this)
+    } else {
+        "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
     }
 
-    fun downloadUrl() = if (externalShareLinkUuid.isBlank()) {
-        ApiRoutes.downloadFile(file = this)
-    } else {
+    fun downloadUrl() = if (isPublicShared()) {
         ApiRoutes.downloadShareLinkFile(driveId, externalShareLinkUuid, file = this)
+    } else {
+        ApiRoutes.downloadFile(file = this)
     }
 
     fun getFileType(): ExtensionType {
