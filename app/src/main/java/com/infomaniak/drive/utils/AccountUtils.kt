@@ -186,10 +186,7 @@ object AccountUtils : CredentialManager() {
 
     suspend fun removeUserAndDeleteToken(context: Context, user: User) {
         CoroutineScope(Dispatchers.IO).launch {
-            val remainingUserCount = AccountUtils.getAllUsers().value?.count()?.minus(1)
-            val remainingUserCountText = remainingUserCount?.toString() ?: "Failed to access value"
-
-            SentryLog.i("logOut", "User logged out, remaining user count: $remainingUserCountText")
+            SentryLog.i("logOut", "User logged out, remaining user count: ${AccountUtils.getAllUsersCount().minus(1)}")
             SentryLog.i("logOut", "User logged out, disconnected user id: ${user.id}")
 
             context.getInfomaniakLogin().deleteToken(
