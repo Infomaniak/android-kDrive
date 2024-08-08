@@ -490,14 +490,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         type: BulkOperationType,
         destinationFolder: File?
     ) {
-        val title = when (errorCode) {
-            "limit_exceeded_error" -> getString(R.string.errorFilesLimitExceeded)
-            else -> {
-                if (success == 0) {
-                    getString(R.string.anErrorHasOccurred)
-                } else {
-                    resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
-                }
+        val title = if (errorCode == "limit_exceeded_error") {
+            getString(R.string.errorFilesLimitExceeded)
+        } else {
+            if (success == 0) {
+                getString(R.string.anErrorHasOccurred)
+            } else {
+                resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
             }
         }
 

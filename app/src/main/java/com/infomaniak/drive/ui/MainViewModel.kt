@@ -196,13 +196,11 @@ class MainViewModel(
 
         val totalOfActions = mediator.value!!.totalOfActions + 1
 
-        mediator.value = mediator.value?.let {
-            MultiSelectMediatorState(
-                numberOfSuccessfulActions,
-                totalOfActions,
-                fileRequest.errorCode,
-            )
-        }
+        mediator.value = MultiSelectMediatorState(
+            numberOfSuccessfulActions,
+            totalOfActions,
+            fileRequest.errorCode,
+        )
     }
 
     fun createShareLink(file: File) = liveData(Dispatchers.IO) {
