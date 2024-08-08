@@ -288,11 +288,8 @@ object ApiRoutes {
     private fun uploadFile(driveId: Int) = "${driveURL(driveId)}/upload"
 
     fun uploadChunkUrl(uploadHost: String, driveId: Int, uploadToken: String?, chunkNumber: Int, currentChunkSize: Int): String {
-        return addChunkToSession(
-            uploadHost,
-            driveId,
-            uploadToken!!
-        ) + "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
+        val chunkParam = "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
+        return addChunkToSession(uploadHost, driveId, uploadToken!!) + chunkParam
     }
 
     fun uploadEmptyFileUrl(
@@ -301,23 +298,17 @@ object ApiRoutes {
         fileName: String,
         conflictOption: ConflictOption,
         directoryPath: String? = null,
-        lastModifiedAt: Date? = null
+        lastModifiedAt: Date? = null,
     ): String {
-        var route = uploadFile(driveId) +
-                "?directory_id=$directoryId" +
+        var params = "?directory_id=$directoryId" +
                 "&total_size=0" +
                 "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
                 "&conflict=" + conflictOption.toString()
 
-        directoryPath?.let {
-            route += "&directory_path=$it"
-        }
+        directoryPath?.let { params += "&directory_path=$it" }
+        lastModifiedAt?.let { params += "&last_modified_at=${it.time / 1_000L}" }
 
-        lastModifiedAt?.let {
-            route += "&last_modified_at=${it.time / 1_000L}"
-        }
-
-        return route
+        return uploadFile(driveId) + params
     }
     //endregion
 

@@ -24,9 +24,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
+import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
 import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
-import com.infomaniak.drive.data.api.ApiRoutes.uploadEmptyFileUrl
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
 import com.infomaniak.drive.data.models.upload.UploadSession
@@ -39,8 +38,6 @@ import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.api.ApiController.ApiMethod
-import com.infomaniak.lib.core.api.ApiController.callApi
 import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
@@ -88,7 +85,7 @@ class UploadTask(
         }
 
         try {
-            if (uploadFile.fileSize == 0L) launchTaskEmptyFile() else launchTask(this)
+            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask(this)
             return@withContext true
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
@@ -198,23 +195,6 @@ class UploadTask(
 
         coroutineScope.ensureActive()
         onFinish(uri)
-    }
-
-    private fun launchTaskEmptyFile() {
-        val uploadUrl = with(uploadFile) {
-            uploadEmptyFileUrl(
-                driveId = driveId,
-                directoryId = remoteFolder,
-                fileName = fileName,
-                conflictOption = ConflictOption.RENAME,
-                directoryPath = remoteSubFolder,
-            )
-        }
-
-        callApi<ApiResponse<File>>(
-            uploadUrl,
-            ApiMethod.POST,
-        )
     }
 
     private suspend fun onFinish(uri: Uri) = with(uploadFile) {
