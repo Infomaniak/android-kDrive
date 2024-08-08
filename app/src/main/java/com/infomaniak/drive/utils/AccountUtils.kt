@@ -186,6 +186,9 @@ object AccountUtils : CredentialManager() {
 
     suspend fun removeUserAndDeleteToken(context: Context, user: User) {
         CoroutineScope(Dispatchers.IO).launch {
+            SentryLog.i("logOut", "User logged out, remaining user count: ${AccountUtils.getAllUsersCount().minus(1)}")
+            SentryLog.i("logOut", "User logged out, disconnected user id: ${user.id}")
+
             context.getInfomaniakLogin().deleteToken(
                 HttpClient.okHttpClientNoTokenInterceptor,
                 user.apiToken,
