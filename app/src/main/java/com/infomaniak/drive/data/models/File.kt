@@ -39,6 +39,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.downloadFile
 import com.infomaniak.lib.core.BuildConfig
 import com.infomaniak.lib.core.utils.contains
 import com.infomaniak.lib.core.utils.guessMimeType
@@ -499,6 +500,28 @@ open class File(
         THUMBNAIL("thumbnail"),
         ONLYOFFICE("onlyoffice"),
         KMAIL("kmail")
+    }
+
+    fun convertToIOFile(
+        context: Context,
+        userDrive: UserDrive,
+        shouldBePdf: Boolean = false,
+        onProgress: (progress: Int) -> Unit,
+    ): IOFile {
+        val cacheFile = when {
+            isPublicShared() -> getPublicShareCache(context)
+            isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
+            isOffline -> getOfflineFile(context, userDrive.userId)!!
+            else -> getCacheFile(context, userDrive)
+        }
+
+        val fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
+        if (fileNeedDownload) {
+            downloadFile(cacheFile, fileModel = this, shouldBePdf, onProgress)
+            cacheFile.setLastModified(getLastModifiedInMilliSecond())
+        }
+
+        return cacheFile
     }
 
     companion object {
