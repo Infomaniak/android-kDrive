@@ -17,14 +17,43 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import android.app.Application
+import androidx.core.content.FileProvider
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.utils.saveToKDrive
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class PreviewSliderViewModel : ViewModel() {
+class PreviewSliderViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val appContext = getApplication<MainApplication>()
+
     val pdfIsDownloading = MutableLiveData<Boolean>()
     var currentPreview: File? = null
     var userDrive = UserDrive()
     var shareLinkUuid = ""
+
+    fun saveToDrive(onDownloadProgress: () -> Unit, onDownloadError: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val cacheFile = currentPreview!!.convertToIOFile(appContext, userDrive) {
+                    viewModelScope.launch(Dispatchers.Main) {
+                        onDownloadProgress()
+                    }
+                }
+
+                val uri = FileProvider.getUriForFile(appContext, appContext.getString(R.string.FILE_AUTHORITY), cacheFile)
+                appContext.saveToKDrive(uri)
+            }.onFailure { exception ->
+                exception.printStackTrace()
+                onDownloadError()
+            }
+        }
+    }
 }

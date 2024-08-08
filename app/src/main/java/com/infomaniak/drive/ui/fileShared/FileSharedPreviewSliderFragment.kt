@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
@@ -101,23 +102,10 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     override fun manageCategoriesClicked(fileId: Int) = Unit
     override fun shareFile() = Unit // TODO
     override fun saveToKDrive() {
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            runCatching {
-
-                val cacheFile = currentFile.convertToIOFile(requireContext(), userDrive) {
-                    // TODO
-                }
-
-                FileProvider.getUriForFile(
-                    requireContext(),
-                    requireContext().getString(R.string.FILE_AUTHORITY),
-                    cacheFile,
-                ).also(requireContext()::saveToKDrive)
-            }.onFailure { exception ->
-                exception.printStackTrace()
-                showSnackbar(R.string.errorDownload)
-            }
-        }
+        previewSliderViewModel.saveToDrive(
+            onDownloadProgress = { }, // TODO
+            onDownloadError = { showSnackbar(R.string.errorDownload) }
+        )
     }
 
     override fun downloadFileClicked() {
