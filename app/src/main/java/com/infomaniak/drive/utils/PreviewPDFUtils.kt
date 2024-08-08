@@ -18,20 +18,13 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
-import com.google.gson.JsonParser
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
-import okhttp3.Request
-import okhttp3.Response
-import java.io.BufferedInputStream
 
 object PreviewPDFUtils {
-    private const val BUFFER_SIZE = 8192
 
     fun convertPdfFileToIOFile(
         context: Context,
@@ -39,14 +32,7 @@ object PreviewPDFUtils {
         userDrive: UserDrive,
         onProgress: (progress: Int) -> Unit,
     ): ApiResponse<IOFile> = runCatching {
-        val outputFile = when {
-            file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
-            file.isOffline -> file.getOfflineFile(context, userDrive.userId)!!
-            file.isPublicShared() -> file.getPublicShareCache(context)
-            else -> file.getCacheFile(context, userDrive)
-        }
-
-        ApiResponse(ApiResponseStatus.SUCCESS, data = convertFileToIOFile(file, outputFile, shouldBePdf = true, onProgress))
+        ApiResponse(ApiResponseStatus.SUCCESS, data = file.convertToIOFile(context, userDrive, shouldBePdf = true, onProgress))
     }.getOrElse { exception ->
         exception.printStackTrace()
         val error = when (exception) {
@@ -56,47 +42,5 @@ object PreviewPDFUtils {
         ApiResponse(result = ApiResponseStatus.ERROR, data = null, translatedError = error)
     }
 
-    fun downloadFile(
-        externalOutputFile: IOFile,
-        fileModel: File,
-        shouldBePdf: Boolean,
-        onProgress: (progress: Int) -> Unit
-    ) {
-        if (externalOutputFile.exists()) externalOutputFile.delete()
-
-        val downloadUrl = fileModel.downloadUrl() + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
-        val request = Request.Builder().url(downloadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
-        val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
-
-        val response = HttpClient.okHttpClient.newBuilder()
-            .addNetworkInterceptor(downloadProgressInterceptor)
-            .build()
-            .newCall(request)
-            .execute()
-
-        response.use {
-            if (!it.isSuccessful) {
-                val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
-                if (errorCode == "password_protected_error") {
-                    throw PasswordProtectedException()
-                } else {
-                    throw Exception("Download error")
-                }
-            }
-
-            if (shouldBePdf && it.body?.contentType()?.toString() != "application/pdf") {
-                throw UnsupportedOperationException("File not supported")
-            }
-
-            createTempFile(it, externalOutputFile)
-        }
-    }
-
-    private fun createTempFile(response: Response, file: IOFile) {
-        BufferedInputStream(response.body?.byteStream(), BUFFER_SIZE).use { input ->
-            file.outputStream().use { output -> input.copyTo(output, BUFFER_SIZE) }
-        }
-    }
-
-    private class PasswordProtectedException : Exception()
+    class PasswordProtectedException : Exception()
 }
