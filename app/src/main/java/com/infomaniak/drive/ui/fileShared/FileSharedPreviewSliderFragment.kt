@@ -34,7 +34,10 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.saveToKDrive
+import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
 import kotlinx.coroutines.Dispatchers
@@ -99,9 +102,9 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     override fun shareFile() = Unit // TODO
     override fun saveToKDrive() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
+            runCatching {
 
-                val cacheFile = convertFileToIOFile(currentFile, currentFile.getPublicShareCache(requireContext())) {
+                val cacheFile = currentFile.convertToIOFile(requireContext(), userDrive) {
                     // TODO
                 }
 
