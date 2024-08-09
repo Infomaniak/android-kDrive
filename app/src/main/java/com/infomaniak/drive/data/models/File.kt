@@ -497,11 +497,12 @@ open class File(
         KMAIL("kmail")
     }
 
-    fun convertToIOFile(
+    suspend fun convertToIOFile(
         context: Context,
         userDrive: UserDrive,
         shouldBePdf: Boolean = false,
         onProgress: (progress: Int) -> Unit,
+        navigateToDownloadDialog: (suspend () -> Unit)? = null,
     ): IOFile {
         val cacheFile = when {
             isPublicShared() -> getPublicShareCache(context)
@@ -512,6 +513,7 @@ open class File(
 
         val fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         if (fileNeedDownload) {
+            navigateToDownloadDialog?.invoke()
             downloadFile(cacheFile, fileModel = this, shouldBePdf, onProgress)
             cacheFile.setLastModified(getLastModifiedInMilliSecond())
         }
