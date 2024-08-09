@@ -34,6 +34,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
@@ -307,11 +308,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         )
                     }
                 } else {
-                    if (apiResponse.error?.code == "limit_exceeded_error") {
-                        showSnackbar(R.string.errorFilesLimitExceeded)
+                    val messageRes = if (apiResponse.error?.code == LIMIT_EXCEEDED_ERROR_CODE) {
+                        R.string.errorFilesLimitExceeded
                     } else {
-                        showSnackbar(apiResponse.translateError())
+                        apiResponse.translateError()
                     }
+
+                    showSnackbar(messageRes)
                 }
                 closeMultiSelect()
             }
@@ -490,7 +493,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         type: BulkOperationType,
         destinationFolder: File?
     ) {
-        val title = if (errorCode == "limit_exceeded_error") {
+        val title = if (errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
             getString(R.string.errorFilesLimitExceeded)
         } else {
             if (success == 0) {
