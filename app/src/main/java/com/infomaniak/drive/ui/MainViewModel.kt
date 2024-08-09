@@ -167,7 +167,7 @@ class MainViewModel(
         }
     }
 
-    fun navigateFileListTo(navController: NavController, fileId: Int) {
+    fun navigateFileListTo(navController: NavController, fileId: Int, isSharedWithMe: Boolean = false) {
         // Clear FileListFragment stack
         navController.popBackStack(R.id.rootFilesFragment, false)
 
@@ -175,7 +175,10 @@ class MainViewModel(
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
-            val file = FileController.getFileById(fileId) ?: FileController.getFileDetails(fileId) ?: return@launch
+            val userDrive = UserDrive(sharedWithMe = isSharedWithMe)
+            val file = FileController.getFileById(fileId, userDrive)
+                ?: FileController.getFileDetails(fileId, userDrive)
+                ?: return@launch
             navigateFileListTo.postValue(file)
         }
     }

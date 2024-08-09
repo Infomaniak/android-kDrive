@@ -140,11 +140,14 @@ class LaunchActivity : AppCompatActivity() {
                     message = "Upload notification has been clicked"
                     level = SentryLevel.INFO
                 })
-                setOpenSpecificFile(
-                    userId = it.destinationUserId,
-                    driveId = it.destinationDriveId,
-                    fileId = it.destinationRemoteFolderId
-                )
+                DriveInfosController.getDrive(driveId = it.destinationDriveId, maintenance = false)?.let { drive ->
+                    setOpenSpecificFile(
+                        userId = drive.userId,
+                        driveId = drive.id,
+                        fileId = it.destinationRemoteFolderId,
+                        isSharedWithMe = drive.sharedWithMe,
+                    )
+                }
             }
         }
     }
@@ -160,7 +163,7 @@ class LaunchActivity : AppCompatActivity() {
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
             DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
-                setOpenSpecificFile(userId = it.userId, driveId = driveId, fileId = fileId)
+                setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
             }
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
@@ -172,10 +175,10 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-    private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int) {
+    private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int, isSharedWithMe: Boolean) {
         if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
-        if (driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
-        mainActivityExtras = MainActivityArgs(destinationFileId = fileId).toBundle()
+        if (!isSharedWithMe && driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
+        mainActivityExtras = MainActivityArgs(destinationFileId = fileId, isDestinationSharedWithMe = isSharedWithMe).toBundle()
     }
 
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {
