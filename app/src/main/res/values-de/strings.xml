@@ -256,6 +256,7 @@
     <string name="errorDuplicate">Fehler beim Duplizieren</string>
     <string name="errorFileCreate">Fehler bei der Erstellung der Datei. Überprüfen Sie den Namen der Datei und Ihre Rechte am Ordner.</string>
     <string name="errorFileLocked">Diese Datei ist bereits von einem Benutzer geöffnet und kann nicht verändert werden</string>
+    <string name="errorFilesLimitExceeded">Limit der Dateien im Ordner erreicht</string>
     <string name="errorGetBookmarkURL">Link nicht wiederherstellbar</string>
     <string name="errorLeaveShare">Fehler beim Abbrechen der Freigabe</string>
     <string name="errorLoadingOfficeEditor">Der Dokumenteneditor kann nicht geladen werden</string>

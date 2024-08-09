@@ -382,6 +382,7 @@ class UploadTask(
                 uploadFile.resetUploadTokenAndCancelSession()
                 throw UploadErrorException()
             }
+            LIMIT_EXCEEDED_ERROR_CODE -> throw LimitExceededException()
             else -> {
                 if (error?.exception is ApiController.ServerErrorException) {
                     uploadFile.resetUploadTokenAndCancelSession()
@@ -434,6 +435,7 @@ class UploadTask(
     class UploadErrorException : Exception()
     class UploadNotTerminated(message: String) : Exception(message)
     class WrittenBytesExceededException : Exception()
+    class LimitExceededException : Exception()
 
     companion object {
         private val TAG = UploadTask::class.java.simpleName
@@ -444,6 +446,8 @@ class UploadTask(
         private const val OPTIMAL_TOTAL_CHUNKS: Int = 200
         private const val TOTAL_CHUNKS: Int = 10_000
         private const val MAX_TOTAL_CHUNKS_SIZE: Long = CHUNK_MAX_SIZE.toLong() * TOTAL_CHUNKS.toLong()
+
+        const val LIMIT_EXCEEDED_ERROR_CODE = "limit_exceeded_error"
 
         var chunkSize: Int = CHUNK_MIN_SIZE
 
