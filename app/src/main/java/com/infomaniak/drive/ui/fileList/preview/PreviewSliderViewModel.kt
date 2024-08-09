@@ -34,6 +34,7 @@ class PreviewSliderViewModel(application: Application) : AndroidViewModel(applic
 
     private val appContext = getApplication<MainApplication>()
 
+    val downloadProgressLiveData = MutableLiveData(0)
     val pdfIsDownloading = MutableLiveData<Boolean>()
     var currentPreview: File? = null
     var userDrive = UserDrive()
