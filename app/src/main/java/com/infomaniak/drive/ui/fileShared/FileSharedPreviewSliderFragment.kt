@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileShared
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,6 +35,7 @@ import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -110,8 +112,9 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     override fun manageCategoriesClicked(fileId: Int) = Unit
     override fun shareFile() = Unit // TODO
     override fun saveToKDrive() {
-        previewSliderViewModel.saveToDrive(
+        previewSliderViewModel.executeDownloadAction(
             activityContext = requireContext(),
+            downloadAction = DownloadAction.SAVE_TO_DRIVE,
             navigateToDownloadDialog = ::navigateToDownloadDialog,
             onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
         )
@@ -122,7 +125,24 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
         // TODO
     }
 
-    override fun openWith() = Unit
+    override fun openWith() {
+        previewSliderViewModel.executeDownloadAction(
+            activityContext = requireContext(),
+            downloadAction = DownloadAction.OPEN_WITH,
+            navigateToDownloadDialog = ::navigateToDownloadDialog,
+            onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
+        )
+    }
+
+    override fun printClicked() {
+        previewSliderViewModel.executeDownloadAction(
+            activityContext = requireContext(),
+            downloadAction = DownloadAction.PRINT_PDF,
+            navigateToDownloadDialog = ::navigateToDownloadDialog,
+            onDownloadError = { showSnackbar(R.string.errorFileNotFound, anchor = bottomSheetView) },
+        )
+    }
+
     override fun onCacheAddedToOffline() = Unit
     override fun onDeleteFile(onApiResponse: () -> Unit) = Unit
     override fun onLeaveShare(onApiResponse: () -> Unit) = Unit

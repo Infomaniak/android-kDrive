@@ -83,10 +83,12 @@ abstract class BaseDownloadProgressDialog : DialogFragment() {
     }
 
     enum class DownloadAction(val value: String) {
-        OPEN_WITH("open_with"),
+        DOWNLOAD("download"),
         OPEN_BOOKMARK("open_bookmark"),
+        OPEN_WITH("open_with"),
         PRINT_PDF("print_pdf"),
-        SAVE_TO_DRIVE("save_to_drive")
+        SAVE_TO_DRIVE("save_to_drive"),
+        SEND_COPY("send_copy"),
     }
 
     companion object {
