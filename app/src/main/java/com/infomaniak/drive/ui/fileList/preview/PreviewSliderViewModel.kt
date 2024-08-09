@@ -17,12 +17,11 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-import android.app.Application
+import android.content.Context
 import androidx.core.content.FileProvider
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -30,9 +29,7 @@ import com.infomaniak.drive.utils.saveToKDrive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class PreviewSliderViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val appContext = getApplication<MainApplication>()
+class PreviewSliderViewModel : ViewModel() {
 
     val downloadProgressLiveData = MutableLiveData(0)
     val pdfIsDownloading = MutableLiveData<Boolean>()
@@ -40,18 +37,24 @@ class PreviewSliderViewModel(application: Application) : AndroidViewModel(applic
     var userDrive = UserDrive()
     var shareLinkUuid = ""
 
-    fun saveToDrive(onDownloadProgress: () -> Unit, onDownloadError: () -> Unit) {
+    fun saveToDrive(activityContext: Context, navigateToDownloadDialog: suspend () -> Unit, onDownloadError: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                val cacheFile = currentPreview!!.convertToIOFile(appContext, userDrive) {
-                    viewModelScope.launch(Dispatchers.Main) {
-                        onDownloadProgress()
-                    }
-                }
+                val cacheFile = currentPreview!!.convertToIOFile(
+                    context = activityContext,
+                    userDrive = userDrive,
+                    onProgress = downloadProgressLiveData::postValue,
+                    navigateToDownloadDialog = navigateToDownloadDialog,
+                )
 
-                val uri = FileProvider.getUriForFile(appContext, appContext.getString(R.string.FILE_AUTHORITY), cacheFile)
-                appContext.saveToKDrive(uri)
+                val uri = FileProvider.getUriForFile(
+                    activityContext,
+                    activityContext.getString(R.string.FILE_AUTHORITY),
+                    cacheFile
+                )
+                activityContext.saveToKDrive(uri)
             }.onFailure { exception ->
+                downloadProgressLiveData.postValue(null)
                 exception.printStackTrace()
                 onDownloadError()
             }
