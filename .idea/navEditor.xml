@@ -30,30 +30,6 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
-                  <entry key="downloadProgressDialog">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="520" />
-                            <option name="y" value="368" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="fileSharedActionsBottomSheetDialog">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="764" />
-                            <option name="y" value="724" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
                   <entry key="fileSharedActivity">
                     <value>
                       <LayoutPositions>
@@ -135,6 +111,18 @@
                       </LayoutPositions>
                     </value>
                   </entry>
+                  <entry key="previewDownloadProgressDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="previewFragment">
                     <value>
                       <LayoutPositions>
@@ -146,7 +134,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_previewFragment_to_fileSharedActionsBottomSheetDialog">
+                            <entry key="action_previewFragment_to_fileDetailsFragment">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -403,18 +391,6 @@
                               </value>
                             </entry>
                           </map>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="downloadProgressDialog">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="1756" />
-                            <option name="y" value="1438" />
-                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>
@@ -901,6 +877,18 @@
                           <Point>
                             <option name="x" value="1102" />
                             <option name="y" value="2826" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="previewDownloadProgressDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
                           </Point>
                         </option>
                       </LayoutPositions>

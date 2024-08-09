@@ -26,7 +26,7 @@ import com.infomaniak.lib.core.models.ApiResponseStatus
 
 object PreviewPDFUtils {
 
-    fun convertPdfFileToIOFile(
+    suspend fun convertPdfFileToIOFile(
         context: Context,
         file: File,
         userDrive: UserDrive,
