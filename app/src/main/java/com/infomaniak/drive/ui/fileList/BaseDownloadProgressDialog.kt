@@ -24,7 +24,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -38,8 +37,7 @@ import kotlinx.coroutines.launch
 abstract class BaseDownloadProgressDialog : DialogFragment() {
 
     protected val binding: DialogDownloadProgressBinding by lazy { DialogDownloadProgressBinding.inflate(layoutInflater) }
-    protected val downloadProgressViewModel: DownloadProgressViewModel by viewModels()
-    private val navigationArgs: DownloadProgressDialogArgs by navArgs()
+    protected val navigationArgs: DownloadProgressDialogArgs by navArgs()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         isCancelable = false
@@ -66,12 +64,6 @@ abstract class BaseDownloadProgressDialog : DialogFragment() {
     }
 
     abstract fun observeDownloadedFile()
-
-    protected fun observeDownloadedFile(onProgressComplete: () -> Unit) {
-        downloadProgressViewModel.downloadProgressLiveData.observe(this@BaseDownloadProgressDialog) { progress ->
-            setProgress(progress, onProgressComplete)
-        }
-    }
 
     protected fun setProgress(progress: Int?, onProgressComplete: suspend () -> Unit) {
         progress?.let {
