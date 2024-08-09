@@ -22,11 +22,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.Companion.TAG
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.Response
@@ -35,6 +37,11 @@ import okhttp3.Response
 class DownloadProgressViewModel : ViewModel() {
 
     val downloadProgressLiveData = MutableLiveData(0)
+    val localFile = SingleLiveEvent<File>()
+
+    fun getLocalFile(fileId: Int, userDrive: UserDrive) {
+        localFile.value = FileController.getFileById(fileId, userDrive)
+    }
 
     fun downloadFile(context: Context, file: File, userDrive: UserDrive) = viewModelScope.launch(Dispatchers.IO) {
         val outputFile = file.getStoredFile(context, userDrive)
@@ -42,20 +49,22 @@ class DownloadProgressViewModel : ViewModel() {
             downloadProgressLiveData.postValue(null)
             return@launch
         }
+
         if (file.isObsoleteOrNotIntact(outputFile)) {
-            try {
-                val response = DownloadOfflineFileManager.downloadFileResponse(
+            runCatching {
+                val apiResponse = DownloadOfflineFileManager.downloadFileResponse(
                     fileUrl = ApiRoutes.downloadFile(file),
                     downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor { progress ->
                         downloadProgressLiveData.postValue(progress)
                     }
                 )
-                if (response.isSuccessful) {
-                    saveData(file, outputFile, response)
+
+                if (apiResponse.isSuccessful) {
+                    saveData(file, outputFile, apiResponse)
                 } else {
                     downloadProgressLiveData.postValue(null)
                 }
-            } catch (exception: Exception) {
+            }.onFailure { exception ->
                 exception.printStackTrace()
                 downloadProgressLiveData.postValue(null)
             }

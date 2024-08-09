@@ -19,68 +19,35 @@ package com.infomaniak.drive.ui.fileList
 
 import android.app.Dialog
 import android.os.Bundle
-import android.view.KeyEvent
-import androidx.fragment.app.DialogFragment
+import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
-import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
 
-class DownloadProgressDialog : DialogFragment() {
+class DownloadProgressDialog : BaseDownloadProgressDialog() {
 
-    private val binding: DialogDownloadProgressBinding by lazy { DialogDownloadProgressBinding.inflate(layoutInflater) }
-    private val navigationArgs: DownloadProgressDialogArgs by navArgs()
     private val downloadProgressViewModel: DownloadProgressViewModel by viewModels()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = with(navigationArgs) {
-        isCancelable = false
+        downloadProgressViewModel.getLocalFile(fileId, userDrive)
+        super.onCreateDialog(savedInstanceState)
+    }
 
-        FileController.getFileById(fileId, userDrive)?.let { file ->
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observeLocalFile()
+    }
+
+    override fun observeDownloadedFile() = with(navigationArgs) {
+        downloadProgressViewModel.downloadProgressLiveData.observe(viewLifecycleOwner) { progress ->
+            setProgress(progress) { setBackNavigationResult(action.value, fileId) }
+        }
+    }
+
+    private fun observeLocalFile() {
+        downloadProgressViewModel.localFile.observe(viewLifecycleOwner) { file ->
             binding.icon.setImageResource(file.getFileType().icon)
-            observeDownloadedFile()
-            startDownloadFile(file, userDrive)
+            downloadProgressViewModel.downloadFile(requireContext(), file, navigationArgs.userDrive)
         }
-
-        return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
-            .setTitle(fileName)
-            .setView(binding.root)
-            .setOnKeyListener { _, keyCode, event ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
-                    findNavController().popBackStack()
-                    true
-                } else false
-            }
-            .create()
-    }
-
-    private fun startDownloadFile(file: File, userDrive: UserDrive) {
-        downloadProgressViewModel.downloadFile(requireContext(), file, userDrive)
-    }
-
-    private fun observeDownloadedFile() = with(navigationArgs) {
-        downloadProgressViewModel.downloadProgressLiveData.observe(this@DownloadProgressDialog) { progress ->
-            progress?.let {
-                if (it == DownloadProgressViewModel.PROGRESS_COMPLETE) {
-                    setBackNavigationResult(action.value, fileId)
-                } else {
-                    binding.downloadProgressIndicator.progress = progress
-                }
-            } ?: run {
-                showSnackbar(R.string.anErrorHasOccurred)
-                findNavController().popBackStack()
-            }
-        }
-    }
-
-    companion object {
-        private const val TAG = "DownloadProgressDialog"
     }
 }
