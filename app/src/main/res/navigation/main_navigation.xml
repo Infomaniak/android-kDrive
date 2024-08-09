@@ -998,7 +998,7 @@
         <argument
             android:name="action"
             android:defaultValue="OPEN_WITH"
-            app:argType="com.infomaniak.drive.ui.fileList.DownloadProgressDialog$DownloadAction" />
+            app:argType="com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog$DownloadAction" />
     </dialog>
 
     <dialog

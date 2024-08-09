@@ -32,7 +32,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.AccessDeniedBottomSheetDialogArgs
-import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
 import com.infomaniak.drive.ui.fileList.FileAdapter
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
