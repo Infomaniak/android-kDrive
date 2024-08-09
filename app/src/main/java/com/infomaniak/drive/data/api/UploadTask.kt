@@ -24,6 +24,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
+import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
+import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
 import com.infomaniak.drive.data.models.upload.UploadSession
@@ -83,7 +85,7 @@ class UploadTask(
         }
 
         try {
-            launchTask(this)
+            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask(this)
             return@withContext true
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
@@ -169,7 +171,16 @@ class UploadTask(
 
                     data = if (count == chunkSize) data else data.copyOf(count)
 
-                    val url = uploadFile.uploadUrl(chunkNumber = chunkNumber, currentChunkSize = count, uploadHost = uploadHost)
+                    val url = with(uploadFile) {
+                        uploadChunkUrl(
+                            driveId = driveId,
+                            uploadToken = uploadToken,
+                            chunkNumber = chunkNumber,
+                            currentChunkSize = count,
+                            uploadHost = uploadHost,
+                        )
+                    }
+
                     SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
 
                     @Suppress("DeferredResultUnused")
@@ -348,8 +359,9 @@ class UploadTask(
         return ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient).also {
             if (it.isSuccess()) it.data?.token?.let { uploadToken ->
                 uploadFile.updateUploadToken(uploadToken, it.data!!.uploadHost)
+            } else {
+                it.manageUploadErrors()
             }
-            else it.manageUploadErrors()
         }.data?.uploadHost
     }
 
@@ -402,14 +414,6 @@ class UploadTask(
                 if (data != null) resetUploadToken()
             }
         }
-    }
-
-    private fun UploadFile.uploadUrl(uploadHost: String, chunkNumber: Int, currentChunkSize: Int): String {
-        return ApiRoutes.addChunkToSession(
-            uploadHost,
-            driveId,
-            uploadToken!!
-        ) + "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
     }
 
     /**
