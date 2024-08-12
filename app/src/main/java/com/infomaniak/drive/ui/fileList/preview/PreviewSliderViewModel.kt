@@ -24,12 +24,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.printPdf
 import com.infomaniak.drive.utils.saveToKDrive
+import com.infomaniak.drive.utils.shareFile
+import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -61,7 +64,7 @@ class PreviewSliderViewModel : ViewModel() {
                 DownloadAction.OPEN_WITH -> {
                     activityContext.openWith(uri, currentPreview!!.getMimeType(), Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                DownloadAction.SEND_COPY -> TODO()
+                DownloadAction.SEND_COPY -> activityContext.shareFile { uri }
                 DownloadAction.SAVE_TO_DRIVE -> activityContext.saveToKDrive(uri)
                 DownloadAction.OPEN_BOOKMARK -> TODO()
                 DownloadAction.PRINT_PDF -> activityContext.printPdf(cacheFile)
