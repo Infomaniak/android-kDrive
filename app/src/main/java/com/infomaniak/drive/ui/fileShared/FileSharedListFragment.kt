@@ -18,7 +18,9 @@
 package com.infomaniak.drive.ui.fileShared
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
@@ -29,9 +31,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileShared.FileSharedViewModel.Companion.ROOT_SHARED_FILE_ID
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openFolder
+import com.infomaniak.drive.views.FileInfoActionsView.Companion.downloadFile
 
 class FileSharedListFragment : FileListFragment() {
 
@@ -41,7 +45,17 @@ class FileSharedListFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
 
+    private var drivePermissions: DrivePermissions? = null
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@FileSharedListFragment) { authorized -> if (authorized) downloadAllFiles() }
+        }
+
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         folderName = navigationArgs.fileName
@@ -66,7 +80,16 @@ class FileSharedListFragment : FileListFragment() {
 
         setupMultiSelectLayout()
 
-        binding.toolbar.setNavigationOnClickListener { onBackPressed() }
+        binding.toolbar.apply {
+            setOnMenuItemClickListener { menuItem ->
+                if (menuItem.itemId == R.id.downloadAllFiles) downloadAllFiles()
+                true
+            }
+
+            setNavigationOnClickListener { onBackPressed() }
+            menu?.findItem(R.id.downloadAllFiles)?.isVisible = true
+        }
+
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
 
         observeRootFile()
@@ -120,6 +143,12 @@ class FileSharedListFragment : FileListFragment() {
             fileListViewModel = fileListViewModel,
             isSharedFile = true,
         )
+    }
+
+    private fun downloadAllFiles() {
+        fileSharedViewModel.rootSharedFile.value?.let { file ->
+            drivePermissions?.let { permissions -> requireContext().downloadFile(permissions, file) }
+        }
     }
 
     companion object {
