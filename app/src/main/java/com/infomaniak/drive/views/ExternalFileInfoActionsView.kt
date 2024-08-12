@@ -43,10 +43,15 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
         binding.print.isGone = isGone
     }
 
+    fun isDownloadHidden(isGone: Boolean) {
+        binding.downloadFile.isGone = isGone
+    }
+
     fun initOnClickListener(onItemClickListener: OnItemClickListener) = with(binding) {
         openWith.setOnClickListener { onItemClickListener.openWith() }
         shareFile.setOnClickListener { onItemClickListener.shareFile() }
         saveToKDrive.setOnClickListener { onItemClickListener.saveToKDrive() }
+        downloadFile.setOnClickListener { onItemClickListener.downloadFileClicked() }
         print.setOnClickListener { onItemClickListener.printClicked() }
     }
 }

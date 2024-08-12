@@ -288,10 +288,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         return true
     }
 
-    fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
+    fun downloadFile(drivePermissions: DrivePermissions, file: File? = null, onSuccess: () -> Unit) {
         if (drivePermissions.checkWriteStoragePermission()) {
-            val fileName = if (currentFile.isFolder()) "${currentFile.name}.zip" else currentFile.name
-            DownloadManagerUtils.scheduleDownload(context, ApiRoutes.downloadFile(currentFile), fileName)
+            val fileToDownload = file ?: currentFile
+            val fileName = if (fileToDownload.isFolder()) "${fileToDownload.name}.zip" else fileToDownload.name
+            DownloadManagerUtils.scheduleDownload(context, fileToDownload.downloadUrl(), fileName)
             onSuccess()
         }
     }
