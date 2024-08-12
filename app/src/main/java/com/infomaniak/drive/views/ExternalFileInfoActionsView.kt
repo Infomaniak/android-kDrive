@@ -24,6 +24,7 @@ import android.widget.FrameLayout
 import androidx.core.view.isGone
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ViewExternalFileInfoActionsBinding
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 
@@ -34,6 +35,10 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val binding by lazy { ViewExternalFileInfoActionsBinding.inflate(LayoutInflater.from(context), this, true) }
+
+    init {
+        if (AccountUtils.currentDriveId == -1) binding.saveToKDrive.isGone = true
+    }
 
     fun updateWithExternalFile(file: File) {
         binding.fileView.setFileItem(file)
