@@ -1,0 +1,3 @@
+- Vérification de l'espace de stockage disponible avant de télécharger des fichiers
+- Correction de chargement infini de fichiers
+- Ne sélectionne plus SharedWithMe comme Drive principal

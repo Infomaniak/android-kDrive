@@ -1,0 +1,3 @@
+- Check available storage space before downloading files
+- Fix infinite files loading
+- Don't select a SharedWithMe as main drive
