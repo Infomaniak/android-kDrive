@@ -227,26 +227,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
     }
 
-    override fun printClicked() {
-        super.printClicked()
-        previewPDFHandler.printClicked(
-            context = requireContext(),
-            onDefaultCase = {
-                requireContext().printPdf {
-                    safeNavigate(
-                        PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
-                            fileId = currentFile.id,
-                            fileName = currentFile.name,
-                            userDrive = userDrive,
-                            action = DownloadAction.PRINT_PDF,
-                        ),
-                    )
-                }
-            },
-            onError = { showSnackbar(R.string.errorFileNotFound) },
-        )
-    }
-
     private fun updateBottomSheetWithCurrentFile() {
         lifecycleScope.launch(Dispatchers.Main) {
             lifecycle.withResumed {
