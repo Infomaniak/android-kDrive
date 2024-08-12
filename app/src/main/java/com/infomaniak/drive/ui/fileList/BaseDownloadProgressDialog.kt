@@ -83,7 +83,6 @@ abstract class BaseDownloadProgressDialog : DialogFragment() {
     }
 
     enum class DownloadAction(val value: String) {
-        DOWNLOAD("download"),
         OPEN_BOOKMARK("open_bookmark"),
         OPEN_WITH("open_with"),
         PRINT_PDF("print_pdf"),
