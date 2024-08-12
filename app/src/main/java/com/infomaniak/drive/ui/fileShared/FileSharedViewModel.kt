@@ -58,7 +58,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
             apiResponse.data
         }
 
-        rootSharedFile.postValue(file)
+        rootSharedFile.postValue(file?.apply { externalShareLinkUuid = fileSharedLinkUuid })
     }
 
     fun getFiles(folderId: Int, sortType: SortType) {

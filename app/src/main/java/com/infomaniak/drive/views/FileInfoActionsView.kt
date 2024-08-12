@@ -288,12 +288,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun downloadFile(drivePermissions: DrivePermissions, file: File? = null, onSuccess: () -> Unit) {
-        if (drivePermissions.checkWriteStoragePermission()) {
-            val fileToDownload = file ?: currentFile
-            val fileName = if (fileToDownload.isFolder()) "${fileToDownload.name}.zip" else fileToDownload.name
-            DownloadManagerUtils.scheduleDownload(context, fileToDownload.downloadUrl(), fileName)
-            onSuccess()
-        }
+        context.downloadFile(drivePermissions, file = file ?: currentFile, onSuccess)
     }
 
     fun createPublicShareLink(
@@ -608,5 +603,13 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     companion object {
         const val SINGLE_OPERATION_CUSTOM_TAG = "single_operation"
+
+        fun Context.downloadFile(drivePermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
+            if (drivePermissions.checkWriteStoragePermission()) {
+                val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
+                DownloadManagerUtils.scheduleDownload(context = this, file.downloadUrl(), fileName)
+                onSuccess?.invoke()
+            }
+        }
     }
 }
