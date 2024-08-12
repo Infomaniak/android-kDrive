@@ -19,15 +19,40 @@ package com.infomaniak.drive.ui.fileShared
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavDestination
+import androidx.navigation.fragment.NavHostFragment
+import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityFileSharedBinding
+import com.infomaniak.drive.extensions.addSentryBreadcrumb
+import com.infomaniak.drive.extensions.trackDestination
+import com.infomaniak.drive.utils.setColorNavigationBar
+import com.infomaniak.drive.utils.setColorStatusBar
 
 class FileSharedActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityFileSharedBinding.inflate(layoutInflater) }
+    private val navController by lazy {
+        (supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment).navController
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
+
+        navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
+    }
+
+    private fun onDestinationChanged(destination: NavDestination) {
+        destination.addSentryBreadcrumb()
+        destination.trackDestination(context = this)
+
+        when (destination.id) {
+            R.id.downloadProgressDialog, R.id.fileSharedPreviewSliderFragment -> Unit
+            else -> {
+                setColorStatusBar()
+                setColorNavigationBar()
+            }
+        }
     }
 }
