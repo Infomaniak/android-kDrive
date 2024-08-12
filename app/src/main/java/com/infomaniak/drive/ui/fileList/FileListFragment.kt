@@ -75,7 +75,6 @@ import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.first
 
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
     NoItemsLayoutView.INoItemsLayoutView {
@@ -670,20 +669,15 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         onFinish: ((FolderFilesResult?) -> Unit)? = null,
     ) {
         showPendingFiles()
-
-        lifecycleScope.launch {
-            if (view == null) return@launch
-
-            val isNetworkAvailable = mainViewModel.isNetworkAvailable.first()
-            fileListViewModel.getFiles(
-                folderId,
-                order = fileListViewModel.sortType,
-                sourceRestrictionType = if (isNetworkAvailable) ONLY_FROM_LOCAL else sourceRestrictionType,
-                userDrive = userDrive,
-                isNewSort = isNewSort,
-            ).observe(viewLifecycleOwner) {
-                onFinish?.invoke(it)
-            }
+        val isNetworkAvailable = mainViewModel.isNetworkAvailable.value == true
+        fileListViewModel.getFiles(
+            folderId,
+            order = fileListViewModel.sortType,
+            sourceRestrictionType = if (isNetworkAvailable) ONLY_FROM_LOCAL else sourceRestrictionType,
+            userDrive = userDrive,
+            isNewSort = isNewSort,
+        ).observe(viewLifecycleOwner) {
+            onFinish?.invoke(it)
         }
     }
 
@@ -836,28 +830,28 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         changeControlsVisibility: Boolean,
         ignoreOffline: Boolean = false
     ) {
-        lifecycleScope.launch {
-                if (_binding == null) return@launch
+        viewLifecycleOwner.lifecycleScope.launch {
+            if (_binding == null) return@launch
 
-                with(binding) {
-                    val isNetworkAvailable = mainViewModel.isNetworkAvailable.first()
-                    val hasFilesAndIsOffline = !hideFileList && !isNetworkAvailable
+            with(binding) {
+                val isNetworkAvailable = mainViewModel.isNetworkAvailable.value == true
+                val hasFilesAndIsOffline = !hideFileList && !isNetworkAvailable
 
-                    sortLayout.isGone = hideFileList
+                sortLayout.isGone = hideFileList
 
-                    if (changeControlsVisibility) {
-                        val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
-                        noNetworkInclude.noNetwork.isVisible = hasFilesAndIsOffline
-                        toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
-                    }
-
-                    noFilesLayout.toggleVisibility(
-                        noNetwork = !isNetworkAvailable && !ignoreOffline,
-                        isVisible = hideFileList,
-                        showRefreshButton = changeControlsVisibility
-                    )
+                if (changeControlsVisibility) {
+                    val isFileListDestination = findNavController().currentDestination?.id == R.id.fileListFragment
+                    noNetworkInclude.noNetwork.isVisible = hasFilesAndIsOffline
+                    toolbar.menu?.findItem(R.id.searchItem)?.isVisible = !hideFileList && isFileListDestination
                 }
+
+                noFilesLayout.toggleVisibility(
+                    noNetwork = !isNetworkAvailable && !ignoreOffline,
+                    isVisible = hideFileList,
+                    showRefreshButton = changeControlsVisibility
+                )
             }
+        }
     }
 
     open fun onRestartItemsClicked() = Unit

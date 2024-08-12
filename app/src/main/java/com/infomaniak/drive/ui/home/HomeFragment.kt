@@ -54,9 +54,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.isNetworkAvailable.collect { isNetworkAvailable ->
-                noNetworkCard.root.isGone = isNetworkAvailable
+                noNetworkCard.root.isGone = isNetworkAvailable == null || isNetworkAvailable == true
             }
         }
 

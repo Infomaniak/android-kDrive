@@ -31,7 +31,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -62,7 +61,6 @@ import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class FileInfoActionsView @JvmOverloads constructor(
@@ -101,27 +99,24 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
     private fun computeFileRights(file: File, rights: Rights) = with(binding) {
-        ownerFragment.lifecycleScope.launch {
-            mainViewModel.isNetworkAvailable.collect { isNetworkAvailable ->
-                displayInfo.isEnabled = isNetworkAvailable
-                disabledInfo.isGone = isNetworkAvailable
+        val hasNetwork = mainViewModel.isNetworkAvailable.value == true
+        displayInfo.isEnabled = hasNetwork
+        disabledInfo.isGone = hasNetwork
 
-                (rights.canShare && isNetworkAvailable).let { rightsEnabled ->
-                    fileRights.isEnabled = rightsEnabled
-                    disabledFileRights.isGone = rightsEnabled
-                }
+        (rights.canShare && hasNetwork).let { rightsEnabled ->
+            fileRights.isEnabled = rightsEnabled
+            disabledFileRights.isGone = rightsEnabled
+        }
 
-                val isPublicLinkEnabled = rights.canBecomeShareLink && isNetworkAvailable
-                        || currentFile.sharelink != null
-                        || !file.dropbox?.url.isNullOrBlank()
+        val isPublicLinkEnabled = rights.canBecomeShareLink && hasNetwork
+                || currentFile.sharelink != null
+                || !file.dropbox?.url.isNullOrBlank()
 
-                sharePublicLink.isEnabled = isPublicLinkEnabled
-                disabledPublicLink.isGone = isPublicLinkEnabled
+        sharePublicLink.isEnabled = isPublicLinkEnabled
+        disabledPublicLink.isGone = isPublicLinkEnabled
 
-                if (!file.dropbox?.url.isNullOrBlank()) {
-                    sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
-                }
-            }
+        if (!file.dropbox?.url.isNullOrBlank()) {
+            sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
         }
 
         ((file.isFolder() && rights.canCreateFile && rights.canCreateDirectory) || !file.isFolder()).let { sendCopyEnabled ->
@@ -512,9 +507,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun editDocumentClicked(mainViewModel: MainViewModel) {
             trackFileActionEvent("edit")
             currentFile?.let { file ->
-                ownerFragment?.lifecycleScope?.launch {
-                    ownerFragment?.openOnlyOfficeDocument(file, mainViewModel.isNetworkAvailable.first())
-                }
+                ownerFragment?.openOnlyOfficeDocument(file, mainViewModel.isNetworkAvailable.value == true)
             }
         }
 

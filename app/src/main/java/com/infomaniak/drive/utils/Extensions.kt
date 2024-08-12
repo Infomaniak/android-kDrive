@@ -500,7 +500,7 @@ fun Fragment.observeAndDisplayNetworkAvailability(
     noNetworkBindingDirectParent: ViewGroup,
     additionalChanges: ((isInternetAvailable: Boolean) -> Unit)? = null,
 ) {
-    lifecycleScope.launch {
+    viewLifecycleOwner.lifecycleScope.launch {
         mainViewModel.isNetworkAvailable.collect { isNetworkAvailable ->
             val togetherAutoTransition = AutoTransition().apply { ordering = TransitionSet.ORDERING_TOGETHER }
             with(togetherAutoTransition) {
@@ -508,8 +508,8 @@ fun Fragment.observeAndDisplayNetworkAvailability(
                 TransitionManager.beginDelayedTransition(noNetworkBindingDirectParent, this)
             }
 
-            noNetworkBinding.noNetwork.isGone = isNetworkAvailable
-            additionalChanges?.invoke(isNetworkAvailable)
+            noNetworkBinding.noNetwork.isGone = isNetworkAvailable == null || isNetworkAvailable == true
+            additionalChanges?.invoke(isNetworkAvailable == true)
         }
     }
 }

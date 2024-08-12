@@ -22,7 +22,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
@@ -35,8 +34,6 @@ import com.infomaniak.drive.utils.openOnlyOfficeDocument
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.safeBinding
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.INoItemsLayoutView {
 
@@ -69,9 +66,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
             noCommentsLayout.toggleVisibility(isVisible = true)
 
             onClickAddCommentButton = {
-                lifecycleScope.launch {
-                    openOnlyOfficeDocument(currentFile, mainViewModel.isNetworkAvailable.first())
-                }
+                openOnlyOfficeDocument(currentFile, mainViewModel.isNetworkAvailable.value == true)
             }
         } else {
             noItemsTitle = R.string.fileDetailsNoComments

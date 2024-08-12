@@ -47,7 +47,6 @@ import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -168,13 +167,11 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             } ?: run {
                 galleryAdapter.isComplete = true
 
-                lifecycleScope.launch {
-                    binding.noGalleryLayout.toggleVisibility(
-                        noNetwork = !mainViewModel.isNetworkAvailable.first(),
-                        isVisible = galleryAdapter.galleryList.isEmpty(),
-                        showRefreshButton = true,
-                    )
-                }
+                binding.noGalleryLayout.toggleVisibility(
+                    noNetwork = mainViewModel.isNetworkAvailable.value == false,
+                    isVisible = galleryAdapter.galleryList.isEmpty(),
+                    showRefreshButton = true,
+                )
             }
 
             onDownloadFinished()
@@ -232,11 +229,9 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             isComplete = false
             isDownloadingGallery = true
 
-            lifecycleScope.launch {
-                val isNetworkAvailable = mainViewModel.isNetworkAvailable.first()
-                if (isRefresh) galleryViewModel.loadLastGallery(driveId, ignoreCloud = !isNetworkAvailable)
-                else if (isNetworkAvailable) galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
-            }
+            val isNetworkAvailable = mainViewModel.isNetworkAvailable.value == true
+            if (isRefresh) galleryViewModel.loadLastGallery(driveId, ignoreCloud = !isNetworkAvailable)
+            else if (isNetworkAvailable) galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
         }
     }
 

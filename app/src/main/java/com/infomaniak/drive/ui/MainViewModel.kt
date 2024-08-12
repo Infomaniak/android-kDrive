@@ -103,7 +103,6 @@ class MainViewModel(
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = TIMEOUT_MS_NETWORK_AVAILABILITY_MS),
             initialValue = null
         )
-        .filterNotNull()
 
     var mustOpenUploadShortcut: Boolean = true
         get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: field
@@ -164,9 +163,8 @@ class MainViewModel(
 
     fun loadRootFiles() {
         rootFilesJob.cancel()
-        rootFilesJob = Job()
-        viewModelScope.launch {
-            if (isNetworkAvailable.first()) {
+        rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
+            if (isNetworkAvailable.value == true) {
                 FolderFilesProvider.getFiles(
                     FolderFilesProvider.FolderFilesProviderArgs(
                         folderId = Utils.ROOT_ID,
