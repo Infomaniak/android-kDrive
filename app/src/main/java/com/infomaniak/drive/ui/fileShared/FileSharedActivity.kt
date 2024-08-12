@@ -48,7 +48,7 @@ class FileSharedActivity : AppCompatActivity() {
         destination.trackDestination(context = this)
 
         when (destination.id) {
-            R.id.downloadProgressDialog, R.id.fileSharedPreviewSliderFragment -> Unit
+            R.id.previewDownloadProgressDialog, R.id.fileSharedPreviewSliderFragment -> Unit
             else -> {
                 setColorStatusBar()
                 setColorNavigationBar()
