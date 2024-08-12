@@ -66,8 +66,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     protected lateinit var drivePermissions: DrivePermissions
     protected lateinit var previewSliderAdapter: PreviewSliderAdapter
     protected lateinit var userDrive: UserDrive
-    protected var isOverlayShown = true
     protected abstract val isFileShare: Boolean
+    private var isOverlayShown = true
 
     override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
@@ -194,11 +194,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         super.onDestroy()
     }
 
-    protected fun clearEdgeToEdge() = with(requireActivity()) {
-        toggleSystemBar(true)
-        window.toggleEdgeToEdge(false)
-    }
-
     protected fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
 
     protected open fun setBackActionHandlers() {
@@ -236,6 +231,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 }
             }
         }
+    }
+
+    private fun clearEdgeToEdge() = with(requireActivity()) {
+        toggleSystemBar(true)
+        window.toggleEdgeToEdge(false)
     }
 
     companion object {
