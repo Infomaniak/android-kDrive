@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.navigation.fragment.navArgs
@@ -35,11 +36,10 @@ import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getHeader
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getPreviewPDFHandler
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.drive.utils.printPdf
@@ -337,6 +337,16 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         private const val HANDLE_PAGE_PDF_PADDING_TOP_DP = 120
         private const val HANDLE_PAGE_PDF_PADDING_BOTTOM_DP = 130
         private const val THUMBNAIL_RATIO = 0.5f
+
+        //region PDF Preview
+        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
+            getHeader()?.setPageNumberVisibility(isVisible)
+        }
+
+        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
+            getHeader()?.setPageNumberValue(currentPage, totalPage)
+        }
+        //endregion
     }
 }
 

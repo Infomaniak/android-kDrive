@@ -135,6 +135,7 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     }
 
     override fun printClicked() {
+        super<BasePreviewSliderFragment>.printClicked()
         previewSliderViewModel.executeDownloadAction(
             activityContext = requireContext(),
             downloadAction = DownloadAction.PRINT_PDF,

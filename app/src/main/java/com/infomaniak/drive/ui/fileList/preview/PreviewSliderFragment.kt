@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.MainViewModel.FileResult
+import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
@@ -327,16 +328,23 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun saveToKDrive() = Unit
     override fun onCacheAddedToOffline() = Unit
 
-    companion object {
-
-        //region PDF Preview
-        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
-            getHeader()?.setPageNumberVisibility(isVisible)
-        }
-
-        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
-            getHeader()?.setPageNumberValue(currentPage, totalPage)
-        }
-        //endregion
+    override fun printClicked() {
+        super<BasePreviewSliderFragment>.printClicked()
+        previewPDFHandler.printClicked(
+            context = requireContext(),
+            onDefaultCase = {
+                requireContext().printPdf {
+                    safeNavigate(
+                        PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
+                            fileId = currentFile.id,
+                            fileName = currentFile.name,
+                            userDrive = userDrive,
+                            action = DownloadAction.PRINT_PDF,
+                        ),
+                    )
+                }
+            },
+            onError = { showSnackbar(R.string.errorFileNotFound) },
+        )
     }
 }
