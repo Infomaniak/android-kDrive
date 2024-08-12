@@ -134,6 +134,11 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
         )
     }
 
+    override fun downloadFileClicked() {
+        super<BasePreviewSliderFragment>.downloadFileClicked()
+        binding.bottomSheetFileInfos.downloadFile(drivePermissions, currentFile) { toggleBottomSheet(shouldShow = true) }
+    }
+
     override fun printClicked() {
         super<BasePreviewSliderFragment>.printClicked()
         previewSliderViewModel.executeDownloadAction(

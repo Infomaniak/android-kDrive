@@ -58,7 +58,6 @@ class PreviewSliderViewModel : ViewModel() {
             val uri = FileProvider.getUriForFile(activityContext, activityContext.getString(R.string.FILE_AUTHORITY), cacheFile)
 
             when (downloadAction) {
-                DownloadAction.DOWNLOAD -> TODO()
                 DownloadAction.OPEN_WITH -> {
                     activityContext.openWith(uri, currentPreview!!.getMimeType(), Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
