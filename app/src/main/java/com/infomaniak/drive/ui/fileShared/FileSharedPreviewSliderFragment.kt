@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileShared
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -35,7 +34,6 @@ import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -110,25 +108,29 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     override fun fileRightsClicked() = Unit
     override fun goToFolder() = Unit
     override fun manageCategoriesClicked(fileId: Int) = Unit
-    override fun shareFile() = Unit // TODO
-    override fun saveToKDrive() {
-        previewSliderViewModel.executeDownloadAction(
-            activityContext = requireContext(),
-            downloadAction = DownloadAction.SAVE_TO_DRIVE,
-            navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
-        )
-    }
-
-    override fun downloadFileClicked() {
-        super<BasePreviewSliderFragment>.downloadFileClicked()
-        // TODO
-    }
 
     override fun openWith() {
         previewSliderViewModel.executeDownloadAction(
             activityContext = requireContext(),
             downloadAction = DownloadAction.OPEN_WITH,
+            navigateToDownloadDialog = ::navigateToDownloadDialog,
+            onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
+        )
+    }
+
+    override fun shareFile() {
+        previewSliderViewModel.executeDownloadAction(
+            activityContext = requireContext(),
+            downloadAction = DownloadAction.SEND_COPY,
+            navigateToDownloadDialog = ::navigateToDownloadDialog,
+            onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
+        )
+    }
+
+    override fun saveToKDrive() {
+        previewSliderViewModel.executeDownloadAction(
+            activityContext = requireContext(),
+            downloadAction = DownloadAction.SAVE_TO_DRIVE,
             navigateToDownloadDialog = ::navigateToDownloadDialog,
             onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
         )
