@@ -79,11 +79,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             context = requireContext(),
             setPrintVisibility = { isGone ->
                 if (_binding == null) return@PreviewPDFHandler
-
-                when (bottomSheetView) {
-                    is FileInfoActionsView -> (bottomSheetView as FileInfoActionsView).setPrintVisibility(isGone)
-                    is ExternalFileInfoActionsView -> (bottomSheetView as ExternalFileInfoActionsView).isPrintingHidden(isGone)
-                }
+                setPrintButtonVisibility(isGone)
             },
         )
     }
@@ -135,7 +131,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                         toggleOpenWithVisibility(isVisible = !isFileShare && !currentFile.isOnlyOfficePreview())
                     }
 
-                    bottomSheetFileInfos.setPrintVisibility(isGone = !currentFile.isPDF())
+                    setPrintButtonVisibility(isGone = !currentFile.isPDF())
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isFileShare
                     updateBottomSheetWithCurrentFile()
                 }
@@ -236,6 +232,13 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private fun clearEdgeToEdge() = with(requireActivity()) {
         toggleSystemBar(true)
         window.toggleEdgeToEdge(false)
+    }
+
+    private fun setPrintButtonVisibility(isGone: Boolean) {
+        when (bottomSheetView) {
+            is FileInfoActionsView -> (bottomSheetView as FileInfoActionsView).setPrintVisibility(isGone)
+            is ExternalFileInfoActionsView -> (bottomSheetView as ExternalFileInfoActionsView).isPrintingHidden(isGone)
+        }
     }
 
     companion object {
