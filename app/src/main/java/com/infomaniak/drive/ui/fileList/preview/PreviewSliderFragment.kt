@@ -132,6 +132,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             )
             updateCurrentFile(currentFile)
             setOnTouchListener { _, _ -> true }
+            setPrintVisibility(isGone = currentFile.isPDF())
         }
 
         previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle)
@@ -152,6 +153,8 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                     lifecycleScope.launchWhenResumed {
                         withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
                     }
+
+                    bottomSheetFileInfos.setPrintVisibility(isGone = currentFile.isPDF())
                 }
             })
         }

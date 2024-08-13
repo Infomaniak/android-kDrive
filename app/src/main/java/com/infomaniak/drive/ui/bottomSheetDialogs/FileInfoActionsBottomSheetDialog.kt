@@ -95,6 +95,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 isSharedWithMe = navigationArgs.userDrive.sharedWithMe,
             )
             updateCurrentFile(currentFile)
+
+            binding.fileInfoActionsView.setPrintVisibility(isGone = currentFile.isPDF())
         }
 
         setupBackActionHandler()

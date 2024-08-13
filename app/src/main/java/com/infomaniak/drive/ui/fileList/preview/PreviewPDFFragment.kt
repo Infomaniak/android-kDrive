@@ -174,7 +174,8 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         touchPriority(true)
                         thumbnailRatio(THUMBNAIL_RATIO)
                         onLoad { pageCount ->
-                            shouldHidePrintOption(isGone = false)
+                            // We can arrive here with a file different from a real PDF like OpenOffice documents
+                            shouldHidePrintOption(isGone = file.extensionType != ExtensionType.PDF.value)
                             binding.downloadLayout.root.isGone = true
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
