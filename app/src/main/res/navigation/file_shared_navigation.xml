@@ -47,7 +47,7 @@
     <fragment
         android:id="@+id/fileSharedListFragment"
         android:name="com.infomaniak.drive.ui.fileShared.FileSharedListFragment"
-        tools:layout="@layout/fragment_file_shared_list">
+        tools:layout="@layout/fragment_file_list">
         <argument
             android:name="fileId"
             android:defaultValue="1"
