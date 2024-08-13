@@ -278,6 +278,8 @@ object ApiRoutes {
         return "${SHARE_URL_V1}share/$driveId/$linkUuid/preview/text/${file.id}"
     }
 
+    fun importShareLinkFiles(driveId: Int) : String = "$DRIVE_API_V2$driveId/imports/sharelink"
+
     private fun shareLinkFile(driveId: Int, linkUuid: String, file: File): String {
         return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}"
     }
