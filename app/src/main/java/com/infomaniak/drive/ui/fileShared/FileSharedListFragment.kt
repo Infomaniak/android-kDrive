@@ -17,11 +17,13 @@
  */
 package com.infomaniak.drive.ui.fileShared
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -29,13 +31,21 @@ import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.SaveExternalFilesActivity
+import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
+import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
+import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileShared.FileSharedViewModel.Companion.ROOT_SHARED_FILE_ID
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.downloadFile
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.whenResultIsOk
+import com.infomaniak.lib.core.R as RCore
 
 class FileSharedListFragment : FileListFragment() {
 
@@ -46,6 +56,17 @@ class FileSharedListFragment : FileListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
 
     private var drivePermissions: DrivePermissions? = null
+    private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk { data ->
+            if (data == null) {
+                showSnackbar(RCore.string.anErrorHasOccurred)
+            } else {
+                val destinationDriveId = data.getIntExtra(DESTINATION_DRIVE_ID_KEY, -1)
+                val destinationFolderId = data.getIntExtra(DESTINATION_FOLDER_ID_KEY, -1)
+                fileSharedViewModel.importFilesToDrive(destinationDriveId, destinationFolderId)
+            }
+        }
+    }
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
@@ -90,10 +111,29 @@ class FileSharedListFragment : FileListFragment() {
             menu?.findItem(R.id.downloadAllFiles)?.isVisible = true
         }
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
+        (requireActivity() as? FileSharedActivity)?.let { parentActivity ->
+            parentActivity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
 
-        observeRootFile()
-        observeFiles()
+            parentActivity.getMainButton().setOnClickListener {
+                if (AccountUtils.currentDriveId == -1) {
+                    showSnackbar(title = "TODO : Show bottomsheet to get app", anchor = parentActivity.getMainButton())
+                } else {
+                    Intent(parentActivity, SaveExternalFilesActivity::class.java).apply {
+                        action = Intent.ACTION_SEND
+                        putExtras(
+                            SaveExternalFilesActivityArgs(
+                                userId = AccountUtils.currentUserId,
+                                driveId = AccountUtils.currentDriveId,
+                                isPublicShare = true,
+                            ).toBundle()
+                        ).also(selectDriveAndFolderResultLauncher::launch)
+                    }
+                }
+            }
+
+            observeRootFile()
+            observeFiles()
+        }
     }
 
     private fun populateFileList(files: List<File>, shouldRefreshFiles: Boolean = true) {
