@@ -25,6 +25,7 @@ import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileLastActivityBody
 import com.infomaniak.drive.data.models.file.LastFileAction
 import com.infomaniak.drive.data.models.file.ListingFiles
@@ -321,6 +322,28 @@ object ApiRepository : ApiRepositoryCore() {
     ): CursorApiResponse<List<File>> {
         val url = ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET)
+    }
+
+    fun importShareLinkFiles(
+        sourceDriveId: Int,
+        linkUuid: String,
+        destinationDriveId: Int,
+        destinationFolderId: Int,
+        fileIds: List<Int> = emptyList(),
+        exceptedFileIds: List<Int> = emptyList(),
+        password: String = "",
+    ): ApiResponse<FileExternalImport> {
+        val body: MutableMap<String, Any> = mutableMapOf(
+            "source_drive_id" to sourceDriveId,
+            "sharelink_uuid" to linkUuid,
+            "destination_folder_id" to destinationFolderId,
+        )
+
+        if (password.isNotBlank()) body["password"] = password
+        if (fileIds.isNotEmpty()) body["file_ids"] = fileIds.toTypedArray()
+        if (exceptedFileIds.isNotEmpty()) body["except_file_ids"] = exceptedFileIds.toTypedArray()
+
+        return callApi(ApiRoutes.importShareLinkFiles(destinationDriveId), POST, body)
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
