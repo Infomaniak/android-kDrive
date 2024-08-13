@@ -33,7 +33,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.CancellableAction
-import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetFileInfoActionsBinding
@@ -97,7 +96,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             )
             updateCurrentFile(currentFile)
 
-            binding.fileInfoActionsView.setPrintVisibility(isGone = currentFile.extensionType != ExtensionType.PDF.value)
+            binding.fileInfoActionsView.setPrintVisibility(isGone = currentFile.isPDF())
         }
 
         setupBackActionHandler()

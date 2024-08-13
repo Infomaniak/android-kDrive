@@ -38,7 +38,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
@@ -133,7 +132,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             )
             updateCurrentFile(currentFile)
             setOnTouchListener { _, _ -> true }
-            setPrintVisibility(isGone = currentFile.extensionType != ExtensionType.PDF.value)
+            setPrintVisibility(isGone = currentFile.isPDF())
         }
 
         previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle)
@@ -155,7 +154,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                         withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
                     }
 
-                    bottomSheetFileInfos.setPrintVisibility(isGone = currentFile.extensionType != ExtensionType.PDF.value)
+                    bottomSheetFileInfos.setPrintVisibility(isGone = currentFile.isPDF())
                 }
             })
         }

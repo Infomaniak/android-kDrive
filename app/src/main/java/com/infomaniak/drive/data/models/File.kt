@@ -205,6 +205,8 @@ open class File(
         }
     }
 
+    fun isPDF() = extensionType != ExtensionType.PDF.value
+
     fun getLastModifiedAt(): Date {
         return Date(getLastModifiedInMilliSecond())
     }
