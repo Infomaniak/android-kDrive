@@ -151,7 +151,7 @@ dependencies {
     implementation 'com.tbuonomo:dotsindicator:5.0'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
 
-    implementation 'io.realm:android-adapters:4.0.0'
+    implementation 'com.github.realm:realm-android-adapters:v4.0.0'
 
     standardImplementation 'com.google.firebase:firebase-messaging-ktx:24.0.0'
 
