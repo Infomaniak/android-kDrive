@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.fileShared
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.infomaniak.drive.R
@@ -43,21 +44,25 @@ class FileSharedActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
     }
 
-    private fun onDestinationChanged(destination: NavDestination) {
-        destination.addSentryBreadcrumb()
-        destination.trackDestination(context = this)
-
-        when (destination.id) {
-            R.id.previewDownloadProgressDialog, R.id.fileSharedPreviewSliderFragment -> Unit
-            else -> {
-                setColorStatusBar()
-                setColorNavigationBar()
-            }
-        }
-    }
-
     override fun onDestroy() {
         IOFile(filesDir, getString(R.string.EXPOSED_PUBLIC_SHARE_DIR)).apply { if (exists()) deleteRecursively() }
         super.onDestroy()
     }
+
+    private fun onDestinationChanged(destination: NavDestination) {
+        destination.addSentryBreadcrumb()
+        destination.trackDestination(context = this)
+
+        val isMainButtonVisible = when (destination.id) {
+            R.id.previewDownloadProgressDialog, R.id.fileSharedPreviewSliderFragment -> false
+            else -> {
+                setColorStatusBar()
+                setColorNavigationBar()
+                true
+            }
+        }
+        binding.mainFileShareButton.isVisible = isMainButtonVisible
+    }
+
+    fun getMainButton() = binding.mainFileShareButton
 }
