@@ -182,6 +182,8 @@ open class File(
         return "${ApiRoutes.imagePreviewFile(this)}&width=2500&height=1500&quality=80"
     }
 
+    fun isPDF() = getFileType() != ExtensionType.PDF
+
     fun onlyOfficeUrl() = "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
 
     fun getFileType(): ExtensionType {
@@ -204,8 +206,6 @@ open class File(
             }
         }
     }
-
-    fun isPDF() = extensionType != ExtensionType.PDF.value
 
     fun getLastModifiedAt(): Date {
         return Date(getLastModifiedInMilliSecond())
