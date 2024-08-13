@@ -834,8 +834,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             if (_binding == null) return@launch
 
             with(binding) {
-                val isNetworkAvailable = mainViewModel.isNetworkAvailable.value == true
-                val hasFilesAndIsOffline = !hideFileList && !isNetworkAvailable
+                val hasNoNetwork = mainViewModel.isNetworkAvailable.value == false
+                val hasFilesAndIsOffline = !hideFileList && hasNoNetwork
 
                 sortLayout.isGone = hideFileList
 
@@ -846,7 +846,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 }
 
                 noFilesLayout.toggleVisibility(
-                    noNetwork = !isNetworkAvailable && !ignoreOffline,
+                    noNetwork = hasNoNetwork && !ignoreOffline,
                     isVisible = hideFileList,
                     showRefreshButton = changeControlsVisibility
                 )
