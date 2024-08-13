@@ -402,6 +402,10 @@
             android:name="folderId"
             android:defaultValue="-1"
             app:argType="integer" />
+        <argument
+            android:name="isPublicShare"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </activity>
 
     <activity
