@@ -43,11 +43,14 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.downloadAsOfflineFiles
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.whenResultIsOk

@@ -51,6 +51,7 @@ import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
@@ -95,6 +96,7 @@ import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -279,7 +281,7 @@ fun Fragment.showSnackbar(
     }
 }
 
-fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable:  Boolean) {
+fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable: Boolean) {
     if (isInternetAvailable) {
         if (file.conversion?.whenOnlyoffice == true) {
             findNavController().navigate(
@@ -290,7 +292,7 @@ fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable:  Boolean) {
             requireContext().openOnlyOfficeActivity(file)
         }
     } else {
-        Toast.makeText(requireContext(),getString(R.string.noConnection),Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), getString(R.string.noConnection), Toast.LENGTH_LONG).show()
     }
 }
 
@@ -498,15 +500,17 @@ fun Fragment.observeAndDisplayNetworkAvailability(
     noNetworkBindingDirectParent: ViewGroup,
     additionalChanges: ((isInternetAvailable: Boolean) -> Unit)? = null,
 ) {
-    mainViewModel.isInternetAvailable.observe(viewLifecycleOwner) { isInternetAvailable ->
-        val togetherAutoTransition = AutoTransition().apply { ordering = TransitionSet.ORDERING_TOGETHER }
-        with(togetherAutoTransition) {
-            noNetworkBindingDirectParent.children.forEach { child -> addTarget(child) }
-            TransitionManager.beginDelayedTransition(noNetworkBindingDirectParent, this)
-        }
+    viewLifecycleOwner.lifecycleScope.launch {
+        mainViewModel.isNetworkAvailable.collect { isNetworkAvailable ->
+            val togetherAutoTransition = AutoTransition().apply { ordering = TransitionSet.ORDERING_TOGETHER }
+            with(togetherAutoTransition) {
+                noNetworkBindingDirectParent.children.forEach { child -> addTarget(child) }
+                TransitionManager.beginDelayedTransition(noNetworkBindingDirectParent, this)
+            }
 
-        noNetworkBinding.noNetwork.isGone = isInternetAvailable
-        additionalChanges?.invoke(isInternetAvailable)
+            noNetworkBinding.noNetwork.isGone = isNetworkAvailable == null || isNetworkAvailable == true
+            additionalChanges?.invoke(isNetworkAvailable == true)
+        }
     }
 }
 

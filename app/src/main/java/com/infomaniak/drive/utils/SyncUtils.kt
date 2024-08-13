@@ -45,7 +45,7 @@ object SyncUtils {
 
     private val TAG = SyncUtils::class.java.simpleName
 
-    fun getFileDates(cursor: Cursor, lastModifiedDateFromUri : Long? = null): Pair<Date?, Date> {
+    fun getFileDates(cursor: Cursor, lastModifiedDateFromUri: Long? = null): Pair<Date?, Date> {
         val dateTakenIndex = cursor.getColumnIndex(DATE_TAKEN)
         val dateAddedIndex = cursor.getColumnIndex(MediaStore.MediaColumns.DATE_ADDED)
 

@@ -99,25 +99,25 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
     private fun computeFileRights(file: File, rights: Rights) = with(binding) {
-        val isOnline = mainViewModel.isInternetAvailable.value == true
+        val hasNetwork = mainViewModel.isNetworkAvailable.value == true
+        displayInfo.isEnabled = hasNetwork
+        disabledInfo.isGone = hasNetwork
 
-        displayInfo.isEnabled = isOnline
-        disabledInfo.isGone = isOnline
-
-        (rights.canShare && isOnline).let { rightsEnabled ->
+        (rights.canShare && hasNetwork).let { rightsEnabled ->
             fileRights.isEnabled = rightsEnabled
             disabledFileRights.isGone = rightsEnabled
         }
 
-        (rights.canBecomeShareLink && isOnline || currentFile.sharelink != null || !file.dropbox?.url.isNullOrBlank())
-            .let { publicLinkEnabled ->
-                sharePublicLink.isEnabled = publicLinkEnabled
-                disabledPublicLink.isGone = publicLinkEnabled
+        val isPublicLinkEnabled = rights.canBecomeShareLink && hasNetwork
+                || currentFile.sharelink != null
+                || !file.dropbox?.url.isNullOrBlank()
 
-                if (!file.dropbox?.url.isNullOrBlank()) {
-                    sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
-                }
-            }
+        sharePublicLink.isEnabled = isPublicLinkEnabled
+        disabledPublicLink.isGone = isPublicLinkEnabled
+
+        if (!file.dropbox?.url.isNullOrBlank()) {
+            sharePublicLinkText.text = context.getString(R.string.buttonShareDropboxLink)
+        }
 
         ((file.isFolder() && rights.canCreateFile && rights.canCreateDirectory) || !file.isFolder()).let { sendCopyEnabled ->
             sendCopy.isEnabled = sendCopyEnabled
@@ -506,10 +506,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         @CallSuper
         fun editDocumentClicked(mainViewModel: MainViewModel) {
             trackFileActionEvent("edit")
-            currentFile?.let {
-                mainViewModel.isInternetAvailable.value?.let { isConnected ->
-                    ownerFragment?.openOnlyOfficeDocument(it, isConnected)
-                }
+            currentFile?.let { file ->
+                ownerFragment?.openOnlyOfficeDocument(file, mainViewModel.isNetworkAvailable.value == true)
             }
         }
 
