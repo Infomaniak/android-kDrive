@@ -305,26 +305,26 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.shareLink(file), DELETE)
     }
 
-    fun getShareLinkInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
-        return callApi(ApiRoutes.getShareLinkInfo(driveId, linkUuid), GET)
+    fun getPublicShareInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
+        return callApi(ApiRoutes.getPublicShareInfo(driveId, linkUuid), GET)
     }
 
-    fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
-        return callApi(ApiRoutes.getShareLinkFile(driveId, linkUuid, fileId), GET)
+    fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
+        return callApi(ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId), GET)
     }
 
-    fun getShareLinkFileChildren(
+    fun getPublicShareChildrenFiles(
         driveId: Int,
         linkUuid: String,
         folderId: FileId,
         sortType: SortType,
         cursor: String?,
     ): CursorApiResponse<List<File>> {
-        val url = ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
+        val url = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET)
     }
 
-    fun importShareLinkFiles(
+    fun importPublicShareFiles(
         sourceDriveId: Int,
         linkUuid: String,
         destinationDriveId: Int,
@@ -343,7 +343,7 @@ object ApiRepository : ApiRepositoryCore() {
         if (fileIds.isNotEmpty()) body["file_ids"] = fileIds.toTypedArray()
         if (exceptedFileIds.isNotEmpty()) body["except_file_ids"] = exceptedFileIds.toTypedArray()
 
-        return callApi(ApiRoutes.importShareLinkFiles(destinationDriveId), POST, body)
+        return callApi(ApiRoutes.importPublicShareFiles(destinationDriveId), POST, body)
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
