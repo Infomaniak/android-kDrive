@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileShared
+package com.infomaniak.drive.ui.publicShare
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -30,19 +30,19 @@ import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.*
 
-class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() {
+class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() {
 
     var rootSharedFile = SingleLiveEvent<File?>()
     val childrenLiveData = SingleLiveEvent<Pair<List<File>, Boolean>>()
 
     private val driveId: Int
-        inline get() = savedStateHandle[FileSharedActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
+        inline get() = savedStateHandle[PublicShareActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
 
-    val fileSharedLinkUuid: String
-        inline get() = savedStateHandle[FileSharedActivityArgs::fileSharedLinkUuid.name] ?: ""
+    val publicShareUuid: String
+        inline get() = savedStateHandle[PublicShareActivityArgs::publicShareUuid.name] ?: ""
 
     private val fileId: Int
-        inline get() = savedStateHandle[FileSharedActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
+        inline get() = savedStateHandle[PublicShareActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
 
     private var getSharedFilesJob: Job = Job()
     private var currentCursor: String? = null
@@ -51,14 +51,14 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
         val file = if (fileId == ROOT_SHARED_FILE_ID) {
             rootSharedFile.value
         } else {
-            val apiResponse = ApiRepository.getShareLinkFile(driveId, fileSharedLinkUuid, fileId)
+            val apiResponse = ApiRepository.getShareLinkFile(driveId, publicShareUuid, fileId)
             if (!apiResponse.isSuccess()) {
                 SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
             }
             apiResponse.data
         }
 
-        rootSharedFile.postValue(file?.apply { externalShareLinkUuid = fileSharedLinkUuid })
+        rootSharedFile.postValue(file?.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid })
     }
 
     fun getFiles(folderId: Int, sortType: SortType) {
@@ -103,7 +103,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
     ) = viewModelScope.launch(Dispatchers.IO) {
         ApiRepository.importShareLinkFiles(
             sourceDriveId = driveId,
-            linkUuid = fileSharedLinkUuid,
+            linkUuid = publicShareUuid,
             destinationDriveId = destinationDriveId,
             destinationFolderId = destinationFolderId,
             fileIds = fileIds,
@@ -116,7 +116,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
     private fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
         val apiResponse = ApiRepository.getShareLinkFileChildren(
             driveId = driveId,
-            linkUuid = fileSharedLinkUuid,
+            linkUuid = publicShareUuid,
             folderId = folderFilesProviderArgs.folderId,
             sortType = folderFilesProviderArgs.order,
             cursor = currentCursor,
@@ -146,7 +146,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
         )
     }
 
-    private fun List<File>.addShareLinkUuid() = map { it.apply { externalShareLinkUuid = fileSharedLinkUuid } }
+    private fun List<File>.addShareLinkUuid() = map { it.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid } }
 
     companion object {
         const val TAG = "FileSharedViewModel"
