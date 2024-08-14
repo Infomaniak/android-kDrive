@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileShared
+package com.infomaniak.drive.ui.publicShare
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,7 +25,7 @@ import androidx.fragment.app.Fragment
 import com.infomaniak.drive.databinding.FragmentFileSharedPasswordBinding
 import com.infomaniak.lib.core.utils.safeBinding
 
-class FileSharedPasswordFragment : Fragment() {
+class PublicSharePasswordFragment : Fragment() {
 
     private var binding: FragmentFileSharedPasswordBinding by safeBinding()
 

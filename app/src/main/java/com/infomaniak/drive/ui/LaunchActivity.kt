@@ -34,8 +34,8 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.ui.fileShared.FileSharedActivity
-import com.infomaniak.drive.ui.fileShared.FileSharedActivityArgs
+import com.infomaniak.drive.ui.publicShare.PublicShareActivity
+import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
@@ -109,7 +109,7 @@ class LaunchActivity : AppCompatActivity() {
                 when (destinationClass) {
                     MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
                     LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
-                    FileSharedActivity::class.java -> fileSharedActivityExtras?.let(::putExtras)
+                    PublicShareActivity::class.java -> fileSharedActivityExtras?.let(::putExtras)
                 }
             }.also(::startActivity)
         }
@@ -117,7 +117,7 @@ class LaunchActivity : AppCompatActivity() {
 
     private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
         when {
-            fileSharedActivityExtras != null -> FileSharedActivity::class.java
+            fileSharedActivityExtras != null -> PublicShareActivity::class.java
             AccountUtils.requestCurrentUser() == null -> LoginActivity::class.java
             else -> loggedUserDestination()
         }
@@ -171,18 +171,18 @@ class LaunchActivity : AppCompatActivity() {
         Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
             val (driveId, fileSharedLinkUuid) = match.destructured
 
-            val apiResponse = ApiRepository.getShareLinkInfo(driveId.toInt(), fileSharedLinkUuid)
-            when (apiResponse.result) {
-                ApiResponseStatus.SUCCESS -> {
-                    val shareLink = apiResponse.data!!
-                    if (apiResponse.data?.validUntil?.before(Date()) == true) {
-                        Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
-                    }
-                    fileSharedActivityExtras = FileSharedActivityArgs(
-                        driveId = driveId.toInt(),
-                        fileSharedLinkUuid = fileSharedLinkUuid,
-                        fileId = shareLink.fileId ?: -1,
-                    ).toBundle()
+                val apiResponse = ApiRepository.getShareLinkInfo(driveId.toInt(), fileSharedLinkUuid)
+                when (apiResponse.result) {
+                    ApiResponseStatus.SUCCESS -> {
+                        val shareLink = apiResponse.data!!
+                        if (apiResponse.data?.validUntil?.before(Date()) == true) {
+                            Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
+                        }
+                        fileSharedActivityExtras = PublicShareActivityArgs(
+                            driveId = driveId.toInt(),
+                            publicShareUuid = fileSharedLinkUuid,
+                            fileId = shareLink.fileId ?: -1,
+                        ).toBundle()
 
                     trackDeepLink("external")
                 }

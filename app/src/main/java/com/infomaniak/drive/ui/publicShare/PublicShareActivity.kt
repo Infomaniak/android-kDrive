@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileShared
+package com.infomaniak.drive.ui.publicShare
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -23,16 +23,16 @@ import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.infomaniak.drive.R
-import com.infomaniak.drive.databinding.ActivityFileSharedBinding
+import com.infomaniak.drive.databinding.ActivityPublicShareBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.setColorNavigationBar
 import com.infomaniak.drive.utils.setColorStatusBar
 
-class FileSharedActivity : AppCompatActivity() {
+class PublicShareActivity : AppCompatActivity() {
 
-    private val binding by lazy { ActivityFileSharedBinding.inflate(layoutInflater) }
+    private val binding by lazy { ActivityPublicShareBinding.inflate(layoutInflater) }
     private val navController by lazy {
         (supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment).navController
     }
@@ -53,12 +53,12 @@ class FileSharedActivity : AppCompatActivity() {
         destination.addSentryBreadcrumb()
         destination.trackDestination(context = this)
 
-        if (destination.id == R.id.fileSharedListFragment || destination.id == R.id.fileSharedBottomSheetFileActions) {
+        if (destination.id == R.id.publicShareListFragment || destination.id == R.id.fileSharedBottomSheetFileActions) {
             setColorStatusBar()
             setColorNavigationBar()
         }
-        binding.mainFileShareButton.isVisible = destination.id == R.id.fileSharedListFragment
+        binding.mainPublicShareButton.isVisible = destination.id == R.id.publicShareListFragment
     }
 
-    fun getMainButton() = binding.mainFileShareButton
+    fun getMainButton() = binding.mainPublicShareButton
 }
