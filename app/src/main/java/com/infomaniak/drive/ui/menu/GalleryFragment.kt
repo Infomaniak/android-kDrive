@@ -168,7 +168,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
                 galleryAdapter.isComplete = true
 
                 binding.noGalleryLayout.toggleVisibility(
-                    noNetwork = mainViewModel.isNetworkAvailable.value == false,
+                    noNetwork = !mainViewModel.hasNetwork,
                     isVisible = galleryAdapter.galleryList.isEmpty(),
                     showRefreshButton = true,
                 )
@@ -229,7 +229,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             isComplete = false
             isDownloadingGallery = true
 
-            val isNetworkAvailable = mainViewModel.isNetworkAvailable.value == true
+            val isNetworkAvailable = mainViewModel.hasNetwork
             if (isRefresh) galleryViewModel.loadLastGallery(driveId, ignoreCloud = !isNetworkAvailable)
             else if (isNetworkAvailable) galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
         }

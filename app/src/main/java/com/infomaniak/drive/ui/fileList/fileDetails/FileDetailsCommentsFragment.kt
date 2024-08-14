@@ -65,9 +65,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
         if (currentFile.isOnlyOfficePreview()) {
             noCommentsLayout.toggleVisibility(isVisible = true)
 
-            onClickAddCommentButton = {
-                openOnlyOfficeDocument(currentFile, mainViewModel.isNetworkAvailable.value == true)
-            }
+            onClickAddCommentButton = { openOnlyOfficeDocument(currentFile, mainViewModel.hasNetwork) }
         } else {
             noItemsTitle = R.string.fileDetailsNoComments
             setCommentsAdapter()

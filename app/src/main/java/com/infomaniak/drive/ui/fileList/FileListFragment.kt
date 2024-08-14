@@ -669,11 +669,10 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         onFinish: ((FolderFilesResult?) -> Unit)? = null,
     ) {
         showPendingFiles()
-        val isNetworkAvailable = mainViewModel.isNetworkAvailable.value == true
         fileListViewModel.getFiles(
             folderId,
             order = fileListViewModel.sortType,
-            sourceRestrictionType = if (isNetworkAvailable) ONLY_FROM_LOCAL else sourceRestrictionType,
+            sourceRestrictionType = if (!mainViewModel.hasNetwork) ONLY_FROM_LOCAL else sourceRestrictionType,
             userDrive = userDrive,
             isNewSort = isNewSort,
         ).observe(viewLifecycleOwner) {
@@ -834,7 +833,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             if (_binding == null) return@launch
 
             with(binding) {
-                val hasNoNetwork = mainViewModel.isNetworkAvailable.value == false
+                val hasNoNetwork = !mainViewModel.hasNetwork
                 val hasFilesAndIsOffline = !hideFileList && hasNoNetwork
 
                 sortLayout.isGone = hideFileList

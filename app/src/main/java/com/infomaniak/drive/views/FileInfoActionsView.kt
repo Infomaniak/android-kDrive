@@ -99,7 +99,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     // TODO - Enhanceable code : Replace these let by an autonomous view with "enabled/disabled" method ?
     private fun computeFileRights(file: File, rights: Rights) = with(binding) {
-        val hasNetwork = mainViewModel.isNetworkAvailable.value == true
+        val hasNetwork = mainViewModel.hasNetwork
         displayInfo.isEnabled = hasNetwork
         disabledInfo.isGone = hasNetwork
 
@@ -507,7 +507,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun editDocumentClicked(mainViewModel: MainViewModel) {
             trackFileActionEvent("edit")
             currentFile?.let { file ->
-                ownerFragment?.openOnlyOfficeDocument(file, mainViewModel.isNetworkAvailable.value == true)
+                ownerFragment?.openOnlyOfficeDocument(file, mainViewModel.hasNetwork)
             }
         }
 

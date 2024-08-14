@@ -104,6 +104,8 @@ class MainViewModel(
             initialValue = null
         )
 
+    inline val hasNetwork get() = isNetworkAvailable.value != false
+
     var mustOpenUploadShortcut: Boolean = true
         get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: field
         set(value) {
@@ -164,7 +166,7 @@ class MainViewModel(
     fun loadRootFiles() {
         rootFilesJob.cancel()
         rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
-            if (isNetworkAvailable.value == true) {
+            if (hasNetwork) {
                 FolderFilesProvider.getFiles(
                     FolderFilesProvider.FolderFilesProviderArgs(
                         folderId = Utils.ROOT_ID,
