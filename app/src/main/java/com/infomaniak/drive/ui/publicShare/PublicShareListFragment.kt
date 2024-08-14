@@ -219,7 +219,7 @@ class PublicShareListFragment : FileListFragment() {
 
             with(publicShareViewModel) {
                 if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
-                    downloadSharedFile()
+                    downloadPublicShareRootFile()
                 } else {
                     getFiles(folderId, fileListViewModel.sortType)
                 }

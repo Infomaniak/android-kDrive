@@ -34,9 +34,9 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
-import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -174,7 +174,7 @@ class LaunchActivity : AppCompatActivity() {
         Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
             val (driveId, fileSharedLinkUuid) = match.destructured
 
-                val apiResponse = ApiRepository.getShareLinkInfo(driveId.toInt(), fileSharedLinkUuid)
+                val apiResponse = ApiRepository.getPublicShareInfo(driveId.toInt(), fileSharedLinkUuid)
                 when (apiResponse.result) {
                     ApiResponseStatus.SUCCESS -> {
                         val shareLink = apiResponse.data!!

@@ -44,14 +44,14 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     private val fileId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
 
-    private var getSharedFilesJob: Job = Job()
+    private var getPublicShareFilesJob: Job = Job()
     private var currentCursor: String? = null
 
-    fun downloadSharedFile() = viewModelScope.launch(Dispatchers.IO) {
+    fun downloadPublicShareRootFile() = viewModelScope.launch(Dispatchers.IO) {
         val file = if (fileId == ROOT_SHARED_FILE_ID) {
             rootSharedFile.value
         } else {
-            val apiResponse = ApiRepository.getShareLinkFile(driveId, publicShareUuid, fileId)
+            val apiResponse = ApiRepository.getPublicShareRootFile(driveId, publicShareUuid, fileId)
             if (!apiResponse.isSuccess()) {
                 SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
             }
@@ -63,9 +63,9 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
 
     fun getFiles(folderId: Int, sortType: SortType) {
         cancelDownload()
-        getSharedFilesJob = Job()
+        getPublicShareFilesJob = Job()
 
-        viewModelScope.launch(Dispatchers.IO + getSharedFilesJob) {
+        viewModelScope.launch(Dispatchers.IO + getPublicShareFilesJob) {
 
             tailrec fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
 
@@ -91,8 +91,8 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     }
 
     fun cancelDownload() {
-        getSharedFilesJob.cancel()
-        getSharedFilesJob.cancelChildren()
+        getPublicShareFilesJob.cancel()
+        getPublicShareFilesJob.cancelChildren()
     }
 
     fun importFilesToDrive(
@@ -101,7 +101,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
         fileIds: List<Int>,
         exceptedFileIds: List<Int>,
     ) = viewModelScope.launch(Dispatchers.IO) {
-        ApiRepository.importShareLinkFiles(
+        ApiRepository.importPublicShareFiles(
             sourceDriveId = driveId,
             linkUuid = publicShareUuid,
             destinationDriveId = destinationDriveId,
@@ -114,7 +114,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     }
 
     private fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
-        val apiResponse = ApiRepository.getShareLinkFileChildren(
+        val apiResponse = ApiRepository.getPublicShareChildrenFiles(
             driveId = driveId,
             linkUuid = publicShareUuid,
             folderId = folderFilesProviderArgs.folderId,
@@ -131,7 +131,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
             )
         }
 
-        getSharedFilesJob.ensureActive()
+        getPublicShareFilesJob.ensureActive()
 
         return handleRemoteFiles(apiResponse)
     }
