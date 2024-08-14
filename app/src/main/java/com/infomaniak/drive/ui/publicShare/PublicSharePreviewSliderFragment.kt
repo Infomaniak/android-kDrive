@@ -49,7 +49,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
     override val previewSliderViewModel: PreviewSliderViewModel by activityViewModels()
 
     override val bottomSheetView: ExternalFileInfoActionsView
-        get() = binding.fileSharedBottomSheetFileActions
+        get() = binding.publicShareBottomSheetFileActions
     override val bottomSheetBehavior: BottomSheetBehavior<View>
         get() = BottomSheetBehavior.from(bottomSheetView)
 
@@ -74,7 +74,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
             userDrive = previewSliderViewModel.userDrive
         }
 
-        previewSliderViewModel.shareLinkUuid = navigationArgs.publicShareUuid
+        previewSliderViewModel.publicShareUuid = navigationArgs.publicShareUuid
 
         return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }

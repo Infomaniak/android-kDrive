@@ -47,7 +47,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.infomaniak.drive.views.ExternalFileInfoActionsView
-        android:id="@+id/fileSharedBottomSheetFileActions"
+        android:id="@+id/publicShareBottomSheetFileActions"
         style="?attr/bottomSheetStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
