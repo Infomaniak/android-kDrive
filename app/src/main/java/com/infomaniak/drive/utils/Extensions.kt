@@ -508,8 +508,8 @@ fun Fragment.observeAndDisplayNetworkAvailability(
                 TransitionManager.beginDelayedTransition(noNetworkBindingDirectParent, this)
             }
 
-            noNetworkBinding.noNetwork.isGone = isNetworkAvailable == null || isNetworkAvailable == true
-            additionalChanges?.invoke(isNetworkAvailable == true)
+            noNetworkBinding.noNetwork.isGone = isNetworkAvailable != false
+            additionalChanges?.invoke(isNetworkAvailable != false)
         }
     }
 }
