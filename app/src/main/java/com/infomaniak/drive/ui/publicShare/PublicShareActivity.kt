@@ -53,7 +53,7 @@ class PublicShareActivity : AppCompatActivity() {
         destination.addSentryBreadcrumb()
         destination.trackDestination(context = this)
 
-        if (destination.id == R.id.publicShareListFragment || destination.id == R.id.fileSharedBottomSheetFileActions) {
+        if (destination.id == R.id.publicShareListFragment || destination.id == R.id.publicShareBottomSheetFileActions) {
             setColorStatusBar()
             setColorNavigationBar()
         }
