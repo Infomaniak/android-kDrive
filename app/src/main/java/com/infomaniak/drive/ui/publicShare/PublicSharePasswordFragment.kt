@@ -22,14 +22,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.infomaniak.drive.databinding.FragmentFileSharedPasswordBinding
+import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.lib.core.utils.safeBinding
 
 class PublicSharePasswordFragment : Fragment() {
 
-    private var binding: FragmentFileSharedPasswordBinding by safeBinding()
+    private var binding: FragmentPublicSharePasswordBinding by safeBinding()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentFileSharedPasswordBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentPublicSharePasswordBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 }

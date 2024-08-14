@@ -88,7 +88,7 @@ class PublicShareListFragment : FileListFragment() {
                 when {
                     file.isFolder() -> openFolder(file)
                     file.isBookmark() -> openBookmark(file)
-                    else -> displayFile(file, mainViewModel, fileAdapter, shareLinkUuid = publicShareViewModel.publicShareUuid)
+                    else -> displayFile(file, mainViewModel, fileAdapter, publicShareUuid = publicShareViewModel.publicShareUuid)
                 }
             }
         }
@@ -207,7 +207,6 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     companion object {
-        const val MATOMO_CATEGORY = "FileSharedListAction"
         private const val DEFAULT_ID = -1
     }
 
