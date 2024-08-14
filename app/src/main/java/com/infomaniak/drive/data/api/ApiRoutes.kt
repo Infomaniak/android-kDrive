@@ -36,8 +36,7 @@ object ApiRoutes {
             "files.dropbox,files.dropbox.capabilities,files.external_import,files.is_favorite," +
             "files.sharelink,files.sorted_name,files.supported_by"
     const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
-    private const val sharedFileWithQuery =
-        "with=capabilities,categories,conversion_capabilities,is_favorite,path,sharelink,sorted_name,supported_by"
+    private const val sharedFileWithQuery = "with=capabilities,conversion_capabilities,supported_by"
 
     private const val ACTIONS = "&actions[]=file_create" +
             "&actions[]=file_rename" +
