@@ -37,7 +37,7 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
 import com.infomaniak.drive.ui.fileList.FileAdapter
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.FileListViewModel
-import com.infomaniak.drive.ui.fileShared.FileSharedListFragmentArgs
+import com.infomaniak.drive.ui.publicShare.PublicShareListFragmentArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -71,8 +71,8 @@ object FilePresenter {
         } else {
             fileListViewModel.cancelDownloadFiles()
             if (isSharedFile) {
-                val args = FileSharedListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
-                safeNavigate(R.id.fileSharedListFragment, args.toBundle())
+                val args = PublicShareListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
+                safeNavigate(R.id.publicShareListFragment, args.toBundle())
             } else {
                 val args = FileListFragmentArgs(
                     folderId = file.id,

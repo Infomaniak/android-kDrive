@@ -39,7 +39,7 @@ class PreviewSliderAdapter(
 
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
-        val args = PreviewFragmentArgs(fileId = file.id, fileShareUuid = shareLinkUuid, userDrive = userDrive).toBundle()
+        val args = PreviewFragmentArgs(fileId = file.id, publicShareUuid = shareLinkUuid, userDrive = userDrive).toBundle()
 
         return when (file.getFileType()) {
             ExtensionType.IMAGE -> PreviewPictureFragment()

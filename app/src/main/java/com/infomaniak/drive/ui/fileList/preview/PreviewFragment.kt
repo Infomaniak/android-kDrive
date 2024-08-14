@@ -43,7 +43,7 @@ open class PreviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if (previewViewModel.currentFile == null) {
             navigationArgs?.let {
-                previewSliderViewModel.shareLinkUuid = it.fileShareUuid
+                previewSliderViewModel.shareLinkUuid = it.publicShareUuid
                 previewSliderViewModel.userDrive = it.userDrive ?: UserDrive()
                 if (it.fileId > 0) previewViewModel.currentFile = getCurrentFile(it.fileId)
             }
