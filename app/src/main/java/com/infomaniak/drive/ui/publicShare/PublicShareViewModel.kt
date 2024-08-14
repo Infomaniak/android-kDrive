@@ -79,7 +79,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
 
                 val newFiles = mutableListOf<File>().apply {
                     childrenLiveData.value?.first?.let(::addAll)
-                    addAll(folderFilesProviderResult.folderFiles.addShareLinkUuid())
+                    addAll(folderFilesProviderResult.folderFiles.addPublicShareUuid())
                 }
 
                 childrenLiveData.postValue(newFiles to true)
@@ -146,10 +146,10 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
         )
     }
 
-    private fun List<File>.addShareLinkUuid() = map { it.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid } }
+    private fun List<File>.addPublicShareUuid() = map { it.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid } }
 
     companion object {
-        const val TAG = "FileSharedViewModel"
+        const val TAG = "publicShareViewModel"
         const val ROOT_SHARED_FILE_ID = 1
     }
 }
