@@ -131,6 +131,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
         file: File?,
         navigateToDownloadDialog: suspend () -> Unit,
         onDownloadError: () -> Unit,
+        onDownloadSuccess: () -> Unit,
     ) = viewModelScope.launch(Dispatchers.IO) {
         runCatching {
             val cacheFile = file!!.convertToIOFile(
@@ -150,6 +151,8 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
                 DownloadAction.OPEN_BOOKMARK -> TODO()
                 DownloadAction.PRINT_PDF -> activityContext.printPdf(cacheFile)
             }
+
+            withContext(Dispatchers.Main) { onDownloadSuccess() }
         }.onFailure { exception ->
             downloadProgressLiveData.postValue(null)
             exception.printStackTrace()
