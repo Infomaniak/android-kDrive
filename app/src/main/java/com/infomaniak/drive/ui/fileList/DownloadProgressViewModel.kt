@@ -25,14 +25,12 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.Companion.TAG
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.Response
-
 
 class DownloadProgressViewModel : ViewModel() {
 
@@ -83,5 +81,6 @@ class DownloadProgressViewModel : ViewModel() {
 
     companion object {
         const val PROGRESS_COMPLETE = 100
+        private const val TAG = "DownloadProgressDialog"
     }
 }

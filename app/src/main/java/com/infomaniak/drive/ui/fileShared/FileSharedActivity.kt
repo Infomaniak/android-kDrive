@@ -61,4 +61,3 @@ class FileSharedActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
-

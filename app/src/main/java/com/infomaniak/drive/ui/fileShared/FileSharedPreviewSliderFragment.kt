@@ -62,9 +62,7 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
             return null
         }
 
-        currentFile = mainViewModel.currentPreviewFileList[navigationArgs.fileId]
-            ?: previewSliderViewModel.currentPreview
-                    ?: throw Exception("No current preview found")
+        currentFile = mainViewModel.currentPreviewFileList[navigationArgs.fileId] ?: throw Exception("No current preview found")
 
         previewSliderViewModel.currentPreview = currentFile
 

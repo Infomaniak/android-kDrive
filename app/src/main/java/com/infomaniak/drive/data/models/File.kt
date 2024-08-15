@@ -181,7 +181,7 @@ open class File(
         return status?.contains("trash") == true
     }
 
-    fun isPublicShared() = externalShareLinkUuid.isNotBlank()
+    private fun isPublicShared() = externalShareLinkUuid.isNotBlank()
 
     fun thumbnail() = when {
         isPublicShared() -> ApiRoutes.getShareLinkFileThumbnail(driveId, externalShareLinkUuid, file = this)
