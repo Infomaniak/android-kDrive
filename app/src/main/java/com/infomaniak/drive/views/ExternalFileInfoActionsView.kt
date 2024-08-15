@@ -37,7 +37,7 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
     private val binding by lazy { ViewExternalFileInfoActionsBinding.inflate(LayoutInflater.from(context), this, true) }
 
     init {
-        if (AccountUtils.currentDriveId == -1) binding.saveToKDrive.isGone = true
+        binding.saveToKDrive.isGone = AccountUtils.currentDriveId == -1
     }
 
     fun updateWithExternalFile(file: File) {

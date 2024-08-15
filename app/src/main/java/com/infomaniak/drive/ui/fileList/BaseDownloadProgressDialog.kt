@@ -89,8 +89,4 @@ abstract class BaseDownloadProgressDialog : DialogFragment() {
         SAVE_TO_DRIVE("save_to_drive"),
         SEND_COPY("send_copy"),
     }
-
-    companion object {
-        const val TAG = "DownloadProgressDialog"
-    }
 }
