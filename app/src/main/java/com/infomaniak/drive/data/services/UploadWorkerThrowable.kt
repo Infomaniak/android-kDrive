@@ -62,7 +62,6 @@ object UploadWorkerThrowable {
             Result.retry()
 
         } catch (exception: CancellationException) { // Work has been cancelled
-            SentryLog.d(UploadWorker.TAG, "UploadWorker > is CancellationException !")
             if (applicationContext.isSyncActive()) Result.failure() else Result.retry()
 
         } catch (exception: UploadTask.LockErrorException) {
