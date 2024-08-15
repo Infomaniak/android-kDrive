@@ -228,7 +228,7 @@ object Utils {
                 fileId = selectedFile.id,
                 driveId = selectedFile.driveId,
                 isSharedWithMe = isSharedWithMe,
-                hideActions = selectedFile.isFromActivities
+                hideActions = selectedFile.isFromActivities,
             )
 
             R.id.previewSliderFragment to args.toBundle()
