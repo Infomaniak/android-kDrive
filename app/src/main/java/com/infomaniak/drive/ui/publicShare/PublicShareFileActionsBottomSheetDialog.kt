@@ -31,7 +31,6 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetPublicShareFileActionsBinding
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -45,7 +44,6 @@ import kotlinx.coroutines.withContext
 class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
 
     private var binding: FragmentBottomSheetPublicShareFileActionsBinding by safeBinding()
-    private val previewSliderViewModel: PreviewSliderViewModel by activityViewModels()
     private val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
     override val ownerFragment = this
@@ -80,6 +78,7 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), Fil
         setCurrentFile()
         updateWithExternalFile(currentFile)
         initOnClickListener(onItemClickListener = this@PublicShareFileActionsBottomSheetDialog)
+        isPrintingHidden(isGone = currentFile.isPDF())
     }
 
     override fun openWith() {
@@ -96,7 +95,7 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), Fil
 
     override fun downloadFileClicked() {
         super.downloadFileClicked()
-        requireContext().downloadFile(drivePermissions, currentFile) { findNavController().popBackStack() }
+        requireContext().downloadFile(drivePermissions, currentFile, findNavController()::popBackStack)
     }
 
     override fun printClicked() {
@@ -117,13 +116,16 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), Fil
     }
 
     private fun executeActionAndClose(action: DownloadAction, @StringRes errorMessageId: Int = R.string.errorDownload) {
-        previewSliderViewModel.executeDownloadAction(
+        publicShareViewModel.executeDownloadAction(
             activityContext = requireContext(),
             downloadAction = action,
+            file = currentFile,
             navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadError = { showSnackbar(errorMessageId, anchor = mainButton) },
+            onDownloadError = {
+                showSnackbar(errorMessageId, anchor = mainButton)
+                findNavController().popBackStack()
+            },
         )
-        findNavController().popBackStack()
     }
 
     override fun displayInfoClicked() = Unit

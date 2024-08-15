@@ -46,6 +46,7 @@ import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.core.R as RCore
 
@@ -82,14 +83,21 @@ class PublicShareListFragment : FileListFragment() {
         setToolbarTitle(R.string.sharedWithMeTitle)
         binding.uploadFileInProgressView.isGone = true
 
-        fileAdapter.initAsyncListDiffer()
-        fileAdapter.onFileClicked = { file ->
-            if (file.isUsable()) {
-                publicShareViewModel.fileClicked = file
-                when {
-                    file.isFolder() -> openFolder(file)
-                    file.isBookmark() -> openBookmark(file)
-                    else -> displayFile(file, mainViewModel, fileAdapter, publicShareUuid = publicShareViewModel.publicShareUuid)
+        fileAdapter.apply {
+            initAsyncListDiffer()
+            onMenuClicked = { file ->
+                if (file.isUsable()) {
+                    publicShareViewModel.fileClicked = file
+                    safeNavigate(R.id.publicShareFileActionsBottomSheet)
+                }
+            }
+            onFileClicked = { file ->
+                if (file.isUsable()) {
+                    when {
+                        file.isFolder() -> openFolder(file)
+                        file.isBookmark() -> openBookmark(file)
+                        else -> displayFile(file, mainViewModel, fileAdapter, publicShareViewModel.publicShareUuid)
+                    }
                 }
             }
         }

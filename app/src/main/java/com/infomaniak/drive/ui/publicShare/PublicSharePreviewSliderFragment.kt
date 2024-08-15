@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -46,6 +47,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
 
     private val navigationArgs: PublicSharePreviewSliderFragmentArgs by navArgs()
     override val previewSliderViewModel: PreviewSliderViewModel by activityViewModels()
+    private val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
     override val bottomSheetView: ExternalFileInfoActionsView
         get() = binding.publicShareBottomSheetFileActions
@@ -101,36 +103,31 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
         )
     }
 
+    private fun executeDownloadAction(action: DownloadAction, @StringRes errorMessage: Int = R.string.errorDownload) {
+        publicShareViewModel.executeDownloadAction(
+            activityContext = requireContext(),
+            downloadAction = action,
+            file = previewSliderViewModel.currentPreview,
+            navigateToDownloadDialog = ::navigateToDownloadDialog,
+            onDownloadError = { showSnackbar(errorMessage, anchor = bottomSheetView) },
+        )
+    }
+
     override fun displayInfoClicked() = Unit
     override fun fileRightsClicked() = Unit
     override fun goToFolder() = Unit
     override fun manageCategoriesClicked(fileId: Int) = Unit
 
     override fun openWith() {
-        previewSliderViewModel.executeDownloadAction(
-            activityContext = requireContext(),
-            downloadAction = DownloadAction.OPEN_WITH,
-            navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
-        )
+        executeDownloadAction(DownloadAction.OPEN_WITH)
     }
 
     override fun shareFile() {
-        previewSliderViewModel.executeDownloadAction(
-            activityContext = requireContext(),
-            downloadAction = DownloadAction.SEND_COPY,
-            navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
-        )
+        executeDownloadAction(DownloadAction.SEND_COPY)
     }
 
     override fun saveToKDrive() {
-        previewSliderViewModel.executeDownloadAction(
-            activityContext = requireContext(),
-            downloadAction = DownloadAction.SAVE_TO_DRIVE,
-            navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadError = { showSnackbar(R.string.errorDownload, anchor = bottomSheetView) },
-        )
+        executeDownloadAction(DownloadAction.SAVE_TO_DRIVE)
     }
 
     override fun downloadFileClicked() {
@@ -142,15 +139,8 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
         super<BasePreviewSliderFragment>.printClicked()
         previewPDFHandler.printClicked(
             context = requireContext(),
-            onDefaultCase = {
-                previewSliderViewModel.executeDownloadAction(
-                    activityContext = requireContext(),
-                    downloadAction = DownloadAction.PRINT_PDF,
-                    navigateToDownloadDialog = ::navigateToDownloadDialog,
-                    onDownloadError = { showSnackbar(R.string.errorFileNotFound, anchor = bottomSheetView) },
-                )
-            },
-            onError = { showSnackbar(R.string.errorFileNotFound) },
+            onDefaultCase = { executeDownloadAction(DownloadAction.PRINT_PDF, R.string.errorFileNotFound) },
+            onError = { showSnackbar(R.string.errorFileNotFound, anchor = bottomSheetView) },
         )
     }
 
