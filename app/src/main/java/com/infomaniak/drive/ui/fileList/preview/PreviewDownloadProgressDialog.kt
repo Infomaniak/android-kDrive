@@ -21,13 +21,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.distinctUntilChanged
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog
+import com.infomaniak.drive.ui.publicShare.PublicShareViewModel
 
 class PreviewDownloadProgressDialog : BaseDownloadProgressDialog() {
 
-    private val previewSliderViewModel: PreviewSliderViewModel by activityViewModels()
+    private val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
     override fun observeDownloadedFile() {
-        previewSliderViewModel.downloadProgressLiveData.apply {
+        publicShareViewModel.downloadProgressLiveData.apply {
             value = 0
             distinctUntilChanged().observe(viewLifecycleOwner) { progress ->
                 setProgress(progress = progress, onProgressComplete = findNavController()::popBackStack)

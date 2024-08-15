@@ -66,6 +66,9 @@
         <action
             android:id="@+id/action_publicShareListFragment_to_publicSharePreviewSliderFragment"
             app:destination="@id/publicSharePreviewSliderFragment" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicShareBottomSheetFileActions"
+            app:destination="@id/publicShareBottomSheetFileActions" />
     </fragment>
 
     <fragment
@@ -108,10 +111,14 @@
             android:name="publicShareUuid"
             android:defaultValue=""
             app:argType="string" />
-        <action
-            android:id="@+id/action_previewFragment_to_fileDetailsFragment"
-            app:destination="@id/fileDetailsFragment" />
     </fragment>
+
+    <dialog
+        android:id="@+id/publicShareFileActionsBottomSheet"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicShareFileActionsBottomSheetDialog"
+        android:label="PublicShareFileActionsBottomSheet"
+        tools:layout="@layout/fragment_bottom_sheet_public_share_file_actions">
+    </dialog>
 
     <dialog
         android:id="@+id/sortFilesBottomSheetDialog"
