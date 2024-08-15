@@ -181,7 +181,6 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun processDeepLink(path: String) {
-        var trackerValue = ""
         if (path.contains("/app/share/")) {
             Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
                 val (driveId, fileSharedLinkUuid) = match.destructured
@@ -198,7 +197,8 @@ class LaunchActivity : AppCompatActivity() {
                             fileSharedLinkUuid = fileSharedLinkUuid,
                             fileId = shareLink.fileId ?: -1,
                         ).toBundle()
-                        trackerValue = "external"
+
+                        trackDeepLink("external")
                     }
                     ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
                     else -> {
@@ -207,7 +207,7 @@ class LaunchActivity : AppCompatActivity() {
                 }
             }
         } else {
-            trackerValue = processInternalLink(path)
+            processInternalLink(path)
         }
 
         Sentry.addBreadcrumb(Breadcrumb().apply {
@@ -215,11 +215,9 @@ class LaunchActivity : AppCompatActivity() {
             message = "DeepLink: $path"
             level = SentryLevel.INFO
         })
-
-        trackDeepLink(trackerValue)
     }
 
-    private fun processInternalLink(path: String): String {
+    private fun processInternalLink(path: String) {
         Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
             val (pathDriveId, pathFolderId, pathFileId) = match.destructured
             val driveId = pathDriveId.toInt()
@@ -229,10 +227,8 @@ class LaunchActivity : AppCompatActivity() {
                 setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
             }
 
-            return "internal"
+            trackDeepLink("internal")
         }
-
-        return ""
     }
 
     private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int, isSharedWithMe: Boolean) {
