@@ -34,6 +34,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
 
     var rootSharedFile = SingleLiveEvent<File?>()
     val childrenLiveData = SingleLiveEvent<Pair<List<File>, Boolean>>()
+    var fileClicked: File? = null
 
     private val driveId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
