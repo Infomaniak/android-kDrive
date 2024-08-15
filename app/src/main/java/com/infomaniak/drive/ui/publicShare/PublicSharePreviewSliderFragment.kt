@@ -110,6 +110,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
             file = previewSliderViewModel.currentPreview,
             navigateToDownloadDialog = ::navigateToDownloadDialog,
             onDownloadError = { showSnackbar(errorMessage, anchor = bottomSheetView) },
+            onDownloadSuccess = { toggleBottomSheet(shouldShow = true) }
         )
     }
 

@@ -125,6 +125,9 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), Fil
                 showSnackbar(errorMessageId, anchor = mainButton)
                 findNavController().popBackStack()
             },
+            onDownloadSuccess = {
+                findNavController().popBackStack(destinationId = R.id.publicShareListFragment, inclusive = false)
+            }
         )
     }
 
