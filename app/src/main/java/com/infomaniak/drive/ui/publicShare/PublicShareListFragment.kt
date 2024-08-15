@@ -85,6 +85,7 @@ class PublicShareListFragment : FileListFragment() {
         fileAdapter.initAsyncListDiffer()
         fileAdapter.onFileClicked = { file ->
             if (file.isUsable()) {
+                publicShareViewModel.fileClicked = file
                 when {
                     file.isFolder() -> openFolder(file)
                     file.isBookmark() -> openBookmark(file)
