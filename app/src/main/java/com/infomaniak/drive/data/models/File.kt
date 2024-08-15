@@ -499,7 +499,7 @@ open class File(
 
     suspend fun convertToIOFile(
         context: Context,
-        userDrive: UserDrive,
+        userDrive: UserDrive = UserDrive(),
         shouldBePdf: Boolean = false,
         onProgress: (progress: Int) -> Unit,
         navigateToDownloadDialog: (suspend () -> Unit)? = null,
