@@ -45,8 +45,7 @@ open class PreviewFragment : Fragment() {
             navigationArgs?.let {
                 previewSliderViewModel.shareLinkUuid = it.fileShareUuid
                 previewSliderViewModel.userDrive = it.userDrive ?: UserDrive()
-                val fileId = it.fileId
-                if (fileId > 0) previewViewModel.currentFile = getCurrentFile(fileId)
+                if (it.fileId > 0) previewViewModel.currentFile = getCurrentFile(it.fileId)
             }
         }
 

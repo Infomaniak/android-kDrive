@@ -72,8 +72,8 @@ object PreviewPDFUtils {
     private fun downloadFile(externalOutputFile: IOFile, fileModel: File, onProgress: (progress: Int) -> Unit) {
         if (externalOutputFile.exists()) externalOutputFile.delete()
 
-        val downLoadUrl = fileModel.downloadUrl() + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
-        val request = Request.Builder().url(downLoadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
+        val downloadUrl = fileModel.downloadUrl() + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
+        val request = Request.Builder().url(downloadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
         val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
 
         val response = HttpClient.okHttpClient.newBuilder()
