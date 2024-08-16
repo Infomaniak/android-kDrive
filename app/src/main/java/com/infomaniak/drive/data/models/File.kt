@@ -181,17 +181,17 @@ open class File(
         return status?.contains("trash") == true
     }
 
-    private fun isPublicShared() = publicShareUuid.isNotBlank()
+    fun isPublicShared() = publicShareUuid.isNotBlank()
 
     fun thumbnail() = when {
-        isPublicShared() -> ApiRoutes.getPublicShareFileThumbnail(driveId, publicShareUuid, file = this)
+        isPublicShared() -> ApiRoutes.getPublicShareFileThumbnail(driveId, publicShareUuid, id)
         isTrashed() -> ApiRoutes.thumbnailTrashFile(file = this)
         else -> ApiRoutes.thumbnailFile(file = this)
     }
 
     fun imagePreview(): String {
         val url = if (isPublicShared()) {
-            ApiRoutes.getPublicShareFilePreview(driveId, publicShareUuid, file = this)
+            ApiRoutes.getPublicShareFilePreview(driveId, publicShareUuid, id)
         } else {
             ApiRoutes.imagePreviewFile(this)
         }
@@ -208,7 +208,7 @@ open class File(
     }
 
     fun downloadUrl() = if (isPublicShared()) {
-        ApiRoutes.downloadPublicShareFile(driveId, publicShareUuid, file = this)
+        ApiRoutes.downloadPublicShareFile(driveId, publicShareUuid, id)
     } else {
         ApiRoutes.downloadFile(file = this)
     }

@@ -104,6 +104,9 @@ class PublicShareListFragment : FileListFragment() {
             setMainButton(parentActivity.getMainButton())
         }
 
+        multiSelectManager.currentFolder = publicShareViewModel.fileClicked
+        mainViewModel.setCurrentFolder(multiSelectManager.currentFolder)
+
         observeRootFile()
         observeFiles()
     }
@@ -117,6 +120,7 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun onFileClicked(file: File) {
         if (file.isUsable()) {
+            publicShareViewModel.fileClicked = file
             when {
                 file.isFolder() -> openFolder(file)
                 file.isBookmark() -> openBookmark(file)
@@ -155,6 +159,7 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun observeRootFile() {
         publicShareViewModel.rootSharedFile.observe(viewLifecycleOwner) { file ->
+            publicShareViewModel.fileClicked = file
             if (file?.isFolder() == true) {
                 openFolder(file)
             } else {
