@@ -137,5 +137,9 @@
         android:id="@+id/previewDownloadProgressDialog"
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialog"
         android:label="PreviewDownloadProgressDialog"
-        tools:layout="@layout/dialog_download_progress" />
+        tools:layout="@layout/dialog_download_progress">
+        <argument
+            android:name="fileName"
+            app:argType="string" />
+    </dialog>
 </navigation>
