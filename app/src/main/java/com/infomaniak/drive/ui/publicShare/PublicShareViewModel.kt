@@ -130,8 +130,8 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
         downloadAction: DownloadAction,
         file: File?,
         navigateToDownloadDialog: suspend () -> Unit,
-        onDownloadError: () -> Unit,
         onDownloadSuccess: () -> Unit,
+        onDownloadError: () -> Unit,
     ) = viewModelScope.launch(Dispatchers.IO) {
         runCatching {
             val cacheFile = file!!.convertToIOFile(

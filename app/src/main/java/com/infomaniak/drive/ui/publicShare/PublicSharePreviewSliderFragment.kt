@@ -21,33 +21,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.StringRes
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
-import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
-import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
-import com.infomaniak.drive.views.FileInfoActionsView
-import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
-class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
+class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicShareItemClickListener {
 
     private val navigationArgs: PublicSharePreviewSliderFragmentArgs by navArgs()
     override val previewSliderViewModel: PreviewSliderViewModel by activityViewModels()
-    private val publicShareViewModel: PublicShareViewModel by activityViewModels()
+    override val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
     override val bottomSheetView: ExternalFileInfoActionsView
         get() = binding.publicShareBottomSheetFileActions
@@ -57,6 +47,18 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
     override val isFileShare = true
     override val ownerFragment = this
 
+    override fun initCurrentFile() {
+        currentFile = mainViewModel.currentPreviewFileList[navigationArgs.fileId] ?: throw Exception("No current preview found")
+    }
+
+    override fun onDownloadSuccess() {
+        toggleBottomSheet(shouldShow = true)
+    }
+
+    override fun onDownloadError(errorMessage: Int) {
+        showSnackbar(errorMessage, anchor = bottomSheetView)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         if (noPreviewList()) {
@@ -64,7 +66,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
             return null
         }
 
-        currentFile = mainViewModel.currentPreviewFileList[navigationArgs.fileId] ?: throw Exception("No current preview found")
+        initCurrentFile()
 
         previewSliderViewModel.currentPreview = currentFile
 
@@ -91,65 +93,4 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAc
         updateWithExternalFile(currentFile)
         initOnClickListener(onItemClickListener = this@PublicSharePreviewSliderFragment)
     }
-
-    private suspend fun navigateToDownloadDialog() = withContext(Dispatchers.Main) {
-        safeNavigate(
-            PublicSharePreviewSliderFragmentDirections.actionPublicSharePreviewSliderFragmentToDownloadProgressDialog(
-                fileId = currentFile.id,
-                fileName = currentFile.name,
-                userDrive = userDrive,
-                action = DownloadAction.SAVE_TO_DRIVE,
-            )
-        )
-    }
-
-    private fun executeDownloadAction(action: DownloadAction, @StringRes errorMessage: Int = R.string.errorDownload) {
-        publicShareViewModel.executeDownloadAction(
-            activityContext = requireContext(),
-            downloadAction = action,
-            file = previewSliderViewModel.currentPreview,
-            navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadError = { showSnackbar(errorMessage, anchor = bottomSheetView) },
-            onDownloadSuccess = { toggleBottomSheet(shouldShow = true) }
-        )
-    }
-
-    override fun displayInfoClicked() = Unit
-    override fun fileRightsClicked() = Unit
-    override fun goToFolder() = Unit
-    override fun manageCategoriesClicked(fileId: Int) = Unit
-
-    override fun openWith() {
-        executeDownloadAction(DownloadAction.OPEN_WITH)
-    }
-
-    override fun shareFile() {
-        executeDownloadAction(DownloadAction.SEND_COPY)
-    }
-
-    override fun saveToKDrive() {
-        executeDownloadAction(DownloadAction.SAVE_TO_DRIVE)
-    }
-
-    override fun downloadFileClicked() {
-        super<BasePreviewSliderFragment>.downloadFileClicked()
-        requireContext().downloadFile(drivePermissions, currentFile) { toggleBottomSheet(shouldShow = true) }
-    }
-
-    override fun printClicked() {
-        super<BasePreviewSliderFragment>.printClicked()
-        previewPDFHandler.printClicked(
-            context = requireContext(),
-            onDefaultCase = { executeDownloadAction(DownloadAction.PRINT_PDF, R.string.errorFileNotFound) },
-            onError = { showSnackbar(R.string.errorFileNotFound, anchor = bottomSheetView) },
-        )
-    }
-
-    override fun onCacheAddedToOffline() = Unit
-    override fun onDeleteFile(onApiResponse: () -> Unit) = Unit
-    override fun onLeaveShare(onApiResponse: () -> Unit) = Unit
-    override fun onDuplicateFile(destinationFolder: File) = Unit
-    override fun onMoveFile(destinationFolder: File) = Unit
-    override fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
-    override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) = Unit
 }
