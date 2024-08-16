@@ -57,9 +57,9 @@ object FilePresenter {
         shouldHideBottomNavigation: Boolean,
         shouldShowSmallFab: Boolean,
         fileListViewModel: FileListViewModel,
-        isSharedFile: Boolean = false
+        isPublicSharedFile: Boolean = false
     ) {
-        if (file.isDisabled() && !isSharedFile) {
+        if (file.isDisabled() && !isPublicSharedFile) {
             safeNavigate(
                 R.id.accessDeniedBottomSheetFragment,
                 AccessDeniedBottomSheetDialogArgs(
@@ -70,7 +70,7 @@ object FilePresenter {
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
-            if (isSharedFile) {
+            if (isPublicSharedFile) {
                 val args = PublicShareListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
                 safeNavigate(R.id.publicShareListFragment, args.toBundle())
             } else {
@@ -88,7 +88,7 @@ object FilePresenter {
     fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?, publicShareUuid: String = "") {
         trackEvent("preview", "preview${file.getFileType().value.capitalizeFirstChar()}")
         val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
-        Utils.displayFile(mainViewModel, findNavController(), file, fileList, shareLinkUuid = publicShareUuid)
+        Utils.displayFile(mainViewModel, findNavController(), file, fileList, publicShareUuid = publicShareUuid)
     }
 
     fun Fragment.openBookmark(file: File) {
