@@ -58,7 +58,7 @@ class PublicShareListFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
 
-    private var drivePermissions: DrivePermissions? = null
+    private var drivePermissions = DrivePermissions()
     private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk(::onDriveAndFolderSelected)
     }
@@ -66,9 +66,7 @@ class PublicShareListFragment : FileListFragment() {
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        drivePermissions = DrivePermissions().apply {
-            registerPermissions(this@PublicShareListFragment) { authorized -> if (authorized) downloadAllFiles() }
-        }
+        drivePermissions.registerPermissions(this@PublicShareListFragment) { authorized -> if (authorized) downloadAllFiles() }
 
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -85,21 +83,8 @@ class PublicShareListFragment : FileListFragment() {
 
         fileAdapter.apply {
             initAsyncListDiffer()
-            onMenuClicked = { file ->
-                if (file.isUsable()) {
-                    publicShareViewModel.fileClicked = file
-                    safeNavigate(R.id.publicShareFileActionsBottomSheet)
-                }
-            }
-            onFileClicked = { file ->
-                if (file.isUsable()) {
-                    when {
-                        file.isFolder() -> openFolder(file)
-                        file.isBookmark() -> openBookmark(file)
-                        else -> displayFile(file, mainViewModel, fileAdapter, publicShareViewModel.publicShareUuid)
-                    }
-                }
-            }
+            onMenuClicked = ::onMenuClicked
+            onFileClicked = ::onFileClicked
         }
 
         setupMultiSelectLayout()
@@ -121,6 +106,23 @@ class PublicShareListFragment : FileListFragment() {
 
         observeRootFile()
         observeFiles()
+    }
+
+    private fun onMenuClicked(file: File) {
+        if (file.isUsable()) {
+            publicShareViewModel.fileClicked = file
+            safeNavigate(R.id.publicShareFileActionsBottomSheet)
+        }
+    }
+
+    private fun onFileClicked(file: File) {
+        if (file.isUsable()) {
+            when {
+                file.isFolder() -> openFolder(file)
+                file.isBookmark() -> openBookmark(file)
+                else -> displayFile(file, mainViewModel, fileAdapter, publicShareViewModel.publicShareUuid)
+            }
+        }
     }
 
     private fun populateFileList(files: List<File>, shouldRefreshFiles: Boolean = true) {
@@ -174,9 +176,7 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun downloadAllFiles() {
         // RootSharedFile can either be a folder or a single file
-        publicShareViewModel.rootSharedFile.value?.let { file ->
-            drivePermissions?.let { permissions -> requireContext().downloadFile(permissions, file) }
-        }
+        publicShareViewModel.rootSharedFile.value?.let { file -> requireContext().downloadFile(drivePermissions, file) }
     }
 
     private fun onDriveAndFolderSelected(data: Intent?) {
