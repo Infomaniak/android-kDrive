@@ -76,5 +76,6 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), OnP
         updateWithExternalFile(currentFile)
         initOnClickListener(onItemClickListener = this@PublicShareFileActionsBottomSheetDialog)
         isPrintingHidden(isGone = currentFile.isPDF())
+        if (currentFile.isFolder()) displayFolderActions()
     }
 }

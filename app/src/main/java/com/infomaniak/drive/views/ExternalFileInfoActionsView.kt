@@ -22,6 +22,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ViewExternalFileInfoActionsBinding
 import com.infomaniak.drive.utils.AccountUtils
@@ -50,6 +51,15 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
 
     fun isDownloadHidden(isGone: Boolean) {
         binding.downloadFile.isGone = isGone
+    }
+
+    fun displayFolderActions() = with(binding) {
+        openWith.isGone = true
+        shareFile.isGone = true
+        saveToKDrive.isGone = true
+        print.isGone = true
+
+        downloadFile.isVisible = true
     }
 
     fun initOnClickListener(onItemClickListener: OnItemClickListener) = with(binding) {
