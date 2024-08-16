@@ -159,7 +159,7 @@ class PublicShareListFragment : FileListFragment() {
             shouldHideBottomNavigation = true,
             shouldShowSmallFab = false,
             fileListViewModel = fileListViewModel,
-            isSharedFile = true,
+            isPublicSharedFile = true,
         )
     }
 
