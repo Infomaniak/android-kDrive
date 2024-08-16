@@ -117,8 +117,7 @@
         android:id="@+id/publicShareFileActionsBottomSheet"
         android:name="com.infomaniak.drive.ui.publicShare.PublicShareFileActionsBottomSheetDialog"
         android:label="PublicShareFileActionsBottomSheet"
-        tools:layout="@layout/fragment_bottom_sheet_public_share_file_actions">
-    </dialog>
+        tools:layout="@layout/fragment_bottom_sheet_public_share_file_actions" />
 
     <dialog
         android:id="@+id/sortFilesBottomSheetDialog"
@@ -138,19 +137,5 @@
         android:id="@+id/previewDownloadProgressDialog"
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialog"
         android:label="PreviewDownloadProgressDialog"
-        tools:layout="@layout/dialog_download_progress">
-        <argument
-            android:name="fileId"
-            app:argType="integer" />
-        <argument
-            android:name="fileName"
-            app:argType="string" />
-        <argument
-            android:name="userDrive"
-            app:argType="com.infomaniak.drive.data.models.UserDrive" />
-        <argument
-            android:name="action"
-            android:defaultValue="OPEN_WITH"
-            app:argType="com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog$DownloadAction" />
-    </dialog>
+        tools:layout="@layout/dialog_download_progress" />
 </navigation>
