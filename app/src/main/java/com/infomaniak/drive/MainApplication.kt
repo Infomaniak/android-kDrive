@@ -59,9 +59,7 @@ import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingInte
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.stores.AppUpdateScheduler
-import io.sentry.Sentry
 import io.sentry.SentryEvent
-import io.sentry.SentryLevel
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
@@ -179,10 +177,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         buildGeneralNotification(getString(R.string.refreshTokenError)).apply {
             setContentIntent(pendingIntent)
             notificationManagerCompat.notifyCompat(this@MainApplication, hashCode, build())
-        }
-        Sentry.withScope { scope ->
-            scope.setExtra("userId", "${user.id}")
-            Sentry.captureMessage("Refresh Token Error", SentryLevel.ERROR)
         }
 
         CoroutineScope(Dispatchers.IO).launch {
