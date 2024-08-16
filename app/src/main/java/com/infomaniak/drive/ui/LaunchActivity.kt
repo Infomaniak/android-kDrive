@@ -59,7 +59,7 @@ class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
-    private var fileSharedActivityExtras: Bundle? = null
+    private var publicShareActivityExtras: Bundle? = null
 
     private var isHelpShortcutPressed = false
 
@@ -109,7 +109,7 @@ class LaunchActivity : AppCompatActivity() {
                 when (destinationClass) {
                     MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
                     LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
-                    PublicShareActivity::class.java -> fileSharedActivityExtras?.let(::putExtras)
+                    PublicShareActivity::class.java -> publicShareActivityExtras?.let(::putExtras)
                 }
             }.also(::startActivity)
         }
@@ -117,7 +117,7 @@ class LaunchActivity : AppCompatActivity() {
 
     private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
         when {
-            fileSharedActivityExtras != null -> PublicShareActivity::class.java
+            publicShareActivityExtras != null -> PublicShareActivity::class.java
             AccountUtils.requestCurrentUser() == null -> LoginActivity::class.java
             else -> loggedUserDestination()
         }
@@ -162,27 +162,27 @@ class LaunchActivity : AppCompatActivity() {
 
     private suspend fun handleDeeplink() = withContext(Dispatchers.IO) {
         intent.data?.path?.let { deeplink ->
-            if (deeplink.contains("/app/share/")) processFileShare(deeplink) else processInternalLink(deeplink)
+            if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else processInternalLink(deeplink)
             SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
         }
     }
 
-    private fun processFileShare(path: String) {
+    private fun processPublicShare(path: String) {
         Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
-            val (driveId, fileSharedLinkUuid) = match.destructured
+            val (driveId, publicShareUuid) = match.destructured
 
-                val apiResponse = ApiRepository.getPublicShareInfo(driveId.toInt(), fileSharedLinkUuid)
-                when (apiResponse.result) {
-                    ApiResponseStatus.SUCCESS -> {
-                        val shareLink = apiResponse.data!!
-                        if (apiResponse.data?.validUntil?.before(Date()) == true) {
-                            Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
-                        }
-                        fileSharedActivityExtras = PublicShareActivityArgs(
-                            driveId = driveId.toInt(),
-                            publicShareUuid = fileSharedLinkUuid,
-                            fileId = shareLink.fileId ?: -1,
-                        ).toBundle()
+            val apiResponse = ApiRepository.getPublicShareInfo(driveId.toInt(), publicShareUuid)
+            when (apiResponse.result) {
+                ApiResponseStatus.SUCCESS -> {
+                    val shareLink = apiResponse.data!!
+                    if (apiResponse.data?.validUntil?.before(Date()) == true) {
+                        Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
+                    }
+                    publicShareActivityExtras = PublicShareActivityArgs(
+                        driveId = driveId.toInt(),
+                        publicShareUuid = publicShareUuid,
+                        fileId = shareLink.fileId ?: -1,
+                    ).toBundle()
 
                     trackDeepLink("external")
                 }
