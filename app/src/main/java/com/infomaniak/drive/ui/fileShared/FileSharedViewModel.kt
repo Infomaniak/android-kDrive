@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.fileShared
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -102,7 +101,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
         fileIds: List<Int> = emptyList(),
         exceptedFileIds: List<Int> = emptyList(),
     ) = viewModelScope.launch(Dispatchers.IO) {
-        val apiResponse = ApiRepository.importShareLinkFiles(
+        ApiRepository.importShareLinkFiles(
             sourceDriveId = driveId,
             linkUuid = fileSharedLinkUuid,
             destinationDriveId = destinationDriveId,
@@ -111,7 +110,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
             exceptedFileIds = exceptedFileIds,
         )
 
-        Log.e("TOTO", "importFilesToDrive: ${apiResponse.data?.countSuccessFiles} ${apiResponse.isSuccess()}")
+        // TODO: Manage apiResponse when the backend will be done
     }
 
     private fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
