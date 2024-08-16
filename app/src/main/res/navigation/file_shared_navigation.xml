@@ -154,11 +154,9 @@
         tools:layout="@layout/activity_save_external_file">
         <argument
             android:name="userId"
-            android:defaultValue="-1"
             app:argType="integer" />
         <argument
             android:name="driveId"
-            android:defaultValue="-1"
             app:argType="integer" />
         <argument
             android:name="folderId"
