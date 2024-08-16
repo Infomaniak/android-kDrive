@@ -20,12 +20,16 @@ package com.infomaniak.drive.ui.fileList.preview
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.distinctUntilChanged
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog
 import com.infomaniak.drive.ui.publicShare.PublicShareViewModel
 
 class PreviewDownloadProgressDialog : BaseDownloadProgressDialog() {
 
     private val publicShareViewModel: PublicShareViewModel by activityViewModels()
+    override val navigationArgs: PreviewDownloadProgressDialogArgs by navArgs()
+
+    override val dialogTitle get() = navigationArgs.fileName
 
     override fun observeDownloadedFile() {
         publicShareViewModel.downloadProgressLiveData.apply {
