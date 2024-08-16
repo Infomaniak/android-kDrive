@@ -266,16 +266,20 @@ object ApiRoutes {
         return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery"
     }
 
-    fun getPublicShareFileThumbnail(driveId: Int, linkUuid: String, file: File): String {
-        return "${publicShareFile(driveId, linkUuid, file)}/thumbnail"
+    fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${publicShareFile(driveId, linkUuid, fileId)}/count"
     }
 
-    fun getPublicShareFilePreview(driveId: Int, linkUuid: String, file: File): String {
-        return "${publicShareFile(driveId, linkUuid, file)}/preview"
+    fun getPublicShareFileThumbnail(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${publicShareFile(driveId, linkUuid, fileId)}/thumbnail"
     }
 
-    fun downloadPublicShareFile(driveId: Int, linkUuid: String, file: File): String {
-        return "${publicShareFile(driveId, linkUuid, file)}/download"
+    fun getPublicShareFilePreview(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${publicShareFile(driveId, linkUuid, fileId)}/preview"
+    }
+
+    fun downloadPublicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${publicShareFile(driveId, linkUuid, fileId)}/download"
     }
 
     fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, file: File): String {
@@ -285,8 +289,8 @@ object ApiRoutes {
 
     fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
 
-    private fun publicShareFile(driveId: Int, linkUuid: String, file: File): String {
-        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}"
+    private fun publicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId"
     }
     //endregion
 
