@@ -324,6 +324,10 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiWithCursor(url, GET)
     }
 
+    fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount>{
+        return callApi(ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId), GET)
+    }
+
     fun importPublicShareFiles(
         sourceDriveId: Int,
         linkUuid: String,
