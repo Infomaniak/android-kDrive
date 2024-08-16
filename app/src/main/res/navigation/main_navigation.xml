@@ -139,7 +139,7 @@
             app:argType="com.infomaniak.drive.data.models.UserDrive"
             app:nullable="true" />
         <argument
-            android:name="fileShareUuid"
+            android:name="publicShareUuid"
             android:defaultValue=""
             app:argType="string" />
         <action

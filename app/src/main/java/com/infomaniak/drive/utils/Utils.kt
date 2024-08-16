@@ -207,7 +207,7 @@ object Utils {
         selectedFile: File,
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
-        shareLinkUuid: String = "",
+        publicShareUuid: String = "",
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
 
@@ -216,11 +216,11 @@ object Utils {
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
 
-        val (destinationClass, bundle) = if (shareLinkUuid.isNotBlank()) {
+        val (destinationClass, bundle) = if (publicShareUuid.isNotBlank()) {
             val args = PublicSharePreviewSliderFragmentArgs(
                 fileId = selectedFile.id,
                 driveId = selectedFile.driveId,
-                publicShareUuid = shareLinkUuid,
+                publicShareUuid = publicShareUuid,
             )
             R.id.publicSharePreviewSliderFragment to args.toBundle()
         } else {
