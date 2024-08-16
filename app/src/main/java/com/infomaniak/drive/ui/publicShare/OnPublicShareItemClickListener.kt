@@ -21,6 +21,7 @@ import androidx.annotation.StringRes
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
@@ -67,9 +68,10 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     }
 
     private suspend fun navigateToDownloadDialog() = withContext(Dispatchers.Main) {
-        currentFile?.let {
+        currentFile?.let { file ->
             ownerFragment?.safeNavigate(
                 resId = R.id.previewDownloadProgressDialog,
+                args = PreviewDownloadProgressDialogArgs(file.name).toBundle(),
             )
         }
     }
