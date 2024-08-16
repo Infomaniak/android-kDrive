@@ -17,67 +17,28 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.databinding.FragmentBottomSheetPublicShareFileActionsBinding
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
+interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListener {
 
-    private var binding: FragmentBottomSheetPublicShareFileActionsBinding by safeBinding()
-    private val publicShareViewModel: PublicShareViewModel by activityViewModels()
+    val drivePermissions: DrivePermissions
+    val publicShareViewModel: PublicShareViewModel
+    val previewPDFHandler: PreviewPDFHandler?
 
-    override val ownerFragment = this
-    override val currentContext by lazy { requireContext() }
-    override lateinit var currentFile: File
-
-    private val mainButton by lazy { (requireActivity() as PublicShareActivity).getMainButton() }
-    private val drivePermissions = DrivePermissions()
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentBottomSheetPublicShareFileActionsBinding.inflate(inflater, container, false).also { binding = it }.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        initBottomSheet()
-
-        drivePermissions.registerPermissions(this@PublicShareFileActionsBottomSheetDialog) { authorized ->
-            if (authorized) downloadFileClicked()
-        }
-    }
-
-    private fun setCurrentFile() {
-        currentFile = publicShareViewModel.fileClicked ?: run {
-            findNavController().popBackStack()
-            return
-        }
-    }
-
-    private fun initBottomSheet() = with(binding.publicShareFileActionsView) {
-        setCurrentFile()
-        updateWithExternalFile(currentFile)
-        initOnClickListener(onItemClickListener = this@PublicShareFileActionsBottomSheetDialog)
-        isPrintingHidden(isGone = currentFile.isPDF())
-    }
+    fun initCurrentFile()
+    fun onDownloadSuccess()
+    fun onDownloadError(@StringRes errorMessage: Int)
 
     override fun openWith() {
         executeActionAndClose(DownloadAction.OPEN_WITH)
@@ -93,33 +54,34 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), Fil
 
     override fun downloadFileClicked() {
         super.downloadFileClicked()
-        requireContext().downloadFile(drivePermissions, currentFile, findNavController()::popBackStack)
+        currentFile?.let { currentContext.downloadFile(drivePermissions, it, ::onDownloadSuccess) }
     }
 
     override fun printClicked() {
         super.printClicked()
-        executeActionAndClose(DownloadAction.PRINT_PDF, R.string.errorFileNotFound)
+        previewPDFHandler?.printClicked(
+            context = currentContext,
+            onDefaultCase = { executeActionAndClose(DownloadAction.PRINT_PDF, R.string.errorFileNotFound) },
+            onError = { onDownloadError(R.string.errorFileNotFound) },
+        )
     }
 
     private suspend fun navigateToDownloadDialog() = withContext(Dispatchers.Main) {
-        safeNavigate(
-            R.id.previewDownloadProgressDialog,
-        )
+        currentFile?.let {
+            ownerFragment?.safeNavigate(
+                resId = R.id.previewDownloadProgressDialog,
+            )
+        }
     }
 
     private fun executeActionAndClose(action: DownloadAction, @StringRes errorMessageId: Int = R.string.errorDownload) {
         publicShareViewModel.executeDownloadAction(
-            activityContext = requireContext(),
+            activityContext = currentContext,
             downloadAction = action,
             file = currentFile,
             navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadError = {
-                showSnackbar(errorMessageId, anchor = mainButton)
-                findNavController().popBackStack()
-            },
-            onDownloadSuccess = {
-                findNavController().popBackStack(destinationId = R.id.publicShareListFragment, inclusive = false)
-            }
+            onDownloadSuccess = ::onDownloadSuccess,
+            onDownloadError = { onDownloadError(errorMessageId) },
         )
     }
 
