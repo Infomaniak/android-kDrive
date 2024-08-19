@@ -285,7 +285,7 @@ object ApiRoutes {
 
     fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/finish"
 
-    private fun uploadFile(driveId: Int) = "${driveURL(driveId)}/upload"
+    private fun uploadFileUrl(driveId: Int) = "${driveURL(driveId)}/upload"
 
     fun uploadChunkUrl(uploadHost: String, driveId: Int, uploadToken: String?, chunkNumber: Int, currentChunkSize: Int): String {
         val chunkParam = "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
@@ -308,7 +308,7 @@ object ApiRoutes {
         directoryPath?.let { params += "&directory_path=$it" }
         lastModifiedAt?.let { params += "&last_modified_at=${it.time / 1_000L}" }
 
-        return uploadFile(driveId) + params
+        return uploadFileUrl(driveId) + params
     }
     //endregion
 
