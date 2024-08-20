@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
+import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.drive.Category
@@ -162,6 +163,18 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun cancelSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<Boolean> {
         return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE, okHttpClient = okHttpClient)
+    }
+
+    fun uploadEmptyFile(uploadFile: UploadFile) = with(uploadFile) {
+        val uploadUrl = ApiRoutes.uploadEmptyFileUrl(
+            driveId = driveId,
+            directoryId = remoteFolder,
+            fileName = fileName,
+            conflictOption = ConflictOption.RENAME,
+            directoryPath = remoteSubFolder,
+        )
+
+        callApi<ApiResponse<File>>(uploadUrl, POST)
     }
 
     fun createFolder(

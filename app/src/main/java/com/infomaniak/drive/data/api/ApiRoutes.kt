@@ -18,9 +18,12 @@
 package com.infomaniak.drive.data.api
 
 import com.infomaniak.drive.BuildConfig.*
+import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.utils.FileId
+import java.net.URLEncoder
+import java.util.Date
 
 object ApiRoutes {
 
@@ -277,12 +280,36 @@ object ApiRoutes {
 
     fun startUploadSession(driveId: Int) = "${uploadSessionUrl(driveId)}/start"
 
-    fun addChunkToSession(uploadHost: String, driveId: Int, uploadToken: String) =
+    private fun addChunkToSession(uploadHost: String, driveId: Int, uploadToken: String) =
         "$uploadHost/3/drive/$driveId/upload/session/$uploadToken/chunk"
 
     fun closeSession(driveId: Int, uploadToken: String) = "${uploadSessionUrl(driveId)}/$uploadToken/finish"
 
-    fun uploadFile(driveId: Int) = "${driveURLV2(driveId)}/upload"
+    private fun uploadFileUrl(driveId: Int) = "${driveURL(driveId)}/upload"
+
+    fun uploadChunkUrl(uploadHost: String, driveId: Int, uploadToken: String?, chunkNumber: Int, currentChunkSize: Int): String {
+        val chunkParam = "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
+        return addChunkToSession(uploadHost, driveId, uploadToken!!) + chunkParam
+    }
+
+    fun uploadEmptyFileUrl(
+        driveId: Int,
+        directoryId: Int,
+        fileName: String,
+        conflictOption: ConflictOption,
+        directoryPath: String? = null,
+        lastModifiedAt: Date? = null,
+    ): String {
+        var params = "?directory_id=$directoryId" +
+                "&total_size=0" +
+                "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
+                "&conflict=" + conflictOption.toString()
+
+        directoryPath?.let { params += "&directory_path=$it" }
+        lastModifiedAt?.let { params += "&last_modified_at=${it.time / 1_000L}" }
+
+        return uploadFileUrl(driveId) + params
+    }
     //endregion
 
     /** Root Directory */
