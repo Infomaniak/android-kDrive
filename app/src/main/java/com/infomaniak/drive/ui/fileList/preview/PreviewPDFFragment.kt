@@ -175,7 +175,8 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         thumbnailRatio(THUMBNAIL_RATIO)
                         onLoad { pageCount ->
                             // We can arrive here with a file different from a real PDF like OpenOffice documents
-                            shouldHidePrintOption(isGone = file.extensionType != ExtensionType.PDF.value)
+                            val canPrintFile = externalFileUri != null || file.extensionType == ExtensionType.PDF.value
+                            shouldHidePrintOption(isGone = !canPrintFile)
                             binding.downloadLayout.root.isGone = true
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
