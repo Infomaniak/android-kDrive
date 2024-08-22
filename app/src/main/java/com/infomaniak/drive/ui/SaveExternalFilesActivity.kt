@@ -248,7 +248,11 @@ class SaveExternalFilesActivity : BaseActivity() {
             ) {
                 null
             } else {
-                val userDrive = UserDrive(userId = selectedUserId.value!!, driveId = selectedDrive.value!!.id)
+                val userDrive = UserDrive(
+                    userId = selectedUserId.value!!,
+                    driveId = selectedDrive.value!!.id,
+                    sharedWithMe = selectedDrive.value!!.sharedWithMe,
+                )
                 FileController.getFileById(folderId, userDrive)
             }
 
