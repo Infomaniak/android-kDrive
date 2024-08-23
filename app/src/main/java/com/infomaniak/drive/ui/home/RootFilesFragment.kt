@@ -22,21 +22,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
+import com.infomaniak.drive.utils.setupDriveToolbar
+import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -104,12 +105,8 @@ class RootFilesFragment : Fragment() {
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
         }
 
-        sharedWithMeFiles.apply {
-            if (DriveInfosController.getDrivesCount(userId = AccountUtils.currentUserId, sharedWithMe = true).isPositive()) {
-                setOnClickListener { safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment()) }
-            } else {
-                isGone = true
-            }
+        sharedWithMeFiles.setOnClickListener {
+            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
         }
 
         myShares.setOnClickListener {

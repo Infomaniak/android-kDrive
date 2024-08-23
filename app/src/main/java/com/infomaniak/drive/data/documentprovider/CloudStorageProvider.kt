@@ -44,11 +44,14 @@ import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.NotificationUtilsCore
@@ -182,15 +185,15 @@ class CloudStorageProvider : DocumentsProvider() {
             isRootFolder -> {
                 cursor.addRootDrives(userId, isRootFolder = true)
 
+                // Show MyShares folder
                 var documentId = parentDocumentId + SEPARATOR + MY_SHARES_FOLDER_ID
                 var name = context?.getString(R.string.mySharesTitle) ?: "My Shares"
                 cursor.addFile(null, documentId, name)
 
-                if (DriveInfosController.getDrivesCount(userId = userId, sharedWithMe = true).isPositive()) {
-                    documentId = parentDocumentId + SEPARATOR + SHARED_WITHME_FOLDER_ID
-                    name = context?.getString(R.string.sharedWithMeTitle) ?: "Shared with me"
-                    cursor.addFile(null, documentId, name)
-                }
+                // Show SharedWithMe folder
+                documentId = parentDocumentId + SEPARATOR + SHARED_WITHME_FOLDER_ID
+                name = context?.getString(R.string.sharedWithMeTitle) ?: "Shared with me"
+                cursor.addFile(null, documentId, name)
             }
             isSharedWithMeFolder -> {
                 cloudScope.launch(cursor.job) {
