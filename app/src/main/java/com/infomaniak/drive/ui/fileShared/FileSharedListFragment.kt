@@ -42,7 +42,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openFolder
-import com.infomaniak.drive.views.FileInfoActionsView.Companion.downloadFile
+import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.core.R as RCore
@@ -58,11 +58,12 @@ class FileSharedListFragment : FileListFragment() {
     private var drivePermissions: DrivePermissions? = null
     private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
-            if (data == null) {
+            val destinationDriveId = data?.getIntExtra(DESTINATION_DRIVE_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
+            val destinationFolderId = data?.getIntExtra(DESTINATION_FOLDER_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
+
+            if (data == null || destinationDriveId == DEFAULT_ID || destinationFolderId == DEFAULT_ID) {
                 showSnackbar(RCore.string.anErrorHasOccurred)
             } else {
-                val destinationDriveId = data.getIntExtra(DESTINATION_DRIVE_ID_KEY, -1)
-                val destinationFolderId = data.getIntExtra(DESTINATION_FOLDER_ID_KEY, -1)
                 fileSharedViewModel.importFilesToDrive(destinationDriveId, destinationFolderId)
             }
         }
@@ -193,6 +194,7 @@ class FileSharedListFragment : FileListFragment() {
 
     companion object {
         const val MATOMO_CATEGORY = "FileSharedListAction"
+        private const val DEFAULT_ID = -1
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

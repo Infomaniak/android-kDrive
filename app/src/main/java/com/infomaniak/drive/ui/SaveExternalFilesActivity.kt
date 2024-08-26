@@ -48,7 +48,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ActivitySaveExternalFileBinding
-import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.menu.settings.SelectDriveDialog
@@ -531,7 +530,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     companion object {
         const val SHARED_FILE_FOLDER = "shared_files"
         const val LAST_MODIFIED_URI_KEY = "last_modified"
-        const val DESTINATION_DRIVE_ID_KEY  = "destination_drive_id"
-        const val DESTINATION_FOLDER_ID_KEY  = "destination_folder_id"
+        const val DESTINATION_DRIVE_ID_KEY = "destination_drive_id"
+        const val DESTINATION_FOLDER_ID_KEY = "destination_folder_id"
     }
 }
