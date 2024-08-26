@@ -54,6 +54,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
+import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SentryLog
@@ -599,17 +600,19 @@ class FileInfoActionsView @JvmOverloads constructor(
                 }
             }
         }
+
+        companion object {
+            fun Context.downloadFile(drivePermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
+                if (drivePermissions.checkWriteStoragePermission()) {
+                    val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
+                    DownloadManagerUtils.scheduleDownload(context = this, file.downloadUrl(), fileName)
+                    onSuccess?.invoke()
+                }
+            }
+        }
     }
 
     companion object {
         const val SINGLE_OPERATION_CUSTOM_TAG = "single_operation"
-
-        fun Context.downloadFile(drivePermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
-            if (drivePermissions.checkWriteStoragePermission()) {
-                val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
-                DownloadManagerUtils.scheduleDownload(context = this, file.downloadUrl(), fileName)
-                onSuccess?.invoke()
-            }
-        }
     }
 }
