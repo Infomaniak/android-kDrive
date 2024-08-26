@@ -37,6 +37,7 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_D
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.FileListFragment
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
@@ -109,6 +110,16 @@ class PublicShareListFragment : FileListFragment() {
 
         observeRootFile()
         observeFiles()
+    }
+
+    override fun onMenuButtonClicked(
+        multiSelectBottomSheet: MultiSelectActionsBottomSheetDialog,
+        areAllFromTheSameFolder: Boolean,
+    ) {
+        super.onMenuButtonClicked(
+            multiSelectBottomSheet = PublicShareMultiSelectActionsBottomSheetDialog(),
+            areAllFromTheSameFolder = true,
+        )
     }
 
     private fun onMenuClicked(file: File) {
