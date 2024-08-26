@@ -72,7 +72,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
 
-    var drivePermissions: DrivePermissions = DrivePermissions()
+    val drivePermissions: DrivePermissions = DrivePermissions()
     open val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {}
 
     val previewPDFHandler by lazy {
