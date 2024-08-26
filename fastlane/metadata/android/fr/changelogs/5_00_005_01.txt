@@ -1,0 +1,5 @@
+- Amélioration de la vérification de la disponibilité du réseau
+- Masquage de l'option d'impression pour les fichiers non-PDF
+- Correction d'un bug où un compte nouvellement connecté ne pouvait pas charger la liste des fichiers
+- Possibilité d'uploader des fichiers vides
+- Correction de l'absence d'emplacement sélectionné lors d'un scan à partir de « Partagé avec moi ».

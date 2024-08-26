@@ -1,0 +1,5 @@
+- Improve the way we check for network availability
+- Hide the print option for non-PDF files
+- Fix a bug where a freshly connected account couldn't load the files list
+- Can now upload empty files
+- Fix no location selected when scanning from "Shared with me"
