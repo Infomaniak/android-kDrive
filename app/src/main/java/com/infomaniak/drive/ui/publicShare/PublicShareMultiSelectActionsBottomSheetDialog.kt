@@ -17,5 +17,34 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
-class PublicShareMultiSelectActionsBottomSheetDialog {
+import android.os.Bundle
+import android.view.View
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
+
+class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MATOMO_CATEGORY) {
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        onlyDisplayDownloadAction()
+    }
+
+    private fun onlyDisplayDownloadAction() = with(binding) {
+        downloadFile.isVisible = true
+
+        manageCategories.isGone = true
+        addFavorites.isGone = true
+        coloredFolder.isGone = true
+        availableOffline.isGone = true
+        moveFile.isGone = true
+        duplicateFile.isGone = true
+        restoreFileIn.isGone = true
+        restoreFileToOriginalPlace.isGone = true
+        deletePermanently.isGone = true
+    }
+
+    companion object {
+        const val MATOMO_CATEGORY = "publicShare"
+    }
 }
