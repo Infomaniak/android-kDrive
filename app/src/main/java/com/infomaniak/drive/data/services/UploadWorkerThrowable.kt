@@ -97,6 +97,11 @@ object UploadWorkerThrowable {
                 Result.retry()
             }
 
+            exception is UploadTask.LimitExceededException -> {
+                currentUploadFile?.exceptionNotification(applicationContext, isLimitExceeded = true)
+                Result.failure()
+            }
+
             else -> {
                 exception.printStackTrace()
                 currentUploadFile?.exceptionNotification(applicationContext)

@@ -34,12 +34,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MainViewModel.MultiSelectMediatorState
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
@@ -306,7 +308,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         )
                     }
                 } else {
-                    showSnackbar(apiResponse.translateError())
+                    val messageRes = if (apiResponse.error?.code == LIMIT_EXCEEDED_ERROR_CODE) {
+                        R.string.errorFilesLimitExceeded
+                    } else {
+                        apiResponse.translateError()
+                    }
+
+                    showSnackbar(messageRes)
                 }
                 closeMultiSelect()
             }
@@ -316,7 +324,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     private fun sendAddOfflineAction(
         type: BulkOperationType,
         folderId: Int?,
-        mediator: MediatorLiveData<Pair<Int, Int>>,
+        mediator: MediatorLiveData<MultiSelectMediatorState>,
     ) {
         if (folderId != null) {
             mainViewModel.notificationPermission.checkNotificationPermission(requestPermission = true)
@@ -334,7 +342,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     private fun sendRemoveOfflineAction(
         type: BulkOperationType,
         selectedFiles: List<File>,
-        mediator: MediatorLiveData<Pair<Int, Int>>,
+        mediator: MediatorLiveData<MultiSelectMediatorState>,
     ) {
         mediator.addSource(
             mainViewModel.removeSelectedFilesFromOffline(
@@ -348,7 +356,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     private fun sendAllIndividualActions(
         selectedFiles: List<File>,
         type: BulkOperationType,
-        mediator: MediatorLiveData<Pair<Int, Int>>,
+        mediator: MediatorLiveData<MultiSelectMediatorState>,
         destinationFolder: File?,
         color: String?,
     ) {
@@ -370,7 +378,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     private fun sendIndividualAction(
         file: File,
         type: BulkOperationType,
-        mediator: MediatorLiveData<Pair<Int, Int>>,
+        mediator: MediatorLiveData<MultiSelectMediatorState>,
         destinationFolder: File?,
         color: String?,
     ) = with(mainViewModel) {
@@ -409,10 +417,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                         updateMultiSelectMediator(mediator),
                     )
                 } else {
-                    mediator.apply {
-                        val success = value?.first ?: 0
-                        val total = (value?.second ?: 0) + 1
-                        value = success to total
+                    mediator.value = mediator.value?.let {
+                        MultiSelectMediatorState(it.numberOfSuccessfulActions, it.totalOfActions + 1, it.errorCode)
                     }
                 }
             }
@@ -467,26 +473,36 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     }
 
     private fun observeMediator(
-        mediator: MediatorLiveData<Pair<Int, Int>>,
+        mediator: MediatorLiveData<MultiSelectMediatorState>,
         fileCount: Int,
         type: BulkOperationType,
         destinationFolder: File?,
         dialog: Dialog? = null,
     ) {
-        mediator.observe(viewLifecycleOwner) { (success, total) ->
+        mediator.observe(viewLifecycleOwner) { (success, total, error) ->
             if (total == fileCount) {
                 dialog?.dismiss()
-                handleIndividualActionsResult(success, type, destinationFolder)
+                handleIndividualActionsResult(success, error, type, destinationFolder)
             }
         }
     }
 
-    private fun handleIndividualActionsResult(success: Int, type: BulkOperationType, destinationFolder: File?) {
-        val title = if (success == 0) {
-            getString(R.string.anErrorHasOccurred)
+    private fun handleIndividualActionsResult(
+        success: Int,
+        errorCode: String?,
+        type: BulkOperationType,
+        destinationFolder: File?,
+    ) {
+        val title = if (errorCode == LIMIT_EXCEEDED_ERROR_CODE) {
+            getString(R.string.errorFilesLimitExceeded)
         } else {
-            resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
+            if (success == 0) {
+                getString(R.string.anErrorHasOccurred)
+            } else {
+                resources.getQuantityString(type.successMessage, success, success, destinationFolder?.name + "/")
+            }
         }
+
         showSnackbar(title, showAboveFab = true)
         closeMultiSelect()
 

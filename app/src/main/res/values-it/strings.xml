@@ -256,6 +256,7 @@
     <string name="errorDuplicate">Errore durante la duplicazione</string>
     <string name="errorFileCreate">Errore durante la creazione del file. Verifica il nome del file e i tuoi diritti sulla cartella.</string>
     <string name="errorFileLocked">Il file è attualmente aperto da un utente e non può essere modificato</string>
+    <string name="errorFilesLimitExceeded">Limite file raggiunto nella cartella</string>
     <string name="errorGetBookmarkURL">Link non recuperabile</string>
     <string name="errorLeaveShare">Errore durante l’abbandono della condivisione</string>
     <string name="errorLoadingOfficeEditor">Impossibile caricare l’editor dei documenti</string>
