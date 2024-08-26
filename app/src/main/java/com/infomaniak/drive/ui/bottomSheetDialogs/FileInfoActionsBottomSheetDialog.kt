@@ -96,7 +96,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             )
             updateCurrentFile(currentFile)
 
-            binding.fileInfoActionsView.setPrintVisibility(isGone = currentFile.isPDF())
+            binding.fileInfoActionsView.setPrintVisibility(isGone = !currentFile.isPDF())
         }
 
         setupBackActionHandler()
