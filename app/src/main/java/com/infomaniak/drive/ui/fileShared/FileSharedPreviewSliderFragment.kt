@@ -37,7 +37,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
-import com.infomaniak.drive.views.FileInfoActionsView.Companion.downloadFile
+import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
