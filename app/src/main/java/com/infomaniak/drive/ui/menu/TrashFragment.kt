@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -65,7 +64,7 @@ class TrashFragment : FileSubTypeListFragment() {
             removeFileFromAdapter(fileToRemove)
         }
 
-        setupMultiSelectLayout()
+        setupBasicMultiSelectLayout()
         observeDriveTrash()
         observeTrashedFolderFiles()
     }
@@ -96,13 +95,6 @@ class TrashFragment : FileSubTypeListFragment() {
                 }
             }
             onMenuClicked = { file -> showTrashedFileActions(file) }
-        }
-    }
-
-    private fun setupMultiSelectLayout() {
-        multiSelectLayout?.apply {
-            moveButtonMultiSelect.isInvisible = true
-            deleteButtonMultiSelect.isInvisible = true
         }
     }
 

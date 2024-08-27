@@ -25,7 +25,6 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.view.isGone
-import androidx.core.view.isInvisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -89,7 +88,7 @@ class PublicShareListFragment : FileListFragment() {
             onFileClicked = ::onFileClicked
         }
 
-        setupMultiSelectLayout()
+        setupBasicMultiSelectLayout()
 
         binding.toolbar.apply {
             setOnMenuItemClickListener { menuItem ->
@@ -148,13 +147,6 @@ class PublicShareListFragment : FileListFragment() {
         binding.swipeRefreshLayout.isRefreshing = false
 
         changeNoFilesLayoutVisibility(files.isEmpty(), changeControlsVisibility = true, ignoreOffline = false)
-    }
-
-    private fun setupMultiSelectLayout() {
-        multiSelectLayout?.apply {
-            moveButtonMultiSelect.isInvisible = true
-            deleteButtonMultiSelect.isInvisible = true
-        }
     }
 
     private fun onBackPressed() {

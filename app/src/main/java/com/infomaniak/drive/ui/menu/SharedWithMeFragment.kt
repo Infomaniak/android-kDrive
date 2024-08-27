@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isInvisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -98,7 +97,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             )
         }
 
-        setupMultiSelectLayout()
+        setupBasicMultiSelectLayout()
     }
 
     private fun openMaintenanceDialog(driveName: String) {
@@ -116,13 +115,6 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 driveId = driveId,
             )
         )
-    }
-
-    private fun setupMultiSelectLayout() {
-        multiSelectLayout?.apply {
-            moveButtonMultiSelect.isInvisible = true
-            deleteButtonMultiSelect.isInvisible = true
-        }
     }
 
     override fun onMenuButtonClicked(
