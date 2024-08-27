@@ -25,6 +25,7 @@ import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -150,7 +151,10 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     private fun setupMultiSelectLayout() {
-        multiSelectLayout?.root?.isGone = true
+        multiSelectLayout?.apply {
+            moveButtonMultiSelect.isInvisible = true
+            deleteButtonMultiSelect.isInvisible = true
+        }
     }
 
     private fun onBackPressed() {
