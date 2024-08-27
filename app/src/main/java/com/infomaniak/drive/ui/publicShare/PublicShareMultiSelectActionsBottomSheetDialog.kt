@@ -21,13 +21,24 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
+import com.infomaniak.lib.core.utils.DownloadManagerUtils
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 
 class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MATOMO_CATEGORY) {
+
+    private val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         onlyDisplayDownloadAction()
+        observeArchiveUuid()
+    }
+
+    override fun downloadArchive() {
+        publicShareViewModel.buildArchive(getArchiveBody())
     }
 
     private fun onlyDisplayDownloadAction() = with(binding) {
@@ -42,6 +53,17 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
         restoreFileIn.isGone = true
         restoreFileToOriginalPlace.isGone = true
         deletePermanently.isGone = true
+    }
+
+    private fun observeArchiveUuid() = with(publicShareViewModel) {
+        buildArchiveResult.observe(viewLifecycleOwner) { (error, archiveUuid) ->
+            archiveUuid?.let {
+                val downloadURL = ApiRoutes.downloadPublicShareArchive(driveId, publicShareUuid, it.uuid)
+                DownloadManagerUtils.scheduleDownload(requireContext(), downloadURL, ARCHIVE_FILE_NAME)
+            }
+            error?.let { showSnackbar(it, anchor = (requireActivity() as PublicShareActivity).getMainButton()) }
+            onActionSelected()
+        }
     }
 
     companion object {
