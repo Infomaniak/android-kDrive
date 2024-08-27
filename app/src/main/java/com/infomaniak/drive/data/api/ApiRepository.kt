@@ -328,6 +328,10 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId), GET)
     }
 
+    fun buildPublicShareArchive(driveId: Int, linkUuid: String, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
+        return callApi(ApiRoutes.buildPublicShareArchive(driveId, linkUuid), POST, archiveBody)
+    }
+
     fun importPublicShareFiles(
         sourceDriveId: Int,
         linkUuid: String,
