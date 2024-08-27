@@ -53,10 +53,10 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
-import kotlin.system.exitProcess
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : AppCompatActivity() {
@@ -194,9 +194,8 @@ class LaunchActivity : AppCompatActivity() {
                 ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
                 else -> {
                     if (apiResponse.error?.exception is ApiController.NetworkException) {
-                        withContext(Dispatchers.Main) { showToast(R.string.errorNetwork) }
-                        finishAffinity()
-                        exitProcess(0)
+                        Dispatchers.Main { showToast(R.string.errorNetwork) }
+                        finishAndRemoveTask()
                     }
                     Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
                 }
