@@ -85,7 +85,7 @@ class MultiSelectManager {
             onlyFolders = onlyFolders,
             onlyFavorite = onlyFavorite,
             onlyOffline = onlyOffline,
-            isAllSelected = isSelectAllOn
+            isAllSelected = isSelectAllOn,
         )
     }
 

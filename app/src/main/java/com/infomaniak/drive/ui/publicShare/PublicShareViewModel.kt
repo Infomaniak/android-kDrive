@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderArgs
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderResult
+import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
@@ -46,8 +47,9 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     val childrenLiveData = SingleLiveEvent<Pair<List<File>, Boolean>>()
     var fileClicked: File? = null
     val downloadProgressLiveData = MutableLiveData(0)
+    val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
 
-    private val driveId: Int
+    val driveId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
 
     val publicShareUuid: String
@@ -123,6 +125,13 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
         )
 
         // TODO: Manage apiResponse when the backend will be done
+    }
+
+    fun buildArchive(archiveBody: ArchiveUUID.ArchiveBody) = viewModelScope.launch(Dispatchers.IO) {
+        val apiResponse = ApiRepository.buildPublicShareArchive(driveId, publicShareUuid, archiveBody)
+        val result = apiResponse.data?.let { archiveUuid -> null to archiveUuid } ?: (apiResponse.translatedError to null)
+
+        buildArchiveResult.postValue(result)
     }
 
     fun executeDownloadAction(
