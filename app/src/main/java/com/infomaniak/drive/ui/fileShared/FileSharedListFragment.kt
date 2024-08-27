@@ -64,7 +64,12 @@ class FileSharedListFragment : FileListFragment() {
             if (data == null || destinationDriveId == DEFAULT_ID || destinationFolderId == DEFAULT_ID) {
                 showSnackbar(RCore.string.anErrorHasOccurred)
             } else {
-                fileSharedViewModel.importFilesToDrive(destinationDriveId, destinationFolderId)
+                fileSharedViewModel.importFilesToDrive(
+                    destinationDriveId = destinationDriveId,
+                    destinationFolderId = destinationFolderId,
+                    fileIds = multiSelectManager.selectedItemsIds.toList(),
+                    exceptedFileIds = multiSelectManager.exceptedItemsIds,
+                )
             }
         }
     }
