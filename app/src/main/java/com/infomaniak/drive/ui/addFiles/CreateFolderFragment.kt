@@ -109,7 +109,7 @@ open class CreateFolderFragment : Fragment() {
         binding.permissionsRecyclerView.adapter = adapter
     }
 
-    private fun toggleCreateFolderButton() = with(binding) {
+    protected open fun toggleCreateFolderButton() = with(binding) {
         createFolderButton.isEnabled = newFolderViewModel.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
     }
 

@@ -19,7 +19,9 @@ package com.infomaniak.drive.ui.addFiles
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.FolderPermission.*
@@ -29,27 +31,42 @@ import com.infomaniak.lib.core.utils.safeNavigate
 
 class CreatePrivateFolderFragment : CreateFolderFragment() {
 
+    private val createFolderFragmentArgs by navArgs<CreatePrivateFolderFragmentArgs>()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         adapter.apply {
-            getShare {
-                setUsers(it.users)
-                val permissions: ArrayList<Permission> = arrayListOf(
-                    ONLY_ME,
-                    if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS,
-                )
-                selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
-                setAll(permissions)
+            if (createFolderFragmentArgs.isSharedWithMe) {
+                binding.accessPermissionTitle.isGone = true
+            } else {
+                getShare {
+                    setUsers(it.users)
+                    val permissions: ArrayList<Permission> = arrayListOf(
+                        ONLY_ME,
+                        if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS,
+                    )
+                    selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
+                    setAll(permissions)
+                }
             }
         }
 
         binding.createFolderButton.setOnClickListener { createPrivateFolder() }
     }
 
+    override fun toggleCreateFolderButton(): Unit = with(binding) {
+        if (createFolderFragmentArgs.isSharedWithMe) {
+            createFolderButton.isEnabled = !folderNameValueInput.text.isNullOrBlank()
+        } else {
+            super.toggleCreateFolderButton()
+        }
+    }
+
     private fun createPrivateFolder() {
         trackNewElementEvent("createPrivateFolder")
-        createFolder(newFolderViewModel.currentPermission == ONLY_ME) { file, redirectToShareDetails ->
+        val onlyForMe = !createFolderFragmentArgs.isSharedWithMe && newFolderViewModel.currentPermission == ONLY_ME
+        createFolder(onlyForMe) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)
                 showSnackbar(R.string.createPrivateFolderSucces, true)

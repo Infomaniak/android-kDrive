@@ -57,17 +57,17 @@ class NewFolderFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        initPrivateFolder()
 
         newFolderViewModel.currentDriveLiveData().observe(viewLifecycleOwner) { drive ->
+            initPrivateFolder(drive?.sharedWithMe == true)
             initCommonFolder(drive)
             initDropBoxFolder(drive)
         }
     }
 
-    private fun initPrivateFolder() {
+    private fun initPrivateFolder(isSharedWithMe: Boolean) {
         binding.privateFolder.setOnClickListener {
-            safeNavigate(R.id.createPrivateFolderFragment)
+            safeNavigate(NewFolderFragmentDirections.actionNewFolderFragmentToCreatePrivateFolderFragment(isSharedWithMe))
         }
     }
 
