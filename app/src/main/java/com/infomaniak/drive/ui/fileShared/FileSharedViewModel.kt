@@ -98,8 +98,8 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
     fun importFilesToDrive(
         destinationDriveId: Int,
         destinationFolderId: Int,
-        fileIds: List<Int> = emptyList(),
-        exceptedFileIds: List<Int> = emptyList(),
+        fileIds: List<Int>,
+        exceptedFileIds: List<Int>,
     ) = viewModelScope.launch(Dispatchers.IO) {
         ApiRepository.importShareLinkFiles(
             sourceDriveId = driveId,
