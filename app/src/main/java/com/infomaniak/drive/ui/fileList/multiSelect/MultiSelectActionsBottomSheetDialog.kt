@@ -265,7 +265,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         RESTORE_IN, RESTORE_TO_ORIGIN, DELETE_PERMANENTLY,
     }
 
-    companion object {
+    protected companion object {
         const val ARCHIVE_FILE_NAME = "Archive.zip"
     }
 }
