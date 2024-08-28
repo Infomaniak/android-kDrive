@@ -408,7 +408,7 @@ object FolderFilesProvider {
                 }
             }
             else -> {
-                if (returnResponse[fileId] == null) {
+                if (returnResponse[fileId] == null && actionFile?.id != currentFolder.id) {
                     upsertAction(realm, currentFolder, actionFile)
                     returnResponse[fileId] = this
                 }
