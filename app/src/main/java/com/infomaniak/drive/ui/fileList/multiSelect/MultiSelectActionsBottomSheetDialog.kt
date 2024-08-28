@@ -203,7 +203,10 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     private fun downloadFiles() {
         navigationArgs.fileIds.forEach { fileId ->
-            FileController.getFileProxyById(fileId = fileId, customRealm = mainViewModel.realm)?.let { file ->
+            FileController.getFileProxyById(
+                fileId = fileId,
+                customRealm = FileController.getRealmInstance(navigationArgs.userDrive),
+            )?.let { file ->
                 val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                 DownloadManagerUtils.scheduleDownload(requireContext(), ApiRoutes.downloadFile(file), fileName)
             }

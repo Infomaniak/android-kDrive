@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_C
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -65,6 +66,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     protected var multiSelectLayout: MultiSelectLayoutBinding? = null
     private var multiSelectToolbar: CollapsingToolbarLayout? = null
     private var swipeRefresh: SwipeRefreshLayout? = null
+
+    protected abstract val userDrive: UserDrive?
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
@@ -170,6 +173,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
     private fun getMultiSelectBottomSheetArguments(areAllFromTheSameFolder: Boolean): Bundle {
         val (fileIds, exceptFileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         return MultiSelectActionsBottomSheetDialogArgs(
+            userDrive = userDrive,
             parentId = mainViewModel.currentFolder.value?.id!!,
             fileIds = if (isAllSelected) intArrayOf() else fileIds,
             exceptFileIds = if (isAllSelected) exceptFileIds else intArrayOf(),

@@ -198,6 +198,11 @@
         android:label="MultiSelectActionsBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_multi_select_actions">
         <argument
+            android:name="userDrive"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
+        <argument
             android:name="parentId"
             app:argType="integer" />
         <argument
