@@ -354,7 +354,7 @@ object FileController {
     fun addChild(localFolderId: Int, newFile: File, realm: Realm) {
         getFileById(realm, localFolderId)?.let { localFolder ->
             if (!localFolder.children.contains(newFile)) {
-                realm.executeTransaction { localFolder.children.add(newFile) }
+                realm.executeTransaction { runCatching { localFolder.children.add(newFile) } }
             }
         }
     }
