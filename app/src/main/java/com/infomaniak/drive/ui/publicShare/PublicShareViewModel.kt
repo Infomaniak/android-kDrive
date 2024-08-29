@@ -55,6 +55,9 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     val publicShareUuid: String
         inline get() = savedStateHandle[PublicShareActivityArgs::publicShareUuid.name] ?: ""
 
+    val isPasswordNeeded: Boolean
+        inline get() = savedStateHandle[PublicShareActivityArgs::isPasswordNeeded.name] ?: false
+
     private val fileId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
 
