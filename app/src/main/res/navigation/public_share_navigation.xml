@@ -33,7 +33,12 @@
             app:argType="string" />
         <argument
             android:name="fileId"
+            android:defaultValue="-1"
             app:argType="integer" />
+        <argument
+            android:name="isPasswordNeeded"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </activity>
 
     <fragment
@@ -69,6 +74,11 @@
         <action
             android:id="@+id/action_publicShareListFragment_to_publicShareBottomSheetFileActions"
             app:destination="@id/publicShareBottomSheetFileActions" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicSharePasswordFragment"
+            app:destination="@id/publicSharePasswordFragment"
+            app:popUpTo="@id/publicShareListFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
