@@ -399,7 +399,8 @@ object FolderFilesProvider {
         when (action) {
             FileActivityType.FILE_DELETE,
             FileActivityType.FILE_MOVE_OUT,
-            FileActivityType.FILE_TRASH -> {
+            FileActivityType.FILE_TRASH,
+            FileActivityType.FILE_TRASH_INHERITED -> {
                 // We used to have this condition, but it doesn't exist on the ios side, according to commit it was an api fix.
                 // returnResponse[fileId]?.createdAt?.time == createdAt.time
                 if (returnResponse[fileId] == null) {
@@ -408,7 +409,8 @@ object FolderFilesProvider {
                 }
             }
             else -> {
-                if (returnResponse[fileId] == null) {
+                // The file has not yet been managed and is not the parent folder.
+                if (returnResponse[fileId] == null && actionFile?.id != currentFolder.id) {
                     upsertAction(realm, currentFolder, actionFile)
                     returnResponse[fileId] = this
                 }
