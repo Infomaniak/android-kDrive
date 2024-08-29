@@ -255,7 +255,9 @@ object ApiRoutes {
 
     /** Public Share */
     //region Public share
-    fun getPublicShareInfo(driveId: Int, linkUuid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid/init"
+    fun getPublicShareInfo(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/init"
+
+    fun submitPublicSharePassword(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/auth"
 
     fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: Int): String {
         return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId?$sharedFileWithQuery"
@@ -290,7 +292,7 @@ object ApiRoutes {
     fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
 
     fun buildPublicShareArchive(driveId: Int, linkUuid: String): String {
-        return "$SHARE_URL_V2$driveId/share/$linkUuid/archive"
+        return "${getPublicShareUrlV2(driveId, linkUuid)}/archive"
     }
 
     fun downloadPublicShareArchive(driveId: Int, publicShareUuid: String, archiveUuid: String): String {
@@ -298,8 +300,10 @@ object ApiRoutes {
     }
 
     private fun publicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/$fileId"
+        return "${getPublicShareUrlV2(driveId, linkUuid)}/files/$fileId"
     }
+
+    private fun getPublicShareUrlV2(driveId: Int, linkUuid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid"
     //endregion
 
     /** External import */
