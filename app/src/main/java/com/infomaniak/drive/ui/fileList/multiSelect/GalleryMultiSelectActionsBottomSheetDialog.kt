@@ -25,4 +25,10 @@ class GalleryMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheet
     override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
         binding.coloredFolder.isGone = true
     }
+
+    // We hide this action because the gallery doesn't rely on realm to display its file.
+    // This make the offline action buggy because we cannot update the UI responsively, and the setting offline doesn't work
+    override fun configureAvailableOffline() {
+        binding.availableOffline.isGone = true
+    }
 }
