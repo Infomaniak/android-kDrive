@@ -67,6 +67,8 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
     var menuGalleryBinding: FragmentMenuGalleryBinding? = null
 
+    override val userDrive = null
+
     private val refreshTimer: CountDownTimer by lazy {
         createRefreshTimer { menuGalleryBinding?.swipeRefreshLayout?.isRefreshing = true }
     }

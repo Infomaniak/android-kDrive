@@ -129,7 +129,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     val fileRecyclerView get() = _binding?.fileRecyclerView
 
-    protected var userDrive: UserDrive? = null
+    override var userDrive: UserDrive? = null
 
     private val selectAllTimer: CountDownTimer by lazy {
         createRefreshTimer {
