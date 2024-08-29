@@ -313,6 +313,15 @@ object ApiRepository : ApiRepositoryCore() {
         )
     }
 
+    fun submitPublicSharePassword(driveId: Int, linkUuid: String, password: String): ApiResponse<Boolean> {
+        return callApi(
+            url = ApiRoutes.submitPublicSharePassword(driveId, linkUuid),
+            method = POST,
+            body = mapOf("password" to password),
+            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+        )
+    }
+
     fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
         return callApi(ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId), GET)
     }
