@@ -32,6 +32,8 @@ import android.os.Bundle
 import android.os.FileObserver
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -60,6 +62,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
+import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
@@ -88,6 +91,7 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
@@ -202,7 +206,27 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    // We use this SuppressLint because we don't want to execute performClick on profileItem when double tapping.
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupBottomNavigation() = with(binding) {
+
+        val gestureDetector = GestureDetector(this@MainActivity, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDoubleTap(e: MotionEvent): Boolean {
+                context.trackAccountEvent("switchDoubleTap")
+                mainViewModel.switchToNextUser { navController.navigate(R.id.homeFragment) }
+                return true
+            }
+
+            override fun onLongPress(e: MotionEvent) {
+                context.trackAccountEvent("longPressDirectAccess")
+                navController.navigate(R.id.switchUserActivity)
+            }
+        })
+
+        bottomNavigation.findViewById<View>(R.id.menuFragment).setOnTouchListener { _, event ->
+            gestureDetector.onTouchEvent(event)
+        }
+
         bottomNavigation.apply {
             setupWithNavControllerCustom(navController)
             itemIconTintList = ContextCompat.getColorStateList(this@MainActivity, R.color.item_icon_tint_bottom)

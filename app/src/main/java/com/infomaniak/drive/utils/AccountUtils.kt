@@ -238,6 +238,13 @@ object AccountUtils : CredentialManager() {
         return currentDrive
     }
 
+    fun switchToNextUser() {
+        val users = getAllUsersSync()
+        currentUser = users[(users.indexOf(currentUser) + 1) % users.size]
+        currentDriveId = -1
+        reloadApp?.invoke(bundleOf())
+    }
+
     private suspend fun resetApp(context: Context) {
         if (getAllUsersCount() == 0) {
             AppSettings.removeAppSettings()

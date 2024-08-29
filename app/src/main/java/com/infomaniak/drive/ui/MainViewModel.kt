@@ -632,6 +632,14 @@ class MainViewModel(
         }
     }
 
+    fun switchToNextUser(onUserSwitched: () -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+        if (AccountUtils.getAllUsersSync().size < 2) return@launch
+
+        AccountUtils.switchToNextUser()
+
+        withContext(Dispatchers.Main) { onUserSwitched() }
+    }
+
     override fun onCleared() {
         realm.close()
         super.onCleared()
