@@ -551,6 +551,8 @@
     <string name="previewNoPreview">Il semblerait que ce fichier n’ait pas d’aperçu.</string>
     <string name="previewPdfPages">%1$d sur %2$d</string>
     <string name="previewVideoSourceError">Fichier vidéo non pris en charge par le lecteur vidéo</string>
+    <string name="publicSharePasswordNeededDescription">Veuillez saisir le mot de passe qui vous a été fourni pour accéder au contenu.</string>
+    <string name="publicSharePasswordNeededTitle">Contenu sécurisé</string>
     <string name="publicSharedLinkTitle">Lien de partage public</string>
     <string name="recentActivityMeTitle">Par moi</string>
     <string name="recentActivityMyTeam">Par mon équipe</string>
