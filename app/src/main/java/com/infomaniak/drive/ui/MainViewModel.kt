@@ -29,7 +29,6 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.JsonObject
 import com.infomaniak.drive.MainApplication
-import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -633,15 +632,12 @@ class MainViewModel(
         }
     }
 
-    fun switchToNextUser(callback: () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (AccountUtils.getAllUsersSync().size < 2) return@launch
+    fun switchToNextUser(onUserSwitched: () -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+        if (AccountUtils.getAllUsersSync().size < 2) return@launch
 
-            getContext().trackAccountEvent("switch")
-            AccountUtils.switchToNextUser()
+        AccountUtils.switchToNextUser()
 
-            withContext(Dispatchers.Main) { callback() }
-        }
+        withContext(Dispatchers.Main) { onUserSwitched() }
     }
 
     override fun onCleared() {
