@@ -86,10 +86,10 @@ open class FileActivity(
         FileActivityType.FILE_MOVE_OUT -> {
             if (isFolder) R.string.fileDetailsActivityFolderMove else R.string.fileDetailsActivityFileMove
         }
-        FileActivityType.FILE_TRASH -> {
+        FileActivityType.FILE_TRASH, FileActivityType.FILE_TRASH_INHERITED -> {
             if (isFolder) R.string.fileDetailsActivityFolderTrash else R.string.fileDetailsActivityFileTrash
         }
-        FileActivityType.FILE_RESTORE -> {
+        FileActivityType.FILE_RESTORE, FileActivityType.FILE_RESTORE_INHERITED -> {
             if (isFolder) R.string.fileDetailsActivityFolderRestore else R.string.fileDetailsActivityFileRestore
         }
         FileActivityType.FILE_DELETE -> {
