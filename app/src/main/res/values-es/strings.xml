@@ -552,6 +552,8 @@
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>
     <string name="previewPdfPages">%1$d de %2$d</string>
     <string name="previewVideoSourceError">El archivo de vídeo no es compatible con el lector de vídeo</string>
+    <string name="publicSharePasswordNeededDescription">Introduzca la contraseña que se le ha facilitado para acceder al contenido.</string>
+    <string name="publicSharePasswordNeededTitle">Contenido seguro</string>
     <string name="publicSharedLinkTitle">Enlace de uso compartido público</string>
     <string name="recentActivityMeTitle">Por mí</string>
     <string name="recentActivityMyTeam">Por mi equipo</string>

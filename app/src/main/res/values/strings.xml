@@ -563,6 +563,8 @@
     <string name="previewNoPreview">This file appears to have no preview.</string>
     <string name="previewPdfPages">%1$d out of %2$d</string>
     <string name="previewVideoSourceError">Video file not supported by the video player</string>
+    <string name="publicSharePasswordNeededDescription">Please enter the password provided to access the content.</string>
+    <string name="publicSharePasswordNeededTitle">Protected content</string>
     <string name="publicSharedLinkTitle">Public sharing link</string>
     <string name="recentActivityMeTitle">By me</string>
     <string name="recentActivityMyTeam">By my team</string>

@@ -552,6 +552,8 @@
     <string name="previewNoPreview">Sembra che il file non abbia anteprima.</string>
     <string name="previewPdfPages">%1$d di %2$d</string>
     <string name="previewVideoSourceError">File video non supportato dal lettore</string>
+    <string name="publicSharePasswordNeededDescription">Inserite la password che vi è stata fornita per accedere al contenuto.</string>
+    <string name="publicSharePasswordNeededTitle">Contenuto sicuro</string>
     <string name="publicSharedLinkTitle">Link di condivisione pubblica</string>
     <string name="recentActivityMeTitle">Da parte mia</string>
     <string name="recentActivityMyTeam">Da parte del mio team</string>
