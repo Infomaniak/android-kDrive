@@ -69,7 +69,7 @@ class PublicShareListFragment : FileListFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (publicShareViewModel.isPasswordNeeded) {
+        if (publicShareViewModel.isPasswordNeeded && !publicShareViewModel.hasBeenAuthenticated) {
             safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicSharePasswordFragment())
         }
     }

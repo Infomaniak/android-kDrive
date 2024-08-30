@@ -44,7 +44,11 @@
     <fragment
         android:id="@+id/publicSharePasswordFragment"
         android:name="com.infomaniak.drive.ui.publicShare.PublicSharePasswordFragment"
-        tools:layout="@layout/fragment_public_share_password" />
+        tools:layout="@layout/fragment_public_share_password">
+        <action
+            android:id="@+id/action_publicSharePasswordFragment_to_publicShareListFragment"
+            app:destination="@id/publicShareListFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/publicShareListFragment"
