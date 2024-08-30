@@ -61,4 +61,8 @@ class PublicShareActivity : AppCompatActivity() {
     }
 
     fun getMainButton() = binding.mainPublicShareButton
+
+    companion object {
+        const val PUBLIC_SHARE_TAG = "publicShare"
+    }
 }
