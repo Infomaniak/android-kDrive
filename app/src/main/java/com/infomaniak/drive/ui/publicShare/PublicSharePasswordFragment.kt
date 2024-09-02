@@ -25,7 +25,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.lib.core.api.ApiController
@@ -81,15 +80,14 @@ class PublicSharePasswordFragment : Fragment() {
 
     private fun onInitError(error: ApiError?) = with(binding) {
         passwordValidateButton.hideProgressCatching(R.string.buttonValid)
-        when {
-            error?.exception is ApiController.NetworkException -> {
-                showSnackbar(R.string.errorNetwork, anchor = passwordValidateButton)
-            }
-            error?.code == ErrorCode.PASSWORD_NOT_VALID -> {
-                showSnackbar(R.string.wrongPdfPassword, anchor = passwordValidateButton)
-            }
-            else -> SentryLog.e(PUBLIC_SHARE_TAG, "downloadSharedFile: ${error?.code}")
+        val errorRes = if (error?.exception is ApiController.NetworkException) {
+            R.string.errorNetwork
+        } else {
+            SentryLog.i(PUBLIC_SHARE_TAG, "Download init public share: ${error?.code}")
+            R.string.anErrorHasOccurred
         }
+
+        showSnackbar(errorRes, anchor = passwordValidateButton)
     }
 
     private fun isFieldBlank(): Boolean {
