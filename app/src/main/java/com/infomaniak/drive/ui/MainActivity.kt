@@ -82,7 +82,6 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
-import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
@@ -516,7 +515,10 @@ class MainActivity : BaseActivity() {
 
             // TODO : We need to find a way to handle the case where the app has never fetched the private folder and
             //  therefore can't find it in Realm
-            if (navigationArgs?.shortcutId == Shortcuts.UPLOAD.id && mustOpenUploadShortcut && parentFolder?.id == ROOT_ID) {
+            if (navigationArgs?.shortcutId == Shortcuts.UPLOAD.id &&
+                mustOpenUploadShortcut &&
+                parentFolder?.getVisibilityType() == File.VisibilityType.IS_PRIVATE
+            ) {
                 mainViewModel.mustOpenUploadShortcut = false
                 uploadFilesHelper?.apply {
                     setParentFolder(parentFolder)
