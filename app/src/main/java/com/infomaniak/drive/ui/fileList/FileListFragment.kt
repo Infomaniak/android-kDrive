@@ -498,7 +498,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             mainViewModel = mainViewModel,
             noNetworkBinding = binding.noNetworkInclude,
             noNetworkBindingDirectParent = binding.fileListLayout,
-            additionalChanges = { isInternetAvailable -> fileAdapter.toggleOfflineMode(requireContext(), !isInternetAvailable) }
+            additionalChanges = { isInternetAvailable ->
+                context?.let { fileAdapter.toggleOfflineMode(it, !isInternetAvailable) }
+            },
         )
     }
 
