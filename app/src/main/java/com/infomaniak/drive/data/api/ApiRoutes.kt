@@ -33,7 +33,8 @@ object ApiRoutes {
     private const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities," +
             "file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name,file.supported_by"
     private const val listingFilesWithQuery = "with=files,files.capabilities,files.categories,files.conversion_capabilities," +
-            "files.dropbox,files.dropbox.capabilities,files.is_favorite,files.sharelink,files.sorted_name,files.supported_by"
+            "files.dropbox,files.dropbox.capabilities,files.external_import,files.is_favorite," +
+            "files.sharelink,files.sorted_name,files.supported_by"
     const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
 
     private const val ACTIONS = "&actions[]=file_create" +
