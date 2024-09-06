@@ -21,12 +21,12 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.annotation.CallSuper
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle.State
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
@@ -80,6 +80,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     }
 
     @SuppressLint("ClickableViewAccessibility")
+    @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -136,7 +137,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     bottomSheetFileInfos.setPrintVisibility(isGone = !currentFile.isPDF())
 
                     lifecycleScope.launch(Dispatchers.Main) {
-                        repeatOnLifecycle(State.RESUMED) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
+                        lifecycle.withResumed { bottomSheetFileInfos.updateCurrentFile(currentFile) }
                     }
                 }
             })
@@ -146,9 +147,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             if (!currentFile.isOnlyOfficePreview()) header.toggleOpenWithVisibility(isVisible = !isDownloading)
             bottomSheetFileInfos.openWith.isGone = isDownloading
         }
-
-
-
+        
         mainViewModel.currentPreviewFileList.let { files ->
             previewSliderAdapter.setFiles(ArrayList(files.values))
             val position = previewSliderAdapter.getPosition(currentFile)
