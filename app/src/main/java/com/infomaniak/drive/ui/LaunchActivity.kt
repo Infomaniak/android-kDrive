@@ -21,6 +21,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.BuildConfig
@@ -28,10 +29,13 @@ import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.ui.fileShared.FileSharedActivity
+import com.infomaniak.drive.ui.fileShared.FileSharedActivityArgs
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
@@ -39,6 +43,8 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
+import com.infomaniak.lib.core.models.ApiResponseStatus
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -46,12 +52,14 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
+    private var fileSharedActivityExtras: Bundle? = null
 
     private var isHelpShortcutPressed = false
 
@@ -61,21 +69,20 @@ class LaunchActivity : AppCompatActivity() {
         setDefaultLocaleIfNeeded()
 
         checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
+        trackScreen()
 
         lifecycleScope.launch {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
             handleNotificationDestinationIntent()
-            handleDeeplink()
             handleShortcuts()
-
+            handleDeeplink()
             startApp()
 
             // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
             // so that even when we return, the activity will still be closed.
             finish()
         }
-        trackScreen()
     }
 
     override fun onPause() {
@@ -102,16 +109,17 @@ class LaunchActivity : AppCompatActivity() {
                 when (destinationClass) {
                     MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
                     LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                    FileSharedActivity::class.java -> fileSharedActivityExtras?.let(::putExtras)
                 }
             }.also(::startActivity)
         }
     }
 
     private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
-        if (AccountUtils.requestCurrentUser() == null) {
-            LoginActivity::class.java
-        } else {
-            loggedUserDestination()
+        when {
+            fileSharedActivityExtras != null -> FileSharedActivity::class.java
+            AccountUtils.requestCurrentUser() == null -> LoginActivity::class.java
+            else -> loggedUserDestination()
         }
     }
 
@@ -152,11 +160,41 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDeeplink() {
-        intent.data?.let { uri -> uri.path?.let { path -> processDeepLink(path) } }
+    private suspend fun handleDeeplink() = withContext(Dispatchers.IO) {
+        intent.data?.path?.let { deeplink ->
+            if (deeplink.contains("/app/share/")) processFileShare(deeplink) else processInternalLink(deeplink)
+            SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
+        }
     }
 
-    private fun processDeepLink(path: String) {
+    private fun processFileShare(path: String) {
+        Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
+            val (driveId, fileSharedLinkUuid) = match.destructured
+
+            val apiResponse = ApiRepository.getShareLinkInfo(driveId.toInt(), fileSharedLinkUuid)
+            when (apiResponse.result) {
+                ApiResponseStatus.SUCCESS -> {
+                    val shareLink = apiResponse.data!!
+                    if (apiResponse.data?.validUntil?.before(Date()) == true) {
+                        Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
+                    }
+                    fileSharedActivityExtras = FileSharedActivityArgs(
+                        driveId = driveId.toInt(),
+                        fileSharedLinkUuid = fileSharedLinkUuid,
+                        fileId = shareLink.fileId ?: -1,
+                    ).toBundle()
+
+                    trackDeepLink("external")
+                }
+                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
+                else -> {
+                    Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
+                }
+            }
+        }
+    }
+
+    private fun processInternalLink(path: String) {
         Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
             val (pathDriveId, pathFolderId, pathFileId) = match.destructured
             val driveId = pathDriveId.toInt()
@@ -166,11 +204,6 @@ class LaunchActivity : AppCompatActivity() {
                 setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
             }
 
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = UploadWorker.BREADCRUMB_TAG
-                message = "DeepLink: $path"
-                level = SentryLevel.INFO
-            })
             trackDeepLink("internal")
         }
     }

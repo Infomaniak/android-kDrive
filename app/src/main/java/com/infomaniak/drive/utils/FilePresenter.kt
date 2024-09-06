@@ -32,7 +32,12 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.AccessDeniedBottomSheetDialogArgs
-import com.infomaniak.drive.ui.fileList.*
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
+import com.infomaniak.drive.ui.fileList.FileAdapter
+import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
+import com.infomaniak.drive.ui.fileList.FileListViewModel
+import com.infomaniak.drive.ui.fileShared.FileSharedListFragmentArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -52,34 +57,38 @@ object FilePresenter {
         shouldHideBottomNavigation: Boolean,
         shouldShowSmallFab: Boolean,
         fileListViewModel: FileListViewModel,
+        isSharedFile: Boolean = false
     ) {
-        if (file.isDisabled()) {
+        if (file.isDisabled() && !isSharedFile) {
             safeNavigate(
                 R.id.accessDeniedBottomSheetFragment,
                 AccessDeniedBottomSheetDialogArgs(
                     isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
                     folderId = file.id,
-                    folderName = file.name
+                    folderName = file.name,
                 ).toBundle()
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
-            safeNavigate(
-                R.id.fileListFragment,
-                FileListFragmentArgs(
+            if (isSharedFile) {
+                val args = FileSharedListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
+                safeNavigate(R.id.fileSharedListFragment, args.toBundle())
+            } else {
+                val args = FileListFragmentArgs(
                     folderId = file.id,
                     folderName = file.getDisplayName(requireContext()),
                     shouldHideBottomNavigation = shouldHideBottomNavigation,
                     shouldShowSmallFab = shouldShowSmallFab,
-                ).toBundle()
-            )
+                )
+                safeNavigate(R.id.fileListFragment, args.toBundle())
+            }
         }
     }
 
-    fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?) {
+    fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?, shareLinkUuid: String = "") {
         trackEvent("preview", "preview${file.getFileType().value.capitalizeFirstChar()}")
         val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
-        Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+        Utils.displayFile(mainViewModel, findNavController(), file, fileList, shareLinkUuid = shareLinkUuid)
     }
 
     fun Fragment.openBookmark(file: File) {
@@ -92,7 +101,7 @@ object FilePresenter {
                     fileId = file.id,
                     fileName = file.name,
                     userDrive = UserDrive(),
-                    action = DownloadProgressDialog.DownloadAction.OPEN_BOOKMARK,
+                    action = DownloadAction.OPEN_BOOKMARK,
                 ).toBundle(),
             )
         }

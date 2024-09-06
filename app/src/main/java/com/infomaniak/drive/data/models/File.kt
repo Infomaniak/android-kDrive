@@ -49,6 +49,7 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import io.sentry.Sentry
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import kotlinx.parcelize.WriteWith
@@ -148,6 +149,11 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
+    @IgnoredOnParcel
+    @Ignore
+    @Transient
+    var externalShareLinkUuid: String = ""
+
     val revisedAtInMillis: Long inline get() = revisedAt * 1000
 
     fun initUid() {
@@ -174,17 +180,35 @@ open class File(
         return status?.contains("trash") == true
     }
 
-    fun thumbnail(): String {
-        return if (isTrashed()) ApiRoutes.thumbnailTrashFile(this) else ApiRoutes.thumbnailFile(this)
+    fun thumbnail() = when {
+        externalShareLinkUuid.isNotBlank() -> ApiRoutes.getShareLinkFileThumbnail(driveId, externalShareLinkUuid, file = this)
+        isTrashed() -> ApiRoutes.thumbnailTrashFile(file = this)
+        else -> ApiRoutes.thumbnailFile(file = this)
     }
 
     fun imagePreview(): String {
-        return "${ApiRoutes.imagePreviewFile(this)}&width=2500&height=1500&quality=80"
+        val url = if (externalShareLinkUuid.isNotBlank()) {
+            ApiRoutes.getShareLinkFilePreview(driveId, externalShareLinkUuid, file = this)
+        } else {
+            ApiRoutes.imagePreviewFile(this)
+        }
+
+        return "$url?width=2500&height=1500&quality=80"
     }
 
     fun isPDF() = getFileType() == ExtensionType.PDF
 
-    fun onlyOfficeUrl() = "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
+    fun onlyOfficeUrl() = if (externalShareLinkUuid.isBlank()) {
+        "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
+    } else {
+        ApiRoutes.showOfficeShareLinkFile(driveId, externalShareLinkUuid, file = this)
+    }
+
+    fun downloadUrl() = if (externalShareLinkUuid.isBlank()) {
+        ApiRoutes.downloadFile(file = this)
+    } else {
+        ApiRoutes.downloadShareLinkFile(driveId, externalShareLinkUuid, file = this)
+    }
 
     fun getFileType(): ExtensionType {
         return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {

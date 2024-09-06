@@ -36,6 +36,7 @@ object ApiRoutes {
             "files.dropbox,files.dropbox.capabilities,files.external_import,files.is_favorite," +
             "files.sharelink,files.sorted_name,files.supported_by"
     const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
+    private const val sharedFileWithQuery = "with=capabilities,conversion_capabilities,supported_by"
 
     private const val ACTIONS = "&actions[]=file_create" +
             "&actions[]=file_rename" +
@@ -225,7 +226,7 @@ object ApiRoutes {
 
     fun thumbnailFile(file: File) = "${fileURLV2(file)}/thumbnail?t=${file.lastModifiedAt}"
 
-    fun imagePreviewFile(file: File) = "${fileURLV2(file)}/preview?quality=80&t=${file.lastModifiedAt}"
+    fun imagePreviewFile(file: File) = "${fileURLV2(file)}/preview"
 
     fun downloadFile(file: File) = "${fileURLV2(file)}/download"
 
@@ -252,6 +253,36 @@ object ApiRoutes {
     /** Share link */
     //region Share link
     fun shareLink(file: File) = "${fileURLV2(file)}/link"
+
+    fun getShareLinkInfo(driveId: Int, linkUuid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid/init"
+
+    fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: Int) = "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId"
+
+    fun getShareLinkFileChildren(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
+        val orderQuery = "order_by=${sortType.orderBy}&order=${sortType.order}"
+        return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery"
+    }
+
+    fun getShareLinkFileThumbnail(driveId: Int, linkUuid: String, file: File): String {
+        return "${shareLinkFile(driveId, linkUuid, file)}/thumbnail"
+    }
+
+    fun getShareLinkFilePreview(driveId: Int, linkUuid: String, file: File): String {
+        return "${shareLinkFile(driveId, linkUuid, file)}/preview"
+    }
+
+    fun downloadShareLinkFile(driveId: Int, linkUuid: String, file: File): String {
+        return "${shareLinkFile(driveId, linkUuid, file)}/download"
+    }
+
+    fun showOfficeShareLinkFile(driveId: Int, linkUuid: String, file: File): String {
+        // For now, this call fails because the back hasn't dev the conversion of office files to pdf for mobile
+        return "${SHARE_URL_V1}share/$driveId/$linkUuid/preview/text/${file.id}"
+    }
+
+    private fun shareLinkFile(driveId: Int, linkUuid: String, file: File): String {
+        return "$SHARE_URL_V2$driveId/share/$linkUuid/files/${file.id}"
+    }
     //endregion
 
     /** External import */

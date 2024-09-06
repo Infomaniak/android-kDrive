@@ -23,69 +23,39 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import androidx.transition.TransitionManager
-import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
-import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.MainViewModel.FileResult
-import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
-import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
-import com.infomaniak.drive.views.PreviewHeaderView
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
+class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
 
-    private var _binding: FragmentPreviewSliderBinding? = null
-    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
-    private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: PreviewSliderFragmentArgs by navArgs()
-    private val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
+    override val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
-    private val bottomSheetBehavior: BottomSheetBehavior<View>
-        get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
-
-    private lateinit var drivePermissions: DrivePermissions
-    private lateinit var previewSliderAdapter: PreviewSliderAdapter
-    private lateinit var userDrive: UserDrive
-    private var isOverlayShown = true
-
+    override val isFileShare = false
     override val ownerFragment = this
-    override val currentContext by lazy { requireContext() }
-    override lateinit var currentFile: File
 
-    val previewPDFHandler by lazy {
-        PreviewPDFHandler(
-            context = requireContext(),
-            setPrintVisibility = { _binding?.bottomSheetFileInfos?.setPrintVisibility(it) },
-        )
-    }
-
-    private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+    override val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data -> onSelectFolderResult(data) }
     }
 
@@ -104,7 +74,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
             previewSliderViewModel.currentPreview = currentFile
             previewSliderViewModel.userDrive = userDrive
-
         } else {
             previewSliderViewModel.currentPreview?.let { currentFile = it }
             userDrive = previewSliderViewModel.userDrive
@@ -114,91 +83,10 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setBackActionHandlers()
-
-        drivePermissions = DrivePermissions().apply {
-            registerPermissions(this@PreviewSliderFragment) { authorized -> if (authorized) downloadFileClicked() }
-        }
-
-        bottomSheetFileInfos.apply {
-            init(
-                ownerFragment = this@PreviewSliderFragment,
-                mainViewModel = mainViewModel,
-                onItemClickListener = this@PreviewSliderFragment,
-                selectFolderResultLauncher = selectFolderResultLauncher,
-                isSharedWithMe = userDrive.sharedWithMe,
-            )
-            updateCurrentFile(currentFile)
-            setOnTouchListener { _, _ -> true }
-            setPrintVisibility(isGone = !currentFile.isPDF())
-        }
-
-        previewSliderAdapter = PreviewSliderAdapter(childFragmentManager, lifecycle)
-
-        viewPager.apply {
-            adapter = previewSliderAdapter
-            offscreenPageLimit = 1
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
-
-                    currentFile = previewSliderAdapter.getFile(position)
-                    with(header) {
-                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
-                        toggleOpenWithVisibility(isVisible = !currentFile.isOnlyOfficePreview())
-                    }
-                    bottomSheetFileInfos.openWith.isVisible = true
-                    lifecycleScope.launchWhenResumed {
-                        withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
-                    }
-
-                    bottomSheetFileInfos.setPrintVisibility(isGone = !currentFile.isPDF())
-                }
-            })
-        }
-
-        previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
-            if (!currentFile.isOnlyOfficePreview()) binding.header.toggleOpenWithVisibility(isVisible = !isDownloading)
-            bottomSheetFileInfos.openWith.isGone = isDownloading
-        }
-
-        binding.header.setup(
-            onBackClicked = { findNavController().popBackStack() },
-            onOpenWithClicked = { openWith() },
-            onEditClicked = { openOnlyOfficeDocument(currentFile, mainViewModel.hasNetwork) },
-        )
-
-        mainViewModel.currentPreviewFileList.let { files ->
-            previewSliderAdapter.setFiles(ArrayList(files.values))
-            val position = previewSliderAdapter.getPosition(currentFile)
-            runCatching {
-                viewPager.setCurrentItem(position, false)
-            }.onFailure {
-                Sentry.withScope { scope ->
-                    scope.setExtra("currentFile", "id: ${currentFile.id}")
-                    scope.setExtra("files.values", files.values.joinToString { "id: ${it.id}" })
-                    Sentry.captureException(it)
-                }
-                currentFile = files.values.first()
-                viewPager.setCurrentItem(0, false)
-            }
-        }
-
         requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
-        binding.header.setupWindowInsetsListener(
-            rootView = root,
-            bottomSheetView = binding.bottomSheetFileInfos,
-        ) {
-            binding.pdfContainer.setMargins(right = it?.right ?: 0)
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        requireActivity().setupStatusBarForPreview()
     }
 
     override fun onResume() {
@@ -212,58 +100,11 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (noPreviewList()) return
-        previewSliderViewModel.currentPreview = currentFile
-        _binding?.bottomSheetFileInfos?.removeOfflineObservations(this)
-    }
-
-    override fun onStop() {
-        clearEdgeToEdge()
-        super.onStop()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
-        _binding = null
-    }
-
-    override fun onDestroy() {
-        // Reset current preview file list
-        if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
-            mainViewModel.currentPreviewFileList = LinkedHashMap()
-        }
-
-        super.onDestroy()
-    }
-
-    private fun clearEdgeToEdge() = with(requireActivity()) {
-        toggleSystemBar(true)
-        window.toggleEdgeToEdge(false)
-    }
-
-    private fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
-
-    private fun setBackActionHandlers() {
-        getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile, userDrive) }
-
-        getBackNavigationResult<Int>(DownloadAction.PRINT_PDF.value) {
-            requireContext().printPdf(file = currentFile.getCacheFile(requireContext()))
-        }
+    override fun setBackActionHandlers() {
+        super.setBackActionHandlers()
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             _binding?.bottomSheetFileInfos?.refreshBottomSheetUi(currentFile)
-        }
-    }
-
-    fun toggleFullscreen() = _binding?.let { binding ->
-        binding.previewSliderParent.apply {
-            isOverlayShown = !isOverlayShown
-            binding.header.toggleVisibility(isOverlayShown)
-            toggleBottomSheet(shouldShow = isOverlayShown)
-            requireActivity().toggleSystemBar(show = isOverlayShown)
         }
     }
 
@@ -287,7 +128,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun sharePublicLink(onActionFinished: () -> Unit) {
-        super.sharePublicLink(onActionFinished)
+        super<FileInfoActionsView.OnItemClickListener>.sharePublicLink(onActionFinished)
         binding.bottomSheetFileInfos.createPublicShareLink(
             onSuccess = { shareLinkUrl ->
                 context?.shareText(shareLinkUrl)
@@ -303,7 +144,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
     }
 
     override fun addFavoritesClicked() {
-        super.addFavoritesClicked()
+        super<FileInfoActionsView.OnItemClickListener>.addFavoritesClicked()
         currentFile.apply {
             val observer: Observer<FileResult> = Observer { fileRequest ->
                 if (fileRequest.isSuccess) {
@@ -320,15 +161,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             } else {
                 mainViewModel.addFileToFavorites(this).observe(viewLifecycleOwner, observer)
             }
-        }
-    }
-
-    private fun toggleBottomSheet(shouldShow: Boolean) {
-        binding.bottomSheetFileInfos.scrollToTop()
-        bottomSheetBehavior.state = if (shouldShow) {
-            BottomSheetBehavior.STATE_COLLAPSED
-        } else {
-            BottomSheetBehavior.STATE_HIDDEN
         }
     }
 
@@ -356,33 +188,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             } else {
                 fileRequest.errorResId?.let { showSnackbar(it) }
             }
-        }
-    }
-
-    override fun printClicked() {
-        super.printClicked()
-        previewPDFHandler.printClicked(
-            context = requireContext(),
-            onDefaultCase = {
-                requireContext().printPdf {
-                    safeNavigate(
-                        PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
-                            fileId = currentFile.id,
-                            fileName = currentFile.name,
-                            userDrive = userDrive,
-                            action = DownloadAction.PRINT_PDF,
-                        ),
-                    )
-                }
-            },
-            onError = { showSnackbar(R.string.errorFileNotFound) },
-        )
-    }
-
-    override fun downloadFileClicked() {
-        super.downloadFileClicked()
-        binding.bottomSheetFileInfos.downloadFile(drivePermissions) {
-            toggleBottomSheet(shouldShow = true)
         }
     }
 
@@ -491,20 +296,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
     companion object {
 
-        private fun Fragment.getHeader(): PreviewHeaderView? {
-            return (parentFragment as? PreviewSliderFragment)?._binding?.header
-                ?: (activity as? PreviewPDFActivity)?.binding?.header
-        }
-
-        fun Fragment.toggleFullscreen() {
-            (parentFragment as? PreviewSliderFragment)?.toggleFullscreen()
-            (activity as? PreviewPDFActivity)?.toggleFullscreen()
-        }
-
-        fun Fragment.openWithClicked() {
-            (parentFragment as? PreviewSliderFragment)?.openWith()
-        }
-
         //region PDF Preview
         fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
             getHeader()?.setPageNumberVisibility(isVisible)
@@ -512,11 +303,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
         fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
             getHeader()?.setPageNumberValue(currentPage, totalPage)
-        }
-
-        fun Fragment.getPreviewPDFHandler(): PreviewPDFHandler {
-            return (parentFragment as? PreviewSliderFragment)?.previewPDFHandler
-                ?: (activity as? PreviewPDFActivity)!!.previewPDFHandler
         }
         //endregion
     }

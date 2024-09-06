@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2024 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,9 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.UserDrive
 
-class PreviewSliderViewModel : ViewModel() {
-    val pdfIsDownloading = MutableLiveData<Boolean>()
-    var currentPreview: File? = null
-    var userDrive = UserDrive()
-    var shareLinkUuid = ""
+class PreviewViewModel : ViewModel() {
+    var currentFile: File? = null
 }

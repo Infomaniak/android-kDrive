@@ -22,6 +22,7 @@ import com.google.gson.JsonElement
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.models.file.FileLastActivityBody
@@ -33,6 +34,7 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.FileId
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.*
 import com.infomaniak.lib.core.api.ApiController.callApi
@@ -69,12 +71,12 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFavoriteFiles(driveId: Int, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+    fun getFavoriteFiles(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
         val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET)
     }
 
-    fun getSharedWithMeFiles(order: File.SortType, cursor: String?): CursorApiResponse<List<File>> {
+    fun getSharedWithMeFiles(order: SortType, cursor: String?): CursorApiResponse<List<File>> {
         return callApiWithCursor(
             url = "${ApiRoutes.getSharedWithMeFiles(order)}&${loadCursor(cursor)}",
             method = GET
@@ -90,7 +92,7 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         parentId: Int,
         cursor: String? = null,
-        order: File.SortType
+        order: SortType
     ): CursorApiResponse<List<File>> {
         val url = "${ApiRoutes.getFolderFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
@@ -101,7 +103,7 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         parentId: Int,
         cursor: String? = null,
-        order: File.SortType
+        order: SortType
     ): CursorApiResponse<ListingFiles> {
         val url = when (cursor) {
             null -> ApiRoutes.getListingFiles(driveId, parentId, order)
@@ -144,7 +146,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun getLastGallery(driveId: Int, cursor: String?): CursorApiResponse<ArrayList<File>> {
         val types = "&types[]=${ExtensionType.IMAGE.value}&types[]=${ExtensionType.VIDEO.value}"
-        val url = "${ApiRoutes.searchFiles(driveId, File.SortType.RECENT)}$types&${loadCursor(cursor)}"
+        val url = "${ApiRoutes.searchFiles(driveId, SortType.RECENT)}$types&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET)
     }
 
@@ -209,7 +211,7 @@ object ApiRepository : ApiRepositoryCore() {
     fun searchFiles(
         driveId: Int,
         query: String? = null,
-        sortType: File.SortType,
+        sortType: SortType,
         cursor: String?,
         date: Pair<String, String>? = null,
         type: String? = null,
@@ -300,6 +302,25 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun deleteFileShareLink(file: File): ApiResponse<Boolean> {
         return callApi(ApiRoutes.shareLink(file), DELETE)
+    }
+
+    fun getShareLinkInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
+        return callApi(ApiRoutes.getShareLinkInfo(driveId, linkUuid), GET)
+    }
+
+    fun getShareLinkFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
+        return callApi(ApiRoutes.getShareLinkFile(driveId, linkUuid, fileId), GET)
+    }
+
+    fun getShareLinkFileChildren(
+        driveId: Int,
+        linkUuid: String,
+        folderId: FileId,
+        sortType: SortType,
+        cursor: String?,
+    ): CursorApiResponse<List<File>> {
+        val url = ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
+        return callApiWithCursor(url, GET)
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
@@ -396,7 +417,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.convertFile(file), POST)
     }
 
-    fun getDriveTrash(driveId: Int, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+    fun getDriveTrash(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
         return callApiWithCursor("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
     }
 
@@ -404,7 +425,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.trashedFile(file), GET)
     }
 
-    fun getTrashedFolderFiles(file: File, order: File.SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+    fun getTrashedFolderFiles(file: File, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
         return callApiWithCursor("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
     }
 
@@ -418,7 +439,7 @@ object ApiRepository : ApiRepositoryCore() {
     fun getMySharedFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
-        sortType: File.SortType,
+        sortType: SortType,
         cursor: String?
     ): CursorApiResponse<ArrayList<File>> {
         return callApiWithCursor(

@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import com.google.gson.JsonParser
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.lib.core.models.ApiResponse
@@ -38,7 +37,7 @@ object PreviewPDFUtils {
         context: Context,
         file: File,
         userDrive: UserDrive,
-        onProgress: (progress: Int) -> Unit
+        onProgress: (progress: Int) -> Unit,
     ): ApiResponse<IOFile> {
         return runCatching {
             val outputFile = when {
@@ -70,16 +69,13 @@ object PreviewPDFUtils {
         }
     }
 
-    private fun downloadFile(
-        externalOutputFile: IOFile,
-        fileModel: File,
-        onProgress: (progress: Int) -> Unit
-    ) {
+    private fun downloadFile(externalOutputFile: IOFile, fileModel: File, onProgress: (progress: Int) -> Unit) {
         if (externalOutputFile.exists()) externalOutputFile.delete()
 
-        val downLoadUrl = ApiRoutes.downloadFile(fileModel) + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
-        val request = Request.Builder().url(downLoadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
+        val downloadUrl = fileModel.downloadUrl() + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
+        val request = Request.Builder().url(downloadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
         val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
+
         val response = HttpClient.okHttpClient.newBuilder()
             .addNetworkInterceptor(downloadProgressInterceptor)
             .build()

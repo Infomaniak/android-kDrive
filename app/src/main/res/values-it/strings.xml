@@ -100,6 +100,7 @@
     <string name="buttonAdd">Aggiungi</string>
     <string name="buttonAddComment">Aggiungi un commento</string>
     <string name="buttonAddFavorites">Aggiungi ai preferiti</string>
+    <string name="buttonAddToKDrive">Aggiungi al mio kDrive</string>
     <string name="buttonAddUser">Aggiungi un utente</string>
     <string name="buttonApplyFilters">Applica i filtri</string>
     <string name="buttonAuthorize">Autorizza</string>

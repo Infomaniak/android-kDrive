@@ -180,7 +180,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     private fun popBackIfNeeded(url: String) {
-        val popBackNeeded = !url.contains(Regex("^https.*/app/office/\\d+/\\d+"))
+        val popBackNeeded = !url.contains(Regex("^https.*/app/(office/\\d+|share/\\d+/[a-z0-9\\-]+/preview/text)/\\d+"))
         if (popBackNeeded) finish()
     }
 

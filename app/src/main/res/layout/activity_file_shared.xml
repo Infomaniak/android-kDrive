@@ -15,28 +15,15 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.fragment.app.FragmentContainerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/view_pdf"
-    app:startDestination="@id/previewPDFFragment">
-
-    <activity
-        android:id="@+id/previewPDFActivity"
-        android:name="com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity"
-        tools:layout="@layout/activity_preview_pdf"/>
-
-    <fragment
-        android:id="@+id/previewPDFFragment"
-        android:name="com.infomaniak.drive.ui.fileList.preview.PreviewPDFFragment"
-        tools:layout="@layout/fragment_preview_pdf">
-
-        <argument
-            android:name="fileUri"
-            app:argType="android.net.Uri"
-            app:nullable="true"
-            android:defaultValue="@null"/>
-
-    </fragment>
-
-</navigation>
+    android:id="@+id/hostFragment"
+    android:name="androidx.navigation.fragment.NavHostFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:defaultNavHost="true"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:navGraph="@navigation/file_shared_navigation" />
