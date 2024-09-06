@@ -54,7 +54,6 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
-import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SentryLog
@@ -286,10 +285,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         return true
-    }
-
-    fun downloadFile(drivePermissions: DrivePermissions, file: File? = null, onSuccess: () -> Unit) {
-        context.downloadFile(drivePermissions, file = file ?: currentFile, onSuccess)
     }
 
     fun createPublicShareLink(
