@@ -70,6 +70,7 @@ import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
@@ -517,7 +518,8 @@ class MainActivity : BaseActivity() {
             //  therefore can't find it in Realm
             if (navigationArgs?.shortcutId == Shortcuts.UPLOAD.id &&
                 mustOpenUploadShortcut &&
-                parentFolder?.getVisibilityType() == File.VisibilityType.IS_PRIVATE
+                // We only want to allow upload at the private folder's root
+                parentFolder?.getVisibilityType() == VisibilityType.IS_PRIVATE
             ) {
                 mainViewModel.mustOpenUploadShortcut = false
                 uploadFilesHelper?.apply {
