@@ -45,7 +45,7 @@ import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.extensions.keepSplashscreenVisibleWhileLoading
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.utils.SingleLiveEvent
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -61,8 +61,6 @@ class LaunchActivity : AppCompatActivity() {
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
     private var fileSharedActivityExtras: Bundle? = null
-
-    private val canFinishActivity: SingleLiveEvent<Boolean> = SingleLiveEvent()
 
     private var isHelpShortcutPressed = false
 
@@ -82,9 +80,12 @@ class LaunchActivity : AppCompatActivity() {
             handleNotificationDestinationIntent()
             handleShortcuts()
             handleDeeplink()
-        }
+            startApp()
 
-        observeToFinishActivity()
+            // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
+            // so that even when we return, the activity will still be closed.
+            finish()
+        }
     }
 
     override fun onPause() {
@@ -93,19 +94,6 @@ class LaunchActivity : AppCompatActivity() {
             overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, android.R.anim.fade_in, android.R.anim.fade_out)
         } else {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-        }
-    }
-
-    private fun observeToFinishActivity() {
-        canFinishActivity.observe(this@LaunchActivity) { canFinish ->
-            if (canFinish) {
-                lifecycleScope.launch {
-                    startApp()
-                    // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
-                    // so that even when we return, the activity will still be closed.
-                    finish()
-                }
-            }
         }
     }
 
@@ -175,46 +163,38 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDeeplink() = lifecycleScope.launch(Dispatchers.IO) {
-        intent.data?.let { uri -> uri.path?.let { path -> processDeepLink(path) } }
-        canFinishActivity.postValue(true)
+    private suspend fun handleDeeplink() = withContext(Dispatchers.IO) {
+        intent.data?.path?.let { deeplink ->
+            if (deeplink.contains("/app/share/")) processFileShare(deeplink) else processInternalLink(deeplink)
+            SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
+        }
     }
 
-    private fun processDeepLink(path: String) {
-        if (path.contains("/app/share/")) {
-            Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
-                val (driveId, fileSharedLinkUuid) = match.destructured
+    private fun processFileShare(path: String) {
+        Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
+            val (driveId, fileSharedLinkUuid) = match.destructured
 
-                val apiResponse = ApiRepository.getShareLinkInfo(driveId.toInt(), fileSharedLinkUuid)
-                when (apiResponse.result) {
-                    ApiResponseStatus.SUCCESS -> {
-                        val shareLink = apiResponse.data!!
-                        if (apiResponse.data?.validUntil?.before(Date()) == true) {
-                            Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
-                        }
-                        fileSharedActivityExtras = FileSharedActivityArgs(
-                            driveId = driveId.toInt(),
-                            fileSharedLinkUuid = fileSharedLinkUuid,
-                            fileId = shareLink.fileId ?: -1,
-                        ).toBundle()
+            val apiResponse = ApiRepository.getShareLinkInfo(driveId.toInt(), fileSharedLinkUuid)
+            when (apiResponse.result) {
+                ApiResponseStatus.SUCCESS -> {
+                    val shareLink = apiResponse.data!!
+                    if (apiResponse.data?.validUntil?.before(Date()) == true) {
+                        Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
+                    }
+                    fileSharedActivityExtras = FileSharedActivityArgs(
+                        driveId = driveId.toInt(),
+                        fileSharedLinkUuid = fileSharedLinkUuid,
+                        fileId = shareLink.fileId ?: -1,
+                    ).toBundle()
 
-                        trackDeepLink("external")
-                    }
-                    ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
-                    else -> {
-                        Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
-                    }
+                    trackDeepLink("external")
+                }
+                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
+                else -> {
+                    Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
                 }
             }
-        } else {
-            processInternalLink(path)
         }
-
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = UploadWorker.BREADCRUMB_TAG
-            message = "DeepLink: $path"
-            level = SentryLevel.INFO
-        })
     }
 
     private fun processInternalLink(path: String) {
