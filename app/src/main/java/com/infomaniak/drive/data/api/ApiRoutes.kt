@@ -276,6 +276,7 @@ object ApiRoutes {
     }
 
     fun showOfficeShareLinkFile(driveId: Int, linkUuid: String, file: File): String {
+        // For now, this call fails because the back hasn't dev the conversion of office files to pdf for mobile
         return "${SHARE_URL_V1}share/$driveId/$linkUuid/preview/text/${file.id}"
     }
 
