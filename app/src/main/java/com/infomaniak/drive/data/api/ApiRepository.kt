@@ -315,11 +315,11 @@ object ApiRepository : ApiRepositoryCore() {
     fun getShareLinkFileChildren(
         driveId: Int,
         linkUuid: String,
-        fileId: FileId,
+        folderId: FileId,
         sortType: SortType,
         cursor: String?,
     ): CursorApiResponse<List<File>> {
-        val url = ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, fileId, sortType) + "&${loadCursor(cursor)}"
+        val url = ApiRoutes.getShareLinkFileChildren(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET)
     }
 
