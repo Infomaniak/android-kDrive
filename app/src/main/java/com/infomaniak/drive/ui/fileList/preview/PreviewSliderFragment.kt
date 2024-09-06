@@ -42,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.FileInfoActionsView
+import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -207,9 +208,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
     override fun downloadFileClicked() {
         super<BasePreviewSliderFragment>.downloadFileClicked()
-        binding.bottomSheetFileInfos.downloadFile(drivePermissions) {
-            toggleBottomSheet(shouldShow = true)
-        }
+        currentContext.downloadFile(drivePermissions, currentFile) { toggleBottomSheet(shouldShow = true) }
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
