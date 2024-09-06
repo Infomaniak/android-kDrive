@@ -50,6 +50,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.downloadAsOfflineFiles
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
@@ -174,7 +175,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         val (fileIds, exceptFileIds, onlyFolders, onlyFavorite, onlyOffline, isAllSelected) = multiSelectManager.getMenuNavArgs()
         return MultiSelectActionsBottomSheetDialogArgs(
             userDrive = userDrive,
-            parentId = mainViewModel.currentFolder.value?.id!!,
+            parentId = if (userDrive?.sharedWithMe == true) OTHER_ROOT_ID else mainViewModel.currentFolder.value?.id!!,
             fileIds = if (isAllSelected) intArrayOf() else fileIds,
             exceptFileIds = if (isAllSelected) exceptFileIds else intArrayOf(),
             onlyFolders = onlyFolders,
