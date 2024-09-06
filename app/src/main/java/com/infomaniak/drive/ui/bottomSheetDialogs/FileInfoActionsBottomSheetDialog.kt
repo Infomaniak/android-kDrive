@@ -50,6 +50,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
+import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -151,7 +152,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToFileDetailsFragment(
                     fileId = id,
-                    userDrive = navigationArgs.userDrive
+                    userDrive = navigationArgs.userDrive,
                 )
             )
         }
@@ -160,7 +161,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun fileRightsClicked() {
         safeNavigate(
             FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToFileShareDetailsFragment(
-                fileId = currentFile.id
+                fileId = currentFile.id,
             )
         )
     }
@@ -175,7 +176,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToManageDropboxFragment(
                     fileId = currentFile.id,
-                    fileName = currentFile.name
+                    fileName = currentFile.name,
                 )
             )
         } else {
@@ -183,7 +184,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 safeNavigate(
                     FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToConvertToDropBoxFragment(
                         fileId = currentFile.id,
-                        fileName = currentFile.name
+                        fileName = currentFile.name,
                     )
                 )
             } else safeNavigate(R.id.dropBoxBottomSheetDialog)
@@ -207,9 +208,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun downloadFileClicked() {
         super.downloadFileClicked()
-        binding.fileInfoActionsView.downloadFile(drivePermissions) {
-            findNavController().popBackStack()
-        }
+        currentContext.downloadFile(drivePermissions, currentFile) { findNavController().popBackStack() }
     }
 
     override fun manageCategoriesClicked(fileId: Int) {
