@@ -99,7 +99,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
         val apiResponse = ApiRepository.getShareLinkFileChildren(
             driveId = driveId,
             linkUuid = fileSharedLinkUuid,
-            fileId = folderFilesProviderArgs.folderId,
+            folderId = folderFilesProviderArgs.folderId,
             sortType = folderFilesProviderArgs.order,
             cursor = currentCursor,
         ).let {
