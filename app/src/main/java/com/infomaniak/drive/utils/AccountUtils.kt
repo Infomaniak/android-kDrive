@@ -193,7 +193,7 @@ object AccountUtils : CredentialManager() {
                 HttpClient.okHttpClientNoTokenInterceptor,
                 user.apiToken,
                 onError = {
-                    SentryLog.e("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
+                    SentryLog.i("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
                 }
             )
         }
