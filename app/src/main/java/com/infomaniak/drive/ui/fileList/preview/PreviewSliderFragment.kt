@@ -89,11 +89,6 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
     }
 
-    override fun onStart() {
-        super.onStart()
-        requireActivity().setupStatusBarForPreview()
-    }
-
     override fun onResume() {
         super.onResume()
 

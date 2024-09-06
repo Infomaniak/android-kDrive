@@ -26,7 +26,6 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 
-
 @SuppressLint("RestrictedApi")
 fun NavDestination.addSentryBreadcrumb() {
     Sentry.addBreadcrumb(Breadcrumb().apply {
