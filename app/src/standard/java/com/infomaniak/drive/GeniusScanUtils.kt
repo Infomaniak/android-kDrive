@@ -82,8 +82,7 @@ object GeniusScanUtils : IGeniusScanUtils {
         true
     } catch (licenseException: LicenseException) {
         licenseException.printStackTrace()
-        SentryLog.e("GeniusScanSDK", "The license is expired or invalid")
-        Sentry.captureException(licenseException)
+        SentryLog.e("GeniusScanSDK", "The license is expired or invalid", throwable = licenseException)
         false
     }
 
