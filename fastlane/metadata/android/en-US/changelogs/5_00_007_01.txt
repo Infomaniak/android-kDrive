@@ -1,0 +1,4 @@
+- Fix external imports not being displayed
+- Fix a crash if the network change when leaving a screen
+- Fix a crash when opening the multi-selection for the 1st time
+- Fix issue with the upload shortcut

@@ -1,0 +1,4 @@
+- Correction des importations externes qui ne s'affichaient pas
+- Correction d'un crash si le réseau change en quittant un écran
+- Correction d'un crash lors de l'ouverture de la multi-sélection pour la première fois
+- Correction d'un problème avec le raccourci de téléversement
