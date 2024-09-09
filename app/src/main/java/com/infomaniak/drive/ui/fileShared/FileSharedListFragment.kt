@@ -29,6 +29,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
@@ -57,21 +58,7 @@ class FileSharedListFragment : FileListFragment() {
 
     private var drivePermissions: DrivePermissions? = null
     private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { data ->
-            val destinationDriveId = data?.getIntExtra(DESTINATION_DRIVE_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
-            val destinationFolderId = data?.getIntExtra(DESTINATION_FOLDER_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
-
-            if (data == null || destinationDriveId == DEFAULT_ID || destinationFolderId == DEFAULT_ID) {
-                showSnackbar(RCore.string.anErrorHasOccurred)
-            } else {
-                fileSharedViewModel.importFilesToDrive(
-                    destinationDriveId = destinationDriveId,
-                    destinationFolderId = destinationFolderId,
-                    fileIds = multiSelectManager.selectedItemsIds.toList(),
-                    exceptedFileIds = multiSelectManager.exceptedItemsIds,
-                )
-            }
-        }
+        it.whenResultIsOk(::onDriveAndFolderSelected)
     }
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
@@ -119,27 +106,11 @@ class FileSharedListFragment : FileListFragment() {
 
         (requireActivity() as? FileSharedActivity)?.let { parentActivity ->
             parentActivity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
-
-            parentActivity.getMainButton().setOnClickListener {
-                if (AccountUtils.currentDriveId == -1) {
-                    showSnackbar(title = "TODO : Show bottomsheet to get app", anchor = parentActivity.getMainButton())
-                } else {
-                    Intent(parentActivity, SaveExternalFilesActivity::class.java).apply {
-                        action = Intent.ACTION_SEND
-                        putExtras(
-                            SaveExternalFilesActivityArgs(
-                                userId = AccountUtils.currentUserId,
-                                driveId = AccountUtils.currentDriveId,
-                                isPublicShare = true,
-                            ).toBundle()
-                        ).also(selectDriveAndFolderResultLauncher::launch)
-                    }
-                }
-            }
-
-            observeRootFile()
-            observeFiles()
+            setMainButton(parentActivity.getMainButton())
         }
+
+        observeRootFile()
+        observeFiles()
     }
 
     private fun populateFileList(files: List<File>, shouldRefreshFiles: Boolean = true) {
@@ -194,6 +165,41 @@ class FileSharedListFragment : FileListFragment() {
     private fun downloadAllFiles() {
         fileSharedViewModel.rootSharedFile.value?.let { file ->
             drivePermissions?.let { permissions -> requireContext().downloadFile(permissions, file) }
+        }
+    }
+
+    private fun onDriveAndFolderSelected(data: Intent?) {
+        val destinationDriveId = data?.getIntExtra(DESTINATION_DRIVE_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
+        val destinationFolderId = data?.getIntExtra(DESTINATION_FOLDER_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
+
+        if (data == null || destinationDriveId == DEFAULT_ID || destinationFolderId == DEFAULT_ID) {
+            showSnackbar(RCore.string.anErrorHasOccurred)
+        } else {
+            fileSharedViewModel.importFilesToDrive(
+                destinationDriveId = destinationDriveId,
+                destinationFolderId = destinationFolderId,
+                fileIds = multiSelectManager.selectedItemsIds.toList(),
+                exceptedFileIds = multiSelectManager.exceptedItemsIds,
+            )
+        }
+    }
+
+    private fun setMainButton(importButton: MaterialButton) {
+        importButton.setOnClickListener {
+            if (AccountUtils.currentDriveId == -1) {
+                showSnackbar(title = "TODO : Show bottomsheet to get app", anchor = importButton)
+            } else {
+                Intent(requireActivity(), SaveExternalFilesActivity::class.java).apply {
+                    action = Intent.ACTION_SEND
+                    putExtras(
+                        SaveExternalFilesActivityArgs(
+                            userId = AccountUtils.currentUserId,
+                            driveId = AccountUtils.currentDriveId,
+                            isPublicShare = true,
+                        ).toBundle()
+                    ).also(selectDriveAndFolderResultLauncher::launch)
+                }
+            }
         }
     }
 
