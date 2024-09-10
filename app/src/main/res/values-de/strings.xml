@@ -553,6 +553,8 @@
     <string name="previewNoPreview">Es scheint, als ob diese Datei keine Vorschau hat.</string>
     <string name="previewPdfPages">%1$d von %2$d</string>
     <string name="previewVideoSourceError">Videodatei wird vom Videoplayer nicht unterstützt</string>
+    <string name="publicShareOutdatedLinkDescription">Der Link wurde deaktiviert oder ist abgelaufen.\nUm auf die Dateien zuzugreifen, senden Sie eine Nachricht an den Nutzer, der den Link für Sie freigegeben hat, damit er ihn wieder aktiviert.</string>
+    <string name="publicShareOutdatedLinkTitle">Die Dateien sind nicht mehr verfügbar</string>
     <string name="publicSharePasswordNeededDescription">Bitte geben Sie das Passwort ein, das Sie erhalten haben, um auf den Inhalt zuzugreifen.</string>
     <string name="publicSharePasswordNeededTitle">Sicherer Inhalt</string>
     <string name="publicSharePasswordNotSupportedDescription">Passwortgeschützte Links sind in der mobilen Anwendung noch nicht verfügbar.</string>
