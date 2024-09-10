@@ -39,16 +39,27 @@
             android:name="isPasswordNeeded"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="isExpired"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </activity>
 
     <fragment
         android:id="@+id/publicSharePasswordFragment"
         android:name="com.infomaniak.drive.ui.publicShare.PublicSharePasswordFragment"
+        android:label="PublicSharePasswordFragment"
         tools:layout="@layout/fragment_public_share_password">
         <action
             android:id="@+id/action_publicSharePasswordFragment_to_publicShareListFragment"
             app:destination="@id/publicShareListFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/publicShareOutdatedFragment"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicShareOutdatedFragment"
+        android:label="PublicShareOutdatedFragment"
+        tools:layout="@layout/fragment_public_share_outdated_link" />
 
     <fragment
         android:id="@+id/publicShareListFragment"
@@ -81,6 +92,11 @@
         <action
             android:id="@+id/action_publicShareListFragment_to_publicSharePasswordFragment"
             app:destination="@id/publicSharePasswordFragment"
+            app:popUpTo="@id/publicShareListFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicShareOutdatedFragment"
+            app:destination="@id/publicShareOutdatedFragment"
             app:popUpTo="@id/publicShareListFragment"
             app:popUpToInclusive="true" />
     </fragment>
