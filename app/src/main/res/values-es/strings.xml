@@ -142,6 +142,7 @@
     <string name="buttonNoDriveAnotherUser">Utilizar otro perfil Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Probar gratuitamente</string>
     <string name="buttonOpenDocument">Abrir el documento</string>
+    <string name="buttonOpenInBrowser">Abrir en el navegador</string>
     <string name="buttonOpenReadOnly">Abrir en modo de solo lectura</string>
     <string name="buttonPlayerFfwd">Avanzar unos segundos</string>
     <string name="buttonPlayerNext">Siguiente</string>
@@ -554,6 +555,7 @@
     <string name="previewVideoSourceError">El archivo de vídeo no es compatible con el lector de vídeo</string>
     <string name="publicSharePasswordNeededDescription">Introduzca la contraseña que se le ha facilitado para acceder al contenido.</string>
     <string name="publicSharePasswordNeededTitle">Contenido seguro</string>
+    <string name="publicSharePasswordNotSupportedDescription">Los enlaces protegidos por contraseña aún no están disponibles en la aplicación móvil.</string>
     <string name="publicSharedLinkTitle">Enlace de uso compartido público</string>
     <string name="recentActivityMeTitle">Por mí</string>
     <string name="recentActivityMyTeam">Por mi equipo</string>
