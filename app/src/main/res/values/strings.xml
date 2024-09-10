@@ -564,6 +564,8 @@
     <string name="previewNoPreview">This file appears to have no preview.</string>
     <string name="previewPdfPages">%1$d out of %2$d</string>
     <string name="previewVideoSourceError">Video file not supported by the video player</string>
+    <string name="publicShareOutdatedLinkDescription">The link has been deactivated or has expired.\nTo access its files, send a message to the user who shared the link with you so that they can reactivate it.</string>
+    <string name="publicShareOutdatedLinkTitle">The files are no longer available</string>
     <string name="publicSharePasswordNeededDescription">Please enter the password provided to access the content.</string>
     <string name="publicSharePasswordNeededTitle">Protected content</string>
     <string name="publicSharePasswordNotSupportedDescription">Password-protected links are not yet available on the mobile application.</string>
