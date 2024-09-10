@@ -17,6 +17,10 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +28,7 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
@@ -31,6 +36,7 @@ import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.R as RCore
 
 class PublicSharePasswordFragment : Fragment() {
 
@@ -44,10 +50,34 @@ class PublicSharePasswordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupValidationButton()
+        // TODO: Remove this and call setupValidationButton instead
+        //  Also change the layout (description, button's title, input visibility)
+        passwordValidateButton.setOnClickListener { requireContext().openDeepLinkInBrowser(getPublicShareUrl()) }
 
         publicSharePasswordEditText.addTextChangedListener { publicSharePasswordLayout.error = null }
     }
+
+    //region Hack TODO: Remove this when the back will support bearer token
+    private fun getPublicShareUrl(): String {
+        return "${BuildConfig.SHARE_URL_V1}share/${publicShareViewModel.driveId}/${publicShareViewModel.publicShareUuid}"
+    }
+
+    private fun Context.openDeepLinkInBrowser(url: String) = runCatching {
+        Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER).apply {
+            setData(Uri.parse(url))
+            flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+        }.also(::startActivity)
+        requireActivity().finishAndRemoveTask()
+    }.onFailure { exception ->
+        val errorMessage = if (exception is ActivityNotFoundException) {
+            RCore.string.browserNotFound
+        } else {
+            RCore.string.anErrorHasOccurred
+        }
+
+        showToast(errorMessage)
+    }
+    //endregion
 
     private fun setupValidationButton() = with(binding.passwordValidateButton) {
         initProgress(viewLifecycleOwner)
