@@ -554,6 +554,8 @@
     <string name="previewNoPreview">Sembra che il file non abbia anteprima.</string>
     <string name="previewPdfPages">%1$d di %2$d</string>
     <string name="previewVideoSourceError">File video non supportato dal lettore</string>
+    <string name="publicShareOutdatedLinkDescription">Il link è stato disattivato o è scaduto.\nPer accedere ai file, inviate un messaggio all’utente che ha condiviso il link in modo che possa riattivarlo.</string>
+    <string name="publicShareOutdatedLinkTitle">I file non sono più disponibili</string>
     <string name="publicSharePasswordNeededDescription">Inserite la password che vi è stata fornita per accedere al contenuto.</string>
     <string name="publicSharePasswordNeededTitle">Contenuto sicuro</string>
     <string name="publicSharePasswordNotSupportedDescription">I link protetti da password non sono ancora disponibili nell’applicazione mobile.</string>
