@@ -153,6 +153,7 @@
     <string name="buttonNoDriveAnotherUser">Use a different Infomaniak profile</string>
     <string name="buttonNoDriveFreeTest">Free trial</string>
     <string name="buttonOpenDocument">Open document</string>
+    <string name="buttonOpenInBrowser">Open in browser</string>
     <string name="buttonOpenReadOnly">Open in read-only mode</string>
     <string name="buttonPlayerFfwd">Forward a few seconds</string>
     <string name="buttonPlayerNext">Next</string>
@@ -564,6 +565,7 @@
     <string name="previewVideoSourceError">Video file not supported by the video player</string>
     <string name="publicSharePasswordNeededDescription">Please enter the password provided to access the content.</string>
     <string name="publicSharePasswordNeededTitle">Protected content</string>
+    <string name="publicSharePasswordNotSupportedDescription">Password-protected links are not yet available on the mobile application.</string>
     <string name="publicSharedLinkTitle">Public sharing link</string>
     <string name="recentActivityMeTitle">By me</string>
     <string name="recentActivityMyTeam">By my team</string>
