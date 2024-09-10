@@ -211,6 +211,14 @@ class LaunchActivity : AppCompatActivity() {
                 ).toBundle()
                 trackDeepLink("publicShareWithPassword")
             }
+            error?.code == ErrorCode.PUBLIC_SHARE_LINK_IS_NOT_VALID -> {
+                publicShareActivityExtras = PublicShareActivityArgs(
+                    driveId = driveId.toInt(),
+                    publicShareUuid = publicShareUuid,
+                    isExpired = true,
+                ).toBundle()
+                trackDeepLink("publicShareExpired")
+            }
             else -> {
                 Log.e("TOTO", "downloadSharedFile: ${error?.code}")
             }
