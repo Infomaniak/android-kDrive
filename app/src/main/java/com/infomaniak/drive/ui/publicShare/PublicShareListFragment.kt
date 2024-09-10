@@ -72,6 +72,10 @@ class PublicShareListFragment : FileListFragment() {
         if (publicShareViewModel.isPasswordNeeded && !publicShareViewModel.hasBeenAuthenticated) {
             safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicSharePasswordFragment())
         }
+
+        if (publicShareViewModel.isExpired) {
+            safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicShareOutdatedFragment())
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
