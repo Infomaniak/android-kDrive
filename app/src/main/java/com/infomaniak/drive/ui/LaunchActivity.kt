@@ -186,13 +186,11 @@ class LaunchActivity : AppCompatActivity() {
                     if (apiResponse.data?.validUntil?.before(Date()) == true) {
                         Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
                     }
-                    publicShareActivityExtras = PublicShareActivityArgs(
-                        driveId = driveId.toInt(),
+                    setPublicShareActivityArgs(
+                        driveId = driveId,
                         publicShareUuid = publicShareUuid,
                         fileId = shareLink.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
-                    ).toBundle()
-
-                    trackDeepLink("publicShare")
+                    )
                 }
                 ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
                 else -> handlePublicShareError(apiResponse.error, driveId, publicShareUuid)
@@ -207,20 +205,10 @@ class LaunchActivity : AppCompatActivity() {
                 finishAndRemoveTask()
             }
             error?.code == ErrorCode.PASSWORD_NOT_VALID -> {
-                publicShareActivityExtras = PublicShareActivityArgs(
-                    driveId = driveId.toInt(),
-                    publicShareUuid = publicShareUuid,
-                    isPasswordNeeded = true,
-                ).toBundle()
-                trackDeepLink("publicShareWithPassword")
+                setPublicShareActivityArgs(driveId, publicShareUuid, isPasswordNeeded = true)
             }
             error?.code == ErrorCode.PUBLIC_SHARE_LINK_IS_NOT_VALID -> {
-                publicShareActivityExtras = PublicShareActivityArgs(
-                    driveId = driveId.toInt(),
-                    publicShareUuid = publicShareUuid,
-                    isExpired = true,
-                ).toBundle()
-                trackDeepLink("publicShareExpired")
+                setPublicShareActivityArgs(driveId, publicShareUuid, isExpired = true)
             }
             else -> {
                 Log.e("TOTO", "downloadSharedFile: ${error?.code}")
@@ -262,6 +250,30 @@ class LaunchActivity : AppCompatActivity() {
             mainActivityExtras = MainActivityArgs(shortcutId = shortcutTag).toBundle()
             if (shortcutTag == Utils.Shortcuts.FEEDBACK.id) isHelpShortcutPressed = true
         }
+    }
+
+    private fun setPublicShareActivityArgs(
+        driveId: String,
+        publicShareUuid: String,
+        fileId: Int = -1,
+        isPasswordNeeded: Boolean = false,
+        isExpired: Boolean = false,
+    ) {
+        publicShareActivityExtras = PublicShareActivityArgs(
+            driveId = driveId.toInt(),
+            publicShareUuid = publicShareUuid,
+            fileId = fileId,
+            isPasswordNeeded = isPasswordNeeded,
+            isExpired = isExpired,
+        ).toBundle()
+
+        val trackerName = when {
+            isPasswordNeeded -> "publicShareWithPassword"
+            isExpired -> "publicShareExpired"
+            else -> "publicShare"
+        }
+
+        trackDeepLink(trackerName)
     }
 
     companion object {
