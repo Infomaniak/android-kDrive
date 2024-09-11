@@ -54,12 +54,12 @@ class FileSharedActivity : AppCompatActivity() {
         destination.trackDestination(context = this)
 
         val isMainButtonVisible = when (destination.id) {
-            R.id.previewDownloadProgressDialog, R.id.fileSharedPreviewSliderFragment -> false
-            else -> {
+            R.id.fileSharedListFragment, R.id.fileSharedBottomSheetFileActions -> {
                 setColorStatusBar()
                 setColorNavigationBar()
                 true
             }
+            else -> false
         }
         binding.mainFileShareButton.isVisible = isMainButtonVisible
     }
