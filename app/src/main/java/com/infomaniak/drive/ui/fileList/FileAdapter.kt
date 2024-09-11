@@ -70,6 +70,7 @@ open class FileAdapter(
     var viewHolderType: DisplayType = DisplayType.LIST
 
     var uploadInProgress = false
+    var publicShareCanDownload = true
 
     var isComplete = false
     var isHomeOffline = false
@@ -351,6 +352,7 @@ open class FileAdapter(
                 || file.isFromActivities
                 || file.isFromSearch
                 || (offlineMode && !file.isOffline)
+                || !publicShareCanDownload
 
         setOnClickListener { onMenuClicked?.invoke(file) }
     }
