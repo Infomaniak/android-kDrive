@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.publicShare
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
@@ -33,6 +34,7 @@ import com.infomaniak.drive.utils.setColorStatusBar
 class PublicShareActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityPublicShareBinding.inflate(layoutInflater) }
+    private val publicShareViewModel: PublicShareViewModel by viewModels()
     private val navController by lazy {
         (supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment).navController
     }
@@ -57,7 +59,8 @@ class PublicShareActivity : AppCompatActivity() {
             setColorStatusBar()
             setColorNavigationBar()
         }
-        binding.mainPublicShareButton.isVisible = destination.id == R.id.publicShareListFragment
+        binding.mainPublicShareButton.isVisible = destination.id == R.id.publicShareListFragment && publicShareViewModel.canDownloadFiles
+
     }
 
     fun getMainButton() = binding.mainPublicShareButton
