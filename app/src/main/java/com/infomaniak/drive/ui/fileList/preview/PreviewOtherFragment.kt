@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import com.infomaniak.drive.databinding.FragmentPreviewOthersBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -46,6 +47,7 @@ class PreviewOtherFragment : PreviewFragment() {
 
         container.setOnClickListener { toggleFullscreen() }
 
+        bigOpenWithButton.isGone = file.isPublicShared() && !previewSliderViewModel.publicShareCanDownload
         bigOpenWithButton.setOnClickListener { openWithClicked() }
     }
 }
