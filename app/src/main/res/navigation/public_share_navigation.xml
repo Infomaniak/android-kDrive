@@ -43,6 +43,10 @@
             android:name="isExpired"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="canDownload"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </activity>
 
     <fragment
