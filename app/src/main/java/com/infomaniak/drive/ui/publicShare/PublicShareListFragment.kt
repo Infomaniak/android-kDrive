@@ -100,8 +100,6 @@ class PublicShareListFragment : FileListFragment() {
             onFileClicked = ::onFileClicked
         }
 
-        setupBasicMultiSelectLayout()
-
         binding.toolbar.apply {
             setOnMenuItemClickListener { menuItem ->
                 if (menuItem.itemId == R.id.downloadAllFiles) downloadAllFiles()
@@ -109,7 +107,7 @@ class PublicShareListFragment : FileListFragment() {
             }
 
             setNavigationOnClickListener { onBackPressed() }
-            menu?.findItem(R.id.downloadAllFiles)?.isVisible = true
+            menu?.findItem(R.id.downloadAllFiles)?.isVisible = publicShareViewModel.canDownloadFiles
         }
 
         (requireActivity() as? PublicShareActivity)?.let { parentActivity ->
@@ -117,11 +115,19 @@ class PublicShareListFragment : FileListFragment() {
             setMainButton(parentActivity.getMainButton())
         }
 
-        multiSelectManager.currentFolder = publicShareViewModel.fileClicked
-        mainViewModel.setCurrentFolder(multiSelectManager.currentFolder)
+        setupMultiSelect()
 
         observeRootFile()
         observeFiles()
+    }
+
+    private fun setupMultiSelect() {
+        setupBasicMultiSelectLayout()
+        multiSelectManager.apply {
+            isMultiSelectAuthorized = publicShareViewModel.canDownloadFiles
+            currentFolder = publicShareViewModel.fileClicked
+            mainViewModel.setCurrentFolder(currentFolder)
+        }
     }
 
     override fun onMenuButtonClicked(

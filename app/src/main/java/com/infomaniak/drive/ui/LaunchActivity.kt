@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
@@ -58,7 +59,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : AppCompatActivity() {
@@ -180,14 +180,7 @@ class LaunchActivity : AppCompatActivity() {
             when (apiResponse.result) {
                 ApiResponseStatus.SUCCESS -> {
                     val shareLink = apiResponse.data!!
-                    if (apiResponse.data?.validUntil?.before(Date()) == true) {
-                        Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
-                    }
-                    setPublicShareActivityArgs(
-                        driveId = driveId,
-                        publicShareUuid = publicShareUuid,
-                        fileId = shareLink.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
-                    )
+                    setPublicShareActivityArgs(driveId, publicShareUuid, shareLink)
                 }
                 ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
                 else -> handlePublicShareError(apiResponse.error, driveId, publicShareUuid)
@@ -252,16 +245,17 @@ class LaunchActivity : AppCompatActivity() {
     private fun setPublicShareActivityArgs(
         driveId: String,
         publicShareUuid: String,
-        fileId: Int = -1,
+        shareLink: ShareLink? = null,
         isPasswordNeeded: Boolean = false,
         isExpired: Boolean = false,
     ) {
         publicShareActivityExtras = PublicShareActivityArgs(
             driveId = driveId.toInt(),
             publicShareUuid = publicShareUuid,
-            fileId = fileId,
+            fileId = shareLink?.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
             isPasswordNeeded = isPasswordNeeded,
             isExpired = isExpired,
+            canDownload = shareLink?.capabilities?.canDownload == true,
         ).toBundle()
 
         val trackerName = when {
