@@ -38,8 +38,8 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_F
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
-import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
 import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
@@ -170,6 +170,7 @@ class PublicShareListFragment : FileListFragment() {
             if (file?.isFolder() == true) {
                 openFolder(file)
             } else {
+                multiSelectManager.isMultiSelectAuthorized = false
                 val fileList = file?.let(::listOf) ?: listOf()
                 publicShareViewModel.childrenLiveData.postValue(fileList to true)
             }
