@@ -94,11 +94,7 @@ class PublicShareListFragment : FileListFragment() {
         setToolbarTitle(R.string.sharedWithMeTitle)
         binding.uploadFileInProgressView.isGone = true
 
-        fileAdapter.apply {
-            initAsyncListDiffer()
-            onMenuClicked = ::onMenuClicked
-            onFileClicked = ::onFileClicked
-        }
+        initFileAdapter()
 
         binding.toolbar.apply {
             setOnMenuItemClickListener { menuItem ->
@@ -119,6 +115,15 @@ class PublicShareListFragment : FileListFragment() {
 
         observeRootFile()
         observeFiles()
+    }
+
+    private fun initFileAdapter() {
+        fileAdapter.apply {
+            initAsyncListDiffer()
+            onMenuClicked = ::onMenuClicked
+            onFileClicked = ::onFileClicked
+            publicShareCanDownload = publicShareViewModel.canDownloadFiles
+        }
     }
 
     private fun setupMultiSelect() {
