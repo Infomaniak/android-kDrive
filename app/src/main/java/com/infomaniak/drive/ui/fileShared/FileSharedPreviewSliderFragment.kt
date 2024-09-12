@@ -141,11 +141,17 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
 
     override fun printClicked() {
         super<BasePreviewSliderFragment>.printClicked()
-        previewSliderViewModel.executeDownloadAction(
-            activityContext = requireContext(),
-            downloadAction = DownloadAction.PRINT_PDF,
-            navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadError = { showSnackbar(R.string.errorFileNotFound, anchor = bottomSheetView) },
+        previewPDFHandler.printClicked(
+            context = requireContext(),
+            onDefaultCase = {
+                previewSliderViewModel.executeDownloadAction(
+                    activityContext = requireContext(),
+                    downloadAction = DownloadAction.PRINT_PDF,
+                    navigateToDownloadDialog = ::navigateToDownloadDialog,
+                    onDownloadError = { showSnackbar(R.string.errorFileNotFound, anchor = bottomSheetView) },
+                )
+            },
+            onError = { showSnackbar(R.string.errorFileNotFound) },
         )
     }
 
