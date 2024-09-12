@@ -251,10 +251,9 @@
     <string name="errorCategoryAlreadyExists">Una categoría con el mismo nombre ya existe</string>
     <string name="errorConflict">Ya existe un elemento con el mismo nombre en esta ubicación</string>
     <string name="errorDelete">Error al eliminar</string>
-    <string name="errorDestinationAlreadyExists">El destino ya existe</string>
     <string name="errorDeviceStorage">Insuficiente almacenamiento telefónico disponible</string>
     <string name="errorDuplicate">Error al duplicar</string>
-    <string name="errorFileCreate">Error al crear el archivo. Comprueba el nombre del archivo y tus derechos sobre la carpeta.</string>
+    <string name="errorFileAlreadyExists">Archivo o carpeta ya existente</string>
     <string name="errorFileLocked">El archivo está actualmente abierto por un usuario y no puede ser modificado</string>
     <string name="errorFilesLimitExceeded">Límite de archivos alcanzado en la carpeta</string>
     <string name="errorGetBookmarkURL">Enlace no recuperable</string>

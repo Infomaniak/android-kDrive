@@ -262,10 +262,9 @@
     <string name="errorCategoryAlreadyExists">A category with the same name already exists</string>
     <string name="errorConflict">An element with the same name already exists in this location</string>
     <string name="errorDelete">Deletion error</string>
-    <string name="errorDestinationAlreadyExists">Destination already exists</string>
     <string name="errorDeviceStorage">Insufficient phone storage</string>
     <string name="errorDuplicate">Duplication error</string>
-    <string name="errorFileCreate">Error when creating file. Check the name of the file and your rights to the folder.</string>
+    <string name="errorFileAlreadyExists">File or folder already exists</string>
     <string name="errorFileLocked">This file is currently opened by another user and cannot be modified</string>
     <string name="errorFilesLimitExceeded">Limit of files in folder reached</string>
     <string name="errorGetBookmarkURL">Non-recoverable link</string>

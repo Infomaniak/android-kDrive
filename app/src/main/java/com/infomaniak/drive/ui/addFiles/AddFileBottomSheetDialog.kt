@@ -193,7 +193,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                         showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name), showAboveFab = true)
                         apiResponse.data?.let { file -> requireContext().openOnlyOfficeActivity(file) }
                     } else {
-                        showSnackbar(R.string.errorFileCreate, showAboveFab = true)
+                        showSnackbar(R.string.errorFileAlreadyExists, showAboveFab = true)
                     }
                     mainViewModel.refreshActivities.value = true
                     dialog.dismiss()

@@ -251,10 +251,9 @@
     <string name="errorCategoryAlreadyExists">Eine Kategorie mit dem gleichen Namen existiert bereits</string>
     <string name="errorConflict">An dieser Stelle existiert bereits ein Element mit demselben Namen</string>
     <string name="errorDelete">Fehler beim Löschen</string>
-    <string name="errorDestinationAlreadyExists">Das Ziel existiert bereits</string>
     <string name="errorDeviceStorage">Unzureichend verfügbarer Telefonspeicher</string>
     <string name="errorDuplicate">Fehler beim Duplizieren</string>
-    <string name="errorFileCreate">Fehler bei der Erstellung der Datei. Überprüfen Sie den Namen der Datei und Ihre Rechte am Ordner.</string>
+    <string name="errorFileAlreadyExists">Datei oder Ordner existiert bereits</string>
     <string name="errorFileLocked">Diese Datei ist bereits von einem Benutzer geöffnet und kann nicht verändert werden</string>
     <string name="errorFilesLimitExceeded">Limit der Dateien im Ordner erreicht</string>
     <string name="errorGetBookmarkURL">Link nicht wiederherstellbar</string>
