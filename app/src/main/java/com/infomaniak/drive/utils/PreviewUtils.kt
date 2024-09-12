@@ -35,15 +35,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
+import com.infomaniak.drive.ui.fileList.DownloadProgressViewModel.Companion.PROGRESS_COMPLETE
 import com.infomaniak.drive.ui.fileList.preview.BitmapPrintDocumentAdapter
 import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
 import com.infomaniak.drive.utils.PreviewPDFUtils.PasswordProtectedException
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.lightNavigationBar
-import okhttp3.Request
 import okhttp3.Response
 import java.io.BufferedInputStream
 
@@ -180,16 +178,9 @@ fun downloadFile(
     if (externalOutputFile.exists()) externalOutputFile.delete()
 
     val downloadUrl = fileModel.downloadUrl() + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
-    val request = Request.Builder().url(downloadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
 
-    val response = HttpClient.okHttpClient.newBuilder()
-        .addNetworkInterceptor(downloadProgressInterceptor)
-        .build()
-        .newCall(request)
-        .execute()
-
-    response.use {
+    DownloadOfflineFileManager.downloadFileResponse(downloadUrl, downloadInterceptor = downloadProgressInterceptor).use {
         if (!it.isSuccessful) {
             val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
             if (errorCode == "password_protected_error") {
@@ -204,6 +195,7 @@ fun downloadFile(
         }
 
         createTempFile(it, externalOutputFile)
+        onProgress(PROGRESS_COMPLETE)
     }
 }
 
