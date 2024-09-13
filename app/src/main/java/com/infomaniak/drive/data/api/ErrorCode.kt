@@ -33,7 +33,7 @@ object ErrorCode {
         ApiErrorCode(CATEGORY_ALREADY_EXISTS, R.string.errorCategoryAlreadyExists),
         ApiErrorCode(COLLABORATIVE_FOLDER_ALREADY_EXISTS_FOR_FILE, R.string.anErrorHasOccurred),
         ApiErrorCode(CONFLICT_ERROR, R.string.errorConflict),
-        ApiErrorCode(DESTINATION_ALREADY_EXISTS, R.string.errorFileCreate),
+        ApiErrorCode(DESTINATION_ALREADY_EXISTS, R.string.errorFileAlreadyExists),
         ApiErrorCode(NO_DRIVE, R.string.noDriveTitle),
         ApiErrorCode(SHARE_LINK_ALREADY_EXISTS, R.string.errorShareLink),
     )
