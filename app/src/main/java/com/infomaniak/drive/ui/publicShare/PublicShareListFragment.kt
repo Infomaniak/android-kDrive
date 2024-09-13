@@ -36,19 +36,22 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
+import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
+import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
-import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.infomaniak.lib.core.R as RCore
 
 class PublicShareListFragment : FileListFragment() {
@@ -207,6 +210,29 @@ class PublicShareListFragment : FileListFragment() {
             shouldShowSmallFab = false,
             fileListViewModel = fileListViewModel,
             isPublicSharedFile = true,
+        )
+    }
+
+    private fun openBookmark(file: File) {
+        publicShareViewModel.executeDownloadAction(
+            activityContext = requireActivity(),
+            downloadAction = DownloadAction.OPEN_BOOKMARK,
+            file = file,
+            navigateToDownloadDialog = {
+                withContext(Dispatchers.Main) {
+                    safeNavigate(
+                        resId = R.id.previewDownloadProgressDialog,
+                        args = PreviewDownloadProgressDialogArgs(file.name).toBundle(),
+                    )
+                }
+            },
+            onDownloadSuccess = {},
+            onDownloadError = {
+                showSnackbar(
+                    title = R.string.errorGetBookmarkURL,
+                    anchor = (requireActivity() as? PublicShareActivity)?.getMainButton(),
+                )
+            },
         )
     }
 
