@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.printPdf
 import com.infomaniak.drive.utils.saveToKDrive
@@ -181,7 +182,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
                 }
                 DownloadAction.SEND_COPY -> activityContext.shareFile { uri }
                 DownloadAction.SAVE_TO_DRIVE -> activityContext.saveToKDrive(uri)
-                DownloadAction.OPEN_BOOKMARK -> TODO()
+                DownloadAction.OPEN_BOOKMARK -> activityContext.openBookmarkIntent(file.name, uri)
                 DownloadAction.PRINT_PDF -> activityContext.printPdf(cacheFile)
             }
 
