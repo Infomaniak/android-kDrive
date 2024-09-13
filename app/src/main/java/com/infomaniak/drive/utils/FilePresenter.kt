@@ -110,17 +110,23 @@ object FilePresenter {
     fun Fragment.openBookmarkIntent(file: File) {
         runCatching {
             val storedFileUri = file.getCloudAndFileUris(requireContext()).second
-            val url =
-                if (file.name.endsWith(".url")) getUrlFromUrlFile(requireContext(), storedFileUri)
-                else getUrlFromWebloc(requireContext(), storedFileUri)
-
-            if (url.isValidUrl()) requireContext().openUrl(url) else Exception("It's not a valid url")
+            requireActivity().openBookmarkIntent(file.name, storedFileUri)
         }.onFailure {
             requireActivity().showSnackbar(
-                requireContext().getString(R.string.errorGetBookmarkURL),
-                (requireActivity() as MainActivity).getMainFab()
+                title = getString(R.string.errorGetBookmarkURL),
+                anchor = (requireActivity() as MainActivity).getMainFab(),
             )
         }
+    }
+
+    fun Context.openBookmarkIntent(fileName: String, uri: Uri) {
+        val url = if (fileName.endsWith(".url")) {
+            getUrlFromUrlFile(context = this, uri)
+        } else {
+            getUrlFromWebloc(context = this, uri)
+        }
+
+        if (url.isValidUrl()) openUrl(url) else throw Exception("It's not a valid url")
     }
 
     private fun getUrlFromUrlFile(context: Context, uri: Uri): String {
