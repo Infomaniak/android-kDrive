@@ -90,6 +90,7 @@ class PublicShareListFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         folderName = navigationArgs.fileName
         folderId = navigationArgs.fileId
+        publicShareViewModel.cancelDownload()
         downloadFiles = DownloadFiles()
 
         super.onViewCreated(view, savedInstanceState)
