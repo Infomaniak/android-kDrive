@@ -219,13 +219,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
     }
 
-    private fun updateBottomSheetWithCurrentFile() {
-        lifecycleScope.launch(Dispatchers.Main) {
-            lifecycle.withResumed {
-                when (val fileActionBottomSheet = bottomSheetView) {
-                    is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(currentFile)
-                    is ExternalFileInfoActionsView -> fileActionBottomSheet.updateWithExternalFile(currentFile)
-                }
+    private fun updateBottomSheetWithCurrentFile() = viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+        lifecycle.withResumed {
+            when (val fileActionBottomSheet = bottomSheetView) {
+                is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(currentFile)
+                is ExternalFileInfoActionsView -> fileActionBottomSheet.updateWithExternalFile(currentFile)
             }
         }
     }
