@@ -25,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.CardviewGalleryBinding
@@ -95,7 +96,7 @@ class GalleryAdapter(
         root.stop()
         videoViews.isVisible = file.getFileType() == ExtensionType.VIDEO
         preview.apply {
-            loadAny(file.thumbnail())
+            loadAny(ApiRoutes.getThumbnailUrl(file))
             contentDescription = file.name
         }
     }

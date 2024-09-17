@@ -30,6 +30,7 @@ import coil.Coil
 import coil.load
 import coil.request.ImageRequest
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -76,7 +77,7 @@ class PreviewPictureFragment : PreviewFragment() {
     }
 
     private fun loadImage() = with(binding) {
-        val imageViewDisposable = imageView.load(file.thumbnail()) { placeholder(R.drawable.coil_hack) }
+        val imageViewDisposable = imageView.load(ApiRoutes.getThumbnailUrl(file)) { placeholder(R.drawable.coil_hack) }
         val imageLoader = Coil.imageLoader(requireContext())
         val previewRequest = buildPreviewRequest()
 
@@ -93,7 +94,7 @@ class PreviewPictureFragment : PreviewFragment() {
         val offlineFile = if (file.isOffline) getOfflineFile() else null
 
         return ImageRequest.Builder(requireContext())
-            .data(offlineFile ?: file.imagePreview())
+            .data(offlineFile ?: ApiRoutes.getImagePreviewUrl(file))
             .listener(
                 onError = { _, _ ->
                     noThumbnailLayout.apply {
