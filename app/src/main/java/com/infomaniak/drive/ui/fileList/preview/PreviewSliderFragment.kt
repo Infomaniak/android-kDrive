@@ -17,18 +17,18 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.fragment.app.Fragment
+import androidx.core.view.isGone
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.MainViewModel.FileResult
+import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
@@ -51,6 +52,11 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
     private val navigationArgs: PreviewSliderFragmentArgs by navArgs()
     override val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
+
+    override val bottomSheetView: FileInfoActionsView
+        get() = binding.bottomSheetFileInfos
+    override val bottomSheetBehavior: BottomSheetBehavior<View>
+        get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
 
     override val isFileShare = false
     override val ownerFragment = this
@@ -82,11 +88,25 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
+
+        bottomSheetView.apply {
+            init(
+                ownerFragment = this@PreviewSliderFragment,
+                mainViewModel = mainViewModel,
+                onItemClickListener = this@PreviewSliderFragment,
+                selectFolderResultLauncher = selectFolderResultLauncher,
+                isSharedWithMe = userDrive.sharedWithMe,
+            )
+            updateCurrentFile(currentFile)
+
+            previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
+                openWith.isGone = isDownloading
+            }
+        }
     }
 
     override fun onResume() {
@@ -98,6 +118,11 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 previewSliderAdapter.updateFile(fileId) { file -> file.isOffline = true }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        _binding?.bottomSheetFileInfos?.removeOfflineObservations(this)
     }
 
     override fun setBackActionHandlers() {
@@ -176,6 +201,14 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
             currentFile.isOffline = false
             binding.bottomSheetFileInfos.refreshBottomSheetUi(currentFile)
+        }
+    }
+
+
+    override fun downloadFileClicked() {
+        super<BasePreviewSliderFragment>.downloadFileClicked()
+        binding.bottomSheetFileInfos.downloadFile(drivePermissions) {
+            toggleBottomSheet(shouldShow = true)
         }
     }
 
@@ -294,16 +327,23 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun saveToKDrive() = Unit
     override fun onCacheAddedToOffline() = Unit
 
-    companion object {
-
-        //region PDF Preview
-        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
-            getHeader()?.setPageNumberVisibility(isVisible)
-        }
-
-        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
-            getHeader()?.setPageNumberValue(currentPage, totalPage)
-        }
-        //endregion
+    override fun printClicked() {
+        super<BasePreviewSliderFragment>.printClicked()
+        previewPDFHandler.printClicked(
+            context = requireContext(),
+            onDefaultCase = {
+                requireContext().printPdf {
+                    safeNavigate(
+                        PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
+                            fileId = currentFile.id,
+                            fileName = currentFile.name,
+                            userDrive = userDrive,
+                            action = DownloadAction.PRINT_PDF,
+                        ),
+                    )
+                }
+            },
+            onError = { showSnackbar(R.string.errorFileNotFound) },
+        )
     }
 }

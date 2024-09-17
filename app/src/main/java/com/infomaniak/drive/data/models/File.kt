@@ -39,6 +39,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.downloadFile
 import com.infomaniak.lib.core.BuildConfig
 import com.infomaniak.lib.core.utils.contains
 import com.infomaniak.lib.core.utils.guessMimeType
@@ -180,14 +181,16 @@ open class File(
         return status?.contains("trash") == true
     }
 
+    private fun isPublicShared() = externalShareLinkUuid.isNotBlank()
+
     fun thumbnail() = when {
-        externalShareLinkUuid.isNotBlank() -> ApiRoutes.getShareLinkFileThumbnail(driveId, externalShareLinkUuid, file = this)
+        isPublicShared() -> ApiRoutes.getShareLinkFileThumbnail(driveId, externalShareLinkUuid, file = this)
         isTrashed() -> ApiRoutes.thumbnailTrashFile(file = this)
         else -> ApiRoutes.thumbnailFile(file = this)
     }
 
     fun imagePreview(): String {
-        val url = if (externalShareLinkUuid.isNotBlank()) {
+        val url = if (isPublicShared()) {
             ApiRoutes.getShareLinkFilePreview(driveId, externalShareLinkUuid, file = this)
         } else {
             ApiRoutes.imagePreviewFile(this)
@@ -198,16 +201,16 @@ open class File(
 
     fun isPDF() = getFileType() == ExtensionType.PDF
 
-    fun onlyOfficeUrl() = if (externalShareLinkUuid.isBlank()) {
-        "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
-    } else {
+    fun onlyOfficeUrl() = if (isPublicShared()) {
         ApiRoutes.showOfficeShareLinkFile(driveId, externalShareLinkUuid, file = this)
+    } else {
+        "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
     }
 
-    fun downloadUrl() = if (externalShareLinkUuid.isBlank()) {
-        ApiRoutes.downloadFile(file = this)
-    } else {
+    fun downloadUrl() = if (isPublicShared()) {
         ApiRoutes.downloadShareLinkFile(driveId, externalShareLinkUuid, file = this)
+    } else {
+        ApiRoutes.downloadFile(file = this)
     }
 
     fun getFileType(): ExtensionType {
@@ -328,6 +331,12 @@ open class File(
     fun deleteCaches(context: Context) {
         if (isOffline) getOfflineFile(context)?.apply { if (exists()) delete() }
         else getCacheFile(context).apply { if (exists()) delete() }
+    }
+
+    fun getPublicShareCache(context: Context): IOFile {
+        val folder = IOFile(context.filesDir, context.getString(R.string.EXPOSED_PUBLIC_SHARE_DIR))
+        if (!folder.exists()) folder.mkdirs()
+        return IOFile(folder, name)
     }
 
     fun isDisabled(): Boolean {
@@ -491,6 +500,30 @@ open class File(
         THUMBNAIL("thumbnail"),
         ONLYOFFICE("onlyoffice"),
         KMAIL("kmail")
+    }
+
+    suspend fun convertToIOFile(
+        context: Context,
+        userDrive: UserDrive,
+        shouldBePdf: Boolean = false,
+        onProgress: (progress: Int) -> Unit,
+        navigateToDownloadDialog: (suspend () -> Unit)? = null,
+    ): IOFile {
+        val cacheFile = when {
+            isPublicShared() -> getPublicShareCache(context)
+            isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
+            isOffline -> getOfflineFile(context, userDrive.userId)!!
+            else -> getCacheFile(context, userDrive)
+        }
+
+        val fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
+        if (fileNeedDownload) {
+            navigateToDownloadDialog?.invoke()
+            downloadFile(cacheFile, fileModel = this, shouldBePdf, onProgress)
+            cacheFile.setLastModified(getLastModifiedInMilliSecond())
+        }
+
+        return cacheFile
     }
 
     companion object {

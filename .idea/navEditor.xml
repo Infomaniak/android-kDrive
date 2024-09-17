@@ -30,18 +30,6 @@
             <LayoutPositions>
               <option name="myPositions">
                 <map>
-                  <entry key="downloadProgressDialog">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="12" />
-                            <option name="y" value="12" />
-                          </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
                   <entry key="fileSharedActivity">
                     <value>
                       <LayoutPositions>
@@ -60,7 +48,7 @@
                         <option name="myPosition">
                           <Point>
                             <option name="x" value="32" />
-                            <option name="y" value="660" />
+                            <option name="y" value="474" />
                           </Point>
                         </option>
                         <option name="myPositions">
@@ -103,7 +91,7 @@
                         <option name="myPosition">
                           <Point>
                             <option name="x" value="276" />
-                            <option name="y" value="724" />
+                            <option name="y" value="410" />
                           </Point>
                         </option>
                         <option name="myPositions">
@@ -119,6 +107,18 @@
                               </value>
                             </entry>
                           </map>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="previewDownloadProgressDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>
@@ -150,7 +150,7 @@
                         <option name="myPosition">
                           <Point>
                             <option name="x" value="276" />
-                            <option name="y" value="368" />
+                            <option name="y" value="766" />
                           </Point>
                         </option>
                       </LayoutPositions>
@@ -391,18 +391,6 @@
                               </value>
                             </entry>
                           </map>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="downloadProgressDialog">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="1756" />
-                            <option name="y" value="1438" />
-                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>
@@ -889,6 +877,18 @@
                           <Point>
                             <option name="x" value="1102" />
                             <option name="y" value="2826" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="previewDownloadProgressDialog">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
                           </Point>
                         </option>
                       </LayoutPositions>

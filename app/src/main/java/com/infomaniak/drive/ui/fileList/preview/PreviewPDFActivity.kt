@@ -77,8 +77,11 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     private fun initBottomSheet() = with(binding) {
         setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
-        bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
-        bottomSheetFileInfos.initOnClickListener(this@PreviewPDFActivity)
+        bottomSheetFileInfos.apply {
+            updateWithExternalFile(getFakeFile())
+            initOnClickListener(this@PreviewPDFActivity)
+            isDownloadHidden(isGone = true)
+        }
     }
 
     override fun onStart() = with(binding) {

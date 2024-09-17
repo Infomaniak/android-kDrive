@@ -29,16 +29,24 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.gson.JsonParser
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
+import com.infomaniak.drive.ui.fileList.DownloadProgressViewModel.Companion.PROGRESS_COMPLETE
 import com.infomaniak.drive.ui.fileList.preview.BitmapPrintDocumentAdapter
 import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
+import com.infomaniak.drive.utils.PreviewPDFUtils.PasswordProtectedException
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
 import com.infomaniak.lib.core.utils.lightNavigationBar
+import okhttp3.Response
+import java.io.BufferedInputStream
+
+private const val BUFFER_SIZE = 8192
 
 fun Activity.setupBottomSheetFileBehavior(
     bottomSheetBehavior: BottomSheetBehavior<View>,
@@ -159,5 +167,40 @@ private fun Context.printPdf(
         onDownloadFile != null -> onDownloadFile()
         bitmaps.isNullOrEmpty().not() -> printBitmaps()
         file != null -> printFile()
+    }
+}
+
+fun downloadFile(
+    externalOutputFile: IOFile,
+    file: File,
+    shouldBePdf: Boolean,
+    onProgress: (progress: Int) -> Unit,
+) {
+    if (externalOutputFile.exists()) externalOutputFile.delete()
+    val downloadUrl = ApiRoutes.downloadFileUrl(file)
+    val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
+
+    DownloadOfflineFileManager.downloadFileResponse(downloadUrl, downloadInterceptor = downloadProgressInterceptor).use {
+        if (!it.isSuccessful) {
+            val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
+            if (errorCode == "password_protected_error") {
+                throw PasswordProtectedException()
+            } else {
+                throw Exception("Download error")
+            }
+        }
+
+        if (shouldBePdf && it.body?.contentType()?.toString() != "application/pdf") {
+            throw UnsupportedOperationException("File not supported")
+        }
+
+        createTempFile(it, externalOutputFile)
+        onProgress(PROGRESS_COMPLETE)
+    }
+}
+
+private fun createTempFile(response: Response, file: IOFile) {
+    BufferedInputStream(response.body?.byteStream(), BUFFER_SIZE).use { input ->
+        file.outputStream().use { output -> input.copyTo(output, BUFFER_SIZE) }
     }
 }

@@ -38,7 +38,6 @@ import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
@@ -288,10 +287,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         return true
     }
 
-    fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
+    fun downloadFile(drivePermissions: DrivePermissions, file: File? = null, onSuccess: () -> Unit) {
         if (drivePermissions.checkWriteStoragePermission()) {
-            val fileName = if (currentFile.isFolder()) "${currentFile.name}.zip" else currentFile.name
-            DownloadManagerUtils.scheduleDownload(context, ApiRoutes.downloadFile(currentFile), fileName)
+            val fileToDownload = file ?: currentFile
+            val fileName = if (fileToDownload.isFolder()) "${fileToDownload.name}.zip" else fileToDownload.name
+            DownloadManagerUtils.scheduleDownload(context, fileToDownload.downloadUrl(), fileName)
             onSuccess()
         }
     }

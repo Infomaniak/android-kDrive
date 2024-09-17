@@ -25,6 +25,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityFileSharedBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.trackDestination
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.setColorNavigationBar
 import com.infomaniak.drive.utils.setColorStatusBar
 
@@ -37,7 +38,6 @@ class FileSharedActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(binding.root)
 
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
@@ -48,11 +48,16 @@ class FileSharedActivity : AppCompatActivity() {
         destination.trackDestination(context = this)
 
         when (destination.id) {
-            R.id.downloadProgressDialog, R.id.fileSharedPreviewSliderFragment -> Unit
+            R.id.previewDownloadProgressDialog, R.id.fileSharedPreviewSliderFragment -> Unit
             else -> {
                 setColorStatusBar()
                 setColorNavigationBar()
             }
         }
+    }
+
+    override fun onDestroy() {
+        IOFile(filesDir, getString(R.string.EXPOSED_PUBLIC_SHARE_DIR)).apply { if (exists()) deleteRecursively() }
+        super.onDestroy()
     }
 }

@@ -88,13 +88,13 @@
             app:destination="@id/previewFragment" />
         <action
             android:id="@+id/action_fileSharedPreviewSliderFragment_to_downloadProgressDialog"
-            app:destination="@id/downloadProgressDialog" />
+            app:destination="@id/previewDownloadProgressDialog" />
     </fragment>
 
     <fragment
         android:id="@+id/previewFragment"
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewFragment"
-        android:label="fragment_preview"
+        android:label="PreviewFragment"
         tools:layout="@layout/fragment_preview_others">
         <argument
             android:name="fileId"
@@ -128,9 +128,9 @@
     </dialog>
 
     <dialog
-        android:id="@+id/downloadProgressDialog"
-        android:name="com.infomaniak.drive.ui.fileList.DownloadProgressDialog"
-        android:label="DownloadProgressDialog"
+        android:id="@+id/previewDownloadProgressDialog"
+        android:name="com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialog"
+        android:label="PreviewDownloadProgressDialog"
         tools:layout="@layout/dialog_download_progress">
         <argument
             android:name="fileId"
@@ -144,7 +144,7 @@
         <argument
             android:name="action"
             android:defaultValue="OPEN_WITH"
-            app:argType="com.infomaniak.drive.ui.fileList.DownloadProgressDialog$DownloadAction" />
+            app:argType="com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog$DownloadAction" />
     </dialog>
 
 </navigation>
