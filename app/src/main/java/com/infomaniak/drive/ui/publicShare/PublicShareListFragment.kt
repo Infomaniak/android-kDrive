@@ -37,8 +37,9 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_D
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.FileListFragment
-import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
+import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
@@ -87,7 +88,7 @@ class PublicShareListFragment : FileListFragment() {
             onFileClicked = ::onFileClicked
         }
 
-        setupMultiSelectLayout()
+        setupBasicMultiSelectLayout()
 
         binding.toolbar.apply {
             setOnMenuItemClickListener { menuItem ->
@@ -104,8 +105,21 @@ class PublicShareListFragment : FileListFragment() {
             setMainButton(parentActivity.getMainButton())
         }
 
+        multiSelectManager.currentFolder = publicShareViewModel.fileClicked
+        mainViewModel.setCurrentFolder(multiSelectManager.currentFolder)
+
         observeRootFile()
         observeFiles()
+    }
+
+    override fun onMenuButtonClicked(
+        multiSelectBottomSheet: MultiSelectActionsBottomSheetDialog,
+        areAllFromTheSameFolder: Boolean,
+    ) {
+        super.onMenuButtonClicked(
+            multiSelectBottomSheet = PublicShareMultiSelectActionsBottomSheetDialog(),
+            areAllFromTheSameFolder = true,
+        )
     }
 
     private fun onMenuClicked(file: File) {
@@ -117,6 +131,7 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun onFileClicked(file: File) {
         if (file.isUsable()) {
+            publicShareViewModel.fileClicked = file
             when {
                 file.isFolder() -> openFolder(file)
                 file.isBookmark() -> openBookmark(file)
@@ -132,10 +147,6 @@ class PublicShareListFragment : FileListFragment() {
         binding.swipeRefreshLayout.isRefreshing = false
 
         changeNoFilesLayoutVisibility(files.isEmpty(), changeControlsVisibility = true, ignoreOffline = false)
-    }
-
-    private fun setupMultiSelectLayout() {
-        multiSelectLayout?.root?.isGone = true
     }
 
     private fun onBackPressed() {
@@ -155,9 +166,11 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun observeRootFile() {
         publicShareViewModel.rootSharedFile.observe(viewLifecycleOwner) { file ->
+            publicShareViewModel.fileClicked = file
             if (file?.isFolder() == true) {
                 openFolder(file)
             } else {
+                multiSelectManager.isMultiSelectAuthorized = false
                 val fileList = file?.let(::listOf) ?: listOf()
                 publicShareViewModel.childrenLiveData.postValue(fileList to true)
             }
