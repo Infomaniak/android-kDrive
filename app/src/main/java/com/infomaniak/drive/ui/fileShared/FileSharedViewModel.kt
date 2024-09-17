@@ -58,7 +58,7 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
             apiResponse.data
         }
 
-        rootSharedFile.postValue(file)
+        rootSharedFile.postValue(file?.apply { externalShareLinkUuid = fileSharedLinkUuid })
     }
 
     fun getFiles(folderId: Int, sortType: SortType) {
@@ -93,6 +93,24 @@ class FileSharedViewModel(val savedStateHandle: SavedStateHandle) : ViewModel() 
     fun cancelDownload() {
         getSharedFilesJob.cancel()
         getSharedFilesJob.cancelChildren()
+    }
+
+    fun importFilesToDrive(
+        destinationDriveId: Int,
+        destinationFolderId: Int,
+        fileIds: List<Int>,
+        exceptedFileIds: List<Int>,
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        ApiRepository.importShareLinkFiles(
+            sourceDriveId = driveId,
+            linkUuid = fileSharedLinkUuid,
+            destinationDriveId = destinationDriveId,
+            destinationFolderId = destinationFolderId,
+            fileIds = fileIds,
+            exceptedFileIds = exceptedFileIds,
+        )
+
+        // TODO: Manage apiResponse when the backend will be done
     }
 
     private fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {

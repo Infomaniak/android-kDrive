@@ -17,21 +17,37 @@
  */
 package com.infomaniak.drive.ui.fileShared
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.SaveExternalFilesActivity
+import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
+import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
+import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileShared.FileSharedViewModel.Companion.ROOT_SHARED_FILE_ID
+import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openFolder
+import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.whenResultIsOk
+import com.infomaniak.lib.core.R as RCore
 
 class FileSharedListFragment : FileListFragment() {
 
@@ -41,7 +57,20 @@ class FileSharedListFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
 
+    private var drivePermissions: DrivePermissions? = null
+    private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        it.whenResultIsOk(::onDriveAndFolderSelected)
+    }
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@FileSharedListFragment) { authorized -> if (authorized) downloadAllFiles() }
+        }
+
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         folderName = navigationArgs.fileName
@@ -66,8 +95,20 @@ class FileSharedListFragment : FileListFragment() {
 
         setupMultiSelectLayout()
 
-        binding.toolbar.setNavigationOnClickListener { onBackPressed() }
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
+        binding.toolbar.apply {
+            setOnMenuItemClickListener { menuItem ->
+                if (menuItem.itemId == R.id.downloadAllFiles) downloadAllFiles()
+                true
+            }
+
+            setNavigationOnClickListener { onBackPressed() }
+            menu?.findItem(R.id.downloadAllFiles)?.isVisible = true
+        }
+
+        (requireActivity() as? FileSharedActivity)?.let { parentActivity ->
+            parentActivity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
+            setMainButton(parentActivity.getMainButton())
+        }
 
         observeRootFile()
         observeFiles()
@@ -122,8 +163,52 @@ class FileSharedListFragment : FileListFragment() {
         )
     }
 
+    private fun downloadAllFiles() {
+        // RootSharedFile can either be a folder or a single file
+        fileSharedViewModel.rootSharedFile.value?.let { file ->
+            drivePermissions?.let { permissions -> requireContext().downloadFile(permissions, file) }
+        }
+    }
+
+    private fun onDriveAndFolderSelected(data: Intent?) {
+        val destinationDriveId = data?.getIntExtra(DESTINATION_DRIVE_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
+        val destinationFolderId = data?.getIntExtra(DESTINATION_FOLDER_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
+
+        if (data == null || destinationDriveId == DEFAULT_ID || destinationFolderId == DEFAULT_ID) {
+            showSnackbar(RCore.string.anErrorHasOccurred)
+        } else {
+            fileSharedViewModel.importFilesToDrive(
+                destinationDriveId = destinationDriveId,
+                destinationFolderId = destinationFolderId,
+                fileIds = multiSelectManager.selectedItemsIds.toList(),
+                exceptedFileIds = multiSelectManager.exceptedItemsIds,
+            )
+        }
+    }
+
+    private fun setMainButton(importButton: MaterialButton) {
+        importButton.setOnClickListener {
+            if (AccountUtils.currentDriveId == -1) {
+                // TODO : Show bottomsheet to get app if this functionality is implemented by the back
+                Intent(requireActivity(), LoginActivity::class.java).also(::startActivity)
+            } else {
+                Intent(requireActivity(), SaveExternalFilesActivity::class.java).apply {
+                    action = Intent.ACTION_SEND
+                    putExtras(
+                        SaveExternalFilesActivityArgs(
+                            userId = AccountUtils.currentUserId,
+                            driveId = AccountUtils.currentDriveId,
+                            isPublicShare = true,
+                        ).toBundle()
+                    ).also(selectDriveAndFolderResultLauncher::launch)
+                }
+            }
+        }
+    }
+
     companion object {
         const val MATOMO_CATEGORY = "FileSharedListAction"
+        private const val DEFAULT_ID = -1
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

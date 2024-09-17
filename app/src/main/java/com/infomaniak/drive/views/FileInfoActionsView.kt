@@ -287,15 +287,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         return true
     }
 
-    fun downloadFile(drivePermissions: DrivePermissions, file: File? = null, onSuccess: () -> Unit) {
-        if (drivePermissions.checkWriteStoragePermission()) {
-            val fileToDownload = file ?: currentFile
-            val fileName = if (fileToDownload.isFolder()) "${fileToDownload.name}.zip" else fileToDownload.name
-            DownloadManagerUtils.scheduleDownload(context, fileToDownload.downloadUrl(), fileName)
-            onSuccess()
-        }
-    }
-
     fun createPublicShareLink(
         onSuccess: ((sharelinkUrl: String) -> Unit)? = null,
         onError: ((translatedError: String) -> Unit)? = null
@@ -601,6 +592,16 @@ class FileInfoActionsView @JvmOverloads constructor(
                 onDeleteFile {
                     trackFileActionEvent("putInTrash")
                     dialog.dismiss()
+                }
+            }
+        }
+
+        companion object {
+            fun Context.downloadFile(drivePermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
+                if (drivePermissions.checkWriteStoragePermission()) {
+                    val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
+                    DownloadManagerUtils.scheduleDownload(context = this, file.downloadUrl(), fileName)
+                    onSuccess?.invoke()
                 }
             }
         }

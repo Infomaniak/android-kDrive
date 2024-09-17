@@ -146,5 +146,4 @@
             android:defaultValue="OPEN_WITH"
             app:argType="com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog$DownloadAction" />
     </dialog>
-
 </navigation>
