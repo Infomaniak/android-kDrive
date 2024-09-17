@@ -27,7 +27,7 @@ import com.infomaniak.drive.ui.publicShare.PublicShareViewModel
 class PreviewDownloadProgressDialog : BaseDownloadProgressDialog() {
 
     private val publicShareViewModel: PublicShareViewModel by activityViewModels()
-    override val navigationArgs: PreviewDownloadProgressDialogArgs by navArgs()
+    private val navigationArgs: PreviewDownloadProgressDialogArgs by navArgs()
 
     override val dialogTitle get() = navigationArgs.fileName
 

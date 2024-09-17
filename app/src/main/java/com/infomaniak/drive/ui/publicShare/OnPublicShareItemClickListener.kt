@@ -41,17 +41,11 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     fun onDownloadSuccess()
     fun onDownloadError(@StringRes errorMessage: Int)
 
-    override fun openWith() {
-        executeActionAndClose(DownloadAction.OPEN_WITH)
-    }
+    override fun openWith() = executeActionAndClose(DownloadAction.OPEN_WITH)
 
-    override fun shareFile() {
-        executeActionAndClose(DownloadAction.SEND_COPY)
-    }
+    override fun shareFile() = executeActionAndClose(DownloadAction.SEND_COPY)
 
-    override fun saveToKDrive() {
-        executeActionAndClose(DownloadAction.SAVE_TO_DRIVE)
-    }
+    override fun saveToKDrive() = executeActionAndClose(DownloadAction.SAVE_TO_DRIVE)
 
     override fun downloadFileClicked() {
         super.downloadFileClicked()
