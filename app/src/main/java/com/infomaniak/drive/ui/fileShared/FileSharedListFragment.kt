@@ -38,6 +38,7 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_F
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileShared.FileSharedViewModel.Companion.ROOT_SHARED_FILE_ID
+import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
@@ -163,6 +164,7 @@ class FileSharedListFragment : FileListFragment() {
     }
 
     private fun downloadAllFiles() {
+        // RootSharedFile can either be a folder or a single file
         fileSharedViewModel.rootSharedFile.value?.let { file ->
             drivePermissions?.let { permissions -> requireContext().downloadFile(permissions, file) }
         }
@@ -187,7 +189,8 @@ class FileSharedListFragment : FileListFragment() {
     private fun setMainButton(importButton: MaterialButton) {
         importButton.setOnClickListener {
             if (AccountUtils.currentDriveId == -1) {
-                showSnackbar(title = "TODO : Show bottomsheet to get app", anchor = importButton)
+                // TODO : Show bottomsheet to get app if this functionality is implemented by the back
+                Intent(requireActivity(), LoginActivity::class.java).also(::startActivity)
             } else {
                 Intent(requireActivity(), SaveExternalFilesActivity::class.java).apply {
                     action = Intent.ACTION_SEND
