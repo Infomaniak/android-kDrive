@@ -25,7 +25,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavArgs
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
@@ -37,7 +36,6 @@ import kotlinx.coroutines.launch
 abstract class BaseDownloadProgressDialog : DialogFragment() {
 
     protected val binding: DialogDownloadProgressBinding by lazy { DialogDownloadProgressBinding.inflate(layoutInflater) }
-    abstract val navigationArgs: NavArgs
 
     abstract val dialogTitle: String
 
