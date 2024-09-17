@@ -28,7 +28,7 @@ import com.infomaniak.lib.core.utils.setBackNavigationResult
 class DownloadProgressDialog : BaseDownloadProgressDialog() {
 
     private val downloadProgressViewModel: DownloadProgressViewModel by viewModels()
-    override val navigationArgs: DownloadProgressDialogArgs by navArgs()
+    private val navigationArgs: DownloadProgressDialogArgs by navArgs()
 
     override val dialogTitle get() = navigationArgs.fileName
 
