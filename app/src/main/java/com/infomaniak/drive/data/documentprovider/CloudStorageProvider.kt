@@ -362,7 +362,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         try {
             val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
-            val response = DownloadOfflineFileManager.downloadFileResponse(file.thumbnail(), okHttpClient)
+            val response = DownloadOfflineFileManager.downloadFileResponse(ApiRoutes.getThumbnailUrl(file), okHttpClient)
 
             if (response.isSuccessful) {
                 DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {

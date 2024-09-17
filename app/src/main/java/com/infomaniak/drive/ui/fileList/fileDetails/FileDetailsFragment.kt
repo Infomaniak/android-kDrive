@@ -35,6 +35,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentFileDetailsBinding
@@ -132,7 +133,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         })
 
         if (file.hasThumbnail) {
-            collapsingBackground.loadAny(file.thumbnail())
+            collapsingBackground.loadAny(ApiRoutes.getThumbnailUrl(file))
         } else {
             appBar.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.background))
             val titleColor = ContextCompat.getColor(requireContext(), R.color.title)
