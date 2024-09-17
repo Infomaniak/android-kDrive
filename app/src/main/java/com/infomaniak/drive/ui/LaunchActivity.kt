@@ -34,9 +34,9 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.services.UploadWorker
-import com.infomaniak.drive.ui.fileShared.FileSharedActivity
-import com.infomaniak.drive.ui.fileShared.FileSharedActivityArgs
 import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.ui.publicShare.PublicShareActivity
+import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -59,7 +59,7 @@ class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
-    private var fileSharedActivityExtras: Bundle? = null
+    private var publicShareActivityExtras: Bundle? = null
 
     private var isHelpShortcutPressed = false
 
@@ -109,7 +109,7 @@ class LaunchActivity : AppCompatActivity() {
                 when (destinationClass) {
                     MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
                     LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
-                    FileSharedActivity::class.java -> fileSharedActivityExtras?.let(::putExtras)
+                    PublicShareActivity::class.java -> publicShareActivityExtras?.let(::putExtras)
                 }
             }.also(::startActivity)
         }
@@ -117,7 +117,7 @@ class LaunchActivity : AppCompatActivity() {
 
     private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
         when {
-            fileSharedActivityExtras != null -> FileSharedActivity::class.java
+            publicShareActivityExtras != null -> PublicShareActivity::class.java
             AccountUtils.requestCurrentUser() == null -> LoginActivity::class.java
             else -> loggedUserDestination()
         }
@@ -162,25 +162,25 @@ class LaunchActivity : AppCompatActivity() {
 
     private suspend fun handleDeeplink() = withContext(Dispatchers.IO) {
         intent.data?.path?.let { deeplink ->
-            if (deeplink.contains("/app/share/")) processFileShare(deeplink) else processInternalLink(deeplink)
+            if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else processInternalLink(deeplink)
             SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
         }
     }
 
-    private fun processFileShare(path: String) {
+    private fun processPublicShare(path: String) {
         Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
-            val (driveId, fileSharedLinkUuid) = match.destructured
+            val (driveId, publicShareUuid) = match.destructured
 
-            val apiResponse = ApiRepository.getShareLinkInfo(driveId.toInt(), fileSharedLinkUuid)
+            val apiResponse = ApiRepository.getPublicShareInfo(driveId.toInt(), publicShareUuid)
             when (apiResponse.result) {
                 ApiResponseStatus.SUCCESS -> {
                     val shareLink = apiResponse.data!!
                     if (apiResponse.data?.validUntil?.before(Date()) == true) {
                         Log.e("TOTO", "downloadSharedFile: expired | ${apiResponse.data?.validUntil}")
                     }
-                    fileSharedActivityExtras = FileSharedActivityArgs(
+                    publicShareActivityExtras = PublicShareActivityArgs(
                         driveId = driveId.toInt(),
-                        fileSharedLinkUuid = fileSharedLinkUuid,
+                        publicShareUuid = publicShareUuid,
                         fileId = shareLink.fileId ?: -1,
                     ).toBundle()
 

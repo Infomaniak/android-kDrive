@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileShared
+package com.infomaniak.drive.ui.publicShare
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -43,13 +43,13 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
+class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
 
-    private val navigationArgs: FileSharedPreviewSliderFragmentArgs by navArgs()
+    private val navigationArgs: PublicSharePreviewSliderFragmentArgs by navArgs()
     override val previewSliderViewModel: PreviewSliderViewModel by activityViewModels()
 
     override val bottomSheetView: ExternalFileInfoActionsView
-        get() = binding.fileSharedBottomSheetFileActions
+        get() = binding.publicShareBottomSheetFileActions
     override val bottomSheetBehavior: BottomSheetBehavior<View>
         get() = BottomSheetBehavior.from(bottomSheetView)
 
@@ -74,7 +74,7 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
             userDrive = previewSliderViewModel.userDrive
         }
 
-        previewSliderViewModel.shareLinkUuid = navigationArgs.shareLinkUuid
+        previewSliderViewModel.publicShareUuid = navigationArgs.publicShareUuid
 
         return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
@@ -89,12 +89,12 @@ class FileSharedPreviewSliderFragment : BasePreviewSliderFragment(), FileInfoAct
     private fun initBottomSheet() = with(bottomSheetView) {
         requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
         updateWithExternalFile(currentFile)
-        initOnClickListener(onItemClickListener = this@FileSharedPreviewSliderFragment)
+        initOnClickListener(onItemClickListener = this@PublicSharePreviewSliderFragment)
     }
 
     private suspend fun navigateToDownloadDialog() = withContext(Dispatchers.Main) {
         safeNavigate(
-            FileSharedPreviewSliderFragmentDirections.actionFileSharedPreviewSliderFragmentToDownloadProgressDialog(
+            PublicSharePreviewSliderFragmentDirections.actionPublicSharePreviewSliderFragmentToDownloadProgressDialog(
                 fileId = currentFile.id,
                 fileName = currentFile.name,
                 userDrive = userDrive,

@@ -37,7 +37,7 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
 import com.infomaniak.drive.ui.fileList.FileAdapter
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.FileListViewModel
-import com.infomaniak.drive.ui.fileShared.FileSharedListFragmentArgs
+import com.infomaniak.drive.ui.publicShare.PublicShareListFragmentArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -57,9 +57,9 @@ object FilePresenter {
         shouldHideBottomNavigation: Boolean,
         shouldShowSmallFab: Boolean,
         fileListViewModel: FileListViewModel,
-        isSharedFile: Boolean = false
+        isPublicSharedFile: Boolean = false
     ) {
-        if (file.isDisabled() && !isSharedFile) {
+        if (file.isDisabled() && !isPublicSharedFile) {
             safeNavigate(
                 R.id.accessDeniedBottomSheetFragment,
                 AccessDeniedBottomSheetDialogArgs(
@@ -70,9 +70,9 @@ object FilePresenter {
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
-            if (isSharedFile) {
-                val args = FileSharedListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
-                safeNavigate(R.id.fileSharedListFragment, args.toBundle())
+            if (isPublicSharedFile) {
+                val args = PublicShareListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
+                safeNavigate(R.id.publicShareListFragment, args.toBundle())
             } else {
                 val args = FileListFragmentArgs(
                     folderId = file.id,
@@ -85,10 +85,10 @@ object FilePresenter {
         }
     }
 
-    fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?, shareLinkUuid: String = "") {
+    fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?, publicShareUuid: String = "") {
         trackEvent("preview", "preview${file.getFileType().value.capitalizeFirstChar()}")
         val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
-        Utils.displayFile(mainViewModel, findNavController(), file, fileList, shareLinkUuid = shareLinkUuid)
+        Utils.displayFile(mainViewModel, findNavController(), file, fileList, publicShareUuid = publicShareUuid)
     }
 
     fun Fragment.openBookmark(file: File) {

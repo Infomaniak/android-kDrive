@@ -18,18 +18,18 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/file_shared_navigation"
-    app:startDestination="@id/fileSharedListFragment">
+    android:id="@+id/public_share_navigation"
+    app:startDestination="@id/publicShareListFragment">
 
     <activity
-        android:id="@+id/fileSharedActivity"
-        android:name="com.infomaniak.drive.ui.fileShared.FileSharedActivity"
-        tools:layout="@layout/activity_file_shared">
+        android:id="@+id/publicShareActivity"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicShareActivity"
+        tools:layout="@layout/activity_public_share">
         <argument
             android:name="driveId"
             app:argType="integer" />
         <argument
-            android:name="fileSharedLinkUuid"
+            android:name="publicShareUuid"
             app:argType="string" />
         <argument
             android:name="fileId"
@@ -37,13 +37,13 @@
     </activity>
 
     <fragment
-        android:id="@+id/fileSharedPasswordFragment"
-        android:name="com.infomaniak.drive.ui.fileShared.FileSharedPasswordFragment"
-        tools:layout="@layout/fragment_file_shared_password" />
+        android:id="@+id/publicSharePasswordFragment"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicSharePasswordFragment"
+        tools:layout="@layout/fragment_public_share_password" />
 
     <fragment
-        android:id="@+id/fileSharedListFragment"
-        android:name="com.infomaniak.drive.ui.fileShared.FileSharedListFragment"
+        android:id="@+id/publicShareListFragment"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicShareListFragment"
         tools:layout="@layout/fragment_file_list">
         <argument
             android:name="fileId"
@@ -54,24 +54,24 @@
             android:defaultValue=""
             app:argType="string" />
         <action
-            android:id="@+id/fileSharedListFragmentToFileSharedListFragment"
-            app:destination="@id/fileSharedListFragment"
+            android:id="@+id/publicShareListFragmentToPublicShareListFragment"
+            app:destination="@id/publicShareListFragment"
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit" />
         <action
-            android:id="@+id/action_fileListFragment_to_sortFilesBottomSheetDialog"
+            android:id="@+id/action_publicShareListFragment_to_sortFilesBottomSheetDialog"
             app:destination="@id/sortFilesBottomSheetDialog" />
         <action
-            android:id="@+id/action_fileSharedListFragment_to_fileSharedPreviewSliderFragment"
-            app:destination="@id/fileSharedPreviewSliderFragment" />
+            android:id="@+id/action_publicShareListFragment_to_publicSharePreviewSliderFragment"
+            app:destination="@id/publicSharePreviewSliderFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/fileSharedPreviewSliderFragment"
-        android:name="com.infomaniak.drive.ui.fileShared.FileSharedPreviewSliderFragment"
-        android:label="FileSharedPreviewSliderFragment"
+        android:id="@+id/publicSharePreviewSliderFragment"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragment"
+        android:label="PublicSharePreviewSliderFragment"
         tools:layout="@layout/fragment_preview_slider">
         <argument
             android:name="fileId"
@@ -80,14 +80,14 @@
             android:name="driveId"
             app:argType="integer" />
         <argument
-            android:name="shareLinkUuid"
+            android:name="publicShareUuid"
             android:defaultValue=""
             app:argType="string" />
         <action
-            android:id="@+id/action_fileSharedPreviewSliderFragment_to_previewFragment"
+            android:id="@+id/action_publicSharePreviewSliderFragment_to_previewFragment"
             app:destination="@id/previewFragment" />
         <action
-            android:id="@+id/action_fileSharedPreviewSliderFragment_to_downloadProgressDialog"
+            android:id="@+id/action_publicSharePreviewSliderFragment_to_downloadProgressDialog"
             app:destination="@id/previewDownloadProgressDialog" />
     </fragment>
 
@@ -105,7 +105,7 @@
             app:argType="com.infomaniak.drive.data.models.UserDrive"
             app:nullable="true" />
         <argument
-            android:name="fileShareUuid"
+            android:name="publicShareUuid"
             android:defaultValue=""
             app:argType="string" />
         <action

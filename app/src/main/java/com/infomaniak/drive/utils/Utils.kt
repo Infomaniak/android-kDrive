@@ -63,7 +63,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
-import com.infomaniak.drive.ui.fileShared.FileSharedPreviewSliderFragmentArgs
+import com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
@@ -207,7 +207,7 @@ object Utils {
         selectedFile: File,
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
-        shareLinkUuid: String = "",
+        publicShareUuid: String = "",
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
 
@@ -216,13 +216,13 @@ object Utils {
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
 
-        val (destinationClass, bundle) = if (shareLinkUuid.isNotBlank()) {
-            val args = FileSharedPreviewSliderFragmentArgs(
+        val (destinationClass, bundle) = if (publicShareUuid.isNotBlank()) {
+            val args = PublicSharePreviewSliderFragmentArgs(
                 fileId = selectedFile.id,
                 driveId = selectedFile.driveId,
-                shareLinkUuid = shareLinkUuid,
+                publicShareUuid = publicShareUuid,
             )
-            R.id.fileSharedPreviewSliderFragment to args.toBundle()
+            R.id.publicSharePreviewSliderFragment to args.toBundle()
         } else {
             val args = PreviewSliderFragmentArgs(
                 fileId = selectedFile.id,

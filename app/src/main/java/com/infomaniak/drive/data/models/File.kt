@@ -153,7 +153,7 @@ open class File(
     @IgnoredOnParcel
     @Ignore
     @Transient
-    var externalShareLinkUuid: String = ""
+    var publicShareUuid: String = ""
 
     val revisedAtInMillis: Long inline get() = revisedAt * 1000
 
@@ -181,17 +181,17 @@ open class File(
         return status?.contains("trash") == true
     }
 
-    private fun isPublicShared() = externalShareLinkUuid.isNotBlank()
+    private fun isPublicShared() = publicShareUuid.isNotBlank()
 
     fun thumbnail() = when {
-        isPublicShared() -> ApiRoutes.getShareLinkFileThumbnail(driveId, externalShareLinkUuid, file = this)
+        isPublicShared() -> ApiRoutes.getPublicShareFileThumbnail(driveId, publicShareUuid, file = this)
         isTrashed() -> ApiRoutes.thumbnailTrashFile(file = this)
         else -> ApiRoutes.thumbnailFile(file = this)
     }
 
     fun imagePreview(): String {
         val url = if (isPublicShared()) {
-            ApiRoutes.getShareLinkFilePreview(driveId, externalShareLinkUuid, file = this)
+            ApiRoutes.getPublicShareFilePreview(driveId, publicShareUuid, file = this)
         } else {
             ApiRoutes.imagePreviewFile(this)
         }
@@ -202,13 +202,13 @@ open class File(
     fun isPDF() = getFileType() == ExtensionType.PDF
 
     fun onlyOfficeUrl() = if (isPublicShared()) {
-        ApiRoutes.showOfficeShareLinkFile(driveId, externalShareLinkUuid, file = this)
+        ApiRoutes.showPublicShareOfficeFile(driveId, publicShareUuid, file = this)
     } else {
         "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
     }
 
     fun downloadUrl() = if (isPublicShared()) {
-        ApiRoutes.downloadShareLinkFile(driveId, externalShareLinkUuid, file = this)
+        ApiRoutes.downloadPublicShareFile(driveId, publicShareUuid, file = this)
     } else {
         ApiRoutes.downloadFile(file = this)
     }

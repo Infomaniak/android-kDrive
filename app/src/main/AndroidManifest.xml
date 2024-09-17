@@ -216,7 +216,7 @@
             android:theme="@style/AppTheme.RequiredUpdate" />
 
         <activity
-            android:name=".ui.fileShared.FileSharedActivity"
+            android:name=".ui.publicShare.PublicShareActivity"
             android:configChanges="orientation|screenSize|layoutDirection" />
 
         <service android:name=".data.sync.MediaObserverService" />

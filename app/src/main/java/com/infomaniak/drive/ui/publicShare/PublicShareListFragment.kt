@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileShared
+package com.infomaniak.drive.ui.publicShare
 
 import android.content.Intent
 import android.os.Bundle
@@ -37,7 +37,7 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_D
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.FileListFragment
-import com.infomaniak.drive.ui.fileShared.FileSharedViewModel.Companion.ROOT_SHARED_FILE_ID
+import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
@@ -49,10 +49,10 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.core.R as RCore
 
-class FileSharedListFragment : FileListFragment() {
+class PublicShareListFragment : FileListFragment() {
 
-    private val fileSharedViewModel: FileSharedViewModel by activityViewModels()
-    private val navigationArgs: FileSharedListFragmentArgs by navArgs()
+    private val publicShareViewModel: PublicShareViewModel by activityViewModels()
+    private val navigationArgs: PublicShareListFragmentArgs by navArgs()
 
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
@@ -66,7 +66,7 @@ class FileSharedListFragment : FileListFragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         drivePermissions = DrivePermissions().apply {
-            registerPermissions(this@FileSharedListFragment) { authorized -> if (authorized) downloadAllFiles() }
+            registerPermissions(this@PublicShareListFragment) { authorized -> if (authorized) downloadAllFiles() }
         }
 
         return super.onCreateView(inflater, container, savedInstanceState)
@@ -88,7 +88,7 @@ class FileSharedListFragment : FileListFragment() {
                 when {
                     file.isFolder() -> openFolder(file)
                     file.isBookmark() -> openBookmark(file)
-                    else -> displayFile(file, mainViewModel, fileAdapter, shareLinkUuid = fileSharedViewModel.fileSharedLinkUuid)
+                    else -> displayFile(file, mainViewModel, fileAdapter, publicShareUuid = publicShareViewModel.publicShareUuid)
                 }
             }
         }
@@ -105,7 +105,7 @@ class FileSharedListFragment : FileListFragment() {
             menu?.findItem(R.id.downloadAllFiles)?.isVisible = true
         }
 
-        (requireActivity() as? FileSharedActivity)?.let { parentActivity ->
+        (requireActivity() as? PublicShareActivity)?.let { parentActivity ->
             parentActivity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
             setMainButton(parentActivity.getMainButton())
         }
@@ -128,8 +128,8 @@ class FileSharedListFragment : FileListFragment() {
     }
 
     private fun onBackPressed() {
-        fileSharedViewModel.cancelDownload()
-        if (folderId == fileSharedViewModel.rootSharedFile.value?.id || folderId == ROOT_SHARED_FILE_ID) {
+        publicShareViewModel.cancelDownload()
+        if (folderId == publicShareViewModel.rootSharedFile.value?.id || folderId == ROOT_SHARED_FILE_ID) {
             requireActivity().finish()
         } else {
             findNavController().popBackStack()
@@ -137,18 +137,18 @@ class FileSharedListFragment : FileListFragment() {
     }
 
     private fun observeFiles() {
-        fileSharedViewModel.childrenLiveData.observe(viewLifecycleOwner) { (files, shouldUpdate) ->
+        publicShareViewModel.childrenLiveData.observe(viewLifecycleOwner) { (files, shouldUpdate) ->
             if (shouldUpdate) populateFileList(files)
         }
     }
 
     private fun observeRootFile() {
-        fileSharedViewModel.rootSharedFile.observe(viewLifecycleOwner) { file ->
+        publicShareViewModel.rootSharedFile.observe(viewLifecycleOwner) { file ->
             if (file?.isFolder() == true) {
                 openFolder(file)
             } else {
                 val fileList = file?.let(::listOf) ?: listOf()
-                fileSharedViewModel.childrenLiveData.postValue(fileList to true)
+                publicShareViewModel.childrenLiveData.postValue(fileList to true)
             }
         }
     }
@@ -159,13 +159,13 @@ class FileSharedListFragment : FileListFragment() {
             shouldHideBottomNavigation = true,
             shouldShowSmallFab = false,
             fileListViewModel = fileListViewModel,
-            isSharedFile = true,
+            isPublicSharedFile = true,
         )
     }
 
     private fun downloadAllFiles() {
         // RootSharedFile can either be a folder or a single file
-        fileSharedViewModel.rootSharedFile.value?.let { file ->
+        publicShareViewModel.rootSharedFile.value?.let { file ->
             drivePermissions?.let { permissions -> requireContext().downloadFile(permissions, file) }
         }
     }
@@ -177,7 +177,7 @@ class FileSharedListFragment : FileListFragment() {
         if (data == null || destinationDriveId == DEFAULT_ID || destinationFolderId == DEFAULT_ID) {
             showSnackbar(RCore.string.anErrorHasOccurred)
         } else {
-            fileSharedViewModel.importFilesToDrive(
+            publicShareViewModel.importFilesToDrive(
                 destinationDriveId = destinationDriveId,
                 destinationFolderId = destinationFolderId,
                 fileIds = multiSelectManager.selectedItemsIds.toList(),
@@ -207,7 +207,6 @@ class FileSharedListFragment : FileListFragment() {
     }
 
     companion object {
-        const val MATOMO_CATEGORY = "FileSharedListAction"
         private const val DEFAULT_ID = -1
     }
 
@@ -216,11 +215,11 @@ class FileSharedListFragment : FileListFragment() {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
-            fileSharedViewModel.childrenLiveData.value = emptyList<File>() to false
+            publicShareViewModel.childrenLiveData.value = emptyList<File>() to false
 
-            with(fileSharedViewModel) {
+            with(publicShareViewModel) {
                 if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
-                    downloadSharedFile()
+                    downloadPublicShareRootFile()
                 } else {
                     getFiles(folderId, fileListViewModel.sortType)
                 }

@@ -30,10 +30,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navGraph="@navigation/file_shared_navigation" />
+        app:navGraph="@navigation/public_share_navigation" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/mainFileShareButton"
+        android:id="@+id/mainPublicShareButton"
         style="@style/ButtonInfomaniak"
         android:layout_width="match_parent"
         android:layout_marginHorizontal="@dimen/marginStandard"
