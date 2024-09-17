@@ -32,7 +32,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
@@ -177,7 +176,7 @@ fun downloadFile(
     onProgress: (progress: Int) -> Unit,
 ) {
     if (externalOutputFile.exists()) externalOutputFile.delete()
-    val downloadUrl = ApiRoutes.downloadFileUrl(file)
+    val downloadUrl = file.downloadUrl()
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
 
     DownloadOfflineFileManager.downloadFileResponse(downloadUrl, downloadInterceptor = downloadProgressInterceptor).use {
