@@ -64,7 +64,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     protected abstract val bottomSheetView: View
     protected abstract val bottomSheetBehavior: BottomSheetBehavior<View>
 
-    protected lateinit var drivePermissions: DrivePermissions
     protected lateinit var previewSliderAdapter: PreviewSliderAdapter
     protected lateinit var userDrive: UserDrive
     protected abstract val isFileShare: Boolean
@@ -73,6 +72,9 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
 
+    // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
+    // it implements
+    val drivePermissions: DrivePermissions = DrivePermissions()
     open val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {}
 
     val previewPDFHandler by lazy {
@@ -92,8 +94,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
         setBackActionHandlers()
 
-        drivePermissions = DrivePermissions().apply {
-            registerPermissions(this@BasePreviewSliderFragment) { authorized -> if (authorized) downloadFileClicked() }
+        drivePermissions.registerPermissions(this@BasePreviewSliderFragment) { authorized ->
+            if (authorized) downloadFileClicked()
         }
 
         header.apply {

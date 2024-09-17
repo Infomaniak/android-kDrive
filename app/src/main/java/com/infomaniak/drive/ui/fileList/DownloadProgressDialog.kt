@@ -22,11 +22,15 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.lib.core.utils.setBackNavigationResult
 
 class DownloadProgressDialog : BaseDownloadProgressDialog() {
 
     private val downloadProgressViewModel: DownloadProgressViewModel by viewModels()
+    private val navigationArgs: DownloadProgressDialogArgs by navArgs()
+
+    override val dialogTitle get() = navigationArgs.fileName
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = with(navigationArgs) {
         downloadProgressViewModel.getLocalFile(fileId, userDrive)

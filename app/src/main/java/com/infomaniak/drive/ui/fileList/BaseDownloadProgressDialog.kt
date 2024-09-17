@@ -26,7 +26,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
@@ -37,13 +36,16 @@ import kotlinx.coroutines.launch
 abstract class BaseDownloadProgressDialog : DialogFragment() {
 
     protected val binding: DialogDownloadProgressBinding by lazy { DialogDownloadProgressBinding.inflate(layoutInflater) }
-    protected val navigationArgs: DownloadProgressDialogArgs by navArgs()
+
+    abstract val dialogTitle: String
+
+    abstract fun observeDownloadedFile()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         isCancelable = false
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
-            .setTitle(navigationArgs.fileName)
+            .setTitle(dialogTitle)
             .setView(binding.root)
             .setOnKeyListener { _, keyCode, event ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_UP) {
@@ -62,8 +64,6 @@ abstract class BaseDownloadProgressDialog : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         observeDownloadedFile()
     }
-
-    abstract fun observeDownloadedFile()
 
     protected fun setProgress(progress: Int?, onProgressComplete: suspend () -> Unit) {
         progress?.let {
