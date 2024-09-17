@@ -42,14 +42,17 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
+import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.utils.SentryLog
+import com.infomaniak.lib.core.utils.showToast
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
@@ -60,7 +63,6 @@ class LaunchActivity : AppCompatActivity() {
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
     private var publicShareActivityExtras: Bundle? = null
-
     private var isHelpShortcutPressed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -167,7 +169,7 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-    private fun processPublicShare(path: String) {
+    private suspend fun processPublicShare(path: String) {
         Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
             val (driveId, publicShareUuid) = match.destructured
 
@@ -188,6 +190,10 @@ class LaunchActivity : AppCompatActivity() {
                 }
                 ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
                 else -> {
+                    if (apiResponse.error?.exception is ApiController.NetworkException) {
+                        Dispatchers.Main { showToast(R.string.errorNetwork) }
+                        finishAndRemoveTask()
+                    }
                     Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
                 }
             }
