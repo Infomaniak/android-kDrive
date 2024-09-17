@@ -53,15 +53,11 @@ class FileSharedActivity : AppCompatActivity() {
         destination.addSentryBreadcrumb()
         destination.trackDestination(context = this)
 
-        val isMainButtonVisible = when (destination.id) {
-            R.id.fileSharedListFragment, R.id.fileSharedBottomSheetFileActions -> {
-                setColorStatusBar()
-                setColorNavigationBar()
-                true
-            }
-            else -> false
+        if (destination.id == R.id.fileSharedListFragment || destination.id == R.id.fileSharedBottomSheetFileActions) {
+            setColorStatusBar()
+            setColorNavigationBar()
         }
-        binding.mainFileShareButton.isVisible = isMainButtonVisible
+        binding.mainFileShareButton.isVisible = destination.id == R.id.fileSharedListFragment
     }
 
     fun getMainButton() = binding.mainFileShareButton
