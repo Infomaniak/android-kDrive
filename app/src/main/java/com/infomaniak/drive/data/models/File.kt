@@ -514,7 +514,7 @@ open class File(
         val fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         if (fileNeedDownload) {
             navigateToDownloadDialog?.invoke()
-            downloadFile(cacheFile, fileModel = this, shouldBePdf, onProgress)
+            downloadFile(cacheFile, file = this, shouldBePdf, onProgress)
             cacheFile.setLastModified(getLastModifiedInMilliSecond())
         }
 
