@@ -1376,19 +1376,22 @@
                             <option name="y" value="368" />
                           </Point>
                         </option>
-                        <option name="myPositions">
-                          <map>
-                            <entry key="action_previewFragment_to_fileDetailsFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                          </map>
-                        </option>
                       </LayoutPositions>
                     </value>
                   </entry>
                   <entry key="publicShareActivity">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="publicShareFileActionsBottomSheet">
                     <value>
                       <LayoutPositions>
                         <option name="myPosition">
@@ -1411,6 +1414,11 @@
                         </option>
                         <option name="myPositions">
                           <map>
+                            <entry key="action_publicShareListFragment_to_publicShareBottomSheetFileActions">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_publicShareListFragment_to_publicSharePreviewSliderFragment">
                               <value>
                                 <LayoutPositions />

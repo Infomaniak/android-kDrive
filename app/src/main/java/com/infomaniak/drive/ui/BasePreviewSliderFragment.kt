@@ -72,6 +72,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     override val currentContext by lazy { requireContext() }
     override lateinit var currentFile: File
 
+    // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
+    // it implements
     val drivePermissions: DrivePermissions = DrivePermissions()
     open val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {}
 
