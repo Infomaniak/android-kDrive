@@ -94,13 +94,7 @@ class PublicShareListFragment : FileListFragment() {
         setToolbarTitle(R.string.sharedWithMeTitle)
         binding.uploadFileInProgressView.isGone = true
 
-        fileAdapter.apply {
-            initAsyncListDiffer()
-            onMenuClicked = ::onMenuClicked
-            onFileClicked = ::onFileClicked
-        }
-
-        setupBasicMultiSelectLayout()
+        initFileAdapter()
 
         binding.toolbar.apply {
             setOnMenuItemClickListener { menuItem ->
@@ -109,7 +103,7 @@ class PublicShareListFragment : FileListFragment() {
             }
 
             setNavigationOnClickListener { onBackPressed() }
-            menu?.findItem(R.id.downloadAllFiles)?.isVisible = true
+            menu?.findItem(R.id.downloadAllFiles)?.isVisible = publicShareViewModel.canDownloadFiles
         }
 
         (requireActivity() as? PublicShareActivity)?.let { parentActivity ->
@@ -117,11 +111,28 @@ class PublicShareListFragment : FileListFragment() {
             setMainButton(parentActivity.getMainButton())
         }
 
-        multiSelectManager.currentFolder = publicShareViewModel.fileClicked
-        mainViewModel.setCurrentFolder(multiSelectManager.currentFolder)
+        setupMultiSelect()
 
         observeRootFile()
         observeFiles()
+    }
+
+    private fun initFileAdapter() {
+        fileAdapter.apply {
+            initAsyncListDiffer()
+            onMenuClicked = ::onMenuClicked
+            onFileClicked = ::onFileClicked
+            publicShareCanDownload = publicShareViewModel.canDownloadFiles
+        }
+    }
+
+    private fun setupMultiSelect() {
+        setupBasicMultiSelectLayout()
+        multiSelectManager.apply {
+            isMultiSelectAuthorized = publicShareViewModel.canDownloadFiles
+            currentFolder = publicShareViewModel.fileClicked
+            mainViewModel.setCurrentFolder(currentFolder)
+        }
     }
 
     override fun onMenuButtonClicked(

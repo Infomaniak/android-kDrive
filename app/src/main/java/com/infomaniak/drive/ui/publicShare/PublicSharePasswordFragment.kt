@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
@@ -107,16 +108,17 @@ class PublicSharePasswordFragment : Fragment() {
     }
 
     private fun observeInitResult() {
-        publicShareViewModel.initPublicShareResult.observe(viewLifecycleOwner) { (errorMessage, fileId) ->
-            errorMessage?.let(::onInitError) ?: onInitSuccess(fileId)
+        publicShareViewModel.initPublicShareResult.observe(viewLifecycleOwner) { (errorMessage, shareLink) ->
+            errorMessage?.let(::onInitError) ?: onInitSuccess(shareLink)
         }
     }
 
-    private fun onInitSuccess(fileId: Int?) {
+    private fun onInitSuccess(shareLink: ShareLink?) {
         binding.passwordValidateButton.hideProgressCatching(R.string.buttonValid)
+        publicShareViewModel.canDownloadFiles = shareLink?.capabilities?.canDownload == true
         safeNavigate(
             PublicSharePasswordFragmentDirections.actionPublicSharePasswordFragmentToPublicShareListFragment(
-                fileId = fileId ?: PUBLIC_SHARE_DEFAULT_ID,
+                fileId = shareLink?.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
             )
         )
     }

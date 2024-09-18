@@ -68,6 +68,12 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
 
         initCurrentFile()
 
+        initPreviewSliderViewModel()
+
+        return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
+    }
+
+    private fun initPreviewSliderViewModel() {
         previewSliderViewModel.currentPreview = currentFile
 
         if (previewSliderViewModel.currentPreview == null) {
@@ -78,8 +84,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
         }
 
         previewSliderViewModel.publicShareUuid = navigationArgs.publicShareUuid
-
-        return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
+        previewSliderViewModel.publicShareCanDownload = publicShareViewModel.canDownloadFiles
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -89,7 +94,11 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     }
 
     private fun initBottomSheet() = with(bottomSheetView) {
-        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
+        requireActivity().setupBottomSheetFileBehavior(
+            bottomSheetBehavior = bottomSheetBehavior,
+            isDraggable = publicShareViewModel.canDownloadFiles,
+            isFitToContents = true,
+        )
         updateWithExternalFile(currentFile)
         initOnClickListener(onItemClickListener = this@PublicSharePreviewSliderFragment)
     }

@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderRe
 import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.printPdf
@@ -49,9 +50,10 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     var fileClicked: File? = null
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
-    val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, Int?>>()
+    val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, ShareLink?>>()
     val submitPasswordResult = SingleLiveEvent<Boolean?>()
     var hasBeenAuthenticated = false
+    var canDownloadFiles = canDownload
 
     val driveId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
@@ -65,15 +67,18 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     val isExpired: Boolean
         inline get() = savedStateHandle[PublicShareActivityArgs::isExpired.name] ?: false
 
+    private val canDownload: Boolean
+        inline get() = savedStateHandle[PublicShareActivityArgs::canDownload.name] ?: false
+
     private val fileId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
 
     private var getPublicShareFilesJob: Job = Job()
     private var currentCursor: String? = null
 
-    fun initPublicShare() = viewModelScope.launch(Dispatchers.IO) {
+    fun initPublicShare() {
         val apiResponse = ApiRepository.getPublicShareInfo(driveId, publicShareUuid)
-        val result = if (apiResponse.isSuccess()) null to apiResponse.data?.fileId else apiResponse.error to null
+        val result = if (apiResponse.isSuccess()) null to apiResponse.data else apiResponse.error to null
 
         initPublicShareResult.postValue(result)
     }
@@ -87,9 +92,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
             rootSharedFile.value
         } else {
             val apiResponse = ApiRepository.getPublicShareRootFile(driveId, publicShareUuid, fileId)
-            if (!apiResponse.isSuccess()) {
-                SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
-            }
+            if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
             apiResponse.data
         }
 
