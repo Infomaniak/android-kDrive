@@ -20,7 +20,10 @@ package com.infomaniak.drive.ui.publicShare
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.FileProvider
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
@@ -35,7 +38,6 @@ import com.infomaniak.drive.utils.printPdf
 import com.infomaniak.drive.utils.saveToKDrive
 import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.lib.core.models.ApiError
-import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.*
@@ -47,6 +49,8 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     var fileClicked: File? = null
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
+    val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, Int?>>()
+    val submitPasswordResult = SingleLiveEvent<Boolean?>()
     var hasBeenAuthenticated = false
 
     val driveId: Int
@@ -64,18 +68,15 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     private var getPublicShareFilesJob: Job = Job()
     private var currentCursor: String? = null
 
-    fun initPublicShare(onSuccess: (Int?) -> Unit, onError: (ApiError?) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
+    fun initPublicShare() = viewModelScope.launch(Dispatchers.IO) {
         val apiResponse = ApiRepository.getPublicShareInfo(driveId, publicShareUuid)
-        Dispatchers.Main {
-            when (apiResponse.result) {
-                ApiResponseStatus.SUCCESS -> apiResponse.data?.let { onSuccess(it.fileId) } ?: onError(null)
-                else -> onError(apiResponse.error)
-            }
-        }
+        val result = if (apiResponse.isSuccess()) null to apiResponse.data?.fileId else apiResponse.error to null
+
+        initPublicShareResult.postValue(result)
     }
 
-    fun submitPublicSharePassword(password: String) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.submitPublicSharePassword(driveId, publicShareUuid, password).data)
+    fun submitPublicSharePassword(password: String) = viewModelScope.launch(Dispatchers.IO) {
+        submitPasswordResult.postValue(ApiRepository.submitPublicSharePassword(driveId, publicShareUuid, password).data)
     }
 
     fun downloadPublicShareRootFile() = viewModelScope.launch(Dispatchers.IO) {
