@@ -226,7 +226,6 @@ class PublicShareListFragment : FileListFragment() {
                     )
                 }
             },
-            onDownloadSuccess = {},
             onDownloadError = {
                 showSnackbar(
                     title = R.string.errorGetBookmarkURL,
