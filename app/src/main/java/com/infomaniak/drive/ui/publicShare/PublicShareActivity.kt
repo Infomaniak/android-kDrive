@@ -59,7 +59,9 @@ class PublicShareActivity : AppCompatActivity() {
             setColorStatusBar()
             setColorNavigationBar()
         }
-        binding.mainPublicShareButton.isVisible = destination.id == R.id.publicShareListFragment && publicShareViewModel.canDownloadFiles
+
+        val isMainButtonVisible = destination.id == R.id.publicShareListFragment && publicShareViewModel.canDownloadFiles
+        binding.mainPublicShareButton.isVisible = isMainButtonVisible
 
     }
 

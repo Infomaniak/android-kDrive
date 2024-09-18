@@ -92,9 +92,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
             rootSharedFile.value
         } else {
             val apiResponse = ApiRepository.getPublicShareRootFile(driveId, publicShareUuid, fileId)
-            if (!apiResponse.isSuccess()) {
-                SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
-            }
+            if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
             apiResponse.data
         }
 
