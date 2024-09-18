@@ -32,6 +32,7 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
+import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.utils.*
@@ -93,7 +94,7 @@ class PublicSharePasswordFragment : Fragment() {
                 } else {
                     hideProgressCatching(R.string.buttonValid)
                     binding.publicSharePasswordEditText.text = null
-                    binding.publicSharePasswordLayout.error = getString(R.string.wrongPdfPassword)
+                    binding.publicSharePasswordLayout.error = getString(R.string.errorWrongPassword)
                 }
             }
         }
@@ -103,7 +104,7 @@ class PublicSharePasswordFragment : Fragment() {
         binding.passwordValidateButton.hideProgressCatching(R.string.buttonValid)
         safeNavigate(
             PublicSharePasswordFragmentDirections.actionPublicSharePasswordFragmentToPublicShareListFragment(
-                fileId = fileId ?: -1,
+                fileId = fileId ?: PUBLIC_SHARE_DEFAULT_ID,
             )
         )
     }

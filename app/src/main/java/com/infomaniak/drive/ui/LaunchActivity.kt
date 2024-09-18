@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
+import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -188,7 +189,7 @@ class LaunchActivity : AppCompatActivity() {
                     publicShareActivityExtras = PublicShareActivityArgs(
                         driveId = driveId.toInt(),
                         publicShareUuid = publicShareUuid,
-                        fileId = shareLink.fileId ?: -1,
+                        fileId = shareLink.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
                     ).toBundle()
 
                     trackDeepLink("publicShare")
