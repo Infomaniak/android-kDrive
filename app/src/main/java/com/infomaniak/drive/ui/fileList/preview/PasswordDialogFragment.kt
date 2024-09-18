@@ -71,7 +71,7 @@ class PasswordDialogFragment : DialogFragment() {
         passwordEditText.text?.clear()
         passwordLayout.apply {
             isErrorEnabled = true
-            error = getString(R.string.wrongPdfPassword)
+            error = getString(R.string.errorWrongPassword)
         }
     }
 
