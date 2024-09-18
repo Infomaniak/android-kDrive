@@ -37,6 +37,7 @@ import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.printPdf
 import com.infomaniak.drive.utils.saveToKDrive
 import com.infomaniak.drive.utils.shareFile
+import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.*
@@ -48,6 +49,9 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     var fileClicked: File? = null
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
+    val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, Int?>>()
+    val submitPasswordResult = SingleLiveEvent<Boolean?>()
+    var hasBeenAuthenticated = false
 
     val driveId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
@@ -55,11 +59,25 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     val publicShareUuid: String
         inline get() = savedStateHandle[PublicShareActivityArgs::publicShareUuid.name] ?: ""
 
+    val isPasswordNeeded: Boolean
+        inline get() = savedStateHandle[PublicShareActivityArgs::isPasswordNeeded.name] ?: false
+
     private val fileId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
 
     private var getPublicShareFilesJob: Job = Job()
     private var currentCursor: String? = null
+
+    fun initPublicShare() = viewModelScope.launch(Dispatchers.IO) {
+        val apiResponse = ApiRepository.getPublicShareInfo(driveId, publicShareUuid)
+        val result = if (apiResponse.isSuccess()) null to apiResponse.data?.fileId else apiResponse.error to null
+
+        initPublicShareResult.postValue(result)
+    }
+
+    fun submitPublicSharePassword(password: String) = viewModelScope.launch(Dispatchers.IO) {
+        submitPasswordResult.postValue(ApiRepository.submitPublicSharePassword(driveId, publicShareUuid, password).data)
+    }
 
     fun downloadPublicShareRootFile() = viewModelScope.launch(Dispatchers.IO) {
         val file = if (fileId == ROOT_SHARED_FILE_ID) {

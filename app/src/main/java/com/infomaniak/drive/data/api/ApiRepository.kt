@@ -306,7 +306,20 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getPublicShareInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
-        return callApi(ApiRoutes.getPublicShareInfo(driveId, linkUuid), GET)
+        return callApi(
+            url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
+            method = GET,
+            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+        )
+    }
+
+    fun submitPublicSharePassword(driveId: Int, linkUuid: String, password: String): ApiResponse<Boolean> {
+        return callApi(
+            url = ApiRoutes.submitPublicSharePassword(driveId, linkUuid),
+            method = POST,
+            body = mapOf("password" to password),
+            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+        )
     }
 
     fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
@@ -324,7 +337,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiWithCursor(url, GET)
     }
 
-    fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount>{
+    fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount> {
         return callApi(ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId), GET)
     }
 

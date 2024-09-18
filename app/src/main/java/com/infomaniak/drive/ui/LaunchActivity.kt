@@ -30,6 +30,7 @@ import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
@@ -37,6 +38,7 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
+import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -44,6 +46,7 @@ import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
+import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.showToast
@@ -183,19 +186,33 @@ class LaunchActivity : AppCompatActivity() {
                     publicShareActivityExtras = PublicShareActivityArgs(
                         driveId = driveId.toInt(),
                         publicShareUuid = publicShareUuid,
-                        fileId = shareLink.fileId ?: -1,
+                        fileId = shareLink.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
                     ).toBundle()
 
-                    trackDeepLink("external")
+                    trackDeepLink("publicShare")
                 }
                 ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
-                else -> {
-                    if (apiResponse.error?.exception is ApiController.NetworkException) {
-                        Dispatchers.Main { showToast(R.string.errorNetwork) }
-                        finishAndRemoveTask()
-                    }
-                    Log.e("TOTO", "downloadSharedFile: ${apiResponse.error?.code}")
-                }
+                else -> handlePublicShareError(apiResponse.error, driveId, publicShareUuid)
+            }
+        }
+    }
+
+    private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
+        when {
+            error?.exception is ApiController.NetworkException -> {
+                Dispatchers.Main { showToast(R.string.errorNetwork) }
+                finishAndRemoveTask()
+            }
+            error?.code == ErrorCode.PASSWORD_NOT_VALID -> {
+                publicShareActivityExtras = PublicShareActivityArgs(
+                    driveId = driveId.toInt(),
+                    publicShareUuid = publicShareUuid,
+                    isPasswordNeeded = true,
+                ).toBundle()
+                trackDeepLink("publicShareWithPassword")
+            }
+            else -> {
+                Log.e("TOTO", "downloadSharedFile: ${error?.code}")
             }
         }
     }

@@ -142,6 +142,7 @@
     <string name="buttonNoDriveAnotherUser">Utiliser un autre profil Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Tester gratuitement</string>
     <string name="buttonOpenDocument">Ouvrir le document</string>
+    <string name="buttonOpenInBrowser">Ouvrir dans le navigateur</string>
     <string name="buttonOpenReadOnly">Ouvrir en lecture seule</string>
     <string name="buttonPlayerFfwd">Avancer de quelques secondes</string>
     <string name="buttonPlayerNext">Suivant</string>
@@ -273,6 +274,7 @@
     <string name="errorSave">Erreur lors de l’enregistrement</string>
     <string name="errorShareAddUser">Ce fichier est déjà partagé avec cet utilisateur.</string>
     <string name="errorShareLink">Erreur lors de la création du lien</string>
+    <string name="errorWrongPassword">Mot de passe incorrect</string>
     <string name="favoritesNoFile">Aucun favori pour le moment</string>
     <string name="favoritesTitle">Favoris</string>
     <string name="fileActivityCollaborativeFolderAccess">a consulté la boîte de dépôt</string>
@@ -552,6 +554,9 @@
     <string name="previewNoPreview">Il semblerait que ce fichier n’ait pas d’aperçu.</string>
     <string name="previewPdfPages">%1$d sur %2$d</string>
     <string name="previewVideoSourceError">Fichier vidéo non pris en charge par le lecteur vidéo</string>
+    <string name="publicSharePasswordNeededDescription">Veuillez saisir le mot de passe qui vous a été fourni pour accéder au contenu.</string>
+    <string name="publicSharePasswordNeededTitle">Contenu sécurisé</string>
+    <string name="publicSharePasswordNotSupportedDescription">Les liens protégés par mot de passe ne sont pas encore disponibles sur l’application mobile.</string>
     <string name="publicSharedLinkTitle">Lien de partage public</string>
     <string name="recentActivityMeTitle">Par moi</string>
     <string name="recentActivityMyTeam">Par mon équipe</string>
@@ -734,5 +739,4 @@
     <string name="userPermissionRemove">L’utilisateur n’aura plus accès à ce fichier.</string>
     <string name="userPermissionWrite">Peut modifier</string>
     <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier</string>
-    <string name="wrongPdfPassword">Mot de passe incorrect</string>
 </resources>

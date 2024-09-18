@@ -142,6 +142,7 @@
     <string name="buttonNoDriveAnotherUser">Utilizar otro perfil Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Probar gratuitamente</string>
     <string name="buttonOpenDocument">Abrir el documento</string>
+    <string name="buttonOpenInBrowser">Abrir en el navegador</string>
     <string name="buttonOpenReadOnly">Abrir en modo de solo lectura</string>
     <string name="buttonPlayerFfwd">Avanzar unos segundos</string>
     <string name="buttonPlayerNext">Siguiente</string>
@@ -273,6 +274,7 @@
     <string name="errorSave">Error al guardar</string>
     <string name="errorShareAddUser">Este archivo ya está compartido con este usuario.</string>
     <string name="errorShareLink">Error al crear el enlace</string>
+    <string name="errorWrongPassword">Contraseña incorrecta</string>
     <string name="favoritesNoFile">Todavía no hay favoritos</string>
     <string name="favoritesTitle">Favoritos</string>
     <string name="fileActivityCollaborativeFolderAccess">ha consultado el buzón de depósito</string>
@@ -552,6 +554,9 @@
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>
     <string name="previewPdfPages">%1$d de %2$d</string>
     <string name="previewVideoSourceError">El archivo de vídeo no es compatible con el lector de vídeo</string>
+    <string name="publicSharePasswordNeededDescription">Introduzca la contraseña que se le ha facilitado para acceder al contenido.</string>
+    <string name="publicSharePasswordNeededTitle">Contenido seguro</string>
+    <string name="publicSharePasswordNotSupportedDescription">Los enlaces protegidos por contraseña aún no están disponibles en la aplicación móvil.</string>
     <string name="publicSharedLinkTitle">Enlace de uso compartido público</string>
     <string name="recentActivityMeTitle">Por mí</string>
     <string name="recentActivityMyTeam">Por mi equipo</string>
@@ -734,5 +739,4 @@
     <string name="userPermissionRemove">El usuario ya no tendrá acceso a este archivo.</string>
     <string name="userPermissionWrite">Puede modificar</string>
     <string name="userPermissionWriteDescription">Modificar el archivo\nDescargar\nAñadir comentario\nAñadir y crear archivo/carpeta\nEliminar el archivo</string>
-    <string name="wrongPdfPassword">Contraseña incorrecta</string>
 </resources>

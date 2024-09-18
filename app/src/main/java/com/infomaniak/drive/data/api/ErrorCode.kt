@@ -28,6 +28,7 @@ object ErrorCode {
     const val DESTINATION_ALREADY_EXISTS = "destination_already_exists"
     const val NO_DRIVE = "no_drive"
     const val SHARE_LINK_ALREADY_EXISTS = "file_share_link_already_exists"
+    const val PASSWORD_NOT_VALID = "password_not_valid"
 
     val apiErrorCodes = listOf(
         ApiErrorCode(CATEGORY_ALREADY_EXISTS, R.string.errorCategoryAlreadyExists),

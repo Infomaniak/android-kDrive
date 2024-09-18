@@ -66,6 +66,14 @@ class PublicShareListFragment : FileListFragment() {
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (publicShareViewModel.isPasswordNeeded && !publicShareViewModel.hasBeenAuthenticated) {
+            safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicSharePasswordFragment())
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         drivePermissions.registerPermissions(this@PublicShareListFragment) { authorized -> if (authorized) downloadAllFiles() }
 
@@ -193,10 +201,10 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     private fun onDriveAndFolderSelected(data: Intent?) {
-        val destinationDriveId = data?.getIntExtra(DESTINATION_DRIVE_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
-        val destinationFolderId = data?.getIntExtra(DESTINATION_FOLDER_ID_KEY, DEFAULT_ID) ?: DEFAULT_ID
+        val destinationDriveId = data?.getIntExtra(DESTINATION_DRIVE_ID_KEY, PUBLIC_SHARE_DEFAULT_ID) ?: PUBLIC_SHARE_DEFAULT_ID
+        val destinationFolderId = data?.getIntExtra(DESTINATION_FOLDER_ID_KEY, PUBLIC_SHARE_DEFAULT_ID) ?: PUBLIC_SHARE_DEFAULT_ID
 
-        if (data == null || destinationDriveId == DEFAULT_ID || destinationFolderId == DEFAULT_ID) {
+        if (data == null || destinationDriveId == PUBLIC_SHARE_DEFAULT_ID || destinationFolderId == PUBLIC_SHARE_DEFAULT_ID) {
             showSnackbar(RCore.string.anErrorHasOccurred)
         } else {
             publicShareViewModel.importFilesToDrive(
@@ -229,7 +237,7 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     companion object {
-        private const val DEFAULT_ID = -1
+        const val PUBLIC_SHARE_DEFAULT_ID = -1
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {

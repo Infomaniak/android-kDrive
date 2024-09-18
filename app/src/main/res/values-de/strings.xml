@@ -142,6 +142,7 @@
     <string name="buttonNoDriveAnotherUser">Ein anderes Infomaniak-Profil verwenden</string>
     <string name="buttonNoDriveFreeTest">Kostenlos testen</string>
     <string name="buttonOpenDocument">Dokument öffnen</string>
+    <string name="buttonOpenInBrowser">Im Browser öffnen</string>
     <string name="buttonOpenReadOnly">Im Lese-Modus öffnen</string>
     <string name="buttonPlayerFfwd">Einige Sekunden vorspulen</string>
     <string name="buttonPlayerNext">Weiter</string>
@@ -273,6 +274,7 @@
     <string name="errorSave">Fehler bei der Speicherung</string>
     <string name="errorShareAddUser">Diese Datei ist bereits für diesen Benutzer freigegeben.</string>
     <string name="errorShareLink">Fehler bei der Erstellung des Links</string>
+    <string name="errorWrongPassword">Falsches Passwort</string>
     <string name="favoritesNoFile">Derzeit keine Favoriten</string>
     <string name="favoritesTitle">Favoriten</string>
     <string name="fileActivityCollaborativeFolderAccess">hat die Briefkasten eingesehen</string>
@@ -552,6 +554,9 @@
     <string name="previewNoPreview">Es scheint, als ob diese Datei keine Vorschau hat.</string>
     <string name="previewPdfPages">%1$d von %2$d</string>
     <string name="previewVideoSourceError">Videodatei wird vom Videoplayer nicht unterstützt</string>
+    <string name="publicSharePasswordNeededDescription">Bitte geben Sie das Passwort ein, das Sie erhalten haben, um auf den Inhalt zuzugreifen.</string>
+    <string name="publicSharePasswordNeededTitle">Sicherer Inhalt</string>
+    <string name="publicSharePasswordNotSupportedDescription">Passwortgeschützte Links sind in der mobilen Anwendung noch nicht verfügbar.</string>
     <string name="publicSharedLinkTitle">Öffentlicher Freigabelink</string>
     <string name="recentActivityMeTitle">Durch mich</string>
     <string name="recentActivityMyTeam">Durch mein Team</string>
@@ -734,5 +739,4 @@
     <string name="userPermissionRemove">Der Benutzer hat keinen Zugriff auf diese Datei mehr.</string>
     <string name="userPermissionWrite">Kann ändern</string>
     <string name="userPermissionWriteDescription">Änderung der Datei\nDownload\nHinzufügen eines Kommentars\nHinzufügen und Anlegen einer Datei / eines Ordners\nLöschen der Datei</string>
-    <string name="wrongPdfPassword">Falsches Passwort</string>
 </resources>
