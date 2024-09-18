@@ -56,6 +56,8 @@ class PublicSharePasswordFragment : Fragment() {
         passwordValidateButton.setOnClickListener { requireContext().openDeepLinkInBrowser(getPublicShareUrl()) }
 
         publicSharePasswordEditText.addTextChangedListener { publicSharePasswordLayout.error = null }
+        observeSubmitPasswordResult()
+        observeInitResult()
     }
 
     //region Hack TODO: Remove this when the back will support bearer token
@@ -87,16 +89,26 @@ class PublicSharePasswordFragment : Fragment() {
 
             showProgressCatching()
             val password = binding.publicSharePasswordEditText.text?.trim().toString()
-            publicShareViewModel.submitPublicSharePassword(password).observe(viewLifecycleOwner) { isAuthorized ->
-                if (isAuthorized == true) {
-                    publicShareViewModel.hasBeenAuthenticated = true
-                    publicShareViewModel.initPublicShare(::onInitSuccess, ::onInitError)
-                } else {
-                    hideProgressCatching(R.string.buttonValid)
-                    binding.publicSharePasswordEditText.text = null
-                    binding.publicSharePasswordLayout.error = getString(R.string.errorWrongPassword)
-                }
+            publicShareViewModel.submitPublicSharePassword(password)
+        }
+    }
+
+    private fun observeSubmitPasswordResult() = with(binding) {
+        publicShareViewModel.submitPasswordResult.observe(viewLifecycleOwner) { isAuthorized ->
+            if (isAuthorized == true) {
+                publicShareViewModel.hasBeenAuthenticated = true
+                publicShareViewModel.initPublicShare()
+            } else {
+                passwordValidateButton.hideProgressCatching(R.string.buttonValid)
+                publicSharePasswordEditText.text = null
+                publicSharePasswordLayout.error = getString(R.string.errorWrongPassword)
             }
+        }
+    }
+
+    private fun observeInitResult() {
+        publicShareViewModel.initPublicShareResult.observe(viewLifecycleOwner) { (errorMessage, fileId) ->
+            errorMessage?.let(::onInitError) ?: onInitSuccess(fileId)
         }
     }
 
