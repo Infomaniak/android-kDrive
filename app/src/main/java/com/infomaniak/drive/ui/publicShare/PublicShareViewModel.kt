@@ -164,7 +164,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
         downloadAction: DownloadAction,
         file: File?,
         navigateToDownloadDialog: suspend () -> Unit,
-        onDownloadSuccess: () -> Unit,
+        onDownloadSuccess: (() -> Unit)? = null,
         onDownloadError: () -> Unit,
     ) = viewModelScope.launch(Dispatchers.IO) {
         runCatching {
@@ -186,11 +186,11 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
                 DownloadAction.PRINT_PDF -> activityContext.printPdf(cacheFile)
             }
 
-            withContext(Dispatchers.Main) { onDownloadSuccess() }
+            Dispatchers.Main { onDownloadSuccess?.invoke() }
         }.onFailure { exception ->
             downloadProgressLiveData.postValue(null)
             exception.printStackTrace()
-            withContext(Dispatchers.Main) { onDownloadError() }
+            Dispatchers.Main { onDownloadError() }
         }
     }
 
