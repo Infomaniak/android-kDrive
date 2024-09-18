@@ -35,6 +35,14 @@
         app:layout_constraintGuide_end="@dimen/marginStandard" />
 
     <ImageView
+        android:id="@+id/logos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_app_logos"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
         android:id="@+id/iconLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
