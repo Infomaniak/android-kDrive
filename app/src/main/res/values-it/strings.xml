@@ -274,6 +274,7 @@
     <string name="errorSave">Errore durante il salvataggio</string>
     <string name="errorShareAddUser">Questo file è già condiviso con questo utente.</string>
     <string name="errorShareLink">Errore durante la creazione del link</string>
+    <string name="errorWrongPassword">Password errata</string>
     <string name="favoritesNoFile">Al momento non sono disponibili preferiti</string>
     <string name="favoritesTitle">Preferiti</string>
     <string name="fileActivityCollaborativeFolderAccess">ha consultato il deposito file</string>
@@ -738,5 +739,4 @@
     <string name="userPermissionRemove">L’utente non avrà più accesso a questo file.</string>
     <string name="userPermissionWrite">Può modificare</string>
     <string name="userPermissionWriteDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file</string>
-    <string name="wrongPdfPassword">Password errata</string>
 </resources>

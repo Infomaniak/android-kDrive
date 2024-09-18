@@ -274,6 +274,7 @@
     <string name="errorSave">Fehler bei der Speicherung</string>
     <string name="errorShareAddUser">Diese Datei ist bereits für diesen Benutzer freigegeben.</string>
     <string name="errorShareLink">Fehler bei der Erstellung des Links</string>
+    <string name="errorWrongPassword">Falsches Passwort</string>
     <string name="favoritesNoFile">Derzeit keine Favoriten</string>
     <string name="favoritesTitle">Favoriten</string>
     <string name="fileActivityCollaborativeFolderAccess">hat die Briefkasten eingesehen</string>
@@ -738,5 +739,4 @@
     <string name="userPermissionRemove">Der Benutzer hat keinen Zugriff auf diese Datei mehr.</string>
     <string name="userPermissionWrite">Kann ändern</string>
     <string name="userPermissionWriteDescription">Änderung der Datei\nDownload\nHinzufügen eines Kommentars\nHinzufügen und Anlegen einer Datei / eines Ordners\nLöschen der Datei</string>
-    <string name="wrongPdfPassword">Falsches Passwort</string>
 </resources>

@@ -274,6 +274,7 @@
     <string name="errorSave">Error al guardar</string>
     <string name="errorShareAddUser">Este archivo ya está compartido con este usuario.</string>
     <string name="errorShareLink">Error al crear el enlace</string>
+    <string name="errorWrongPassword">Contraseña incorrecta</string>
     <string name="favoritesNoFile">Todavía no hay favoritos</string>
     <string name="favoritesTitle">Favoritos</string>
     <string name="fileActivityCollaborativeFolderAccess">ha consultado el buzón de depósito</string>
@@ -738,5 +739,4 @@
     <string name="userPermissionRemove">El usuario ya no tendrá acceso a este archivo.</string>
     <string name="userPermissionWrite">Puede modificar</string>
     <string name="userPermissionWriteDescription">Modificar el archivo\nDescargar\nAñadir comentario\nAñadir y crear archivo/carpeta\nEliminar el archivo</string>
-    <string name="wrongPdfPassword">Contraseña incorrecta</string>
 </resources>

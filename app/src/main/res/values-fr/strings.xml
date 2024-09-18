@@ -274,6 +274,7 @@
     <string name="errorSave">Erreur lors de l’enregistrement</string>
     <string name="errorShareAddUser">Ce fichier est déjà partagé avec cet utilisateur.</string>
     <string name="errorShareLink">Erreur lors de la création du lien</string>
+    <string name="errorWrongPassword">Mot de passe incorrect</string>
     <string name="favoritesNoFile">Aucun favori pour le moment</string>
     <string name="favoritesTitle">Favoris</string>
     <string name="fileActivityCollaborativeFolderAccess">a consulté la boîte de dépôt</string>
@@ -738,5 +739,4 @@
     <string name="userPermissionRemove">L’utilisateur n’aura plus accès à ce fichier.</string>
     <string name="userPermissionWrite">Peut modifier</string>
     <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier</string>
-    <string name="wrongPdfPassword">Mot de passe incorrect</string>
 </resources>
