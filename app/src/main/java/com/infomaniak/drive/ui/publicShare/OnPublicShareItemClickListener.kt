@@ -17,19 +17,23 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
+import android.content.Intent
 import androidx.annotation.StringRes
+import androidx.core.content.FileProvider
+import androidx.lifecycle.LifecycleOwner
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
-import com.infomaniak.drive.utils.DrivePermissions
-import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
+import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.invoke
 
 interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListener {
 
@@ -41,11 +45,17 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     fun onDownloadSuccess()
     fun onDownloadError(@StringRes errorMessage: Int)
 
-    override fun openWith() = executeActionAndClose(DownloadAction.OPEN_WITH)
+    fun observeCacheFileForAction(lifecycleOwner: LifecycleOwner) {
+        publicShareViewModel.fetchCacheFileForActionResult.observe(lifecycleOwner) { (cacheFile, action) ->
+            cacheFile?.let { file -> executeDownloadAction(action, file) } ?: onDownloadError(getErrorMessage(action))
+        }
+    }
 
-    override fun shareFile() = executeActionAndClose(DownloadAction.SEND_COPY)
+    override fun openWith() = fetchCacheFileForAction(DownloadAction.OPEN_WITH)
 
-    override fun saveToKDrive() = executeActionAndClose(DownloadAction.SAVE_TO_DRIVE)
+    override fun shareFile() = fetchCacheFileForAction(DownloadAction.SEND_COPY)
+
+    override fun saveToKDrive() = fetchCacheFileForAction(DownloadAction.SAVE_TO_DRIVE)
 
     override fun downloadFileClicked() {
         super.downloadFileClicked()
@@ -56,12 +66,23 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
         super.printClicked()
         previewPDFHandler?.printClicked(
             context = currentContext,
-            onDefaultCase = { executeActionAndClose(DownloadAction.PRINT_PDF, R.string.errorFileNotFound) },
+            onDefaultCase = { fetchCacheFileForAction(DownloadAction.PRINT_PDF) },
             onError = { onDownloadError(R.string.errorFileNotFound) },
         )
     }
 
-    private suspend fun navigateToDownloadDialog() = withContext(Dispatchers.Main) {
+    private fun fetchCacheFileForAction(action: DownloadAction) {
+        ownerFragment?.viewLifecycleOwner?.let { lifecycleOwner ->
+            publicShareViewModel.fetchCacheFileForAction(
+                file = currentFile,
+                navigateToDownloadDialog = ::navigateToDownloadDialog,
+            ).observe(lifecycleOwner) { cacheFile ->
+                cacheFile?.let { file -> executeDownloadAction(action, file) } ?: onDownloadError(getErrorMessage(action))
+            }
+        }
+    }
+
+    private suspend fun navigateToDownloadDialog() = Dispatchers.Main {
         currentFile?.let { file ->
             ownerFragment?.safeNavigate(
                 resId = R.id.previewDownloadProgressDialog,
@@ -70,15 +91,27 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
         }
     }
 
-    private fun executeActionAndClose(action: DownloadAction, @StringRes errorMessageId: Int = R.string.errorDownload) {
-        publicShareViewModel.executeDownloadAction(
-            activityContext = currentContext,
-            downloadAction = action,
-            file = currentFile,
-            navigateToDownloadDialog = ::navigateToDownloadDialog,
-            onDownloadSuccess = ::onDownloadSuccess,
-            onDownloadError = { onDownloadError(errorMessageId) },
-        )
+    private fun executeDownloadAction(downloadAction: DownloadAction, cacheFile: IOFile) = runCatching {
+        val uri = FileProvider.getUriForFile(currentContext, currentContext.getString(R.string.FILE_AUTHORITY), cacheFile)
+
+        when (downloadAction) {
+            DownloadAction.OPEN_WITH -> {
+                currentContext.openWith(uri, currentFile?.getMimeType(), Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            DownloadAction.SEND_COPY -> currentContext.shareFile { uri }
+            DownloadAction.SAVE_TO_DRIVE -> currentContext.saveToKDrive(uri)
+            DownloadAction.OPEN_BOOKMARK -> currentContext.openBookmarkIntent(cacheFile.name, uri)
+            DownloadAction.PRINT_PDF -> currentContext.printPdf(cacheFile)
+        }
+
+        onDownloadSuccess()
+    }.onFailure { exception ->
+        exception.printStackTrace()
+        onDownloadError(getErrorMessage(downloadAction))
+    }
+
+    private fun getErrorMessage(downloadAction: DownloadAction): Int {
+        return if (downloadAction == DownloadAction.PRINT_PDF) R.string.errorFileNotFound else R.string.errorDownload
     }
 
     override fun displayInfoClicked() = Unit

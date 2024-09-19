@@ -91,6 +91,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
         super.onViewCreated(view, savedInstanceState)
 
         initBottomSheet()
+        observeCacheFileForAction(viewLifecycleOwner)
     }
 
     private fun initBottomSheet() = with(bottomSheetView) {
