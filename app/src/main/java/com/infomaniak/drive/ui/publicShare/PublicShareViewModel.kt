@@ -101,7 +101,6 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     }
 
     fun getFiles(folderId: Int, sortType: SortType) {
-        cancelDownload(shouldResetCursor = false)
         getPublicShareFilesJob = Job()
 
         viewModelScope.launch(Dispatchers.IO + getPublicShareFilesJob) {
@@ -130,10 +129,10 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
         }
     }
 
-    fun cancelDownload(shouldResetCursor: Boolean = true) {
+    fun cancelDownload() {
         getPublicShareFilesJob.cancel()
         getPublicShareFilesJob.cancelChildren()
-        if (shouldResetCursor) currentCursor = null
+        currentCursor = null
     }
 
     fun importFilesToDrive(

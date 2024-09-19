@@ -287,6 +287,7 @@ class PublicShareListFragment : FileListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
             publicShareViewModel.childrenLiveData.value = emptyList<File>() to false
+            publicShareViewModel.cancelDownload()
 
             with(publicShareViewModel) {
                 if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
