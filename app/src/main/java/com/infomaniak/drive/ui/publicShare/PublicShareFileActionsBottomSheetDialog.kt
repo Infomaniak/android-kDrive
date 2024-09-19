@@ -69,6 +69,8 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), OnP
         drivePermissions.registerPermissions(this@PublicShareFileActionsBottomSheetDialog) { authorized ->
             if (authorized) downloadFileClicked()
         }
+
+        observeCacheFileForAction(viewLifecycleOwner)
     }
 
     private fun initBottomSheet() = with(binding.publicShareFileActionsView) {
