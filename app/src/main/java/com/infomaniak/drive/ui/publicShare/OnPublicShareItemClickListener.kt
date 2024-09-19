@@ -45,17 +45,17 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     fun onDownloadSuccess()
     fun onDownloadError(@StringRes errorMessage: Int)
 
-    fun observeCacheFileForAction(lifecycleOwner: LifecycleOwner) {
-        publicShareViewModel.fetchCacheFileForActionResult.observe(lifecycleOwner) { (cacheFile, action) ->
+    fun observeCacheFileForAction(viewLifecycleOwner: LifecycleOwner) {
+        publicShareViewModel.fetchCacheFileForActionResult.observe(viewLifecycleOwner) { (cacheFile, action) ->
             cacheFile?.let { file -> executeDownloadAction(action, file) } ?: onDownloadError(getErrorMessage(action))
         }
     }
 
-    override fun openWith() = fetchCacheFileForAction(DownloadAction.OPEN_WITH)
+    override fun openWith() = startAction(DownloadAction.OPEN_WITH)
 
-    override fun shareFile() = fetchCacheFileForAction(DownloadAction.SEND_COPY)
+    override fun shareFile() = startAction(DownloadAction.SEND_COPY)
 
-    override fun saveToKDrive() = fetchCacheFileForAction(DownloadAction.SAVE_TO_DRIVE)
+    override fun saveToKDrive() = startAction(DownloadAction.SAVE_TO_DRIVE)
 
     override fun downloadFileClicked() {
         super.downloadFileClicked()
@@ -66,17 +66,19 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
         super.printClicked()
         previewPDFHandler?.printClicked(
             context = currentContext,
-            onDefaultCase = { fetchCacheFileForAction(DownloadAction.PRINT_PDF) },
+            onDefaultCase = { startAction(DownloadAction.PRINT_PDF) },
             onError = { onDownloadError(R.string.errorFileNotFound) },
         )
     }
 
-    private fun fetchCacheFileForAction(action: DownloadAction) {
+    private fun startAction(action: DownloadAction) {
+        val cacheFileResult = publicShareViewModel.fetchCacheFileForAction(
+            file = currentFile,
+            navigateToDownloadDialog = ::navigateToDownloadDialog,
+        )
+
         ownerFragment?.viewLifecycleOwner?.let { lifecycleOwner ->
-            publicShareViewModel.fetchCacheFileForAction(
-                file = currentFile,
-                navigateToDownloadDialog = ::navigateToDownloadDialog,
-            ).observe(lifecycleOwner) { cacheFile ->
+            cacheFileResult.observe(lifecycleOwner) { cacheFile ->
                 cacheFile?.let { file -> executeDownloadAction(action, file) } ?: onDownloadError(getErrorMessage(action))
             }
         }
