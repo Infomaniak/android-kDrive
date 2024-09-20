@@ -43,6 +43,7 @@ import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUB
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.Utils.openDeepLinkInBrowser
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.api.ApiController
@@ -68,6 +69,7 @@ class LaunchActivity : AppCompatActivity() {
     private var mainActivityExtras: Bundle? = null
     private var publicShareActivityExtras: Bundle? = null
     private var isHelpShortcutPressed = false
+    private var shouldStartApp = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +87,8 @@ class LaunchActivity : AppCompatActivity() {
             handleNotificationDestinationIntent()
             handleShortcuts()
             handleDeeplink()
-            startApp()
+
+            if (shouldStartApp) startApp()
 
             // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
             // so that even when we return, the activity will still be closed.
@@ -168,7 +171,7 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun handleDeeplink() = withContext(Dispatchers.IO) {
+    private suspend fun handleDeeplink() = Dispatchers.IO {
         intent.data?.path?.let { deeplink ->
             if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else processInternalLink(deeplink)
             SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
@@ -210,8 +213,15 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun processInternalLink(path: String) {
-        Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
-            val (pathDriveId, pathFolderId, pathFileId) = match.destructured
+        Regex("/app/[a-z]+/(\\d+)/([a-z-]*)/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
+            val (pathDriveId, roleFolderId, pathFolderId, pathFileId) = match.destructured
+            // In case of SharedWithMe deeplinks, we open the link in the web as we cannot support them in-app for now
+            if (roleFolderId == SHARED_WITH_ME_FOLDER_ROLE) {
+                openDeepLinkInBrowser(path)
+                shouldStartApp = false
+                return
+            }
+
             val driveId = pathDriveId.toInt()
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
@@ -272,5 +282,6 @@ class LaunchActivity : AppCompatActivity() {
 
     companion object {
         private const val SHORTCUTS_TAG = "shortcuts_tag"
+        private const val SHARED_WITH_ME_FOLDER_ROLE = "shared-with-me"
     }
 }
