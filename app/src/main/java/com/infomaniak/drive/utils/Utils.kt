@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
@@ -67,11 +68,13 @@ import com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.showKeyboard
 import com.infomaniak.lib.core.utils.showToast
 import java.util.Date
 import kotlin.math.min
 import kotlin.math.pow
+import com.infomaniak.lib.core.R as RCore
 
 object Utils {
 
@@ -279,6 +282,24 @@ object Utils {
                 ).toBundle(),
             )
         }.also(selectFolderResultLauncher::launch)
+    }
+
+    fun Activity.openDeepLinkInBrowser(url: String) = runCatching {
+        Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER).apply {
+            setData(Uri.parse(url))
+            flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+        }.also(::startActivity)
+
+        finishAndRemoveTask()
+    }.onFailure { exception ->
+        exception.printStackTrace()
+        SentryLog.d("OpenDeepLinkInBrowser", exception.message.toString(), exception)
+        val errorMessage = if (exception is ActivityNotFoundException) {
+            RCore.string.browserNotFound
+        } else {
+            RCore.string.anErrorHasOccurred
+        }
+        showToast(errorMessage)
     }
 
     fun Context.openWith(uri: Uri, type: String?, flags: Int) {
