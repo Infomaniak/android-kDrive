@@ -21,7 +21,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.BuildConfig
@@ -38,9 +37,11 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
+import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.AccountUtils.requestCurrentUser
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.openDeepLinkInBrowser
@@ -173,6 +174,10 @@ class LaunchActivity : AppCompatActivity() {
 
     private suspend fun handleDeeplink() = Dispatchers.IO {
         intent.data?.path?.let { deeplink ->
+            // If the app is closed, the currentUser will be null. We don't want that otherwise the link will always be opened as
+            // external instead of internal if you already have access to the files. So we set it here
+            if (AccountUtils.currentUser == null) requestCurrentUser()
+
             if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else processInternalLink(deeplink)
             SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
         }
@@ -206,9 +211,7 @@ class LaunchActivity : AppCompatActivity() {
             error?.code == ErrorCode.PUBLIC_SHARE_LINK_IS_NOT_VALID -> {
                 setPublicShareActivityArgs(driveId, publicShareUuid, isExpired = true)
             }
-            else -> {
-                Log.e("TOTO", "downloadSharedFile: ${error?.code}")
-            }
+            else -> SentryLog.e(PUBLIC_SHARE_TAG, "Error during getPublicShareFile: ${error?.code} / ${error?.description}")
         }
     }
 
