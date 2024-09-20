@@ -57,22 +57,31 @@ class SelectFolderActivity : BaseActivity() {
         val customArgs = navigationArgs.customArgs
         val currentFolderId = navigationArgs.folderId.getIntOrNull()
         val disabledFolderId = navigationArgs.disabledFolderId.getIntOrNull()
-        val currentUserDrive = UserDrive(userId, driveId)
 
-        mainViewModel.selectFolderUserDrive = currentUserDrive
+        // We're doing this in the mainthread because the FileListFragment rely on mainViewModel.selectFolderUserDrive.
+        // Moving this call in a background thread we'll break everything
+        DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let { selectedDrive ->
+            val isSharedWithMe = selectedDrive.sharedWithMe
+            val currentUserDrive = UserDrive(userId, driveId, isSharedWithMe)
+            mainViewModel.selectFolderUserDrive = currentUserDrive
 
-        selectFolderViewModel.apply {
-            userDrive = currentUserDrive
-            currentDrive = DriveInfosController.getDrive(userId, driveId)
-            disableSelectedFolderId = disabledFolderId
-        }
+            selectFolderViewModel.apply {
+                userDrive = currentUserDrive
+                currentDrive = DriveInfosController.getDrive(userId, driveId)
+                disableSelectedFolderId = disabledFolderId
+            }
 
-        setSaveButton(customArgs)
+            setSaveButton(customArgs)
 
-        currentFolderId?.let { folderId ->
-            // Simply navigate when the folder exists in the local database
-            FileController.getFileProxyById(folderId, customRealm = mainViewModel.realm)?.let {
-                initiateNavigationToCurrentFolder(folderId, currentUserDrive)
+            currentFolderId?.let { folderId ->
+                // Simply navigate when the folder exists in the local database
+                FileController.getFileProxyById(
+                    fileId = folderId,
+                    userDrive = currentUserDrive,
+                    customRealm = getCustomRealm(currentUserDrive),
+                )?.let {
+                    initiateNavigationToCurrentFolder(folderId, currentUserDrive)
+                }
             }
         }
     }
@@ -96,6 +105,8 @@ class SelectFolderActivity : BaseActivity() {
         }
     }
 
+    private fun getCustomRealm(currentUserDrive: UserDrive) = if (currentUserDrive.sharedWithMe) null else mainViewModel.realm
+
     private fun initiateNavigationToCurrentFolder(folderId: Int, userDrive: UserDrive) {
         generateNavigationIds(folderId, userDrive)
         navigateToCurrentFolder()
@@ -108,7 +119,7 @@ class SelectFolderActivity : BaseActivity() {
     }
 
     private fun MutableList<Int>.addNavigationIdsRecursively(folderId: Int, userDrive: UserDrive) {
-        FileController.getParentFileProxy(folderId, mainViewModel.realm)?.id?.let { parentId ->
+        FileController.getParentFileProxy(folderId, userDrive, getCustomRealm(userDrive))?.id?.let { parentId ->
             if (parentId != Utils.ROOT_ID) {
                 add(parentId)
                 addNavigationIdsRecursively(parentId, userDrive)

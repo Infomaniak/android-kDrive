@@ -70,15 +70,19 @@ object FileController {
     // https://github.com/realm/realm-java/issues/1862
     fun emptyList(realm: Realm): RealmResults<File> = realm.where(File::class.java).alwaysFalse().findAll()
 
-    fun getParentFileProxy(fileId: Int, realm: Realm): File? {
-        return getFileById(realm, fileId)?.localParent?.let { parents ->
-            parents.firstOrNull { it.id > 0 }
+    fun getParentFileProxy(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
+        val block: (Realm) -> File? = { currentRealm ->
+            getFileById(currentRealm, fileId)?.localParent?.let { parents ->
+                parents.firstOrNull { it.id > 0 }
+            }
         }
+
+        return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
     fun getParentFile(fileId: Int, userDrive: UserDrive? = null, realm: Realm? = null): File? {
         val block: (Realm) -> File? = { currentRealm ->
-            getParentFileProxy(fileId, currentRealm)?.let { parent ->
+            getParentFileProxy(fileId, userDrive, currentRealm)?.let { parent ->
                 currentRealm.copyFromRealm(parent, 0)
             }
         }
