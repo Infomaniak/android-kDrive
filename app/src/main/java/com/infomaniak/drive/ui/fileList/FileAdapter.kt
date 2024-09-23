@@ -162,10 +162,10 @@ open class FileAdapter(
         if (fileList.isManaged) super.updateData(null)
     }
 
-    fun setFiles(newItemList: List<File>) {
+    fun setFiles(newItemList: List<File>, isFileListResetNeeded: Boolean = false) {
         fileList = RealmList(*newItemList.toTypedArray())
         hideLoading()
-        if (fileAsyncListDiffer == null) {
+        if (fileAsyncListDiffer == null || isFileListResetNeeded) {
             notifyDataSetChanged()
         } else {
             fileAsyncListDiffer?.submitList(newItemList)
