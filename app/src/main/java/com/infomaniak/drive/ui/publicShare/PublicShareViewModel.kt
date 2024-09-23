@@ -36,6 +36,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
+import io.sentry.Sentry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -215,13 +216,22 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     private fun handleRemoteFiles(apiResponse: CursorApiResponse<List<File>>) = apiResponse.data?.let { remoteFiles ->
-        //TODO: Better management of this rootSharedFile value
-        FolderFilesProviderResult(
-            folder = rootSharedFile.value!!,
-            folderFiles = ArrayList(remoteFiles),
-            isComplete = !apiResponse.hasMore,
-            cursor = apiResponse.cursor,
-        )
+        rootSharedFile.value?.let { parentFolder ->
+            FolderFilesProviderResult(
+                folder = parentFolder,
+                folderFiles = ArrayList(remoteFiles),
+                isComplete = !apiResponse.hasMore,
+                cursor = apiResponse.cursor,
+            )
+        } ?: run {
+            Sentry.captureMessage("Root folder is null in HandleRemoteFiles, that should not happen") { scope ->
+                scope.setExtra("publicShareUuid", publicShareUuid)
+                scope.setTag("isPasswordNeeded", isPasswordNeeded.toString())
+                scope.setTag("isExpired", isExpired.toString())
+                scope.setTag("canDownload", canDownload.toString())
+            }
+            null
+        }
     }
 
     private fun List<File>.addPublicShareUuid() = map { it.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid } }
