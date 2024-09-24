@@ -73,7 +73,6 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     private fun initPreviewSliderViewModel() = with(previewSliderViewModel) {
         currentPreview = currentFile
         userDrive = UserDrive(driveId = publicShareViewModel.driveId)
-        publicShareUuid = publicShareViewModel.publicShareUuid
         publicShareCanDownload = publicShareViewModel.canDownloadFiles
     }
 

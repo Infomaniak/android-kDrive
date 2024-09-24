@@ -115,7 +115,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         previewSliderAdapter = PreviewSliderAdapter(
             manager = childFragmentManager,
             lifecycle = lifecycle,
-            publicShareUuid = previewSliderViewModel.publicShareUuid,
             userDrive = previewSliderViewModel.userDrive,
         )
 
