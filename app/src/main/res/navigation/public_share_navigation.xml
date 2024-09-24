@@ -131,10 +131,6 @@
             android:defaultValue="@null"
             app:argType="com.infomaniak.drive.data.models.UserDrive"
             app:nullable="true" />
-        <argument
-            android:name="publicShareUuid"
-            android:defaultValue=""
-            app:argType="string" />
     </fragment>
 
     <dialog
