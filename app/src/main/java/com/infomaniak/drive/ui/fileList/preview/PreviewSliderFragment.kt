@@ -282,7 +282,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun openWith() {
-        context?.openWith(ownerFragment = this, currentFile = currentFile) {
+        context?.openWith(ownerFragment = this, currentFile = currentFile, userDrive = userDrive) {
             safeNavigate(
                 PreviewSliderFragmentDirections.actionPreviewSliderFragmentToDownloadProgressDialog(
                     fileId = currentFile.id,
