@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
@@ -35,7 +34,6 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 
 class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicShareItemClickListener {
 
-    private val navigationArgs: PublicSharePreviewSliderFragmentArgs by navArgs()
     override val previewSliderViewModel: PreviewSliderViewModel by activityViewModels()
     override val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
@@ -48,7 +46,8 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     override val ownerFragment = this
 
     override fun initCurrentFile() {
-        currentFile = mainViewModel.currentPreviewFileList[navigationArgs.fileId] ?: throw Exception("No current preview found")
+        currentFile = mainViewModel.currentPreviewFileList[publicShareViewModel.fileClicked?.id]
+            ?: throw Exception("No current preview found")
     }
 
     override fun onDownloadSuccess() {
@@ -61,30 +60,21 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
-        if (noPreviewList()) {
+        runCatching { initCurrentFile() }.onFailure {
             findNavController().popBackStack()
             return null
         }
-
-        initCurrentFile()
 
         initPreviewSliderViewModel()
 
         return FragmentPreviewSliderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
-    private fun initPreviewSliderViewModel() {
-        previewSliderViewModel.currentPreview = currentFile
-
-        if (previewSliderViewModel.currentPreview == null) {
-            userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = true)
-            previewSliderViewModel.userDrive = userDrive
-        } else {
-            userDrive = previewSliderViewModel.userDrive
-        }
-
-        previewSliderViewModel.publicShareUuid = navigationArgs.publicShareUuid
-        previewSliderViewModel.publicShareCanDownload = publicShareViewModel.canDownloadFiles
+    private fun initPreviewSliderViewModel() = with(previewSliderViewModel) {
+        currentPreview = currentFile
+        userDrive = UserDrive(driveId = publicShareViewModel.driveId)
+        publicShareUuid = publicShareViewModel.publicShareUuid
+        publicShareCanDownload = publicShareViewModel.canDownloadFiles
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
