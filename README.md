@@ -1,13 +1,13 @@
 # Infomaniak kDrive app
 
 ## A modern Android application for [kDrive by Infomaniak](https://www.infomaniak.com/kdrive).
-### Synchronise, share, collaborate.  The Swiss cloud that’s 100% secure.
+### Synchronise, share, and collaborate.  The Swiss cloud is 100% secure.
 
 #### :cloud: All the space you need
 Always have access to all your photos, videos and documents. kDrive can store up to 106 TB of data.
 
 #### :globe_with_meridians: A collaborative ecosystem. Everything included. 
-Collaborate online on Office documents, organise meetings, share your work. Anything is possible!
+Collaborate online on Office documents, organize meetings, share your work. Anything is possible!
 
 #### :lock:  kDrive respects your privacy
 Protect your data in a sovereign cloud exclusively developed and hosted in Switzerland. Infomaniak doesn’t analyze or resell your data.
