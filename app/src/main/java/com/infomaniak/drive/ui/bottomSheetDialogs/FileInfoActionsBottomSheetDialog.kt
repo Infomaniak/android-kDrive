@@ -104,7 +104,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     private fun setupBackActionHandler() {
-        getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile) }
+        getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile, navigationArgs.userDrive) }
 
         getBackNavigationResult<Any>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) {
             lifecycleScope.launchWhenResumed { binding.fileInfoActionsView.refreshBottomSheetUi(currentFile) }
@@ -313,7 +313,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     }
 
     override fun openWith() {
-        context?.openWith(ownerFragment = ownerFragment, currentFile = currentFile) {
+        context?.openWith(ownerFragment = ownerFragment, currentFile = currentFile, userDrive = navigationArgs.userDrive) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToDownloadProgressDialog(
                     fileId = currentFile.id,
