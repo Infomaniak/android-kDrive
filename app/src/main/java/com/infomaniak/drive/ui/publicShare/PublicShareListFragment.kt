@@ -169,7 +169,7 @@ class PublicShareListFragment : FileListFragment() {
             when {
                 file.isFolder() -> openFolder(file)
                 file.isBookmark() -> openBookmark(file)
-                else -> displayFile(file, mainViewModel, fileAdapter, publicShareViewModel.publicShareUuid)
+                else -> displayFile(file, mainViewModel, fileAdapter)
             }
         }
     }
@@ -224,7 +224,6 @@ class PublicShareListFragment : FileListFragment() {
             shouldHideBottomNavigation = true,
             shouldShowSmallFab = false,
             fileListViewModel = fileListViewModel,
-            isPublicSharedFile = true,
         )
     }
 
