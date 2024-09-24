@@ -34,6 +34,7 @@ import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.DownloadProgressViewModel.Companion.PROGRESS_COMPLETE
@@ -98,13 +99,15 @@ fun Context.openWith(
     ownerFragment: Fragment? = null,
     currentFile: File? = null,
     externalFileUri: Uri? = null,
+    userDrive: UserDrive = UserDrive(),
     onDownloadFile: (() -> Unit)? = null,
 ) {
     trackFileActionEvent("openWith")
 
     ownerFragment?.apply {
         // This is only for fragments. For activities, the snackbar is shown in the openWith method.
-        if (requireContext().openWithIntentExceptkDrive(currentFile!!).resolveActivity(requireContext().packageManager) == null) {
+        val openWithIntent = requireContext().openWithIntentExceptkDrive(currentFile!!, userDrive)
+        if (openWithIntent.resolveActivity(requireContext().packageManager) == null) {
             showSnackbar(R.string.errorNoSupportingAppFound, showAboveFab = true)
             findNavController().popBackStack()
         } else {

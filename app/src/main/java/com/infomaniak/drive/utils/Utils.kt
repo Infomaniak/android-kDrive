@@ -299,7 +299,7 @@ object Utils {
         startActivityFor(openWithIntentExceptkDrive(uri, type, flags))
     }
 
-    fun Context.openWith(file: File, userDrive: UserDrive = UserDrive()) {
+    fun Context.openWith(file: File, userDrive: UserDrive) {
         startActivityFor(openWithIntentExceptkDrive(file, userDrive))
     }
 
@@ -311,7 +311,7 @@ object Utils {
         }
     }
 
-    fun Context.openWithIntentExceptkDrive(file: File, userDrive: UserDrive = UserDrive()): Intent {
+    fun Context.openWithIntentExceptkDrive(file: File, userDrive: UserDrive): Intent {
         val (cloudUri, uri) = file.getCloudAndFileUris(this, userDrive)
         val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION or

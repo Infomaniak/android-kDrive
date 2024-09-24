@@ -198,7 +198,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         getBackNavigationResult<Int>(DownloadAction.OPEN_WITH.value) { context?.openWith(currentFile, userDrive) }
 
         getBackNavigationResult<Int>(DownloadAction.PRINT_PDF.value) {
-            requireContext().printPdf(file = currentFile.getCacheFile(requireContext()))
+            requireContext().printPdf(file = currentFile.getCacheFile(requireContext(), userDrive))
         }
     }
 
