@@ -129,7 +129,7 @@
     <string name="buttonEmpty">Vider</string>
     <string name="buttonEmptyTrash">Vider la corbeille</string>
     <string name="buttonFileRights">Partage et droits</string>
-    <string name="buttonLeaveShare">Abandonner le partage</string>
+    <string name="buttonLeaveShare">Quitter le partage</string>
     <string name="buttonLike">J’aime</string>
     <string name="buttonLogin">Se connecter</string>
     <string name="buttonLogout">Se déconnecter</string>
