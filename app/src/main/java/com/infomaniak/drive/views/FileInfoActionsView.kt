@@ -42,12 +42,9 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
-import com.infomaniak.drive.data.models.CancellableAction
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
-import com.infomaniak.drive.data.models.Rights
-import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -257,7 +254,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         if (currentFile.isFolder()) {
             openAddFileBottom()
         } else {
-            ownerFragment.requireContext().shareFile { CloudStorageProvider.createShareFileUri(context, currentFile) }
+            val userDrive = UserDrive(sharedWithMe = isSharedWithMe)
+            ownerFragment.requireContext().shareFile { CloudStorageProvider.createShareFileUri(context, currentFile, userDrive) }
         }
     }
 
