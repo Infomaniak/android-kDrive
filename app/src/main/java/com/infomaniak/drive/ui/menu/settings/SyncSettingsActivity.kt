@@ -55,6 +55,7 @@ import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.TimeZone
@@ -371,7 +372,10 @@ class SyncSettingsActivity : BaseActivity() {
 
             trackPhotoSyncEvent(if (activateSyncSwitch.isChecked) "enabled" else "disabled")
 
-            finish()
+            Dispatchers.Main {
+                saveButton.hideProgressCatching(R.string.buttonSave)
+                finish()
+            }
         }
     }
 
