@@ -129,7 +129,7 @@
     <string name="buttonEmpty">Vaciar</string>
     <string name="buttonEmptyTrash">Vaciar la papelera</string>
     <string name="buttonFileRights">Uso compartido y derechos</string>
-    <string name="buttonLeaveShare">Salir del uso compartido</string>
+    <string name="buttonLeaveShare">Dejar de compartir</string>
     <string name="buttonLike">Me gusta</string>
     <string name="buttonLogin">Conectarse</string>
     <string name="buttonLogout">Desconectarse</string>

@@ -129,7 +129,7 @@
     <string name="buttonEmpty">Svuota</string>
     <string name="buttonEmptyTrash">Svuota il cestino</string>
     <string name="buttonFileRights">Condivisione e diritti</string>
-    <string name="buttonLeaveShare">Abbandona la condivisione</string>
+    <string name="buttonLeaveShare">Lascia la quota</string>
     <string name="buttonLike">Mi piace</string>
     <string name="buttonLogin">Connettiti</string>
     <string name="buttonLogout">Disconnettiti</string>
