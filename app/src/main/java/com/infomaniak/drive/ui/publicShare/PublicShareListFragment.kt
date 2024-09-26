@@ -32,6 +32,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
+import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_BOOKMARK_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_SAVE_TO_KDRIVE_NAME
+import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
@@ -53,6 +56,7 @@ import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
@@ -244,7 +248,10 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun executeOpenBookmarkAction(cacheFile: IOFile?) = runCatching {
         val uri = FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), cacheFile!!)
-        requireContext().openBookmarkIntent(cacheFile.name, uri)
+        with(requireContext()) {
+            trackPublicShareActionEvent(ACTION_OPEN_BOOKMARK_NAME)
+            openBookmarkIntent(cacheFile.name, uri)
+        }
     }.onFailure { exception ->
         exception.printStackTrace()
         showSnackbar(
@@ -255,6 +262,7 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun downloadAllFiles() {
         // RootSharedFile can either be a folder or a single file
+        requireContext().trackPublicShareActionEvent("downloadAllFiles")
         publicShareViewModel.rootSharedFile.value?.let { file -> requireContext().downloadFile(drivePermissions, file) }
     }
 
@@ -277,9 +285,11 @@ class PublicShareListFragment : FileListFragment() {
     private fun setMainButton(importButton: MaterialButton) {
         importButton.setOnClickListener {
             if (AccountUtils.currentDriveId == -1) {
+                requireContext().trackPublicShareActionEvent("createAccountAd")
                 // TODO : Show bottomsheet to get app if this functionality is implemented by the back
                 Intent(requireActivity(), LoginActivity::class.java).also(::startActivity)
             } else {
+                requireContext().trackPublicShareActionEvent("bulk${ACTION_SAVE_TO_KDRIVE_NAME.capitalizeFirstChar()}")
                 Intent(requireActivity(), SaveExternalFilesActivity::class.java).apply {
                     action = Intent.ACTION_SEND
                     putExtras(
