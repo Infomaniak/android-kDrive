@@ -386,6 +386,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun shareFile() = Unit
     override fun saveToKDrive() = Unit
+    override fun printClicked() = Unit
 
     companion object {
 
