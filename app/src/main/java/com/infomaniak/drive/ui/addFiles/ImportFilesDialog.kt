@@ -106,10 +106,10 @@ class ImportFilesDialog : DialogFragment() {
             }
         }
 
-        lifecycle.withResumed {
+        viewLifecycleOwner.lifecycle.withResumed {
+            if (successCount > 0) requireContext().syncImmediately()
             dismiss()
         }
-        context?.syncImmediately()
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
