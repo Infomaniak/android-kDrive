@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.addFiles
 
 import android.app.Dialog
 import android.content.DialogInterface
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import androidx.core.net.toUri
@@ -43,10 +44,7 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.Date
 
 class ImportFilesDialog : DialogFragment() {
@@ -106,7 +104,7 @@ class ImportFilesDialog : DialogFragment() {
             }
         }
 
-        viewLifecycleOwner.lifecycle.withResumed {
+        lifecycle.withResumed {
             if (successCount > 0) requireContext().syncImmediately()
             dismiss()
         }
@@ -126,28 +124,33 @@ class ImportFilesDialog : DialogFragment() {
             if (isLowMemory()) throw NotEnoughRamException()
 
             if (cursor.moveToFirst()) {
-                val fileName = cursor.getFileName(uri)
-                val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
-
-                val outputFile = getOutputFile(uri, fileModifiedAt)
-                ensureActive()
-                UploadFile(
-                    uri = outputFile.toUri().toString(),
-                    driveId = navArgs.driveId,
-                    fileCreatedAt = fileCreatedAt,
-                    fileModifiedAt = fileModifiedAt,
-                    fileName = fileName,
-                    fileSize = outputFile.length(),
-                    remoteFolder = navArgs.folderId,
-                    type = UploadFile.Type.UPLOAD.name,
-                    userId = AccountUtils.currentUserId,
-                ).store()
-                successCount++
-                currentImportFile = null
+                processCursorData(cursor, uri)
             } else {
                 captureWithSentry(cursorState = "empty")
             }
         } ?: captureWithSentry(cursorState = "null")
+    }
+
+    private fun CoroutineScope.processCursorData(cursor: Cursor, uri: Uri) {
+        SentryLog.i(TAG, "processCursorData: uri=$uri")
+        val fileName = cursor.getFileName(uri)
+        val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
+
+        val outputFile = getOutputFile(uri, fileModifiedAt)
+        ensureActive()
+        UploadFile(
+            uri = outputFile.toUri().toString(),
+            driveId = navArgs.driveId,
+            fileCreatedAt = fileCreatedAt,
+            fileModifiedAt = fileModifiedAt,
+            fileName = fileName,
+            fileSize = outputFile.length(),
+            remoteFolder = navArgs.folderId,
+            type = UploadFile.Type.UPLOAD.name,
+            userId = AccountUtils.currentUserId,
+        ).store()
+        successCount++
+        currentImportFile = null
     }
 
     private fun isLowMemory(): Boolean {
