@@ -36,6 +36,8 @@ object MatomoDrive : MatomoCore {
     const val ACTION_SAVE_TO_KDRIVE_NAME = "saveToKDrive"
     const val ACTION_SEND_FILE_COPY_NAME = "sendFileCopy"
 
+    const val PUBLIC_SHARE_ACTION_CATEGORY = "publicShareAction"
+
     fun Fragment.trackCategoriesEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent("categories", name, action, value)
     }
@@ -45,7 +47,7 @@ object MatomoDrive : MatomoCore {
     }
 
     fun Context.trackPublicShareActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("publicShareAction", name, action, value)
+        trackEvent(PUBLIC_SHARE_ACTION_CATEGORY, name, action, value)
     }
 
     fun Context.trackPdfActivityActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
