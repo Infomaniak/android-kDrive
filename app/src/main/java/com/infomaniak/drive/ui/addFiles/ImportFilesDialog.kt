@@ -158,21 +158,30 @@ class ImportFilesDialog : DialogFragment() {
         return memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
     }
 
-    private fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
+    private suspend fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
+
+        fun captureCannotProcessCopyData() {
+            Sentry.withScope { scope ->
+                scope.setExtra("uri", uri.toString())
+                SentryLog.e(TAG, "Uri is valid but data cannot be copied from the import file")
+            }
+        }
+
+        val contentResolver = lifecycle.withResumed { requireContext().contentResolver }
         return IOFile(requireContext().uploadFolder, uri.hashCode().toString()).apply {
             if (exists()) delete()
             setLastModified(fileModifiedAt.time)
             createNewFile()
             currentImportFile = this
-            context?.contentResolver?.openInputStream(uri)?.use { inputStream ->
+            contentResolver.openInputStream(uri)?.use { inputStream ->
                 outputStream().use { inputStream.copyTo(it) }
-            }
+            } ?: captureCannotProcessCopyData()
         }
     }
 
     private class NotEnoughRamException : Exception("Low device memory.")
 
     private companion object {
-        val TAG = ImportFilesDialog::class.java.simpleName
+        val TAG: String = ImportFilesDialog::class.java.simpleName
     }
 }
