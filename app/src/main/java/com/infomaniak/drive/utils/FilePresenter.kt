@@ -24,7 +24,9 @@ import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
 import com.dd.plist.NSString
 import com.dd.plist.PropertyListParser
+import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_BOOKMARK_NAME
 import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
@@ -91,6 +93,7 @@ object FilePresenter {
     }
 
     fun Fragment.openBookmark(file: File) {
+        requireContext().trackFileActionEvent(ACTION_OPEN_BOOKMARK_NAME)
         if (file.canUseStoredFile(requireContext())) {
             openBookmarkIntent(file)
         } else {
