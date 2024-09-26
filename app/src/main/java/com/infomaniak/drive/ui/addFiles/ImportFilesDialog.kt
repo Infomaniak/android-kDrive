@@ -92,7 +92,6 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun importFiles() {
-        var errorCount = 0
         navArgs.uris.forEach { uri ->
             runCatching {
                 initUpload(uri)
@@ -104,8 +103,6 @@ class ImportFilesDialog : DialogFragment() {
                 } else {
                     Sentry.captureException(exception)
                 }
-
-                errorCount++
             }
         }
 
