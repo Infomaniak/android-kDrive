@@ -40,6 +40,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -115,6 +116,15 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
+        fun captureWithSentry(cursorState: String) {
+            // We have cases where importation has failed,
+            // but we've added enough information to know the cause.
+            Sentry.withScope { scope ->
+                scope.setExtra("uri", uri.toString())
+                SentryLog.e(TAG, "Uri found but cursor is $cursorState")
+            }
+        }
+
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (isLowMemory()) throw NotEnoughRamException()
 
@@ -137,8 +147,10 @@ class ImportFilesDialog : DialogFragment() {
                 ).store()
                 successCount++
                 currentImportFile = null
+            } else {
+                captureWithSentry(cursorState = "empty")
             }
-        }
+        } ?: captureWithSentry(cursorState = "null")
     }
 
     private fun isLowMemory(): Boolean {
@@ -159,4 +171,8 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private class NotEnoughRamException : Exception("Low device memory.")
+
+    private companion object {
+        val TAG = ImportFilesDialog::class.java.simpleName
+    }
 }
