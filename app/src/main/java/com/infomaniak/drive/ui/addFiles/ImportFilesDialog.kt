@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.addFiles
 
 import android.app.Dialog
 import android.content.DialogInterface
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import androidx.core.net.toUri
@@ -40,12 +41,10 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.Date
 
 class ImportFilesDialog : DialogFragment() {
@@ -91,7 +90,6 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun importFiles() {
-        var errorCount = 0
         navArgs.uris.forEach { uri ->
             runCatching {
                 initUpload(uri)
@@ -103,42 +101,56 @@ class ImportFilesDialog : DialogFragment() {
                 } else {
                     Sentry.captureException(exception)
                 }
-
-                errorCount++
             }
         }
 
         lifecycle.withResumed {
+            if (successCount > 0) requireContext().syncImmediately()
             dismiss()
         }
-        context?.syncImmediately()
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
+        fun captureWithSentry(cursorState: String) {
+            // We have cases where importation has failed,
+            // but we've added enough information to know the cause.
+            Sentry.withScope { scope ->
+                scope.setExtra("uri", uri.toString())
+                SentryLog.e(TAG, "Uri found but cursor is $cursorState")
+            }
+        }
+
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (isLowMemory()) throw NotEnoughRamException()
 
             if (cursor.moveToFirst()) {
-                val fileName = cursor.getFileName(uri)
-                val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
-
-                val outputFile = getOutputFile(uri, fileModifiedAt)
-                ensureActive()
-                UploadFile(
-                    uri = outputFile.toUri().toString(),
-                    driveId = navArgs.driveId,
-                    fileCreatedAt = fileCreatedAt,
-                    fileModifiedAt = fileModifiedAt,
-                    fileName = fileName,
-                    fileSize = outputFile.length(),
-                    remoteFolder = navArgs.folderId,
-                    type = UploadFile.Type.UPLOAD.name,
-                    userId = AccountUtils.currentUserId,
-                ).store()
-                successCount++
-                currentImportFile = null
+                processCursorData(cursor, uri)
+            } else {
+                captureWithSentry(cursorState = "empty")
             }
-        }
+        } ?: captureWithSentry(cursorState = "null")
+    }
+
+    private fun CoroutineScope.processCursorData(cursor: Cursor, uri: Uri) {
+        SentryLog.i(TAG, "processCursorData: uri=$uri")
+        val fileName = cursor.getFileName(uri)
+        val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
+
+        val outputFile = getOutputFile(uri, fileModifiedAt)
+        ensureActive()
+        UploadFile(
+            uri = outputFile.toUri().toString(),
+            driveId = navArgs.driveId,
+            fileCreatedAt = fileCreatedAt,
+            fileModifiedAt = fileModifiedAt,
+            fileName = fileName,
+            fileSize = outputFile.length(),
+            remoteFolder = navArgs.folderId,
+            type = UploadFile.Type.UPLOAD.name,
+            userId = AccountUtils.currentUserId,
+        ).store()
+        successCount++
+        currentImportFile = null
     }
 
     private fun isLowMemory(): Boolean {
@@ -146,17 +158,30 @@ class ImportFilesDialog : DialogFragment() {
         return memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
     }
 
-    private fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
+    private suspend fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
+
+        fun captureCannotProcessCopyData() {
+            Sentry.withScope { scope ->
+                scope.setExtra("uri", uri.toString())
+                SentryLog.e(TAG, "Uri is valid but data cannot be copied from the import file")
+            }
+        }
+
+        val contentResolver = lifecycle.withResumed { requireContext().contentResolver }
         return IOFile(requireContext().uploadFolder, uri.hashCode().toString()).apply {
             if (exists()) delete()
             setLastModified(fileModifiedAt.time)
             createNewFile()
             currentImportFile = this
-            context?.contentResolver?.openInputStream(uri)?.use { inputStream ->
+            contentResolver.openInputStream(uri)?.use { inputStream ->
                 outputStream().use { inputStream.copyTo(it) }
-            }
+            } ?: captureCannotProcessCopyData()
         }
     }
 
     private class NotEnoughRamException : Exception("Low device memory.")
+
+    private companion object {
+        val TAG: String = ImportFilesDialog::class.java.simpleName
+    }
 }
