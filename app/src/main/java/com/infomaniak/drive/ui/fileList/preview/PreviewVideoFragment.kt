@@ -186,7 +186,8 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     private fun getRenderersFactory(appContext: Context): RenderersFactory {
-        return DefaultRenderersFactory(appContext).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+        return DefaultRenderersFactory(appContext)
+            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
     }
 
     private fun getMediaSourceFactory(context: Context, offlineIsComplete: Boolean): MediaSourceFactory {
@@ -209,7 +210,11 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
-        return if (offlineFile != null && offlineIsComplete) offlineFile.toUri() else Uri.parse(ApiRoutes.getDownloadFileUrl(file))
+        return if (offlineFile != null && offlineIsComplete) {
+            offlineFile.toUri()
+        } else {
+            Uri.parse(ApiRoutes.getDownloadFileUrl(file))
+        }
     }
 
     private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
