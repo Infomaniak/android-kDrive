@@ -65,7 +65,6 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
-import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -434,8 +433,6 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
 }
 
 fun Context.shareFile(getUriToShare: () -> Uri?) {
-    trackFileActionEvent("sendFileCopy")
-
     val shareIntent = Intent().apply {
         action = Intent.ACTION_SEND
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

@@ -30,7 +30,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
+import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_WITH_NAME
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
+import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
+import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
@@ -79,7 +82,6 @@ fun Activity.setupBottomSheetFileBehavior(
 }
 
 fun Context.saveToKDrive(externalFileUri: Uri) {
-    trackFileActionEvent("saveToKDrive")
 
     Intent(this, SaveExternalFilesActivity::class.java).apply {
         action = Intent.ACTION_SEND
@@ -102,7 +104,11 @@ fun Context.openWith(
     userDrive: UserDrive = UserDrive(),
     onDownloadFile: (() -> Unit)? = null,
 ) {
-    trackFileActionEvent("openWith")
+    when {
+        currentFile?.isPublicShared() == true -> trackPublicShareActionEvent(ACTION_OPEN_WITH_NAME)
+        externalFileUri != null -> trackPdfActivityActionEvent(ACTION_OPEN_WITH_NAME)
+        else -> trackFileActionEvent(ACTION_OPEN_WITH_NAME)
+    }
 
     ownerFragment?.apply {
         // This is only for fragments. For activities, the snackbar is shown in the openWith method.

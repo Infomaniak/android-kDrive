@@ -27,6 +27,11 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_BOOKMARK_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_WITH_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_PRINT_PDF_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_SAVE_TO_KDRIVE_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_SEND_FILE_COPY_NAME
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogDownloadProgressBinding
 import com.infomaniak.drive.utils.showSnackbar
@@ -82,11 +87,11 @@ abstract class BaseDownloadProgressDialog : DialogFragment() {
         }
     }
 
-    enum class DownloadAction(val value: String) {
-        OPEN_BOOKMARK("open_bookmark"),
-        OPEN_WITH("open_with"),
-        PRINT_PDF("print_pdf"),
-        SAVE_TO_DRIVE("save_to_drive"),
-        SEND_COPY("send_copy"),
+    enum class DownloadAction(val value: String, val matomoValue: String) {
+        OPEN_BOOKMARK("open_bookmark", ACTION_OPEN_BOOKMARK_NAME),
+        OPEN_WITH("open_with", ACTION_OPEN_WITH_NAME),
+        PRINT_PDF("print_pdf", ACTION_PRINT_PDF_NAME),
+        SAVE_TO_DRIVE("save_to_drive", ACTION_SAVE_TO_KDRIVE_NAME),
+        SEND_COPY("send_copy", ACTION_SEND_FILE_COPY_NAME),
     }
 }
