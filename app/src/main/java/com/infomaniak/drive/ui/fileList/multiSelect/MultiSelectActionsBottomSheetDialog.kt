@@ -149,13 +149,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
 
         binding.downloadFile.apply {
-            setOnClickListener {
-                if (drivePermissions.checkWriteStoragePermission()) {
-                    trackEvent(matomoCategory, "bulkDownload")
-                    download()
-                }
-            }
-
+            setOnClickListener { if (drivePermissions.checkWriteStoragePermission()) download() }
             isVisible = navigationArgs.fileIds.isNotEmpty() || navigationArgs.isAllSelected
         }
     }
@@ -181,6 +175,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     private fun download() {
+        trackEvent(matomoCategory, "bulkDownload")
         if (navigationArgs.areAllFromTheSameFolder) downloadArchive() else downloadFiles()
     }
 
