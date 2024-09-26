@@ -34,6 +34,8 @@ import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.infomaniak.drive.MatomoDrive.ACTION_DOWNLOAD_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_SEND_FILE_COPY_NAME
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
@@ -254,8 +256,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         if (currentFile.isFolder()) {
             openAddFileBottom()
         } else {
-            val userDrive = UserDrive(sharedWithMe = isSharedWithMe)
-            ownerFragment.requireContext().shareFile { CloudStorageProvider.createShareFileUri(context, currentFile, userDrive) }
+            ownerFragment.requireContext().apply {
+                trackFileActionEvent(ACTION_SEND_FILE_COPY_NAME)
+                val userDrive = UserDrive(sharedWithMe = isSharedWithMe)
+                shareFile { CloudStorageProvider.createShareFileUri(context, currentFile, userDrive) }
+            }
         }
     }
 
@@ -459,9 +464,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun shareFile()
         fun saveToKDrive()
         fun openWith()
-
-        @CallSuper
-        fun printClicked() = trackFileActionEvent("printPdf")
+        fun printClicked()
 
         @CallSuper
         fun addFavoritesClicked() = trackFileActionEvent("favorite", currentFile?.isFavorite == false)
@@ -474,8 +477,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun displayInfoClicked()
 
-        @CallSuper
-        fun downloadFileClicked() = trackFileActionEvent("download")
+        fun downloadFileClicked() = trackFileActionEvent(ACTION_DOWNLOAD_NAME)
 
         @CallSuper
         fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)

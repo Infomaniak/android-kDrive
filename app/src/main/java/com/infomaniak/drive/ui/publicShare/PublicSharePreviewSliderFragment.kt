@@ -42,7 +42,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     override val bottomSheetBehavior: BottomSheetBehavior<View>
         get() = BottomSheetBehavior.from(bottomSheetView)
 
-    override val isFileShare = true
+    override val isPublicShare = true
     override val ownerFragment = this
 
     override fun initCurrentFile() {
