@@ -131,7 +131,7 @@ class ImportFilesDialog : DialogFragment() {
         } ?: captureWithSentry(cursorState = "null")
     }
 
-    private fun CoroutineScope.processCursorData(cursor: Cursor, uri: Uri) {
+    private suspend fun CoroutineScope.processCursorData(cursor: Cursor, uri: Uri) {
         SentryLog.i(TAG, "processCursorData: uri=$uri")
         val fileName = cursor.getFileName(uri)
         val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
