@@ -29,6 +29,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.drive.MatomoDrive.ACTION_PRINT_PDF_NAME
+import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
@@ -59,7 +61,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override val bottomSheetBehavior: BottomSheetBehavior<View>
         get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
 
-    override val isFileShare = false
+    override val isPublicShare = false
     override val ownerFragment = this
 
     override val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
@@ -327,7 +329,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun onCacheAddedToOffline() = Unit
 
     override fun printClicked() {
-        super<BasePreviewSliderFragment>.printClicked()
+        requireContext().trackFileActionEvent(ACTION_PRINT_PDF_NAME)
         previewPDFHandler.printClicked(
             context = requireContext(),
             onDefaultCase = {

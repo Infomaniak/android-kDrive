@@ -21,6 +21,8 @@ import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
+import com.infomaniak.drive.MatomoDrive.ACTION_DOWNLOAD_NAME
+import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -62,12 +64,11 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     override fun saveToKDrive() = startAction(DownloadAction.SAVE_TO_DRIVE)
 
     override fun downloadFileClicked() {
-        super.downloadFileClicked()
+        currentContext.trackPublicShareActionEvent(ACTION_DOWNLOAD_NAME)
         currentFile?.let { currentContext.downloadFile(drivePermissions, it, ::onDownloadSuccess) }
     }
 
     override fun printClicked() {
-        super.printClicked()
         previewPDFHandler?.printClicked(
             context = currentContext,
             onDefaultCase = { startAction(DownloadAction.PRINT_PDF) },
@@ -93,6 +94,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     }
 
     private fun executeDownloadAction(downloadAction: DownloadAction, cacheFile: IOFile) = runCatching {
+        currentContext.trackPublicShareActionEvent(downloadAction.matomoValue)
         val uri = FileProvider.getUriForFile(currentContext, currentContext.getString(R.string.FILE_AUTHORITY), cacheFile)
 
         when (downloadAction) {
