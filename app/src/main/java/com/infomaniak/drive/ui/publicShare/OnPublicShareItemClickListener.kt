@@ -61,7 +61,13 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
 
     override fun shareFile() = startAction(DownloadAction.SEND_COPY)
 
-    override fun saveToKDrive() = startAction(DownloadAction.SAVE_TO_DRIVE)
+    override fun saveToKDrive() {
+        if (AccountUtils.currentDriveId == -1) {
+            ownerFragment?.safeNavigate(R.id.obtainKDriveAdBottomSheet)
+        } else {
+            startAction(DownloadAction.SAVE_TO_DRIVE)
+        }
+    }
 
     override fun downloadFileClicked() {
         currentContext.trackPublicShareActionEvent(ACTION_DOWNLOAD_NAME)
