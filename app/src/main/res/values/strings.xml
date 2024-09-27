@@ -543,6 +543,13 @@
     <string name="notificationTitle">Notifications</string>
     <string name="notificationUploadDownloadChannelName">Uploads and downloads</string>
     <string name="notificationUploadServiceChannelName">File upload services</string>
+    <string name="obtainkDriveAdAlreadyGotAccount">I already have an account</string>
+    <string name="obtainkDriveAdDescription">Store your photos, documents and emails in Switzerland with an independent company that respects your privacy.</string>
+    <string name="obtainkDriveAdFreeTrialButton">Free trial</string>
+    <string name="obtainkDriveAdListing1">15 GB free, then 2 TB up to 106 TB</string>
+    <string name="obtainkDriveAdListing2">Online creation and collaboration for Word, Excel and PowerPoint documents</string>
+    <string name="obtainkDriveAdListing3">Automatic file import from Google Drive, Dropbox, One Drive, NextCloud, Hubic and WebDav</string>
+    <string name="obtainkDriveAdTitle">Get kDrive for free</string>
     <string name="offlineFileNoFile">No files offline</string>
     <string name="offlineFileNoFileDescription">Select a file and make it available offline so you can find it here when you’re not logged in.</string>
     <string name="offlineFileTitle">Offline</string>
