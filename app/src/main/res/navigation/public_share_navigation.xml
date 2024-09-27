@@ -103,6 +103,12 @@
             app:destination="@id/publicShareOutdatedFragment"
             app:popUpTo="@id/publicShareListFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_obtainKDriveAdBottomSheet"
+            app:destination="@id/obtainKDriveAdBottomSheet" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicShareFileActionsBottomSheet"
+            app:destination="@id/publicShareFileActionsBottomSheet" />
     </fragment>
 
     <fragment
@@ -138,6 +144,12 @@
         android:name="com.infomaniak.drive.ui.publicShare.PublicShareFileActionsBottomSheetDialog"
         android:label="PublicShareFileActionsBottomSheet"
         tools:layout="@layout/fragment_bottom_sheet_public_share_file_actions" />
+
+    <dialog
+        android:id="@+id/obtainKDriveAdBottomSheet"
+        android:name="com.infomaniak.drive.ui.publicShare.ObtainKDriveAdBottomSheetDialog"
+        android:label="ObtainKDriveAdBottomSheet"
+        tools:layout="@layout/fragment_bottom_sheet_obtain_kdrive_ad" />
 
     <dialog
         android:id="@+id/sortFilesBottomSheetDialog"
