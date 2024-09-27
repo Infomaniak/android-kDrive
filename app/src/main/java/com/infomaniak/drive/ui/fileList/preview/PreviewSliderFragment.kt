@@ -47,6 +47,7 @@ import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.DownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
+import com.infomaniak.drive.ui.menu.GalleryFragment.Companion.DELETE_FILE_KEY
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -438,6 +439,7 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                 removeFileInSlider()
                 showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, currentFile.name))
                 mainViewModel.deleteFileFromHome.value = true
+                setBackNavigationResult(DELETE_FILE_KEY, currentFile.id, withPopBackStack = false)
             } else {
                 showSnackbar(R.string.errorDelete)
             }
