@@ -17,12 +17,16 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.databinding.FragmentBottomSheetObtainKdriveAdBinding
+import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.ui.login.LoginActivityArgs
 import com.infomaniak.lib.core.utils.safeBinding
 
 class ObtainKDriveAdBottomSheetDialog : BottomSheetDialogFragment() {
@@ -33,4 +37,17 @@ class ObtainKDriveAdBottomSheetDialog : BottomSheetDialogFragment() {
         return FragmentBottomSheetObtainKdriveAdBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.freeTrialButton.setOnClickListener { openLoginActivity(shouldLaunchAccountCreation = true) }
+        binding.alreadyGotAnAccountButton.setOnClickListener { openLoginActivity(shouldLaunchAccountCreation = false) }
+    }
+
+    private fun openLoginActivity(shouldLaunchAccountCreation: Boolean) {
+        Intent(requireActivity(), LoginActivity::class.java).apply {
+            putExtras(LoginActivityArgs(shouldLaunchAccountCreation = shouldLaunchAccountCreation).toBundle())
+        }.also(::startActivity)
+        findNavController().popBackStack()
+    }
 }

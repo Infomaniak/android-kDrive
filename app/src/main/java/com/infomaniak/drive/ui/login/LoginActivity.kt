@@ -63,7 +63,9 @@ class LoginActivity : AppCompatActivity() {
 
     private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
-    private val navigationArgs: LoginActivityArgs? by lazy { intent?.extras?.let(LoginActivityArgs::fromBundle) }
+    private val navigationArgs: LoginActivityArgs? by lazy {
+        intent?.extras?.let(LoginActivityArgs::fromBundle)
+    }
 
     private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         with(result) {
@@ -120,19 +122,23 @@ class LoginActivity : AppCompatActivity() {
 
         signInButton.setOnClickListener {
             trackAccountEvent("openCreationWebview")
-            infomaniakLogin.startCreateAccountWebView(
-                resultLauncher = createAccountResultLauncher,
-                createAccountUrl = BuildConfig.CREATE_ACCOUNT_URL,
-                successHost = BuildConfig.CREATE_ACCOUNT_SUCCESS_HOST,
-                cancelHost = BuildConfig.CREATE_ACCOUNT_CANCEL_HOST,
-            )
+            startAccountCreation()
         }
 
         onBackPressedDispatcher.addCallback {
             if (introViewpager.currentItem == 0) finish() else introViewpager.currentItem -= 1
         }
 
-        handleHelpShortcut()
+        handleNavigationFlags()
+    }
+
+    private fun startAccountCreation() {
+        infomaniakLogin.startCreateAccountWebView(
+            resultLauncher = createAccountResultLauncher,
+            createAccountUrl = BuildConfig.CREATE_ACCOUNT_URL,
+            successHost = BuildConfig.CREATE_ACCOUNT_SUCCESS_HOST,
+            cancelHost = BuildConfig.CREATE_ACCOUNT_CANCEL_HOST,
+        )
     }
 
     private fun ActivityResult.handleCreateAccountActivityResult() = with(binding) {
@@ -203,8 +209,11 @@ class LoginActivity : AppCompatActivity() {
         signInButton.isEnabled = true
     }
 
-    private fun handleHelpShortcut() {
-        if (navigationArgs?.isHelpShortcutPressed == true) openSupport()
+    private fun handleNavigationFlags() {
+        when {
+            navigationArgs?.isHelpShortcutPressed == true -> openSupport()
+            navigationArgs?.shouldLaunchAccountCreation == true -> startAccountCreation()
+        }
     }
 
     companion object {
