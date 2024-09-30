@@ -552,6 +552,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun writeDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
         val tempFile = createTempFile(file.parentId, file.name)
+        val cacheFile = file.getCacheFile(context, userDrive)
         val handler = Handler(context.mainLooper)
 
         return ParcelFileDescriptor.open(tempFile, accessMode, handler) { exception: IOException? ->
@@ -568,6 +569,7 @@ class CloudStorageProvider : DocumentsProvider() {
                         userId = userDrive.userId,
                     ).store()
                     context.syncImmediately()
+                    cacheFile.delete() // Delete old cache
                 }
             } else {
                 exception.printStackTrace()
