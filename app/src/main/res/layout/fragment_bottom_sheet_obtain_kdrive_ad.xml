@@ -73,7 +73,7 @@
         android:text="@string/obtainkDriveAdListing3" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/testKDriveButton"
+        android:id="@+id/freeTrialButton"
         style="@style/ButtonInfomaniak"
         android:layout_width="match_parent"
         android:layout_marginHorizontal="@dimen/marginStandard"
