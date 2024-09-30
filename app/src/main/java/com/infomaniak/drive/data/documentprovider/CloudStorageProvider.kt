@@ -258,17 +258,29 @@ class CloudStorageProvider : DocumentsProvider() {
         SentryLog.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
         val context = context ?: return null
 
+        fun getRemoteFile(localFile: File?, fileId: Int, driveId: Int): File? {
+            val userId = getUserId(documentId)
+            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
+            return ApiRepository.getFileDetails(localFile ?: File(id = fileId, driveId = driveId), okHttpClient).data
+        }
+
         val isWrite = mode.indexOf('w') != -1
         val accessMode = ParcelFileDescriptor.parseMode(mode)
         val fileId = getFileIdFromDocumentId(documentId)
         val userDrive = createUserDrive(documentId)
-        val file = FileController.getFileById(fileId, userDrive)
+        val localFile = FileController.getFileById(fileId, userDrive)
 
-        return file?.let {
+        val updatedFile = runCatching {
+            getRemoteFile(localFile, fileId, userDrive.driveId)
+        }.getOrElse {
+            localFile
+        }
+
+        return updatedFile?.let {
             if (isWrite) {
-                writeDataFile(context, file, userDrive, accessMode)
+                writeDataFile(context, updatedFile, userDrive, accessMode)
             } else {
-                getDataFile(context, file, userDrive, accessMode)
+                getDataFile(context, updatedFile, userDrive, accessMode)
             }
         }
     }
