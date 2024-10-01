@@ -45,6 +45,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getAdjustedColumnNumber
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
+import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -83,6 +84,10 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        getBackNavigationResult<Int>(DELETE_FILE_KEY) { fileId ->
+            galleryAdapter.deleteByFileId(fileId)
+        }
 
         setupPagination()
 
@@ -331,5 +336,7 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
         const val TAG = "GalleryFragment"
         const val MATOMO_CATEGORY = "picturesFileAction"
         private const val NUMBER_ITEMS_LOADER = 13
+
+        const val DELETE_FILE_KEY = "sort_type_option"
     }
 }
