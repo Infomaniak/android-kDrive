@@ -24,8 +24,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.core.content.FileProvider
 import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -45,13 +47,16 @@ import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_S
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
+import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.FilePresenter.openFolder
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.launch
 import com.infomaniak.lib.core.R as RCore
 
 class PublicShareListFragment : FileListFragment() {
@@ -119,6 +124,7 @@ class PublicShareListFragment : FileListFragment() {
 
         observeRootFile()
         observeFiles()
+        observeBookmarkAction()
     }
 
     private fun initFileAdapter() {
@@ -204,6 +210,14 @@ class PublicShareListFragment : FileListFragment() {
         }
     }
 
+    private fun observeBookmarkAction() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            publicShareViewModel.fetchCacheFileForActionResult.collect { (cacheFile, action) ->
+                if (action == DownloadAction.OPEN_BOOKMARK) executeOpenBookmarkAction(cacheFile)
+            }
+        }
+    }
+
     private fun openFolder(folder: File) {
         openFolder(
             file = folder,
@@ -215,24 +229,28 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     private fun openBookmark(file: File) {
-        publicShareViewModel.executeDownloadAction(
-            activityContext = requireActivity(),
-            downloadAction = DownloadAction.OPEN_BOOKMARK,
+        publicShareViewModel.fetchCacheFileForAction(
             file = file,
+            action = DownloadAction.OPEN_BOOKMARK,
             navigateToDownloadDialog = {
-                withContext(Dispatchers.Main) {
+                Dispatchers.Main {
                     safeNavigate(
                         resId = R.id.previewDownloadProgressDialog,
                         args = PreviewDownloadProgressDialogArgs(file.name).toBundle(),
                     )
                 }
             },
-            onDownloadError = {
-                showSnackbar(
-                    title = R.string.errorGetBookmarkURL,
-                    anchor = (requireActivity() as? PublicShareActivity)?.getMainButton(),
-                )
-            },
+        )
+    }
+
+    private fun executeOpenBookmarkAction(cacheFile: IOFile?) = runCatching {
+        val uri = FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), cacheFile!!)
+        requireContext().openBookmarkIntent(cacheFile.name, uri)
+    }.onFailure { exception ->
+        exception.printStackTrace()
+        showSnackbar(
+            title = R.string.errorGetBookmarkURL,
+            anchor = (requireActivity() as? PublicShareActivity)?.getMainButton(),
         )
     }
 
