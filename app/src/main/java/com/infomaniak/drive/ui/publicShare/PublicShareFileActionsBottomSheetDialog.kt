@@ -74,7 +74,10 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), OnP
     }
 
     private fun initBottomSheet() = with(binding.publicShareFileActionsView) {
-        runCatching { initCurrentFile() }.onFailure { findNavController().popBackStack() }
+        runCatching { initCurrentFile() }.onFailure {
+            findNavController().popBackStack()
+            return@with
+        }
         updateWithExternalFile(currentFile)
         initOnClickListener(onItemClickListener = this@PublicShareFileActionsBottomSheetDialog)
         isPrintingHidden(isGone = true)
