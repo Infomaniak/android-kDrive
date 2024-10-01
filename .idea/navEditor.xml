@@ -1419,6 +1419,16 @@
                                 <LayoutPositions />
                               </value>
                             </entry>
+                            <entry key="action_publicShareListFragment_to_publicShareOutdatedFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                            <entry key="action_publicShareListFragment_to_publicSharePasswordFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
                             <entry key="action_publicShareListFragment_to_publicSharePreviewSliderFragment">
                               <value>
                                 <LayoutPositions />
@@ -1439,6 +1449,18 @@
                       </LayoutPositions>
                     </value>
                   </entry>
+                  <entry key="publicShareOutdatedFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="12" />
+                            <option name="y" value="12" />
+                          </Point>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
                   <entry key="publicSharePasswordFragment">
                     <value>
                       <LayoutPositions>
@@ -1447,6 +1469,15 @@
                             <option name="x" value="256" />
                             <option name="y" value="12" />
                           </Point>
+                        </option>
+                        <option name="myPositions">
+                          <map>
+                            <entry key="action_publicSharePasswordFragment_to_publicShareListFragment">
+                              <value>
+                                <LayoutPositions />
+                              </value>
+                            </entry>
+                          </map>
                         </option>
                       </LayoutPositions>
                     </value>
@@ -1473,18 +1504,6 @@
                               </value>
                             </entry>
                           </map>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="saveExternalFilesActivity">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="500" />
-                            <option name="y" value="12" />
-                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>

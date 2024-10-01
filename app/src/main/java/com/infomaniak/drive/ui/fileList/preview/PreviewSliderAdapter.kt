@@ -28,7 +28,6 @@ import com.infomaniak.drive.data.models.UserDrive
 class PreviewSliderAdapter(
     manager: FragmentManager,
     lifecycle: Lifecycle,
-    private val publicShareUuid: String,
     private val userDrive: UserDrive,
 ) : FragmentStateAdapter(manager, lifecycle) {
 
@@ -39,7 +38,7 @@ class PreviewSliderAdapter(
 
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
-        val args = PreviewFragmentArgs(fileId = file.id, publicShareUuid = publicShareUuid, userDrive = userDrive).toBundle()
+        val args = PreviewFragmentArgs(fileId = file.id, userDrive = userDrive).toBundle()
 
         return when (file.getFileType()) {
             ExtensionType.IMAGE -> PreviewPictureFragment()
