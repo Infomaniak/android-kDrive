@@ -44,6 +44,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomShee
 import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
+import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.PublicShareFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
@@ -173,8 +174,8 @@ class PublicShareListFragment : FileListFragment() {
         }
     }
 
-    private fun populateFileList(files: List<File>, shouldRefreshFiles: Boolean = true) {
-        if (shouldRefreshFiles) fileAdapter.setFiles(files) else fileAdapter.addFileList(files)
+    private fun populateFileList(files: List<File>, isNewSort: Boolean) {
+        fileAdapter.setFiles(files, isFileListResetNeeded = isNewSort)
         fileAdapter.isComplete = true
         showLoadingTimer.cancel()
         binding.swipeRefreshLayout.isRefreshing = false
@@ -192,8 +193,8 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     private fun observeFiles() {
-        publicShareViewModel.childrenLiveData.observe(viewLifecycleOwner) { (files, shouldUpdate) ->
-            if (shouldUpdate) populateFileList(files)
+        publicShareViewModel.childrenLiveData.observe(viewLifecycleOwner) { (files, shouldUpdate, isNewSort) ->
+            if (shouldUpdate) populateFileList(files, isNewSort)
         }
     }
 
@@ -204,8 +205,7 @@ class PublicShareListFragment : FileListFragment() {
                 openFolder(file)
             } else {
                 multiSelectManager.isMultiSelectAuthorized = false
-                val fileList = file?.let(::listOf) ?: listOf()
-                publicShareViewModel.childrenLiveData.postValue(fileList to true)
+                publicShareViewModel.setSingleRootFile(file)
             }
         }
     }
@@ -306,13 +306,14 @@ class PublicShareListFragment : FileListFragment() {
             fileAdapter.isComplete = false
 
             with(publicShareViewModel) {
-                childrenLiveData.value = emptyList<File>() to false
+                val emptyFilesResult = PublicShareFilesResult(files = emptyList(), shouldUpdate = false, isNewSort = false)
+                childrenLiveData.value = emptyFilesResult
                 cancelDownload()
 
                 if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
                     downloadPublicShareRootFile()
                 } else {
-                    getFiles(folderId, fileListViewModel.sortType)
+                    getFiles(folderId, fileListViewModel.sortType, isNewSort)
                 }
             }
         }

@@ -45,7 +45,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     private val appContext = getApplication<MainApplication>()
 
     var rootSharedFile = SingleLiveEvent<File?>()
-    val childrenLiveData = SingleLiveEvent<Pair<List<File>, Boolean>>()
+    val childrenLiveData = SingleLiveEvent<PublicShareFilesResult>()
     var fileClicked: File? = null
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
@@ -107,7 +107,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         rootSharedFile.postValue(file?.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid })
     }
 
-    fun getFiles(folderId: Int, sortType: SortType) {
+    fun getFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
         getPublicShareFilesJob = Job()
 
         viewModelScope.launch(Dispatchers.IO + getPublicShareFilesJob) {
@@ -123,11 +123,12 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
                 ensureActive()
 
                 val newFiles = mutableListOf<File>().apply {
-                    childrenLiveData.value?.first?.let(::addAll)
+                    childrenLiveData.value?.files?.let(::addAll)
                     addAll(folderFilesProviderResult.folderFiles.addPublicShareUuid())
+                    if (any(File::isFolder)) sortByDescending(File::isFolder)
                 }
 
-                childrenLiveData.postValue(newFiles to true)
+                childrenLiveData.postValue(PublicShareFilesResult(files = newFiles, shouldUpdate = true, isNewSort = isNewSort))
                 currentCursor = folderFilesProviderResult.cursor
                 if (!folderFilesProviderResult.isComplete) recursiveDownload(folderId, isFirstPage = false)
             }
@@ -165,6 +166,13 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         val result = apiResponse.data?.let { archiveUuid -> null to archiveUuid } ?: (apiResponse.translatedError to null)
 
         buildArchiveResult.postValue(result)
+    }
+
+    fun setSingleRootFile(file: File?) {
+        val fileList = file?.let(::listOf) ?: listOf()
+        childrenLiveData.postValue(
+            PublicShareFilesResult(fileList, shouldUpdate = true, isNewSort = false)
+        )
     }
 
     fun fetchCacheFileForAction(file: File?, action: DownloadAction, navigateToDownloadDialog: suspend () -> Unit) {
@@ -217,6 +225,12 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     private fun List<File>.addPublicShareUuid() = map { it.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid } }
+
+    data class PublicShareFilesResult(
+        val files: List<File>,
+        val shouldUpdate: Boolean,
+        val isNewSort: Boolean,
+    )
 
     companion object {
         const val TAG = "publicShareViewModel"
