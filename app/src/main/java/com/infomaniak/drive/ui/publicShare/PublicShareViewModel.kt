@@ -168,6 +168,13 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         buildArchiveResult.postValue(result)
     }
 
+    fun setSingleRootFile(file: File?) {
+        val fileList = file?.let(::listOf) ?: listOf()
+        childrenLiveData.postValue(
+            PublicShareFilesResult(fileList, shouldUpdate = true, isNewSort = false)
+        )
+    }
+
     fun fetchCacheFileForAction(file: File?, action: DownloadAction, navigateToDownloadDialog: suspend () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {

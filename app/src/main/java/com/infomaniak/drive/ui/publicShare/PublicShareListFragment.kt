@@ -205,10 +205,7 @@ class PublicShareListFragment : FileListFragment() {
                 openFolder(file)
             } else {
                 multiSelectManager.isMultiSelectAuthorized = false
-                val fileList = file?.let(::listOf) ?: listOf()
-                publicShareViewModel.childrenLiveData.postValue(
-                    PublicShareFilesResult(fileList, shouldUpdate = true, isNewSort = false)
-                )
+                publicShareViewModel.setSingleRootFile(file)
             }
         }
     }
