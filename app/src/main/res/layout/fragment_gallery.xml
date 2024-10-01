@@ -23,6 +23,10 @@
     android:orientation="vertical"
     tools:context=".ui.menu.GalleryFragment">
 
+    <include
+        android:id="@+id/noNetworkInclude"
+        layout="@layout/layout_no_network_small" />
+
     <com.infomaniak.drive.ui.menu.RecyclerViewFastScroller
         android:id="@+id/galleryFastScroller"
         android:layout_width="match_parent"

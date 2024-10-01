@@ -59,23 +59,12 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
-            android:id="@+id/galleryContentLinearLayout"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/galleryFragmentView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:nestedScrollingEnabled="true"
+            tools:layout="@layout/fragment_gallery" />
 
-            <include
-                android:id="@+id/noNetworkInclude"
-                layout="@layout/layout_no_network_small" />
-
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/galleryFragmentView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="true"
-                tools:layout="@layout/fragment_gallery" />
-
-        </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

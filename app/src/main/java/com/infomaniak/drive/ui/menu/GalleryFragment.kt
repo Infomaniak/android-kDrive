@@ -119,6 +119,8 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             configGalleryLayoutManager()
 
             noGalleryLayout.iNoItemsLayoutView = this@GalleryFragment
+
+            (parentFragment as MenuGalleryFragment).initNoNetworkLayout(noNetworkInclude)
         }
 
         mainViewModel.observeDownloadOffline(requireContext()).observe(viewLifecycleOwner) { workInfoList ->

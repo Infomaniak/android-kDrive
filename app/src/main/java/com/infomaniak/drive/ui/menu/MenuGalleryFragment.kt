@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
+import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
@@ -51,6 +52,14 @@ class MenuGalleryFragment : Fragment() {
         ViewCompat.requestApplyInsets(binding.galleryListCoordinator)
         val galleryFragment = addGalleryFragment()
         setUi(galleryFragment)
+    }
+
+    fun initNoNetworkLayout(noNetworkInclude: LayoutNoNetworkSmallBinding) = with(binding) {
+        observeAndDisplayNetworkAvailability(
+            mainViewModel = mainViewModel,
+            noNetworkBinding = noNetworkInclude,
+            noNetworkBindingDirectParent = galleryFragmentView,
+        )
     }
 
     private fun addGalleryFragment(): GalleryFragment = with(childFragmentManager) {
@@ -79,12 +88,6 @@ class MenuGalleryFragment : Fragment() {
         }
 
         adjustFastScrollBarScrollRange(galleryFragment)
-
-        observeAndDisplayNetworkAvailability(
-            mainViewModel = mainViewModel,
-            noNetworkBinding = noNetworkInclude,
-            noNetworkBindingDirectParent = galleryContentLinearLayout,
-        )
     }
 
     private fun MultiSelectLayoutBinding.setMultiSelectClickListeners(galleryFragment: GalleryFragment) = with(galleryFragment) {
