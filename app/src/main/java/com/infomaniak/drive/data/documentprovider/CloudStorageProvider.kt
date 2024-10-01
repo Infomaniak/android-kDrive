@@ -258,17 +258,28 @@ class CloudStorageProvider : DocumentsProvider() {
         SentryLog.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
         val context = context ?: return null
 
+        fun getRemoteFile(localFile: File?, fileId: Int, driveId: Int): File? {
+            val okHttpClient = runBlocking { AccountUtils.getHttpClient(getUserId(documentId).toInt()) }
+            return ApiRepository.getFileDetails(localFile ?: File(id = fileId, driveId = driveId), okHttpClient).data
+        }
+
         val isWrite = mode.indexOf('w') != -1
         val accessMode = ParcelFileDescriptor.parseMode(mode)
         val fileId = getFileIdFromDocumentId(documentId)
         val userDrive = createUserDrive(documentId)
-        val file = FileController.getFileById(fileId, userDrive)
+        val localFile = FileController.getFileById(fileId, userDrive)
 
-        return file?.let {
+        val updatedFile = runCatching {
+            getRemoteFile(localFile, fileId, userDrive.driveId)
+        }.getOrElse {
+            localFile
+        }
+
+        return updatedFile?.let {
             if (isWrite) {
-                writeDataFile(context, file, userDrive, accessMode)
+                writeDataFile(context, updatedFile, userDrive, accessMode)
             } else {
-                getDataFile(context, file, userDrive, accessMode)
+                getDataFile(context, updatedFile, userDrive, accessMode)
             }
         }
     }
@@ -552,6 +563,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun writeDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
         val tempFile = createTempFile(file.parentId, file.name)
+        val cacheFile = file.getCacheFile(context, userDrive)
         val handler = Handler(context.mainLooper)
 
         return ParcelFileDescriptor.open(tempFile, accessMode, handler) { exception: IOException? ->
@@ -568,6 +580,7 @@ class CloudStorageProvider : DocumentsProvider() {
                         userId = userDrive.userId,
                     ).store()
                     context.syncImmediately()
+                    cacheFile.delete() // Delete old cache
                 }
             } else {
                 exception.printStackTrace()
