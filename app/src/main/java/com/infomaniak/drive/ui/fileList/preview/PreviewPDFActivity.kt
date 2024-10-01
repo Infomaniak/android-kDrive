@@ -66,10 +66,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
             navController.navigate(R.id.previewPDFFragment)
 
-            header.setup(
-                onBackClicked = { finish() },
-                onOpenWithClicked = { openWith(externalFileUri = previewPDFHandler.externalFileUri) },
-            )
+            header.setup(onBackClicked = ::finish, onOpenWithClicked = ::openWith)
         }
 
         initBottomSheet()
