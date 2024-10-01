@@ -453,6 +453,7 @@ object FolderFilesProvider {
         val folder: File,
         val folderFiles: ArrayList<File>,
         val isComplete: Boolean,
+        val cursor: String? = null,
     )
 
     enum class SourceRestrictionType {

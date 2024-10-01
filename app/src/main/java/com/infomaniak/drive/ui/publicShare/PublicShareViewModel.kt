@@ -77,6 +77,11 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     private var getPublicShareFilesJob: Job = Job()
     private var currentCursor: String? = null
 
+    override fun onCleared() {
+        cancelDownload()
+        super.onCleared()
+    }
+
     fun initPublicShare() {
         val apiResponse = ApiRepository.getPublicShareInfo(driveId, publicShareUuid)
         val result = if (apiResponse.isSuccess()) null to apiResponse.data else apiResponse.error to null
@@ -101,7 +106,6 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     }
 
     fun getFiles(folderId: Int, sortType: SortType) {
-        cancelDownload()
         getPublicShareFilesJob = Job()
 
         viewModelScope.launch(Dispatchers.IO + getPublicShareFilesJob) {
@@ -122,6 +126,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
                 }
 
                 childrenLiveData.postValue(newFiles to true)
+                currentCursor = folderFilesProviderResult.cursor
                 if (!folderFilesProviderResult.isComplete) recursiveDownload(folderId, isFirstPage = false)
             }
 
@@ -132,6 +137,7 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     fun cancelDownload() {
         getPublicShareFilesJob.cancel()
         getPublicShareFilesJob.cancelChildren()
+        currentCursor = null
     }
 
     fun importFilesToDrive(
@@ -212,18 +218,16 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
             )
         }
 
-        getPublicShareFilesJob.ensureActive()
-
         return handleRemoteFiles(apiResponse)
     }
 
     private fun handleRemoteFiles(apiResponse: CursorApiResponse<List<File>>) = apiResponse.data?.let { remoteFiles ->
-        currentCursor = apiResponse.cursor
         //TODO: Better management of this rootSharedFile value
         FolderFilesProviderResult(
             folder = rootSharedFile.value!!,
             folderFiles = ArrayList(remoteFiles),
             isComplete = !apiResponse.hasMore,
+            cursor = apiResponse.cursor,
         )
     }
 
