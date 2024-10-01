@@ -124,12 +124,7 @@ class PublicShareListFragment : FileListFragment() {
 
         observeRootFile()
         observeFiles()
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            publicShareViewModel.fetchCacheFileForActionResult.collect { (cacheFile, action) ->
-                if (action == DownloadAction.OPEN_BOOKMARK) executeOpenBookmarkAction(cacheFile)
-            }
-        }
+        observeBookmarkAction()
     }
 
     private fun initFileAdapter() {
@@ -211,6 +206,14 @@ class PublicShareListFragment : FileListFragment() {
                 multiSelectManager.isMultiSelectAuthorized = false
                 val fileList = file?.let(::listOf) ?: listOf()
                 publicShareViewModel.childrenLiveData.postValue(fileList to true)
+            }
+        }
+    }
+
+    private fun observeBookmarkAction() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            publicShareViewModel.fetchCacheFileForActionResult.collect { (cacheFile, action) ->
+                if (action == DownloadAction.OPEN_BOOKMARK) executeOpenBookmarkAction(cacheFile)
             }
         }
     }
