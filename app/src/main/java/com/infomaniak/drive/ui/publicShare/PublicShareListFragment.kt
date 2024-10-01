@@ -27,6 +27,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.core.content.FileProvider
 import androidx.core.view.isGone
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -37,6 +38,7 @@ import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
+import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
@@ -54,6 +56,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
+import kotlinx.coroutines.launch
 import com.infomaniak.lib.core.R as RCore
 
 class PublicShareListFragment : FileListFragment() {
@@ -121,6 +124,12 @@ class PublicShareListFragment : FileListFragment() {
 
         observeRootFile()
         observeFiles()
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            publicShareViewModel.fetchCacheFileForActionResult.collect { (cacheFile, action) ->
+                if (action == DownloadAction.OPEN_BOOKMARK) executeOpenBookmarkAction(cacheFile)
+            }
+        }
     }
 
     private fun initFileAdapter() {
@@ -219,6 +228,7 @@ class PublicShareListFragment : FileListFragment() {
     private fun openBookmark(file: File) {
         publicShareViewModel.fetchCacheFileForAction(
             file = file,
+            action = DownloadAction.OPEN_BOOKMARK,
             navigateToDownloadDialog = {
                 Dispatchers.Main {
                     safeNavigate(
@@ -227,7 +237,7 @@ class PublicShareListFragment : FileListFragment() {
                     )
                 }
             },
-        ).observe(viewLifecycleOwner, ::executeOpenBookmarkAction)
+        )
     }
 
     private fun executeOpenBookmarkAction(cacheFile: IOFile?) = runCatching {

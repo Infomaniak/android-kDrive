@@ -18,7 +18,10 @@
 package com.infomaniak.drive.ui.publicShare
 
 import android.app.Application
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
@@ -34,6 +37,8 @@ import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class PublicShareViewModel(application: Application, val savedStateHandle: SavedStateHandle) : AndroidViewModel(application) {
 
@@ -44,7 +49,10 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     var fileClicked: File? = null
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
-    val fetchCacheFileForActionResult = SingleLiveEvent<Pair<IOFile?, DownloadAction>>()
+    val fetchCacheFileForActionResult = MutableSharedFlow<Pair<IOFile?, DownloadAction>>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
     val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, ShareLink?>>()
     val submitPasswordResult = SingleLiveEvent<Boolean?>()
     var hasBeenAuthenticated = false
@@ -159,19 +167,21 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         buildArchiveResult.postValue(result)
     }
 
-    fun fetchCacheFileForAction(file: File?, navigateToDownloadDialog: suspend () -> Unit) = liveData(Dispatchers.IO) {
-        runCatching {
-            emit(
-                file!!.convertToIOFile(
-                    context = appContext,
-                    onProgress = downloadProgressLiveData::postValue,
-                    navigateToDownloadDialog = navigateToDownloadDialog,
+    fun fetchCacheFileForAction(file: File?, action: DownloadAction, navigateToDownloadDialog: suspend () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                fetchCacheFileForActionResult.emit(
+                    file!!.convertToIOFile(
+                        context = appContext,
+                        onProgress = downloadProgressLiveData::postValue,
+                        navigateToDownloadDialog = navigateToDownloadDialog,
+                    ) to action
                 )
-            )
-        }.onFailure { exception ->
-            emit(null)
-            downloadProgressLiveData.postValue(null)
-            exception.printStackTrace()
+            }.onFailure { exception ->
+                fetchCacheFileForActionResult.emit(null to action)
+                downloadProgressLiveData.postValue(null)
+                exception.printStackTrace()
+            }
         }
     }
 
