@@ -1,0 +1,2 @@
+- Correction de traductions erronées
+- Correction de quelques problèmes lors du téléchargement et de l'importation de fichiers

@@ -1,0 +1,2 @@
+- Fix wrong translations
+- Fix some issues when uploading & importing files
