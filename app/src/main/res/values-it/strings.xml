@@ -532,6 +532,13 @@
     <string name="notificationTitle">Notifiche</string>
     <string name="notificationUploadDownloadChannelName">Importazioni e download</string>
     <string name="notificationUploadServiceChannelName">Servizi per l’importazione di file</string>
+    <string name="obtainkDriveAdAlreadyGotAccount">Ho già un account</string>
+    <string name="obtainkDriveAdDescription">Archiviate le vostre foto, i vostri documenti e le vostre e-mail in Svizzera con un’azienda indipendente che rispetta la vostra privacy.</string>
+    <string name="obtainkDriveAdFreeTrialButton">Prova gratuita</string>
+    <string name="obtainkDriveAdListing1">15 GB gratuiti, poi 2 TB fino a 106 TB</string>
+    <string name="obtainkDriveAdListing2">Creazione e collaborazione online di documenti Word, Excel e PowerPoint</string>
+    <string name="obtainkDriveAdListing3">Importazione automatica dei file da Google Drive, Dropbox, One Drive, NextCloud, Hubic e WebDav</string>
+    <string name="obtainkDriveAdTitle">Ottieni kDrive gratuitamente</string>
     <string name="offlineFileNoFile">Nessun file offline</string>
     <string name="offlineFileNoFileDescription">Seleziona un file e rendilo disponibile offline per ritrovarlo qui quando non hai connessione.</string>
     <string name="offlineFileTitle">Offline</string>

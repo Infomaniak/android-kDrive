@@ -25,6 +25,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -38,6 +39,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
+import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
@@ -54,8 +56,8 @@ import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
@@ -63,7 +65,9 @@ class LoginActivity : AppCompatActivity() {
 
     private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
-    private val navigationArgs: LoginActivityArgs? by lazy { intent?.extras?.let(LoginActivityArgs::fromBundle) }
+    private val navigationArgs: LoginActivityArgs? by lazy {
+        intent?.extras?.let(LoginActivityArgs::fromBundle)
+    }
 
     private val webViewLoginResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
         with(result) {
@@ -120,19 +124,23 @@ class LoginActivity : AppCompatActivity() {
 
         signInButton.setOnClickListener {
             trackAccountEvent("openCreationWebview")
-            infomaniakLogin.startCreateAccountWebView(
-                resultLauncher = createAccountResultLauncher,
-                createAccountUrl = BuildConfig.CREATE_ACCOUNT_URL,
-                successHost = BuildConfig.CREATE_ACCOUNT_SUCCESS_HOST,
-                cancelHost = BuildConfig.CREATE_ACCOUNT_CANCEL_HOST,
-            )
+            startAccountCreation()
         }
 
         onBackPressedDispatcher.addCallback {
             if (introViewpager.currentItem == 0) finish() else introViewpager.currentItem -= 1
         }
 
-        handleHelpShortcut()
+        handleNavigationFlags()
+    }
+
+    private fun startAccountCreation() {
+        infomaniakLogin.startCreateAccountWebView(
+            resultLauncher = createAccountResultLauncher,
+            createAccountUrl = BuildConfig.CREATE_ACCOUNT_URL,
+            successHost = BuildConfig.CREATE_ACCOUNT_SUCCESS_HOST,
+            cancelHost = BuildConfig.CREATE_ACCOUNT_CANCEL_HOST,
+        )
     }
 
     private fun ActivityResult.handleCreateAccountActivityResult() = with(binding) {
@@ -163,19 +171,25 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             when (val returnValue = authenticateUser(this@LoginActivity, apiToken)) {
                 is User -> {
-                    trackUserId(AccountUtils.currentUserId)
-                    trackAccountEvent("loggedIn")
-                    launchMainActivity()
+                    val deeplink = navigationArgs?.publicShareDeeplink
+                    if (deeplink.isNullOrBlank()) {
+                        trackUserId(AccountUtils.currentUserId)
+                        trackAccountEvent("loggedIn")
+                        launchMainActivity()
+                    } else {
+                        launchDeeplinkAndFinish(deeplink)
+                    }
+
                     return@launch
                 }
-                is ApiResponse<*> -> withContext(Dispatchers.Main) {
+                is ApiResponse<*> -> Dispatchers.Main {
                     if (returnValue.error?.code == ErrorCode.NO_DRIVE) {
                         launchNoDriveActivity()
                     } else {
                         showError(getString(returnValue.translatedError))
                     }
                 }
-                else -> withContext(Dispatchers.Main) { showError(getString(R.string.anErrorHasOccurred)) }
+                else -> Dispatchers.Main { showError(getString(R.string.anErrorHasOccurred)) }
             }
 
             infomaniakLogin.deleteToken(
@@ -193,6 +207,14 @@ class LoginActivity : AppCompatActivity() {
         if (!connectButton.isEnabled) connectButton.isEnabled = true
     }
 
+    private fun launchDeeplinkAndFinish(deeplink: String) {
+        Intent(this@LoginActivity, LaunchActivity::class.java).apply {
+            setData(deeplink.toUri())
+            clearStack()
+        }.also(::startActivity)
+        finishAffinity()
+    }
+
     private fun launchMainActivity() {
         startActivity(Intent(this, MainActivity::class.java).clearStack())
     }
@@ -203,8 +225,11 @@ class LoginActivity : AppCompatActivity() {
         signInButton.isEnabled = true
     }
 
-    private fun handleHelpShortcut() {
-        if (navigationArgs?.isHelpShortcutPressed == true) openSupport()
+    private fun handleNavigationFlags() {
+        when {
+            navigationArgs?.isHelpShortcutPressed == true -> openSupport()
+            navigationArgs?.shouldLaunchAccountCreation == true -> startAccountCreation()
+        }
     }
 
     companion object {

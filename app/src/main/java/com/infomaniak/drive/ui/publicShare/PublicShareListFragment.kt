@@ -45,7 +45,6 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
-import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
 import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.PublicShareFilesResult
 import com.infomaniak.drive.utils.AccountUtils
@@ -286,8 +285,7 @@ class PublicShareListFragment : FileListFragment() {
         importButton.setOnClickListener {
             if (AccountUtils.currentDriveId == -1) {
                 requireContext().trackPublicShareActionEvent("createAccountAd")
-                // TODO : Show bottomsheet to get app if this functionality is implemented by the back
-                Intent(requireActivity(), LoginActivity::class.java).also(::startActivity)
+                safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToObtainKDriveAdBottomSheet())
             } else {
                 requireContext().trackPublicShareActionEvent("bulk${ACTION_SAVE_TO_KDRIVE_NAME.capitalizeFirstChar()}")
                 Intent(requireActivity(), SaveExternalFilesActivity::class.java).apply {
