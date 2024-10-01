@@ -417,6 +417,10 @@
             android:name="shouldLaunchAccountCreation"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="publicShareDeeplink"
+            android:defaultValue=""
+            app:argType="string" />
     </activity>
 
     <dialog
