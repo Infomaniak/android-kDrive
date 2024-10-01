@@ -21,6 +21,7 @@ import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
@@ -34,6 +35,7 @@ import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Compan
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
+import kotlinx.coroutines.launch
 
 interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListener {
 
@@ -46,8 +48,10 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     fun onDownloadError(@StringRes errorMessage: Int)
 
     fun observeCacheFileForAction(viewLifecycleOwner: LifecycleOwner) {
-        publicShareViewModel.fetchCacheFileForActionResult.observe(viewLifecycleOwner) { (cacheFile, action) ->
-            cacheFile?.let { file -> executeDownloadAction(action, file) } ?: onDownloadError(getErrorMessage(action))
+        viewLifecycleOwner.lifecycleScope.launch {
+            publicShareViewModel.fetchCacheFileForActionResult.collect { (cacheFile, action) ->
+                cacheFile?.let { file -> executeDownloadAction(action, file) } ?: onDownloadError(getErrorMessage(action))
+            }
         }
     }
 
@@ -72,16 +76,11 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     }
 
     private fun startAction(action: DownloadAction) {
-        val cacheFileResult = publicShareViewModel.fetchCacheFileForAction(
+        publicShareViewModel.fetchCacheFileForAction(
             file = currentFile,
+            action = action,
             navigateToDownloadDialog = ::navigateToDownloadDialog,
         )
-
-        ownerFragment?.viewLifecycleOwner?.let { lifecycleOwner ->
-            cacheFileResult.observe(lifecycleOwner) { cacheFile ->
-                cacheFile?.let { file -> executeDownloadAction(action, file) } ?: onDownloadError(getErrorMessage(action))
-            }
-        }
     }
 
     private suspend fun navigateToDownloadDialog() = Dispatchers.Main {
