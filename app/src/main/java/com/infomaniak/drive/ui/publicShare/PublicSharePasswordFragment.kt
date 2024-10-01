@@ -25,6 +25,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
@@ -50,7 +51,12 @@ class PublicSharePasswordFragment : Fragment() {
 
         // TODO: Remove this and call setupValidationButton instead
         //  Also change the layout (description, button's title, input visibility)
-        passwordValidateButton.setOnClickListener { requireActivity().openDeepLinkInBrowser(getPublicShareUrl()) }
+        passwordValidateButton.setOnClickListener {
+            with(requireActivity()) {
+                trackPublicShareActionEvent("openInBrowser")
+                openDeepLinkInBrowser(getPublicShareUrl())
+            }
+        }
 
         publicSharePasswordEditText.addTextChangedListener { publicSharePasswordLayout.error = null }
         observeSubmitPasswordResult()
