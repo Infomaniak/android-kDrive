@@ -259,8 +259,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val context = context ?: return null
 
         fun getRemoteFile(localFile: File?, fileId: Int, driveId: Int): File? {
-            val userId = getUserId(documentId)
-            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
+            val okHttpClient = runBlocking { AccountUtils.getHttpClient(getUserId(documentId).toInt()) }
             return ApiRepository.getFileDetails(localFile ?: File(id = fileId, driveId = driveId), okHttpClient).data
         }
 
