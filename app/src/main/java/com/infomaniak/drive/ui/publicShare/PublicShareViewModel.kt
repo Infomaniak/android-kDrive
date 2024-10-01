@@ -77,6 +77,11 @@ class PublicShareViewModel(val savedStateHandle: SavedStateHandle) : ViewModel()
     private var getPublicShareFilesJob: Job = Job()
     private var currentCursor: String? = null
 
+    override fun onCleared() {
+        cancelDownload()
+        super.onCleared()
+    }
+
     fun initPublicShare() {
         val apiResponse = ApiRepository.getPublicShareInfo(driveId, publicShareUuid)
         val result = if (apiResponse.isSuccess()) null to apiResponse.data else apiResponse.error to null
