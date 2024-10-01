@@ -165,6 +165,8 @@ open class FileAdapter(
     fun setFiles(newItemList: List<File>, isFileListResetNeeded: Boolean = false) {
         fileList = RealmList(*newItemList.toTypedArray())
         hideLoading()
+        // isFileListResetNeeded is used because when sorting file in PublicShareListFragment, the animation of the asynclist
+        // is bugged, so we just redraw the whole list. As it's only once it's not a problem
         if (fileAsyncListDiffer == null || isFileListResetNeeded) {
             notifyDataSetChanged()
         } else {
