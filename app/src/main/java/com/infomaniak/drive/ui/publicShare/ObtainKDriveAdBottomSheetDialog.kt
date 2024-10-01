@@ -22,6 +22,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.databinding.FragmentBottomSheetObtainKdriveAdBinding
@@ -32,6 +33,7 @@ import com.infomaniak.lib.core.utils.safeBinding
 class ObtainKDriveAdBottomSheetDialog : BottomSheetDialogFragment() {
 
     private var binding: FragmentBottomSheetObtainKdriveAdBinding by safeBinding()
+    private val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentBottomSheetObtainKdriveAdBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -44,9 +46,14 @@ class ObtainKDriveAdBottomSheetDialog : BottomSheetDialogFragment() {
         binding.alreadyGotAnAccountButton.setOnClickListener { openLoginActivity(shouldLaunchAccountCreation = false) }
     }
 
-    private fun openLoginActivity(shouldLaunchAccountCreation: Boolean) {
+    private fun openLoginActivity(shouldLaunchAccountCreation: Boolean) = with(publicShareViewModel) {
         Intent(requireActivity(), LoginActivity::class.java).apply {
-            putExtras(LoginActivityArgs(shouldLaunchAccountCreation = shouldLaunchAccountCreation).toBundle())
+            putExtras(
+                LoginActivityArgs(
+                    shouldLaunchAccountCreation = shouldLaunchAccountCreation,
+                    publicShareDeeplink = "https://kdrive.infomaniak.com/app/share/$driveId/$publicShareUuid",
+                ).toBundle()
+            )
         }.also(::startActivity)
         findNavController().popBackStack()
     }

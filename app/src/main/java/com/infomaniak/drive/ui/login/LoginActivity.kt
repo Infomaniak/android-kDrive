@@ -25,6 +25,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -38,6 +39,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
+import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
@@ -54,8 +56,8 @@ import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
@@ -169,19 +171,25 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             when (val returnValue = authenticateUser(this@LoginActivity, apiToken)) {
                 is User -> {
-                    trackUserId(AccountUtils.currentUserId)
-                    trackAccountEvent("loggedIn")
-                    launchMainActivity()
+                    val deeplink = navigationArgs?.publicShareDeeplink
+                    if (deeplink.isNullOrBlank()) {
+                        trackUserId(AccountUtils.currentUserId)
+                        trackAccountEvent("loggedIn")
+                        launchMainActivity()
+                    } else {
+                        launchDeeplinkAndFinish(deeplink)
+                    }
+
                     return@launch
                 }
-                is ApiResponse<*> -> withContext(Dispatchers.Main) {
+                is ApiResponse<*> -> Dispatchers.Main {
                     if (returnValue.error?.code == ErrorCode.NO_DRIVE) {
                         launchNoDriveActivity()
                     } else {
                         showError(getString(returnValue.translatedError))
                     }
                 }
-                else -> withContext(Dispatchers.Main) { showError(getString(R.string.anErrorHasOccurred)) }
+                else -> Dispatchers.Main { showError(getString(R.string.anErrorHasOccurred)) }
             }
 
             infomaniakLogin.deleteToken(
@@ -197,6 +205,14 @@ class LoginActivity : AppCompatActivity() {
         connectButton.hideProgressCatching(R.string.connect)
         signInButton.isEnabled = true
         if (!connectButton.isEnabled) connectButton.isEnabled = true
+    }
+
+    private fun launchDeeplinkAndFinish(deeplink: String) {
+        Intent(this@LoginActivity, LaunchActivity::class.java).apply {
+            setData(deeplink.toUri())
+            clearStack()
+        }.also(::startActivity)
+        finishAffinity()
     }
 
     private fun launchMainActivity() {
