@@ -25,7 +25,6 @@ import androidx.core.net.toUri
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
@@ -40,7 +39,6 @@ import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.downloadFile
-import com.infomaniak.lib.core.BuildConfig
 import com.infomaniak.lib.core.utils.contains
 import com.infomaniak.lib.core.utils.guessMimeType
 import io.realm.RealmList
@@ -183,35 +181,7 @@ open class File(
 
     fun isPublicShared() = publicShareUuid.isNotBlank()
 
-    fun thumbnail() = when {
-        isPublicShared() -> ApiRoutes.getPublicShareFileThumbnail(driveId, publicShareUuid, id)
-        isTrashed() -> ApiRoutes.thumbnailTrashFile(file = this)
-        else -> ApiRoutes.thumbnailFile(file = this)
-    }
-
-    fun imagePreview(): String {
-        val url = if (isPublicShared()) {
-            ApiRoutes.getPublicShareFilePreview(driveId, publicShareUuid, id)
-        } else {
-            ApiRoutes.imagePreviewFile(this)
-        }
-
-        return "$url?width=2500&height=1500&quality=80"
-    }
-
     fun isPDF() = getFileType() == ExtensionType.PDF
-
-    fun onlyOfficeUrl() = if (isPublicShared()) {
-        ApiRoutes.showPublicShareOfficeFile(driveId, publicShareUuid, file = this)
-    } else {
-        "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
-    }
-
-    fun downloadUrl() = if (isPublicShared()) {
-        ApiRoutes.downloadPublicShareFile(driveId, publicShareUuid, id)
-    } else {
-        ApiRoutes.downloadFile(file = this)
-    }
 
     fun getFileType(): ExtensionType {
         return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {
