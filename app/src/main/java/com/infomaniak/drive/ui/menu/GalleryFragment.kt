@@ -43,6 +43,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getAdjustedColumnNumber
+import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.setPagination
@@ -120,7 +121,11 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
             noGalleryLayout.iNoItemsLayoutView = this@GalleryFragment
 
-            (parentFragment as MenuGalleryFragment).initNoNetworkLayout(noNetworkInclude)
+            observeAndDisplayNetworkAvailability(
+                mainViewModel = mainViewModel,
+                noNetworkBinding = noNetworkInclude,
+                noNetworkBindingDirectParent = root,
+            )
         }
 
         mainViewModel.observeDownloadOffline(requireContext()).observe(viewLifecycleOwner) { workInfoList ->
