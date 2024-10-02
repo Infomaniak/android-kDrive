@@ -58,7 +58,6 @@ open class Rights(
     var canUseTeam: Boolean = false,
     @SerializedName("can_write")
     var canWrite: Boolean = false,
-    @SerializedName("colorable")
     var colorable: Boolean = false,
     var right: String = "",
 ) : RealmObject(), Parcelable {
