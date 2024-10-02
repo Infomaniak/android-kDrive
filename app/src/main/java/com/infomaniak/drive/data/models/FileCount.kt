@@ -17,8 +17,11 @@
  */
 package com.infomaniak.drive.data.models
 
+import com.google.gson.annotations.SerializedName
+
 data class FileCount(
     val files: Int,
     val count: Int,
-    val folders: Int
+    @SerializedName("directories")
+    val folders: Int,
 )
