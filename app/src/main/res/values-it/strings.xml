@@ -251,7 +251,7 @@
     <string name="errorCategoryAlreadyExists">Esiste già una categoria con lo stesso nome</string>
     <string name="errorConflict">Un elemento con lo stesso nome esiste già in questa posizione</string>
     <string name="errorDelete">Errore durante l’eliminazione</string>
-    <string name="errorDeviceStorage">Insufficiente memoria telefonica disponibile</string>
+    <string name="errorDeviceStorage">Memoria del dispositivo insufficiente</string>
     <string name="errorDuplicate">Errore durante la duplicazione</string>
     <string name="errorFileAlreadyExists">Il file o la cartella esiste già</string>
     <string name="errorFileLocked">Il file è attualmente aperto da un utente e non può essere modificato</string>

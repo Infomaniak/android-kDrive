@@ -204,7 +204,7 @@
     <string name="createDropBoxLimitFileSizeError">Doit être supérieur à 0</string>
     <string name="createDropBoxTitle">Créer une boîte de dépôt</string>
     <string name="createFolderAccessPermissionTitle">Qui peut accéder à ce dossier ?</string>
-    <string name="createFolderEmailWhenFinishedTitle">Recevoir un email dès qu’un fichier a été importé</string>
+    <string name="createFolderEmailWhenFinishedTitle">Recevoir un e-mail dès qu’un fichier a été importé</string>
     <string name="createFolderKeepParentsRightDescription">Les utilisateurs qui ont accès au dossier %s pourront également accéder à ce dossier</string>
     <string name="createFolderKeepParentsRightTitle">Garder les partages et les droits du dossier parent</string>
     <string name="createFolderLimitFileSizeDescription">Les personnes ne pourront pas dépasser l’espace de stockage alloué à ce dossier.</string>
@@ -251,7 +251,7 @@
     <string name="errorCategoryAlreadyExists">Une catégorie avec le même nom existe déjà</string>
     <string name="errorConflict">Un élément du même nom existe déjà à cet emplacement</string>
     <string name="errorDelete">Erreur lors de la suppression</string>
-    <string name="errorDeviceStorage">Stockage disponible du téléphone insuffisant</string>
+    <string name="errorDeviceStorage">Stockage insuffisant</string>
     <string name="errorDuplicate">Erreur lors de la duplication</string>
     <string name="errorFileAlreadyExists">Le fichier ou le dossier existe déjà</string>
     <string name="errorFileLocked">Le fichier est actuellement ouvert par un utilisateur et ne peut être modifié</string>
@@ -522,7 +522,7 @@
     <string name="notSupportedExtensionDescription">Souhaitez-vous créer une copie de votre fichier avec une extension compatible pour l’éditer en ligne ? Le fichier original %s restera inchangé.\u0020</string>
     <string name="notSupportedExtensionTitle">L’extension %s n’est pas supportée pour l’édition en ligne</string>
     <string name="notificationCommentChannelName">Commentaires</string>
-    <string name="notificationGeneralChannelName">Notification générales</string>
+    <string name="notificationGeneralChannelName">Notifications générales</string>
     <string name="notificationSharedWithMeChannelName">Éléments partagés</string>
     <string name="notificationStartDownloadTicker">Démarrage du téléchargement à partir du serveur</string>
     <string name="notificationStartUploadTicker">Démarrage de l’importation vers le serveur</string>
