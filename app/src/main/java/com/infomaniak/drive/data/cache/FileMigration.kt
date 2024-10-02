@@ -349,6 +349,15 @@ class FileMigration : RealmMigration {
 
             oldVersionTemp++
         }
+
+        // Migrated to version 8
+        if (oldVersionTemp == 7L) {
+            schema.get("Rights")?.apply {
+                addField("colorable", Boolean::class.java, FieldAttribute.REQUIRED)
+            }
+
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -376,7 +385,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val dbVersion = 7L // Must be bumped when the schema changes
+        const val dbVersion = 8L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }
