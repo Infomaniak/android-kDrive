@@ -352,8 +352,8 @@ class FileMigration : RealmMigration {
 
         // Migrated to version 8
         if (oldVersionTemp == 7L) {
-            schema.get(File::class.java.simpleName)?.apply {
-                addField(Rights::colorable.name, Boolean::class.java, FieldAttribute.REQUIRED)
+            schema.get("Rights")?.apply {
+                addField("colorable", Boolean::class.java, FieldAttribute.REQUIRED)
             }
 
             oldVersionTemp++
