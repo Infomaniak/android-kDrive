@@ -33,7 +33,6 @@ import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBottomSheetDialog
-import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.toPx
 
@@ -79,12 +78,6 @@ class MenuGalleryFragment : Fragment() {
         }
 
         adjustFastScrollBarScrollRange(galleryFragment)
-
-        observeAndDisplayNetworkAvailability(
-            mainViewModel = mainViewModel,
-            noNetworkBinding = noNetworkInclude,
-            noNetworkBindingDirectParent = galleryContentLinearLayout,
-        )
     }
 
     private fun MultiSelectLayoutBinding.setMultiSelectClickListeners(galleryFragment: GalleryFragment) = with(galleryFragment) {
