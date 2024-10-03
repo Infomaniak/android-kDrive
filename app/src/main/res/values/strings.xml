@@ -140,7 +140,7 @@
     <string name="buttonEmpty">Empty</string>
     <string name="buttonEmptyTrash">Empty recycle bin</string>
     <string name="buttonFileRights">Sharing and rights</string>
-    <string name="buttonLeaveShare">Stop sharing</string>
+    <string name="buttonLeaveShare">Leave file share</string>
     <string name="buttonLike">Like</string>
     <string name="buttonLogin">Log in</string>
     <string name="buttonLogout">Log off</string>
