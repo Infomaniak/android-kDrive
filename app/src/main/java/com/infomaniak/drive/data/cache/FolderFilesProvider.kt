@@ -45,7 +45,7 @@ object FolderFilesProvider {
 
     // Bump this when we want to force-refresh files that are too old.
     // Example: We did it when we added Categories & Colored folders, to automatically display them when updating the app.
-    private const val MIN_VERSION_CODE = 4_03_002_01
+    private const val MIN_VERSION_CODE = 5_00_010_01
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
