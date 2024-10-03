@@ -417,8 +417,9 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             BulkOperationType.MANAGE_CATEGORIES -> Unit
             BulkOperationType.COLOR_FOLDER -> {
                 if (color != null && file.isAllowedToBeColored()) {
+                    val userDrive = UserDrive(sharedWithMe = file.getVisibilityType() == File.VisibilityType.IS_IN_SHARED_SPACE)
                     mediator.addSource(
-                        updateFolderColor(file, color),
+                        updateFolderColor(file, color, userDrive),
                         updateMultiSelectMediator(mediator),
                     )
                 } else {
