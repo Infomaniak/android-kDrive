@@ -52,6 +52,7 @@ import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -129,6 +130,7 @@ class PublicShareListFragment : FileListFragment() {
         observeRootFile()
         observeFiles()
         observeBookmarkAction()
+        observeFilesImportation()
     }
 
     private fun initFileAdapter() {
@@ -217,6 +219,16 @@ class PublicShareListFragment : FileListFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             publicShareViewModel.fetchCacheFileForActionResult.collect { (cacheFile, action) ->
                 if (action == DownloadAction.OPEN_BOOKMARK) executeOpenBookmarkAction(cacheFile)
+            }
+        }
+    }
+
+    private fun observeFilesImportation() {
+        publicShareViewModel.importPublicShareResult.observe(viewLifecycleOwner) { (apiError, destinationPath) ->
+            if (apiError == null) {
+                PublicShareUtils.launchDeeplink(requireActivity(), destinationPath, shouldFinish = false)
+            } else {
+                showSnackbar(apiError, anchor = importButton)
             }
         }
     }
