@@ -92,10 +92,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         oldSyncSettings = UploadFile.getAppSyncSettings()
 
-        selectDriveViewModel.apply {
-            selectedUserId.value = oldSyncSettings?.userId ?: AccountUtils.currentUserId
-            selectedDrive.value = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
-        }
+        initUserAndDrive()
 
         val oldIntervalTypeValue = oldSyncSettings?.getIntervalType() ?: IntervalType.IMMEDIATELY
         val oldSyncVideoValue = oldSyncSettings?.syncVideo ?: true
@@ -175,6 +172,15 @@ class SyncSettingsActivity : BaseActivity() {
         saveButton.initProgress(this@SyncSettingsActivity)
         saveButton.setOnClickListener {
             if (permission.checkSyncPermissions()) saveSettings()
+        }
+    }
+
+    private fun initUserAndDrive() {
+        selectDriveViewModel.apply {
+            val userId = oldSyncSettings?.userId ?: AccountUtils.currentUserId
+            val drive = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
+            if (selectedUserId.value != userId) selectedUserId.value = userId
+            if (selectedDrive.value != drive) selectedDrive.value = drive
         }
     }
 
