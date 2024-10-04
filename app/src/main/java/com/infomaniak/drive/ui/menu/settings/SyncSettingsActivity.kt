@@ -70,7 +70,7 @@ class SyncSettingsActivity : BaseActivity() {
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
             data?.extras?.let { bundle ->
-                syncSettingsViewModel.syncFolder.value = SelectFolderActivityArgs.fromBundle(bundle).folderId
+                syncSettingsViewModel.syncFolderId.value = SelectFolderActivityArgs.fromBundle(bundle).folderId
             }
         }
     }
@@ -183,7 +183,7 @@ class SyncSettingsActivity : BaseActivity() {
                     SelectFolderActivityArgs(
                         userId = selectDriveViewModel.selectedUserId.value!!,
                         driveId = selectDriveViewModel.selectedDrive.value?.id!!,
-                        folderId = syncSettingsViewModel.syncFolder.value ?: -1,
+                        folderId = syncSettingsViewModel.syncFolderId.value ?: -1,
                     ).toBundle()
                 )
                 selectFolderResultLauncher.launch(this)
@@ -238,16 +238,16 @@ class SyncSettingsActivity : BaseActivity() {
             }
             if (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId ||
                 selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId ||
-                syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder
+                syncSettingsViewModel.syncFolderId.value != oldSyncSettings?.syncFolder
             ) {
-                syncSettingsViewModel.syncFolder.value = null
+                syncSettingsViewModel.syncFolderId.value = null
             }
             changeSaveButtonStatus()
         }
     }
 
     private fun observeSyncFolder() = with(binding) {
-        syncSettingsViewModel.syncFolder.observe(this@SyncSettingsActivity) { syncFolderId ->
+        syncSettingsViewModel.syncFolderId.observe(this@SyncSettingsActivity) { syncFolderId ->
 
             val selectedUserId = selectDriveViewModel.selectedUserId.value
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
@@ -314,7 +314,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun saveSettingVisibility(isVisible: Boolean) = with(binding) {
-        mediaFoldersSettingsVisibility(isVisible && syncSettingsViewModel.syncFolder.value != null)
+        mediaFoldersSettingsVisibility(isVisible && syncSettingsViewModel.syncFolderId.value != null)
         saveSettingsTitle.isVisible = isVisible
         saveSettingsLayout.isVisible = isVisible
     }
@@ -335,7 +335,7 @@ class SyncSettingsActivity : BaseActivity() {
         val isEdited = (editNumber > 0)
                 || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
                 || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
-                || (syncSettingsViewModel.syncFolder.value != oldSyncSettings?.syncFolder)
+                || (syncSettingsViewModel.syncFolderId.value != oldSyncSettings?.syncFolder)
                 || (syncSettingsViewModel.saveOldPictures.value != SavePicturesDate.SINCE_NOW)
                 || allSyncedFoldersCount > 0
         saveButton.isVisible = isEdited
@@ -345,7 +345,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
                 && (selectDriveViewModel.selectedDrive.value != null)
-                && (syncSettingsViewModel.syncFolder.value != null)
+                && (syncSettingsViewModel.syncFolderId.value != null)
                 && allSyncedFoldersCount > 0
     }
 
@@ -395,7 +395,7 @@ class SyncSettingsActivity : BaseActivity() {
             userId = selectDriveViewModel.selectedUserId.value!!,
             driveId = selectDriveViewModel.selectedDrive.value!!.id,
             lastSync = date,
-            syncFolder = syncSettingsViewModel.syncFolder.value!!,
+            syncFolder = syncSettingsViewModel.syncFolderId.value!!,
             syncVideo = syncVideoSwitch.isChecked,
             createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
             deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked

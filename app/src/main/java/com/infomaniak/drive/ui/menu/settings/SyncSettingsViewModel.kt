@@ -27,11 +27,11 @@ class SyncSettingsViewModel : ViewModel() {
     val customDate = MutableLiveData<Date>()
     val saveOldPictures = MutableLiveData<SavePicturesDate>()
     val syncIntervalType = MutableLiveData<IntervalType>()
-    val syncFolder = MutableLiveData<Int?>()
+    val syncFolderId = MutableLiveData<Int?>()
 
     fun init(intervalTypeValue: IntervalType, syncFolderId: Int?) {
+        this.syncFolderId.value = syncFolderId
         syncIntervalType.value = intervalTypeValue
-        syncFolder.value = syncFolderId
         saveOldPictures.value = SavePicturesDate.SINCE_NOW
     }
 }
