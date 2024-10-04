@@ -40,6 +40,7 @@ import io.sentry.Sentry
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 
 class PublicShareViewModel(application: Application, val savedStateHandle: SavedStateHandle) : AndroidViewModel(application) {
 
@@ -50,14 +51,16 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     var fileClicked: File? = null
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
-    val fetchCacheFileForActionResult = MutableSharedFlow<Pair<IOFile?, DownloadAction>>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
     val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, ShareLink?>>()
     val submitPasswordResult = SingleLiveEvent<Boolean?>()
     var hasBeenAuthenticated = false
     var canDownloadFiles = canDownload
+
+    private val _fetchCacheFileForActionResult = MutableSharedFlow<Pair<IOFile?, DownloadAction>>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    val fetchCacheFileForActionResult: SharedFlow<Pair<IOFile?, DownloadAction>> = _fetchCacheFileForActionResult
 
     val driveId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
@@ -179,7 +182,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     fun fetchCacheFileForAction(file: File?, action: DownloadAction, navigateToDownloadDialog: suspend () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             runCatching {
-                fetchCacheFileForActionResult.emit(
+                _fetchCacheFileForActionResult.emit(
                     file!!.convertToIOFile(
                         context = appContext,
                         onProgress = downloadProgressLiveData::postValue,
@@ -187,7 +190,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
                     ) to action
                 )
             }.onFailure { exception ->
-                fetchCacheFileForActionResult.emit(null to action)
+                _fetchCacheFileForActionResult.emit(null to action)
                 downloadProgressLiveData.postValue(null)
                 exception.printStackTrace()
             }
