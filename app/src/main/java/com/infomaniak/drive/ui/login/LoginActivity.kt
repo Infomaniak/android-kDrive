@@ -42,6 +42,7 @@ import com.infomaniak.drive.databinding.ActivityLoginBinding
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.lib.core.InfomaniakCore
@@ -177,7 +178,7 @@ class LoginActivity : AppCompatActivity() {
                         trackAccountEvent("loggedIn")
                         launchMainActivity()
                     } else {
-                        launchDeeplinkAndFinish(deeplink)
+                        PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)
                     }
 
                     return@launch
