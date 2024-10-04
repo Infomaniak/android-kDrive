@@ -414,13 +414,6 @@ class SyncSettingsActivity : BaseActivity() {
             }
     }
 
-    class SyncSettingsViewModel : ViewModel() {
-        val customDate = MutableLiveData<Date>()
-        val saveOldPictures = MutableLiveData<SavePicturesDate>()
-        val syncIntervalType = MutableLiveData<IntervalType>()
-        val syncFolder = MutableLiveData<Int?>()
-    }
-
     private fun trackPhotoSyncEvent(name: String, value: Boolean? = null) {
         trackEvent("photoSync", name, value = value?.toFloat())
     }
