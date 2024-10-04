@@ -472,13 +472,20 @@ open class FileAdapter(
         }
 
         override fun areContentsTheSame(oldItem: File, newItem: File): Boolean {
+
+            val areCategoriesTheSame = oldItem.categories.size == newItem.categories.size &&
+                    oldItem.categories.filterIndexed { index, fileCategory ->
+                        newItem.categories[index]?.categoryId != fileCategory.categoryId
+                    }.isEmpty()
+
             return oldItem.name == newItem.name &&
                     oldItem.isFavorite == newItem.isFavorite &&
                     oldItem.isOffline == newItem.isOffline &&
+                    oldItem.color == newItem.color &&
                     oldItem.lastModifiedAt == newItem.lastModifiedAt &&
-                    oldItem.size == newItem.size
+                    oldItem.size == newItem.size &&
+                    areCategoriesTheSame
         }
-
     }
 
     companion object {

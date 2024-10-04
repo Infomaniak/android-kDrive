@@ -364,11 +364,8 @@ class MainViewModel(
         emit(FileController.renameFile(file, newName))
     }
 
-    fun updateFolderColor(file: File, color: String) = liveData(Dispatchers.IO) {
-        val fileResult = FileResult(
-            isSuccess = FileController.updateFolderColor(file, color).isSuccess()
-        )
-        emit(fileResult)
+    fun updateFolderColor(file: File, color: String, userDrive: UserDrive) = liveData(Dispatchers.IO) {
+        emit(FileResult(isSuccess = FileController.updateFolderColor(file, color, userDrive).isSuccess()))
     }
 
     fun manageCategory(categoryId: Int, files: List<File>, isAdding: Boolean) = liveData(Dispatchers.IO) {

@@ -243,9 +243,9 @@ object FileController {
         return apiResponse
     }
 
-    fun updateFolderColor(file: File, color: String, realm: Realm? = null): ApiResponse<Boolean> {
+    fun updateFolderColor(file: File, color: String, userDrive: UserDrive): ApiResponse<Boolean> {
         return ApiRepository.updateFolderColor(file, color).also {
-            if (it.isSuccess()) updateFile(file.id, realm) { localFile -> localFile.color = color }
+            if (it.isSuccess()) updateFile(file.id, userDrive = userDrive) { localFile -> localFile.color = color }
         }
     }
 
@@ -254,7 +254,7 @@ object FileController {
         realm: Realm? = null,
         userDrive: UserDrive? = null,
         context: Context,
-        onSuccess: ((fileId: Int) -> Unit)? = null
+        onSuccess: ((fileId: Int) -> Unit)? = null,
     ): ApiResponse<CancellableAction> {
         val apiResponse = ApiRepository.deleteFile(file)
         if (apiResponse.isSuccess()) {
@@ -294,6 +294,7 @@ object FileController {
             }
             realm?.let(block) ?: getRealmInstance(userDrive).use(block)
         } catch (exception: Exception) {
+            exception.printStackTrace()
             Sentry.withScope { scope ->
                 scope.setExtra("custom realm", "${realm != null}")
                 Sentry.captureException(exception)
