@@ -17,24 +17,21 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
-import android.os.Bundle
-import android.view.View
-import androidx.fragment.app.activityViewModels
-import com.infomaniak.drive.R
-import com.infomaniak.drive.views.SelectBottomSheetDialog
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.infomaniak.drive.data.models.SyncSettings.IntervalType
+import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
+import java.util.Date
 
-class SelectSaveDateBottomSheetDialog : SelectBottomSheetDialog() {
+class SyncSettingsViewModel : ViewModel() {
+    val customDate = MutableLiveData<Date>()
+    val saveOldPictures = MutableLiveData<SavePicturesDate>()
+    val syncIntervalType = MutableLiveData<IntervalType>()
+    val syncFolderId = MutableLiveData<Int?>()
 
-    private val syncSettingsViewModel: SyncSettingsViewModel by activityViewModels()
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
-        super.onViewCreated(view, savedInstanceState)
-
-        selectTitle.setText(R.string.syncSettingsButtonSaveDate)
-
-        selectRecyclerView.adapter = SelectSaveDateBottomSheetAdapter(syncSettingsViewModel.saveOldPictures.value!!) {
-            syncSettingsViewModel.saveOldPictures.value = it
-            dismiss()
-        }
+    fun init(intervalTypeValue: IntervalType, syncFolderId: Int?) {
+        this.syncFolderId.value = syncFolderId
+        syncIntervalType.value = intervalTypeValue
+        saveOldPictures.value = SavePicturesDate.SINCE_NOW
     }
 }

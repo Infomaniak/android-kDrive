@@ -25,7 +25,7 @@ import com.infomaniak.drive.views.SelectBottomSheetDialog
 
 class SelectIntervalTypeBottomSheetDialog : SelectBottomSheetDialog() {
 
-    private val syncSettingsViewModel: SyncSettingsActivity.SyncSettingsViewModel by activityViewModels()
+    private val syncSettingsViewModel: SyncSettingsViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
