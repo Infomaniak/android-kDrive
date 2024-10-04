@@ -226,7 +226,14 @@ class PublicShareListFragment : FileListFragment() {
     private fun observeFilesImportation() {
         publicShareViewModel.importPublicShareResult.observe(viewLifecycleOwner) { (apiError, destinationPath) ->
             if (apiError == null) {
-                PublicShareUtils.launchDeeplink(requireActivity(), destinationPath, shouldFinish = false)
+                showSnackbar(
+                    title = R.string.publicShareImportationInProgress,
+                    anchor = importButton,
+                    actionButtonTitle = R.string.buttonSeeFolder,
+                    onActionClicked = {
+                        PublicShareUtils.launchDeeplink(requireActivity(), destinationPath, shouldFinish = false)
+                    }
+                )
             } else {
                 showSnackbar(apiError, anchor = importButton)
             }
