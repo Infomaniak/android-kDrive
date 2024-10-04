@@ -27,8 +27,6 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
@@ -100,39 +98,40 @@ class SyncSettingsActivity : BaseActivity() {
         val oldDeleteAfterSyncValue = oldSyncSettings?.deleteAfterSync ?: false
         val oldSaveOldPicturesValue = SavePicturesDate.SINCE_NOW
 
-        syncSettingsViewModel.apply {
-            syncIntervalType.value = oldIntervalTypeValue
-            syncFolder.value = oldSyncSettings?.syncFolder
-            saveOldPictures.value = SavePicturesDate.SINCE_NOW
-        }
+        syncSettingsViewModel.init(intervalTypeValue = oldIntervalTypeValue, syncFolderId = oldSyncSettings?.syncFolder)
+
+        setupListeners(permission, oldSyncVideoValue, oldCreateDatedSubFoldersValue, oldDeleteAfterSyncValue)
+
+        syncVideoSwitch.isChecked = oldSyncVideoValue
+        createDatedSubFoldersSwitch.isChecked = oldCreateDatedSubFoldersValue
+        deletePicturesAfterSyncSwitch.isChecked = oldDeleteAfterSyncValue
 
         observeAllUsers()
         observeCustomDate()
         observeSelectedDrive()
 
-        selectPath.setOnClickListener {
-            Intent(this@SyncSettingsActivity, SelectFolderActivity::class.java).apply {
-                putExtras(
-                    SelectFolderActivityArgs(
-                        userId = selectDriveViewModel.selectedUserId.value!!,
-                        driveId = selectDriveViewModel.selectedDrive.value?.id!!,
-                        folderId = syncSettingsViewModel.syncFolder.value ?: -1,
-                    ).toBundle()
-                )
-                selectFolderResultLauncher.launch(this)
-            }
-        }
-
         observeSyncFolder()
         observeSaveOldPictures(oldSaveOldPicturesValue)
 
-        syncDatePicker.setOnClickListener { showSyncDatePicker() }
-
         observeSyncIntervalType(oldIntervalTypeValue)
+    }
 
-        syncVideoSwitch.isChecked = oldSyncVideoValue
-        createDatedSubFoldersSwitch.isChecked = oldCreateDatedSubFoldersValue
-        deletePicturesAfterSyncSwitch.isChecked = oldDeleteAfterSyncValue
+    private fun initUserAndDrive() {
+        selectDriveViewModel.apply {
+            val userId = oldSyncSettings?.userId ?: AccountUtils.currentUserId
+            val drive = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
+            if (selectedUserId.value != userId) selectedUserId.value = userId
+            if (selectedDrive.value != drive) selectedDrive.value = drive
+        }
+    }
+
+    private fun ActivitySyncSettingsBinding.setupListeners(
+        permission: DrivePermissions,
+        oldSyncVideoValue: Boolean,
+        oldCreateDatedSubFoldersValue: Boolean,
+        oldDeleteAfterSyncValue: Boolean,
+    ) {
+        setupSelectFolderListener()
 
         activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -165,6 +164,8 @@ class SyncSettingsActivity : BaseActivity() {
             SelectSaveDateBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectSaveDateBottomSheetDialog")
         }
 
+        syncDatePicker.setOnClickListener { showSyncDatePicker() }
+
         syncPeriodicity.setOnClickListener {
             SelectIntervalTypeBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectIntervalTypeBottomSheetDialog")
         }
@@ -175,12 +176,18 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
-    private fun initUserAndDrive() {
-        selectDriveViewModel.apply {
-            val userId = oldSyncSettings?.userId ?: AccountUtils.currentUserId
-            val drive = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
-            if (selectedUserId.value != userId) selectedUserId.value = userId
-            if (selectedDrive.value != drive) selectedDrive.value = drive
+    private fun ActivitySyncSettingsBinding.setupSelectFolderListener() {
+        selectPath.setOnClickListener {
+            Intent(this@SyncSettingsActivity, SelectFolderActivity::class.java).apply {
+                putExtras(
+                    SelectFolderActivityArgs(
+                        userId = selectDriveViewModel.selectedUserId.value!!,
+                        driveId = selectDriveViewModel.selectedDrive.value?.id!!,
+                        folderId = syncSettingsViewModel.syncFolder.value ?: -1,
+                    ).toBundle()
+                )
+                selectFolderResultLauncher.launch(this)
+            }
         }
     }
 
@@ -359,21 +366,8 @@ class SyncSettingsActivity : BaseActivity() {
     private fun saveSettings() = with(binding) {
         saveButton.showProgressCatching()
         lifecycleScope.launch(Dispatchers.IO) {
-            val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
-                SavePicturesDate.SINCE_NOW -> Date()
-                SavePicturesDate.SINCE_FOREVER -> Date(0)
-                SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
-            }
             if (activateSyncSwitch.isChecked) {
-                val syncSettings = SyncSettings(
-                    userId = selectDriveViewModel.selectedUserId.value!!,
-                    driveId = selectDriveViewModel.selectedDrive.value!!.id,
-                    lastSync = date,
-                    syncFolder = syncSettingsViewModel.syncFolder.value!!,
-                    syncVideo = syncVideoSwitch.isChecked,
-                    createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
-                    deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
-                )
+                val syncSettings = generateSyncSettings()
                 trackPhotoSyncEvents(syncSettings)
                 syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                 UploadFile.setAppSyncSettings(syncSettings)
@@ -389,6 +383,23 @@ class SyncSettingsActivity : BaseActivity() {
                 finish()
             }
         }
+    }
+
+    private fun generateSyncSettings(): SyncSettings = with(binding) {
+        val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
+            SavePicturesDate.SINCE_NOW -> Date()
+            SavePicturesDate.SINCE_FOREVER -> Date(0)
+            SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
+        }
+        return SyncSettings(
+            userId = selectDriveViewModel.selectedUserId.value!!,
+            driveId = selectDriveViewModel.selectedDrive.value!!.id,
+            lastSync = date,
+            syncFolder = syncSettingsViewModel.syncFolder.value!!,
+            syncVideo = syncVideoSwitch.isChecked,
+            createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
+            deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
+        )
     }
 
     private fun showSyncDatePicker() {
