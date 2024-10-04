@@ -560,6 +560,7 @@
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>
     <string name="previewPdfPages">%1$d de %2$d</string>
     <string name="previewVideoSourceError">El archivo de vídeo no es compatible con el lector de vídeo</string>
+    <string name="publicShareImportationInProgress">Descarga en curso en la carpeta seleccionada</string>
     <string name="publicShareOutdatedLinkDescription">El enlace ha sido desactivado o ha caducado.\nPara acceder a los archivos, envía un mensaje al usuario que compartió el enlace contigo para que pueda reactivarlo.</string>
     <string name="publicShareOutdatedLinkTitle">Los archivos ya no están disponibles</string>
     <string name="publicSharePasswordNeededDescription">Introduzca la contraseña que se le ha facilitado para acceder al contenido.</string>
