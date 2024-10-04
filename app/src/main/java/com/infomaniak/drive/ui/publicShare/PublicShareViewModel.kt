@@ -22,6 +22,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
@@ -34,6 +35,7 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.models.ApiError
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.sentry.Sentry
@@ -52,6 +54,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
     val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, ShareLink?>>()
+    val importPublicShareResult = SingleLiveEvent<Pair<Int?, String>>()
     val submitPasswordResult = SingleLiveEvent<Boolean?>()
     var hasBeenAuthenticated = false
     var canDownloadFiles = canDownload
@@ -153,7 +156,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         fileIds: List<Int>,
         exceptedFileIds: List<Int>,
     ) = viewModelScope.launch(Dispatchers.IO) {
-        ApiRepository.importPublicShareFiles(
+        val apiResponse = ApiRepository.importPublicShareFiles(
             sourceDriveId = driveId,
             linkUuid = publicShareUuid,
             destinationDriveId = destinationDriveId,
@@ -162,7 +165,9 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             exceptedFileIds = exceptedFileIds,
         )
 
-        // TODO: Manage apiResponse when the backend will be done
+        val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
+        val destinationPath = "${BuildConfig.SHARE_URL_V1}/drive/$destinationDriveId/files/$destinationFolderId"
+        importPublicShareResult.postValue(error to destinationPath)
     }
 
     fun buildArchive(archiveBody: ArchiveUUID.ArchiveBody) = viewModelScope.launch(Dispatchers.IO) {
