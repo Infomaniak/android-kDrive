@@ -20,12 +20,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog">
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    tools:context=".ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
         android:paddingHorizontal="@dimen/marginStandard"
         tools:background="@color/appBar">
 

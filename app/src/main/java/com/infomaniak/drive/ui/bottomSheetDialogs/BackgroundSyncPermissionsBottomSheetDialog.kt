@@ -24,6 +24,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.UiSettings
@@ -38,6 +40,8 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     private val drivePermissions = DrivePermissions()
     private var hasDoneNecessary = false
     private var hadBatteryLifePermission = false
+
+    private val bottomSheetBehavior by lazy { (dialog as BottomSheetDialog).behavior }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentBottomSheetBackgroundSyncBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -78,6 +82,8 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     private fun onHasBatteryPermission(hasBatteryPermission: Boolean) {
         hadBatteryLifePermission = hasBatteryPermission
         showManufacturerWarning(hasBatteryPermission)
+
+        if (hasBatteryPermission) bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
     private fun showManufacturerWarning(hasBatteryPermission: Boolean) {
