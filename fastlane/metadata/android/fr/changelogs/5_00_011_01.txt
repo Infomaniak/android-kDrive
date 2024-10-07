@@ -1,0 +1,6 @@
+- Correction de la synchronisation d'un fichier provenant d'une application externe via le stockage en nuage
+- Correction d'un conflit entre les interactions de rafraîchissement et de défilement dans la galerie
+- Correction des couleurs des dossiers
+- Mise à jour des traductions
+- Correction d'un problème de double écran de démarrage
+- Suppression d'un espace vide entre le bas des feuilles inférieures et le bas de l'écran

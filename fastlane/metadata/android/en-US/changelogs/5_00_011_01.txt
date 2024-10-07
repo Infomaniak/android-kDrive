@@ -1,0 +1,6 @@
+- Fix syncing of file from an external app via cloud storage
+- Fix conflict between refresh and scroll interactions in the gallery
+- Fix folders colors
+- Update translations
+- Fix double splash screens issue
+- Remove an empty space between bottom sheets and the bottom of the screen
