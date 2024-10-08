@@ -160,7 +160,6 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
                         .forEach { unselectedFragment ->
                             (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
                         }
-                    (selectedFragment as? PreviewVideoFragment)?.onFragmentSelected()
 
                     currentFile = previewSliderAdapter.getFile(position)
                     with(header) {
