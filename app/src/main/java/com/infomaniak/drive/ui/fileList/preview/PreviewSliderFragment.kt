@@ -23,12 +23,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.annotation.OptIn
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
@@ -142,19 +144,35 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
             adapter = previewSliderAdapter
             offscreenPageLimit = 1
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+
+                @OptIn(UnstableApi::class)
                 override fun onPageSelected(position: Int) {
-                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
+                    val selectedFragmentId = previewSliderAdapter.getItemId(position)
+                    val selectedFragment = childFragmentManager.findFragmentByTag("f$selectedFragmentId")
+
+                    selectedFragment?.trackScreen()
+
+                    // Implementation of onFragmentSelected/onFragmentUnselected to handle resume of media to the same position
+                    childFragmentManager.fragments
+                        .filter {
+                            it is PreviewVideoFragment && it != selectedFragment
+                        }
+                        .forEach { unselectedFragment ->
+                            (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
+                        }
+                    (selectedFragment as? PreviewVideoFragment)?.onFragmentSelected()
 
                     currentFile = previewSliderAdapter.getFile(position)
                     with(header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
                         toggleOpenWithVisibility(isVisible = !currentFile.isOnlyOfficePreview())
                     }
+
+                    // Update of BottomSheet
                     bottomSheetFileInfos.openWith.isVisible = true
                     lifecycleScope.launchWhenResumed {
                         withContext(Dispatchers.Main) { bottomSheetFileInfos.updateCurrentFile(currentFile) }
                     }
-
                     bottomSheetFileInfos.setPrintVisibility(isGone = !currentFile.isPDF())
                 }
             })
