@@ -51,6 +51,8 @@ open class PreviewVideoFragment : PreviewFragment() {
     private var _binding: FragmentPreviewVideoBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
+    private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
+
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
 
@@ -121,7 +123,7 @@ open class PreviewVideoFragment : PreviewFragment() {
             createPlayer()
         }
     }
-    
+
     fun onFragmentUnselected() {
         mediaPosition = mediaController?.currentPosition ?: 0L
     }
@@ -160,20 +162,26 @@ open class PreviewVideoFragment : PreviewFragment() {
     private fun initMediaController(offlineFile: IOFile?, offlineIsComplete: Boolean) = with(binding) {
         val context = requireContext()
         val playbackSessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
-        mediaControllerFuture = MediaController.Builder(context, playbackSessionToken).buildAsync()
-        mediaControllerFuture?.addListener(
-            {
-                mediaController = mediaControllerFuture?.get()
-                mediaController?.setMediaItem(getMediaItem(offlineFile, offlineIsComplete))
-                mediaController?.addListener(playerListener)
-                mediaController?.seekTo(mediaPosition)
-                playerView.player = mediaController
+        mediaControllerFuture = MediaController.Builder(context, playbackSessionToken).buildAsync().apply {
+            addListener(
+                getRunnable(offlineFile, offlineIsComplete, playerView),
+                mainExecutor,
+            )
+        }
+    }
 
-                playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
-                playerView.controllerHideOnTouch = false
-            },
-            ContextCompat.getMainExecutor(context),
-        )
+    private fun getRunnable(offlineFile: IOFile?, offlineIsComplete: Boolean, playerView: PlayerView): Runnable {
+        return Runnable {
+            mediaController = mediaControllerFuture?.get()?.apply {
+                setMediaItem(getMediaItem(offlineFile, offlineIsComplete))
+                addListener(playerListener)
+                seekTo(mediaPosition)
+            }
+
+            playerView.player = mediaController
+            playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
+            playerView.controllerHideOnTouch = false
+        }
     }
 
     private fun getMediaItem(offlineFile: IOFile?, offlineIsComplete: Boolean): MediaItem {

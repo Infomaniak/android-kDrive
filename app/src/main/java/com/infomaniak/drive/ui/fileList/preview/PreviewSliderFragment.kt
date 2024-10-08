@@ -152,14 +152,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
                     selectedFragment?.trackScreen()
 
-                    // Implementation of onFragmentSelected/onFragmentUnselected to handle resume of media to the same position
-                    childFragmentManager.fragments
-                        .filter {
-                            it is PreviewVideoFragment && it != selectedFragment
-                        }
-                        .forEach { unselectedFragment ->
-                            (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
-                        }
+                    // Implementation of onFragmentUnselected to handle resume of media to the same position
+                    childFragmentManager.fragments.filter {
+                        it is PreviewVideoFragment && it != selectedFragment
+                    }.forEach { unselectedFragment ->
+                        (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
+                    }
 
                     currentFile = previewSliderAdapter.getFile(position)
                     with(header) {
