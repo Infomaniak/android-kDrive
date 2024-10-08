@@ -115,12 +115,13 @@ open class PreviewVideoFragment : PreviewFragment() {
         }
     }
 
-    fun onFragmentSelected() {
-        if (!noCurrentFile()) {
+    override fun onResume() {
+        super.onResume()
+        if (!noCurrentFile() && (mediaController == null || mediaController?.isPlaying == false)) {
             createPlayer()
         }
     }
-
+    
     fun onFragmentUnselected() {
         mediaPosition = mediaController?.currentPosition ?: 0L
     }
