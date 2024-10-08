@@ -125,6 +125,7 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     fun onFragmentUnselected() {
+        mediaController?.pause()
         mediaPosition = mediaController?.currentPosition ?: 0L
     }
 
