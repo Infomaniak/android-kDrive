@@ -147,12 +147,12 @@ class PreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListene
 
                 @OptIn(UnstableApi::class)
                 override fun onPageSelected(position: Int) {
-                    val selectedFragmentId = previewSliderAdapter.getItemId(position)
-                    val selectedFragment = childFragmentManager.findFragmentByTag("f$selectedFragmentId")
+                    val selectedFragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")
 
                     selectedFragment?.trackScreen()
 
-                    // Implementation of onFragmentUnselected to handle resume of media to the same position
+                    // Implementation of onFragmentUnselected to handle resume of media to the same position, only
+                    // for PreviewVideoFragment.
                     childFragmentManager.fragments.filter {
                         it is PreviewVideoFragment && it != selectedFragment
                     }.forEach { unselectedFragment ->
