@@ -54,6 +54,8 @@ open class PreviewVideoFragment : PreviewFragment() {
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
 
+    private var mediaPosition = 0L
+
     private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             val flagKeepScreenOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
@@ -113,9 +115,14 @@ open class PreviewVideoFragment : PreviewFragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (!noCurrentFile() && mediaController == null) createPlayer()
+    fun onFragmentSelected() {
+        if (!noCurrentFile()) {
+            createPlayer()
+        }
+    }
+
+    fun onFragmentUnselected() {
+        mediaPosition = mediaController?.currentPosition ?: 0L
     }
 
     override fun onDestroyView() {
@@ -153,15 +160,19 @@ open class PreviewVideoFragment : PreviewFragment() {
         val context = requireContext()
         val playbackSessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
         mediaControllerFuture = MediaController.Builder(context, playbackSessionToken).buildAsync()
-        mediaControllerFuture?.addListener({
-            mediaController = mediaControllerFuture?.get()
-            mediaController?.setMediaItem(getMediaItem(offlineFile, offlineIsComplete))
-            mediaController?.addListener(playerListener)
+        mediaControllerFuture?.addListener(
+            {
+                mediaController = mediaControllerFuture?.get()
+                mediaController?.setMediaItem(getMediaItem(offlineFile, offlineIsComplete))
+                mediaController?.addListener(playerListener)
+                mediaController?.seekTo(mediaPosition)
+                playerView.player = mediaController
 
-            playerView.player = mediaController
-            playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
-            playerView.controllerHideOnTouch = false
-        }, ContextCompat.getMainExecutor(context))
+                playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
+                playerView.controllerHideOnTouch = false
+            },
+            ContextCompat.getMainExecutor(context),
+        )
     }
 
 
