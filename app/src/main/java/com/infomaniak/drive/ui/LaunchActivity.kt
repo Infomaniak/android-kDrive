@@ -41,10 +41,9 @@ import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_
 import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.AccountUtils.requestCurrentUser
+import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.Utils.openDeepLinkInBrowser
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.api.ApiController
@@ -176,7 +175,7 @@ class LaunchActivity : AppCompatActivity() {
         intent.data?.path?.let { deeplink ->
             // If the app is closed, the currentUser will be null. We don't want that otherwise the link will always be opened as
             // external instead of internal if you already have access to the files. So we set it here
-            if (AccountUtils.currentUser == null) requestCurrentUser()
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
 
             if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else processInternalLink(deeplink)
             SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
@@ -220,7 +219,7 @@ class LaunchActivity : AppCompatActivity() {
             val (pathDriveId, roleFolderId, pathFolderId, pathFileId) = match.destructured
             // In case of SharedWithMe deeplinks, we open the link in the web as we cannot support them in-app for now
             if (roleFolderId == SHARED_WITH_ME_FOLDER_ROLE) {
-                openDeepLinkInBrowser(path)
+                PublicShareUtils.openDeepLinkInBrowser(activity = this, path)
                 shouldStartApp = false
                 return
             }

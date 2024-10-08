@@ -31,7 +31,7 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
-import com.infomaniak.drive.utils.Utils.openDeepLinkInBrowser
+import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.utils.*
@@ -52,10 +52,8 @@ class PublicSharePasswordFragment : Fragment() {
         // TODO: Remove this and call setupValidationButton instead
         //  Also change the layout (description, button's title, input visibility)
         passwordValidateButton.setOnClickListener {
-            with(requireActivity()) {
-                trackPublicShareActionEvent("openInBrowser")
-                openDeepLinkInBrowser(getPublicShareUrl())
-            }
+            requireActivity().trackPublicShareActionEvent("openInBrowser")
+            PublicShareUtils.openDeepLinkInBrowser(requireActivity(), getPublicShareUrl())
         }
 
         publicSharePasswordEditText.addTextChangedListener { publicSharePasswordLayout.error = null }

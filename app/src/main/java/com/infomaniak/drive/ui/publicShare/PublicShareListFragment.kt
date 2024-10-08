@@ -31,7 +31,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.button.MaterialButton
 import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_BOOKMARK_NAME
 import com.infomaniak.drive.MatomoDrive.ACTION_SAVE_TO_KDRIVE_NAME
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
@@ -72,6 +71,7 @@ class PublicShareListFragment : FileListFragment() {
     override var hideBackButtonWhenRoot: Boolean = false
 
     private var drivePermissions = DrivePermissions()
+    private inline val importButton get() = (requireActivity() as PublicShareActivity).getMainButton()
     private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk(::onDriveAndFolderSelected)
     }
@@ -121,9 +121,9 @@ class PublicShareListFragment : FileListFragment() {
 
         (requireActivity() as? PublicShareActivity)?.let { parentActivity ->
             parentActivity.onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
-            setMainButton(parentActivity.getMainButton())
         }
 
+        setMainButton()
         setupMultiSelect()
 
         observeRootFile()
@@ -253,10 +253,7 @@ class PublicShareListFragment : FileListFragment() {
         }
     }.onFailure { exception ->
         exception.printStackTrace()
-        showSnackbar(
-            title = R.string.errorGetBookmarkURL,
-            anchor = (requireActivity() as? PublicShareActivity)?.getMainButton(),
-        )
+        showSnackbar(title = R.string.errorGetBookmarkURL, anchor = importButton)
     }
 
     private fun downloadAllFiles() {
@@ -270,7 +267,7 @@ class PublicShareListFragment : FileListFragment() {
         val destinationFolderId = data?.getIntExtra(DESTINATION_FOLDER_ID_KEY, PUBLIC_SHARE_DEFAULT_ID) ?: PUBLIC_SHARE_DEFAULT_ID
 
         if (data == null || destinationDriveId == PUBLIC_SHARE_DEFAULT_ID || destinationFolderId == PUBLIC_SHARE_DEFAULT_ID) {
-            showSnackbar(RCore.string.anErrorHasOccurred)
+            showSnackbar(RCore.string.anErrorHasOccurred, anchor = importButton)
         } else {
             publicShareViewModel.importFilesToDrive(
                 destinationDriveId = destinationDriveId,
@@ -281,7 +278,7 @@ class PublicShareListFragment : FileListFragment() {
         }
     }
 
-    private fun setMainButton(importButton: MaterialButton) {
+    private fun setMainButton() {
         importButton.setOnClickListener {
             if (AccountUtils.currentDriveId == -1) {
                 requireContext().trackPublicShareActionEvent("createAccountAd")
