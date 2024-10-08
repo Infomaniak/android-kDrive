@@ -25,7 +25,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -39,7 +38,6 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
-import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
@@ -206,14 +204,6 @@ class LoginActivity : AppCompatActivity() {
         connectButton.hideProgressCatching(R.string.connect)
         signInButton.isEnabled = true
         if (!connectButton.isEnabled) connectButton.isEnabled = true
-    }
-
-    private fun launchDeeplinkAndFinish(deeplink: String) {
-        Intent(this@LoginActivity, LaunchActivity::class.java).apply {
-            setData(deeplink.toUri())
-            clearStack()
-        }.also(::startActivity)
-        finishAffinity()
     }
 
     private fun launchMainActivity() {
