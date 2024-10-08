@@ -134,7 +134,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                         .forEach { unselectedFragment ->
                             (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
                         }
-                    (selectedFragment as? PreviewVideoFragment)?.onFragmentSelected()
 
                     currentFile = previewSliderAdapter.getFile(position)
                     previewSliderViewModel.currentPreview = currentFile
