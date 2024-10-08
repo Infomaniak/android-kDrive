@@ -22,16 +22,18 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.CallSuper
+import androidx.annotation.OptIn
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withResumed
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -121,7 +123,21 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             offscreenPageLimit = 1
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                @OptIn(UnstableApi::class)
                 override fun onPageSelected(position: Int) {
+                    val selectedFragmentId = previewSliderAdapter.getItemId(position)
+                    val selectedFragment = childFragmentManager.findFragmentByTag("f$selectedFragmentId")
+
+                    // Implementation of onFragmentSelected/onFragmentUnselected to handle resume of media to the same position
+                    childFragmentManager.fragments
+                        .filter {
+                            it is PreviewVideoFragment && it != selectedFragment
+                        }
+                        .forEach { unselectedFragment ->
+                            (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
+                        }
+                    (selectedFragment as? PreviewVideoFragment)?.onFragmentSelected()
+
                     val file = previewSliderAdapter.getFile(position)
                     currentFile = file
                     previewSliderViewModel.currentPreview = file
