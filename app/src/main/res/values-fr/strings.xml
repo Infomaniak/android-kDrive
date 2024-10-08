@@ -560,6 +560,7 @@
     <string name="previewNoPreview">Il semblerait que ce fichier n’ait pas d’aperçu.</string>
     <string name="previewPdfPages">%1$d sur %2$d</string>
     <string name="previewVideoSourceError">Fichier vidéo non pris en charge par le lecteur vidéo</string>
+    <string name="publicShareImportationInProgress">Téléchargement en cours dans le dossier sélectionné</string>
     <string name="publicShareOutdatedLinkDescription">Le lien a été désactivé ou a expiré.\nPour accéder aux fichiers, envoyez un message à l’utilisateur qui vous a partagé le lien pour qu’il le réactive.</string>
     <string name="publicShareOutdatedLinkTitle">Les fichiers ne sont plus disponibles</string>
     <string name="publicSharePasswordNeededDescription">Veuillez saisir le mot de passe qui vous a été fourni pour accéder au contenu.</string>

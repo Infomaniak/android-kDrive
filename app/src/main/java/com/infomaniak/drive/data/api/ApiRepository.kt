@@ -353,7 +353,7 @@ object ApiRepository : ApiRepositoryCore() {
         fileIds: List<Int>,
         exceptedFileIds: List<Int>,
         password: String = "",
-    ): ApiResponse<FileExternalImport> {
+    ): ApiResponse<List<FileExternalImport>> {
         val body: MutableMap<String, Any> = mutableMapOf(
             "source_drive_id" to sourceDriveId,
             "sharelink_uuid" to linkUuid,
