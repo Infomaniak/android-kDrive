@@ -59,6 +59,7 @@ open class PreviewVideoFragment : PreviewFragment() {
     private var mediaPosition = 0L
 
     private val playerListener = object : Player.Listener {
+
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             val flagKeepScreenOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             if (isPlaying) {
@@ -124,11 +125,6 @@ open class PreviewVideoFragment : PreviewFragment() {
         }
     }
 
-    fun onFragmentUnselected() {
-        mediaController?.pause()
-        mediaPosition = mediaController?.currentPosition ?: 0L
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -144,6 +140,11 @@ open class PreviewVideoFragment : PreviewFragment() {
         mediaControllerFuture?.let { MediaController.releaseFuture(it) }
         mediaControllerFuture = null
         super.onDestroy()
+    }
+
+    fun onFragmentUnselected() {
+        mediaController?.pause()
+        mediaPosition = mediaController?.currentPosition ?: 0L
     }
 
     private fun createPlayer() {
