@@ -128,14 +128,12 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     val selectedFragmentId = previewSliderAdapter.getItemId(position)
                     val selectedFragment = childFragmentManager.findFragmentByTag("f$selectedFragmentId")
 
-                    // Implementation of onFragmentSelected/onFragmentUnselected to handle resume of media to the same position
-                    childFragmentManager.fragments
-                        .filter {
-                            it is PreviewVideoFragment && it != selectedFragment
-                        }
-                        .forEach { unselectedFragment ->
-                            (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
-                        }
+                    // Implementation of onFragmentUnselected to handle resume of media to the same position
+                    childFragmentManager.fragments.filter {
+                        it is PreviewVideoFragment && it != selectedFragment
+                    }.forEach { unselectedFragment ->
+                        (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
+                    }
 
                     val file = previewSliderAdapter.getFile(position)
                     currentFile = file
