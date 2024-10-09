@@ -27,6 +27,7 @@ import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
@@ -120,8 +121,8 @@ class SyncSettingsActivity : BaseActivity() {
         selectDriveViewModel.apply {
             val userId = oldSyncSettings?.userId ?: AccountUtils.currentUserId
             val drive = oldSyncSettings?.run { DriveInfosController.getDrive(userId, driveId) }
-            if (selectedUserId.value != userId) selectedUserId.value = userId
-            if (selectedDrive.value != drive) selectedDrive.value = drive
+            selectedUserId.value = userId
+            selectedDrive.value = drive
         }
     }
 
@@ -223,7 +224,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun observeSelectedDrive() = with(binding) {
-        selectDriveViewModel.selectedDrive.observe(this@SyncSettingsActivity) {
+        selectDriveViewModel.selectedDrive.distinctUntilChanged().observe(this@SyncSettingsActivity) {
             it?.let {
                 driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
                 driveName.text = it.name
