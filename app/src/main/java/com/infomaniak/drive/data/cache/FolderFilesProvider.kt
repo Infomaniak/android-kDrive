@@ -399,8 +399,7 @@ object FolderFilesProvider {
         when (action) {
             FileActivityType.FILE_DELETE,
             FileActivityType.FILE_MOVE_OUT,
-            FileActivityType.FILE_TRASH,
-            FileActivityType.FILE_TRASH_INHERITED -> {
+            FileActivityType.FILE_TRASH -> {
                 // We used to have this condition, but it doesn't exist on the ios side, according to commit it was an api fix.
                 // returnResponse[fileId]?.createdAt?.time == createdAt.time
                 if (returnResponse[fileId] == null) {
