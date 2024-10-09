@@ -77,7 +77,7 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                 }
                 binding.userCardview.root.isVisible = true
 
-                popupLayoutBinding.usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>, isCardview = false) { user ->
+                popupLayoutBinding.usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>, isCardView = false) { user ->
                     selectedUserId.value = user.id
                     driveListAdapter.setDrives(getDriveList())
 
