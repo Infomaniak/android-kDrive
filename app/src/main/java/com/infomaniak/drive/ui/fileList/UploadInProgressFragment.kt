@@ -43,8 +43,8 @@ import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.realm.RealmResults
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class UploadInProgressFragment : FileListFragment() {
 
@@ -139,10 +139,8 @@ class UploadInProgressFragment : FileListFragment() {
             pendingUploadFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
                 Utils.createConfirmation(requireContext(), title) {
-                    if (fileAdapter.fileList.getOrNull(position)?.name == fileName) {
-                        closeItemClicked(uploadFile = syncFile)
-                        fileAdapter.deleteAt(position)
-                    }
+                    closeItemClicked(uploadFile = syncFile)
+                    fileAdapter.deleteByFileName(fileName)
                 }
             }
         }
@@ -192,15 +190,18 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
     private fun closeItemClicked(uploadFile: UploadFile? = null, folderId: Int? = null) {
-        val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
-        lifecycleScope.launch(Dispatchers.IO) {
+        if (!isVisible) return
+
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            val progressDialog = Dispatchers.Main {
+                Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
+            }
             var needPopBackStack = false
             uploadFile?.let {
                 it.uploadToken?.let { token ->
                     ApiRepository.cancelSession(AccountUtils.currentDriveId, token, it.okHttpClient)
                 }
                 UploadFile.deleteAll(listOf(it))
-                needPopBackStack = true
             }
             folderId?.let {
                 UploadFile.cancelAllPendingFilesSessions(folderId = it)
@@ -212,7 +213,7 @@ class UploadInProgressFragment : FileListFragment() {
                 needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(folderId = it) == 0
             }
 
-            withContext(Dispatchers.Main) {
+            Dispatchers.Main {
                 progressDialog.dismiss()
                 if (isResumed && needPopBackStack) {
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
