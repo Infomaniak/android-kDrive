@@ -79,7 +79,10 @@ class UploadInProgressFragment : FileListFragment() {
         if (isPendingFolders()) {
             fileAdapter.onFileClicked = { navigateToUploadView(it.id, it.name) }
         } else {
-            binding.toolbar.setNavigationOnClickListener { popBackStack() }
+            binding.toolbar.apply {
+                setNavigationOnClickListener { popBackStack() }
+                menu.findItem(R.id.closeItem).isVisible = true
+            }
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { popBackStack() }
         }
 
@@ -290,7 +293,6 @@ class UploadInProgressFragment : FileListFragment() {
                     noFilesLayout.toggleVisibility(uploadFolders.isEmpty())
                     showLoadingTimer.cancel()
                     swipeRefreshLayout.isRefreshing = false
-                    toolbar.menu.findItem(R.id.closeItem).isVisible = true
                 }
             }
         }
