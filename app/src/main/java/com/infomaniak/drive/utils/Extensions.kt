@@ -182,11 +182,15 @@ fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
 fun ItemUserBinding.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
+    val isCurrentUser = AccountUtils.currentUserId == user.id
     userName.text = user.displayName
     userEmail.text = user.email
     userAvatar.loadAvatar(user)
-    chevron.isVisible = showChevron
-    root.setOnClickListener { onItemClicked(user) }
+    chevron.isVisible = showChevron && !isCurrentUser
+    check.isVisible = isCurrentUser
+    if (!isCurrentUser) {
+        root.setOnClickListener { onItemClicked(user) }
+    }
 }
 
 fun ImageView.animateRotation(isDeployed: Boolean = false) {
