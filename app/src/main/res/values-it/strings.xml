@@ -464,7 +464,7 @@
     <string name="lastEditsTitle">Ultime modifiche</string>
     <string name="localizedFilenamePrivateSpace">I miei file</string>
     <string name="localizedFilenamePrivateTeamSpace">La mia cartella personale</string>
-    <string name="localizedFilenameTeamSpace">File dell’organizzazione</string>
+    <string name="localizedFilenameTeamSpace">Cartelle comuni</string>
     <string name="locateButton">Localizzare</string>
     <string name="manageCategoriesCreateTitle">Crea %s</string>
     <string name="manageCategoriesNoCategory">Nessuna categoria</string>
