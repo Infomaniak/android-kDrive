@@ -42,9 +42,7 @@ object ApiRoutes {
             "&actions[]=file_move" +
             "&actions[]=file_move_out" +
             "&actions[]=file_trash" +
-//            "&actions[]=file_trash_inherited" + TODO: Waiting for api fix (https://infomaniak.kchat.infomaniak.com/infomaniak/pl/9ce13d8b-2e1e-47f1-8a31-f5d95b4798d2)
             "&actions[]=file_restore" +
-//            "&actions[]=file_restore_inherited" + TODO: Waiting for api fix (https://infomaniak.kchat.infomaniak.com/infomaniak/pl/9ce13d8b-2e1e-47f1-8a31-f5d95b4798d2)
             "&actions[]=file_delete" +
             "&actions[]=file_update" +
             "&actions[]=file_favorite_create" +

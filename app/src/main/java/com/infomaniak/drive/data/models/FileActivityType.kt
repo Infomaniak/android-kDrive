@@ -32,12 +32,8 @@ enum class FileActivityType {
     FILE_MOVE_OUT,
     @SerializedName("file_trash")
     FILE_TRASH,
-    @SerializedName("file_trash_inherited")
-    FILE_TRASH_INHERITED,
     @SerializedName("file_restore")
     FILE_RESTORE,
-    @SerializedName("file_restore_inherited")
-    FILE_RESTORE_INHERITED,
     @SerializedName("file_delete")
     FILE_DELETE,
     @SerializedName("file_update")
