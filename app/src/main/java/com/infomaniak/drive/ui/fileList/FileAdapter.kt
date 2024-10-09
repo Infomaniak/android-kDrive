@@ -202,6 +202,13 @@ open class FileAdapter(
         }
     }
 
+    fun deleteByFileName(fileName: String) {
+        if (!fileList.isManaged) {
+            val position = indexOf(fileName)
+            if (position >= 0) deleteAt(position)
+        }
+    }
+
     private fun indexOf(fileId: Int) = fileList.indexOfFirst { it.id == fileId }
 
     fun indexOf(fileName: String) = fileList.indexOfFirst { it.name == fileName }
