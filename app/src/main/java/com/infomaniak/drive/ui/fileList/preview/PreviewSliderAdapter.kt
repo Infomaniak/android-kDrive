@@ -24,6 +24,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewMusicFragment
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewVideoFragment
 
 class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(manager, lifecycle) {
 

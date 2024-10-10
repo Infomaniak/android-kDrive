@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileList.preview
+package com.infomaniak.drive.ui.fileList.preview.playback
 
 import android.content.ComponentName
 import android.net.Uri
@@ -30,17 +30,15 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.media3.ui.PlayerView
 import com.google.common.util.concurrent.ListenableFuture
-import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
+import com.infomaniak.drive.ui.fileList.preview.PreviewFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
@@ -58,36 +56,26 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     private var mediaPosition = 0L
 
-    private val playerListener = object : Player.Listener {
-
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            val flagKeepScreenOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-            if (isPlaying) {
-                trackMediaPlayerEvent("play")
-                toggleFullscreen()
-                activity?.window?.addFlags(flagKeepScreenOn)
-            } else {
-                trackMediaPlayerEvent("pause")
-                activity?.window?.clearFlags(flagKeepScreenOn)
-            }
+    private val flagKeepScreenOn by lazy { WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON }
+    private val playerListener = PlayerListener(activity, isPlayingChanged = { isPlaying ->
+        if (isPlaying) {
+            toggleFullscreen()
+            activity?.window?.addFlags(flagKeepScreenOn)
+        } else {
+            activity?.window?.clearFlags(flagKeepScreenOn)
         }
-
-        override fun onPlayerError(error: PlaybackException) {
-            super.onPlayerError(error)
-            error.printStackTrace()
-
-            _binding?.errorLayout?.let {
-                when (error.message) {
-                    "Source error" -> it.previewDescription.setText(R.string.previewVideoSourceError)
-                    else -> it.previewDescription.setText(R.string.previewLoadError)
-                }
-                it.bigOpenWithButton.isVisible = true
-                it.root.isVisible = true
-                it.previewDescription.isVisible = true
+    }, onError = { playbackExceptionMessage ->
+        _binding?.errorLayout?.let { errorLayout ->
+            when (playbackExceptionMessage) {
+                "Source error" -> errorLayout.previewDescription.setText(R.string.previewVideoSourceError)
+                else -> errorLayout.previewDescription.setText(R.string.previewLoadError)
             }
-            _binding?.playerView?.isGone = true
+            errorLayout.bigOpenWithButton.isVisible = true
+            errorLayout.root.isVisible = true
+            errorLayout.previewDescription.isVisible = true
         }
-    }
+        _binding?.playerView?.isGone = true
+    })
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewVideoBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -112,7 +100,7 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         playerView.setOnClickListener {
             if ((it as PlayerView).isControllerFullyVisible) {
-                trackMediaPlayerEvent("toggleFullScreen")
+                playerListener.trackMediaPlayerEvent(context, "toggleFullScreen")
                 toggleFullscreen()
             }
         }
@@ -203,10 +191,6 @@ open class PreviewVideoFragment : PreviewFragment() {
         } else {
             Uri.parse(ApiRoutes.downloadFile(file))
         }
-    }
-
-    private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
-        trackEvent("mediaPlayer", name, value = value)
     }
 
     companion object {

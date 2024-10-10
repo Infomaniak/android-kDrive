@@ -15,6 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileList.preview
+package com.infomaniak.drive.ui.fileList.preview.playback
 
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
+
+@OptIn(UnstableApi::class)
 class PreviewMusicFragment : PreviewVideoFragment()
