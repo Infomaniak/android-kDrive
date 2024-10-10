@@ -135,7 +135,7 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
     private fun setupOnStopUploadButtonClicked() {
-        fileAdapter.onStopUploadButtonClicked = { position, fileName ->
+        fileAdapter.onStopUploadButtonClicked = { fileName ->
             pendingUploadFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
                 Utils.createConfirmation(requireContext(), title) {
