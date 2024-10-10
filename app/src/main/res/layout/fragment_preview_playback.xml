@@ -22,7 +22,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:background="@color/previewBackground"
-    tools:context=".ui.fileList.preview.playback.PreviewVideoFragment">
+    tools:context=".ui.fileList.preview.playback.PreviewPlaybackFragment">
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
