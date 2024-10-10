@@ -52,4 +52,11 @@
         android:visible="false"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/downloadAllFiles"
+        android:icon="@drawable/ic_menu_download"
+        android:title="@string/buttonDownload"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
 </menu>

@@ -24,6 +24,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.drive.MatomoDrive.ACTION_PRINT_PDF_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_SAVE_TO_KDRIVE_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_SEND_FILE_COPY_NAME
+import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
@@ -66,10 +70,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
             navController.navigate(R.id.previewPDFFragment)
 
-            header.setup(
-                onBackClicked = { finish() },
-                onOpenWithClicked = { openWith(externalFileUri = previewPDFHandler.externalFileUri) },
-            )
+            header.setup(onBackClicked = ::finish, onOpenWithClicked = ::openWith)
         }
 
         initBottomSheet()
@@ -77,8 +78,11 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
     private fun initBottomSheet() = with(binding) {
         setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
-        bottomSheetFileInfos.updateWithExternalFile(getFakeFile())
-        bottomSheetFileInfos.initOnClickListener(this@PreviewPDFActivity)
+        bottomSheetFileInfos.apply {
+            updateWithExternalFile(getFakeFile())
+            initOnClickListener(this@PreviewPDFActivity)
+            isDownloadHidden(isGone = true)
+        }
     }
 
     override fun onStart() = with(binding) {
@@ -116,17 +120,19 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     private fun setupNavController(): NavController {
         return navHostFragment.navController.apply {
             setGraph(
-                R.navigation.view_pdf,
+                R.navigation.preview_pdf_navigation,
                 PreviewPDFFragmentArgs(fileUri = previewPDFHandler.externalFileUri).toBundle(),
             )
         }
     }
 
     override fun shareFile() {
+        trackPdfActivityActionEvent(ACTION_SEND_FILE_COPY_NAME)
         shareFile { previewPDFHandler.externalFileUri }
     }
 
     override fun saveToKDrive() {
+        trackPdfActivityActionEvent(ACTION_SAVE_TO_KDRIVE_NAME)
         previewPDFHandler.externalFileUri?.let(::saveToKDrive)
     }
 
@@ -135,7 +141,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     override fun printClicked() {
-        super.printClicked()
+        trackPdfActivityActionEvent(ACTION_PRINT_PDF_NAME)
         previewPDFHandler.printClicked(
             context = this,
             onError = { showSnackbar(R.string.errorFileNotFound) },

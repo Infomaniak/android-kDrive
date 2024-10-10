@@ -269,6 +269,16 @@ class SaveExternalFilesActivity : BaseActivity() {
         binding.saveButton.apply {
             initProgress(this@SaveExternalFilesActivity)
             setOnClickListener {
+                if (navigationArgs.isPublicShare) {
+                    Intent().apply {
+                        putExtra(DESTINATION_DRIVE_ID_KEY, selectDriveViewModel.selectedDrive.value?.id)
+                        putExtra(DESTINATION_FOLDER_ID_KEY, saveExternalFilesViewModel.folderId.value)
+                        setResult(RESULT_OK, this)
+                    }
+                    finish()
+                    return@setOnClickListener
+                }
+
                 showProgressCatching()
                 if (drivePermissions.checkSyncPermissions()) {
                     val userId = selectedUserId.value!!
@@ -382,7 +392,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun isValidFields(): Boolean {
-        return (isMultiple || !binding.fileNameEdit.showOrHideEmptyError()) &&
+        return (isMultiple || !binding.fileNameEdit.showOrHideEmptyError() || navigationArgs.isPublicShare) &&
                 selectDriveViewModel.selectedUserId.value != null &&
                 selectDriveViewModel.selectedDrive.value != null &&
                 saveExternalFilesViewModel.folderId.value != null &&
@@ -520,5 +530,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     companion object {
         const val SHARED_FILE_FOLDER = "shared_files"
         const val LAST_MODIFIED_URI_KEY = "last_modified"
+        const val DESTINATION_DRIVE_ID_KEY = "destination_drive_id"
+        const val DESTINATION_FOLDER_ID_KEY = "destination_folder_id"
     }
 }

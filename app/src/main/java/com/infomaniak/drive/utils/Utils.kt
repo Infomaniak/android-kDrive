@@ -208,17 +208,26 @@ object Utils {
         isSharedWithMe: Boolean = false,
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
-        val bundle = PreviewSliderFragmentArgs(
-            fileId = selectedFile.id,
-            driveId = selectedFile.driveId,
-            isSharedWithMe = isSharedWithMe,
-            hideActions = selectedFile.isFromActivities
-        ).toBundle()
+
         val navOptions = NavOptions.Builder()
             .setEnterAnim(R.anim.fragment_open_enter)
             .setExitAnim(R.anim.fragment_open_exit)
             .build()
-        navController.navigate(R.id.previewSliderFragment, bundle, navOptions)
+
+        val (destinationClass, bundle) = if (selectedFile.isPublicShared()) {
+            R.id.publicSharePreviewSliderFragment to null
+        } else {
+            val args = PreviewSliderFragmentArgs(
+                fileId = selectedFile.id,
+                driveId = selectedFile.driveId,
+                isSharedWithMe = isSharedWithMe,
+                hideActions = selectedFile.isFromActivities,
+            )
+
+            R.id.previewSliderFragment to args.toBundle()
+        }
+
+        navController.navigate(destinationClass, bundle, navOptions)
     }
 
     fun convertBytesToGigaBytes(bytes: Long) = (bytes / 1024.0.pow(3))
@@ -269,7 +278,7 @@ object Utils {
         startActivityFor(openWithIntentExceptkDrive(uri, type, flags))
     }
 
-    fun Context.openWith(file: File, userDrive: UserDrive = UserDrive()) {
+    fun Context.openWith(file: File, userDrive: UserDrive) {
         startActivityFor(openWithIntentExceptkDrive(file, userDrive))
     }
 
@@ -281,7 +290,7 @@ object Utils {
         }
     }
 
-    fun Context.openWithIntentExceptkDrive(file: File, userDrive: UserDrive = UserDrive()): Intent {
+    fun Context.openWithIntentExceptkDrive(file: File, userDrive: UserDrive): Intent {
         val (cloudUri, uri) = file.getCloudAndFileUris(this, userDrive)
         val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION or

@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
 import coil.load
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
@@ -185,7 +186,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
         if (this?.hasThumbnail == true && getFileType() == ExtensionType.IMAGE || this?.getFileType() == ExtensionType.VIDEO) {
             iconViewBinding.root.isGone = true
             imageView.isVisible = true
-            imageView.loadAny(thumbnail(), getFileType().icon)
+            imageView.loadAny(ApiRoutes.getThumbnailUrl(file = this), getFileType().icon)
         } else {
             imageView.isGone = true
             iconViewBinding.root.isVisible = true

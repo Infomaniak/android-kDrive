@@ -25,4 +25,7 @@
     <external-files-path
         name="files"
         path="/" />
+    <files-path
+        name="@string/EXPOSED_PUBLIC_SHARE_DIR"
+        path="public_share/" />
 </paths>

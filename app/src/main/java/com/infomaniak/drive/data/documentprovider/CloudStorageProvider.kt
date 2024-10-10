@@ -362,7 +362,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
         try {
             val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
-            val response = DownloadOfflineFileManager.downloadFileResponse(file.thumbnail(), okHttpClient)
+            val response = DownloadOfflineFileManager.downloadFileResponse(ApiRoutes.getThumbnailUrl(file), okHttpClient)
 
             if (response.isSuccessful) {
                 DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
@@ -851,13 +851,13 @@ class CloudStorageProvider : DocumentsProvider() {
             }
         }
 
-        fun createShareFileUri(context: Context, file: File, userDrive: UserDrive = UserDrive()): Uri? {
+        fun createShareFileUri(context: Context, file: File, userDrive: UserDrive): Uri? {
             val currentUserId = userDrive.userId
             val currentDriveId = userDrive.driveId
 
             DriveInfosController.getDrive(currentUserId, currentDriveId)?.let { drive ->
                 val baseContentUri = "content://${context.getString(R.string.CLOUD_STORAGE_AUTHORITY)}/document/"
-                val sharedId = if (drive.sharedWithMe) "${SHARED_WITHME_FOLDER_ID}$SEPARATOR" else ""
+                val sharedId = if (userDrive.sharedWithMe) "${SHARED_WITHME_FOLDER_ID}$SEPARATOR" else ""
                 val content = "$currentUserId$SEPARATOR$sharedId${drive.name}$DRIVE_SEPARATOR$currentDriveId/${file.id}"
                 return "$baseContentUri${URLEncoder.encode(content, "UTF-8")}".toUri()
             }

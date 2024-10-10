@@ -174,7 +174,13 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     fun getFileCount(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
         lastItemCount?.let { emit(it) }
-        ApiRepository.getFileCount(folder).data?.let { fileCount ->
+        val apiResponse = if (folder.isPublicShared()) {
+            ApiRepository.getPublicShareFileCount(folder.driveId, folder.publicShareUuid, folder.id)
+        } else {
+            ApiRepository.getFileCount(folder)
+        }
+
+        apiResponse.data?.let { fileCount ->
             lastItemCount = fileCount
             emit(fileCount)
         }

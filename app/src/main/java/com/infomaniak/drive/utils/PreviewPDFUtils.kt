@@ -18,97 +18,29 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
-import com.google.gson.JsonParser
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
-import okhttp3.Request
-import okhttp3.Response
-import java.io.BufferedInputStream
 
 object PreviewPDFUtils {
-    private const val BUFFER_SIZE = 8192
 
-    fun convertPdfFileToIOFile(
+    suspend fun convertPdfFileToIOFile(
         context: Context,
         file: File,
         userDrive: UserDrive,
-        onProgress: (progress: Int) -> Unit
-    ): ApiResponse<IOFile> {
-        return runCatching {
-            val outputFile = when {
-                file.isOnlyOfficePreview() -> file.getConvertedPdfCache(context, userDrive)
-                file.isOffline -> file.getOfflineFile(context, userDrive.userId)!!
-                else -> file.getCacheFile(context, userDrive)
-            }
-
-            val officePdfNeedDownload = file.isOnlyOfficePreview() && (outputFile.lastModified() / 1000) < file.lastModifiedAt
-            val pdfNeedDownload = !file.isOnlyOfficePreview() && file.isObsoleteOrNotIntact(outputFile)
-
-            if (officePdfNeedDownload || pdfNeedDownload) {
-                downloadFile(outputFile, file, onProgress)
-                outputFile.setLastModified(file.getLastModifiedInMilliSecond())
-            }
-
-            ApiResponse(ApiResponseStatus.SUCCESS, outputFile)
-        }.getOrElse { exception ->
-            exception.printStackTrace()
-            val error = when (exception) {
-                is PasswordProtectedException -> R.string.previewFileProtectedError
-                else -> R.string.previewNoPreview
-            }
-            ApiResponse(
-                result = ApiResponseStatus.ERROR,
-                data = null,
-                translatedError = error,
-            )
+        onProgress: (progress: Int) -> Unit,
+    ): ApiResponse<IOFile> = runCatching {
+        ApiResponse(ApiResponseStatus.SUCCESS, data = file.convertToIOFile(context, userDrive, shouldBePdf = true, onProgress))
+    }.getOrElse { exception ->
+        exception.printStackTrace()
+        val error = when (exception) {
+            is PasswordProtectedException -> R.string.previewFileProtectedError
+            else -> R.string.previewNoPreview
         }
+        ApiResponse(result = ApiResponseStatus.ERROR, data = null, translatedError = error)
     }
 
-    private fun downloadFile(
-        externalOutputFile: IOFile,
-        fileModel: File,
-        onProgress: (progress: Int) -> Unit
-    ) {
-        if (externalOutputFile.exists()) externalOutputFile.delete()
-
-        val downLoadUrl = ApiRoutes.downloadFile(fileModel) + if (fileModel.isOnlyOfficePreview()) "?as=pdf" else ""
-        val request = Request.Builder().url(downLoadUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
-        val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
-        val response = HttpClient.okHttpClient.newBuilder()
-            .addNetworkInterceptor(downloadProgressInterceptor)
-            .build()
-            .newCall(request)
-            .execute()
-
-        response.use {
-            if (!it.isSuccessful) {
-                val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
-                if (errorCode == "password_protected_error") {
-                    throw PasswordProtectedException()
-                } else {
-                    throw Exception("Download error")
-                }
-            }
-            when (it.body?.contentType()?.toString()) {
-                "application/pdf" -> createTempPdfFile(it, externalOutputFile)
-                else -> throw UnsupportedOperationException("File not supported")
-            }
-        }
-    }
-
-    private fun createTempPdfFile(response: Response, file: IOFile) {
-        BufferedInputStream(response.body?.byteStream(), BUFFER_SIZE).use { input ->
-            file.outputStream().use { output ->
-                input.copyTo(output, BUFFER_SIZE)
-            }
-        }
-    }
-
-    private class PasswordProtectedException : Exception()
+    class PasswordProtectedException : Exception()
 }

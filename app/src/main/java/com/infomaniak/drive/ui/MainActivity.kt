@@ -66,7 +66,6 @@ import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
-import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
@@ -76,6 +75,8 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
+import com.infomaniak.drive.extensions.addSentryBreadcrumb
+import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
@@ -97,9 +98,7 @@ import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
 import com.infomaniak.lib.stores.reviewmanagers.InAppReviewManager
 import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
-import io.sentry.Breadcrumb
 import io.sentry.Sentry
-import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -444,21 +443,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        destination.trackDestination()
-    }
-
-    @SuppressLint("RestrictedApi")
-    private fun NavDestination.addSentryBreadcrumb() {
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "Navigation"
-            message = "Accessed to destination : $displayName"
-            level = SentryLevel.INFO
-        })
-    }
-
-    @SuppressLint("RestrictedApi")
-    private fun NavDestination.trackDestination() {
-        trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
+        destination.trackDestination(context = this)
     }
 
     private fun handleBottomNavigationVisibility(

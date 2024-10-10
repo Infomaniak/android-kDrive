@@ -23,7 +23,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 
 class PreviewSliderViewModel : ViewModel() {
+
     val pdfIsDownloading = MutableLiveData<Boolean>()
     var currentPreview: File? = null
     var userDrive = UserDrive()
+    var publicShareCanDownload = true
 }

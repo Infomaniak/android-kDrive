@@ -42,6 +42,7 @@ import androidx.viewbinding.ViewBinding
 import coil.load
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
@@ -137,7 +138,7 @@ private fun ImageView.displayFileIcon(
     when {
         file.hasThumbnail && (isGrid || isGraphic) -> {
             scaleType = ImageView.ScaleType.CENTER_CROP
-            loadAny(file.thumbnail(), fileType.icon)
+            loadAny(ApiRoutes.getThumbnailUrl(file), fileType.icon)
         }
         file.isFromUploads && isGraphic -> {
             scaleType = ImageView.ScaleType.CENTER_CROP

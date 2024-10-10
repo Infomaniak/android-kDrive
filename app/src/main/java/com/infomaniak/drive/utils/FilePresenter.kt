@@ -24,7 +24,9 @@ import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
 import com.dd.plist.NSString
 import com.dd.plist.PropertyListParser
+import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_BOOKMARK_NAME
 import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
@@ -32,7 +34,12 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.AccessDeniedBottomSheetDialogArgs
-import com.infomaniak.drive.ui.fileList.*
+import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
+import com.infomaniak.drive.ui.fileList.FileAdapter
+import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
+import com.infomaniak.drive.ui.fileList.FileListViewModel
+import com.infomaniak.drive.ui.publicShare.PublicShareListFragmentArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
@@ -53,26 +60,29 @@ object FilePresenter {
         shouldShowSmallFab: Boolean,
         fileListViewModel: FileListViewModel,
     ) {
-        if (file.isDisabled()) {
+        if (file.isDisabled() && !file.isPublicShared()) {
             safeNavigate(
                 R.id.accessDeniedBottomSheetFragment,
                 AccessDeniedBottomSheetDialogArgs(
                     isAdmin = AccountUtils.getCurrentDrive()?.isUserAdmin() ?: false,
                     folderId = file.id,
-                    folderName = file.name
+                    folderName = file.name,
                 ).toBundle()
             )
         } else {
             fileListViewModel.cancelDownloadFiles()
-            safeNavigate(
-                R.id.fileListFragment,
-                FileListFragmentArgs(
+            if (file.isPublicShared()) {
+                val args = PublicShareListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
+                safeNavigate(R.id.publicShareListFragment, args.toBundle())
+            } else {
+                val args = FileListFragmentArgs(
                     folderId = file.id,
                     folderName = file.getDisplayName(requireContext()),
                     shouldHideBottomNavigation = shouldHideBottomNavigation,
                     shouldShowSmallFab = shouldShowSmallFab,
-                ).toBundle()
-            )
+                )
+                safeNavigate(R.id.fileListFragment, args.toBundle())
+            }
         }
     }
 
@@ -83,6 +93,7 @@ object FilePresenter {
     }
 
     fun Fragment.openBookmark(file: File) {
+        requireContext().trackFileActionEvent(ACTION_OPEN_BOOKMARK_NAME)
         if (file.canUseStoredFile(requireContext())) {
             openBookmarkIntent(file)
         } else {
@@ -92,7 +103,7 @@ object FilePresenter {
                     fileId = file.id,
                     fileName = file.name,
                     userDrive = UserDrive(),
-                    action = DownloadProgressDialog.DownloadAction.OPEN_BOOKMARK,
+                    action = DownloadAction.OPEN_BOOKMARK,
                 ).toBundle(),
             )
         }
@@ -101,17 +112,23 @@ object FilePresenter {
     fun Fragment.openBookmarkIntent(file: File) {
         runCatching {
             val storedFileUri = file.getCloudAndFileUris(requireContext()).second
-            val url =
-                if (file.name.endsWith(".url")) getUrlFromUrlFile(requireContext(), storedFileUri)
-                else getUrlFromWebloc(requireContext(), storedFileUri)
-
-            if (url.isValidUrl()) requireContext().openUrl(url) else Exception("It's not a valid url")
+            requireActivity().openBookmarkIntent(file.name, storedFileUri)
         }.onFailure {
             requireActivity().showSnackbar(
-                requireContext().getString(R.string.errorGetBookmarkURL),
-                (requireActivity() as MainActivity).getMainFab()
+                title = getString(R.string.errorGetBookmarkURL),
+                anchor = (requireActivity() as MainActivity).getMainFab(),
             )
         }
+    }
+
+    fun Context.openBookmarkIntent(fileName: String, uri: Uri) {
+        val url = if (fileName.endsWith(".url")) {
+            getUrlFromUrlFile(context = this, uri)
+        } else {
+            getUrlFromWebloc(context = this, uri)
+        }
+
+        if (url.isValidUrl()) openUrl(url) else throw Exception("It's not a valid url")
     }
 
     private fun getUrlFromUrlFile(context: Context, uri: Uri): String {

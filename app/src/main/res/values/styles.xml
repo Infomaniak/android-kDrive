@@ -249,6 +249,16 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="ObtainkDriveAdListingTextAppearance">
+        <item name="android:drawablePadding">@dimen/marginStandardMedium</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_marginTop">@dimen/marginStandardMedium</item>
+        <item name="android:lineSpacingMultiplier">1.0</item>
+        <item name="android:textSize">14sp</item>
+        <item name="drawableStartCompat">@drawable/ic_check</item>
+        <item name="drawableTint">#5287FF</item>
+    </style>
+
     <!--CardView-->
 
     <style name="CardViewInfomaniak" parent="Widget.MaterialComponents.CardView">

@@ -27,6 +27,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import androidx.navigation.fragment.navArgs
@@ -35,11 +36,10 @@ import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewPdfBinding
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.getPreviewPDFHandler
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumber
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.setPageNumberChipVisibility
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getHeader
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getPreviewPDFHandler
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.drive.utils.printPdf
@@ -57,13 +57,13 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     private var binding: FragmentPreviewPdfBinding by safeBinding()
 
-    private val previewPDFViewModel by viewModels<PreviewPDFViewModel>()
+    private val previewPDFViewModel: PreviewPDFViewModel by viewModels()
 
     private val passwordDialog: PasswordDialogFragment by lazy {
         PasswordDialogFragment().apply { onPasswordEntered = ::showPdf }
     }
 
-    private val navigationArgs: PreviewPDFFragmentArgs by navArgs()
+    private val pdfNavigationArgs: PreviewPDFFragmentArgs by navArgs()
 
     private val previewPDFHandler by lazy { getPreviewPDFHandler() }
 
@@ -159,7 +159,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         if (!binding.pdfView.isShown || isPasswordProtected) {
             lifecycleScope.launch {
                 withResumed {
-                    with(getConfigurator(navigationArgs.fileUri, pdfFile)) {
+                    with(getConfigurator(pdfNavigationArgs.fileUri, pdfFile)) {
                         password(password)
                         disableLongPress()
                         enableAnnotationRendering(true)
@@ -274,19 +274,22 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         if (pdfFile == null) {
             previewSliderViewModel.pdfIsDownloading.value = true
             isDownloading = true
-            previewPDFViewModel.downloadPdfFile(requireContext(), file, previewSliderViewModel.userDrive)
-                .observe(viewLifecycleOwner) { apiResponse ->
-                    apiResponse.data?.let { pdfFile ->
-                        this@PreviewPDFFragment.pdfFile = pdfFile
-                        showPdf()
-                    } ?: run {
-                        downloadProgressIndicator.isGone = true
-                        previewDescription.setText(apiResponse.translatedError)
-                        bigOpenWithButton.isVisible = true
-                    }
-                    previewSliderViewModel.pdfIsDownloading.value = false
-                    isDownloading = false
+            previewPDFViewModel.downloadPdfFile(
+                context = requireContext(),
+                file = file,
+                userDrive = previewSliderViewModel.userDrive,
+            ).observe(viewLifecycleOwner) { apiResponse ->
+                apiResponse.data?.let { pdfFile ->
+                    this@PreviewPDFFragment.pdfFile = pdfFile
+                    showPdf()
+                } ?: run {
+                    downloadProgressIndicator.isGone = true
+                    previewDescription.setText(apiResponse.translatedError)
+                    bigOpenWithButton.isVisible = true
                 }
+                previewSliderViewModel.pdfIsDownloading.value = false
+                isDownloading = false
+            }
         } else {
             showPdf()
         }
@@ -334,6 +337,16 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
         private const val HANDLE_PAGE_PDF_PADDING_TOP_DP = 120
         private const val HANDLE_PAGE_PDF_PADDING_BOTTOM_DP = 130
         private const val THUMBNAIL_RATIO = 0.5f
+
+        //region PDF Preview
+        fun Fragment.setPageNumberChipVisibility(isVisible: Boolean) {
+            getHeader()?.setPageNumberVisibility(isVisible)
+        }
+
+        fun Fragment.setPageNumber(currentPage: Int, totalPage: Int) {
+            getHeader()?.setPageNumberValue(currentPage, totalPage)
+        }
+        //endregion
     }
 }
 

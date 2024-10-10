@@ -111,6 +111,7 @@
     <string name="buttonAdd">Add</string>
     <string name="buttonAddComment">Add a comment</string>
     <string name="buttonAddFavorites">Add to favorites</string>
+    <string name="buttonAddToKDrive">Add to my kDrive</string>
     <string name="buttonAddUser">Add a user</string>
     <string name="buttonApplyFilters">Apply filters</string>
     <string name="buttonAuthorize">Authorise</string>
@@ -152,6 +153,7 @@
     <string name="buttonNoDriveAnotherUser">Use a different Infomaniak profile</string>
     <string name="buttonNoDriveFreeTest">Free trial</string>
     <string name="buttonOpenDocument">Open document</string>
+    <string name="buttonOpenInBrowser">Open in browser</string>
     <string name="buttonOpenReadOnly">Open in read-only mode</string>
     <string name="buttonPlayerFfwd">Forward a few seconds</string>
     <string name="buttonPlayerNext">Next</string>
@@ -282,6 +284,7 @@
     <string name="errorSave">Save error</string>
     <string name="errorShareAddUser">This file is already shared with this user.</string>
     <string name="errorShareLink">Error when creating link</string>
+    <string name="errorWrongPassword">Wrong password</string>
     <string name="favoritesNoFile">No favorites at this time</string>
     <string name="favoritesTitle">Favorites</string>
     <string name="fileActivityCollaborativeFolderAccess">has accessed the drop box</string>
@@ -540,6 +543,13 @@
     <string name="notificationTitle">Notifications</string>
     <string name="notificationUploadDownloadChannelName">Uploads and downloads</string>
     <string name="notificationUploadServiceChannelName">File upload services</string>
+    <string name="obtainkDriveAdAlreadyGotAccount">I already have an account</string>
+    <string name="obtainkDriveAdDescription">Store your photos, documents and emails in Switzerland with an independent company that respects your privacy.</string>
+    <string name="obtainkDriveAdFreeTrialButton">Free trial</string>
+    <string name="obtainkDriveAdListing1">15 GB free, then 2 TB up to 106 TB</string>
+    <string name="obtainkDriveAdListing2">Online creation and collaboration for Word, Excel and PowerPoint documents</string>
+    <string name="obtainkDriveAdListing3">Automatic file import from Google Drive, Dropbox, One Drive, NextCloud, Hubic and WebDav</string>
+    <string name="obtainkDriveAdTitle">Get kDrive for free</string>
     <string name="offlineFileNoFile">No files offline</string>
     <string name="offlineFileNoFileDescription">Select a file and make it available offline so you can find it here when you’re not logged in.</string>
     <string name="offlineFileTitle">Offline</string>
@@ -561,6 +571,12 @@
     <string name="previewNoPreview">This file appears to have no preview.</string>
     <string name="previewPdfPages">%1$d out of %2$d</string>
     <string name="previewVideoSourceError">Video file not supported by the video player</string>
+    <string name="publicShareImportationInProgress">Download in progress in selected folder</string>
+    <string name="publicShareOutdatedLinkDescription">The link has been deactivated or has expired.\nTo access its files, send a message to the user who shared the link with you so that they can reactivate it.</string>
+    <string name="publicShareOutdatedLinkTitle">The files are no longer available</string>
+    <string name="publicSharePasswordNeededDescription">Please enter the password provided to access the content.</string>
+    <string name="publicSharePasswordNeededTitle">Protected content</string>
+    <string name="publicSharePasswordNotSupportedDescription">Password-protected links are not yet available on the mobile application.</string>
     <string name="publicSharedLinkTitle">Public sharing link</string>
     <string name="recentActivityMeTitle">By me</string>
     <string name="recentActivityMyTeam">By my team</string>
@@ -743,5 +759,4 @@
     <string name="userPermissionRemove">User will no longer have access to this file.</string>
     <string name="userPermissionWrite">Can change</string>
     <string name="userPermissionWriteDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDeleting the file</string>
-    <string name="wrongPdfPassword">Wrong password</string>
 </resources>

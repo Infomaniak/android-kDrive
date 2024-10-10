@@ -26,7 +26,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
@@ -69,13 +68,12 @@ class PreviewHeaderView @JvmOverloads constructor(
     fun setup(
         onBackClicked: (() -> Unit)? = null,
         onOpenWithClicked: (() -> Unit)? = null,
-        onEditClicked: (() -> Unit)? = null
+        onEditClicked: (() -> Unit)? = null,
     ) = with(binding) {
         backButton.setOnClickListener { onBackClicked?.invoke() }
         openWithButton.setOnClickListener { onOpenWithClicked?.invoke() }
         editButton.apply {
             setOnClickListener { onEditClicked?.invoke() }
-            isGone = onEditClicked == null
         }
     }
 

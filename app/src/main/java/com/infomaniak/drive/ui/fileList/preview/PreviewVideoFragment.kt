@@ -42,8 +42,8 @@ import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.openWithClicked
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment.Companion.toggleFullscreen
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
+import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
@@ -186,7 +186,8 @@ open class PreviewVideoFragment : PreviewFragment() {
     }
 
     private fun getRenderersFactory(appContext: Context): RenderersFactory {
-        return DefaultRenderersFactory(appContext).setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+        return DefaultRenderersFactory(appContext)
+            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
     }
 
     private fun getMediaSourceFactory(context: Context, offlineIsComplete: Boolean): MediaSourceFactory {
@@ -212,7 +213,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         return if (offlineFile != null && offlineIsComplete) {
             offlineFile.toUri()
         } else {
-            Uri.parse(ApiRoutes.downloadFile(file))
+            Uri.parse(ApiRoutes.getDownloadFileUrl(file))
         }
     }
 
