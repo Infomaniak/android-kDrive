@@ -37,16 +37,17 @@ import androidx.media3.ui.PlayerView
 import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
+import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.ui.fileList.preview.PreviewFragment
+import com.infomaniak.drive.ui.fileList.preview.playback.PlayerListener.Companion.trackMediaPlayerEvent
 import com.infomaniak.drive.utils.IOFile
 
 @UnstableApi
-open class PreviewVideoFragment : PreviewFragment() {
+open class PreviewPlaybackFragment : PreviewFragment() {
 
-    private var _binding: FragmentPreviewVideoBinding? = null
+    private var _binding: FragmentPreviewPlaybackBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
@@ -78,7 +79,7 @@ open class PreviewVideoFragment : PreviewFragment() {
     })
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentPreviewVideoBinding.inflate(inflater, container, false).also { _binding = it }.root
+        return FragmentPreviewPlaybackBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
@@ -100,7 +101,7 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         playerView.setOnClickListener {
             if ((it as PlayerView).isControllerFullyVisible) {
-                playerListener.trackMediaPlayerEvent(context, "toggleFullScreen")
+                context?.trackMediaPlayerEvent("toggleFullScreen")
                 toggleFullscreen()
             }
         }
@@ -108,7 +109,8 @@ open class PreviewVideoFragment : PreviewFragment() {
 
     override fun onResume() {
         super.onResume()
-        if (!noCurrentFile() && (mediaController == null || mediaController?.isPlaying == false)) {
+        val hasMediaNotStarted = mediaController?.isPlaying == false && mediaController?.currentPosition == 0L
+        if (!noCurrentFile() && (mediaController == null || hasMediaNotStarted)) {
             createPlayer()
         }
     }
