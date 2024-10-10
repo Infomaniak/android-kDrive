@@ -26,8 +26,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.ui.fileList.preview.playback.PreviewMusicFragment
-import com.infomaniak.drive.ui.fileList.preview.playback.PreviewVideoFragment
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 
 class PreviewSliderAdapter(
     manager: FragmentManager,
@@ -47,8 +46,7 @@ class PreviewSliderAdapter(
 
         return when (file.getFileType()) {
             ExtensionType.IMAGE -> PreviewPictureFragment()
-            ExtensionType.VIDEO -> PreviewVideoFragment()
-            ExtensionType.AUDIO -> PreviewMusicFragment()
+            ExtensionType.VIDEO, ExtensionType.AUDIO -> PreviewPlaybackFragment()
             ExtensionType.PDF -> PreviewPDFFragment()
             else -> if (file.isOnlyOfficePreview()) PreviewPDFFragment() else PreviewOtherFragment()
         }.apply { arguments = args }
