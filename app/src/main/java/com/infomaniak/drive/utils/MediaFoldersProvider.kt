@@ -153,7 +153,12 @@ object MediaFoldersProvider {
         } ?: let {
             val isFirstConfiguration = !AccountUtils.isEnableAppSync()
             val isSynced = isFirstConfiguration && path.contains("${Environment.DIRECTORY_DCIM}/")
-            MediaFolder(folderId, folderName, isSynced).apply { storeOrUpdate() }
+            MediaFolder(
+                id = folderId,
+                name = folderName,
+                isSynced = isSynced,
+                path = path
+            ).apply { storeOrUpdate() }
         }
     }
 }
