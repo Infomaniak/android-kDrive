@@ -102,10 +102,19 @@ class UploadMigration : RealmMigration {
                 .addField(UploadFile::uploadHost.name, String::class.java)
             oldVersionTemp++
         }
+        //endregion
+
+        //region Migrate to version 7: Add path to MediaFolder
+        if (oldVersionTemp == 6L) {
+            schema.get(MediaFolder::class.java.simpleName)!!
+                .addField(MediaFolder::path.name, String::class.java, FieldAttribute.REQUIRED)
+            oldVersionTemp++
+        }
+        //endregion
 
     }
 
     companion object {
-        const val dbVersion = 6L // Must be bumped when the schema changes
+        const val dbVersion = 7L // Must be bumped when the schema changes
     }
 }
