@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu.settings
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -39,6 +40,8 @@ class MediaFoldersAdapter(
     override fun onBindViewHolder(holder: MediaFoldersViewHolder, position: Int): Unit = with(holder.binding) {
         val mediaFolder = itemList[position]
         mediaFolderTitle.text = mediaFolder.name
+        mediaFolderPath.isGone = mediaFolder.name.isEmpty() || mediaFolder.path.isEmpty()
+        mediaFolderPath.text = mediaFolder.path
         mediaFolderSwitch.apply {
             isChecked = mediaFolder.isSynced
             isVisible = true
