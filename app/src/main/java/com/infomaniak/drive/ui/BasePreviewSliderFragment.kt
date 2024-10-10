@@ -39,7 +39,11 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
-import com.infomaniak.drive.ui.fileList.preview.*
+import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
+import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderAdapter
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
@@ -128,9 +132,9 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     // Implementation of onFragmentUnselected to handle resume of media to the same position, only
                     // for PreviewVideoFragment.
                     childFragmentManager.fragments.filter {
-                        it is PreviewVideoFragment && it != selectedFragment
+                        it is PreviewPlaybackFragment && it != selectedFragment
                     }.forEach { unselectedFragment ->
-                        (unselectedFragment as? PreviewVideoFragment)?.onFragmentUnselected()
+                        (unselectedFragment as? PreviewPlaybackFragment)?.onFragmentUnselected()
                     }
 
                     currentFile = previewSliderAdapter.getFile(position)
