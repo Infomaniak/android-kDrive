@@ -63,7 +63,7 @@ open class FileAdapter(
     var onEmptyList: (() -> Unit)? = null
     var onFileClicked: ((file: File) -> Unit)? = null
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
-    var onStopUploadButtonClicked: ((index: Int, fileName: String) -> Unit)? = null
+    var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
 
     var selectFolder = false
     var showShareFileButton = true
@@ -202,6 +202,13 @@ open class FileAdapter(
         }
     }
 
+    fun deleteByFileName(fileName: String) {
+        if (!fileList.isManaged) {
+            val position = indexOf(fileName)
+            if (position >= 0) deleteAt(position)
+        }
+    }
+
     private fun indexOf(fileId: Int) = fileList.indexOfFirst { it.id == fileId }
 
     fun indexOf(fileName: String) = fileList.indexOfFirst { it.name == fileName }
@@ -314,7 +321,7 @@ open class FileAdapter(
         checkIfEnableFile(file)
 
         when {
-            uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(position, file)
+            uploadInProgress && !file.isPendingUploadFolder() -> displayStopUploadButton(file)
             multiSelectManager.isMultiSelectOn -> displayFileChecked(file, isGrid)
             else -> fileChecked.isGone = true
         }
@@ -323,9 +330,9 @@ open class FileAdapter(
         setupCardClicksListeners(file, position)
     }
 
-    private fun FileItemViewHolder.displayStopUploadButton(position: Int, file: File) {
+    private fun FileItemViewHolder.displayStopUploadButton(file: File) {
         stopUploadButton?.apply {
-            setOnClickListener { onStopUploadButtonClicked?.invoke(position, file.name) }
+            setOnClickListener { onStopUploadButtonClicked?.invoke(file.name) }
             isVisible = true
         }
     }
