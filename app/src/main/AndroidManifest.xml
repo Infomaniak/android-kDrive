@@ -109,7 +109,7 @@
             tools:node="merge" />
 
         <service
-            android:name=".ui.fileList.preview.PlaybackService"
+            android:name=".ui.fileList.preview.playback.PlaybackService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
