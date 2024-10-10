@@ -157,7 +157,7 @@ object MediaFoldersProvider {
                 id = folderId,
                 name = folderName,
                 isSynced = isSynced,
-                path = path
+                path = path,
             ).apply { storeOrUpdate() }
         }
     }
