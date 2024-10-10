@@ -26,6 +26,7 @@ open class MediaFolder(
     @PrimaryKey var id: Long = 0L,
     var name: String = "",
     var isSynced: Boolean = false,
+    var path: String = "",
 ) : RealmObject() {
 
     fun storeOrUpdate() {
@@ -33,6 +34,7 @@ open class MediaFolder(
             it.executeTransaction { realm ->
                 findByIdQuery(realm, id)?.let { queryMedia ->
                     isSynced = queryMedia.isSynced
+                    path = queryMedia.path
                 }
                 realm.insertOrUpdate(this)
             }

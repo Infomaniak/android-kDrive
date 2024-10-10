@@ -106,6 +106,6 @@ class UploadMigration : RealmMigration {
     }
 
     companion object {
-        const val dbVersion = 6L // Must be bumped when the schema changes
+        const val dbVersion = 7L // Must be bumped when the schema changes
     }
 }
