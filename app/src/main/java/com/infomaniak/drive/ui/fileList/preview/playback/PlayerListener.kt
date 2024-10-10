@@ -30,7 +30,7 @@ class PlayerListener(
 ) : Player.Listener {
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
-        trackMediaPlayerEvent(activity, if (isPlaying) "play" else "pause")
+        activity?.trackMediaPlayerEvent(if (isPlaying) "play" else "pause")
         isPlayingChanged(isPlaying)
     }
 
@@ -44,7 +44,10 @@ class PlayerListener(
         onError(playbackException.message)
     }
 
-    fun trackMediaPlayerEvent(context: Context?, name: String, value: Float? = null) {
-        context?.trackEvent("mediaPlayer", name, value = value)
+    companion object {
+
+        fun Context.trackMediaPlayerEvent(name: String, value: Float? = null) {
+            trackEvent("mediaPlayer", name, value = value)
+        }
     }
 }
