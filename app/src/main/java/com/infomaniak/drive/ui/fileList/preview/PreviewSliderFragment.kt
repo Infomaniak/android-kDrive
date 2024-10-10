@@ -42,6 +42,7 @@ import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewVideoFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
