@@ -21,7 +21,7 @@ import com.google.gson.annotations.SerializedName
 
 data class MqttNotification(
     val uid: String,
-    val action: MqttAction,
+    val action: MqttAction? = null,
     @SerializedName("drive_id")
     val driveId: Int,
 
@@ -49,4 +49,10 @@ data class MqttNotification(
     fun isFileActionNotification() = fileId != null
 
     fun isProgressNotification() = progress != null
+
+    fun isImportTerminated(): Boolean {
+        return action == MqttAction.EXTERNAL_IMPORT_FINISHED ||
+                action == MqttAction.EXTERNAL_IMPORT_CANCELED ||
+                action == MqttAction.EXTERNAL_IMPORT_ERROR
+    }
 }

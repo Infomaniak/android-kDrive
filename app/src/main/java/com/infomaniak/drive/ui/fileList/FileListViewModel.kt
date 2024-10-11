@@ -263,7 +263,9 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     fun updateExternalImport(notification: MqttNotification) {
         viewModelScope.launch(Dispatchers.IO) {
-            with(notification) { importId?.let { FileController.updateExternalImport(driveId, it, action) } }
+            with(notification) {
+                if (importId != null && action != null) FileController.updateExternalImport(driveId, importId, action)
+            }
         }
     }
 

@@ -23,11 +23,20 @@ enum class MqttAction {
     @SerializedName("file_move")
     FILE_MOVE,
 
-    @SerializedName("file_trash")
-    FILE_TRASH,
+    @SerializedName("file_update")
+    FILE_UPDATE,
+
+    @SerializedName("file_rename")
+    FILE_RENAME,
 
     @SerializedName("file_restore")
     FILE_RESTORE,
+
+    @SerializedName("file_trash")
+    FILE_TRASH,
+
+    @SerializedName("file_delete")
+    FILE_DELETE,
 
     @SerializedName("file_create")
     FILE_CREATE,
@@ -44,12 +53,18 @@ enum class MqttAction {
     @SerializedName("import_started")
     EXTERNAL_IMPORT_STARTED,
 
-    @SerializedName("create_file")
-    EXTERNAL_IMPORT_CREATE_FILE,
+    @SerializedName("import_file_created")
+    EXTERNAL_IMPORT_FILE_CREATED,
 
-    @SerializedName("import_finish")
-    EXTERNAL_IMPORT_FINISH,
+    @SerializedName("import_canceling")
+    EXTERNAL_IMPORT_CANCELING,
 
-    @SerializedName("cancel")
-    EXTERNAL_IMPORT_CANCEL,
+    @SerializedName("import_canceled")
+    EXTERNAL_IMPORT_CANCELED,
+
+    @SerializedName("import_errored")
+    EXTERNAL_IMPORT_ERROR,
+
+    @SerializedName("import_finished")
+    EXTERNAL_IMPORT_FINISHED,
 }

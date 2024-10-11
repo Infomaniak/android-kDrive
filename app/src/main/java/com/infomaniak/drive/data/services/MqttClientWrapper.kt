@@ -21,7 +21,6 @@ import android.content.Context
 import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
 import com.infomaniak.drive.data.models.IpsToken
-import com.infomaniak.drive.data.models.MqttAction
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
 import com.infomaniak.drive.utils.isPositive
@@ -37,6 +36,7 @@ import org.eclipse.paho.client.mqttv3.*
 object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     private const val MQTT_AUTO_DISCONNECT_TIMER = 5_000L
+    private const val TAG = "MQTT"
 
     private lateinit var appContext: Context
     private lateinit var clientId: String
@@ -151,9 +151,12 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
         with(gson.fromJson(message.toString(), MqttNotification::class.java)) {
-            if (action == MqttAction.EXTERNAL_IMPORT_FINISH || action == MqttAction.EXTERNAL_IMPORT_CANCEL) {
-                runningExternalImportIds.remove(importId)
+            if (action == null) {
+                val unknownAction = message.toString().substringAfter("\"action\":")
+                SentryLog.e(TAG, "Unknown MQTT action : $unknownAction")
             }
+
+            if (isImportTerminated()) runningExternalImportIds.remove(importId)
 
             postValue(this)
         }
