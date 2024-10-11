@@ -255,6 +255,7 @@
     <string name="errorDelete">Fehler beim Löschen</string>
     <string name="errorDeviceStorage">Unzureichender Gerätespeicher</string>
     <string name="errorDuplicate">Fehler beim Duplizieren</string>
+    <string name="errorExternalImportInProgress">Der Ordner kann nicht bearbeitet werden, da ein externer Import im Gange ist</string>
     <string name="errorFileAlreadyExists">Datei oder Ordner existiert bereits</string>
     <string name="errorFileLocked">Diese Datei ist bereits von einem Benutzer geöffnet und kann nicht verändert werden</string>
     <string name="errorFilesLimitExceeded">Limit der Dateien im Ordner erreicht</string>
@@ -267,6 +268,7 @@
     <string name="errorNetworkDescription">Die Ergebnisse können unvollständig sein</string>
     <string name="errorPreviewDeleted">Diese Datei wurde endgültig gelöscht</string>
     <string name="errorPreviewTrash">Die Vorschau auf eine Datei im Papierkorb ist nicht verfügbar</string>
+    <string name="errorQuotaExceeded">Unzureichender Platz auf Ihrem kDrive</string>
     <string name="errorRename">Fehler beim Umbenennen</string>
     <string name="errorRestore">Fehler bei der Wiederherstellung</string>
     <string name="errorRightModification">Fehler bei der Änderung der Rechte</string>

@@ -255,6 +255,7 @@
     <string name="errorDelete">Error al eliminar</string>
     <string name="errorDeviceStorage">Almacenamiento insuficiente del dispositivo</string>
     <string name="errorDuplicate">Error al duplicar</string>
+    <string name="errorExternalImportInProgress">No se puede realizar ninguna acción en la carpeta porque hay una importación externa en curso</string>
     <string name="errorFileAlreadyExists">Archivo o carpeta ya existente</string>
     <string name="errorFileLocked">El archivo está actualmente abierto por un usuario y no puede ser modificado</string>
     <string name="errorFilesLimitExceeded">Límite de archivos alcanzado en la carpeta</string>
@@ -267,6 +268,7 @@
     <string name="errorNetworkDescription">Los resultados pueden ser incompletos</string>
     <string name="errorPreviewDeleted">Se ha eliminado definitivamente este archivo</string>
     <string name="errorPreviewTrash">La vista previa de un archivo en la papelera no está disponible</string>
+    <string name="errorQuotaExceeded">Espacio insuficiente en tu kDrive</string>
     <string name="errorRename">Error al cambiar el nombre</string>
     <string name="errorRestore">Error al restaurar</string>
     <string name="errorRightModification">Error al modificar los derechos</string>

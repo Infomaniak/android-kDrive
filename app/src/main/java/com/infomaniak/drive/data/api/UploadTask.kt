@@ -378,7 +378,7 @@ class UploadTask(
                     throw ProductBlockedException()
                 }
             }
-            "quota_exceeded_error" -> throw QuotaExceededException()
+            ErrorCode.QUOTA_EXCEEDED_ERROR -> throw QuotaExceededException()
             "upload_destination_not_found_error", "upload_destination_not_writable_error" -> throw FolderNotFoundException()
             "upload_not_terminated", "upload_not_terminated_error" -> {
                 // Upload finish with 0 chunks uploaded
