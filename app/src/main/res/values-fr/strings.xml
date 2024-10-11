@@ -255,6 +255,7 @@
     <string name="errorDelete">Erreur lors de la suppression</string>
     <string name="errorDeviceStorage">Stockage insuffisant</string>
     <string name="errorDuplicate">Erreur lors de la duplication</string>
+    <string name="errorExternalImportInProgress">Impossible d’effectuer l’action sur le dossier, une importation externe est en cours</string>
     <string name="errorFileAlreadyExists">Le fichier ou le dossier existe déjà</string>
     <string name="errorFileLocked">Le fichier est actuellement ouvert par un utilisateur et ne peut être modifié</string>
     <string name="errorFilesLimitExceeded">Limite de fichiers dans le dossier atteinte</string>
@@ -267,6 +268,7 @@
     <string name="errorNetworkDescription">Les résultats peuvent être incomplets</string>
     <string name="errorPreviewDeleted">Ce fichier a été supprimé définitivement</string>
     <string name="errorPreviewTrash">L’aperçu d’un fichier dans la corbeille n’est pas disponible</string>
+    <string name="errorQuotaExceeded">Espace insuffisant sur votre kDrive</string>
     <string name="errorRename">Erreur lors du renommage</string>
     <string name="errorRestore">Erreur lors de la restauration</string>
     <string name="errorRightModification">Erreur lors de la modification des droits</string>

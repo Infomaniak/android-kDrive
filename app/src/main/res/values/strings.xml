@@ -266,6 +266,7 @@
     <string name="errorDelete">Deletion error</string>
     <string name="errorDeviceStorage">Insufficient device storage</string>
     <string name="errorDuplicate">Duplication error</string>
+    <string name="errorExternalImportInProgress">Cannot perform action on the folder because an external import is in progress</string>
     <string name="errorFileAlreadyExists">File or folder already exists</string>
     <string name="errorFileLocked">This file is currently opened by another user and cannot be modified</string>
     <string name="errorFilesLimitExceeded">Limit of files in folder reached</string>
@@ -278,6 +279,7 @@
     <string name="errorNetworkDescription">Results may be incomplete</string>
     <string name="errorPreviewDeleted">This file has been permanently deleted</string>
     <string name="errorPreviewTrash">Previewing a file in the trash is not possible</string>
+    <string name="errorQuotaExceeded">Not enough space on your kDrive</string>
     <string name="errorRename">Rename error</string>
     <string name="errorRestore">Recover error</string>
     <string name="errorRightModification">Error when editing rights</string>

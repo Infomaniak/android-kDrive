@@ -255,6 +255,7 @@
     <string name="errorDelete">Errore durante l’eliminazione</string>
     <string name="errorDeviceStorage">Memoria del dispositivo insufficiente</string>
     <string name="errorDuplicate">Errore durante la duplicazione</string>
+    <string name="errorExternalImportInProgress">Non è possibile eseguire un’azione sulla cartella perché è in corso un’importazione esterna</string>
     <string name="errorFileAlreadyExists">Il file o la cartella esiste già</string>
     <string name="errorFileLocked">Il file è attualmente aperto da un utente e non può essere modificato</string>
     <string name="errorFilesLimitExceeded">Limite file raggiunto nella cartella</string>
@@ -267,6 +268,7 @@
     <string name="errorNetworkDescription">I risultati possono essere incompleti</string>
     <string name="errorPreviewDeleted">Il file è stato eliminato definitivamente</string>
     <string name="errorPreviewTrash">L’anteprima di un file spostato nel cestino non è disponibile</string>
+    <string name="errorQuotaExceeded">Spazio insufficiente sul kDrive</string>
     <string name="errorRename">Errore durante la rinomina</string>
     <string name="errorRestore">Errore durante il ripristino</string>
     <string name="errorRightModification">Errore durante la modifica dei diritti</string>
