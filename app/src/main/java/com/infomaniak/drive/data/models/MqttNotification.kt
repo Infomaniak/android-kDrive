@@ -49,4 +49,10 @@ data class MqttNotification(
     fun isFileActionNotification() = fileId != null
 
     fun isProgressNotification() = progress != null
+
+    fun isImportTerminated(): Boolean {
+        return action == MqttAction.EXTERNAL_IMPORT_FINISHED ||
+                action == MqttAction.EXTERNAL_IMPORT_CANCELED ||
+                action == MqttAction.EXTERNAL_IMPORT_ERROR
+    }
 }

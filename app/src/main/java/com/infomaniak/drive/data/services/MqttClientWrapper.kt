@@ -21,7 +21,6 @@ import android.content.Context
 import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
 import com.infomaniak.drive.data.models.IpsToken
-import com.infomaniak.drive.data.models.MqttAction
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
 import com.infomaniak.drive.utils.isPositive
@@ -157,12 +156,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
                 SentryLog.e(TAG, "Unknown MQTT action : $unknownAction")
             }
 
-            if (action == MqttAction.EXTERNAL_IMPORT_FINISHED ||
-                action == MqttAction.EXTERNAL_IMPORT_CANCELED ||
-                action == MqttAction.EXTERNAL_IMPORT_ERROR
-            ) {
-                runningExternalImportIds.remove(importId)
-            }
+            if (isImportTerminated()) runningExternalImportIds.remove(importId)
 
             postValue(this)
         }
