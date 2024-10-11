@@ -869,8 +869,9 @@ object FileController {
 
     fun updateExternalImport(driveId: Int, importId: Int, action: MqttAction) {
         when (action) {
-            MqttAction.EXTERNAL_IMPORT_FINISH -> FileExternalImportStatus.DONE
-            MqttAction.EXTERNAL_IMPORT_CANCEL -> FileExternalImportStatus.CANCELED
+            MqttAction.EXTERNAL_IMPORT_FINISHED -> FileExternalImportStatus.DONE
+            MqttAction.EXTERNAL_IMPORT_CANCELED -> FileExternalImportStatus.CANCELED
+            MqttAction.EXTERNAL_IMPORT_ERROR -> FileExternalImportStatus.FAILED
             else -> null
         }?.let { status -> updateExternalImportStatus(driveId, importId, status) }
     }

@@ -151,7 +151,10 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
         with(gson.fromJson(message.toString(), MqttNotification::class.java)) {
-            if (action == MqttAction.EXTERNAL_IMPORT_FINISH || action == MqttAction.EXTERNAL_IMPORT_CANCEL) {
+            if (action == MqttAction.EXTERNAL_IMPORT_FINISHED ||
+                action == MqttAction.EXTERNAL_IMPORT_CANCELED ||
+                action == MqttAction.EXTERNAL_IMPORT_ERROR
+            ) {
                 runningExternalImportIds.remove(importId)
             }
 
