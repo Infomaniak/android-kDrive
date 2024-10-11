@@ -21,7 +21,7 @@ import com.google.gson.annotations.SerializedName
 
 data class MqttNotification(
     val uid: String,
-    val action: MqttAction,
+    val action: MqttAction? = null,
     @SerializedName("drive_id")
     val driveId: Int,
 

@@ -37,6 +37,7 @@ import org.eclipse.paho.client.mqttv3.*
 object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     private const val MQTT_AUTO_DISCONNECT_TIMER = 5_000L
+    private const val TAG = "MQTT"
 
     private lateinit var appContext: Context
     private lateinit var clientId: String
@@ -151,6 +152,11 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     override fun messageArrived(topic: String?, message: MqttMessage?) {
         with(gson.fromJson(message.toString(), MqttNotification::class.java)) {
+            if (action == null) {
+                val unknownAction = message.toString().substringAfter("\"action\":")
+                SentryLog.e(TAG, "Unknown MQTT action : $unknownAction")
+            }
+
             if (action == MqttAction.EXTERNAL_IMPORT_FINISHED ||
                 action == MqttAction.EXTERNAL_IMPORT_CANCELED ||
                 action == MqttAction.EXTERNAL_IMPORT_ERROR

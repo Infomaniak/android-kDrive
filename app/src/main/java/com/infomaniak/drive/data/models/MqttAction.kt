@@ -23,11 +23,20 @@ enum class MqttAction {
     @SerializedName("file_move")
     FILE_MOVE,
 
-    @SerializedName("file_trash")
-    FILE_TRASH,
+    @SerializedName("file_update")
+    FILE_UPDATE,
+
+    @SerializedName("file_rename")
+    FILE_RENAME,
 
     @SerializedName("file_restore")
     FILE_RESTORE,
+
+    @SerializedName("file_trash")
+    FILE_TRASH,
+
+    @SerializedName("file_delete")
+    FILE_DELETE,
 
     @SerializedName("file_create")
     FILE_CREATE,
