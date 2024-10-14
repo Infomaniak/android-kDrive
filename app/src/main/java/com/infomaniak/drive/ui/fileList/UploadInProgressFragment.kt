@@ -17,14 +17,17 @@
  */
 package com.infomaniak.drive.ui.fileList
 
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.Data
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.File
@@ -43,8 +46,8 @@ import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.realm.RealmResults
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class UploadInProgressFragment : FileListFragment() {
 
@@ -60,6 +63,10 @@ class UploadInProgressFragment : FileListFragment() {
 
     private var pendingUploadFiles = mutableListOf<UploadFile>()
     private var pendingFiles = mutableListOf<File>()
+    private var cancellationConfirmationDialog: AlertDialog? = null
+    private val cancellationProgressDialog by lazy {
+        Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         downloadFiles = DownloadFiles()
@@ -135,15 +142,14 @@ class UploadInProgressFragment : FileListFragment() {
     }
 
     private fun setupOnStopUploadButtonClicked() {
-        fileAdapter.onStopUploadButtonClicked = { position, fileName ->
+        fileAdapter.onStopUploadButtonClicked = { fileName ->
             pendingUploadFiles.find { it.fileName == fileName }?.let { syncFile ->
                 val title = getString(R.string.uploadInProgressCancelFileUploadTitle, syncFile.fileName)
-                Utils.createConfirmation(requireContext(), title) {
-                    if (fileAdapter.fileList.getOrNull(position)?.name == fileName) {
-                        closeItemClicked(uploadFile = syncFile)
-                        fileAdapter.deleteAt(position)
-                    }
-                }
+
+                cancellationConfirmationDialog = createCancellationConfirmationDialog(requireContext(), title) {
+                    closeItemClicked(uploadFile = syncFile)
+                    fileAdapter.deleteByFileName(fileName)
+                }.also(AlertDialog::show)
             }
         }
     }
@@ -162,6 +168,11 @@ class UploadInProgressFragment : FileListFragment() {
         }
     }
 
+    override fun onDestroyView() {
+        dismissDialogs()
+        super.onDestroyView()
+    }
+
     private fun whenAnUploadIsDone(position: Int, fileId: Int) {
         if (fileAdapter.fileList.getOrNull(position)?.id == fileId) {
             fileAdapter.deleteAt(position)
@@ -177,30 +188,29 @@ class UploadInProgressFragment : FileListFragment() {
     override fun onRestartItemsClicked() {
         val title = getString(R.string.uploadInProgressRestartUploadTitle)
         val context = requireContext()
-        Utils.createConfirmation(context, title) {
-            if (fileAdapter.getFiles().isNotEmpty()) {
-                context.syncImmediately()
-            }
-        }
+        cancellationConfirmationDialog = createCancellationConfirmationDialog(context, title) {
+            if (fileAdapter.getFiles().isNotEmpty()) context.syncImmediately()
+        }.also(AlertDialog::show)
     }
 
     override fun onCloseItemsClicked() {
         val title = getString(R.string.uploadInProgressCancelAllUploadTitle)
-        Utils.createConfirmation(requireContext(), title) {
+        cancellationConfirmationDialog = createCancellationConfirmationDialog(requireContext(), title) {
             closeItemClicked(folderId = folderId)
-        }
+        }.also(AlertDialog::show)
     }
 
     private fun closeItemClicked(uploadFile: UploadFile? = null, folderId: Int? = null) {
-        val progressDialog = Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
-        lifecycleScope.launch(Dispatchers.IO) {
+        if (!isVisible) return
+
+        cancellationProgressDialog.show()
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             var needPopBackStack = false
             uploadFile?.let {
                 it.uploadToken?.let { token ->
                     ApiRepository.cancelSession(AccountUtils.currentDriveId, token, it.okHttpClient)
                 }
                 UploadFile.deleteAll(listOf(it))
-                needPopBackStack = true
             }
             folderId?.let {
                 UploadFile.cancelAllPendingFilesSessions(folderId = it)
@@ -212,8 +222,8 @@ class UploadInProgressFragment : FileListFragment() {
                 needPopBackStack = UploadFile.getCurrentUserPendingUploadsCount(folderId = it) == 0
             }
 
-            withContext(Dispatchers.Main) {
-                progressDialog.dismiss()
+            Dispatchers.Main {
+                cancellationProgressDialog.dismiss()
                 if (isResumed && needPopBackStack) {
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
                     requireContext().syncImmediately(data, true)
@@ -314,5 +324,21 @@ class UploadInProgressFragment : FileListFragment() {
                 } ?: noFilesLayout.toggleVisibility(true)
             }
         }
+    }
+
+    private fun createCancellationConfirmationDialog(
+        context: Context,
+        title: String,
+        onConfirmation: () -> Unit,
+    ) = MaterialAlertDialogBuilder(context, R.style.DialogStyle)
+        .setTitle(title)
+        .setPositiveButton(context.getString(R.string.buttonConfirm)) { _, _ -> onConfirmation() }
+        .setNegativeButton(R.string.buttonCancel) { _, _ -> }
+        .setCancelable(false)
+        .create()
+
+    private fun dismissDialogs() {
+        cancellationProgressDialog.dismiss()
+        cancellationConfirmationDialog?.dismiss()
     }
 }

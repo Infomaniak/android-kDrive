@@ -454,7 +454,7 @@ object Utils {
                 downloadProgressIndicator.isIndeterminate = true
                 setView(root)
             }
-        }.show()
+        }.create()
     }
 
     enum class Shortcuts(val id: String) {
