@@ -34,6 +34,8 @@ import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.infomaniak.drive.MatomoDrive.ACTION_DOWNLOAD_NAME
+import com.infomaniak.drive.MatomoDrive.ACTION_SEND_FILE_COPY_NAME
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
@@ -42,12 +44,9 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
-import com.infomaniak.drive.data.models.CancellableAction
-import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_SHARED_SPACE
 import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
-import com.infomaniak.drive.data.models.Rights
-import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -257,7 +256,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         if (currentFile.isFolder()) {
             openAddFileBottom()
         } else {
-            ownerFragment.requireContext().shareFile { CloudStorageProvider.createShareFileUri(context, currentFile) }
+            ownerFragment.requireContext().apply {
+                trackFileActionEvent(ACTION_SEND_FILE_COPY_NAME)
+                val userDrive = UserDrive(sharedWithMe = isSharedWithMe)
+                shareFile { CloudStorageProvider.createShareFileUri(context, currentFile, userDrive) }
+            }
         }
     }
 
@@ -286,14 +289,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         return true
-    }
-
-    fun downloadFile(drivePermissions: DrivePermissions, onSuccess: () -> Unit) {
-        if (drivePermissions.checkWriteStoragePermission()) {
-            val fileName = if (currentFile.isFolder()) "${currentFile.name}.zip" else currentFile.name
-            DownloadManagerUtils.scheduleDownload(context, ApiRoutes.downloadFile(currentFile), fileName)
-            onSuccess()
-        }
     }
 
     fun createPublicShareLink(
@@ -469,9 +464,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun shareFile()
         fun saveToKDrive()
         fun openWith()
-
-        @CallSuper
-        fun printClicked() = trackFileActionEvent("printPdf")
+        fun printClicked()
 
         @CallSuper
         fun addFavoritesClicked() = trackFileActionEvent("favorite", currentFile?.isFavorite == false)
@@ -484,8 +477,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         fun displayInfoClicked()
 
-        @CallSuper
-        fun downloadFileClicked() = trackFileActionEvent("download")
+        fun downloadFileClicked() = trackFileActionEvent(ACTION_DOWNLOAD_NAME)
 
         @CallSuper
         fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
@@ -601,6 +593,16 @@ class FileInfoActionsView @JvmOverloads constructor(
                 onDeleteFile {
                     trackFileActionEvent("putInTrash")
                     dialog.dismiss()
+                }
+            }
+        }
+
+        companion object {
+            fun Context.downloadFile(drivePermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
+                if (drivePermissions.checkWriteStoragePermission()) {
+                    val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
+                    DownloadManagerUtils.scheduleDownload(context = this, ApiRoutes.getDownloadFileUrl(file), fileName)
+                    onSuccess?.invoke()
                 }
             }
         }

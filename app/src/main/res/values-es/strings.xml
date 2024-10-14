@@ -100,6 +100,7 @@
     <string name="buttonAdd">Añadir</string>
     <string name="buttonAddComment">Añadir un comentario</string>
     <string name="buttonAddFavorites">Añadir a favoritos</string>
+    <string name="buttonAddToKDrive">Añadir a mi kDrive</string>
     <string name="buttonAddUser">Añadir un usuario</string>
     <string name="buttonApplyFilters">Aplicar filtros</string>
     <string name="buttonAuthorize">Autorizar</string>
@@ -141,6 +142,7 @@
     <string name="buttonNoDriveAnotherUser">Utilizar otro perfil Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Probar gratuitamente</string>
     <string name="buttonOpenDocument">Abrir el documento</string>
+    <string name="buttonOpenInBrowser">Abrir en el navegador</string>
     <string name="buttonOpenReadOnly">Abrir en modo de solo lectura</string>
     <string name="buttonPlayerFfwd">Avanzar unos segundos</string>
     <string name="buttonPlayerNext">Siguiente</string>
@@ -253,6 +255,7 @@
     <string name="errorDelete">Error al eliminar</string>
     <string name="errorDeviceStorage">Almacenamiento insuficiente del dispositivo</string>
     <string name="errorDuplicate">Error al duplicar</string>
+    <string name="errorExternalImportInProgress">No se puede realizar ninguna acción en la carpeta porque hay una importación externa en curso</string>
     <string name="errorFileAlreadyExists">Archivo o carpeta ya existente</string>
     <string name="errorFileLocked">El archivo está actualmente abierto por un usuario y no puede ser modificado</string>
     <string name="errorFilesLimitExceeded">Límite de archivos alcanzado en la carpeta</string>
@@ -265,12 +268,14 @@
     <string name="errorNetworkDescription">Los resultados pueden ser incompletos</string>
     <string name="errorPreviewDeleted">Se ha eliminado definitivamente este archivo</string>
     <string name="errorPreviewTrash">La vista previa de un archivo en la papelera no está disponible</string>
+    <string name="errorQuotaExceeded">Espacio insuficiente en tu kDrive</string>
     <string name="errorRename">Error al cambiar el nombre</string>
     <string name="errorRestore">Error al restaurar</string>
     <string name="errorRightModification">Error al modificar los derechos</string>
     <string name="errorSave">Error al guardar</string>
     <string name="errorShareAddUser">Este archivo ya está compartido con este usuario.</string>
     <string name="errorShareLink">Error al crear el enlace</string>
+    <string name="errorWrongPassword">Contraseña incorrecta</string>
     <string name="favoritesNoFile">Todavía no hay favoritos</string>
     <string name="favoritesTitle">Favoritos</string>
     <string name="fileActivityCollaborativeFolderAccess">ha consultado el buzón de depósito</string>
@@ -529,6 +534,13 @@
     <string name="notificationTitle">Notificaciones</string>
     <string name="notificationUploadDownloadChannelName">Importaciones y descargas</string>
     <string name="notificationUploadServiceChannelName">Servicio de importación de archivos</string>
+    <string name="obtainkDriveAdAlreadyGotAccount">Ya tengo una cuenta</string>
+    <string name="obtainkDriveAdDescription">Almacene sus fotos, documentos y correos electrónicos en Suiza con una empresa independiente que respeta su privacidad.</string>
+    <string name="obtainkDriveAdFreeTrialButton">Prueba gratuita</string>
+    <string name="obtainkDriveAdListing1">15 GB gratuitos, luego 2 TB hasta 106 TB</string>
+    <string name="obtainkDriveAdListing2">Creación y colaboración en línea de documentos Word, Excel y PowerPoint</string>
+    <string name="obtainkDriveAdListing3">Importación automática de tus archivos desde Google Drive, Dropbox, One Drive, NextCloud, Hubic y WebDav</string>
+    <string name="obtainkDriveAdTitle">Consigue kDrive gratis</string>
     <string name="offlineFileNoFile">No hay archivos sin conexión</string>
     <string name="offlineFileNoFileDescription">Selecciona un archivo y márcalo como disponible sin conexión para tenerlo aquí cuando no tengas red.</string>
     <string name="offlineFileTitle">Sin conexión</string>
@@ -550,6 +562,12 @@
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>
     <string name="previewPdfPages">%1$d de %2$d</string>
     <string name="previewVideoSourceError">El archivo de vídeo no es compatible con el lector de vídeo</string>
+    <string name="publicShareImportationInProgress">Descarga en curso en la carpeta seleccionada</string>
+    <string name="publicShareOutdatedLinkDescription">El enlace ha sido desactivado o ha caducado.\nPara acceder a los archivos, envía un mensaje al usuario que compartió el enlace contigo para que pueda reactivarlo.</string>
+    <string name="publicShareOutdatedLinkTitle">Los archivos ya no están disponibles</string>
+    <string name="publicSharePasswordNeededDescription">Introduzca la contraseña que se le ha facilitado para acceder al contenido.</string>
+    <string name="publicSharePasswordNeededTitle">Contenido seguro</string>
+    <string name="publicSharePasswordNotSupportedDescription">Los enlaces protegidos por contraseña aún no están disponibles en la aplicación móvil.</string>
     <string name="publicSharedLinkTitle">Enlace de uso compartido público</string>
     <string name="recentActivityMeTitle">Por mí</string>
     <string name="recentActivityMyTeam">Por mi equipo</string>
@@ -732,5 +750,4 @@
     <string name="userPermissionRemove">El usuario ya no tendrá acceso a este archivo.</string>
     <string name="userPermissionWrite">Puede modificar</string>
     <string name="userPermissionWriteDescription">Modificar el archivo\nDescargar\nAñadir comentario\nAñadir y crear archivo/carpeta\nEliminar el archivo</string>
-    <string name="wrongPdfPassword">Contraseña incorrecta</string>
 </resources>

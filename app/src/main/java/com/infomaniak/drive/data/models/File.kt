@@ -25,7 +25,6 @@ import androidx.core.net.toUri
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
@@ -39,7 +38,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.BuildConfig
+import com.infomaniak.drive.utils.downloadFile
 import com.infomaniak.lib.core.utils.contains
 import com.infomaniak.lib.core.utils.guessMimeType
 import io.realm.RealmList
@@ -49,6 +48,7 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import io.sentry.Sentry
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import kotlinx.parcelize.WriteWith
@@ -148,6 +148,11 @@ open class File(
     @Ignore
     var currentProgress: Int = INDETERMINATE_PROGRESS
 
+    @IgnoredOnParcel
+    @Ignore
+    @Transient
+    var publicShareUuid: String = ""
+
     val revisedAtInMillis: Long inline get() = revisedAt * 1000
 
     fun initUid() {
@@ -174,17 +179,9 @@ open class File(
         return status?.contains("trash") == true
     }
 
-    fun thumbnail(): String {
-        return if (isTrashed()) ApiRoutes.thumbnailTrashFile(this) else ApiRoutes.thumbnailFile(this)
-    }
-
-    fun imagePreview(): String {
-        return "${ApiRoutes.imagePreviewFile(this)}&width=2500&height=1500&quality=80"
-    }
+    fun isPublicShared() = publicShareUuid.isNotBlank()
 
     fun isPDF() = getFileType() == ExtensionType.PDF
-
-    fun onlyOfficeUrl() = "${BuildConfig.AUTOLOG_URL}?url=" + ApiRoutes.showOffice(this)
 
     fun getFileType(): ExtensionType {
         return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {
@@ -304,6 +301,12 @@ open class File(
     fun deleteCaches(context: Context) {
         if (isOffline) getOfflineFile(context)?.apply { if (exists()) delete() }
         else getCacheFile(context).apply { if (exists()) delete() }
+    }
+
+    private fun getPublicShareCache(context: Context): IOFile {
+        val folder = IOFile(context.filesDir, context.getString(R.string.EXPOSED_PUBLIC_SHARE_DIR))
+        if (!folder.exists()) folder.mkdirs()
+        return IOFile(folder, name)
     }
 
     fun isDisabled(): Boolean {
@@ -462,6 +465,30 @@ open class File(
         THUMBNAIL("thumbnail"),
         ONLYOFFICE("onlyoffice"),
         KMAIL("kmail")
+    }
+
+    suspend fun convertToIOFile(
+        context: Context,
+        userDrive: UserDrive = UserDrive(),
+        shouldBePdf: Boolean = false,
+        onProgress: (progress: Int) -> Unit,
+        navigateToDownloadDialog: (suspend () -> Unit)? = null,
+    ): IOFile {
+        val cacheFile = when {
+            isPublicShared() -> getPublicShareCache(context)
+            isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
+            isOffline -> getOfflineFile(context, userDrive.userId)!!
+            else -> getCacheFile(context, userDrive)
+        }
+
+        val fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
+        if (fileNeedDownload) {
+            navigateToDownloadDialog?.invoke()
+            downloadFile(cacheFile, file = this, shouldBePdf, onProgress)
+            cacheFile.setLastModified(getLastModifiedInMilliSecond())
+        }
+
+        return cacheFile
     }
 
     companion object {

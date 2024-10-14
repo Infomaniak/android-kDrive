@@ -28,22 +28,36 @@ import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.ui.publicShare.PublicShareActivity
+import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
+import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
+import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.isKeyguardSecure
+import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
+import com.infomaniak.lib.core.models.ApiError
+import com.infomaniak.lib.core.models.ApiResponseStatus
+import com.infomaniak.lib.core.utils.SentryLog
+import com.infomaniak.lib.core.utils.showToast
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -52,8 +66,9 @@ class LaunchActivity : AppCompatActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
-
+    private var publicShareActivityExtras: Bundle? = null
     private var isHelpShortcutPressed = false
+    private var shouldStartApp = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,21 +76,21 @@ class LaunchActivity : AppCompatActivity() {
         setDefaultLocaleIfNeeded()
 
         checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
+        trackScreen()
 
         lifecycleScope.launch {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
             handleNotificationDestinationIntent()
-            handleDeeplink()
             handleShortcuts()
+            handleDeeplink()
 
-            startApp()
+            if (shouldStartApp) startApp()
 
             // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
             // so that even when we return, the activity will still be closed.
             finish()
         }
-        trackScreen()
     }
 
     override fun onPause() {
@@ -102,16 +117,17 @@ class LaunchActivity : AppCompatActivity() {
                 when (destinationClass) {
                     MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
                     LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                    PublicShareActivity::class.java -> publicShareActivityExtras?.let(::putExtras)
                 }
             }.also(::startActivity)
         }
     }
 
     private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
-        if (AccountUtils.requestCurrentUser() == null) {
-            LoginActivity::class.java
-        } else {
-            loggedUserDestination()
+        when {
+            publicShareActivityExtras != null -> PublicShareActivity::class.java
+            AccountUtils.requestCurrentUser() == null -> LoginActivity::class.java
+            else -> loggedUserDestination()
         }
     }
 
@@ -152,13 +168,59 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDeeplink() {
-        intent.data?.let { uri -> uri.path?.let { path -> processDeepLink(path) } }
+    private suspend fun handleDeeplink() = Dispatchers.IO {
+        intent.data?.path?.let { deeplink ->
+            // If the app is closed, the currentUser will be null. We don't want that otherwise the link will always be opened as
+            // external instead of internal if you already have access to the files. So we set it here
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
+
+            if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else processInternalLink(deeplink)
+            SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
+        }
     }
 
-    private fun processDeepLink(path: String) {
-        Regex("/app/[a-z]+/(\\d+)/[a-z]*/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
-            val (pathDriveId, pathFolderId, pathFileId) = match.destructured
+    private suspend fun processPublicShare(path: String) {
+        Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
+            val (driveId, publicShareUuid) = match.destructured
+
+            val apiResponse = ApiRepository.getPublicShareInfo(driveId.toInt(), publicShareUuid)
+            when (apiResponse.result) {
+                ApiResponseStatus.SUCCESS -> {
+                    val shareLink = apiResponse.data!!
+                    setPublicShareActivityArgs(driveId, publicShareUuid, shareLink)
+                }
+                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
+                else -> handlePublicShareError(apiResponse.error, driveId, publicShareUuid)
+            }
+        }
+    }
+
+    private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
+        when {
+            error?.exception is ApiController.NetworkException -> {
+                Dispatchers.Main { showToast(R.string.errorNetwork) }
+                finishAndRemoveTask()
+            }
+            error?.code == ErrorCode.PASSWORD_NOT_VALID -> {
+                setPublicShareActivityArgs(driveId, publicShareUuid, isPasswordNeeded = true)
+            }
+            error?.code == ErrorCode.PUBLIC_SHARE_LINK_IS_NOT_VALID -> {
+                setPublicShareActivityArgs(driveId, publicShareUuid, isExpired = true)
+            }
+            else -> SentryLog.e(PUBLIC_SHARE_TAG, "Error during getPublicShareFile: ${error?.code} / ${error?.description}")
+        }
+    }
+
+    private fun processInternalLink(path: String) {
+        Regex("/app/[a-z]+/(\\d+)/([a-z-]*)/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
+            val (pathDriveId, roleFolderId, pathFolderId, pathFileId) = match.destructured
+            // In case of SharedWithMe deeplinks, we open the link in the web as we cannot support them in-app for now
+            if (roleFolderId == SHARED_WITH_ME_FOLDER_ROLE) {
+                PublicShareUtils.openDeepLinkInBrowser(activity = this, path)
+                shouldStartApp = false
+                return
+            }
+
             val driveId = pathDriveId.toInt()
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
@@ -166,11 +228,6 @@ class LaunchActivity : AppCompatActivity() {
                 setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
             }
 
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = UploadWorker.BREADCRUMB_TAG
-                message = "DeepLink: $path"
-                level = SentryLevel.INFO
-            })
             trackDeepLink("internal")
         }
     }
@@ -197,7 +254,33 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
+    private fun setPublicShareActivityArgs(
+        driveId: String,
+        publicShareUuid: String,
+        shareLink: ShareLink? = null,
+        isPasswordNeeded: Boolean = false,
+        isExpired: Boolean = false,
+    ) {
+        publicShareActivityExtras = PublicShareActivityArgs(
+            driveId = driveId.toInt(),
+            publicShareUuid = publicShareUuid,
+            fileId = shareLink?.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
+            isPasswordNeeded = isPasswordNeeded,
+            isExpired = isExpired,
+            canDownload = shareLink?.capabilities?.canDownload == true,
+        ).toBundle()
+
+        val trackerName = when {
+            isPasswordNeeded -> "publicShareWithPassword"
+            isExpired -> "publicShareExpired"
+            else -> "publicShare"
+        }
+
+        trackDeepLink(trackerName)
+    }
+
     companion object {
         private const val SHORTCUTS_TAG = "shortcuts_tag"
+        private const val SHARED_WITH_ME_FOLDER_ROLE = "shared-with-me"
     }
 }

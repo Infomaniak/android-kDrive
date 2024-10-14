@@ -130,6 +130,14 @@
         android:name="com.infomaniak.drive.ui.fileList.preview.PreviewFragment"
         android:label="fragment_preview"
         tools:layout="@layout/fragment_preview_others">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="userDrive"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
         <action
             android:id="@+id/action_previewFragment_to_fileDetailsFragment"
             app:destination="@id/fileDetailsFragment" />
@@ -390,6 +398,10 @@
             android:name="folderId"
             android:defaultValue="-1"
             app:argType="integer" />
+        <argument
+            android:name="isPublicShare"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </activity>
 
     <activity
@@ -401,6 +413,14 @@
             android:name="isHelpShortcutPressed"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="shouldLaunchAccountCreation"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="publicShareDeeplink"
+            android:defaultValue=""
+            app:argType="string" />
     </activity>
 
     <dialog
@@ -986,7 +1006,7 @@
         <argument
             android:name="action"
             android:defaultValue="OPEN_WITH"
-            app:argType="com.infomaniak.drive.ui.fileList.DownloadProgressDialog$DownloadAction" />
+            app:argType="com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog$DownloadAction" />
     </dialog>
 
     <dialog

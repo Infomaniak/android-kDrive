@@ -17,15 +17,19 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 
-class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(manager, lifecycle) {
+class PreviewSliderAdapter(
+    manager: FragmentManager,
+    lifecycle: Lifecycle,
+    private val userDrive: UserDrive,
+) : FragmentStateAdapter(manager, lifecycle) {
 
     private var files = ArrayList<File>()
     private var filePagesIds: ArrayList<Long> = ArrayList()
@@ -34,17 +38,15 @@ class PreviewSliderAdapter(manager: FragmentManager, lifecycle: Lifecycle) : Fra
 
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
-        val args = bundleOf(PreviewFragment.FILE_ID_TAG to file.id)
+        val args = PreviewFragmentArgs(fileId = file.id, userDrive = userDrive).toBundle()
+
         return when (file.getFileType()) {
-            ExtensionType.IMAGE -> PreviewPictureFragment().apply { arguments = args }
-            ExtensionType.VIDEO -> PreviewVideoFragment().apply { arguments = args }
-            ExtensionType.AUDIO -> PreviewMusicFragment().apply { arguments = args }
-            ExtensionType.PDF -> PreviewPDFFragment().apply { arguments = args }
-            else -> {
-                if (file.isOnlyOfficePreview()) PreviewPDFFragment().apply { arguments = args }
-                else PreviewOtherFragment().apply { arguments = args }
-            }
-        }
+            ExtensionType.IMAGE -> PreviewPictureFragment()
+            ExtensionType.VIDEO -> PreviewVideoFragment()
+            ExtensionType.AUDIO -> PreviewMusicFragment()
+            ExtensionType.PDF -> PreviewPDFFragment()
+            else -> if (file.isOnlyOfficePreview()) PreviewPDFFragment() else PreviewOtherFragment()
+        }.apply { arguments = args }
     }
 
     fun setFiles(files: ArrayList<File>) {

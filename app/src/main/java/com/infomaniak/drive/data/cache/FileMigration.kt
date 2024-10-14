@@ -45,7 +45,7 @@ class FileMigration : RealmMigration {
 
         // Migrated to version 1
         if (oldVersionTemp == 0L) {
-            schema.get(File::class.java.simpleName)?.apply {
+            schema[File::class.java.simpleName]?.apply {
                 removeField("order")
                 removeField("orderBy")
                 if (hasField("canUseTag")) removeField("canUseTag")
@@ -73,17 +73,17 @@ class FileMigration : RealmMigration {
                 addField(FileCategory::userId.name, Int::class.java).setNullable(FileCategory::userId.name, true)
                 addField("addedToFileAt", Date::class.java, FieldAttribute.REQUIRED)
             }
-            schema.get(File::class.java.simpleName)?.apply {
+            schema[File::class.java.simpleName]?.apply {
                 addRealmListField(File::categories.name, fileCategorySchema)
             }
-            schema.get(FileCategory::class.java.simpleName)?.apply {
+            schema[FileCategory::class.java.simpleName]?.apply {
                 isEmbedded = true
             }
             // Rights migration with sentry logs
             val sentryLogs = arrayListOf<Pair<Int, String>>()
             var countOfflineFiles = 0
             runCatching {
-                schema.get(Rights::class.java.simpleName)?.transform { // apply for each right
+                schema[Rights::class.java.simpleName]?.transform { // apply for each right
                     val fileId = it.getInt("fileId")
                     val file = realm.where(File::class.java.simpleName).equalTo(File::id.name, fileId).findFirst()
                     if (file == null) {
@@ -122,7 +122,7 @@ class FileMigration : RealmMigration {
         // - Added new field (Folder Color) in File table
         // - Added new field (Version Code) in File table
         if (oldVersionTemp == 2L) {
-            schema.get(File::class.java.simpleName)?.apply {
+            schema[File::class.java.simpleName]?.apply {
                 addField("_color", String::class.java)
                 addField("versionCode", Int::class.java)
             }
@@ -193,7 +193,7 @@ class FileMigration : RealmMigration {
             }
 
             // Rights migration
-            schema.get(Rights::class.java.simpleName)?.apply {
+            schema[Rights::class.java.simpleName]?.apply {
                 renameField("show", Rights::canShow.name)
                 renameField("read", Rights::canRead.name)
                 renameField("write", Rights::canWrite.name)
@@ -228,7 +228,7 @@ class FileMigration : RealmMigration {
             }
 
             // FileCategory migration
-            schema.get(FileCategory::class.java.simpleName)?.apply {
+            schema[FileCategory::class.java.simpleName]?.apply {
                 renameField("id", FileCategory::categoryId.name)
                 renameField("iaCategoryUserValidation", FileCategory::userValidation.name)
                 renameField("isGeneratedByIa", FileCategory::isGeneratedByAI.name)
@@ -236,7 +236,7 @@ class FileMigration : RealmMigration {
             }
 
             // File migration
-            schema.get(File::class.java.simpleName)?.apply {
+            schema[File::class.java.simpleName]?.apply {
                 removeField("collaborativeFolder")
                 removeField("onlyofficeConvertExtension")
                 removeField("hasVersion")
@@ -259,19 +259,19 @@ class FileMigration : RealmMigration {
             }
 
             // FileActivity migration
-            schema.get(FileActivity::class.java.simpleName)?.apply {
+            schema[FileActivity::class.java.simpleName]?.apply {
                 removeField("path")
             }
 
             // Set embedded objects
-            schema.get(ShareLinkCapabilities::class.java.simpleName)?.isEmbedded = true
-            schema.get(ShareLink::class.java.simpleName)?.isEmbedded = true
-            schema.get(DropBoxValidity::class.java.simpleName)?.isEmbedded = true
-            schema.get(DropBoxSize::class.java.simpleName)?.isEmbedded = true
-            schema.get(DropBoxCapabilities::class.java.simpleName)?.isEmbedded = true
-            schema.get(DropBox::class.java.simpleName)?.isEmbedded = true
-            schema.get(FileVersion::class.java.simpleName)?.isEmbedded = true
-            schema.get(FileConversion::class.java.simpleName)?.isEmbedded = true
+            schema[ShareLinkCapabilities::class.java.simpleName]?.isEmbedded = true
+            schema[ShareLink::class.java.simpleName]?.isEmbedded = true
+            schema[DropBoxValidity::class.java.simpleName]?.isEmbedded = true
+            schema[DropBoxSize::class.java.simpleName]?.isEmbedded = true
+            schema[DropBoxCapabilities::class.java.simpleName]?.isEmbedded = true
+            schema[DropBox::class.java.simpleName]?.isEmbedded = true
+            schema[FileVersion::class.java.simpleName]?.isEmbedded = true
+            schema[FileConversion::class.java.simpleName]?.isEmbedded = true
 
             oldVersionTemp++
         }
@@ -296,17 +296,17 @@ class FileMigration : RealmMigration {
             }
 
             // File migration
-            schema.get(File::class.java.simpleName)?.addRealmObjectField(File::externalImport.name, fileExternalImportSchema)
+            schema[File::class.java.simpleName]?.addRealmObjectField(File::externalImport.name, fileExternalImportSchema)
 
             // Set embedded objects
-            schema.get(FileExternalImport::class.java.simpleName)?.isEmbedded = true
+            schema[FileExternalImport::class.java.simpleName]?.isEmbedded = true
 
             oldVersionTemp++
         }
 
         // Migrated to version 6
         if (oldVersionTemp == 5L) {
-            schema.get(File::class.java.simpleName)?.apply {
+            schema[File::class.java.simpleName]?.apply {
                 renameField("_color", File::color.name)
             }
 
@@ -316,7 +316,7 @@ class FileMigration : RealmMigration {
         // Migrated to version 7
         // - Migrate to ApiV3
         if (oldVersionTemp == 6L) {
-            schema.get(File::class.java.simpleName)?.apply {
+            schema[File::class.java.simpleName]?.apply {
                 addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
                 addField("uid", String::class.java, FieldAttribute.REQUIRED)
                 addField("revisedAt", Long::class.java)
@@ -351,9 +351,21 @@ class FileMigration : RealmMigration {
         }
 
         // Migrated to version 8
+        // - Add new field `colorable` in Rights table
         if (oldVersionTemp == 7L) {
-            schema.get("Rights")?.apply {
-                addField("colorable", Boolean::class.java, FieldAttribute.REQUIRED)
+            schema["Rights"]?.addField("colorable", Boolean::class.java, FieldAttribute.REQUIRED)
+
+            oldVersionTemp++
+        }
+
+        // Migrated to version 9
+        // - Add new field `fileId` in ShareLink table
+        // - Add new field `accessBlocked` in ShareLink table
+        if (oldVersionTemp == 8L) {
+            schema["ShareLink"]?.apply {
+                addField("fileId", Int::class.java)
+                setNullable("fileId", true)
+                addField("accessBlocked", Boolean::class.java, FieldAttribute.REQUIRED)
             }
 
             oldVersionTemp++
@@ -375,7 +387,7 @@ class FileMigration : RealmMigration {
         // Delete all realm DB
         realm.deleteAll()
         // Continue migration
-        schema.get(Rights::class.java.simpleName)?.isEmbedded = true
+        schema[Rights::class.java.simpleName]?.isEmbedded = true
 
         // Logout the current user if there is at least one offline file
         offlineFile?.let {
@@ -385,7 +397,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val dbVersion = 8L // Must be bumped when the schema changes
+        const val dbVersion = 9L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }

@@ -29,12 +29,29 @@ object MatomoDrive : MatomoCore {
     override val Context.tracker: Tracker get() = (this as MainApplication).matomoTracker
     override val siteId = 8
 
+    const val ACTION_DOWNLOAD_NAME = "download"
+    const val ACTION_OPEN_WITH_NAME = "openWith"
+    const val ACTION_OPEN_BOOKMARK_NAME = "openBookmark"
+    const val ACTION_PRINT_PDF_NAME = "printPdf"
+    const val ACTION_SAVE_TO_KDRIVE_NAME = "saveToKDrive"
+    const val ACTION_SEND_FILE_COPY_NAME = "sendFileCopy"
+
+    const val PUBLIC_SHARE_ACTION_CATEGORY = "publicShareAction"
+
     fun Fragment.trackCategoriesEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent("categories", name, action, value)
     }
 
     fun Context.trackFileActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent("fileAction", name, action, value)
+    }
+
+    fun Context.trackPublicShareActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(PUBLIC_SHARE_ACTION_CATEGORY, name, action, value)
+    }
+
+    fun Context.trackPdfActivityActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent("pdfActivityAction", name, action, value)
     }
 
     fun Fragment.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {

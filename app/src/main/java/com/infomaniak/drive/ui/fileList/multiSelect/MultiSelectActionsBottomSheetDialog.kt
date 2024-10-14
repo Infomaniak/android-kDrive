@@ -149,13 +149,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         }
 
         binding.downloadFile.apply {
-            setOnClickListener {
-                if (drivePermissions.checkWriteStoragePermission()) {
-                    trackEvent(matomoCategory, "bulkDownload")
-                    download()
-                }
-            }
-
+            setOnClickListener { if (drivePermissions.checkWriteStoragePermission()) download() }
             isVisible = navigationArgs.fileIds.isNotEmpty() || navigationArgs.isAllSelected
         }
     }
@@ -181,13 +175,13 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     private fun download() {
+        trackEvent(matomoCategory, "bulkDownload")
         if (navigationArgs.areAllFromTheSameFolder) downloadArchive() else downloadFiles()
     }
 
-    private fun downloadArchive() = with(navigationArgs) {
-        val archiveBody = if (isAllSelected) ArchiveBody(parentId, exceptFileIds) else ArchiveBody(fileIds)
+    protected open fun downloadArchive() {
         liveData(Dispatchers.IO) {
-            emit(ApiRepository.buildArchive(AccountUtils.currentDriveId, archiveBody))
+            emit(ApiRepository.buildArchive(AccountUtils.currentDriveId, getArchiveBody()))
         }.observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { archiveUUID ->
@@ -199,6 +193,10 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             }
             onActionSelected()
         }
+    }
+
+    protected fun getArchiveBody() = with(navigationArgs) {
+        if (isAllSelected) ArchiveBody(parentId, exceptFileIds) else ArchiveBody(fileIds)
     }
 
     private fun downloadFiles() {
@@ -262,7 +260,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         RESTORE_IN, RESTORE_TO_ORIGIN, DELETE_PERMANENTLY,
     }
 
-    private companion object {
+    protected companion object {
         const val ARCHIVE_FILE_NAME = "Archive.zip"
     }
 }

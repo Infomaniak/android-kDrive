@@ -22,6 +22,7 @@ import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.utils.FileId
+import com.infomaniak.lib.core.BuildConfig
 import java.net.URLEncoder
 import java.util.Date
 
@@ -36,6 +37,7 @@ object ApiRoutes {
             "files.dropbox,files.dropbox.capabilities,files.external_import,files.is_favorite," +
             "files.sharelink,files.sorted_name,files.supported_by"
     const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
+    private const val sharedFileWithQuery = "with=capabilities,conversion_capabilities,supported_by"
 
     private const val ACTIONS = "&actions[]=file_create" +
             "&actions[]=file_rename" +
@@ -93,6 +95,45 @@ object ApiRoutes {
 
     fun trashURLV2(file: File) = "${driveURLV2(file.driveId)}/trash/${file.id}"
     private fun trashURL(file: File) = "${driveURL(file.driveId)}/trash/${file.id}"
+
+    /** File Url */
+    //region File url
+    fun getDownloadFileUrl(file: File): String = with(file) {
+        val downloadUrl = if (isPublicShared()) {
+            downloadPublicShareFile(driveId, publicShareUuid, id)
+        } else {
+            downloadFile(file)
+        }
+
+        return if (isOnlyOfficePreview()) "$downloadUrl?as=pdf" else downloadUrl
+    }
+
+    fun getThumbnailUrl(file: File) = with(file) {
+        when {
+            isPublicShared() -> getPublicShareFileThumbnail(driveId, publicShareUuid, id)
+            isTrashed() -> thumbnailTrashFile(file)
+            else -> thumbnailFile(file)
+        }
+    }
+
+    fun getImagePreviewUrl(file: File): String = with(file) {
+        val url = if (isPublicShared()) {
+            getPublicShareFilePreview(driveId, publicShareUuid, id)
+        } else {
+            imagePreviewFile(file)
+        }
+
+        return "$url?width=2500&height=1500&quality=80"
+    }
+
+    fun getOnlyOfficeUrl(file: File) = with(file) {
+        if (isPublicShared()) {
+            showPublicShareOfficeFile(driveId, publicShareUuid, id)
+        } else {
+            "${BuildConfig.AUTOLOG_URL}?url=" + showOffice(file)
+        }
+    }
+    //endregion
 
     /** Drive */
     //region Drive
@@ -221,9 +262,9 @@ object ApiRoutes {
 
     fun createOfficeFile(driveId: Int, folderId: Int) = "${fileURL(driveId, folderId)}/file?$fileWithQuery"
 
-    fun thumbnailFile(file: File) = "${fileURLV2(file)}/thumbnail?t=${file.lastModifiedAt}"
+    private fun thumbnailFile(file: File) = "${fileURLV2(file)}/thumbnail?t=${file.lastModifiedAt}"
 
-    fun imagePreviewFile(file: File) = "${fileURLV2(file)}/preview?quality=80&t=${file.lastModifiedAt}"
+    private fun imagePreviewFile(file: File) = "${fileURLV2(file)}/preview"
 
     fun downloadFile(file: File) = "${fileURLV2(file)}/download"
 
@@ -252,6 +293,59 @@ object ApiRoutes {
     fun shareLink(file: File) = "${fileURLV2(file)}/link"
     //endregion
 
+    /** Public Share */
+    //region Public share
+    fun getPublicShareInfo(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/init"
+
+    fun submitPublicSharePassword(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/auth"
+
+    fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId?$sharedFileWithQuery"
+    }
+
+    fun getPublicShareChildrenFiles(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
+        val orderQuery = "order_by=${sortType.orderBy}&order=${sortType.order}"
+        return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery"
+    }
+
+    fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${publicShareFile(driveId, linkUuid, fileId)}/count"
+    }
+
+    private fun getPublicShareFileThumbnail(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${publicShareFile(driveId, linkUuid, fileId)}/thumbnail"
+    }
+
+    private fun getPublicShareFilePreview(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${publicShareFile(driveId, linkUuid, fileId)}/preview"
+    }
+
+    private fun downloadPublicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${publicShareFile(driveId, linkUuid, fileId)}/download"
+    }
+
+    private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int): String {
+        // For now, this call fails because the back hasn't dev the conversion of office files to pdf for mobile
+        return "${SHARE_URL_V1}share/$driveId/$linkUuid/preview/text/${fileId}"
+    }
+
+    fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
+
+    fun buildPublicShareArchive(driveId: Int, linkUuid: String): String {
+        return "${getPublicShareUrlV2(driveId, linkUuid)}/archive"
+    }
+
+    fun downloadPublicShareArchive(driveId: Int, publicShareUuid: String, archiveUuid: String): String {
+        return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download"
+    }
+
+    private fun publicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
+        return "${getPublicShareUrlV2(driveId, linkUuid)}/files/$fileId"
+    }
+
+    private fun getPublicShareUrlV2(driveId: Int, linkUuid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid"
+    //endregion
+
     /** External import */
     //region External import
     fun cancelExternalImport(driveId: Int, importId: Int) = "${driveURLV2(driveId)}/imports/$importId/cancel"
@@ -267,7 +361,7 @@ object ApiRoutes {
 
     fun trashedFolderFiles(file: File, order: SortType) = "${trashURL(file)}/files?${orderQuery(order)}&$fileWithQuery"
 
-    fun thumbnailTrashFile(file: File) = "${trashURLV2(file)}/thumbnail?t=${file.lastModifiedAt}"
+    private fun thumbnailTrashFile(file: File) = "${trashURLV2(file)}/thumbnail?t=${file.lastModifiedAt}"
 
     fun restoreTrashFile(file: File) = "${trashURLV2(file)}/restore"
     //endregion
@@ -333,6 +427,6 @@ object ApiRoutes {
 
     fun renewDrive(accountId: Int) = "${MANAGER_URL}$accountId/accounts/accounting/renewal"
 
-    fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
+    private fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
     //endregion
 }

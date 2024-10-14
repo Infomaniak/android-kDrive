@@ -70,6 +70,7 @@ open class FileAdapter(
     var viewHolderType: DisplayType = DisplayType.LIST
 
     var uploadInProgress = false
+    var publicShareCanDownload = true
 
     var isComplete = false
     var isHomeOffline = false
@@ -140,7 +141,7 @@ open class FileAdapter(
         fileAsyncListDiffer = AsyncListDiffer(this, FileDiffCallback())
     }
 
-    fun addFileList(newFileList: ArrayList<File>) {
+    fun addFileList(newFileList: List<File>) {
         val oldItemCount = itemCount
         addAll(newFileList)
         if (oldItemCount > 0) {
@@ -161,17 +162,19 @@ open class FileAdapter(
         if (fileList.isManaged) super.updateData(null)
     }
 
-    fun setFiles(newItemList: List<File>) {
+    fun setFiles(newItemList: List<File>, isFileListResetNeeded: Boolean = false) {
         fileList = RealmList(*newItemList.toTypedArray())
         hideLoading()
-        if (fileAsyncListDiffer == null) {
+        // isFileListResetNeeded is used because when sorting file in PublicShareListFragment, the animation of the asynclist
+        // is bugged, so we just redraw the whole list. As it's only once it's not a problem
+        if (fileAsyncListDiffer == null || isFileListResetNeeded) {
             notifyDataSetChanged()
         } else {
             fileAsyncListDiffer?.submitList(newItemList)
         }
     }
 
-    fun addAll(newItemList: ArrayList<File>) {
+    fun addAll(newItemList: List<File>) {
         val beforeItemCount = itemCount
         val list = ArrayList(fileList).apply { addAll(newItemList) }
         fileList = RealmList(*list.toTypedArray())
@@ -351,6 +354,7 @@ open class FileAdapter(
                 || file.isFromActivities
                 || file.isFromSearch
                 || (offlineMode && !file.isOffline)
+                || !publicShareCanDownload
 
         setOnClickListener { onMenuClicked?.invoke(file) }
     }

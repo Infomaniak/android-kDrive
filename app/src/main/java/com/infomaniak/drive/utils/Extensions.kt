@@ -65,9 +65,9 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
-import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
@@ -298,7 +298,7 @@ fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable: Boolean) {
 
 fun Context.openOnlyOfficeActivity(file: File) {
     startActivity(Intent(this, OnlyOfficeActivity::class.java).apply {
-        putExtra(OnlyOfficeActivity.ONLYOFFICE_URL_TAG, file.onlyOfficeUrl())
+        putExtra(OnlyOfficeActivity.ONLYOFFICE_URL_TAG, ApiRoutes.getOnlyOfficeUrl(file))
         putExtra(OnlyOfficeActivity.ONLYOFFICE_FILENAME_TAG, file.name)
     })
 }
@@ -433,8 +433,6 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
 }
 
 fun Context.shareFile(getUriToShare: () -> Uri?) {
-    trackFileActionEvent("sendFileCopy")
-
     val shareIntent = Intent().apply {
         action = Intent.ACTION_SEND
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)

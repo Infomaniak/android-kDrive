@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2024 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/public_share_navigation"
+    app:startDestination="@id/publicShareListFragment">
+
+    <activity
+        android:id="@+id/publicShareActivity"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicShareActivity"
+        tools:layout="@layout/activity_public_share">
+        <argument
+            android:name="driveId"
+            app:argType="integer" />
+        <argument
+            android:name="publicShareUuid"
+            app:argType="string" />
+        <argument
+            android:name="fileId"
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <argument
+            android:name="isPasswordNeeded"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="isExpired"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="canDownload"
+            android:defaultValue="false"
+            app:argType="boolean" />
+    </activity>
+
+    <fragment
+        android:id="@+id/publicSharePasswordFragment"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicSharePasswordFragment"
+        android:label="PublicSharePasswordFragment"
+        tools:layout="@layout/fragment_public_share_password">
+        <action
+            android:id="@+id/action_publicSharePasswordFragment_to_publicShareListFragment"
+            app:destination="@id/publicShareListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/publicShareOutdatedFragment"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicShareOutdatedFragment"
+        android:label="PublicShareOutdatedFragment"
+        tools:layout="@layout/fragment_public_share_outdated_link" />
+
+    <fragment
+        android:id="@+id/publicShareListFragment"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicShareListFragment"
+        tools:layout="@layout/fragment_file_list">
+        <argument
+            android:name="fileId"
+            android:defaultValue="1"
+            app:argType="integer" />
+        <argument
+            android:name="fileName"
+            android:defaultValue=""
+            app:argType="string" />
+        <action
+            android:id="@+id/publicShareListFragmentToPublicShareListFragment"
+            app:destination="@id/publicShareListFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_sortFilesBottomSheetDialog"
+            app:destination="@id/sortFilesBottomSheetDialog" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicSharePreviewSliderFragment"
+            app:destination="@id/publicSharePreviewSliderFragment" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicShareBottomSheetFileActions"
+            app:destination="@id/publicShareBottomSheetFileActions" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicSharePasswordFragment"
+            app:destination="@id/publicSharePasswordFragment"
+            app:popUpTo="@id/publicShareListFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicShareOutdatedFragment"
+            app:destination="@id/publicShareOutdatedFragment"
+            app:popUpTo="@id/publicShareListFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_obtainKDriveAdBottomSheet"
+            app:destination="@id/obtainKDriveAdBottomSheet" />
+        <action
+            android:id="@+id/action_publicShareListFragment_to_publicShareFileActionsBottomSheet"
+            app:destination="@id/publicShareFileActionsBottomSheet" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/publicSharePreviewSliderFragment"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragment"
+        android:label="PublicSharePreviewSliderFragment"
+        tools:layout="@layout/fragment_preview_slider">
+        <action
+            android:id="@+id/action_publicSharePreviewSliderFragment_to_previewFragment"
+            app:destination="@id/previewFragment" />
+        <action
+            android:id="@+id/action_publicSharePreviewSliderFragment_to_downloadProgressDialog"
+            app:destination="@id/previewDownloadProgressDialog" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/previewFragment"
+        android:name="com.infomaniak.drive.ui.fileList.preview.PreviewFragment"
+        android:label="PreviewFragment"
+        tools:layout="@layout/fragment_preview_others">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+        <argument
+            android:name="userDrive"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/publicShareFileActionsBottomSheet"
+        android:name="com.infomaniak.drive.ui.publicShare.PublicShareFileActionsBottomSheetDialog"
+        android:label="PublicShareFileActionsBottomSheet"
+        tools:layout="@layout/fragment_bottom_sheet_public_share_file_actions" />
+
+    <dialog
+        android:id="@+id/obtainKDriveAdBottomSheet"
+        android:name="com.infomaniak.drive.ui.publicShare.ObtainKDriveAdBottomSheetDialog"
+        android:label="ObtainKDriveAdBottomSheet"
+        tools:layout="@layout/fragment_bottom_sheet_obtain_kdrive_ad" />
+
+    <dialog
+        android:id="@+id/sortFilesBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.fileList.SortFilesBottomSheetDialog"
+        android:label="SortFilesBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_select">
+        <argument
+            android:name="sortType"
+            android:defaultValue="NAME_AZ"
+            app:argType="com.infomaniak.drive.data.models.File$SortType" />
+        <argument
+            android:name="sortTypeUsage"
+            app:argType="com.infomaniak.drive.data.models.File$SortTypeUsage" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/previewDownloadProgressDialog"
+        android:name="com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialog"
+        android:label="PreviewDownloadProgressDialog"
+        tools:layout="@layout/dialog_download_progress">
+        <argument
+            android:name="fileName"
+            app:argType="string" />
+    </dialog>
+</navigation>

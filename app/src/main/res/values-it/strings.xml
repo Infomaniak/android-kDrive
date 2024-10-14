@@ -100,6 +100,7 @@
     <string name="buttonAdd">Aggiungi</string>
     <string name="buttonAddComment">Aggiungi un commento</string>
     <string name="buttonAddFavorites">Aggiungi ai preferiti</string>
+    <string name="buttonAddToKDrive">Aggiungi al mio kDrive</string>
     <string name="buttonAddUser">Aggiungi un utente</string>
     <string name="buttonApplyFilters">Applica i filtri</string>
     <string name="buttonAuthorize">Autorizza</string>
@@ -141,6 +142,7 @@
     <string name="buttonNoDriveAnotherUser">Utilizza un altro profilo Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Prova gratuitamente</string>
     <string name="buttonOpenDocument">Aprire documento</string>
+    <string name="buttonOpenInBrowser">Aprire nel browser</string>
     <string name="buttonOpenReadOnly">Aprire in modalità di sola lettura</string>
     <string name="buttonPlayerFfwd">Vai avanti di alcuni secondi</string>
     <string name="buttonPlayerNext">Avanti</string>
@@ -253,6 +255,7 @@
     <string name="errorDelete">Errore durante l’eliminazione</string>
     <string name="errorDeviceStorage">Memoria del dispositivo insufficiente</string>
     <string name="errorDuplicate">Errore durante la duplicazione</string>
+    <string name="errorExternalImportInProgress">Non è possibile eseguire un’azione sulla cartella perché è in corso un’importazione esterna</string>
     <string name="errorFileAlreadyExists">Il file o la cartella esiste già</string>
     <string name="errorFileLocked">Il file è attualmente aperto da un utente e non può essere modificato</string>
     <string name="errorFilesLimitExceeded">Limite file raggiunto nella cartella</string>
@@ -265,12 +268,14 @@
     <string name="errorNetworkDescription">I risultati possono essere incompleti</string>
     <string name="errorPreviewDeleted">Il file è stato eliminato definitivamente</string>
     <string name="errorPreviewTrash">L’anteprima di un file spostato nel cestino non è disponibile</string>
+    <string name="errorQuotaExceeded">Spazio insufficiente sul kDrive</string>
     <string name="errorRename">Errore durante la rinomina</string>
     <string name="errorRestore">Errore durante il ripristino</string>
     <string name="errorRightModification">Errore durante la modifica dei diritti</string>
     <string name="errorSave">Errore durante il salvataggio</string>
     <string name="errorShareAddUser">Questo file è già condiviso con questo utente.</string>
     <string name="errorShareLink">Errore durante la creazione del link</string>
+    <string name="errorWrongPassword">Password errata</string>
     <string name="favoritesNoFile">Al momento non sono disponibili preferiti</string>
     <string name="favoritesTitle">Preferiti</string>
     <string name="fileActivityCollaborativeFolderAccess">ha consultato il deposito file</string>
@@ -529,6 +534,13 @@
     <string name="notificationTitle">Notifiche</string>
     <string name="notificationUploadDownloadChannelName">Importazioni e download</string>
     <string name="notificationUploadServiceChannelName">Servizi per l’importazione di file</string>
+    <string name="obtainkDriveAdAlreadyGotAccount">Ho già un account</string>
+    <string name="obtainkDriveAdDescription">Archiviate le vostre foto, i vostri documenti e le vostre e-mail in Svizzera con un’azienda indipendente che rispetta la vostra privacy.</string>
+    <string name="obtainkDriveAdFreeTrialButton">Prova gratuita</string>
+    <string name="obtainkDriveAdListing1">15 GB gratuiti, poi 2 TB fino a 106 TB</string>
+    <string name="obtainkDriveAdListing2">Creazione e collaborazione online di documenti Word, Excel e PowerPoint</string>
+    <string name="obtainkDriveAdListing3">Importazione automatica dei file da Google Drive, Dropbox, One Drive, NextCloud, Hubic e WebDav</string>
+    <string name="obtainkDriveAdTitle">Ottieni kDrive gratuitamente</string>
     <string name="offlineFileNoFile">Nessun file offline</string>
     <string name="offlineFileNoFileDescription">Seleziona un file e rendilo disponibile offline per ritrovarlo qui quando non hai connessione.</string>
     <string name="offlineFileTitle">Offline</string>
@@ -550,6 +562,12 @@
     <string name="previewNoPreview">Sembra che il file non abbia anteprima.</string>
     <string name="previewPdfPages">%1$d di %2$d</string>
     <string name="previewVideoSourceError">File video non supportato dal lettore</string>
+    <string name="publicShareImportationInProgress">Download in corso nella cartella selezionata</string>
+    <string name="publicShareOutdatedLinkDescription">Il link è stato disattivato o è scaduto.\nPer accedere ai file, inviate un messaggio all’utente che ha condiviso il link in modo che possa riattivarlo.</string>
+    <string name="publicShareOutdatedLinkTitle">I file non sono più disponibili</string>
+    <string name="publicSharePasswordNeededDescription">Inserite la password che vi è stata fornita per accedere al contenuto.</string>
+    <string name="publicSharePasswordNeededTitle">Contenuto sicuro</string>
+    <string name="publicSharePasswordNotSupportedDescription">I link protetti da password non sono ancora disponibili nell’applicazione mobile.</string>
     <string name="publicSharedLinkTitle">Link di condivisione pubblica</string>
     <string name="recentActivityMeTitle">Da parte mia</string>
     <string name="recentActivityMyTeam">Da parte del mio team</string>
@@ -732,5 +750,4 @@
     <string name="userPermissionRemove">L’utente non avrà più accesso a questo file.</string>
     <string name="userPermissionWrite">Può modificare</string>
     <string name="userPermissionWriteDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file</string>
-    <string name="wrongPdfPassword">Password errata</string>
 </resources>

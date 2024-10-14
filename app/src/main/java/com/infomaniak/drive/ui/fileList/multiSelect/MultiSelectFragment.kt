@@ -24,6 +24,7 @@ import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -140,6 +141,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             deleteButtonMultiSelect.isEnabled = isEnabled
             moveButtonMultiSelect.isEnabled = isEnabled
             menuButtonMultiSelect.isEnabled = isEnabled
+        }
+    }
+
+    fun setupBasicMultiSelectLayout() {
+        multiSelectLayout?.apply {
+            moveButtonMultiSelect.isInvisible = true
+            deleteButtonMultiSelect.isInvisible = true
         }
     }
 
