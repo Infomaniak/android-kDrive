@@ -149,7 +149,11 @@ object MediaFoldersProvider {
         coroutineScope?.ensureActive()
         if (path.startsWith("Android/media/${BuildConfig.APPLICATION_ID}")) return null
         return MediaFolder.findById(realm, folderId)?.let { mediaFolder ->
-            mediaFolder.apply { if (mediaFolder.name != folderName) mediaFolder.storeOrUpdate() }
+            mediaFolder.apply {
+                if (mediaFolder.name != folderName || mediaFolder.path != path) {
+                    mediaFolder.storeOrUpdate(path)
+                }
+            }
         } ?: let {
             val isFirstConfiguration = !AccountUtils.isEnableAppSync()
             val isSynced = isFirstConfiguration && path.contains("${Environment.DIRECTORY_DCIM}/")

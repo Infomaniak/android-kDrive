@@ -169,5 +169,4 @@ object SyncUtils {
         cancelContentObserver()
         cancelPeriodicSync()
     }
-
 }
