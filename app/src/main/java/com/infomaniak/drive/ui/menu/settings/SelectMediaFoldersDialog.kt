@@ -126,7 +126,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
                     MediaFolder.getRealmInstance().use { realm ->
                         val cacheMediaFolders = MediaFolder.getAll(realm)
                         viewModelScope.launch(Dispatchers.Main) {
-                            if (cacheMediaFolders.isNotEmpty()) emit(false to cacheMediaFolders)
+                            if (cacheMediaFolders.any { it.path.isNotEmpty() }) emit(false to cacheMediaFolders)
                         }
 
                         val localMediaFolders = ArrayList(
@@ -153,7 +153,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
 
         private fun ArrayList<MediaFolder>.newMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
             return filterNot { mediaFolder ->
-                cachedMediaFolders.any { cache -> cache.id == mediaFolder.id }
+                cachedMediaFolders.any { it.path.isNotEmpty()} && cachedMediaFolders.any { cache -> cache.id == mediaFolder.id }
             } as ArrayList<MediaFolder>
         }
 
