@@ -72,7 +72,7 @@ import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
 
-    val matomoTracker: Tracker by lazy { buildTracker(shouldOptOut = true) }
+    val matomoTracker: Tracker by lazy { buildTracker() }
     var geniusScanIsReady = false
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
