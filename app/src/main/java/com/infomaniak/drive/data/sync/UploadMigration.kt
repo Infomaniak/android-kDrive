@@ -106,8 +106,7 @@ class UploadMigration : RealmMigration {
 
         //region Migrate to version 7: Add path to MediaFolder
         if (oldVersionTemp == 6L) {
-            schema.get(MediaFolder::class.java.simpleName)!!
-                .addField(MediaFolder::path.name, String::class.java, FieldAttribute.REQUIRED)
+            schema[MediaFolder::class.java.simpleName]?.addField("path", String::class.java, FieldAttribute.REQUIRED)
             oldVersionTemp++
         }
         //endregion
