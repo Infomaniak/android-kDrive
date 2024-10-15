@@ -152,8 +152,8 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
         }
 
         private fun ArrayList<MediaFolder>.newMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
-            return filterNot { mediaFolder ->
-                cachedMediaFolders.any { it.path.isNotEmpty()} && cachedMediaFolders.any { cache -> cache.id == mediaFolder.id }
+            return filter { mediaFolder ->
+                cachedMediaFolders.any { it.id == mediaFolder.id && it.path.isEmpty() }
             } as ArrayList<MediaFolder>
         }
 
