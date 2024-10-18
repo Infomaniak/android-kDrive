@@ -22,8 +22,13 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.R
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.setBackNavigationResult
+import io.sentry.Sentry
+import io.sentry.SentryLevel
 
 class DownloadProgressDialog : BaseDownloadProgressDialog() {
 
@@ -50,6 +55,23 @@ class DownloadProgressDialog : BaseDownloadProgressDialog() {
 
     private fun observeLocalFile() {
         downloadProgressViewModel.localFile.observe(viewLifecycleOwner) { file ->
+            if (file == null) {
+                Sentry.captureMessage(
+                    "file is null in DownloadProgressFragment. It should not happen",
+                    SentryLevel.ERROR,
+                ) { scope ->
+                    scope.setExtra("fileId", navigationArgs.fileId.toString())
+                    scope.setExtra("driveId", navigationArgs.userDrive.driveId.toString())
+                    scope.setTag("isSharedWithMe", navigationArgs.userDrive.sharedWithMe.toString())
+                    scope.setTag("parent", findNavController().previousBackStackEntry?.destination?.label.toString())
+                }
+
+                findNavController().popBackStack()
+                requireActivity().showSnackbar(R.string.anErrorHasOccurred)
+
+                return@observe
+            }
+
             binding.icon.setImageResource(file.getFileType().icon)
             downloadProgressViewModel.downloadFile(requireContext(), file, navigationArgs.userDrive)
         }
