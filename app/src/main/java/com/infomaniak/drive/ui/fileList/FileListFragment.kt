@@ -31,7 +31,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle.State
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -750,15 +752,22 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
-            getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
-                trackEvent("fileList", newSortType.name)
-                fileListViewModel.sortType = newSortType
-                _binding?.sortButton?.setText(fileListViewModel.sortType.translation)
+            // This is to handle the case where we want to upload a file without being in the root folder.
+            // The parent fragment observer will trigger while its view is destroyed so we have to wait for
+            // the resumed state to be reached.
+            lifecycleScope.launch {
+                repeatOnLifecycle(State.RESUMED) {
+                    getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
+                        trackEvent("fileList", newSortType.name)
+                        fileListViewModel.sortType = newSortType
+                        _binding?.sortButton?.setText(fileListViewModel.sortType.translation)
 
-                downloadFiles(fileListViewModel.isSharedWithMe, true)
+                        downloadFiles(fileListViewModel.isSharedWithMe, true)
 
-                UiSettings(requireContext()).sortType = newSortType
-                refreshActivities()
+                        UiSettings(requireContext()).sortType = newSortType
+                        refreshActivities()
+                    }
+                }
             }
         }
     }
