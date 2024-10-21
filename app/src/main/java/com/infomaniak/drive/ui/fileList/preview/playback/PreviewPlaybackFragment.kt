@@ -109,9 +109,10 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     override fun onResume() {
         super.onResume()
-        val hasMediaNotStarted = mediaController?.isPlaying == false && mediaController?.currentPosition == 0L
-        if (!noCurrentFile() && (mediaController == null || hasMediaNotStarted)) {
+        if (!noCurrentFile() && (mediaController == null || mediaController?.currentPosition == 0L)) {
             createPlayer()
+        } else if (mediaController?.isPlaying == false) {
+            mediaController?.seekTo(mediaPosition)
         }
     }
 
