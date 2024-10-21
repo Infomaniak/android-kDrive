@@ -35,7 +35,7 @@ import okhttp3.Response
 class DownloadProgressViewModel : ViewModel() {
 
     val downloadProgressLiveData = MutableLiveData(0)
-    val localFile = SingleLiveEvent<File>()
+    val localFile = SingleLiveEvent<File?>()
 
     fun getLocalFile(fileId: Int, userDrive: UserDrive) {
         localFile.value = FileController.getFileById(fileId, userDrive)
