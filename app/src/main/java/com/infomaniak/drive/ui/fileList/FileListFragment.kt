@@ -752,6 +752,9 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
+            // This is to handle the case where we want to upload a file without being in the root folder.
+            // The parent fragment observer will trigger while its view is destroyed so we have to wait for
+            // the resumed state to be reached.
             lifecycleScope.launch {
                 repeatOnLifecycle(State.RESUMED) {
                     getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
