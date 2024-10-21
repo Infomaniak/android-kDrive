@@ -1,0 +1,3 @@
+- Add path of folders in synchronisation settings screen
+- Fix infinite loading in synchronisation settings screen
+- Fix crash when sorting files in the private folder without going to the root folder

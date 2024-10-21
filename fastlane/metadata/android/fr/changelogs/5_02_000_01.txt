@@ -1,0 +1,3 @@
+- Ajout du chemin des dossiers dans l'écran des options de synchronisation
+- Correction du chargement infini dans l'écran des options de synchronisation
+- Correction d'un crash lors du tri des fichiers dans le dossier privé sans accéder au dossier racine
