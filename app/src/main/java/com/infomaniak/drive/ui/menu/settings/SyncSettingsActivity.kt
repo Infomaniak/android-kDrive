@@ -53,6 +53,8 @@ import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
@@ -367,17 +369,27 @@ class SyncSettingsActivity : BaseActivity() {
     private fun saveSettings() = with(binding) {
         saveButton.showProgressCatching()
         lifecycleScope.launch(Dispatchers.IO) {
-            if (activateSyncSwitch.isChecked) {
-                val syncSettings = generateSyncSettings()
-                trackPhotoSyncEvents(syncSettings)
-                syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
-                UploadFile.setAppSyncSettings(syncSettings)
-                activateAutoSync(syncSettings)
-            } else {
-                disableAutoSync()
-            }
+            runCatching {
+                if (activateSyncSwitch.isChecked) {
+                    val syncSettings = generateSyncSettings()
+                    trackPhotoSyncEvents(syncSettings)
+                    syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
+                    UploadFile.setAppSyncSettings(syncSettings)
+                    activateAutoSync(syncSettings)
+                } else {
+                    disableAutoSync()
+                }
 
-            trackPhotoSyncEvent(if (activateSyncSwitch.isChecked) "enabled" else "disabled")
+                trackPhotoSyncEvent(if (activateSyncSwitch.isChecked) "enabled" else "disabled")
+            }.onFailure {
+                it.printStackTrace()
+                showSnackbar(R.string.anErrorHasOccurred)
+                Sentry.captureException(it) { scope ->
+                    scope.setTag("syncIntervalType", syncSettingsViewModel.syncIntervalType.value?.title.toString())
+                    scope.setTag("createMonthFolder", createDatedSubFoldersSwitch.isChecked.toString())
+                    scope.setTag("deletePhoto", deletePicturesAfterSyncSwitch.isChecked.toString())
+                }
+            }
 
             Dispatchers.Main {
                 saveButton.hideProgressCatching(R.string.buttonSave)
