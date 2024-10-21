@@ -26,13 +26,15 @@ open class MediaFolder(
     @PrimaryKey var id: Long = 0L,
     var name: String = "",
     var isSynced: Boolean = false,
+    var path: String = "",
 ) : RealmObject() {
 
-    fun storeOrUpdate() {
+    fun storeOrUpdate(newPath: String? = null) {
         return UploadFile.getRealmInstance().use {
             it.executeTransaction { realm ->
                 findByIdQuery(realm, id)?.let { queryMedia ->
                     isSynced = queryMedia.isSynced
+                    path = newPath ?: queryMedia.path
                 }
                 realm.insertOrUpdate(this)
             }
@@ -55,8 +57,7 @@ open class MediaFolder(
 
         fun getRealmInstance() = UploadFile.getRealmInstance()
 
-        private fun findByIdQuery(realm: Realm, id: Long) =
-            realm.mediaFolderTable.equalTo(MediaFolder::id.name, id).findFirst()
+        private fun findByIdQuery(realm: Realm, id: Long) = realm.mediaFolderTable.equalTo(MediaFolder::id.name, id).findFirst()
 
         fun findById(realm: Realm, id: Long): MediaFolder? {
             return findByIdQuery(realm, id)?.let { mediaFolder ->
