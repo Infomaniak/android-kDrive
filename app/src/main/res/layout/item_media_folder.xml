@@ -19,8 +19,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/buttonHeight"
-    android:background="@color/backgroundCardview">
+    android:layout_height="wrap_content"
+    android:background="@color/backgroundCardview"
+    android:minHeight="@dimen/buttonHeight"
+    android:paddingVertical="@dimen/marginStandardSmall">
 
     <TextView
         android:id="@+id/mediaFolderTitle"
@@ -28,12 +30,14 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/marginStandard"
-        android:ellipsize="end"
+        android:ellipsize="middle"
+        android:maxLines="2"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintBottom_toTopOf="@id/mediaFolderPath"
         app:layout_constraintEnd_toStartOf="@id/mediaFolderSwitch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
         tools:text="Camera" />
 
     <TextView
@@ -42,6 +46,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/marginStandard"
+        android:layout_marginTop="@dimen/marginStandardVerySmall"
         android:ellipsize="middle"
         android:singleLine="true"
         android:visibility="gone"
@@ -49,6 +54,7 @@
         app:layout_constraintEnd_toStartOf="@id/mediaFolderSwitch"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/mediaFolderTitle"
+        app:layout_constraintVertical_chainStyle="packed"
         tools:text="/some/folder"
         tools:visibility="visible" />
 
