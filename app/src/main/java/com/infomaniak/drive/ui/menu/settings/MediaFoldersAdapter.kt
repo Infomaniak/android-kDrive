@@ -39,11 +39,17 @@ class MediaFoldersAdapter(
 
     override fun onBindViewHolder(holder: MediaFoldersViewHolder, position: Int): Unit = with(holder.binding) {
         val mediaFolder = itemList[position]
+
+        var path = mediaFolder.path.substringBeforeLast(mediaFolder.name)
+        if (!path.startsWith("/")) path = "/$path"
+
         mediaFolderTitle.text = mediaFolder.name
+
         mediaFolderPath.apply {
             isGone = mediaFolder.name.isEmpty() || mediaFolder.path.isEmpty()
-            text = mediaFolder.path
+            text = path
         }
+
         mediaFolderSwitch.apply {
             isChecked = mediaFolder.isSynced
             isVisible = true
