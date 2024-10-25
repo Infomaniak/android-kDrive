@@ -27,6 +27,7 @@ import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.FileObserver
@@ -366,28 +367,37 @@ class MainActivity : BaseActivity() {
         if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getCurrentUserPendingUploadsCount() == 0) {
             UploadFile.getAllUploadedFiles()?.let { filesUploadedRecently ->
                 if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT) {
-                    Utils.createConfirmation(
-                        context = this,
-                        title = getString(R.string.modalDeletePhotosTitle),
-                        message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
-                        buttonText = getString(R.string.buttonDelete),
-                        isDeletion = true,
-                    ) {
+
+                    fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
+                        return uploadFiles
+                            .filter {
+                                !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) &&
+                                        !DocumentsContract.isDocumentUri(this, it.getUriObject())
+                            }
+                            .map { it.getUriObject() }
+                    }
+
+                    fun onConfirmation(filesUploadedRecently: ArrayList<UploadFile>, filesUriToDelete: List<Uri>) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            val filesDeletionRequest = MediaStore.createDeleteRequest(
-                                contentResolver,
-                                filesUploadedRecently
-                                    .filter {
-                                        !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) &&
-                                                !DocumentsContract.isDocumentUri(this, it.getUriObject())
-                                    }
-                                    .map { it.getUriObject() }
-                            )
+                            val filesDeletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUriToDelete)
                             uploadedFilesToDelete = filesUploadedRecently
                             filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
                         } else {
                             mainViewModel.deleteSynchronizedFilesOnDevice(filesUploadedRecently)
                         }
+                    }
+
+                    // We check before sending the request to the MediaStore that the filtered list of URIs we have
+                    // is not empty because otherwise it'll crash.
+                    getFilesUriToDelete(filesUploadedRecently).takeIf { it.isNotEmpty() }?.let { filesUriToDelete ->
+                        Utils.createConfirmation(
+                            context = this,
+                            title = getString(R.string.modalDeletePhotosTitle),
+                            message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
+                            buttonText = getString(R.string.buttonDelete),
+                            isDeletion = true,
+                            onConfirmation = { onConfirmation(filesUploadedRecently, filesUriToDelete) }
+                        )
                     }
                 }
             }
