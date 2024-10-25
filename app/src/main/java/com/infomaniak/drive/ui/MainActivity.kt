@@ -387,8 +387,8 @@ class MainActivity : BaseActivity() {
                         }
                     }
 
-                    // We check before sending the request to the MediaStore that the filtered list of URIs we have
-                    // is not empty because otherwise it'll crash.
+                    // We check that the filtered list of URIs is not empty before showing the dialog and sending the request to
+                    // MediaStore; otherwise, it would cause a crash.
                     getFilesUriToDelete(filesUploadedRecently).takeIf { it.isNotEmpty() }?.let { filesUriToDelete ->
                         Utils.createConfirmation(
                             context = this,
