@@ -1,0 +1,1 @@
+- Amélioration de l'UI du chemin des dossiers dans l'écran des options de synchronisation

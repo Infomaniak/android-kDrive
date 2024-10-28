@@ -1,0 +1,1 @@
+- Enhance path of folders UI in synchronisation settings screen
