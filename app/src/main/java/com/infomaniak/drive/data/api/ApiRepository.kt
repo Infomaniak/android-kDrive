@@ -222,7 +222,7 @@ object ApiRepository : ApiRepositoryCore() {
         var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${loadCursor(cursor)}"
         if (!query.isNullOrBlank()) url += "&query=$query"
         if (date != null) url += "&modified_at=custom&modified_after=${date.first}&modified_before=${date.second}"
-        if (type != null) url += "&type=$type"
+        if (type != null) url += "&types[]=$type"
         if (categories != null) url += "&category=$categories"
 
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
