@@ -25,7 +25,8 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:touchscreenBlocksFocus="false">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/fileDetailsCollapsingToolbar"
@@ -66,6 +67,7 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                android:touchscreenBlocksFocus="false"
                 app:layout_collapseMode="pin"
                 app:navigationIconTint="@android:color/white" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
