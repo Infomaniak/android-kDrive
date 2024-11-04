@@ -133,12 +133,12 @@ dependencies {
     implementation project(path: ':Core:AppLock')
     implementation project(path: ':Core:Stores')
 
-    def work_version = '2.9.1'
+    def work_version = '2.9.1' // Keep the same version as the one in Core
     implementation "androidx.work:work-runtime-ktx:$work_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.2.0'
-    implementation 'androidx.lifecycle:lifecycle-process:2.8.6'
+    implementation 'androidx.lifecycle:lifecycle-process:2.8.7'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
     implementation 'androidx.webkit:webkit:1.12.1'
 
@@ -148,7 +148,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:6.5.2'
+    implementation 'com.airbnb.android:lottie:6.6.0'
     implementation 'com.github.Infomaniak:android-pdfview:3.2.10'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.5'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
@@ -157,7 +157,7 @@ dependencies {
 
     implementation 'com.github.realm:realm-android-adapters:v4.0.0'
 
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:24.0.0'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:24.0.3'
 
     implementation 'com.googlecode.plist:dd-plist:1.28'
 
