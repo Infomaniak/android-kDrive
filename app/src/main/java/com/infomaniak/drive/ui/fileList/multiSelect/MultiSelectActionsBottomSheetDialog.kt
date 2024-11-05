@@ -121,18 +121,25 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
         file?.isAllowedToBeColored() == true
     }
 
-    protected open fun configureAvailableOffline(): Unit = with(binding) {
+    protected open fun configureAvailableOffline() = with(binding) {
+        if (navigationArgs.onlyFolders) {
+            availableOffline.isGone = true
+            return@with
+        }
+
+        availableOffline.apply {
+            isEnabled = true
+            isVisible = true
+            setOnClickListener { selectOfflineDialogActionCallBack() }
+        }
+
         availableOfflineIcon.isGone = navigationArgs.onlyOffline
+
         availableOfflineComplete.isVisible = navigationArgs.onlyOffline
-        availableOffline.isEnabled = !navigationArgs.onlyFolders
 
         availableOfflineSwitch.apply {
             isChecked = navigationArgs.onlyOffline
             setOnCheckedChangeListener { _, _ -> selectOfflineDialogActionCallBack() }
-        }
-
-        availableOffline.apply {
-            setOnClickListener { selectOfflineDialogActionCallBack() }
         }
     }
 
