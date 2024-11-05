@@ -98,7 +98,7 @@
 
         <activity
             android:name=".ui.MainActivity"
-            android:configChanges="orientation|screenSize|layoutDirection" />
+            android:configChanges="orientation|screenSize|layoutDirection|screenLayout" />
 
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
