@@ -167,6 +167,9 @@ class DownloadOfflineFileManager(
             )
         )
 
+        // This line is here to help some devices that don't succeed in automatically creating the file…
+        offlineFile.createNewFile()
+
         saveRemoteData(downloadWorker.workerTag(), response, offlineFile) {
             onProgress(100, file.id)
             FileController.updateOfflineStatus(file.id, true)
