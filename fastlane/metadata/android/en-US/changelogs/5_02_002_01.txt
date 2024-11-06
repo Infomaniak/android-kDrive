@@ -1,0 +1,2 @@
+- Various fixes related to offline files
+- Rotation fix in the Gallery for some devices

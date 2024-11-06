@@ -1,0 +1,2 @@
+- Divers correctifs liés aux fichiers hors ligne
+- Correction de la rotation dans la Galerie pour certains appareils
