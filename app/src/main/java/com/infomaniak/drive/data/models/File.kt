@@ -86,7 +86,8 @@ open class File(
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     @SerializedName("is_favorite")
     var isFavorite: Boolean = false,
-    var sharelink: ShareLink? = null,
+    @SerializedName("sharelink")
+    var shareLink: ShareLink? = null,
     @SerializedName("capabilities")
     var rights: Rights? = null,
     var categories: @RawValue RealmList<FileCategory> = RealmList(),

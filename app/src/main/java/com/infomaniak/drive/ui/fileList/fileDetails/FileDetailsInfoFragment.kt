@@ -66,7 +66,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
 
             this@FileDetailsInfoFragment.file = file
 
-            file.sharelink?.let { setupShareLink() }
+            file.shareLink?.let { setupShareLink() }
             setupCategoriesContainer(file.getCategories())
             displayUsersAvatars()
             setupShareButton()
@@ -173,7 +173,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
     private fun setupShareLink() {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeShareLink == true || file.sharelink?.url?.isNotBlank() == true -> setupNormalShareLink()
+            file.rights?.canBecomeShareLink == true || file.shareLink?.url?.isNotBlank() == true -> setupNormalShareLink()
             else -> hideShareLinkView()
         }
     }
@@ -187,7 +187,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         showShareLinkView()
         binding.shareLinkContainer.setup(
             file = file,
-            shareLink = file.sharelink,
+            shareLink = file.shareLink,
             onTitleClicked = { newShareLink -> handleOnShareLinkTitleClicked(newShareLink) },
             onSettingsClicked = { newShareLink -> handleOnShareLinkSettingsClicked(newShareLink) })
     }

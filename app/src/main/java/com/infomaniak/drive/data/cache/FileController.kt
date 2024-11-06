@@ -316,7 +316,7 @@ object FileController {
         getRealmInstance().use { realm ->
             getFileProxyById(fileId, customRealm = realm)?.let { fileProxy ->
                 ApiRepository.getShareLink(fileProxy).data?.let { shareLink ->
-                    realm.executeTransaction { fileProxy.sharelink = shareLink }
+                    realm.executeTransaction { fileProxy.shareLink = shareLink }
                 }
             }
         }

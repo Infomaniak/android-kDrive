@@ -108,7 +108,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         val isPublicLinkEnabled = rights.canBecomeShareLink && hasNetwork
-                || currentFile.sharelink != null
+                || currentFile.shareLink != null
                 || !file.dropbox?.url.isNullOrBlank()
 
         sharePublicLink.isEnabled = isPublicLinkEnabled
@@ -292,20 +292,20 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun createPublicShareLink(
-        onSuccess: ((sharelinkUrl: String) -> Unit)? = null,
+        onSuccess: ((shareLinkUrl: String) -> Unit)? = null,
         onError: ((translatedError: String) -> Unit)? = null
     ) {
         when {
             currentFile.dropbox != null -> onSuccess?.invoke(currentFile.dropbox?.url!!)
-            currentFile.sharelink != null -> onSuccess?.invoke(currentFile.sharelink?.url!!)
+            currentFile.shareLink != null -> onSuccess?.invoke(currentFile.shareLink?.url!!)
             else -> {
                 showCopyPublicLinkLoader(true)
                 mainViewModel.createShareLink(currentFile).observe(ownerFragment) { postShareResponse ->
                     when {
                         postShareResponse?.isSuccess() == true -> {
-                            postShareResponse.data?.let { sharelink ->
-                                updateFilePublicLink(sharelink)
-                                onSuccess?.invoke(sharelink.url)
+                            postShareResponse.data?.let { shareLink ->
+                                updateFilePublicLink(shareLink)
+                                onSuccess?.invoke(shareLink.url)
                             }
                         }
                         else -> {
@@ -320,9 +320,9 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     private fun updateFilePublicLink(shareLink: ShareLink) {
         CoroutineScope(Dispatchers.IO).launch {
-            FileController.updateFile(currentFile.id) { it.sharelink = shareLink }
+            FileController.updateFile(currentFile.id) { it.shareLink = shareLink }
         }
-        currentFile.sharelink = shareLink
+        currentFile.shareLink = shareLink
         refreshBottomSheetUi(currentFile)
     }
 
@@ -391,7 +391,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             isActivated = file.isFavorite
             text = context.getString(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
         }
-        sharePublicLinkText.setText(if (file.sharelink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
+        sharePublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
 
         setOfflineItemUi(file, isOfflineProgress)
     }

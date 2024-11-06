@@ -255,7 +255,7 @@ class FileMigration : RealmMigration {
                 addRealmObjectField(File::conversion.name, fileConversionSchema)
                 addRealmObjectField(File::dropbox.name, dropboxSchema)
                 addRealmObjectField(File::version.name, fileVersionSchema)
-                addRealmObjectField(File::sharelink.name, shareLinkSchema)
+                addRealmObjectField(File::shareLink.name, shareLinkSchema)
             }
 
             // FileActivity migration

@@ -82,7 +82,7 @@ class FileShareDetailsFragment : Fragment() {
             setAvailableShareableItems()
             setToolbarTitle()
             binding.sharedUsersTitle.isGone = true
-            setupShareLink(file.sharelink)
+            setupShareLink(file.shareLink)
             refreshUi()
             setBackActionHandlers()
             setBackPressedHandlers()
@@ -202,7 +202,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun setupShareLink(shareLink: ShareLink? = null) {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeShareLink == true || file.sharelink?.url?.isNotBlank() == true -> setupNormalShareLink(shareLink)
+            file.rights?.canBecomeShareLink == true || file.shareLink?.url?.isNotBlank() == true -> setupNormalShareLink(shareLink)
             else -> hideShareLinkView()
         }
     }
