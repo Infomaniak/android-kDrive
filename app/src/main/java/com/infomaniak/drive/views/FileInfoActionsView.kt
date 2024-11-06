@@ -269,26 +269,25 @@ class FileInfoActionsView @JvmOverloads constructor(
      *
      * @return true if the file has been successfully downloaded, false if its name contains forbidden characters
      */
-    fun downloadAsOfflineFile(): Boolean {
-        with(currentFile) {
-            if (Utils.getInvalidFileNameCharacter(name) != null) return false
+    fun downloadAsOfflineFile(): Boolean = with(currentFile) {
 
-            val cacheFile = getCacheFile(context)
-            if (cacheFile.exists()) {
-                getOfflineFile(context)?.let { offlineFile ->
-                    Utils.moveCacheFileToOffline(this, cacheFile, offlineFile)
-                    CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, true) }
-                    isOffline = true
-                    onItemClickListener.onCacheAddedToOffline()
-                }
-            } else {
-                Utils.downloadAsOfflineFile(context, this)
-                if (isMarkedAsOffline) mainViewModel.updateOfflineFile.value = id
+        if (Utils.getInvalidFileNameCharacter(name) != null) return@with false
+
+        val cacheFile = getCacheFile(context)
+        if (cacheFile.exists()) {
+            getOfflineFile(context)?.let { offlineFile ->
+                Utils.moveCacheFileToOffline(file = this, cacheFile, offlineFile)
+                CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, isOffline = true) }
+                isOffline = true
+                onItemClickListener.onCacheAddedToOffline()
             }
-            refreshBottomSheetUi(this)
+        } else {
+            Utils.downloadAsOfflineFile(context, file = this)
+            if (isMarkedAsOffline) mainViewModel.updateOfflineFile.value = id
         }
+        refreshBottomSheetUi(file = this)
 
-        return true
+        return@with true
     }
 
     fun createPublicShareLink(
