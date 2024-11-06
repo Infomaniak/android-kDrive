@@ -34,7 +34,7 @@ open class AppSettings(
     companion object {
         private const val DB_NAME = "AppSettings.realm"
         private val realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(AppSettingsMigration.dbVersion)
+            .schemaVersion(AppSettingsMigration.DB_VERSION)
             .modules(RealmModules.AppSettingsModule())
             .migration(AppSettingsMigration())
             .build()
@@ -116,7 +116,7 @@ open class AppSettings(
         }
 
         companion object {
-            const val dbVersion = 1L // Must be bumped when the schema changes
+            const val DB_VERSION = 1L // Must be bumped when the schema changes
         }
     }
 }

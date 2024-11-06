@@ -255,7 +255,7 @@ class FileMigration : RealmMigration {
                 addRealmObjectField(File::conversion.name, fileConversionSchema)
                 addRealmObjectField(File::dropbox.name, dropboxSchema)
                 addRealmObjectField(File::version.name, fileVersionSchema)
-                addRealmObjectField(File::shareLink.name, shareLinkSchema)
+                addRealmObjectField("sharelink", shareLinkSchema)
             }
 
             // FileActivity migration
@@ -370,6 +370,14 @@ class FileMigration : RealmMigration {
 
             oldVersionTemp++
         }
+
+        // Migrated to version 10
+        // - Rename field `sharelink` into `shareLink`
+        if (oldVersionTemp == 9L) {
+            schema[File::class.java.simpleName]?.renameField("sharelink", File::shareLink.name)
+
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -397,7 +405,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val dbVersion = 9L // Must be bumped when the schema changes
+        const val DB_VERSION = 10L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }
