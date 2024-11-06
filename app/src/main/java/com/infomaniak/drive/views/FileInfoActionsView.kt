@@ -221,7 +221,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOfflineSwitch.setOnClickListener { view ->
             val downloadError = !onItemClickListener.availableOfflineSwitched(
                 fileInfoActionsView = this@FileInfoActionsView,
-                isChecked = (view as SwitchMaterial).isChecked
+                isChecked = (view as SwitchMaterial).isChecked,
             )
 
             with(ownerFragment) {
@@ -235,9 +235,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         showAboveFab = isBottomSheetFragmentView,
                     )
                 }
-                if (isBottomSheetFragmentView) {
-                    findNavController().popBackStack()
-                }
+                if (isBottomSheetFragmentView) findNavController().popBackStack()
             }
         }
         availableOffline.setOnClickListener { availableOfflineSwitch.performClick() }

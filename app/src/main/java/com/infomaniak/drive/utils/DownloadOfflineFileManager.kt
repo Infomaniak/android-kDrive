@@ -72,6 +72,7 @@ class DownloadOfflineFileManager(
         file: File,
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
+
         currentFile = file
         val offlineFile = file.getOfflineFile(context, userDrive.userId)
         val cacheFile = file.getCacheFile(context, userDrive)
@@ -101,7 +102,7 @@ class DownloadOfflineFileManager(
             lastDownloadedFile = offlineFile
         }
 
-        return startOfflineDownload(context = context, file = file, offlineFile = offlineFile!!, onProgress = onProgress)
+        return startOfflineDownload(context, file, offlineFile!!, onProgress)
     }
 
     fun cleanLastDownloadedFile() {
@@ -139,9 +140,11 @@ class DownloadOfflineFileManager(
         context: Context,
         file: File,
         offlineFile: java.io.File,
-        onProgress: (progress: Int, fileId: Int) -> Unit
+        onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result = withContext(Dispatchers.IO) {
+
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
+
         val response = downloadFileResponse(
             fileUrl = ApiRoutes.downloadFile(file),
             okHttpClient = okHttpClient,
@@ -158,12 +161,12 @@ class DownloadOfflineFileManager(
                             context = context,
                             contentTitle = file.name,
                             contentText = "%d%%".format(progress),
-                            progressPercent = progress
+                            progressPercent = progress,
                         )
                     }
 
                     SentryLog.d(downloadWorker.workerTag(), "download $progress%")
-                }
+                },
             )
         )
 
@@ -180,7 +183,9 @@ class DownloadOfflineFileManager(
         if (response.isSuccessful) {
             fileDownloaded(context, file.id)
             ListenableWorker.Result.success()
-        } else ListenableWorker.Result.failure()
+        } else {
+            ListenableWorker.Result.failure()
+        }
     }
 
     private fun fileDownloaded(context: Context, fileId: Int) {
@@ -276,9 +281,9 @@ class DownloadOfflineFileManager(
             response: Response,
             outputFile: java.io.File? = null,
             outputStream: ParcelFileDescriptor.AutoCloseOutputStream? = null,
-            onFinish: (() -> Unit)? = null
+            onFinish: (() -> Unit)? = null,
         ) {
-            SentryLog.d(tag, "save remote data to ${outputFile?.path}")
+            SentryLog.d(tag, "Save remote data to ${outputFile?.path}")
             response.body?.byteStream()?.buffered()?.use { input ->
                 val stream = outputStream ?: outputFile?.outputStream()
                 stream?.use { output ->
