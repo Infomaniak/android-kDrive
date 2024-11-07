@@ -255,13 +255,11 @@ class FileMigration : RealmMigration {
                 addRealmObjectField(File::conversion.name, fileConversionSchema)
                 addRealmObjectField(File::dropbox.name, dropboxSchema)
                 addRealmObjectField(File::version.name, fileVersionSchema)
-                addRealmObjectField(File::sharelink.name, shareLinkSchema)
+                addRealmObjectField("sharelink", shareLinkSchema)
             }
 
             // FileActivity migration
-            schema[FileActivity::class.java.simpleName]?.apply {
-                removeField("path")
-            }
+            schema[FileActivity::class.java.simpleName]?.removeField("path")
 
             // Set embedded objects
             schema[ShareLinkCapabilities::class.java.simpleName]?.isEmbedded = true
@@ -306,9 +304,7 @@ class FileMigration : RealmMigration {
 
         // Migrated to version 6
         if (oldVersionTemp == 5L) {
-            schema[File::class.java.simpleName]?.apply {
-                renameField("_color", File::color.name)
-            }
+            schema["File"]?.renameField("_color", "color")
 
             oldVersionTemp++
         }
@@ -316,8 +312,8 @@ class FileMigration : RealmMigration {
         // Migrated to version 7
         // - Migrate to ApiV3
         if (oldVersionTemp == 6L) {
-            schema[File::class.java.simpleName]?.apply {
-                addField(File::isMarkedAsOffline.name, Boolean::class.java, FieldAttribute.REQUIRED)
+            schema["File"]?.apply {
+                addField("isMarkedAsOffline", Boolean::class.java, FieldAttribute.REQUIRED)
                 addField("uid", String::class.java, FieldAttribute.REQUIRED)
                 addField("revisedAt", Long::class.java)
                 addField("updatedAt", Long::class.java)
@@ -370,6 +366,14 @@ class FileMigration : RealmMigration {
 
             oldVersionTemp++
         }
+
+        // Migrated to version 10
+        // - Rename field `sharelink` into `shareLink`
+        if (oldVersionTemp == 9L) {
+            schema["File"]?.renameField("sharelink", "shareLink")
+
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -382,12 +386,12 @@ class FileMigration : RealmMigration {
     }
 
     private fun temporaryMigrationFixToV2(realm: DynamicRealm, schema: RealmSchema) {
-        val offlineFile = realm.where(File::class.java.simpleName).equalTo(File::isOffline.name, true).findFirst()
+        val offlineFile = realm.where("File").equalTo("isOffline", true).findFirst()
 
         // Delete all realm DB
         realm.deleteAll()
         // Continue migration
-        schema[Rights::class.java.simpleName]?.isEmbedded = true
+        schema["Rights"]?.isEmbedded = true
 
         // Logout the current user if there is at least one offline file
         offlineFile?.let {
@@ -397,7 +401,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val dbVersion = 9L // Must be bumped when the schema changes
+        const val DB_VERSION = 10L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }

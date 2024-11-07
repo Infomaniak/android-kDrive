@@ -86,7 +86,8 @@ open class File(
     var users: @WriteWith<IntRealmListParceler> RealmList<Int> = RealmList(),
     @SerializedName("is_favorite")
     var isFavorite: Boolean = false,
-    var sharelink: ShareLink? = null,
+    @SerializedName("sharelink")
+    var shareLink: ShareLink? = null,
     @SerializedName("capabilities")
     var rights: Rights? = null,
     var categories: @RawValue RealmList<FileCategory> = RealmList(),
@@ -271,7 +272,7 @@ open class File(
      * File is offline and local file is the same as in the server (same modification date and size)
      */
     fun isOfflineAndIntact(offlineFile: IOFile): Boolean {
-        return isOffline && ((offlineFile.lastModified() / 1000) == lastModifiedAt && isIntactFile(offlineFile))
+        return isOffline && ((offlineFile.lastModified() / 1_000L) == lastModifiedAt && isIntactFile(offlineFile))
     }
 
     fun getConvertedPdfCache(context: Context, userDrive: UserDrive): IOFile {

@@ -316,7 +316,7 @@ object FileController {
         getRealmInstance().use { realm ->
             getFileProxyById(fileId, customRealm = realm)?.let { fileProxy ->
                 ApiRepository.getShareLink(fileProxy).data?.let { shareLink ->
-                    realm.executeTransaction { fileProxy.sharelink = shareLink }
+                    realm.executeTransaction { fileProxy.shareLink = shareLink }
                 }
             }
         }
@@ -433,7 +433,7 @@ object FileController {
 
     private fun getRealmConfiguration(dbName: String): RealmConfiguration {
         return RealmConfiguration.Builder()
-            .schemaVersion(FileMigration.dbVersion) // Must be bumped when the schema changes
+            .schemaVersion(FileMigration.DB_VERSION) // Must be bumped when the schema changes
             .migration(FileMigration())
             .modules(RealmModules.LocalFilesModule())
             .name(dbName)

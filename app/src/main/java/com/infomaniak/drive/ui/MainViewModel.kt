@@ -223,7 +223,7 @@ class MainViewModel(
         val apiResponse = ApiRepository.createShareLink(file, body)
 
         if (apiResponse.isSuccess()) {
-            FileController.updateFile(file.id) { it.sharelink = apiResponse.data }
+            FileController.updateFile(file.id) { it.shareLink = apiResponse.data }
         }
         emit(apiResponse)
     }
@@ -278,7 +278,7 @@ class MainViewModel(
     fun deleteFileShareLink(file: File) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.deleteFileShareLink(file)
         if (apiResponse.isSuccess()) FileController.updateFile(file.id) {
-            it.sharelink = null
+            it.shareLink = null
             it.rights?.canBecomeShareLink = true
         }
         emit(apiResponse)

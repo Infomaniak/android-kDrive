@@ -150,9 +150,9 @@ open class UploadFile(
 
     companion object {
         private const val DB_NAME = "Sync.realm"
-        private const val ONE_DAY = 24 * 60 * 60 * 1000
+        private const val ONE_DAY = 24 * 60 * 60 * 1_000
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-            .schemaVersion(UploadMigration.dbVersion)
+            .schemaVersion(UploadMigration.DB_VERSION)
             .modules(RealmModules.SyncFilesModule())
             .migration(UploadMigration())
             .build()

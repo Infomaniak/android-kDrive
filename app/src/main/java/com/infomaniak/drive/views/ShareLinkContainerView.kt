@@ -51,7 +51,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         currentFile = file
         this.shareLink = shareLink
         isVisible = true
-        urlValue = file.sharelink?.url ?: ""
+        urlValue = file.shareLink?.url ?: ""
 
         selectUi(file.isDropBox())
 
