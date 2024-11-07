@@ -26,12 +26,10 @@ import androidx.core.view.isGone
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBottomSheetDialog
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.toPx
@@ -39,7 +37,6 @@ import com.infomaniak.lib.core.utils.toPx
 class MenuGalleryFragment : Fragment() {
 
     private var binding: FragmentMenuGalleryBinding by safeBinding()
-    private val mainViewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentMenuGalleryBinding.inflate(inflater, container, false).also { binding = it }.root
