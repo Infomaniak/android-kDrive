@@ -364,44 +364,43 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleDeletionOfUploadedPhotos() {
-        if (UploadFile.getAppSyncSettings()?.deleteAfterSync == true && UploadFile.getCurrentUserPendingUploadsCount() == 0) {
-            UploadFile.getAllUploadedFiles()?.let { filesUploadedRecently ->
-                if (filesUploadedRecently.size >= SYNCED_FILES_DELETION_FILES_AMOUNT) {
 
-                    fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
-                        return uploadFiles
-                            .filter {
-                                !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) &&
-                                        !DocumentsContract.isDocumentUri(this, it.getUriObject())
-                            }
-                            .map { it.getUriObject() }
-                    }
-
-                    fun onConfirmation(filesUploadedRecently: ArrayList<UploadFile>, filesUriToDelete: List<Uri>) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            val filesDeletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUriToDelete)
-                            uploadedFilesToDelete = filesUploadedRecently
-                            filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
-                        } else {
-                            mainViewModel.deleteSynchronizedFilesOnDevice(filesUploadedRecently)
-                        }
-                    }
-
-                    // We check that the filtered list of URIs is not empty before showing the dialog and sending the request to
-                    // MediaStore; otherwise, it would cause a crash.
-                    getFilesUriToDelete(filesUploadedRecently).takeIf { it.isNotEmpty() }?.let { filesUriToDelete ->
-                        Utils.createConfirmation(
-                            context = this,
-                            title = getString(R.string.modalDeletePhotosTitle),
-                            message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
-                            buttonText = getString(R.string.buttonDelete),
-                            isDeletion = true,
-                            onConfirmation = { onConfirmation(filesUploadedRecently, filesUriToDelete) }
-                        )
-                    }
+        fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
+            return uploadFiles
+                .filter {
+                    !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) &&
+                            !DocumentsContract.isDocumentUri(this, it.getUriObject())
                 }
+                .map { it.getUriObject() }
+        }
+
+        fun onConfirmation(filesUploadedRecently: ArrayList<UploadFile>, filesUriToDelete: List<Uri>) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val filesDeletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUriToDelete)
+                uploadedFilesToDelete = filesUploadedRecently
+                filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
+            } else {
+                mainViewModel.deleteSynchronizedFilesOnDevice(filesUploadedRecently)
             }
         }
+
+        val syncSettings = UploadFile.getAppSyncSettings() ?: return
+        if (!syncSettings.deleteAfterSync) return
+        if (UploadFile.getCurrentUserPendingUploadsCount() != 0) return
+        val filesUploadedRecently = UploadFile.getAllUploadedFiles() ?: return
+        if (filesUploadedRecently.size < SYNCED_FILES_DELETION_FILES_AMOUNT) return
+        // We check that the filtered list of URIs is not empty before showing the dialog
+        // and sending the request to MediaStore; otherwise, it would cause a crash.
+        val filesUriToDelete = getFilesUriToDelete(filesUploadedRecently).takeIf { it.isNotEmpty() } ?: return
+
+        Utils.createConfirmation(
+            context = this,
+            title = getString(R.string.modalDeletePhotosTitle),
+            message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
+            buttonText = getString(R.string.buttonDelete),
+            isDeletion = true,
+            onConfirmation = { onConfirmation(filesUploadedRecently, filesUriToDelete) }
+        )
     }
 
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
