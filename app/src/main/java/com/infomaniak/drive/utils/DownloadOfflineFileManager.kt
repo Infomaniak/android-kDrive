@@ -175,12 +175,18 @@ class DownloadOfflineFileManager(
             // This line is here to help some devices that don't succeed in automatically creating the file…
             offlineFile.createNewFile()
         }.onFailure {
+            val parentExists = offlineFile.parentFile?.exists()
+
             Sentry.withScope { scope ->
-                scope.setExtra("does parent exist", offlineFile.parentFile?.exists().toString())
+                scope.setExtra("does parent exist", parentExists.toString())
                 SentryLog.e(TAG, "Failed to create a new file", it)
             }
 
-            return@withContext ListenableWorker.Result.failure()
+            if (parentExists == false) {
+                offlineFile.parentFile?.createNewFile()
+            } else {
+                return@withContext ListenableWorker.Result.failure()
+            }
         }
 
         saveRemoteData(downloadWorker.workerTag(), response, offlineFile) {
