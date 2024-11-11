@@ -46,6 +46,7 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.SentryLog
+import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -170,8 +171,7 @@ class DownloadOfflineFileManager(
             )
         )
 
-        // This line is here to help some devices that don't succeed in automatically creating the file…
-        offlineFile.createNewFile()
+        makeSureFileExists(offlineFile) ?: return@withContext ListenableWorker.Result.failure()
 
         saveRemoteData(downloadWorker.workerTag(), response, offlineFile) {
             onProgress(100, file.id)
@@ -186,6 +186,25 @@ class DownloadOfflineFileManager(
         } else {
             ListenableWorker.Result.failure()
         }
+    }
+
+    private fun makeSureFileExists(offlineFile: java.io.File): Unit? {
+        val parentExists = offlineFile.parentFile?.exists()
+
+        runCatching {
+            // This line is here to help some devices that don't succeed in automatically creating the file…
+            if (parentExists == false) offlineFile.parentFile?.mkdirs()
+            offlineFile.createNewFile()
+        }.onFailure {
+            Sentry.withScope { scope ->
+                scope.setExtra("does parent exist", parentExists.toString())
+                SentryLog.e(TAG, "Failed to create a new file", it)
+            }
+
+            return null
+        }
+
+        return Unit
     }
 
     private fun fileDownloaded(context: Context, fileId: Int) {
@@ -232,6 +251,7 @@ class DownloadOfflineFileManager(
 
     companion object {
         private const val MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS = 1000L
+        private val TAG = DownloadOfflineFileManager::class.java.simpleName
 
         fun getFailedDownloadWorkerOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
             WorkQuery.Builder
