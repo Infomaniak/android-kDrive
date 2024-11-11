@@ -171,23 +171,7 @@ class DownloadOfflineFileManager(
             )
         )
 
-        runCatching {
-            // This line is here to help some devices that don't succeed in automatically creating the file…
-            offlineFile.createNewFile()
-        }.onFailure {
-            val parentExists = offlineFile.parentFile?.exists()
-
-            Sentry.withScope { scope ->
-                scope.setExtra("does parent exist", parentExists.toString())
-                SentryLog.e(TAG, "Failed to create a new file", it)
-            }
-
-            if (parentExists == false) {
-                offlineFile.parentFile?.createNewFile()
-            } else {
-                return@withContext ListenableWorker.Result.failure()
-            }
-        }
+        makeSureFileExists(offlineFile) ?: return@withContext ListenableWorker.Result.failure()
 
         saveRemoteData(downloadWorker.workerTag(), response, offlineFile) {
             onProgress(100, file.id)
@@ -202,6 +186,25 @@ class DownloadOfflineFileManager(
         } else {
             ListenableWorker.Result.failure()
         }
+    }
+
+    private fun makeSureFileExists(offlineFile: java.io.File): Unit? {
+        val parentExists = offlineFile.parentFile?.exists()
+
+        runCatching {
+            // This line is here to help some devices that don't succeed in automatically creating the file…
+            if (parentExists == false) offlineFile.parentFile?.mkdirs()
+            offlineFile.createNewFile()
+        }.onFailure {
+            Sentry.withScope { scope ->
+                scope.setExtra("does parent exist", parentExists.toString())
+                SentryLog.e(TAG, "Failed to create a new file", it)
+            }
+
+            return null
+        }
+
+        return Unit
     }
 
     private fun fileDownloaded(context: Context, fileId: Int) {
