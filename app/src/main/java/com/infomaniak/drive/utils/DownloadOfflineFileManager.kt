@@ -192,8 +192,8 @@ class DownloadOfflineFileManager(
         val parentExists = offlineFile.parentFile?.exists()
 
         runCatching {
-            // This line is here to help some devices that don't succeed in automatically creating the file…
             if (parentExists == false) offlineFile.parentFile?.mkdirs()
+            // This line is here to help some devices that don't succeed in automatically creating the file…
             offlineFile.createNewFile()
         }.onFailure {
             Sentry.withScope { scope ->
