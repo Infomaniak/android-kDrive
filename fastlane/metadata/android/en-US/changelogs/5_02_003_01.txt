@@ -1,0 +1,4 @@
+- Enhance Gallery UI
+- Better handling of deleted images in the Gallery
+- Fix issue when creating a new file
+- Fix issue in search filters

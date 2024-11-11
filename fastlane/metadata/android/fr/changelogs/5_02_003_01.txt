@@ -1,0 +1,4 @@
+- Amélioration de l'interface utilisateur de la galerie
+- Meilleure gestion des images supprimées dans la galerie
+- Correction d'un problème lors de la création d'un nouveau fichier
+- Correction d'un problème dans les filtres de recherche
