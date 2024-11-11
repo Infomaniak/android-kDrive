@@ -47,9 +47,6 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
-import io.sentry.SentryEvent
-import io.sentry.SentryLevel
-import io.sentry.protocol.Message
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -179,15 +176,8 @@ class DownloadOfflineFileManager(
             offlineFile.createNewFile()
         }.onFailure {
             Sentry.withScope { scope ->
-                val sentryEvent = SentryEvent().apply {
-                    level = SentryLevel.ERROR
-                    message = Message().apply { this.message = "Failed to create a new file" }
-                    throwable = it
-                }
-
                 scope.setExtra("does parent exist", offlineFile.parentFile?.exists().toString())
-
-                Sentry.captureEvent(sentryEvent)
+                SentryLog.e(TAG, "Failed to create a new file", it)
             }
 
             return@withContext ListenableWorker.Result.failure()
@@ -252,6 +242,7 @@ class DownloadOfflineFileManager(
 
     companion object {
         private const val MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS = 1000L
+        private val TAG = DownloadOfflineFileManager::class.java.simpleName
 
         fun getFailedDownloadWorkerOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
             WorkQuery.Builder
