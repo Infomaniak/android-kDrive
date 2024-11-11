@@ -277,6 +277,9 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 removeFileInSlider()
                 showSnackbar(getString(R.string.snackbarMoveTrashConfirmation, currentFile.name))
                 mainViewModel.deleteFileFromHome.value = true
+                mainViewModel.deleteFilesFromGallery.postValue(
+                    mainViewModel.deleteFilesFromGallery.value?.plus(currentFile.id) ?: listOf(currentFile.id)
+                )
             } else {
                 showSnackbar(R.string.errorDelete)
             }

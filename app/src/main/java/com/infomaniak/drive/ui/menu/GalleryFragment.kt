@@ -148,6 +148,10 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
         }
 
         observeApiResultPagination()
+
+        mainViewModel.deleteFilesFromGallery.observe(viewLifecycleOwner) { filesId ->
+            filesId.forEach(galleryAdapter::deleteByFileId)
+        }
     }
 
     private fun observeApiResultPagination() {

@@ -124,6 +124,8 @@ class MainViewModel(
     private var syncOfflineFilesJob = Job()
     private var setCurrentFolderJob = Job()
 
+    val deleteFilesFromGallery = SingleLiveEvent<List<Int>>()
+
     private fun getContext() = getApplication<MainApplication>()
 
     fun setCurrentFolder(folder: File?) {
