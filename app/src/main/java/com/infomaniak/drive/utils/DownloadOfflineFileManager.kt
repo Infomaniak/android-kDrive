@@ -46,6 +46,10 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.SentryLog
+import io.sentry.Sentry
+import io.sentry.SentryEvent
+import io.sentry.SentryLevel
+import io.sentry.protocol.Message
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -170,8 +174,24 @@ class DownloadOfflineFileManager(
             )
         )
 
-        // This line is here to help some devices that don't succeed in automatically creating the file…
-        offlineFile.createNewFile()
+        runCatching {
+            // This line is here to help some devices that don't succeed in automatically creating the file…
+            offlineFile.createNewFile()
+        }.onFailure {
+            Sentry.withScope { scope ->
+                val sentryEvent = SentryEvent().apply {
+                    level = SentryLevel.ERROR
+                    message = Message().apply { this.message = "Failed to create a new file" }
+                    throwable = it
+                }
+
+                scope.setExtra("does parent exist", offlineFile.parentFile?.exists().toString())
+
+                Sentry.captureEvent(sentryEvent)
+            }
+
+            return@withContext ListenableWorker.Result.failure()
+        }
 
         saveRemoteData(downloadWorker.workerTag(), response, offlineFile) {
             onProgress(100, file.id)
