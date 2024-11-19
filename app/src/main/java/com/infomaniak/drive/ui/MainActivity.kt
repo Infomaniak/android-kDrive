@@ -99,7 +99,6 @@ import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
 import com.infomaniak.lib.stores.reviewmanagers.InAppReviewManager
 import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
-import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -277,10 +276,7 @@ class MainActivity : BaseActivity() {
         inAppUpdateManager.init(
             onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) "discoverNow" else "discoverLater") },
             onInstallStart = { trackInAppUpdate("installUpdate") },
-            onInstallFailure = {
-                Sentry.captureException(it)
-                showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab())
-            },
+            onInstallFailure = { showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab()) },
             onInAppUpdateUiChange = { isUpdateDownloaded ->
                 if (isUpdateDownloaded && canDisplayInAppSnackbar()) {
                     inAppUpdateSnackbar = showIndefiniteSnackbar(
