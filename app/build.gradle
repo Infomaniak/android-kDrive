@@ -157,7 +157,7 @@ dependencies {
 
     implementation 'com.github.realm:realm-android-adapters:v4.0.0'
 
-    standardImplementation 'com.google.firebase:firebase-messaging-ktx:24.0.3'
+    standardImplementation 'com.google.firebase:firebase-messaging-ktx:24.1.0'
 
     implementation 'com.googlecode.plist:dd-plist:1.28'
 
