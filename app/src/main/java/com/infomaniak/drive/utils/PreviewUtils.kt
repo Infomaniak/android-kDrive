@@ -186,7 +186,7 @@ fun downloadFile(
     onProgress: (progress: Int) -> Unit,
 ) {
     if (externalOutputFile.exists()) externalOutputFile.delete()
-    val downloadUrl = ApiRoutes.getDownloadFileUrl(file)
+    val downloadUrl = ApiRoutes.getDownloadFileUrl(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
 
     DownloadOfflineFileManager.downloadFileResponse(downloadUrl, downloadInterceptor = downloadProgressInterceptor).use {

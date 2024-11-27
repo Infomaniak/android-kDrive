@@ -105,7 +105,7 @@ object ApiRoutes {
             downloadFile(file)
         }
 
-        return if (isOnlyOfficePreview()) "$downloadUrl?as=pdf" else downloadUrl
+        return downloadUrl
     }
 
     fun getThumbnailUrl(file: File) = with(file) {
