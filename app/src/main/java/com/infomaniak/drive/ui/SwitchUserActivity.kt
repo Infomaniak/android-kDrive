@@ -26,7 +26,6 @@ import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.models.user.User
 
 class SwitchUserActivity : AppCompatActivity() {
 
@@ -41,7 +40,9 @@ class SwitchUserActivity : AppCompatActivity() {
         }
 
         AccountUtils.getAllUsers().observe(this@SwitchUserActivity) { users ->
-            usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>) { user ->
+            val currentUserId = AccountUtils.currentUserId
+            val orderedUsers = users.sortedBy { it.id != currentUserId }
+            usersRecyclerView.adapter = UserAdapter(orderedUsers) { user ->
                 trackAccountEvent("switch")
                 AccountUtils.currentUser = user
                 AccountUtils.currentDriveId = -1
