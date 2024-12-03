@@ -99,13 +99,21 @@ class RootFilesFragment : Fragment() {
                 CommonFolders -> {
                     folderToOpenSet.join()
                     commonFolderToOpen?.let { (id, name) ->
-                        safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(folderId = id, folderName = name))
+                        val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+                            folderId = id,
+                            folderName = name
+                        )
+                        safeNavigate(directions)
                     }
                 }
                 PersonalFolder -> {
                     folderToOpenSet.join()
                     personalFolderToOpen?.let { (id, name) ->
-                        safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(folderId = id, folderName = name))
+                        val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+                            folderId = id,
+                            folderName = name
+                        )
+                        safeNavigate(directions)
                     }
                 }
                 Favorites -> {
@@ -135,14 +143,22 @@ class RootFilesFragment : Fragment() {
         organizationFolder.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = CommonFolders
             commonFolderToOpen?.let { (id, name) ->
-                safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(folderId = id, folderName = name))
+                val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+                    folderId = id,
+                    folderName = name
+                )
+                safeNavigate(directions)
             }
         }
 
         personalFolder.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = PersonalFolder
             personalFolderToOpen?.let { (id, name) ->
-                safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(folderId = id, folderName = name))
+                val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+                    folderId = id,
+                    folderName = name
+                )
+                safeNavigate(directions)
             }
         }
 
