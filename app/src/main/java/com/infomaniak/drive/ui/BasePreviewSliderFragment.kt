@@ -22,17 +22,18 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.CallSuper
+import androidx.annotation.OptIn
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
@@ -42,6 +43,7 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderAdapter
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
@@ -123,8 +125,17 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             offscreenPageLimit = 1
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                @OptIn(UnstableApi::class)
                 override fun onPageSelected(position: Int) {
-                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
+                    val selectedFragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")
+
+                    // Implementation of onFragmentUnselected to handle resume of media to the same position, only
+                    // for PreviewVideoFragment.
+                    childFragmentManager.fragments.filter {
+                        it is PreviewPlaybackFragment && it != selectedFragment
+                    }.forEach { unselectedFragment ->
+                        (unselectedFragment as? PreviewPlaybackFragment)?.onFragmentUnselected()
+                    }
 
                     currentFile = previewSliderAdapter.getFile(position)
                     previewSliderViewModel.currentPreview = currentFile
