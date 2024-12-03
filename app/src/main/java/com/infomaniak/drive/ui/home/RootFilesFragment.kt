@@ -116,24 +116,12 @@ class RootFilesFragment : Fragment() {
                         safeNavigate(directions)
                     }
                 }
-                Favorites -> {
-                    safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
-                }
-                RecentChanges -> {
-                    safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
-                }
-                SharedWithMe -> {
-                    safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
-                }
-                MyShares -> {
-                    safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
-                }
-                Offline -> {
-                    safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
-                }
-                Trash -> {
-                    safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
-                }
+                Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
+                RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
+                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
+                MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
+                Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
+                Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
                 null -> Unit // No-op
             }
         }
