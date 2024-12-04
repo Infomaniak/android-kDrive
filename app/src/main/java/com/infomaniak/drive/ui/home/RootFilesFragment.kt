@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDirections
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
@@ -43,6 +44,7 @@ import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -96,24 +98,12 @@ class RootFilesFragment : Fragment() {
     private fun setupItems() = with(binding) {
         organizationFolder.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = CommonFolders
-            commonFolderToOpen?.let { (id, name) ->
-                val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-                    folderId = id,
-                    folderName = name
-                )
-                safeNavigate(directions)
-            }
+            commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
         }
 
         personalFolder.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = PersonalFolder
-            personalFolderToOpen?.let { (id, name) ->
-                val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-                    folderId = id,
-                    folderName = name
-                )
-                safeNavigate(directions)
-            }
+            personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
         }
 
         favorites.setOnClickListener {
@@ -147,7 +137,7 @@ class RootFilesFragment : Fragment() {
         }
     }
 
-    private val folderToOpenSet = Job()
+    private val hasFolderToOpenBeenSet: CompletableJob = Job()
 
     private fun observeFiles() {
         fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
@@ -165,7 +155,7 @@ class RootFilesFragment : Fragment() {
         fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
             personalFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
         }
-        folderToOpenSet.complete()
+        hasFolderToOpenBeenSet.complete()
     }
 
     private fun observeNavigateFileListTo() {
@@ -188,29 +178,17 @@ class RootFilesFragment : Fragment() {
     private fun navigateToLastVisitedFileTreeCategory() {
         if (fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory) {
             uiSettings.lastVisitedRootFileTreeCategory = null
-        }
-        if (!fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory) lifecycleScope.launch {
+        } else lifecycleScope.launch {
             fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory = true
             when (uiSettings.lastVisitedRootFileTreeCategory) {
+                null -> Unit // Stay here (at the root)
                 CommonFolders -> {
-                    folderToOpenSet.join()
-                    commonFolderToOpen?.let { (id, name) ->
-                        val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-                            folderId = id,
-                            folderName = name
-                        )
-                        safeNavigate(directions)
-                    }
+                    hasFolderToOpenBeenSet.join()
+                    commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
                 }
                 PersonalFolder -> {
-                    folderToOpenSet.join()
-                    personalFolderToOpen?.let { (id, name) ->
-                        val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-                            folderId = id,
-                            folderName = name
-                        )
-                        safeNavigate(directions)
-                    }
+                    hasFolderToOpenBeenSet.join()
+                    personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
                 }
                 Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
                 RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
@@ -218,8 +196,14 @@ class RootFilesFragment : Fragment() {
                 MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
                 Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
                 Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
-                null -> Unit // No-op
             }
         }
     }
+
+    private fun fileListDirections(
+        folderToOpen: FolderToOpen,
+    ): NavDirections = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+        folderId = folderToOpen.id,
+        folderName = folderToOpen.name
+    )
 }
