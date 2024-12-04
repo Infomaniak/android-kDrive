@@ -90,41 +90,7 @@ class RootFilesFragment : Fragment() {
 
         setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, rootFilesUploadFileInProgressView)
 
-        if (fileListViewModel.justLaunched.not()) {
-            uiSettings.lastVisitedRootFileTreeCategory = null
-        }
-        if (fileListViewModel.justLaunched) lifecycleScope.launch {
-            fileListViewModel.justLaunched = false
-            when (uiSettings.lastVisitedRootFileTreeCategory) {
-                CommonFolders -> {
-                    folderToOpenSet.join()
-                    commonFolderToOpen?.let { (id, name) ->
-                        val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-                            folderId = id,
-                            folderName = name
-                        )
-                        safeNavigate(directions)
-                    }
-                }
-                PersonalFolder -> {
-                    folderToOpenSet.join()
-                    personalFolderToOpen?.let { (id, name) ->
-                        val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-                            folderId = id,
-                            folderName = name
-                        )
-                        safeNavigate(directions)
-                    }
-                }
-                Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
-                RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
-                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
-                MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
-                Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
-                Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
-                null -> Unit // No-op
-            }
-        }
+        navigateToLastVisitedFileTreeCategory()
     }
 
     private fun setupItems() = with(binding) {
@@ -218,4 +184,42 @@ class RootFilesFragment : Fragment() {
     }
 
     data class FolderToOpen(val id: Int, val name: String)
+
+    private fun navigateToLastVisitedFileTreeCategory() {
+        if (fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory) {
+            uiSettings.lastVisitedRootFileTreeCategory = null
+        }
+        if (!fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory) lifecycleScope.launch {
+            fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory = true
+            when (uiSettings.lastVisitedRootFileTreeCategory) {
+                CommonFolders -> {
+                    folderToOpenSet.join()
+                    commonFolderToOpen?.let { (id, name) ->
+                        val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+                            folderId = id,
+                            folderName = name
+                        )
+                        safeNavigate(directions)
+                    }
+                }
+                PersonalFolder -> {
+                    folderToOpenSet.join()
+                    personalFolderToOpen?.let { (id, name) ->
+                        val directions = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+                            folderId = id,
+                            folderName = name
+                        )
+                        safeNavigate(directions)
+                    }
+                }
+                Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
+                RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
+                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
+                MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
+                Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
+                Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
+                null -> Unit // No-op
+            }
+        }
+    }
 }

@@ -44,11 +44,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     private val realm = FileController.getRealmInstance()
 
-    var justLaunched = true
-
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
     private var checkOfflineFilesJob = Job()
+
+    var hasNavigatedToLastVisitedFileTreeCategory = false
 
     lateinit var sortType: SortType
 
