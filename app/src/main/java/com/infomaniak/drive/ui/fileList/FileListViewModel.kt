@@ -48,6 +48,8 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     private var getFolderActivitiesJob: Job = Job()
     private var checkOfflineFilesJob = Job()
 
+    var hasNavigatedToLastVisitedFileTreeCategory = false
+
     lateinit var sortType: SortType
 
     var isSharedWithMe = false

@@ -26,11 +26,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDirections
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
@@ -40,6 +44,9 @@ import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
+import kotlinx.coroutines.CompletableJob
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class RootFilesFragment : Fragment() {
 
@@ -47,8 +54,11 @@ class RootFilesFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val fileListViewModel: FileListViewModel by viewModels()
 
+    private val uiSettings by lazy { UiSettings(requireContext()) }
+
     private var commonFolderToOpen: FolderToOpen? = null
     private var personalFolderToOpen: FolderToOpen? = null
+    private val hasFolderToOpenBeenSet: CompletableJob = Job()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentRootFilesBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -82,42 +92,48 @@ class RootFilesFragment : Fragment() {
         )
 
         setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, rootFilesUploadFileInProgressView)
+
+        navigateToLastVisitedFileTreeCategory()
     }
 
     private fun setupItems() = with(binding) {
         organizationFolder.setOnClickListener {
-            commonFolderToOpen?.let { (id, name) ->
-                safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(folderId = id, folderName = name))
-            }
+            uiSettings.lastVisitedRootFileTreeCategory = CommonFolders
+            commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
         }
 
         personalFolder.setOnClickListener {
-            personalFolderToOpen?.let { (id, name) ->
-                safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(folderId = id, folderName = name))
-            }
+            uiSettings.lastVisitedRootFileTreeCategory = PersonalFolder
+            personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
         }
 
         favorites.setOnClickListener {
+            uiSettings.lastVisitedRootFileTreeCategory = Favorites
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
         }
 
         recentChanges.setOnClickListener {
+            uiSettings.lastVisitedRootFileTreeCategory = RecentChanges
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
         }
 
         sharedWithMeFiles.setOnClickListener {
+            uiSettings.lastVisitedRootFileTreeCategory = SharedWithMe
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
         }
 
         myShares.setOnClickListener {
+            uiSettings.lastVisitedRootFileTreeCategory = MyShares
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
         }
 
         offlineFile.setOnClickListener {
+            uiSettings.lastVisitedRootFileTreeCategory = Offline
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
         }
 
         trashbin.setOnClickListener {
+            uiSettings.lastVisitedRootFileTreeCategory = Trash
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
         }
     }
@@ -138,6 +154,7 @@ class RootFilesFragment : Fragment() {
         fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
             personalFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
         }
+        hasFolderToOpenBeenSet.complete()
     }
 
     private fun observeNavigateFileListTo() {
@@ -156,4 +173,36 @@ class RootFilesFragment : Fragment() {
     }
 
     data class FolderToOpen(val id: Int, val name: String)
+
+    private fun navigateToLastVisitedFileTreeCategory() {
+        if (fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory) {
+            uiSettings.lastVisitedRootFileTreeCategory = null
+        } else lifecycleScope.launch {
+            fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory = true
+            when (uiSettings.lastVisitedRootFileTreeCategory) {
+                null -> Unit // Stay here (at the root)
+                CommonFolders -> {
+                    hasFolderToOpenBeenSet.join()
+                    commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
+                }
+                PersonalFolder -> {
+                    hasFolderToOpenBeenSet.join()
+                    personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
+                }
+                Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
+                RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
+                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
+                MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
+                Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
+                Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
+            }
+        }
+    }
+
+    private fun fileListDirections(
+        folderToOpen: FolderToOpen,
+    ): NavDirections = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+        folderId = folderToOpen.id,
+        folderName = folderToOpen.name
+    )
 }
