@@ -58,6 +58,7 @@ class RootFilesFragment : Fragment() {
 
     private var commonFolderToOpen: FolderToOpen? = null
     private var personalFolderToOpen: FolderToOpen? = null
+    private val hasFolderToOpenBeenSet: CompletableJob = Job()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentRootFilesBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -136,8 +137,6 @@ class RootFilesFragment : Fragment() {
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
         }
     }
-
-    private val hasFolderToOpenBeenSet: CompletableJob = Job()
 
     private fun observeFiles() {
         fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
