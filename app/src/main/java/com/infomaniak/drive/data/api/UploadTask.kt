@@ -224,13 +224,13 @@ class UploadTask(
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
     }
 
-    private fun uploadChunkRequest(
+    private suspend fun uploadChunkRequest(
         requestSemaphore: Semaphore,
         requestBody: RequestBody,
         url: String,
-    ) {
+    ) = coroutineScope {
         val uploadRequestBody = ProgressRequestBody(requestBody) { currentBytes, _, _ ->
-            runBlocking { progressMutex.withLock { updateProgress(currentBytes) } }
+            launch { progressMutex.withLock { updateProgress(currentBytes) } }
         }
 
         val request = Request.Builder().url(url)
