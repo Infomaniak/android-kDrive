@@ -263,7 +263,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         SentryLog.d(TAG, "startUploadFile (size: $fileSize)")
 
-        return UploadTask(context = applicationContext, uploadFile = this, worker = this@UploadWorker).run {
+        return UploadTask(context = applicationContext, uploadFile = this, setProgress = ::setProgress).run {
             currentUploadTask = this
             start().also { isUploaded ->
                 if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
