@@ -47,6 +47,7 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
@@ -229,17 +230,30 @@ class UploadTask(
         requestBody: RequestBody,
         url: String,
     ) = coroutineScope {
+        val progressChannel = Channel<Int>(Channel.UNLIMITED)
+
+        val progressJob = launch {
+            for (currentBytes in progressChannel) {
+                progressMutex.withLock { updateProgress(currentBytes) }
+            }
+        }
+
         val uploadRequestBody = ProgressRequestBody(requestBody) { currentBytes, _, _ ->
-            launch { progressMutex.withLock { updateProgress(currentBytes) } }
+            progressChannel.trySend(currentBytes)
         }
 
         val request = Request.Builder().url(url)
             .headers(HttpUtils.getHeaders(contentType = null))
             .post(uploadRequestBody).build()
 
-        val response = uploadFile.okHttpClient.newCall(request).execute()
-        manageApiResponse(response)
-        requestSemaphore.release()
+        try {
+            val response = uploadFile.okHttpClient.newCall(request).execute()
+            manageApiResponse(response)
+        } finally {
+            progressChannel.cancel()
+            progressJob.join()
+            requestSemaphore.release()
+        }
     }
 
     private fun initChunkSize(fileSize: Long) {
