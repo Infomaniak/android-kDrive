@@ -21,6 +21,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
@@ -59,11 +60,12 @@ import java.io.BufferedInputStream
 import java.io.FileNotFoundException
 import java.util.Date
 import kotlin.math.ceil
+import kotlin.reflect.KSuspendFunction1
 
 class UploadTask(
     private val context: Context,
     private val uploadFile: UploadFile,
-    private val worker: UploadWorker,
+    private val setProgress: KSuspendFunction1<Data, Unit>,
     private val onProgress: ((progress: Int) -> Unit)? = null
 ) {
 
@@ -330,7 +332,6 @@ class UploadTask(
 
         onProgress?.invoke(progress)
 
-        if (worker.isStopped) throw CancellationException()
         ensureActive()
 
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
@@ -355,7 +356,7 @@ class UploadTask(
     }
 
     private suspend fun shareProgress(progress: Int = 0, isUploaded: Boolean = false) {
-        worker.setProgress(
+        setProgress(
             workDataOf(
                 UploadWorker.FILENAME to uploadFile.fileName,
                 UploadWorker.PROGRESS to progress,
