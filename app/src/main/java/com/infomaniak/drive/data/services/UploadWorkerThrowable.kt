@@ -30,7 +30,6 @@ import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotificat
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
