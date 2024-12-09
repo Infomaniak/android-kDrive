@@ -209,6 +209,7 @@
 
         <activity
             android:name="com.infomaniak.lib.applock.LockActivity"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.Lock" />
 
         <activity
