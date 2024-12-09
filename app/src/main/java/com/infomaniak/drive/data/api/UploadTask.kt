@@ -54,7 +54,6 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import java.io.BufferedInputStream
 import java.io.FileNotFoundException
 import java.util.Date
 import kotlin.math.ceil
@@ -75,7 +74,7 @@ class UploadTask(
     private var uploadNotificationElapsedTime = ELAPSED_TIME
     private var uploadNotificationStartTime = 0L
 
-    suspend fun start() = withContext(Dispatchers.IO) {
+    suspend fun start(): Boolean {
         notificationManagerCompat = NotificationManagerCompat.from(context)
 
         uploadNotification = context.uploadProgressNotification()
@@ -85,8 +84,8 @@ class UploadTask(
         }
 
         try {
-            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask(this)
-            return@withContext true
+            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask()
+            return true
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
             SentryLog.w(TAG, "file not found", exception)
@@ -116,12 +115,12 @@ class UploadTask(
         } finally {
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         }
-        return@withContext false
+        return false
     }
 
-    private suspend fun launchTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
+    private suspend fun launchTask() = coroutineScope {
         val uri = uploadFile.getUriObject()
-        context.contentResolver.openInputStream(uploadFile.getOriginalUri(context)).use { fileInputStream ->
+        context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))?.buffered()?.use { fileInputStream ->
             initChunkSize(uploadFile.fileSize)
 
             val uploadedChunks = uploadFile.getValidChunks()
@@ -135,66 +134,62 @@ class UploadTask(
                 uploadFile.uploadHost
             }!!
 
-            BufferedInputStream(fileInputStream, chunkSize * 2).use { input ->
-                val chunkParentJob = Job()
-                val requestSemaphore = Semaphore(limitParallelRequest)
+            val chunkParentJob = Job()
+            val requestSemaphore = Semaphore(limitParallelRequest)
 
-                if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
+            if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
 
-                Sentry.addBreadcrumb(Breadcrumb().apply {
-                    category = UploadWorker.BREADCRUMB_TAG
-                    message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
-                    level = SentryLevel.INFO
-                })
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = UploadWorker.BREADCRUMB_TAG
+                message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
+                level = SentryLevel.INFO
+            })
 
-                SentryLog.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
+            SentryLog.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
 
-                val validChunksIds = uploadedChunks?.validChunksIds
-                previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
+            val validChunksIds = uploadedChunks?.validChunksIds
+            previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
 
-                for (chunkNumber in 1..totalChunks) {
-                    requestSemaphore.acquire()
-                    if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
-                        SentryLog.d("kDrive", "chunk:$chunkNumber ignored")
-                        input.skip(chunkSize.toLong())
-                        requestSemaphore.release()
-                        continue
-                    }
-
-                    SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
-                    var data = ByteArray(chunkSize)
-                    val count = input.read(data, 0, chunkSize)
-                    if (count == -1) {
-                        requestSemaphore.release()
-                        continue
-                    }
-
-                    data = if (count == chunkSize) data else data.copyOf(count)
-
-                    val url = with(uploadFile) {
-                        uploadChunkUrl(
-                            driveId = driveId,
-                            uploadToken = uploadToken,
-                            chunkNumber = chunkNumber,
-                            currentChunkSize = count,
-                            uploadHost = uploadHost,
-                        )
-                    }
-
-                    SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
-
-                    @Suppress("DeferredResultUnused")
-                    coroutineScope.async(chunkParentJob) {
-                        uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
-                    }
+            for (chunkNumber in 1..totalChunks) {
+                requestSemaphore.acquire()
+                if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
+                    SentryLog.d("kDrive", "chunk:$chunkNumber ignored")
+                    fileInputStream.skip(chunkSize.toLong())
+                    requestSemaphore.release()
+                    continue
                 }
-                chunkParentJob.complete()
-                chunkParentJob.join()
+
+                SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
+                var data = ByteArray(chunkSize)
+                val count = fileInputStream.read(data, 0, chunkSize)
+                if (count == -1) {
+                    requestSemaphore.release()
+                    continue
+                }
+
+                data = if (count == chunkSize) data else data.copyOf(count)
+
+                val url = with(uploadFile) {
+                    uploadChunkUrl(
+                        driveId = driveId,
+                        uploadToken = uploadToken,
+                        chunkNumber = chunkNumber,
+                        currentChunkSize = count,
+                        uploadHost = uploadHost,
+                    )
+                }
+
+                SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
+
+                launch(chunkParentJob) {
+                    uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
+                }
             }
+            chunkParentJob.complete()
+            chunkParentJob.join()
         }
 
-        coroutineScope.ensureActive()
-        onFinish(uri)
+        if (isActive) onFinish(uri)
     }
 
     private suspend fun onFinish(uri: Uri) = with(uploadFile) {
