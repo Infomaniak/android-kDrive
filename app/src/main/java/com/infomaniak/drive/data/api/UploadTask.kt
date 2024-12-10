@@ -59,17 +59,22 @@ import okhttp3.Response
 import java.io.BufferedInputStream
 import java.io.FileNotFoundException
 import java.util.Date
-import kotlin.math.ceil
 import kotlin.reflect.KSuspendFunction1
 
 class UploadTask(
     private val context: Context,
     private val uploadFile: UploadFile,
     private val setProgress: KSuspendFunction1<Data, Unit>,
-    private val onProgress: ((progress: Int) -> Unit)? = null
+    private val onProgress: ((progress: Int) -> Unit)? = null,
 ) {
 
-    private var limitParallelRequest = 4
+    private val fileChunkSizeManager = FileChunkSizeManager()
+
+    private val chunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong()
+        ?: fileChunkSizeManager.computeChunkSize(uploadFile.fileSize)
+    private val totalChunks = fileChunkSizeManager.computeFileChunks(fileSize = uploadFile.fileSize, fileChunkSize = chunkSize)
+    private val limitParallelRequest = fileChunkSizeManager.computeParallelChunks(chunkSize)
+
     private var previousChunkBytesWritten = 0L
     private var currentProgress = 0
 
@@ -97,7 +102,7 @@ class UploadTask(
                 scope.level = SentryLevel.WARNING
                 Sentry.captureException(exception)
             }
-        } catch (exception: TotalChunksExceededException) {
+        } catch (exception: FileChunkSizeManager.AllowedFileSizeExceededException) {
             SentryLog.w(TAG, "total chunks exceeded", exception)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
@@ -123,24 +128,18 @@ class UploadTask(
     }
 
     private suspend fun launchTask() = coroutineScope {
-        val uri = uploadFile.getUriObject()
         context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))?.buffered()?.use { fileInputStream ->
-            initChunkSize(uploadFile.fileSize)
 
             val uploadedChunks = uploadFile.getValidChunks()
             val isNewUploadSession = uploadedChunks?.needToResetUpload() ?: true
-            val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
 
             val uploadHost = if (isNewUploadSession) {
                 uploadFile.prepareUploadSession(totalChunks)
             } else {
-                chunkSize = uploadedChunks!!.validChuckSize
                 uploadFile.uploadHost
             }!!
 
             val requestSemaphore = Semaphore(limitParallelRequest)
-
-            if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = UploadWorker.BREADCRUMB_TAG
@@ -162,7 +161,7 @@ class UploadTask(
             )
         }
 
-        if (isActive) onFinish(uri)
+        if (isActive) onFinish(uploadFile.getUriObject())
     }
 
     private suspend fun uploadChunks(
@@ -177,13 +176,14 @@ class UploadTask(
             requestSemaphore.acquire()
             if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
                 SentryLog.d("kDrive", "chunk:$chunkNumber ignored")
-                fileInputStream.skip(chunkSize.toLong())
+                fileInputStream.skip(chunkSize)
                 requestSemaphore.release()
                 continue
             }
 
             SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
 
+            val chunkSize = chunkSize.toInt()
             var data = ByteArray(chunkSize)
             val count = fileInputStream.read(data, 0, chunkSize)
             if (count == -1) {
@@ -258,42 +258,8 @@ class UploadTask(
         }
     }
 
-    private fun initChunkSize(fileSize: Long) {
-        val fileChunkSize = ceil(fileSize.toDouble() / OPTIMAL_TOTAL_CHUNKS).toInt()
-
-        when {
-            fileChunkSize < CHUNK_MIN_SIZE -> chunkSize = CHUNK_MIN_SIZE
-            fileChunkSize <= CHUNK_MAX_SIZE -> chunkSize = fileChunkSize
-            fileChunkSize > CHUNK_MAX_SIZE -> {
-                val totalChunks = ceil(fileSize.toDouble() / CHUNK_MAX_SIZE)
-                if (totalChunks <= TOTAL_CHUNKS) {
-                    chunkSize = CHUNK_MAX_SIZE
-                } else {
-                    Sentry.withScope { scope ->
-                        scope.level = SentryLevel.WARNING
-                        scope.setExtra("fileSize", "$fileSize")
-                        Sentry.captureMessage("Max chunk size exceeded, file size exceed $MAX_TOTAL_CHUNKS_SIZE")
-                    }
-                    throw AllowedFileSizeExceededException()
-                }
-            }
-        }
-
-        val availableHalfMemory = getAvailableHalfMemory()
-
-        if (chunkSize >= availableHalfMemory) {
-            chunkSize = availableHalfMemory.toInt()
-        }
-
-        if (chunkSize == 0) throw OutOfMemoryError("chunk size is 0")
-
-        if (chunkSize * limitParallelRequest >= availableHalfMemory) {
-            limitParallelRequest = 1 // We limit it to 1 because if we have more it throws OOF exceptions
-        }
-    }
-
     private fun ValidChunks.needToResetUpload(): Boolean {
-        return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize) {
+        return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize.toInt()) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
         } else uploadFile.uploadHost == null
@@ -461,7 +427,6 @@ class UploadTask(
     class ProductBlockedException : Exception()
     class ProductMaintenanceException : Exception()
     class QuotaExceededException : Exception()
-    class TotalChunksExceededException : Exception()
     class UploadErrorException : Exception()
     class UploadNotTerminated(message: String) : Exception(message)
     class WrittenBytesExceededException : Exception()
@@ -471,15 +436,7 @@ class UploadTask(
         private val TAG = UploadTask::class.java.simpleName
         private val progressMutex = Mutex()
 
-        private const val CHUNK_MIN_SIZE: Int = 1 * 1024 * 1024
-        private const val CHUNK_MAX_SIZE: Int = 50 * 1024 * 1024 // 50 Mo and max file size to upload 500Gb
-        private const val OPTIMAL_TOTAL_CHUNKS: Int = 200
-        private const val TOTAL_CHUNKS: Int = 10_000
-        private const val MAX_TOTAL_CHUNKS_SIZE: Long = CHUNK_MAX_SIZE.toLong() * TOTAL_CHUNKS.toLong()
-
         const val LIMIT_EXCEEDED_ERROR_CODE = "limit_exceeded_error"
-
-        var chunkSize: Int = CHUNK_MIN_SIZE
 
         enum class ConflictOption {
             @SerializedName("error")

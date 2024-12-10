@@ -163,7 +163,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
-
         for (uploadFile in uploadFiles) {
             SentryLog.d(TAG, "startSyncFiles> size: ${uploadFile.fileSize}")
 
