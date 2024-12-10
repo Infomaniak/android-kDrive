@@ -65,7 +65,7 @@ class FileChunkSizeManager(
 
     companion object {
         private const val CHUNK_MIN_SIZE = 1L * 1024 * 1024 // 1Mo
-        private const val CHUNK_MAX_SIZE = 50L * 1024 * 1024 // 50Mo
+        private const val CHUNK_MAX_SIZE = 50L * 1024 * 1024 // 50 Mo and max file size to upload 500Gb
         private const val OPTIMAL_TOTAL_CHUNKS = 200
         private const val MAX_CHUNK_COUNT = 10_000
         private const val MAX_PARALLEL_CHUNKS = 4
