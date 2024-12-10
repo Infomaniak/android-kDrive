@@ -59,6 +59,7 @@ import okhttp3.Response
 import java.io.BufferedInputStream
 import java.io.FileNotFoundException
 import java.util.Date
+import java.util.concurrent.ArrayBlockingQueue
 import kotlin.reflect.KSuspendFunction1
 
 class UploadTask(
@@ -139,7 +140,6 @@ class UploadTask(
                 uploadFile.uploadHost
             }!!
 
-            val requestSemaphore = Semaphore(limitParallelRequest)
 
             Sentry.addBreadcrumb(Breadcrumb().apply {
                 category = UploadWorker.BREADCRUMB_TAG
@@ -153,10 +153,9 @@ class UploadTask(
 
             uploadChunks(
                 totalChunks = totalChunks,
-                requestSemaphore = requestSemaphore,
                 validChunksIds = uploadedChunks?.validChunksIds,
                 isNewUploadSession = isNewUploadSession,
-                fileInputStream = fileInputStream,
+                inputStream = fileInputStream,
                 uploadHost = uploadHost,
             )
         }
@@ -166,32 +165,32 @@ class UploadTask(
 
     private suspend fun uploadChunks(
         totalChunks: Int,
-        requestSemaphore: Semaphore,
         validChunksIds: List<Int>?,
         isNewUploadSession: Boolean,
-        fileInputStream: BufferedInputStream,
+        inputStream: BufferedInputStream,
         uploadHost: String,
     ) = coroutineScope {
+        val requestSemaphore = Semaphore(limitParallelRequest)
+        val byteArrayPool = ArrayBlockingQueue<ByteArray>(limitParallelRequest)
+
         for (chunkNumber in 1..totalChunks) {
             requestSemaphore.acquire()
             if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
                 SentryLog.d("kDrive", "chunk:$chunkNumber ignored")
-                fileInputStream.skip(chunkSize)
+                inputStream.skip(chunkSize)
                 requestSemaphore.release()
                 continue
             }
 
             SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
 
-            val chunkSize = chunkSize.toInt()
-            var data = ByteArray(chunkSize)
-            val count = fileInputStream.read(data, 0, chunkSize)
+            val data = getReusableByteArray(byteArrayPool, inputStream, isLastChunk = chunkNumber == totalChunks)
+            val count = inputStream.read(data, 0, data.size)
+
             if (count == -1) {
                 requestSemaphore.release()
                 continue
             }
-
-            data = if (count == chunkSize) data else data.copyOf(count)
 
             val url = with(uploadFile) {
                 uploadChunkUrl(
@@ -209,6 +208,17 @@ class UploadTask(
                 uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
             }
         }
+    }
+
+    private fun getReusableByteArray(
+        byteArrayPool: ArrayBlockingQueue<ByteArray>,
+        inputStream: BufferedInputStream,
+        isLastChunk: Boolean,
+    ): ByteArray {
+        val currentChunkSize = if (isLastChunk) inputStream.available() else chunkSize.toInt()
+        val reusableByteArray = if (isLastChunk) null else byteArrayPool.poll()
+
+        return reusableByteArray ?: ByteArray(currentChunkSize)
     }
 
     private suspend fun onFinish(uri: Uri) = with(uploadFile) {
