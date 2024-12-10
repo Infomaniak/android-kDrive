@@ -30,7 +30,7 @@ import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.UploadTask
+import com.infomaniak.drive.data.api.FileChunkSizeManager
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.DialogImportFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -131,7 +131,7 @@ class ImportFilesDialog : DialogFragment() {
         } ?: captureWithSentry(cursorState = "null")
     }
 
-    private suspend fun CoroutineScope.processCursorData(cursor: Cursor, uri: Uri) {
+    private suspend fun processCursorData(cursor: Cursor, uri: Uri) = coroutineScope {
         SentryLog.i(TAG, "processCursorData: uri=$uri")
         val fileName = cursor.getFileName(uri)
         val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
@@ -155,7 +155,7 @@ class ImportFilesDialog : DialogFragment() {
 
     private fun isLowMemory(): Boolean {
         val memoryInfo = requireContext().getAvailableMemory()
-        return memoryInfo.lowMemory || memoryInfo.availMem < UploadTask.chunkSize
+        return memoryInfo.lowMemory || memoryInfo.availMem < FileChunkSizeManager.CHUNK_MIN_SIZE
     }
 
     private suspend fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
