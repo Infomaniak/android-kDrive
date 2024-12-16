@@ -6,6 +6,7 @@ apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'realm-android'
 apply plugin: 'de.mannodermaus.android-junit5'
 
+
 android {
 
     namespace 'com.infomaniak.drive'
@@ -59,10 +60,26 @@ android {
 
     kotlinOptions { jvmTarget = javaVersion }
 
+    def debugKeystoreFile = rootProject.file("debug.keystore")
+    signingConfigs {
+        debug {
+            storeFile = debugKeystoreFile
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            storePassword = "android"
+        }
+    }
+
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+//            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+            signingConfig = signingConfigs.debug
         }
     }
 
