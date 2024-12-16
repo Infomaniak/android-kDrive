@@ -1,0 +1,1 @@
+- L'application se souvient désormais du dernier dossier racine dans lequel l'utilisateur s'est rendu
