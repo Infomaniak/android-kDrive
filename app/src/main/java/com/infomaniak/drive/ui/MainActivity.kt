@@ -87,7 +87,6 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.lib.applock.LockActivity
-import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
@@ -102,7 +101,6 @@ import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
 
 class MainActivity : BaseActivity() {
 
@@ -115,7 +113,6 @@ class MainActivity : BaseActivity() {
 
     private lateinit var downloadReceiver: DownloadReceiver
 
-    private var lastAppClosingTime = Date().time
     private var uploadedFilesToDelete = arrayListOf<UploadFile>()
     private var hasDisplayedInformationPanel: Boolean = false
 
@@ -190,6 +187,11 @@ class MainActivity : BaseActivity() {
         observeCurrentFolder()
         observeBulkDownloadRunning()
         observeFailureDownloadWorkerOffline()
+
+        LockActivity.scheduleLockIfNeeded(
+            targetActivity = this,
+            isAppLockEnabled = { AppSettings.appSecurityLock }
+        )
     }
 
     override fun onStart() {
@@ -332,14 +334,6 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
 
-        if (isKeyguardSecure() && AppSettings.appSecurityLock) {
-            LockActivity.lockAfterTimeout(
-                lastAppClosingTime = lastAppClosingTime,
-                context = this,
-                destinationClass = this::class.java
-            )
-        }
-
         launchAllUpload(drivePermissions)
 
         mainViewModel.checkBulkDownloadStatus()
@@ -352,11 +346,6 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
 
         handleDeletionOfUploadedPhotos()
-    }
-
-    override fun onPause() {
-        lastAppClosingTime = Date().time
-        super.onPause()
     }
 
     private fun handleDeletionOfUploadedPhotos() {
