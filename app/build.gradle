@@ -19,8 +19,8 @@ android {
         applicationId 'com.infomaniak.drive'
         minSdkVersion 21
         targetSdkVersion 34
-        versionCode 5_02_006_01
-        versionName '5.2.6'
+        versionCode 5_02_007_01
+        versionName '5.2.7'
 
         setProperty "archivesBaseName", "kdrive-$versionName ($versionCode)"
 
@@ -148,7 +148,7 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
 
-    implementation 'com.airbnb.android:lottie:6.6.0'
+    implementation 'com.airbnb.android:lottie:6.6.1'
     implementation 'com.github.Infomaniak:android-pdfview:3.2.10'
     implementation 'com.github.MikeOrtiz:TouchImageView:3.5'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
@@ -179,7 +179,7 @@ dependencies {
     androidTestImplementation "androidx.test:rules:$androidx_test_version"
     androidTestImplementation 'androidx.test:runner:1.6.2'
 
-    def jupiter_version = '5.11.3'
+    def jupiter_version = '5.11.4'
     androidTestImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter_version"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter_version"
