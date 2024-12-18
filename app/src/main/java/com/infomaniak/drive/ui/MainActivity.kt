@@ -101,7 +101,6 @@ import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
 
 class MainActivity : BaseActivity() {
 
