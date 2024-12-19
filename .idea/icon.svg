@@ -1,3 +1,20 @@
+<!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2024 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
 <svg width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path opacity="0.504232" fill-rule="evenodd" clip-rule="evenodd"
         d="M13.2767 1.957C13.2767 0.648469 14.5781 -0.238382 15.7577 0.266322L18.8444 1.58707C19.3169 1.78921 19.6821 2.18872 19.8479 2.6846L21.0752 6.35632C21.2727 6.94741 21.7509 7.39476 22.3438 7.54317L35.1867 10.7581C35.988 10.9587 36.5517 11.6938 36.5517 12.5381V27.8757C36.5517 29.1086 35.3861 29.9897 34.2348 29.6271L14.5406 23.4249C13.7894 23.1884 13.2767 22.478 13.2767 21.6735V1.957Z"
