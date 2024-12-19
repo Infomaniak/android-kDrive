@@ -38,7 +38,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.lib.applock.Utils.isKeyguardSecure
+import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -79,7 +79,7 @@ class SettingsFragment : Fragment() {
             requireContext().openAppNotificationSettings()
         }
         appSecurity.apply {
-            if (requireContext().isKeyguardSecure()) {
+            if (LockActivity.hasBiometrics()) {
                 appSecuritySeparator.isVisible = true
                 isVisible = true
                 setOnClickListener {
