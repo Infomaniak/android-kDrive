@@ -21,9 +21,12 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.views.SelectBottomSheetDialog
 
 class SelectSaveDateBottomSheetDialog : SelectBottomSheetDialog() {
+
+    private val uiSettings by lazy { UiSettings(requireContext()) }
 
     private val syncSettingsViewModel: SyncSettingsViewModel by activityViewModels()
 
@@ -33,6 +36,7 @@ class SelectSaveDateBottomSheetDialog : SelectBottomSheetDialog() {
         selectTitle.setText(R.string.syncSettingsButtonSaveDate)
 
         selectRecyclerView.adapter = SelectSaveDateBottomSheetAdapter(syncSettingsViewModel.saveOldPictures.value!!) {
+            uiSettings.syncSettingsDate = it
             syncSettingsViewModel.saveOldPictures.value = it
             dismiss()
         }
