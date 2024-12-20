@@ -37,12 +37,9 @@ import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.MediaFolder
-import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.SyncSettings.IntervalType
 import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
-import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.ActivitySyncSettingsBinding
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
@@ -64,6 +61,8 @@ import java.util.TimeZone
 class SyncSettingsActivity : BaseActivity() {
 
     private val binding: ActivitySyncSettingsBinding by lazy { ActivitySyncSettingsBinding.inflate(layoutInflater) }
+
+    private val uiSettings by lazy { UiSettings(this) }
 
     private val syncSettingsViewModel: SyncSettingsViewModel by viewModels()
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
@@ -101,7 +100,11 @@ class SyncSettingsActivity : BaseActivity() {
         val oldDeleteAfterSyncValue = oldSyncSettings?.deleteAfterSync ?: false
         val oldSaveOldPicturesValue = SavePicturesDate.SINCE_NOW
 
-        syncSettingsViewModel.init(intervalTypeValue = oldIntervalTypeValue, syncFolderId = oldSyncSettings?.syncFolder)
+        syncSettingsViewModel.init(
+            intervalTypeValue = oldIntervalTypeValue,
+            syncFolderId = oldSyncSettings?.syncFolder,
+            savePicturesDate = uiSettings.syncSettingsDate,
+        )
 
         setupListeners(permission, oldSyncVideoValue, oldCreateDatedSubFoldersValue, oldDeleteAfterSyncValue)
 

@@ -21,6 +21,7 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.ui.home.RootFileTreeCategory
 import com.infomaniak.drive.utils.Utils
@@ -63,6 +64,7 @@ class UiSettings(context: Context) : SharedValues {
     var recentSearches by sharedValue("recentSearches", emptyList())
     var sortType by sharedValue("sortType", SortType.NAME_AZ)
     var accessTokenApiCallRecord by sharedValue<ApiCallRecord>("accessTokenApiCallRecord", null)
+    var syncSettingsDate by sharedValue("syncSettingsDate", SavePicturesDate.SINCE_NOW)
 
     data class SaveExternalFilesData(
         val userId: Int,
