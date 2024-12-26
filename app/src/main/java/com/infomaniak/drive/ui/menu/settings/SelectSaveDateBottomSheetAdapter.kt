@@ -22,23 +22,23 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
 import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
 import com.infomaniak.drive.ui.menu.settings.SelectSaveDateBottomSheetAdapter.SelectSaveDateViewHolder
 
 class SelectSaveDateBottomSheetAdapter(
-    private val selectedSaveDate: SyncSettings.SavePicturesDate,
-    private val onItemClicked: (saveDate: SyncSettings.SavePicturesDate) -> Unit,
+    private val selectedSaveDate: SavePicturesDate,
+    private val onItemClicked: (saveDate: SavePicturesDate) -> Unit,
 ) : Adapter<SelectSaveDateViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectSaveDateViewHolder {
         return SelectSaveDateViewHolder(ItemSelectBottomSheetBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    override fun getItemCount() = SyncSettings.SavePicturesDate.values().size
+    override fun getItemCount() = SavePicturesDate.entries.size
 
     override fun onBindViewHolder(holder: SelectSaveDateViewHolder, position: Int) = with(holder.binding) {
-        val saveDate = SyncSettings.SavePicturesDate.values()[position]
+        val saveDate = SavePicturesDate.entries[position]
         itemSelectText.setText(saveDate.title)
         itemSelectActiveIcon.isVisible = selectedSaveDate == saveDate
         root.setOnClickListener { onItemClicked(saveDate) }
