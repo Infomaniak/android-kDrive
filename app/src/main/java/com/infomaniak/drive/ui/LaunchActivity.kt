@@ -32,7 +32,6 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
-import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
@@ -44,8 +43,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.applock.LockActivity
-import com.infomaniak.lib.applock.Utils.isKeyguardSecure
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.lib.core.models.ApiError
@@ -106,21 +103,13 @@ class LaunchActivity : AppCompatActivity() {
 
         val destinationClass = getDestinationClass()
 
-        if (destinationClass == LockActivity::class.java) {
-            LockActivity.startAppLockActivity(
-                context = this,
-                destinationClass = MainActivity::class.java,
-                destinationClassArgs = mainActivityExtras
-            )
-        } else {
-            Intent(this, destinationClass).apply {
-                when (destinationClass) {
-                    MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
-                    LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
-                    PublicShareActivity::class.java -> publicShareActivityExtras?.let(::putExtras)
-                }
-            }.also(::startActivity)
-        }
+        Intent(this, destinationClass).apply {
+            when (destinationClass) {
+                MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
+                LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                PublicShareActivity::class.java -> publicShareActivityExtras?.let(::putExtras)
+            }
+        }.also(::startActivity)
     }
 
     private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
@@ -143,7 +132,6 @@ class LaunchActivity : AppCompatActivity() {
 
         return when {
             areAllDrivesInMaintenance -> MaintenanceActivity::class.java
-            isKeyguardSecure() && AppSettings.appSecurityLock -> LockActivity::class.java
             else -> MainActivity::class.java
         }
     }
