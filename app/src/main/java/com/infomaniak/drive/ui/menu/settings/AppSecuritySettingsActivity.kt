@@ -24,6 +24,7 @@ import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
+import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.applock.Utils.silentlyReverseSwitch
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
@@ -47,7 +48,10 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
             isChecked = AppSettings.appSecurityLock
             setOnCheckedChangeListener { _, _ ->
                 // Reverse switch (before official parameter changed) by silent click
-                silentlyReverseSwitch(this) { shouldLock -> AppSettings.appSecurityLock = shouldLock }
+                silentlyReverseSwitch(this) { shouldLock ->
+                    AppSettings.appSecurityLock = shouldLock
+                    if (shouldLock) LockActivity.unlock()
+                }
             }
         }
     }
