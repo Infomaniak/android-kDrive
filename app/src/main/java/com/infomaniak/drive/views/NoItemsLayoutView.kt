@@ -18,6 +18,7 @@
 package com.infomaniak.drive.views
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
@@ -62,6 +63,7 @@ class NoItemsLayoutView @JvmOverloads constructor(
                 }
             } else {
                 noItemsIconLayout.icon.setImageResource(iNoItemsLayoutView.noItemsIcon)
+                noItemsIconLayout.icon.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.iconColor))
                 noItemsTitle.setText(iNoItemsLayoutView.noItemsTitle)
                 noItemsRefreshButton.isGone = true
             }
