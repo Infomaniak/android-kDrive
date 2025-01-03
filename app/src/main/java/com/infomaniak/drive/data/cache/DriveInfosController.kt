@@ -135,7 +135,7 @@ object DriveInfosController {
     ): Drive? {
         val block: (Realm) -> Drive? = { realm ->
             realm.getDrivesQuery(userId, driveId, sharedWithMe, maintenance).findFirst()?.let {
-                if (customRealm == null) realm.copyFromRealm(it, 1) else it
+                if (customRealm == null) realm.copyFromRealm(it, 2) else it
             }
         }
         return customRealm?.let(block) ?: getRealmInstance().use(block)

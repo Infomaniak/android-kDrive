@@ -179,7 +179,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 )
             )
         } else {
-            if (AccountUtils.getCurrentDrive()?.packFunctionality?.dropbox == true) {
+            if (AccountUtils.getCurrentDrive()?.pack?.capabilities?.useDropbox == true) {
                 safeNavigate(
                     FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToConvertToDropBoxFragment(
                         fileId = currentFile.id,

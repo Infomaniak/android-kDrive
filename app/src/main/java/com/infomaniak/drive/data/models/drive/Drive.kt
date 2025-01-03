@@ -69,8 +69,6 @@ open class Drive(
     var pack: DrivePack? = DrivePack(),
     var size: Long = 0,
     var version: String = "",
-    @SerializedName("pack_functionality")
-    private var _packFunctionality: DrivePackFunctionality? = DrivePackFunctionality(),
     @SerializedName("users")
     private var _users: DriveUsersCategories? = DriveUsersCategories(),
     @SerializedName("teams")
@@ -80,9 +78,6 @@ open class Drive(
 
     val driveAccount: DriveAccount
         get() = _driveAccount ?: DriveAccount()
-
-    val packFunctionality: DrivePackFunctionality
-        get() = _packFunctionality ?: DrivePackFunctionality()
 
     val preferences: DrivePreferences
         get() = _preferences ?: DrivePreferences()
