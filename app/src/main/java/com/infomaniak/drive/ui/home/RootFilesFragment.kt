@@ -175,6 +175,8 @@ class RootFilesFragment : Fragment() {
     data class FolderToOpen(val id: Int, val name: String)
 
     private fun navigateToLastVisitedFileTreeCategory() {
+        val hasDeepLink = requireActivity().intent.data != null
+        if (hasDeepLink) return
         if (fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory) {
             uiSettings.lastVisitedRootFileTreeCategory = null
         } else lifecycleScope.launch {
