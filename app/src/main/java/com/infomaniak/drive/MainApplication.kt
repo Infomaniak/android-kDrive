@@ -126,7 +126,9 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
         InfomaniakCore.apply {
             init(
-                appId = BuildConfig.APPLICATION_ID,
+                appId = BuildConfig.APPLICATION_ID.removeSuffix(
+                    suffix = ".debug" // Because the backend only accepts the release package name for now.
+                ),
                 appVersionCode = BuildConfig.VERSION_CODE,
                 appVersionName = BuildConfig.VERSION_NAME,
                 clientId = BuildConfig.CLIENT_ID,

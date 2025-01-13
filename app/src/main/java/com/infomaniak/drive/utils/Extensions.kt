@@ -379,7 +379,9 @@ fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPag
 
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
-    appUID = BuildConfig.APPLICATION_ID,
+    appUID = BuildConfig.APPLICATION_ID.removeSuffix(
+        suffix = ".debug" // Because the backend only accepts the release package name for now.
+    ),
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,
 )
