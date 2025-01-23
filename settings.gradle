@@ -1,2 +1,24 @@
-include ':app', ':Core', ':Core:AppLock', ':Core:Stores'
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        // mavenLocal() // Only used when we want to use a local version of a library (./gradlew publishToMavenLocal)
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://s3.amazonaws.com/tgl.maven' }
+    }
+    versionCatalogs {
+        create("core") { from(files("Core/gradle/core.versions.toml")) }
+    }
+}
+
 rootProject.name = "kDrive"
+include ':app', ':Core:Legacy', ':Core:Legacy:AppLock', ':Core:Legacy:Stores'
