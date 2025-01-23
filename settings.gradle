@@ -11,7 +11,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        //        mavenLocal() // Only used when we want to use a local version of a library (./gradlew publishToMavenLocal)
+        // mavenLocal() // Only used when we want to use a local version of a library (./gradlew publishToMavenLocal)
         maven { url 'https://jitpack.io' }
         maven { url 'https://s3.amazonaws.com/tgl.maven' }
     }
@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-include ':app', ':Core:Legacy', ':Core:Legacy:AppLock', ':Core:Legacy:Stores'
 rootProject.name = "kDrive"
+include ':app', ':Core:Legacy', ':Core:Legacy:AppLock', ':Core:Legacy:Stores'
