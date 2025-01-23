@@ -129,9 +129,9 @@ sentry {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(path: ':Core')
-    implementation project(path: ':Core:AppLock')
-    implementation project(path: ':Core:Stores')
+    implementation project(path: ':Core:Legacy')
+    implementation project(path: ':Core:Legacy:AppLock')
+    implementation project(path: ':Core:Legacy:Stores')
 
     def work_version = '2.9.1' // Keep the same version as the one in Core
     implementation "androidx.work:work-runtime-ktx:$work_version"

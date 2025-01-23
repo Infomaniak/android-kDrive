@@ -1,2 +1,4 @@
 include ':app', ':Core', ':Core:AppLock', ':Core:Stores'
+
+include ':app', ':Core:Legacy', ':Core:Legacy:AppLock', ':Core:Legacy:Stores'
 rootProject.name = "kDrive"
