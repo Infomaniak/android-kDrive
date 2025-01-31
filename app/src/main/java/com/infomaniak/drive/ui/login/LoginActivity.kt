@@ -54,6 +54,7 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
@@ -157,12 +158,22 @@ class LoginActivity : AppCompatActivity() {
 
     private fun authenticateUser(authCode: String) {
         lifecycleScope.launch {
-            infomaniakLogin.getToken(
-                okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
-                code = authCode,
-                onSuccess = ::onGetTokenSuccess,
-                onError = { showError(getLoginErrorDescription(this@LoginActivity, it)) },
-            )
+            runCatching {
+                val tokenResult = infomaniakLogin.getToken(
+                    okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+                    code = authCode,
+                )
+
+                when (tokenResult) {
+                    is InfomaniakLogin.TokenResult.Success -> onGetTokenSuccess(tokenResult.apiToken)
+                    is InfomaniakLogin.TokenResult.Error -> {
+                        showError(getLoginErrorDescription(this@LoginActivity, tokenResult.errorStatus))
+                    }
+                }
+            }.onFailure { exception ->
+                if (exception is CancellationException) throw exception
+                SentryLog.e(TAG, "Failure on getToken", exception)
+            }
         }
     }
 
@@ -191,11 +202,17 @@ class LoginActivity : AppCompatActivity() {
                 else -> Dispatchers.Main { showError(getString(R.string.anErrorHasOccurred)) }
             }
 
-            infomaniakLogin.deleteToken(
-                okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
-                token = apiToken,
-                onError = { SentryLog.i("DeleteTokenError", "API response error: $it") },
-            )
+            runCatching {
+                infomaniakLogin.deleteToken(
+                    okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+                    token = apiToken,
+                )?.let { errorStatus ->
+                    SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
+                }
+            }.onFailure { exception ->
+                if (exception is CancellationException) throw exception
+                SentryLog.e(TAG, "Failure on deleteToken", exception)
+            }
         }
     }
 
@@ -224,6 +241,8 @@ class LoginActivity : AppCompatActivity() {
     }
 
     companion object {
+        private val TAG = LoginActivity::class.java.simpleName
+
         suspend fun authenticateUser(context: Context, apiToken: ApiToken): Any {
 
             AccountUtils.getUserById(apiToken.userId)?.let {
