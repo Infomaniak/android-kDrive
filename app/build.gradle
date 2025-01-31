@@ -26,8 +26,8 @@ android {
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         buildConfigField 'String', 'CLIENT_ID', '"9473D73C-C20F-4971-9E10-D957C563FA68"'
-        buildConfigField 'String', 'CREATE_ACCOUNT_URL', '"https://welcome.infomaniak.com/signup/ikdrive/steps"'
-        buildConfigField 'String', 'CREATE_ACCOUNT_SUCCESS_HOST', '"drive.infomaniak.com"'
+        buildConfigField 'String', 'CREATE_ACCOUNT_URL', '"https://welcome.infomaniak.com/signup/ikdrive?app=true"'
+        buildConfigField 'String', 'CREATE_ACCOUNT_SUCCESS_HOST', '"kdrive.infomaniak.com"'
         buildConfigField 'String', 'CREATE_ACCOUNT_CANCEL_HOST', '"welcome.infomaniak.com"'
         buildConfigField 'String', 'DRIVE_API_V1', '"https://api.kdrive.infomaniak.com/drive/"'
         buildConfigField 'String', 'DRIVE_API_V2', '"https://api.kdrive.infomaniak.com/2/drive/"'
