@@ -182,7 +182,7 @@ class LoginActivity : AppCompatActivity() {
                     return@launch
                 }
                 is ApiResponse<*> -> Dispatchers.Main {
-                    if (returnValue.error?.code == ErrorCode.NO_DRIVE) {
+                    if (returnValue.error?.description == ErrorCode.NO_DRIVE) {
                         launchNoDriveActivity()
                     } else {
                         showError(getString(returnValue.translatedError))
