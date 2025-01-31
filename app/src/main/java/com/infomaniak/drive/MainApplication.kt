@@ -63,10 +63,7 @@ import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.matomo.sdk.Tracker
 import java.util.UUID
 
@@ -76,6 +73,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     var geniusScanIsReady = false
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
+
+    private val applicationScope = CoroutineScope(Dispatchers.Default + CoroutineName("MainApplication"))
 
     override fun onCreate() {
         super<Application>.onCreate()
@@ -179,7 +178,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             notificationManagerCompat.notifyCompat(this@MainApplication, hashCode, build())
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        applicationScope.launch {
             AccountUtils.removeUserAndDeleteToken(this@MainApplication, user)
         }
     }

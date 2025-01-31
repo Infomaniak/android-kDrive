@@ -184,18 +184,23 @@ object AccountUtils : CredentialManager() {
         }
     }
 
-    suspend fun removeUserAndDeleteToken(context: Context, user: User) {
-        CoroutineScope(Dispatchers.IO).launch {
-            SentryLog.i("logOut", "User logged out, remaining user count: ${AccountUtils.getAllUsersCount().minus(1)}")
-            SentryLog.i("logOut", "User logged out, disconnected user id: ${user.id}")
+    suspend fun removeUserAndDeleteToken(context: Context, user: User) = coroutineScope {
+        SentryLog.i("logOut", "User logged out, remaining user count: ${AccountUtils.getAllUsersCount().minus(1)}")
+        SentryLog.i("logOut", "User logged out, disconnected user id: ${user.id}")
 
-            context.getInfomaniakLogin().deleteToken(
-                HttpClient.okHttpClientNoTokenInterceptor,
-                user.apiToken,
-                onError = {
-                    SentryLog.i("deleteTokenError", "Api response error : ${LoginActivity.getLoginErrorDescription(context, it)}")
+        launch {
+            runCatching {
+                context.getInfomaniakLogin().deleteToken(
+                    HttpClient.okHttpClientNoTokenInterceptor,
+                    user.apiToken,
+                )?.let { errorStatus ->
+                    val loginErrorDescription = LoginActivity.getLoginErrorDescription(context, errorStatus)
+                    SentryLog.i("deleteTokenError", "Api response error : $loginErrorDescription")
                 }
-            )
+            }.onFailure { exception ->
+                if (exception is CancellationException) throw exception
+                SentryLog.e("AccountUtils", "Failure on deleteToken", exception)
+            }
         }
 
         removeUser(context, user)
