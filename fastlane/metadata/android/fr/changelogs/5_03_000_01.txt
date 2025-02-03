@@ -1,4 +1,4 @@
-- feat : Verrouillage de l'application lorsque l'écran s'éteint
-- feat : Sauvegarde de la date de synchronisation dans les paramètres
-- fix : Indication qu'une dropbox ne peut pas être utilisé dans certains cas
-- fix : Couleur de l'icône des stats vides
+- Verrouillage de l'application lorsque l'écran s'éteint
+- Sauvegarde de la date de synchronisation dans les paramètres
+- Indication qu'une dropbox ne peut pas être utilisé dans certains cas
+- Couleur de l'icône des stats vides

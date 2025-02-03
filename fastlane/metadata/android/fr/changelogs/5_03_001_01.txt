@@ -1,0 +1,3 @@
+- Ajout du login par SSO
+- Redirige correctement l'utilisateur dans l'application après la création d'un compte
+- Redirige l'utilisateur vers le bon écran s'il n'a pas de Drive

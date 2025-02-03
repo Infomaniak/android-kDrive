@@ -1,4 +1,4 @@
-- feat: Lock the app when the screen turns off
-- feat: Save synchronization settings date
-- fix: Indicates that dropbox cannot be used
-- fix: Empty stats icon color
+- Lock the app when the screen turns off
+- Save synchronization settings date
+- Indicates that dropbox cannot be used
+- Empty stats icon color

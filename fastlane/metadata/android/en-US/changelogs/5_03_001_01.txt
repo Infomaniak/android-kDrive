@@ -1,0 +1,3 @@
+- Add SSO login
+- Correctly redirect user in the app after creating an account
+- Redirect user to the correct screen if they don't have any Drive
