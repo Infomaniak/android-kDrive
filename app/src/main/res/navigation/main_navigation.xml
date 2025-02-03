@@ -21,6 +21,8 @@
     android:id="@+id/main_navigation"
     app:startDestination="@id/homeFragment">
 
+    <include app:graph="@navigation/my_ksuite_navigation" />
+
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.infomaniak.drive.ui.home.HomeFragment"
@@ -1067,4 +1069,18 @@
             app:destination="@id/fileListFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/myKSuiteDashboardFragment"
+        android:name="com.infomaniak.core.myksuite.ui.views.MyKSuiteDashboardFragment"
+        android:label="MyKSuiteDashboardFragment">
+        <argument
+            android:name="userName"
+            app:argType="string" />
+        <argument
+            android:name="avatarUri"
+            app:argType="string" />
+        <argument
+            android:name="dailySendLimit"
+            app:argType="string" />
+    </fragment>
 </navigation>

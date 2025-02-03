@@ -27,6 +27,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentNewFolderBinding
@@ -83,13 +85,19 @@ class NewFolderFragment : Fragment() {
     }
 
     private fun initDropBoxFolder(drive: Drive?) {
+        val canCreateDropbox = drive?.quotas?.canCreateDropbox == true
+        binding.myKSuitePlusChip.isVisible = !canCreateDropbox
         binding.dropBox.apply {
             isVisible = drive?.sharedWithMe != true
             setOnClickListener {
-                safeNavigate(
-                    if (drive?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
-                    else R.id.dropBoxBottomSheetDialog
-                )
+                if (canCreateDropbox) {
+                    safeNavigate(
+                        if (drive?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
+                        else R.id.dropBoxBottomSheetDialog
+                    )
+                } else {
+                    findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+                }
             }
         }
     }

@@ -177,14 +177,22 @@
                     <TextView
                         android:id="@+id/dropBoxTitle"
                         style="@style/Subtitle2"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="@dimen/marginStandardMedium"
                         android:text="@string/dropBoxTitle"
                         app:layout_constraintBottom_toBottomOf="@id/dropBoxIcon"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@id/dropBoxIcon"
                         app:layout_constraintTop_toTopOf="@id/dropBoxIcon" />
+
+                    <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+                        android:id="@+id/myKSuitePlusChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/marginStandardMedium"
+                        app:layout_constraintBottom_toBottomOf="@+id/dropBoxTitle"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/dropBoxTitle" />
 
                     <TextView
                         android:id="@+id/dropBoxDescription"
