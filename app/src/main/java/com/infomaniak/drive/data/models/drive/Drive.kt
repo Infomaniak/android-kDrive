@@ -43,6 +43,8 @@ open class Drive(
     private var _role: String = "",
     @SerializedName("capabilities")
     private var _capabilities: DriveCapabilities? = DriveCapabilities(),
+    @SerializedName("quota")
+    private var _quotas: DriveQuotas? = DriveQuotas(),
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
     @SerializedName("categories_permissions")
@@ -96,6 +98,9 @@ open class Drive(
 
     val rights: DriveRights
         get() = _rights ?: DriveRights()
+
+    val quotas: DriveQuotas
+        get() = _quotas ?: DriveQuotas()
 
     val role: DriveUser.Role?
         get() = enumValueOfOrNull<DriveUser.Role>(_role)

@@ -22,6 +22,6 @@ import io.realm.annotations.RealmClass
 
 @RealmClass(embedded = true)
 open class DriveQuota(
-    var current: Int? = null,
-    var max: Int? = null,
+    var current: Int = -1,
+    var max: Int = -1,
 ) : RealmObject()

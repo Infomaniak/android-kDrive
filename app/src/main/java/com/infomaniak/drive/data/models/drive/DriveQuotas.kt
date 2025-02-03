@@ -26,4 +26,8 @@ open class DriveQuotas(
     var dropbox: DriveQuota? = null,
     @SerializedName("shared_link")
     var sharedLink: DriveQuota? = null,
-) : RealmObject()
+) : RealmObject() {
+
+    inline val canCreateDropbox get() = dropbox?.let { it.current < it.max } ?: true
+    inline val canCreateShareLink get() = sharedLink?.let { it.current < it.max } ?: true
+}
