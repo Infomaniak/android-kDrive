@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 
@@ -32,26 +33,17 @@ open class DrivePack(
     val capabilities: DrivePackCapabilities
         get() = _capabilities ?: DrivePackCapabilities()
 
-    val type: DrivePackType? get() = drivePackTypeOf(id)
+    val type: DrivePackType? get() = enumValueOfOrNull<DrivePackType>(name.uppercase())
 
-    private fun drivePackTypeOf(id: Int) = when (id) {
-        DrivePackType.SOLO.id -> DrivePackType.SOLO
-        DrivePackType.TEAM.id -> DrivePackType.TEAM
-        DrivePackType.PRO.id -> DrivePackType.PRO
-        DrivePackType.FREE.id -> DrivePackType.FREE
-        DrivePackType.KSUITE_STANDARD.id -> DrivePackType.KSUITE_STANDARD
-        DrivePackType.KSUITE_PRO.id -> DrivePackType.KSUITE_PRO
-        DrivePackType.KSUITE_ENTREPRISE.id -> DrivePackType.KSUITE_ENTREPRISE
-        else -> null
-    }
-
-    enum class DrivePackType(val id: Int) {
-        SOLO(1),
-        TEAM(2),
-        PRO(3),
-        FREE(6),
-        KSUITE_STANDARD(8),
-        KSUITE_PRO(11),
-        KSUITE_ENTREPRISE(14),
+    enum class DrivePackType {
+        SOLO,
+        TEAM,
+        PRO,
+        FREE,
+        KSUITE_STANDARD,
+        KSUITE_PRO,
+        KSUITE_ENTREPRISE,
+        MY_KSUITE,
+        MY_KSUITE_PLUS,
     }
 }
