@@ -26,6 +26,7 @@ import android.content.res.ColorStateList
 import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -45,6 +46,7 @@ import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle.Event
@@ -181,14 +183,31 @@ fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
 
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
-fun ItemUserBinding.setUserView(user: User, showChevron: Boolean = true, onItemClicked: (user: User) -> Unit) {
+fun ItemUserBinding.setUserView(
+    user: User,
+    showIcon: Boolean = true,
+    showCurrentUser: Boolean = false,
+    withForceClick: Boolean = true,
+    onItemClicked: (user: User) -> Unit,
+) {
     val isCurrentUser = AccountUtils.currentUserId == user.id
     userName.text = user.displayName
     userEmail.text = user.email
     userAvatar.loadAvatar(user)
-    chevron.isVisible = showChevron && !isCurrentUser
-    check.isVisible = isCurrentUser
-    if (!isCurrentUser) {
+
+    fun getRightIcon(): Drawable? {
+        return if (isCurrentUser && showCurrentUser) {
+            ResourcesCompat.getDrawable(this.context.resources, R.drawable.ic_check, null)?.apply {
+                setTint(ResourcesCompat.getColor(this@setUserView.context.resources, R.color.iconColor, null))
+            }
+        } else {
+            ResourcesCompat.getDrawable(this.context.resources, R.drawable.ic_chevron_right, null)
+        }
+    }
+
+    if (showIcon) rightIndicator.setImageDrawable(getRightIcon())
+
+    if (!isCurrentUser || withForceClick) {
         root.setOnClickListener { onItemClicked(user) }
     }
 }

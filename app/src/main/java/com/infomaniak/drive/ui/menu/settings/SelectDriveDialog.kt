@@ -32,7 +32,6 @@ import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setUserView
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
-import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.utils.safeBinding
 
 class SelectDriveDialog : FullScreenBottomSheetDialog() {
@@ -77,11 +76,13 @@ class SelectDriveDialog : FullScreenBottomSheetDialog() {
                 }
                 binding.userCardview.root.isVisible = true
 
-                popupLayoutBinding.usersRecyclerView.adapter = UserAdapter(users as ArrayList<User>, isCardView = false) { user ->
+                popupLayoutBinding.usersRecyclerView.adapter = UserAdapter(users, isCardView = false) { user ->
                     selectedUserId.value = user.id
                     driveListAdapter.setDrives(getDriveList())
 
-                    binding.userCardview.itemViewUser.setUserView(user) { popupWindow.showAsDropDown(binding.userCardview.root) }
+                    binding.userCardview.itemViewUser.setUserView(user) {
+                        popupWindow.showAsDropDown(binding.userCardview.root)
+                    }
 
                     popupWindow.dismiss()
                 }

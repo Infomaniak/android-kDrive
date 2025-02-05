@@ -59,7 +59,13 @@ class UserAdapter(
             this as ItemUserBinding
         }
 
-        itemUserBinding.setUserView(user, isCardView, onItemClicked)
+        itemUserBinding.setUserView(
+            user,
+            showIcon = isCardView,
+            showCurrentUser = true,
+            withForceClick = !isCardView,
+            onItemClicked = onItemClicked,
+        )
     }
 
     override fun getItemCount() = users.size
