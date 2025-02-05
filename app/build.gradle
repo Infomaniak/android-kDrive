@@ -75,7 +75,7 @@ android {
             getIsDefault().set(true)
 
             dependencies {
-                implementation "com.geniusscansdk:gssdk:5.0.7"
+                implementation "com.geniusscansdk:gssdk:5.6.1"
             }
         }
         fdroid { dimension 'distribution' }
