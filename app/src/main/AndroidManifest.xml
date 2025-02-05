@@ -101,7 +101,8 @@
 
         <activity
             android:name=".ui.MainActivity"
-            android:configChanges="orientation|screenSize|layoutDirection|screenLayout" />
+            android:supportsPictureInPicture="true"
+            android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize" />
 
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
