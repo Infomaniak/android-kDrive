@@ -46,9 +46,9 @@ class PlaybackService : MediaSessionService() {
 
     private val mediaSessionCallback = object : MediaSession.Callback {
 
-        // When the user returns from the PreviewVideoFragment, we want to stop
+        // When the user returns from the PreviewPlaybackFragment, we want to stop
         // the service because it does not make sense to have the media notification
-        // when the user willingly quits the PreviewVideoFragment.
+        // when the user willingly quits the PreviewPlaybackFragment.
         override fun onDisconnected(session: MediaSession, controller: MediaSession.ControllerInfo) {
             super.onDisconnected(session, controller)
             stopSelf()

@@ -17,30 +17,29 @@
  */
 package com.infomaniak.drive.ui.fileList.preview.playback
 
-import android.content.ComponentName
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.core.content.ContextCompat
+import androidx.annotation.RequiresApi
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
 import androidx.media3.ui.PlayerView
-import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
+import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.ui.fileList.preview.PreviewFragment
+import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.playback.PlayerListener.Companion.trackMediaPlayerEvent
 import com.infomaniak.drive.utils.IOFile
 
@@ -50,14 +49,20 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     private var _binding: FragmentPreviewPlaybackBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
-    private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
-
-    private var mediaControllerFuture: ListenableFuture<MediaController>? = null
-    private var mediaController: MediaController? = null
-
     private var mediaPosition = 0L
 
     private val flagKeepScreenOn by lazy { WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON }
+
+    private val offlineFile: IOFile? by lazy {
+        if (file.isOffline) {
+            file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
+        } else {
+            null
+        }
+    }
+    private val offlineIsComplete by lazy { isOfflineFileComplete(offlineFile) }
+
+    @RequiresApi(Build.VERSION_CODES.N)
     private val playerListener = PlayerListener(activity, isPlayingChanged = { isPlaying ->
         if (isPlaying) {
             toggleFullscreen()
@@ -107,12 +112,31 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onResume() {
         super.onResume()
-        if (!noCurrentFile() && (mediaController == null || mediaController?.currentPosition == 0L)) {
-            createPlayer()
-        } else if (mediaController?.isPlaying == false) {
-            mediaController?.seekTo(mediaPosition)
+        (parentFragment as BasePreviewSliderFragment).getMediaController { mediaController ->
+            if (!mediaController.isPlaying) {
+                mediaController.removeListener(playerListener)
+                mediaController.addListener(playerListener)
+
+                mediaController.setMediaItem(getMediaItem(offlineFile, offlineIsComplete))
+
+                binding.playerView.player = mediaController
+                binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
+                binding.playerView.controllerHideOnTouch = false
+
+                mediaController.seekTo(mediaPosition)
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        (parentFragment as BasePreviewSliderFragment).getMediaController { mediaController ->
+            if (!mediaController.isPlaying) {
+                mediaPosition = mediaController.currentPosition
+            }
         }
     }
 
@@ -121,62 +145,15 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         _binding = null
     }
 
-    override fun onDestroy() {
-        mediaController?.let {
-            it.release()
-            it.removeListener(playerListener)
-        }
-        mediaController = null
-
-        mediaControllerFuture?.let { MediaController.releaseFuture(it) }
-        mediaControllerFuture = null
-        super.onDestroy()
-    }
+    private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { file.isOfflineAndIntact(it) } ?: false
 
     fun onFragmentUnselected() {
-        mediaController?.pause()
-        mediaPosition = mediaController?.currentPosition ?: 0L
-    }
-
-    private fun createPlayer() {
-        val offlineFile = getOfflineFile()
-        val offlineIsComplete = offlineFile?.let { file.isOfflineAndIntact(offlineFile) } ?: false
-        initMediaController(offlineFile, offlineIsComplete)
-    }
-
-    private fun getOfflineFile(): IOFile? {
-        return if (file.isOffline) {
-            file.getOfflineFile(requireContext(), previewSliderViewModel.userDrive.userId)
-        } else {
-            null
+        (parentFragment as PreviewSliderFragment).getMediaController { mediaController ->
+            mediaController.pause()
+            mediaPosition = mediaController.currentPosition
+            binding.playerView.player = null
         }
     }
-
-    private fun initMediaController(offlineFile: IOFile?, offlineIsComplete: Boolean) = with(binding) {
-        val context = requireContext()
-        val playbackSessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
-        mediaControllerFuture = MediaController.Builder(context, playbackSessionToken).buildAsync().apply {
-            addListener(
-                getRunnable(offlineFile, offlineIsComplete, playerView),
-                mainExecutor,
-            )
-        }
-    }
-
-    private fun getRunnable(offlineFile: IOFile?, offlineIsComplete: Boolean, playerView: PlayerView): Runnable {
-        return Runnable {
-            mediaController = mediaControllerFuture?.get()?.apply {
-                setMediaItem(getMediaItem(offlineFile, offlineIsComplete))
-                addListener(playerListener)
-                seekTo(mediaPosition)
-            }
-
-            playerView.player = mediaController
-            playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
-            playerView.controllerHideOnTouch = false
-        }
-    }
-
 
     private fun getMediaItem(offlineFile: IOFile?, offlineIsComplete: Boolean): MediaItem {
         val mediaMetadata = MediaMetadata.Builder()
