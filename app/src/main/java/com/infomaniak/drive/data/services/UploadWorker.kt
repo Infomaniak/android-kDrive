@@ -311,7 +311,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val args = initArgs(lastUploadDate)
         val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
-                "OR ${MediaStore.MediaColumns.DATE_MODIFIED} = ? )"
+                "OR ${MediaStore.MediaColumns.DATE_MODIFIED} >= ? )"
         var customSelection: String
         var customArgs: Array<String>
 
