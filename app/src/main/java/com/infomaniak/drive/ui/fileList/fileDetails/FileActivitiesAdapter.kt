@@ -52,7 +52,7 @@ class FileActivitiesAdapter(val isFolder: Boolean) : LoaderAdapter<FileActivity>
             val currentFileActivity = itemList[position]
 
             val translation = currentFileActivity.translation(isFolder)?.let(context::getString)
-                ?: context.resources.getQuantityString(R.plurals.fileActivityUnknown, 1, 1)
+                ?: context.resources.getQuantityString(R.plurals.fileActivityUnknown, 1)
             activityAction.text = translation
             activityHour.text = currentFileActivity.getHour()
 
