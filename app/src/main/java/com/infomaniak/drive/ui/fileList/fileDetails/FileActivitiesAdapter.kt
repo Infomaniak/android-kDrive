@@ -51,7 +51,9 @@ class FileActivitiesAdapter(val isFolder: Boolean) : LoaderAdapter<FileActivity>
 
             val currentFileActivity = itemList[position]
 
-            activityAction.setText(currentFileActivity.translation(isFolder))
+            val translation = currentFileActivity.translation(isFolder)?.let(context::getString)
+                ?: context.resources.getQuantityString(R.plurals.fileActivityUnknown, 1)
+            activityAction.text = translation
             activityHour.text = currentFileActivity.getHour()
 
             currentFileActivity.user?.let { driveUser ->

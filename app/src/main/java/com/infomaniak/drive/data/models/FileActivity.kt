@@ -22,6 +22,7 @@ import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.FORMAT_DATE_HOUR_MINUTE
 import com.infomaniak.lib.core.utils.FORMAT_FULL_DATE
+import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import com.infomaniak.lib.core.utils.format
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
@@ -72,7 +73,7 @@ open class FileActivity(
             }
         }
 
-    fun translation(isFolder: Boolean): Int = when (getAction()) {
+    fun translation(isFolder: Boolean): Int? = when (getAction()) {
         FileActivityType.FILE_ACCESS -> {
             if (isFolder) R.string.fileDetailsActivityFolderAccess else R.string.fileDetailsActivityFileAccess
         }
@@ -140,6 +141,7 @@ open class FileActivity(
         FileActivityType.FILE_UNCATEGORIZE -> R.string.fileDetailsActivityFileUncategorize
         FileActivityType.FILE_COLOR_UPDATE -> R.string.fileDetailsActivityFileColorUpdate
         FileActivityType.FILE_COLOR_DELETE -> R.string.fileDetailsActivityFileColorDelete
+        null -> null
     }
 
     fun getDay(context: Context): String {
@@ -156,8 +158,8 @@ open class FileActivity(
         return createdAt.format(FORMAT_DATE_HOUR_MINUTE)
     }
 
-    fun getAction(): FileActivityType {
+    fun getAction(): FileActivityType? {
         return if (action == "file_move") FileActivityType.FILE_MOVE_IN
-        else FileActivityType.valueOf(action.uppercase())
+        else enumValueOfOrNull<FileActivityType>(action.uppercase())
     }
 }
