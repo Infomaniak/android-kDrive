@@ -24,6 +24,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Rational
 import android.view.View
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.CallSuper
 import androidx.annotation.OptIn
@@ -93,6 +94,10 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
 
+    var positionForMedium: MutableMap<Int?, Long?> = mutableMapOf()
+    // If the user click want to navigate back and something is playing, we don't want to start PIP
+    private var canStartPictureInPicture = true
+
     // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
     // it implements
     val drivePermissions: DrivePermissions = DrivePermissions()
@@ -122,7 +127,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         header.apply {
             setupWindowInsetsListener(root, bottomSheetView) { pdfContainer.setMargins(right = it?.right ?: 0) }
             setup(
-                onBackClicked = findNavController()::popBackStack,
+                onBackClicked = ::navigateBack,
                 onOpenWithClicked = ::openWith,
                 onEditClicked = { openOnlyOfficeDocument(currentFile, mainViewModel.hasNetwork) },
             )
@@ -249,7 +254,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         if (noPreviewList()) return
         previewSliderViewModel.currentPreview = currentFile
 
-        if (mediaController?.isPlaying == true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (canStartPictureInPicture && mediaController?.isPlaying == true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pipParams?.let { requireActivity().enterPictureInPictureMode(it) }
         }
     }
@@ -281,6 +286,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
 
         super.onDestroy()
+    }
+
+    private fun navigateBack() {
+        canStartPictureInPicture = false
+        findNavController().popBackStack()
     }
 
     private fun getPictureInPictureParams(): PictureInPictureParams? {
@@ -330,6 +340,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 mediaController = mediaControllerFuture?.get()?.apply {
                     callback(this)
                 }
+            } else {
+                callback(mediaController!!)
             }
         }
     }
