@@ -53,6 +53,16 @@
             app:layout_goneMarginStart="0dp"
             tools:text="@string/restrictedSharedLinkTitle" />
 
+        <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginStart="@dimen/marginStandardSmall"
+            app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
+            app:layout_constraintStart_toEndOf="@id/shareLinkTitle"
+            app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
+            tools:visibility="visible" />
+
         <ImageView
             android:id="@+id/shareLinkSwitch"
             android:layout_width="wrap_content"
