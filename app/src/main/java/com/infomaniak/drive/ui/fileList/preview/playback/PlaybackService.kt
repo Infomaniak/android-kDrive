@@ -17,13 +17,13 @@
  */
 package com.infomaniak.drive.ui.fileList.preview.playback
 
-import android.content.Context
 import android.content.Intent
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DataSourceBitmapLoader
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -57,15 +57,16 @@ class PlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
-        exoPlayer = ExoPlayer.Builder(this, getRenderersFactory(this))
-            .setMediaSourceFactory(DefaultMediaSourceFactory(getDataSourceFactory(this)))
-            .setTrackSelector(getTrackSelector(this))
+        exoPlayer = ExoPlayer.Builder(this, getRenderersFactory())
+            .setMediaSourceFactory(DefaultMediaSourceFactory(getDataSourceFactory()))
+            .setTrackSelector(getTrackSelector())
             .build().apply {
                 addAnalyticsListener(EventLogger())
                 setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
                 playWhenReady = false
                 mediaSession = MediaSession.Builder(this@PlaybackService, this)
                     .setCallback(mediaSessionCallback)
+                    .setBitmapLoader(getBitmapLoader())
                     .build()
                 prepare()
             }
@@ -77,6 +78,7 @@ class PlaybackService : MediaSessionService() {
         if (!player.playWhenReady
             || player.mediaItemCount == 0
             || player.playbackState == Player.STATE_ENDED
+            || !player.isPlaying
         ) {
             stopSelf()
         }
@@ -93,22 +95,25 @@ class PlaybackService : MediaSessionService() {
         super.onDestroy()
     }
 
-    private fun getRenderersFactory(appContext: Context): RenderersFactory {
-        return DefaultRenderersFactory(appContext)
+    private fun getRenderersFactory(): RenderersFactory {
+        return DefaultRenderersFactory(this)
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
     }
 
-    private fun getDataSourceFactory(context: Context): DataSource.Factory {
-        val appContext = context.applicationContext
+    private fun getDataSourceFactory(): DataSource.Factory {
         val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
-            setUserAgent(Util.getUserAgent(appContext, context.getString(R.string.app_name)))
+            setUserAgent(Util.getUserAgent(this@PlaybackService, getString(R.string.app_name)))
             setDefaultRequestProperties(HttpUtils.getHeaders().toMap())
         }
-        return DefaultDataSource.Factory(appContext, okHttpDataSource)
+        return DefaultDataSource.Factory(this, okHttpDataSource)
     }
 
-    private fun getTrackSelector(context: Context): DefaultTrackSelector {
-        return DefaultTrackSelector(context).apply {
+    private fun getBitmapLoader(): DataSourceBitmapLoader {
+        return DataSourceBitmapLoader(DataSourceBitmapLoader.DEFAULT_EXECUTOR_SERVICE.get(), getDataSourceFactory())
+    }
+
+    private fun getTrackSelector(): DefaultTrackSelector {
+        return DefaultTrackSelector(this).apply {
             setParameters(buildUponParameters().setMaxVideoSizeSd())
         }
     }
