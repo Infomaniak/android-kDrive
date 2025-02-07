@@ -34,6 +34,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
@@ -48,8 +49,6 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private var _binding: FragmentPreviewPlaybackBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
-
-    private var mediaPosition = 0L
 
     private val flagKeepScreenOn by lazy { WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON }
 
@@ -82,6 +81,8 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         }
         _binding?.playerView?.isGone = true
     })
+
+    private var isInPictureInPictureMode = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPlaybackBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -116,7 +117,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     override fun onResume() {
         super.onResume()
         (parentFragment as BasePreviewSliderFragment).getMediaController { mediaController ->
-            if (!mediaController.isPlaying) {
+            if (!mediaController.isPlaying && !isInPictureInPictureMode) {
                 mediaController.removeListener(playerListener)
                 mediaController.addListener(playerListener)
 
@@ -126,16 +127,9 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
                 binding.playerView.controllerHideOnTouch = false
 
-                mediaController.seekTo(mediaPosition)
-            }
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        (parentFragment as BasePreviewSliderFragment).getMediaController { mediaController ->
-            if (!mediaController.isPlaying) {
-                mediaPosition = mediaController.currentPosition
+                mediaController.seekTo((parentFragment as BasePreviewSliderFragment).positionForMedium[file.id] ?: 0L)
+            } else {
+                isInPictureInPictureMode = false
             }
         }
     }
@@ -145,25 +139,42 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         _binding = null
     }
 
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
+
+        if (!this.isInPictureInPictureMode) this.isInPictureInPictureMode = isInPictureInPictureMode
+    }
+
     private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { file.isOfflineAndIntact(it) } ?: false
 
     fun onFragmentUnselected() {
         (parentFragment as PreviewSliderFragment).getMediaController { mediaController ->
             mediaController.pause()
-            mediaPosition = mediaController.currentPosition
+            if (mediaController.currentMediaItem?.mediaId?.toInt() == file.id) {
+                (parentFragment as BasePreviewSliderFragment).positionForMedium[file.id] = mediaController.currentPosition
+            }
             binding.playerView.player = null
         }
     }
 
     private fun getMediaItem(offlineFile: IOFile?, offlineIsComplete: Boolean): MediaItem {
-        val mediaMetadata = MediaMetadata.Builder()
+        val uri = getUri(offlineFile, offlineIsComplete)
+        val mediaMetadataBuilder = MediaMetadata.Builder()
             .setTitle(file.name)
-            .build()
+
+        if (file.getFileType() == ExtensionType.VIDEO) {
+            mediaMetadataBuilder.setArtworkUri(getThumbnailUri())
+        }
+
         return MediaItem.Builder()
             .setMediaId(file.id.toString())
-            .setMediaMetadata(mediaMetadata)
-            .setUri(getUri(offlineFile, offlineIsComplete))
+            .setMediaMetadata(mediaMetadataBuilder.build())
+            .setUri(uri)
             .build()
+    }
+
+    private fun getThumbnailUri(): Uri {
+        return Uri.parse(ApiRoutes.getThumbnailUrl(file))
     }
 
     private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
