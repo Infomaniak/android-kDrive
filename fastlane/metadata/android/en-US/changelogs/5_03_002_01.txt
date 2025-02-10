@@ -1,0 +1,3 @@
+- Move current account first in accounts list
+- Remove possibility to switch to current user
+- Add a check icon to better detect the current user

@@ -1,0 +1,3 @@
+- Déplace le compte courant en premier dans la liste des comptes
+- Retire la possibilité de passer à l'utilisateur actuel
+- Ajout d'une icône de vérification pour mieux détecter l'utilisateur actuel
