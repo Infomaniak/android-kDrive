@@ -91,12 +91,8 @@
                 android:id="@+id/trashAutoClearLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/marginStandardMedium"
-                android:background="?selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:paddingHorizontal="@dimen/marginStandard"
-                android:paddingVertical="@dimen/marginStandardSmall"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandard"
                 android:visibility="gone"
                 tools:visibility="visible">
 
@@ -116,28 +112,26 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardMedium"
                     android:text="@string/trashAutoClearDescription"
+                    app:layout_constraintBottom_toTopOf="@id/trashAutoClearUpgradeButton"
                     app:layout_constraintStart_toEndOf="@id/trashAutoClearIcon"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/trashAutoClearUpgradeButton"
+                    style="@style/TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/buttonUpgrade"
-                    android:textColor="@color/primary"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="@id/trashAutoClearDescription"
-                    app:layout_constraintTop_toTopOf="@id/trashAutoClearMyKSuiteChip" />
+                    app:layout_constraintStart_toEndOf="@id/trashAutoClearIcon"
+                    app:layout_constraintTop_toBottomOf="@id/trashAutoClearDescription" />
 
                 <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
-                    android:id="@+id/trashAutoClearMyKSuiteChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/marginStandardSmall"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toBottomOf="@id/trashAutoClearUpgradeButton"
                     app:layout_constraintStart_toEndOf="@id/trashAutoClearUpgradeButton"
-                    app:layout_constraintTop_toBottomOf="@id/trashAutoClearDescription" />
+                    app:layout_constraintTop_toTopOf="@id/trashAutoClearUpgradeButton" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

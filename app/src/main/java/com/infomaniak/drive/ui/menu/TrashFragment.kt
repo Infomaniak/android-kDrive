@@ -177,10 +177,8 @@ class TrashFragment : FileSubTypeListFragment() {
     }
 
     private fun setupAutoClearUpgradeLayout() {
-        binding.trashAutoClearLayout.apply {
-            isVisible = AccountUtils.getCurrentDrive()?.isMyKSuitePack == true
-            setOnClickListener { openMyKSuiteUpgradeBottomSheet() }
-        }
+        binding.trashAutoClearLayout.isVisible = AccountUtils.getCurrentDrive()?.isMyKSuitePack == true
+        binding.trashAutoClearUpgradeButton.setOnClickListener { openMyKSuiteUpgradeBottomSheet() }
     }
 
     companion object {
