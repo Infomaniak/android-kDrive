@@ -89,10 +89,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
 
+    var positionForMedium: MutableMap<Int?, Long?> = mutableMapOf()
+
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
 
-    var positionForMedium: MutableMap<Int?, Long?> = mutableMapOf()
     // If the user click want to navigate back and something is playing, we don't want to start PIP
     private var canStartPictureInPicture = true
 
@@ -278,9 +279,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private fun addBackPressedCallback() {
         requireActivity()
             .onBackPressedDispatcher
-            .addCallback(viewLifecycleOwner) {
-                navigateBack()
-            }
+            .addCallback(viewLifecycleOwner) { navigateBack() }
     }
 
     private fun navigateBack() {
