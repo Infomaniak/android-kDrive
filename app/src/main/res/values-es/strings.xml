@@ -168,6 +168,7 @@
     <string name="buttonSwitchDrive">Cambiar de drive</string>
     <string name="buttonTakePhotoOrVideo">Hacer una foto o un vídeo</string>
     <string name="buttonToggleDisplay">Pasar al modo cuadrícula o lista</string>
+    <string name="buttonUpgrade">Actualizar</string>
     <string name="buttonUpgradeOffer">Mejorar mi oferta</string>
     <string name="buttonUpload">Importar desde el teléfono</string>
     <string name="buttonValid">Validar</string>
@@ -592,6 +593,7 @@
     <string name="selectMediaFoldersTitle">Archivos a guardar</string>
     <string name="settingsOnlyWifiSyncDescription">Las cargas y actualizaciones de archivos sin conexión sólo se harán con una conexión Wi-Fi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transferencia sólo con WiFi</string>
+    <string name="settingsSectionGeneral">General</string>
     <string name="settingsTitle">Parámetros</string>
     <string name="shareFileInputUserAndEmail">Invita a un usuario o una dirección de correo electrónico…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Los usuarios únicamente pueden consultar el documento.</string>
@@ -694,6 +696,7 @@
     <string name="trashActionDelete">Eliminar definitivamente</string>
     <string name="trashActionRestoreFileIn">Restaurar en</string>
     <string name="trashActionRestoreFileOriginalPlace">Restaurar en el emplazamiento original</string>
+    <string name="trashAutoClearDescription">La basura se limpia automáticamente cada 30 días.</string>
     <string name="trashNoFile">No se ha eliminado ningún archivo</string>
     <string name="trashTitle">Papelera</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
