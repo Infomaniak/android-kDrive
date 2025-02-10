@@ -48,16 +48,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandardMedium"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/shareLinkIcon"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_goneMarginStart="0dp"
             tools:text="@string/restrictedSharedLinkTitle" />
 
         <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+            android:id="@+id/shareLinkMyKSuiteChip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:layout_marginStart="@dimen/marginStandardSmall"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
             app:layout_constraintStart_toEndOf="@id/shareLinkTitle"
             app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
