@@ -31,6 +31,7 @@ import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.TrashMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MyKSuiteUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.showSnackbar
@@ -67,6 +68,8 @@ class TrashFragment : FileSubTypeListFragment() {
         setupBasicMultiSelectLayout()
         observeDriveTrash()
         observeTrashedFolderFiles()
+
+        setupAutoClearUpgradeLayout()
     }
 
     private fun initParams() = with(binding) {
@@ -170,6 +173,13 @@ class TrashFragment : FileSubTypeListFragment() {
                     isNewSort = result.isNewSort,
                 )
             }
+        }
+    }
+
+    private fun setupAutoClearUpgradeLayout() {
+        binding.trashAutoClearLayout.apply {
+            isVisible = AccountUtils.getCurrentDrive()?.isMyKSuitePack == true
+            setOnClickListener { openMyKSuiteUpgradeBottomSheet() }
         }
     }
 
