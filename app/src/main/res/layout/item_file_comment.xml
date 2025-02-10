@@ -142,7 +142,7 @@
                     android:layout_gravity="center_vertical"
                     android:background="?selectableItemBackground"
                     android:paddingVertical="@dimen/marginStandardMedium"
-                    android:src="@drawable/ic_delete" />
+                    android:src="@drawable/ic_bin" />
             </FrameLayout>
         </FrameLayout>
 
