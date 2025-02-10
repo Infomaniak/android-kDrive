@@ -95,6 +95,7 @@ object GeniusScanUtils : IGeniusScanUtils {
             foregroundColor = ContextCompat.getColor(this@startScanFlow, R.color.white)
             highlightColor = ContextCompat.getColor(this@startScanFlow, R.color.accent)
             ocrConfiguration = getOcrConfiguration()
+            defaultCurvatureCorrection = ScanConfiguration.CurvatureCorrectionMode.ENABLED
         }
         scanWithConfiguration(scanConfiguration, resultLauncher)
     }
