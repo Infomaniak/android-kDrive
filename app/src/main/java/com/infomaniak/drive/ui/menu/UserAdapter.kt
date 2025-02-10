@@ -29,13 +29,13 @@ import com.infomaniak.drive.utils.setUserView
 import com.infomaniak.lib.core.models.user.User
 
 class UserAdapter(
-    private val users: ArrayList<User>,
-    private val isCardview: Boolean = true,
+    private val users: List<User>,
+    private val isCardView: Boolean = true,
     private val onItemClicked: (user: User) -> Unit,
 ) : Adapter<UserViewHolder>() {
 
     override fun getItemViewType(position: Int): Int {
-        return if (isCardview) VIEW_TYPE_CARDVIEW
+        return if (isCardView) VIEW_TYPE_CARDVIEW
         else VIEW_TYPE_NORMAL
     }
 
@@ -59,7 +59,13 @@ class UserAdapter(
             this as ItemUserBinding
         }
 
-        itemUserBinding.setUserView(user, isCardview, onItemClicked)
+        itemUserBinding.setUserView(
+            user,
+            showRightIndicator = isCardView,
+            showCurrentUser = true,
+            withForceClick = !isCardView,
+            onItemClicked = onItemClicked,
+        )
     }
 
     override fun getItemCount() = users.size

@@ -102,13 +102,13 @@ class AvailableShareableItemsAdapter(
                     userAvatar.loadAvatar(item)
                     userName.text = item.displayName
                     userEmail.text = item.email
-                    chevron.isGone = true
+                    rightIndicator.isGone = true
                 }
                 is Invitation -> {
                     userAvatar.load(R.drawable.ic_account)
                     userName.text = item.email
                     userEmail.text = context.getString(R.string.userInviteByEmail)
-                    chevron.isGone = true
+                    rightIndicator.isGone = true
                 }
                 is Team -> {
                     val teamUsersCount = item.usersCount(AccountUtils.getCurrentDrive()!!)
@@ -117,7 +117,7 @@ class AvailableShareableItemsAdapter(
                     userName.text = item.name
                     userEmail.text =
                         context.resources.getQuantityString(R.plurals.shareUsersCount, teamUsersCount, teamUsersCount)
-                    chevron.isGone = true
+                    rightIndicator.isGone = true
                 }
             }
 
