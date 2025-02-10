@@ -30,7 +30,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.views.MyKSuiteUpgradeBottomSheetDialogArgs
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
@@ -317,8 +317,7 @@ class FileShareDetailsFragment : Fragment() {
             val canCreateShareLink = drive.quotas.canCreateShareLink || hasShareLink
 
             binding.shareLinkContainer.showMyKSuitePlusChip(canCreateShareLink) {
-                val args = MyKSuiteUpgradeBottomSheetDialogArgs(kSuiteApp = KSuiteApp.Drive)
-                safeNavigate(R.id.myKSuiteUpgradeBottomSheet, args = args.toBundle())
+                findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
             }
         }
     }
