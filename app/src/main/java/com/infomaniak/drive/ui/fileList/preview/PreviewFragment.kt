@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.session.MediaController
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -71,4 +72,8 @@ open class PreviewFragment : Fragment() {
     }
 
     protected fun noCurrentFile() = previewViewModel.currentFile == null
+
+    protected fun getMediaController(callback: (MediaController) -> Unit) {
+        (parentFragment as PreviewSliderFragment).getMediaController { callback(it) }
+    }
 }
