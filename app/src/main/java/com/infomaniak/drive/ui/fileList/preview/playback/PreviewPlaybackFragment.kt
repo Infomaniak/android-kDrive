@@ -40,7 +40,6 @@ import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.ui.fileList.preview.PreviewFragment
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.playback.PlayerListener.Companion.trackMediaPlayerEvent
 import com.infomaniak.drive.utils.IOFile
 
@@ -116,7 +115,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onResume() {
         super.onResume()
-        (parentFragment as BasePreviewSliderFragment).getMediaController { mediaController ->
+        getMediaController { mediaController ->
             if (!mediaController.isPlaying && !isInPictureInPictureMode) {
                 mediaController.removeListener(playerListener)
                 mediaController.addListener(playerListener)
@@ -145,10 +144,8 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         if (!this.isInPictureInPictureMode) this.isInPictureInPictureMode = isInPictureInPictureMode
     }
 
-    private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { file.isOfflineAndIntact(it) } ?: false
-
     fun onFragmentUnselected() {
-        (parentFragment as PreviewSliderFragment).getMediaController { mediaController ->
+        getMediaController { mediaController ->
             mediaController.pause()
             if (mediaController.currentMediaItem?.mediaId?.toInt() == file.id) {
                 (parentFragment as BasePreviewSliderFragment).positionForMedium[file.id] = mediaController.currentPosition
@@ -156,6 +153,8 @@ open class PreviewPlaybackFragment : PreviewFragment() {
             binding.playerView.player = null
         }
     }
+
+    private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { file.isOfflineAndIntact(it) } ?: false
 
     private fun getMediaItem(offlineFile: IOFile?, offlineIsComplete: Boolean): MediaItem {
         val uri = getUri(offlineFile, offlineIsComplete)
