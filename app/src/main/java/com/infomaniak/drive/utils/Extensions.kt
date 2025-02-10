@@ -185,7 +185,7 @@ fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
 fun ItemUserBinding.setUserView(
     user: User,
-    showIcon: Boolean = true,
+    showRightIndicator: Boolean = true,
     showCurrentUser: Boolean = false,
     withForceClick: Boolean = true,
     onItemClicked: (user: User) -> Unit,
@@ -205,7 +205,7 @@ fun ItemUserBinding.setUserView(
         }
     }
 
-    if (showIcon) rightIndicator.setImageDrawable(getRightIcon())
+    if (showRightIndicator) rightIndicator.setImageDrawable(getRightIcon())
 
     if (!isCurrentUser || withForceClick) {
         root.setOnClickListener { onItemClicked(user) }

@@ -61,7 +61,7 @@ class UserAdapter(
 
         itemUserBinding.setUserView(
             user,
-            showIcon = isCardView,
+            showRightIndicator = isCardView,
             showCurrentUser = true,
             withForceClick = !isCardView,
             onItemClicked = onItemClicked,
