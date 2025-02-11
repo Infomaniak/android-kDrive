@@ -21,4 +21,6 @@
     <color name="previewBackgroundTransparent">#80111C28</color>
     <color name="disabledButtonBackgroundColor">@android:color/black</color>
     <color name="backgroundShortcut">#F5F5F5</color>
+    <color name="myKSuiteChipOnBackground">#FFFFFF</color>
+    <color name="myKSuiteChipOnCardBackground">#F1F1F1</color>
 </resources>

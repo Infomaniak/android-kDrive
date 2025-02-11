@@ -131,7 +131,8 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="@id/trashAutoClearUpgradeButton"
                     app:layout_constraintStart_toEndOf="@id/trashAutoClearUpgradeButton"
-                    app:layout_constraintTop_toTopOf="@id/trashAutoClearUpgradeButton" />
+                    app:layout_constraintTop_toTopOf="@id/trashAutoClearUpgradeButton"
+                    app:backgroundColor="@color/myKSuiteChipOnBackground" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

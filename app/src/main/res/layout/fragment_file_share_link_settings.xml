@@ -173,6 +173,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/upgradeOfferPassword"
                     app:layout_constraintStart_toEndOf="@id/upgradeOfferPassword"
                     app:layout_constraintTop_toTopOf="@id/upgradeOfferPassword"
+                    app:backgroundColor="@color/myKSuiteChipOnCardBackground"
                     tools:visibility="visible" />
 
                 <com.infomaniak.lib.core.views.EndIconTextInputLayout
@@ -306,6 +307,7 @@
                     app:layout_constraintBottom_toBottomOf="@id/upgradeOfferExpirationDate"
                     app:layout_constraintStart_toEndOf="@id/upgradeOfferExpirationDate"
                     app:layout_constraintTop_toTopOf="@id/upgradeOfferExpirationDate"
+                    app:backgroundColor="@color/myKSuiteChipOnCardBackground"
                     tools:visibility="visible" />
 
                 <com.infomaniak.drive.views.DateInputView

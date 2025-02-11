@@ -192,7 +192,8 @@
                         android:layout_marginEnd="@dimen/marginStandardMedium"
                         app:layout_constraintBottom_toBottomOf="@+id/dropBoxTitle"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/dropBoxTitle" />
+                        app:layout_constraintTop_toTopOf="@id/dropBoxTitle"
+                        app:backgroundColor="@color/myKSuiteChipOnCardBackground" />
 
                     <TextView
                         android:id="@+id/dropBoxDescription"
