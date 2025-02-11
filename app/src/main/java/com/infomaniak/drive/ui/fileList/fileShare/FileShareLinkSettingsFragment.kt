@@ -204,7 +204,7 @@ class FileShareLinkSettingsFragment : Fragment() {
 
     private fun setupFreeAccountUi() = with(binding) {
         AccountUtils.getCurrentDrive()?.let { drive ->
-            if (drive.isFreePack || drive.isMyKSuitePack) {
+            if (drive.isFreeTier) {
                 setupUpgradeOfferListener(drive.isMyKSuitePack)
 
                 addPasswordSwitch.isEnabled = false

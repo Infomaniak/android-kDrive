@@ -48,6 +48,7 @@ import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
 import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.MyKSuiteUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
@@ -400,13 +401,16 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
 
         fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
-            if (AccountUtils.getCurrentDrive()?.isFreePack == true) {
-                safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
-            } else {
-                safeNavigate(
-                    R.id.colorFolderBottomSheetDialog,
-                    ColorFolderBottomSheetDialogArgs(color = color).toBundle()
-                )
+            val drive = AccountUtils.getCurrentDrive()
+            when {
+                drive?.isFreePack == true -> safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
+                drive?.isMyKSuitePack == true -> openMyKSuiteUpgradeBottomSheet()
+                else -> {
+                    safeNavigate(
+                        R.id.colorFolderBottomSheetDialog,
+                        ColorFolderBottomSheetDialogArgs(color = color).toBundle()
+                    )
+                }
             }
         }
     }
