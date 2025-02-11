@@ -230,10 +230,12 @@ object AccountUtils : CredentialManager() {
 
     fun getAllUsersSync(): List<User> = userDatabase.userDao().getAllSync()
 
-    fun getCurrentDrive(): Drive? {
-        if (currentDriveId != currentDrive?.id) {
-            currentDrive = DriveInfosController.getDrive(currentUserId, currentDriveId, maintenance = false) ?: getFirstDrive()
-        }
+    fun refreshCurrentDrive() {
+        currentDrive = DriveInfosController.getDrive(currentUserId, currentDriveId, maintenance = false) ?: getFirstDrive()
+    }
+
+    fun getCurrentDrive(forceRefresh: Boolean = false): Drive? {
+        if (currentDriveId != currentDrive?.id || forceRefresh) refreshCurrentDrive()
         return currentDrive
     }
 

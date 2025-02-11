@@ -181,7 +181,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 )
             )
         } else {
-            if (AccountUtils.getCurrentDrive()?.canCreateDropbox == true) {
+            if (AccountUtils.getCurrentDrive(forceRefresh = true)?.canCreateDropbox == true) {
                 safeNavigate(
                     FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToConvertToDropBoxFragment(
                         fileId = currentFile.id,
