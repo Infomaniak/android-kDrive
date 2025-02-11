@@ -117,6 +117,9 @@ open class Drive(
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
+    inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (!isFreeTier || quotas.canCreateDropbox)
+    inline val canCreateShareLink get() = !isFreeTier || quotas.canCreateShareLink
+
     fun isUserAdmin(): Boolean = role == DriveUser.Role.ADMIN
 
     fun isDriveUser(): Boolean = role != DriveUser.Role.NONE && role != DriveUser.Role.EXTERNAL

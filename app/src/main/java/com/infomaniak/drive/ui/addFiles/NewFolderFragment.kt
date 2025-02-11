@@ -85,16 +85,13 @@ class NewFolderFragment : Fragment() {
     }
 
     private fun initDropBoxFolder(drive: Drive?) {
-        val canCreateDropbox = drive?.quotas?.canCreateDropbox == true
+        val canCreateDropbox = drive?.canCreateDropbox == true
         binding.myKSuitePlusChip.isVisible = !canCreateDropbox
         binding.dropBox.apply {
             isVisible = drive?.sharedWithMe != true
             setOnClickListener {
                 if (canCreateDropbox) {
-                    safeNavigate(
-                        if (drive?.pack?.capabilities?.useDropbox == true) R.id.createDropBoxFolderFragment
-                        else R.id.dropBoxBottomSheetDialog
-                    )
+                    safeNavigate(R.id.createDropBoxFolderFragment)
                 } else {
                     findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
                 }

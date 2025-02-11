@@ -314,7 +314,7 @@ class FileShareDetailsFragment : Fragment() {
     private fun observeFileDrive() {
         fileShareViewModel.currentDriveResult.observe(viewLifecycleOwner) { drive ->
             val hasShareLink = fileShareViewModel.currentFile.value?.shareLink != null
-            val canCreateShareLink = drive.quotas.canCreateShareLink || hasShareLink
+            val canCreateShareLink = drive.canCreateShareLink || hasShareLink
 
             binding.shareLinkContainer.showMyKSuitePlusChip(canCreateShareLink) {
                 findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)

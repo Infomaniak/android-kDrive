@@ -127,16 +127,12 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
     }
 
-    private fun setupUpgradeOfferListener(isMyKSuitePack: Boolean) = with(binding) {
+    private fun setupUpgradeOfferListener() {
         val upgradeOfferOnClickListener = View.OnClickListener {
-            if (isMyKSuitePack) {
-                findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
-            } else {
-                safeNavigate(R.id.secureLinkShareBottomSheetDialog)
-            }
+            findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
         }
-        addPasswordLayout.setOnClickListener(upgradeOfferOnClickListener)
-        addExpirationDateLayout.setOnClickListener(upgradeOfferOnClickListener)
+        binding.addPasswordLayout.setOnClickListener(upgradeOfferOnClickListener)
+        binding.addExpirationDateLayout.setOnClickListener(upgradeOfferOnClickListener)
     }
 
     private fun setupSaveButton() = with(binding) {
@@ -205,17 +201,17 @@ class FileShareLinkSettingsFragment : Fragment() {
     private fun setupFreeAccountUi() = with(binding) {
         AccountUtils.getCurrentDrive()?.let { drive ->
             if (drive.isFreeTier) {
-                setupUpgradeOfferListener(drive.isMyKSuitePack)
+                setupUpgradeOfferListener()
 
                 addPasswordSwitch.isEnabled = false
                 addPasswordSwitch.isClickable = false
                 upgradeOfferPassword.isVisible = true
-                offerPasswordMyKSuitePlusChip.isVisible = drive.isMyKSuitePack
+                offerPasswordMyKSuitePlusChip.isVisible = true
 
                 addExpirationDateSwitch.isEnabled = false
                 addExpirationDateSwitch.isClickable = false
                 upgradeOfferExpirationDate.isVisible = true
-                offerExpirationMyKSuitePlusChip.isVisible = drive.isMyKSuitePack
+                offerExpirationMyKSuitePlusChip.isVisible = true
             }
         }
     }
