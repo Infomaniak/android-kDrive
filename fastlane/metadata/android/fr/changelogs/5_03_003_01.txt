@@ -1,1 +1,1 @@
-- Correctement déconnecte l'utilisateur si son token expire
+- Déconnecte correctement l'utilisateur si son token expire
