@@ -32,6 +32,7 @@ object ErrorCode {
     const val PASSWORD_NOT_VALID = "password_not_valid"
     const val PUBLIC_SHARE_LINK_IS_NOT_VALID = "link_is_not_valid"
     const val QUOTA_EXCEEDED_ERROR = "quota_exceeded_error"
+    const val NOT_AUTHORIZED = "not_authorized"
 
     val apiErrorCodes = listOf(
         ApiErrorCode(CATEGORY_ALREADY_EXISTS, R.string.errorCategoryAlreadyExists),

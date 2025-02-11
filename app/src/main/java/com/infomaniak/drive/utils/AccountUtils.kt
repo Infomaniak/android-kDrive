@@ -111,19 +111,31 @@ object AccountUtils : CredentialManager() {
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ) = withContext(Dispatchers.IO) {
 
-        val (userResult, user) = with(ApiRepository.getUserProfile(okHttpClient)) {
-            result to (data ?: return@withContext)
-        }
+        val apiResponse = ApiRepository.getUserProfile(okHttpClient)
 
-        if (userResult != ApiResponseStatus.ERROR) {
-            ApiRepository.getAllDrivesData(okHttpClient).apply {
-                if (result != ApiResponseStatus.ERROR) {
-                    handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
-                } else if (error?.code == ErrorCode.NO_DRIVE) {
-                    removeUserAndDeleteToken(context, user)
+        if (apiResponse.result == ApiResponseStatus.ERROR) {
+            when (apiResponse.error?.code) {
+                ErrorCode.NOT_AUTHORIZED -> {
+                    val user = currentUser ?: requestCurrentUser() ?: return@withContext
+                    deleteSyncFilesThenLogoutUser(context, user)
                 }
             }
+            return@withContext
         }
+
+        val user = apiResponse.data ?: return@withContext
+        ApiRepository.getAllDrivesData(okHttpClient).apply {
+            if (result != ApiResponseStatus.ERROR) {
+                handleDrivesData(context, fromMaintenance, fromCloudStorage, user, data as DriveInfo)
+            } else if (error?.code == ErrorCode.NO_DRIVE) {
+                removeUserAndDeleteToken(context, user)
+            }
+        }
+    }
+
+    suspend fun deleteSyncFilesThenLogoutUser(context: Context, user: User) {
+        if (UploadFile.getAppSyncSettings()?.userId == user.id) UploadFile.deleteAllSyncFile()
+        removeUserAndDeleteToken(context, user)
     }
 
     private suspend fun handleDrivesData(

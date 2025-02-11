@@ -34,7 +34,6 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
@@ -110,8 +109,7 @@ class MenuFragment : Fragment() {
                     .setMessage(getString(R.string.alertRemoveUserDescription, currentUser.displayName))
                     .setPositiveButton(R.string.buttonConfirm) { _, _ ->
                         lifecycleScope.launch(Dispatchers.IO) {
-                            if (UploadFile.getAppSyncSettings()?.userId == currentUser.id) UploadFile.deleteAllSyncFile()
-                            AccountUtils.removeUserAndDeleteToken(requireContext(), currentUser)
+                            AccountUtils.deleteSyncFilesThenLogoutUser(requireContext(), currentUser)
                         }
                     }
                     .setNegativeButton(R.string.buttonCancel) { _, _ -> }
