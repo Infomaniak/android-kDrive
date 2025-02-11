@@ -40,7 +40,7 @@ object DriveInfosController {
         .modules(RealmModules.DriveFilesModule())
         .build()
 
-    fun getRealmInstance() = Realm.getInstance(realmConfiguration)
+    fun getRealmInstance(): Realm = Realm.getInstance(realmConfiguration)
 
     private fun ArrayList<Drive>.initDriveForRealm(
         drive: Drive,

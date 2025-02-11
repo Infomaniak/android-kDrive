@@ -128,11 +128,15 @@ class LaunchActivity : AppCompatActivity() {
             AccountUtils.updateCurrentUserAndDrives(this)
         }
 
-        val areAllDrivesInMaintenance = DriveInfosController.getDrives(userId = AccountUtils.currentUserId).all { it.maintenance }
+        val areAllDrivesInMaintenance = DriveInfosController.getDrives(userId = AccountUtils.currentUserId)
+            .takeUnless { it.isEmpty() }
+            ?.all { it.maintenance }
+            ?: false
 
-        return when {
-            areAllDrivesInMaintenance -> MaintenanceActivity::class.java
-            else -> MainActivity::class.java
+        return if (areAllDrivesInMaintenance) {
+            MaintenanceActivity::class.java
+        } else {
+            MainActivity::class.java
         }
     }
 
