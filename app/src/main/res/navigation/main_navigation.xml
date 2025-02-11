@@ -706,18 +706,6 @@
         tools:layout="@layout/fragment_bottom_sheet_information" />
 
     <dialog
-        android:id="@+id/secureLinkShareBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SecureLinkShareBottomSheetDialog"
-        android:label="SecureLinkShareBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_information" />
-
-    <dialog
-        android:id="@+id/dropBoxBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DropBoxBottomSheetDialog"
-        android:label="DropBoxBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_information" />
-
-    <dialog
         android:id="@+id/updateAvailableBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.UpdateAvailableBottomSheetDialog"
         android:label="UpdateAvailableBottomSheetDialog"
@@ -905,12 +893,6 @@
             app:argType="string"
             app:nullable="true" />
     </dialog>
-
-    <dialog
-        android:id="@+id/colorFolderUpgradeBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderUpgradeBottomSheetDialog"
-        android:label="ColorFolderUpgradeBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_information" />
 
     <dialog
         android:id="@+id/categoryInfoActionsBottomSheetDialog"
