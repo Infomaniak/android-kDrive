@@ -1051,18 +1051,4 @@
             app:destination="@id/fileListFragment" />
     </fragment>
 
-    <fragment
-        android:id="@+id/myKSuiteDashboardFragment"
-        android:name="com.infomaniak.core.myksuite.ui.views.MyKSuiteDashboardFragment"
-        android:label="MyKSuiteDashboardFragment">
-        <argument
-            android:name="userName"
-            app:argType="string" />
-        <argument
-            android:name="avatarUri"
-            app:argType="string" />
-        <argument
-            android:name="dailySendLimit"
-            app:argType="string" />
-    </fragment>
 </navigation>

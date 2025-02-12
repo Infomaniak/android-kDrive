@@ -179,7 +179,7 @@ class TrashFragment : FileSubTypeListFragment() {
     }
 
     private fun setupAutoClearUpgradeLayout() {
-        binding.trashAutoClearLayout.isVisible = AccountUtils.getCurrentDrive()?.isMyKSuitePack == true
+        binding.trashAutoClearLayout.isVisible = AccountUtils.getCurrentDrive()?.isFreeTier == true
         binding.trashAutoClearUpgradeButton.setOnClickListener {
             findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
         }

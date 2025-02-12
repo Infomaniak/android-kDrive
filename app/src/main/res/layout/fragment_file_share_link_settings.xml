@@ -119,10 +119,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardMedium"
-                android:layout_marginBottom="@dimen/marginStandardSmall"
                 android:background="?selectableItemBackground"
                 android:paddingHorizontal="@dimen/marginStandard"
-                android:paddingBottom="@dimen/marginStandardSmall">
+                android:paddingBottom="@dimen/marginStandardMedium">
 
                 <TextView
                     android:id="@+id/addPasswordTitle"
@@ -170,10 +169,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardSmall"
                     android:visibility="gone"
+                    app:backgroundColor="@color/myKSuiteChipOnCardBackground"
                     app:layout_constraintBottom_toBottomOf="@id/upgradeOfferPassword"
                     app:layout_constraintStart_toEndOf="@id/upgradeOfferPassword"
                     app:layout_constraintTop_toTopOf="@id/upgradeOfferPassword"
-                    app:backgroundColor="@color/myKSuiteChipOnCardBackground"
                     tools:visibility="visible" />
 
                 <com.infomaniak.lib.core.views.EndIconTextInputLayout
@@ -253,10 +252,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardMedium"
-                android:layout_marginBottom="@dimen/marginStandardSmall"
                 android:background="?selectableItemBackground"
                 android:paddingHorizontal="@dimen/marginStandard"
-                android:paddingBottom="@dimen/marginStandardSmall">
+                android:paddingBottom="@dimen/marginStandardMedium">
 
                 <TextView
                     android:id="@+id/addExpirationDateTitle"
@@ -304,10 +302,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/marginStandardSmall"
                     android:visibility="gone"
+                    app:backgroundColor="@color/myKSuiteChipOnCardBackground"
                     app:layout_constraintBottom_toBottomOf="@id/upgradeOfferExpirationDate"
                     app:layout_constraintStart_toEndOf="@id/upgradeOfferExpirationDate"
                     app:layout_constraintTop_toTopOf="@id/upgradeOfferExpirationDate"
-                    app:backgroundColor="@color/myKSuiteChipOnCardBackground"
                     tools:visibility="visible" />
 
                 <com.infomaniak.drive.views.DateInputView

@@ -105,14 +105,12 @@ open class Drive(
     val role: DriveUser.Role?
         get() = enumValueOfOrNull<DriveUser.Role>(_role)
 
+    // Old offer pack, now replaced by My kSuite
     inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
-
+    // Old offer pack, now replaced by My kSuite Plus
     inline val isSoloPack get() = pack?.type == DrivePack.DrivePackType.SOLO
-
     inline val isMyKSuitePack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE
-
     inline val isMyKSuitePlusPack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE_PLUS
-
     inline val isFreeTier get() = isFreePack || isMyKSuitePack
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
