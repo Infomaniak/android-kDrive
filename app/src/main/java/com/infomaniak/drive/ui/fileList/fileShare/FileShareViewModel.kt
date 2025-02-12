@@ -71,4 +71,9 @@ class FileShareViewModel : ViewModel() {
             emit(this)
         }
     }
+
+    override fun onCleared() {
+        driveRealm.close()
+        super.onCleared()
+    }
 }
