@@ -171,8 +171,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
-    override fun dropBoxClicked(isDropBox: Boolean) {
-        super.dropBoxClicked(isDropBox)
+    override fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) {
+        super.dropBoxClicked(isDropBox, canCreateDropbox)
         if (isDropBox) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToManageDropboxFragment(
@@ -181,7 +181,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 )
             )
         } else {
-            if (AccountUtils.getCurrentDrive(forceRefresh = true)?.canCreateDropbox == true) {
+            if (canCreateDropbox) {
                 safeNavigate(
                     FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToConvertToDropBoxFragment(
                         fileId = currentFile.id,

@@ -24,6 +24,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewBottomSheetItemBinding
 import com.infomaniak.lib.core.utils.getAttributes
@@ -57,6 +58,12 @@ class BottomSheetItemView @JvmOverloads constructor(
             binding.icon.imageTintList = value
         }
 
+    var shouldShowMyKSuiteChip: Boolean
+        get() = binding.myKSuitePlusChip.isVisible
+        set(value) {
+            binding.myKSuitePlusChip.isVisible = value
+        }
+
 
     override fun setEnabled(enabled: Boolean) {
         binding.disabledOverlay.isGone = enabled
@@ -69,6 +76,7 @@ class BottomSheetItemView @JvmOverloads constructor(
             icon = getDrawable(R.styleable.BottomSheetItemView_icon)
             getString(R.styleable.BottomSheetItemView_text)?.let { text = it }
             getColorStateList(R.styleable.BottomSheetItemView_iconTint)?.let { iconTintList = it }
+            shouldShowMyKSuiteChip = getBoolean(R.styleable.BottomSheetItemView_showMyKSuiteChip, false)
         }
     }
 
