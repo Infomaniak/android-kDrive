@@ -70,17 +70,20 @@ class ShareLinkContainerView @JvmOverloads constructor(
         selectUi()
     }
 
-    fun showMyKSuitePlusChip(canCreateShareLink: Boolean, showMyKSuitePlusAd: () -> Unit) = with(binding) {
-        if (this@ShareLinkContainerView.shareLink != null) return@with
+    fun setupMyKSuitePlusChip(canCreateShareLink: Boolean, showMyKSuitePlusAd: () -> Unit) = with(binding) {
+        if (this@ShareLinkContainerView.shareLink != null || currentFile.isDropBox()) return@with
 
         shareLinkMyKSuiteChip.isGone = canCreateShareLink
         titleContainer.isEnabled = canCreateShareLink
         titleContainer.isClickable = canCreateShareLink
         shareLinkSettings.isEnabled = canCreateShareLink
-        shareLinkSettings.isClickable = canCreateShareLink
         shareLinkButton.isEnabled = canCreateShareLink
-        shareLinkButton.isClickable = canCreateShareLink
-        if (!canCreateShareLink) root.setOnClickListener { showMyKSuitePlusAd() } else root.setOnClickListener(null)
+
+        root.apply {
+            if (!canCreateShareLink) setOnClickListener { showMyKSuitePlusAd() } else setOnClickListener(null)
+            isClickable = !canCreateShareLink
+            isEnabled = !canCreateShareLink
+        }
     }
 
     private fun selectUi(isDropbox: Boolean = false) {
