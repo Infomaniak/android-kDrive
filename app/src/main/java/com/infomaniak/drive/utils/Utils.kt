@@ -22,12 +22,8 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
-import android.os.Environment
-import android.provider.DocumentsContract
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
@@ -69,7 +65,6 @@ import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.showKeyboard
 import com.infomaniak.lib.core.utils.showToast
 import java.util.Date
-import kotlin.math.min
 import kotlin.math.pow
 
 object Utils {
@@ -413,45 +408,6 @@ object Utils {
         }
         file.copyTo(outputFile, true)
         return outputFile.toUri()
-    }
-
-    /**
-     * From file path
-     */
-    @Deprecated(message = "Only for API 28 and below, otherwise use ThumbnailUtils.createImageThumbnail()")
-    fun extractThumbnail(filePath: String, width: Int, height: Int): Bitmap? {
-        val bitmapOptions = BitmapFactory.Options()
-        bitmapOptions.inJustDecodeBounds = true
-        BitmapFactory.decodeFile(filePath, bitmapOptions)
-
-        val widthScale = bitmapOptions.outWidth.toFloat() / width
-        val heightScale = bitmapOptions.outHeight.toFloat() / height
-        val scale = min(widthScale, heightScale)
-        var sampleSize = 1
-        while (sampleSize < scale) {
-            sampleSize *= 2
-        }
-        bitmapOptions.inSampleSize = sampleSize
-        bitmapOptions.inJustDecodeBounds = false
-
-        return BitmapFactory.decodeFile(filePath, bitmapOptions)
-    }
-
-    fun getRealPathFromExternalStorage(context: Context, uri: Uri): String {
-        // ExternalStorageProvider
-        val docId = DocumentsContract.getDocumentId(uri)
-        val split = docId.split(":").dropLastWhile { it.isEmpty() }.toTypedArray()
-        val type = split.first()
-        val relativePath = split.getOrNull(1) ?: return ""
-        val external = context.externalMediaDirs
-        return when {
-            "primary".equals(type, true) -> Environment.getExternalStorageDirectory().toString() + "/" + relativePath
-            external.size > 1 -> {
-                val filePath = external[1].absolutePath
-                filePath.substring(0, filePath.indexOf("Android")) + relativePath
-            }
-            else -> ""
-        }
     }
 
     fun createProgressDialog(context: Context, title: Int): AlertDialog {
