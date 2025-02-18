@@ -531,7 +531,7 @@ class MainViewModel(
         syncOfflineFilesJob.cancel()
     }
 
-    @Deprecated(message = "Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()")
+    // Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()
     fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
         val fileDeleted = arrayListOf<UploadFile>()
         filesToDelete.forEach { uploadFile ->
@@ -541,10 +541,9 @@ class MainViewModel(
                 query?.use { cursor ->
                     if (cursor.moveToFirst()) {
                         var columnIndex: Int? = null
-                        var pathname: String? = null
                         try {
                             columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-                            pathname = cursor.getString(columnIndex)
+                            val pathname = cursor.getString(columnIndex)
                             IOFile(pathname).delete()
                             getContext().contentResolver.delete(uri, null, null)
                         } catch (nullPointerException: NullPointerException) {
