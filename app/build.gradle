@@ -12,7 +12,7 @@ android {
 
     compileSdk 34
 
-    ndkVersion "25.2.9519653"
+    ndkVersion "28.0.13004108"
 
     defaultConfig {
         testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
