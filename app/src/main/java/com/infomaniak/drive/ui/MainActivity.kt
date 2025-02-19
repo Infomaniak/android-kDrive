@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.ContentResolver
 import android.content.Context
 import android.content.IntentFilter
@@ -118,6 +119,7 @@ class MainActivity : BaseActivity() {
 
     private lateinit var drivePermissions: DrivePermissions
 
+    private var deleteLocalMediaRequestDialog: Dialog? = null
     private val pendingFilesUrisQueue = ArrayDeque<List<Uri>>()
 
     private val filesDeletionResult = registerForActivityResult(StartIntentSenderForResult()) {
@@ -203,6 +205,7 @@ class MainActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         mainViewModel.loadRootFiles()
+        handleDeletionOfUploadedPhotos()
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -350,8 +353,6 @@ class MainActivity : BaseActivity() {
 
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
-
-        handleDeletionOfUploadedPhotos()
     }
 
     private fun launchNextDeleteRequest() {
@@ -392,7 +393,7 @@ class MainActivity : BaseActivity() {
         // and sending the request to MediaStore; otherwise, it would cause a crash.
         val filesUriToDelete = getFilesUriToDelete(filesUploadedRecently).takeIf { it.isNotEmpty() } ?: return
 
-        Utils.createConfirmation(
+        deleteLocalMediaRequestDialog = Utils.createConfirmation(
             context = this,
             title = getString(R.string.modalDeletePhotosTitle),
             message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
@@ -400,6 +401,7 @@ class MainActivity : BaseActivity() {
             isDeletion = true,
             onConfirmation = { onConfirmation(filesUploadedRecently, filesUriToDelete) }
         )
+
     }
 
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
@@ -526,6 +528,8 @@ class MainActivity : BaseActivity() {
     override fun onStop() {
         super.onStop()
         saveLastNavigationItemSelected()
+        deleteLocalMediaRequestDialog?.dismiss()
+        deleteLocalMediaRequestDialog = null
     }
 
     fun saveLastNavigationItemSelected() {
@@ -623,6 +627,6 @@ class MainActivity : BaseActivity() {
         // Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
         // When you exceed this value, the system may not propagate dialog to delete the images,
         // and when you exceed 10_000 you receive a `NullPointerException`.
-        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5000
+        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 50
     }
 }
