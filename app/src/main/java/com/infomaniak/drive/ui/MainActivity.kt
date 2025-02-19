@@ -376,9 +376,11 @@ class MainActivity : BaseActivity() {
 
         fun onConfirmation(filesUploadedRecently: ArrayList<UploadFile>, filesUriToDelete: List<Uri>) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                pendingFilesUrisQueue.clear()
-                pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
-                launchNextDeleteRequest()
+                lifecycleScope.launch {
+                    pendingFilesUrisQueue.clear()
+                    pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
+                    launchNextDeleteRequest()
+                }
             } else {
                 mainViewModel.deleteSynchronizedFilesOnDevice(filesUploadedRecently)
             }
