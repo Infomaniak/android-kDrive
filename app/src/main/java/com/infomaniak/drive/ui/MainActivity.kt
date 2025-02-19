@@ -118,8 +118,14 @@ class MainActivity : BaseActivity() {
 
     private lateinit var drivePermissions: DrivePermissions
 
+    private val pendingFilesUrisQueue = ArrayDeque<List<Uri>>()
+
     private val filesDeletionResult = registerForActivityResult(StartIntentSenderForResult()) {
-        it.whenResultIsOk { lifecycleScope.launch(Dispatchers.IO) { UploadFile.deleteAll(uploadedFilesToDelete) } }
+        it.whenResultIsOk {
+            val filesUris = pendingFilesUrisQueue.removeFirstOrNull() ?: return@whenResultIsOk
+            lifecycleScope.launch(Dispatchers.IO) { UploadFile.deleteAllFromUris(filesUris) }
+            if (pendingFilesUrisQueue.isNotEmpty()) launchNextDeleteRequest()
+        }
     }
 
     private val fileObserver: FileObserver by lazy {
@@ -348,6 +354,14 @@ class MainActivity : BaseActivity() {
         handleDeletionOfUploadedPhotos()
     }
 
+    private fun launchNextDeleteRequest() {
+        val filesUris = pendingFilesUrisQueue.firstOrNull() ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val deletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUris)
+            filesDeletionResult.launch(IntentSenderRequest.Builder(deletionRequest.intentSender).build())
+        }
+    }
+
     private fun handleDeletionOfUploadedPhotos() {
 
         fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
@@ -361,9 +375,9 @@ class MainActivity : BaseActivity() {
 
         fun onConfirmation(filesUploadedRecently: ArrayList<UploadFile>, filesUriToDelete: List<Uri>) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val filesDeletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUriToDelete)
-                uploadedFilesToDelete = filesUploadedRecently
-                filesDeletionResult.launch(IntentSenderRequest.Builder(filesDeletionRequest.intentSender).build())
+                pendingFilesUrisQueue.clear()
+                pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
+                launchNextDeleteRequest()
             } else {
                 mainViewModel.deleteSynchronizedFilesOnDevice(filesUploadedRecently)
             }
@@ -605,5 +619,10 @@ class MainActivity : BaseActivity() {
 
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
+
+        // Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
+        // When you exceed this value, the system may not propagate dialog to delete the images,
+        // and when you exceed 10_000 you receive a `NullPointerException`.
+        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5000
     }
 }
