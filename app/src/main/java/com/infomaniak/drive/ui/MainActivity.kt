@@ -401,7 +401,6 @@ class MainActivity : BaseActivity() {
             isDeletion = true,
             onConfirmation = { onConfirmation(filesUploadedRecently, filesUriToDelete) }
         )
-
     }
 
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
@@ -627,6 +626,6 @@ class MainActivity : BaseActivity() {
         // Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
         // When you exceed this value, the system may not propagate dialog to delete the images,
         // and when you exceed 10_000 you receive a `NullPointerException`.
-        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 50
+        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5_000
     }
 }
