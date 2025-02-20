@@ -277,7 +277,8 @@
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:fillViewport="true">
+                android:fillViewport="true"
+                android:touchscreenBlocksFocus="true">
 
                 <com.infomaniak.drive.views.NoItemsLayoutView
                     android:id="@+id/noFilesLayout"
