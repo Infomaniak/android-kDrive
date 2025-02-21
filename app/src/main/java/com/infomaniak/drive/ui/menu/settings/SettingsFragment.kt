@@ -28,9 +28,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.myksuite.ui.components.MyKSuiteTier
-import com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData
-import com.infomaniak.core.myksuite.ui.screens.components.KSuiteProductsWithQuotas
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteDashboard
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -40,13 +38,13 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentSettingsBinding
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
-import java.util.Date
 
 class SettingsFragment : Fragment() {
 
@@ -74,33 +72,7 @@ class SettingsFragment : Fragment() {
             requireActivity().launchAllUpload(drivePermissions)
         }
 
-        AccountUtils.getCurrentDrive()?.let { drive ->
-            myKSuiteSettingsTitle.setText(if (drive.isFreeTier) R.string.myKSuiteName else R.string.myKSuitePlusName)
-        }
-
-        dashboardSettings.setOnClickListener {
-            trackSettingsEvent("openMyKSuiteDashboard")
-            findNavController().openMyKSuiteDashboard(
-                MyKSuiteDashboardScreenData(
-                    myKSuiteTier = MyKSuiteTier.Plus,
-                    email = "",
-                    dailySendingLimit = "500",
-                    kSuiteProductsWithQuotas = listOf(
-                        KSuiteProductsWithQuotas.Drive(
-                            driveUsedSize = "0",
-                            driveMaxSize = "1 To",
-                            driveProgress = 0.5f,
-                        ),
-                        KSuiteProductsWithQuotas.Mail(
-                            mailUsedSize = "0",
-                            mailMaxSize = "1 To",
-                            mailProgress = 0.5f,
-                        ),
-                    ),
-                    trialExpiryAt = Date().time,
-                )
-            )
-        }
+        setupMyKSuiteLayout()
 
         syncPicture.setOnClickListener {
             safeNavigate(R.id.syncSettingsActivity)
@@ -126,6 +98,30 @@ class SettingsFragment : Fragment() {
         }
         about.setOnClickListener {
             safeNavigate(R.id.aboutSettingsFragment)
+        }
+    }
+
+    private fun toggleMyKSuiteLayoutVisibility(isVisible: Boolean) {
+        binding.myKSuiteSettingsTitle.isVisible = isVisible
+        binding.myKSuiteLayout.isVisible = isVisible
+    }
+
+    private fun setupMyKSuiteLayout() = with(binding) {
+        toggleMyKSuiteLayoutVisibility(MyKSuiteDataUtils.myKSuite != null)
+
+        MyKSuiteDataUtils.myKSuite?.let { myKSuiteData ->
+
+            myKSuiteSettingsEmail.text = myKSuiteData.mail.email
+
+            AccountUtils.getCurrentDrive()?.let { drive ->
+                myKSuiteSettingsTitle.setText(if (drive.isFreeTier) R.string.myKSuiteName else R.string.myKSuitePlusName)
+            }
+
+            dashboardSettings.setOnClickListener {
+                trackSettingsEvent("openMyKSuiteDashboard")
+                val data = MyKSuiteUiUtils.getDashboardData(requireContext(), myKSuiteData, AccountUtils.currentUser?.avatar)
+                findNavController().openMyKSuiteDashboard(data)
+            }
         }
     }
 

@@ -204,6 +204,7 @@ class MainActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         mainViewModel.loadRootFiles()
+        mainViewModel.fetchMyKSuiteData()
         handleDeletionOfUploadedPhotos()
     }
 

@@ -638,6 +638,10 @@ class MainViewModel(
         withContext(Dispatchers.Main) { onUserSwitched() }
     }
 
+    fun fetchMyKSuiteData() = viewModelScope.launch(Dispatchers.IO) {
+        MyKSuiteDataUtils.fetchMyKSuiteData()
+    }
+
     override fun onCleared() {
         realm.close()
         super.onCleared()

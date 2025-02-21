@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
+import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
@@ -507,6 +508,15 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun cancelExternalImport(driveId: Int, importId: Int): ApiResponse<Boolean> {
         return callApi(ApiRoutes.cancelExternalImport(driveId, importId), PUT)
+    }
+
+    fun getMyKSuiteData(okHttpClient: OkHttpClient): ApiResponse<MyKSuiteData> {
+        return callApi(
+            url = com.infomaniak.core.myksuite.ui.network.ApiRoutes.myKSuiteData(),
+            method = ApiController.ApiMethod.GET,
+            okHttpClient = okHttpClient,
+            useKotlinxSerialization = true,
+        )
     }
 
     private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"
