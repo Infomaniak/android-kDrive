@@ -25,6 +25,8 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.infomaniak.core.utils.SECONDS_IN_A_DAY
+import com.infomaniak.core.utils.format
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -33,7 +35,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.utils.format
 import io.realm.*
 import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
@@ -150,7 +151,7 @@ open class UploadFile(
 
     companion object {
         private const val DB_NAME = "Sync.realm"
-        private const val ONE_DAY = 24 * 60 * 60 * 1_000
+        private const val ONE_DAY = SECONDS_IN_A_DAY * 1_000L
         private var realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
             .schemaVersion(UploadMigration.DB_VERSION)
             .modules(RealmModules.SyncFilesModule())
