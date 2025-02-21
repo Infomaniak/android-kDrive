@@ -28,8 +28,12 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
+import com.infomaniak.core.utils.FORMAT_HOUR_MINUTES
+import com.infomaniak.core.utils.format
+import com.infomaniak.core.utils.hours
+import com.infomaniak.core.utils.minutes
 import com.infomaniak.drive.databinding.ViewTimeInputBinding
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener
 import com.wdullaer.materialdatetimepicker.time.Timepoint
@@ -58,7 +62,7 @@ class TimeInputView @JvmOverloads constructor(
         minutes = defaultDate.minutes()
 
         binding.timeValueInput.apply {
-            text = SpannableStringBuilder(defaultDate.format(FORMAT_DATE_HOUR_MINUTE))
+            text = SpannableStringBuilder(defaultDate.format(FORMAT_HOUR_MINUTES))
             keyListener = null
             setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_UP) {
@@ -69,7 +73,7 @@ class TimeInputView @JvmOverloads constructor(
                             set(Calendar.HOUR_OF_DAY, hours)
                             set(Calendar.MINUTE, minutes)
                         }.time
-                        text = SpannableStringBuilder(newDate.format(FORMAT_DATE_HOUR_MINUTE))
+                        text = SpannableStringBuilder(newDate.format(FORMAT_HOUR_MINUTES))
                         onDateSet(hours, minutes)
                     }
                 }

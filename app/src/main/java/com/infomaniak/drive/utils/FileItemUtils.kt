@@ -32,6 +32,7 @@ import androidx.viewbinding.ViewBinding
 import coil.load
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.infomaniak.core.thumbnails.ThumbnailsUtils.getLocalThumbnail
+import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -46,7 +47,6 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.utils.format
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

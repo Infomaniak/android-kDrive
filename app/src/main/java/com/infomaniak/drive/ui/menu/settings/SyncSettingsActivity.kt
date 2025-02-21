@@ -32,6 +32,9 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH
+import com.infomaniak.core.utils.format
+import com.infomaniak.core.utils.startOfTheDay
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
@@ -49,8 +52,11 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.showProgressCatching
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke

@@ -27,9 +27,9 @@ import androidx.fragment.app.FragmentManager
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointForward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewDateInputBinding
-import com.infomaniak.lib.core.utils.format
 import java.util.Calendar
 import java.util.Date
 

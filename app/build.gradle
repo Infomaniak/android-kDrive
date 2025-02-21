@@ -129,6 +129,7 @@ sentry {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(path: ':Core')
     implementation project(path: ':Core:Legacy')
     implementation project(path: ':Core:Legacy:AppLock')
     implementation project(path: ':Core:Legacy:Stores')
