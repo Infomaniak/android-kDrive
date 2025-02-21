@@ -199,20 +199,18 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun setupFreeAccountUi() = with(binding) {
-        AccountUtils.getCurrentDrive()?.let { drive ->
-            if (drive.isFreeTier) {
-                setupUpgradeOfferListener()
+        if (AccountUtils.getCurrentDrive()?.isFreeTier == true) {
+            setupUpgradeOfferListener()
 
-                addPasswordSwitch.isEnabled = false
-                addPasswordSwitch.isClickable = false
-                upgradeOfferPassword.isVisible = true
-                offerPasswordMyKSuitePlusChip.isVisible = true
+            addPasswordSwitch.isEnabled = false
+            addPasswordSwitch.isClickable = false
+            upgradeOfferPassword.isVisible = true
+            offerPasswordMyKSuitePlusChip.isVisible = true
 
-                addExpirationDateSwitch.isEnabled = false
-                addExpirationDateSwitch.isClickable = false
-                upgradeOfferExpirationDate.isVisible = true
-                offerExpirationMyKSuitePlusChip.isVisible = true
-            }
+            addExpirationDateSwitch.isEnabled = false
+            addExpirationDateSwitch.isClickable = false
+            upgradeOfferExpirationDate.isVisible = true
+            offerExpirationMyKSuitePlusChip.isVisible = true
         }
     }
 
