@@ -28,6 +28,10 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.myksuite.ui.components.MyKSuiteTier
+import com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData
+import com.infomaniak.core.myksuite.ui.screens.components.KSuiteProductsWithQuotas
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteDashboard
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
@@ -42,6 +46,7 @@ import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
+import java.util.Date
 
 class SettingsFragment : Fragment() {
 
@@ -67,6 +72,34 @@ class SettingsFragment : Fragment() {
             trackSettingsEvent("onlyWifiTransfer", isChecked)
             AppSettings.onlyWifiSync = isChecked
             requireActivity().launchAllUpload(drivePermissions)
+        }
+
+        AccountUtils.getCurrentDrive()?.let { drive ->
+            myKSuiteSettingsTitle.setText(if (drive.isFreeTier) R.string.myKSuiteName else R.string.myKSuitePlusName)
+        }
+
+        dashboardSettings.setOnClickListener {
+            trackSettingsEvent("openMyKSuiteDashboard")
+            findNavController().openMyKSuiteDashboard(
+                MyKSuiteDashboardScreenData(
+                    myKSuiteTier = MyKSuiteTier.Plus,
+                    email = "",
+                    dailySendingLimit = "500",
+                    kSuiteProductsWithQuotas = listOf(
+                        KSuiteProductsWithQuotas.Drive(
+                            driveUsedSize = "0",
+                            driveMaxSize = "1 To",
+                            driveProgress = 0.5f,
+                        ),
+                        KSuiteProductsWithQuotas.Mail(
+                            mailUsedSize = "0",
+                            mailMaxSize = "1 To",
+                            mailProgress = 0.5f,
+                        ),
+                    ),
+                    trialExpiryAt = Date().time,
+                )
+            )
         }
 
         syncPicture.setOnClickListener {

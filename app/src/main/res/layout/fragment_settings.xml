@@ -45,233 +45,317 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <com.google.android.material.card.MaterialCardView
-            style="@style/CardViewInfomaniak"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/marginStandard">
+            android:layout_height="match_parent"
+            android:layout_marginVertical="@dimen/marginStandard"
+            android:orientation="vertical">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/myKSuiteSettingsTitle"
+                style="@style/Subtitle2"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginBottom="@dimen/marginStandardMedium"
+                tools:text="@string/myKSuiteName" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/syncPicture"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardViewInfomaniak"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard">
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:padding="@dimen/marginStandard">
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/syncPictureTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
+                        android:id="@+id/myKSuiteSettingsEmail"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/syncSettingsTitle"
+                        android:layout_margin="@dimen/marginStandard"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/syncPictureValue"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/syncPictureValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/allDisabled"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/themeSettings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:padding="@dimen/marginStandard">
-
-                    <TextView
-                        android:id="@+id/themeSettingsTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/themeSettingsTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/themeSettingsValue"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/themeSettingsValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/themeSettingsSystemLabel"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/notifications"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:paddingHorizontal="@dimen/marginStandard"
-                    android:paddingVertical="@dimen/marginStandardMedium">
-
-                    <TextView
-                        android:id="@+id/notificationsTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/notificationTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/notificationsEnd"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/notificationsEnd"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_chevron_right"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
+                        tools:text="ellen.ripley@ik.me" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
 
-                <View
-                    android:id="@+id/appSecuritySeparator"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/dashboardSettings"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?selectableItemBackground"
+                        android:padding="20dp">
+
+                        <TextView
+                            android:id="@+id/dashboardSettingsTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/myKSuiteDashboardTitle"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/dashboardChevron"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/dashboardChevron"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_chevron_right"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:ignore="ContentDescription" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                style="@style/Subtitle2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:layout_marginBottom="@dimen/marginStandardMedium"
+                android:text="@string/settingsSectionGeneral" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/CardViewInfomaniak"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard">
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/appSecurity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:padding="@dimen/marginStandard"
-                    android:transitionName="appSecurityTransition">
-
-                    <TextView
-                        android:id="@+id/appSecurityTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/syncPicture"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/appSecurityTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/appSecurityValue"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:background="?selectableItemBackground"
+                        android:padding="@dimen/marginStandard">
 
-                    <TextView
-                        android:id="@+id/appSecurityValue"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/syncPictureTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/syncSettingsTitle"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/syncPictureValue"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/syncPictureValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/allDisabled"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/themeSettings"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/allDisabled"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:background="?selectableItemBackground"
+                        android:padding="@dimen/marginStandard">
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:id="@+id/themeSettingsTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/themeSettingsTitle"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/themeSettingsValue"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
+                        <TextView
+                            android:id="@+id/themeSettingsValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/themeSettingsSystemLabel"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:paddingHorizontal="@dimen/marginStandard"
-                    android:paddingVertical="@dimen/marginStandardMedium">
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <TextView
-                        android:id="@+id/onlyWifiSyncTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/notifications"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/settingsOnlyWifiSyncTitle"
-                        app:layout_constraintBottom_toBottomOf="@id/onlyWifiSyncValue"
-                        app:layout_constraintEnd_toStartOf="@id/onlyWifiSyncValue"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="@id/onlyWifiSyncValue" />
+                        android:background="?selectableItemBackground"
+                        android:paddingHorizontal="@dimen/marginStandard"
+                        android:paddingVertical="20dp">
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/onlyWifiSyncValue"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:id="@+id/notificationsTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/notificationTitle"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/notificationsEnd"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/notificationsEnd"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_chevron_right"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:ignore="ContentDescription" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:id="@+id/appSecuritySeparator"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/appSecurity"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toTopOf="@id/onlyWifiSyncDescription"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:background="?selectableItemBackground"
+                        android:padding="@dimen/marginStandard"
+                        android:transitionName="appSecurityTransition">
 
-                    <TextView
-                        android:id="@+id/onlyWifiSyncDescription"
-                        android:layout_width="0dp"
+                        <TextView
+                            android:id="@+id/appSecurityTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/appSecurityTitle"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/appSecurityValue"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/appSecurityValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/allDisabled"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/settingsOnlyWifiSyncDescription"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/onlyWifiSyncValue"
-                        app:layout_constraintVertical_chainStyle="packed" />
+                        android:background="?selectableItemBackground"
+                        android:paddingHorizontal="@dimen/marginStandard"
+                        android:paddingTop="@dimen/marginStandardSmall"
+                        android:paddingBottom="@dimen/marginStandard">
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:id="@+id/onlyWifiSyncTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settingsOnlyWifiSyncTitle"
+                            app:layout_constraintBottom_toBottomOf="@id/onlyWifiSyncValue"
+                            app:layout_constraintEnd_toStartOf="@id/onlyWifiSyncValue"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/onlyWifiSyncValue" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/onlyWifiSyncValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintBottom_toTopOf="@id/onlyWifiSyncDescription"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/about"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:paddingHorizontal="@dimen/marginStandard"
-                    android:paddingVertical="@dimen/marginStandardMedium">
+                        <TextView
+                            android:id="@+id/onlyWifiSyncDescription"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/settingsOnlyWifiSyncDescription"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/onlyWifiSyncValue"
+                            app:layout_constraintVertical_chainStyle="packed" />
 
-                    <TextView
-                        android:id="@+id/aboutTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/about"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/aboutTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/aboutEndButton"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        android:background="?selectableItemBackground"
+                        android:paddingHorizontal="@dimen/marginStandard"
+                        android:paddingVertical="@dimen/marginStandardMedium">
 
-                    <ImageView
-                        android:id="@+id/aboutEndButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_chevron_right"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
+                        <TextView
+                            android:id="@+id/aboutTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/aboutTitle"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/aboutEndButton"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                        <ImageView
+                            android:id="@+id/aboutEndButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_chevron_right"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:ignore="ContentDescription" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
