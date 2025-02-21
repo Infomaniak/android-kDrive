@@ -114,7 +114,6 @@ class MainActivity : BaseActivity() {
 
     private lateinit var downloadReceiver: DownloadReceiver
 
-    private var uploadedFilesToDelete = arrayListOf<UploadFile>()
     private var hasDisplayedInformationPanel: Boolean = false
 
     private lateinit var drivePermissions: DrivePermissions
