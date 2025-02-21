@@ -25,6 +25,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.infomaniak.core.utils.format
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -33,7 +34,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.utils.format
 import io.realm.*
 import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey

@@ -32,6 +32,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.utils.FORMAT_NEW_FILE
+import com.infomaniak.core.utils.format
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MainApplication
@@ -49,8 +51,10 @@ import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException

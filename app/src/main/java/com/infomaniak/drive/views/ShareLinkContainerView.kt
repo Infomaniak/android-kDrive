@@ -23,13 +23,13 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.infomaniak.core.utils.format
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.ViewShareLinkContainerBinding
 import com.infomaniak.drive.utils.shareText
-import com.infomaniak.lib.core.utils.format
 
 class ShareLinkContainerView @JvmOverloads constructor(
     context: Context,

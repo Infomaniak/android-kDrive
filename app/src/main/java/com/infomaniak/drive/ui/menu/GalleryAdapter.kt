@@ -24,6 +24,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.checkbox.MaterialCheckBox
+import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.ExtensionType
@@ -33,7 +34,6 @@ import com.infomaniak.drive.databinding.TitleRecyclerSectionBinding
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
-import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.views.LoaderAdapter
 
 class GalleryAdapter(

@@ -29,6 +29,7 @@ import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -43,7 +44,6 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.format
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
