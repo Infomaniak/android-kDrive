@@ -113,6 +113,12 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
+    private fun getErrorMessage(fileResult: FileResult) = when (fileResult.errorCode) {
+        ApiErrorCode.AN_ERROR_HAS_OCCURRED -> R.string.errorRestore
+        "conflict_error" -> R.string.errorConflict
+        else -> fileResult.errorResId
+    }
+
     private fun restoreResult(fileResult: FileResult, originalPlace: Boolean, folderName: String? = null) {
         if (fileResult.isSuccess) {
             val title = if (originalPlace) R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess
@@ -125,8 +131,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
             showSnackbar(resources.getQuantityString(title, 1, *args.toTypedArray()))
             dismissAndRemoveFileFromList()
         } else {
-            val snackbarText = if (fileResult.errorCode == ApiErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore
-            else fileResult.errorResId
+            val snackbarText = getErrorMessage(fileResult)
 
             snackbarText?.let { text -> showSnackbar(text) }
             findNavController().popBackStack()
