@@ -145,7 +145,7 @@ open class FileActivity(
     }
 
     fun getDay(context: Context): String {
-        val dateDiff = Date().time / 1000 - createdAt.time / 1000
+        val dateDiff = Date().time / 1_000L - createdAt.time / 1_000L
 
         return when (TimeUnit.SECONDS.toDays(dateDiff).toInt()) {
             0 -> context.getString(R.string.allToday)
