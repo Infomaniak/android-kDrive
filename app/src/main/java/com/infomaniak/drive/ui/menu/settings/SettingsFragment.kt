@@ -26,12 +26,10 @@ import androidx.collection.arrayMapOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
-import com.infomaniak.core.myksuite.ui.views.MyKSuiteDashboardFragmentArgs
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
@@ -121,17 +119,14 @@ class SettingsFragment : Fragment() {
 
             dashboardSettings.setOnClickListener {
                 trackSettingsEvent("openMyKSuiteDashboard")
-                findNavController().openMyKSuiteDashboard(myKSuiteData)
+                openMyKSuiteDashboard(myKSuiteData)
             }
         }
     }
 
-    private fun NavController.openMyKSuiteDashboard(myKSuiteData: MyKSuiteData) {
+    private fun openMyKSuiteDashboard(myKSuiteData: MyKSuiteData) {
         val data = MyKSuiteUiUtils.getDashboardData(requireContext(), myKSuiteData, AccountUtils.currentUser?.avatar)
-        navigate(
-            resId = R.id.myKSuiteDashboardFragment,
-            args = MyKSuiteDashboardFragmentArgs(dashboardData = data).toBundle(),
-        )
+        safeNavigate(directions = SettingsFragmentDirections.actionSettingsFragmentToMyKSuiteDashboardFragment(data))
     }
 
     private fun openThemeSettings() {

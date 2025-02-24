@@ -509,6 +509,11 @@
         <action
             android:id="@+id/action_settingsFragment_to_aboutSettingsFragment"
             app:destination="@id/aboutSettingsFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_MyKSuiteDashboardFragment"
+            app:destination="@+id/myKSuiteDashboardFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit" />
     </fragment>
 
     <activity
