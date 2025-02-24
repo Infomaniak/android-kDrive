@@ -309,20 +309,34 @@ open class UploadFile(
             getRealmInstance().use {
                 it.executeTransaction { realm ->
                     uploadFiles.forEach { uploadFile ->
-                        uploadFileByUriQuery(realm, uploadFile.uri).findFirst()?.let { uploadFileRealm ->
-                            // Don't delete definitively if it's a sync
-                            if (uploadFileRealm.type == Type.SYNC.name) {
-                                uploadFileRealm.deletedAt = Date()
-                            } else {
-                                // Delete definitively
-                                val uri = uploadFileRealm.getUriObject()
-                                if (uri.scheme.equals(ContentResolver.SCHEME_FILE) && !uploadFile.isSyncOffline()) {
-                                    uri.toFile().apply { if (exists()) delete() }
-                                }
-                                uploadFileRealm.deleteFromRealm()
-                            }
-                        }
+                        deleteFromRealm(realm, uploadFile.uri)
                     }
+                }
+            }
+        }
+
+        fun deleteAllFromUris(uris: List<Uri>) {
+            getRealmInstance().use {
+                it.executeTransaction { mutableRealm ->
+                    uris.forEach { uri ->
+                        deleteFromRealm(mutableRealm, uri.toString())
+                    }
+                }
+            }
+        }
+
+        private fun deleteFromRealm(realm: Realm, uploadFileUri: String) {
+            uploadFileByUriQuery(realm, uploadFileUri).findFirst()?.let { uploadFileRealm ->
+                // Don't delete definitively if it's a sync
+                if (uploadFileRealm.type == Type.SYNC.name) {
+                    uploadFileRealm.deletedAt = Date()
+                } else {
+                    // Delete definitively
+                    val uri = uploadFileRealm.getUriObject()
+                    if (uri.scheme.equals(ContentResolver.SCHEME_FILE) && !uploadFileRealm.isSyncOffline()) {
+                        uri.toFile().apply { if (exists()) delete() }
+                    }
+                    uploadFileRealm.deleteFromRealm()
                 }
             }
         }

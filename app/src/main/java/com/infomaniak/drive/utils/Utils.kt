@@ -82,7 +82,7 @@ object Utils {
         autoDismiss: Boolean = true,
         isDeletion: Boolean = false,
         onConfirmation: (dialog: Dialog) -> Unit
-    ) {
+    ): AlertDialog {
         val style = if (isDeletion) R.style.DeleteDialogStyle else R.style.DialogStyle
         val dialog = MaterialAlertDialogBuilder(context, style)
             .setTitle(title)
@@ -101,6 +101,7 @@ object Utils {
                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE).isEnabled = false
             }
         }
+        return dialog
     }
 
     fun confirmFileDeletion(
