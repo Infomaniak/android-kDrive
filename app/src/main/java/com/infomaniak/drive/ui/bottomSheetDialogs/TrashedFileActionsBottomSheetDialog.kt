@@ -29,6 +29,7 @@ import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentBottomSheetTrashedFileActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -115,7 +116,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun getErrorMessage(fileResult: FileResult) = when (fileResult.errorCode) {
         ApiErrorCode.AN_ERROR_HAS_OCCURRED -> R.string.errorRestore
-        "conflict_error" -> R.string.errorConflict
+        ErrorCode.CONFLICT_ERROR -> R.string.errorConflict
         else -> fileResult.errorResId
     }
 
