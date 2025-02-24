@@ -326,7 +326,7 @@ open class UploadFile(
         }
 
         private fun deleteFromRealm(realm: Realm, uploadFileUri: String) {
-            uploadFileByUriQuery(realm, uploadFileUri.toString()).findFirst()?.let { uploadFileRealm ->
+            uploadFileByUriQuery(realm, uploadFileUri).findFirst()?.let { uploadFileRealm ->
                 // Don't delete definitively if it's a sync
                 if (uploadFileRealm.type == Type.SYNC.name) {
                     uploadFileRealm.deletedAt = Date()
