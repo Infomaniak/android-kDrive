@@ -1051,4 +1051,12 @@
             app:destination="@id/fileListFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/myKSuiteDashboardFragment"
+        android:name="com.infomaniak.drive.ui.menu.settings.KSuiteDashboardFragment"
+        android:label="MyKSuiteDashboardFragment">
+        <argument
+            android:name="dashboardData"
+            app:argType="com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData" />
+    </fragment>
 </navigation>

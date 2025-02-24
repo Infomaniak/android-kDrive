@@ -26,10 +26,12 @@ import androidx.collection.arrayMapOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteDashboard
+import com.infomaniak.core.myksuite.ui.views.MyKSuiteDashboardFragmentArgs
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
@@ -119,10 +121,17 @@ class SettingsFragment : Fragment() {
 
             dashboardSettings.setOnClickListener {
                 trackSettingsEvent("openMyKSuiteDashboard")
-                val data = MyKSuiteUiUtils.getDashboardData(requireContext(), myKSuiteData, AccountUtils.currentUser?.avatar)
-                findNavController().openMyKSuiteDashboard(data)
+                findNavController().openMyKSuiteDashboard(myKSuiteData)
             }
         }
+    }
+
+    private fun NavController.openMyKSuiteDashboard(myKSuiteData: MyKSuiteData) {
+        val data = MyKSuiteUiUtils.getDashboardData(requireContext(), myKSuiteData, AccountUtils.currentUser?.avatar)
+        navigate(
+            resId = R.id.myKSuiteDashboardFragment,
+            args = MyKSuiteDashboardFragmentArgs(dashboardData = data).toBundle(),
+        )
     }
 
     private fun openThemeSettings() {
