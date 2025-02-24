@@ -35,8 +35,10 @@ object DriveInfosController {
 
     private const val DB_NAME = "DrivesInfos.realm"
 
-    private val realmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
-        .deleteRealmIfMigrationNeeded()
+    private val realmConfiguration = RealmConfiguration.Builder()
+        .name(DB_NAME)
+        .schemaVersion(DriveMigration.DB_VERSION) // Must be bumped when the schema changes
+        .migration(DriveMigration())
         .modules(RealmModules.DriveFilesModule())
         .build()
 
