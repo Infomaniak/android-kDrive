@@ -45,6 +45,7 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
 import okhttp3.OkHttpClient
+import com.infomaniak.core.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
 
@@ -512,7 +513,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     fun getMyKSuiteData(okHttpClient: OkHttpClient): ApiResponse<MyKSuiteData> {
         return callApi(
-            url = com.infomaniak.core.myksuite.ui.network.ApiRoutes.myKSuiteData(),
+            url = MyKSuiteApiRoutes.myKSuiteData(),
             method = ApiController.ApiMethod.GET,
             okHttpClient = okHttpClient,
             useKotlinxSerialization = true,

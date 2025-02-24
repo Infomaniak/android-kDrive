@@ -34,8 +34,6 @@ class KSuiteDashboardFragment : MyKSuiteDashboardFragment() {
 
         myKSuiteViewModel.refreshMyKSuite()
         myKSuiteViewModel.myKSuiteDataResult.observe(viewLifecycleOwner) { myKSuiteData ->
-            if (myKSuiteData == null) return@observe
-
             resetContent(
                 dashboardData = MyKSuiteUiUtils.getDashboardData(
                     context = requireContext(),

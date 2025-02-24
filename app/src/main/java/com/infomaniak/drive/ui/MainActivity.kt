@@ -102,6 +102,7 @@ import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.infomaniak.core.myksuite.R as RMyKSuite
 
 class MainActivity : BaseActivity() {
 
@@ -441,7 +442,7 @@ class MainActivity : BaseActivity() {
         }
 
         when (destination.id) {
-            R.id.fileDetailsFragment, com.infomaniak.core.myksuite.R.id.myKSuiteDashboardFragment -> {
+            R.id.fileDetailsFragment, RMyKSuite.id.myKSuiteDashboardFragment -> {
                 setColorNavigationBar(true)
             }
             R.id.fileShareLinkSettingsFragment -> {

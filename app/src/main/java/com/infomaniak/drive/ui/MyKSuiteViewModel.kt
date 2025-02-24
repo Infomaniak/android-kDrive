@@ -27,9 +27,9 @@ import kotlinx.coroutines.launch
 
 class MyKSuiteViewModel : ViewModel() {
 
-    val myKSuiteDataResult = SingleLiveEvent<MyKSuiteData?>()
+    val myKSuiteDataResult = SingleLiveEvent<MyKSuiteData>()
 
     fun refreshMyKSuite() = viewModelScope.launch(Dispatchers.IO) {
-        myKSuiteDataResult.postValue(MyKSuiteDataUtils.fetchData())
+        MyKSuiteDataUtils.fetchData()?.let(myKSuiteDataResult::postValue)
     }
 }
