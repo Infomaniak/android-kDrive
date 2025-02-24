@@ -422,8 +422,6 @@ object ApiRoutes {
 
     /** Others */
     //region Others
-    fun upgradeDrive(driveId: Int) = "${SHOP_URL}drive/$driveId"
-
     fun orderDrive() = "${SHOP_URL}drive"
 
     fun renewDrive(accountId: Int) = "${MANAGER_URL}$accountId/accounts/accounting/renewal"

@@ -112,6 +112,7 @@ open class Drive(
     inline val isMyKSuitePack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE
     inline val isMyKSuitePlusPack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE_PLUS
     inline val isFreeTier get() = isFreePack || isMyKSuitePack
+    inline val isSingleUserDrive get() = isFreeTier || isMyKSuitePlusPack || isSoloPack
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
