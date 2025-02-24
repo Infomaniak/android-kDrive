@@ -102,12 +102,14 @@ import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.infomaniak.core.myksuite.R as RMyKSuite
 
 class MainActivity : BaseActivity() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val mainViewModel: MainViewModel by viewModels()
+    private val myKSuiteViewModel: MyKSuiteViewModel by viewModels()
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
     private val uiSettings by lazy { UiSettings(this) }
     private val navController by lazy { setupNavController() }
@@ -204,6 +206,7 @@ class MainActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         mainViewModel.loadRootFiles()
+        myKSuiteViewModel.refreshMyKSuite()
         handleDeletionOfUploadedPhotos()
     }
 
@@ -439,7 +442,7 @@ class MainActivity : BaseActivity() {
         }
 
         when (destination.id) {
-            R.id.fileDetailsFragment -> {
+            R.id.fileDetailsFragment, RMyKSuite.id.myKSuiteDashboardFragment -> {
                 setColorNavigationBar(true)
             }
             R.id.fileShareLinkSettingsFragment -> {

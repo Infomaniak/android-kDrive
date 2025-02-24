@@ -44,6 +44,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
@@ -146,6 +147,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         )
         HttpClient.init(tokenInterceptorListener)
         MqttClientWrapper.init(applicationContext)
+
+        MyKSuiteDataUtils.initDatabase(this)
     }
 
     override fun onStart(owner: LifecycleOwner) {

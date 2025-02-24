@@ -203,6 +203,7 @@ object AccountUtils : CredentialManager() {
             }
         }
 
+        MyKSuiteDataUtils.deleteData(user.id)
         removeUser(context, user)
     }
 

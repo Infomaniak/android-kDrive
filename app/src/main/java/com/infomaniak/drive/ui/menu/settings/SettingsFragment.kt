@@ -28,6 +28,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
@@ -36,6 +38,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentSettingsBinding
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.applock.LockActivity
@@ -69,6 +72,8 @@ class SettingsFragment : Fragment() {
             requireActivity().launchAllUpload(drivePermissions)
         }
 
+        setupMyKSuiteLayout()
+
         syncPicture.setOnClickListener {
             safeNavigate(R.id.syncSettingsActivity)
         }
@@ -94,6 +99,34 @@ class SettingsFragment : Fragment() {
         about.setOnClickListener {
             safeNavigate(R.id.aboutSettingsFragment)
         }
+    }
+
+    private fun toggleMyKSuiteLayoutVisibility(isVisible: Boolean) {
+        binding.myKSuiteSettingsTitle.isVisible = isVisible
+        binding.myKSuiteLayout.isVisible = isVisible
+    }
+
+    private fun setupMyKSuiteLayout() = with(binding) {
+        toggleMyKSuiteLayoutVisibility(MyKSuiteDataUtils.myKSuite != null)
+
+        MyKSuiteDataUtils.myKSuite?.let { myKSuiteData ->
+
+            myKSuiteSettingsEmail.text = myKSuiteData.mail.email
+
+            AccountUtils.getCurrentDrive()?.let { drive ->
+                myKSuiteSettingsTitle.setText(if (drive.isFreeTier) R.string.myKSuiteName else R.string.myKSuitePlusName)
+            }
+
+            dashboardSettings.setOnClickListener {
+                trackSettingsEvent("openMyKSuiteDashboard")
+                openMyKSuiteDashboard(myKSuiteData)
+            }
+        }
+    }
+
+    private fun openMyKSuiteDashboard(myKSuiteData: MyKSuiteData) {
+        val data = MyKSuiteUiUtils.getDashboardData(requireContext(), myKSuiteData, AccountUtils.currentUser?.avatar)
+        safeNavigate(directions = SettingsFragmentDirections.actionSettingsFragmentToMyKSuiteDashboardFragment(data))
     }
 
     private fun openThemeSettings() {
