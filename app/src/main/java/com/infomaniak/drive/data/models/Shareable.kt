@@ -78,7 +78,7 @@ interface Shareable : Parcelable {
 
         @SerializedName("delete")
         DELETE(
-            R.drawable.ic_delete,
+            R.drawable.ic_bin,
             R.string.buttonDelete,
             R.string.userPermissionRemove,
             "delete"

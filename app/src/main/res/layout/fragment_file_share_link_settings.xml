@@ -51,7 +51,6 @@
             android:id="@+id/settingsLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginHorizontal="@dimen/marginStandard"
             android:orientation="vertical">
 
             <TextView
@@ -59,6 +58,7 @@
                 style="@style/Subtitle2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginTop="@dimen/marginStandard"
                 android:text="@string/fileShareLinkSettingsAccessRightTitle" />
 
@@ -67,6 +67,7 @@
                 style="@style/BorderedCardViewInfomaniak"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
                 android:layout_marginTop="@dimen/marginStandardSmall">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -117,7 +118,10 @@
                 android:id="@+id/addPasswordLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="@dimen/marginStandardMedium">
+                android:layout_marginTop="@dimen/marginStandardMedium"
+                android:background="?selectableItemBackground"
+                android:paddingHorizontal="@dimen/marginStandard"
+                android:paddingBottom="@dimen/marginStandardMedium">
 
                 <TextView
                     android:id="@+id/addPasswordTitle"
@@ -146,17 +150,29 @@
                     app:layout_constraintTop_toBottomOf="@id/addPasswordSwitch"
                     tools:text="@string/shareLinkPasswordRightDescription" />
 
-                <com.google.android.material.chip.Chip
+                <TextView
                     android:id="@+id/upgradeOfferPassword"
-                    style="@style/ChipLink"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/marginStandardMedium"
                     android:text="@string/buttonUpgradeOffer"
+                    android:textColor="@color/primary"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/addPasswordDescription"
+                    tools:visibility="visible" />
+
+                <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+                    android:id="@+id/offerPasswordMyKSuitePlusChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardSmall"
+                    android:visibility="gone"
+                    app:backgroundColor="@color/myKSuiteChipOnCardBackground"
+                    app:layout_constraintBottom_toBottomOf="@id/upgradeOfferPassword"
+                    app:layout_constraintStart_toEndOf="@id/upgradeOfferPassword"
+                    app:layout_constraintTop_toTopOf="@id/upgradeOfferPassword"
                     tools:visibility="visible" />
 
                 <com.infomaniak.lib.core.views.EndIconTextInputLayout
@@ -199,7 +215,8 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="@dimen/marginStandardMedium">
+                android:layout_marginVertical="@dimen/marginStandardMedium"
+                android:paddingHorizontal="@dimen/marginStandard">
 
                 <TextView
                     android:id="@+id/allowDownloadTitle"
@@ -234,7 +251,10 @@
                 android:id="@+id/addExpirationDateLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="@dimen/marginStandardMedium">
+                android:layout_marginTop="@dimen/marginStandardMedium"
+                android:background="?selectableItemBackground"
+                android:paddingHorizontal="@dimen/marginStandard"
+                android:paddingBottom="@dimen/marginStandardMedium">
 
                 <TextView
                     android:id="@+id/addExpirationDateTitle"
@@ -263,17 +283,30 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/addExpirationDateSwitch" />
 
-                <com.google.android.material.chip.Chip
+                <TextView
                     android:id="@+id/upgradeOfferExpirationDate"
-                    style="@style/ChipLink"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="@dimen/marginStandardMedium"
                     android:text="@string/buttonUpgradeOffer"
+                    android:textColor="@color/primary"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription" />
+                    app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription"
+                    tools:visibility="visible" />
+
+                <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+                    android:id="@+id/offerExpirationMyKSuitePlusChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardSmall"
+                    android:visibility="gone"
+                    app:backgroundColor="@color/myKSuiteChipOnCardBackground"
+                    app:layout_constraintBottom_toBottomOf="@id/upgradeOfferExpirationDate"
+                    app:layout_constraintStart_toEndOf="@id/upgradeOfferExpirationDate"
+                    app:layout_constraintTop_toTopOf="@id/upgradeOfferExpirationDate"
+                    tools:visibility="visible" />
 
                 <com.infomaniak.drive.views.DateInputView
                     android:id="@+id/expirationDateInput"

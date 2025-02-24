@@ -29,6 +29,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
@@ -73,6 +75,7 @@ class FileShareDetailsFragment : Fragment() {
 
         fileShareViewModel.fetchCurrentFile(navigationArgs.fileId).observe(viewLifecycleOwner) { currentFile ->
             file = currentFile?.also {
+                fileShareViewModel.initCurrentDriveLiveData(it.driveId)
                 fileShareViewModel.currentFile.value = it
             } ?: run {
                 findNavController().popBackStack()
@@ -186,6 +189,8 @@ class FileShareDetailsFragment : Fragment() {
                 refreshUi()
             }
         }
+
+        observeFileDrive()
     }
 
     private fun setBackPressedHandlers() = with(binding) {
@@ -304,5 +309,16 @@ class FileShareDetailsFragment : Fragment() {
                 notShareableEmails = notShareableEmails.toTypedArray()
             )
         )
+    }
+
+    private fun observeFileDrive() {
+        fileShareViewModel.currentDriveResult.observe(viewLifecycleOwner) { drive ->
+            val hasShareLink = fileShareViewModel.currentFile.value?.shareLink != null
+            val canCreateShareLink = drive.canCreateShareLink || hasShareLink
+
+            binding.shareLinkContainer.setupMyKSuitePlusChip(canCreateShareLink) {
+                findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+            }
+        }
     }
 }

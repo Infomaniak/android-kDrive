@@ -83,7 +83,7 @@
         android:layout_height="34dp"
         android:layout_marginEnd="@dimen/marginStandardVerySmall"
         android:contentDescription="@string/buttonDelete"
-        app:icon="@drawable/ic_delete"
+        app:icon="@drawable/ic_bin"
         app:iconSize="20dp"
         app:iconTint="@color/icon_toolbar_button"
         app:layout_constraintBottom_toBottomOf="parent"

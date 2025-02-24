@@ -20,9 +20,12 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
+import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -46,7 +49,7 @@ class TrashFragment : FileSubTypeListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override val sortTypeUsage = SortTypeUsage.TRASH
 
-    override val noItemsRootIcon = R.drawable.ic_delete
+    override val noItemsRootIcon = R.drawable.ic_bin
     override val noItemsRootTitle = R.string.trashNoFile
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
@@ -67,6 +70,8 @@ class TrashFragment : FileSubTypeListFragment() {
         setupBasicMultiSelectLayout()
         observeDriveTrash()
         observeTrashedFolderFiles()
+
+        setupAutoClearUpgradeLayout()
     }
 
     private fun initParams() = with(binding) {
@@ -170,6 +175,13 @@ class TrashFragment : FileSubTypeListFragment() {
                     isNewSort = result.isNewSort,
                 )
             }
+        }
+    }
+
+    private fun setupAutoClearUpgradeLayout() {
+        binding.trashAutoClearLayout.isVisible = AccountUtils.getCurrentDrive()?.isFreeTier == true
+        binding.trashAutoClearUpgradeButton.setOnClickListener {
+            findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
         }
     }
 

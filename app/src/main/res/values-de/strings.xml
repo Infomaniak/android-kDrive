@@ -168,6 +168,7 @@
     <string name="buttonSwitchDrive">Drive wechseln</string>
     <string name="buttonTakePhotoOrVideo">Foto oder Video aufnehmen</string>
     <string name="buttonToggleDisplay">Zum Raster- oder Listenmodus wechseln</string>
+    <string name="buttonUpgrade">Upgrade</string>
     <string name="buttonUpgradeOffer">Mein Angebot erweitern</string>
     <string name="buttonUpload">Vom Telefon importieren</string>
     <string name="buttonValid">Validieren</string>
@@ -592,6 +593,7 @@
     <string name="selectMediaFoldersTitle">Zu speichernde Dateien</string>
     <string name="settingsOnlyWifiSyncDescription">Uploads und Aktualisierungen von Offline-Dateien können nur über eine Wi-Fi-Verbindung durchgeführt werden.</string>
     <string name="settingsOnlyWifiSyncTitle">Übertragung nur im WLAN</string>
+    <string name="settingsSectionGeneral">Allgemein</string>
     <string name="settingsTitle">Einstellungen</string>
     <string name="shareFileInputUserAndEmail">Laden Sie einen Benutzer oder eine E-Mail-Adresse ein…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Benutzer können das Dokument nur einsehen.</string>
@@ -694,6 +696,7 @@
     <string name="trashActionDelete">Endgültig löschen</string>
     <string name="trashActionRestoreFileIn">Wiederherstellen in</string>
     <string name="trashActionRestoreFileOriginalPlace">Am ursprünglichen Ort wiederherstellen</string>
+    <string name="trashAutoClearDescription">Der Papierkorb wird alle 30 Tage automatisch gereinigt.</string>
     <string name="trashNoFile">Keine Datei gelöscht</string>
     <string name="trashTitle">Papierkorb</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">

@@ -19,7 +19,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/buttonHeight">
+    android:layout_height="@dimen/buttonHeight"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -44,6 +45,12 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             tools:text="@string/manageCategoriesTitle" />
+
+        <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+            android:id="@+id/myKSuitePlusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:backgroundColor="@color/myKSuiteChipOnCardBackground" />
 
     </LinearLayout>
 

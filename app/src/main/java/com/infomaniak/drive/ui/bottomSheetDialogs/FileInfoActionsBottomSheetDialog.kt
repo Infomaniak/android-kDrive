@@ -30,6 +30,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
@@ -169,8 +171,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
-    override fun dropBoxClicked(isDropBox: Boolean) {
-        super.dropBoxClicked(isDropBox)
+    override fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) {
+        super.dropBoxClicked(isDropBox, canCreateDropbox)
         if (isDropBox) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToManageDropboxFragment(
@@ -179,14 +181,16 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 )
             )
         } else {
-            if (AccountUtils.getCurrentDrive()?.pack?.capabilities?.useDropbox == true) {
+            if (canCreateDropbox) {
                 safeNavigate(
                     FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToConvertToDropBoxFragment(
                         fileId = currentFile.id,
                         fileName = currentFile.name,
                     )
                 )
-            } else safeNavigate(R.id.dropBoxBottomSheetDialog)
+            } else {
+                findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+            }
         }
     }
 
@@ -400,12 +404,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
 
         fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
-            if (AccountUtils.getCurrentDrive()?.isFreePack == true) {
-                safeNavigate(R.id.colorFolderUpgradeBottomSheetDialog)
+            if (AccountUtils.getCurrentDrive()?.isFreeTier == true) {
+                findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
             } else {
                 safeNavigate(
                     R.id.colorFolderBottomSheetDialog,
-                    ColorFolderBottomSheetDialogArgs(color = color).toBundle()
+                    ColorFolderBottomSheetDialogArgs(color = color).toBundle(),
                 )
             }
         }

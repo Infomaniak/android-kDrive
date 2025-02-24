@@ -27,6 +27,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.core.utils.*
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -92,7 +94,6 @@ class FileShareLinkSettingsFragment : Fragment() {
         setupExpirationDate()
         setupNewPassword()
         setupAllowDownload()
-        setupUpgradeOffer()
         setupSaveButton()
         setupFileShareLinkRights()
     }
@@ -126,10 +127,12 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
     }
 
-    private fun setupUpgradeOffer() = with(binding) {
-        val upgradeOfferOnClickListener = View.OnClickListener { safeNavigate(R.id.secureLinkShareBottomSheetDialog) }
-        upgradeOfferPassword.setOnClickListener(upgradeOfferOnClickListener)
-        upgradeOfferExpirationDate.setOnClickListener(upgradeOfferOnClickListener)
+    private fun setupUpgradeOfferListener() {
+        val upgradeOfferOnClickListener = View.OnClickListener {
+            findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+        }
+        binding.addPasswordLayout.setOnClickListener(upgradeOfferOnClickListener)
+        binding.addExpirationDateLayout.setOnClickListener(upgradeOfferOnClickListener)
     }
 
     private fun setupSaveButton() = with(binding) {
@@ -196,19 +199,18 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun setupFreeAccountUi() = with(binding) {
-        if (AccountUtils.getCurrentDrive()?.isFreePack == true) {
+        if (AccountUtils.getCurrentDrive()?.isFreeTier == true) {
+            setupUpgradeOfferListener()
 
-            addPasswordLayout.apply {
-                addPasswordSwitch.isEnabled = false
-                addPasswordSwitch.isClickable = false
-                upgradeOfferPassword.isVisible = true
-            }
+            addPasswordSwitch.isEnabled = false
+            addPasswordSwitch.isClickable = false
+            upgradeOfferPassword.isVisible = true
+            offerPasswordMyKSuitePlusChip.isVisible = true
 
-            addExpirationDateLayout.apply {
-                addExpirationDateSwitch.isEnabled = false
-                addExpirationDateSwitch.isClickable = false
-                upgradeOfferExpirationDate.isVisible = true
-            }
+            addExpirationDateSwitch.isEnabled = false
+            addExpirationDateSwitch.isClickable = false
+            upgradeOfferExpirationDate.isVisible = true
+            offerExpirationMyKSuitePlusChip.isVisible = true
         }
     }
 

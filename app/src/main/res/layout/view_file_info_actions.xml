@@ -318,6 +318,7 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 app:icon="@drawable/ic_color_bucket"
+                app:showMyKSuiteChip="true"
                 app:text="@string/buttonChangeFolderColor"
                 tools:visibility="visible" />
 
@@ -327,6 +328,7 @@
                 android:layout_height="wrap_content"
                 app:icon="@drawable/ic_folder_dropbox"
                 app:iconTint="@color/iconColor"
+                app:showMyKSuiteChip="true"
                 app:text="@string/buttonConvertToDropBox" />
 
             <com.infomaniak.drive.views.BottomSheetItemView
@@ -449,7 +451,7 @@
                 android:id="@+id/deleteFile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:icon="@drawable/ic_delete"
+                app:icon="@drawable/ic_bin"
                 app:text="@string/modalMoveTrashTitle" />
 
             <com.infomaniak.drive.views.BottomSheetItemView

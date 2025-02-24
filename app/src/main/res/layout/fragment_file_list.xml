@@ -87,6 +87,56 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/trashAutoClearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandard"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/trashAutoClearIcon"
+                    android:layout_width="@dimen/marginStandardMedium"
+                    android:layout_height="@dimen/marginStandardMedium"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_bin"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="@color/iconColor" />
+
+                <TextView
+                    android:id="@+id/trashAutoClearDescription"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardMedium"
+                    android:text="@string/trashAutoClearDescription"
+                    app:layout_constraintBottom_toTopOf="@id/trashAutoClearUpgradeButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/trashAutoClearIcon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/trashAutoClearUpgradeButton"
+                    style="@style/TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/buttonUpgrade"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/trashAutoClearIcon"
+                    app:layout_constraintTop_toBottomOf="@id/trashAutoClearDescription" />
+
+                <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:backgroundColor="@color/myKSuiteChipOnBackground"
+                    app:layout_constraintBottom_toBottomOf="@id/trashAutoClearUpgradeButton"
+                    app:layout_constraintStart_toEndOf="@id/trashAutoClearUpgradeButton"
+                    app:layout_constraintTop_toTopOf="@id/trashAutoClearUpgradeButton" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <include
                 android:id="@+id/searchViewCard"
                 layout="@layout/item_search_view"

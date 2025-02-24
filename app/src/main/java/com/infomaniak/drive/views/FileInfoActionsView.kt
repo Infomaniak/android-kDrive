@@ -79,6 +79,8 @@ class FileInfoActionsView @JvmOverloads constructor(
     private lateinit var selectFolderResultLauncher: ActivityResultLauncher<Intent>
     private var isSharedWithMe = false
 
+    private val canCreateDropbox by lazy { AccountUtils.getCurrentDrive(forceRefresh = true)?.canCreateDropbox == true }
+
     val openWith get() = binding.openWith
 
     fun init(
@@ -160,22 +162,14 @@ class FileInfoActionsView @JvmOverloads constructor(
             computeFileRights(file, rights)
         }
 
-        if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
-            dropBox.text = context.getString(
-                if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
-            )
-            dropBox.setOnClickListener { onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox()) }
-            dropBox.isVisible = true
-        } else {
-            dropBox.isGone = true
-        }
+        setupDropboxItem()
 
         if (currentFile.isFolder()) {
             sendCopyIcon.setImageResource(R.drawable.ic_add)
             sendCopyText.setText(R.string.buttonAdd)
             availableOffline.isGone = true
             openWith.isGone = true
-            coloredFolder.isVisible = currentFile.isAllowedToBeColored()
+            setupColoredFolderVisibility()
         }
     }
 
@@ -196,6 +190,29 @@ class FileInfoActionsView @JvmOverloads constructor(
     private fun openAddFileBottom() {
         mainViewModel.currentFolderOpenAddFileBottom.value = currentFile
         ownerFragment.safeNavigate(R.id.addFileBottomSheetDialog)
+    }
+
+    private fun setupDropboxItem() = with(binding.dropBox) {
+        if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
+            text = context.getString(
+                if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
+            )
+            setOnClickListener {
+                onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox(), canCreateDropbox = canCreateDropbox)
+            }
+            isVisible = true
+            shouldShowMyKSuiteChip = !canCreateDropbox && !currentFile.isDropBox()
+        } else {
+            isGone = true
+        }
+    }
+
+    private fun setupColoredFolderVisibility() = with(binding.coloredFolder) {
+        // Displays the item to change folder color for all folder if the user is in free tier to display My kSuite Ad.
+        // But only displays it for the folder that can really be colored if it's a paid drive.
+        val isDriveFree = AccountUtils.getCurrentDrive()?.isFreeTier == true
+        isVisible = isDriveFree || currentFile.isAllowedToBeColored()
+        shouldShowMyKSuiteChip = isDriveFree
     }
 
     private fun initOnClickListeners() = with(binding) {
@@ -477,7 +494,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun downloadFileClicked() = trackFileActionEvent(ACTION_DOWNLOAD_NAME)
 
         @CallSuper
-        fun dropBoxClicked(isDropBox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
+        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
         fun fileRightsClicked()
         fun goToFolder()
         fun manageCategoriesClicked(fileId: Int)
