@@ -76,7 +76,6 @@ class BottomSheetItemView @JvmOverloads constructor(
             icon = getDrawable(R.styleable.BottomSheetItemView_icon)
             getString(R.styleable.BottomSheetItemView_text)?.let { text = it }
             getColorStateList(R.styleable.BottomSheetItemView_iconTint)?.let { iconTintList = it }
-            shouldShowMyKSuiteChip = getBoolean(R.styleable.BottomSheetItemView_showMyKSuiteChip, false)
         }
     }
 

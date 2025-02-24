@@ -75,6 +75,5 @@
         <attr name="icon" />
         <attr name="iconTint" format="color" />
         <attr name="text" format="string" />
-        <attr name="showMyKSuiteChip" format="boolean" />
     </declare-styleable>
 </resources>
