@@ -30,6 +30,6 @@ class MyKSuiteViewModel : ViewModel() {
     val myKSuiteDataResult = SingleLiveEvent<MyKSuiteData?>()
 
     fun refreshMyKSuite() = viewModelScope.launch(Dispatchers.IO) {
-        myKSuiteDataResult.postValue(MyKSuiteDataUtils.fetchMyKSuiteData())
+        myKSuiteDataResult.postValue(MyKSuiteDataUtils.fetchData())
     }
 }

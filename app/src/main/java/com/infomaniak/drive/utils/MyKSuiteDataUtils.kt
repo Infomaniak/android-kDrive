@@ -34,7 +34,7 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
 
     override var myKSuite: MyKSuiteData? = null
 
-    override suspend fun fetchMyKSuiteData(): MyKSuiteData? = runCatching {
+    override suspend fun fetchData(): MyKSuiteData? = runCatching {
         MyKSuiteDataUtils.requestKSuiteData()
         val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClient)
         if (apiResponse.data != null) {
