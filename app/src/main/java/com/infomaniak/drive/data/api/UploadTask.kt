@@ -71,11 +71,6 @@ class UploadTask(
 
     private val fileChunkSizeManager = FileChunkSizeManager()
 
-    private val chunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong()
-        ?: fileChunkSizeManager.computeChunkSize(uploadFile.fileSize)
-    private val totalChunks = fileChunkSizeManager.computeFileChunks(fileSize = uploadFile.fileSize, fileChunkSize = chunkSize)
-    private val limitParallelRequest = fileChunkSizeManager.computeParallelChunks(chunkSize)
-
     private var previousChunkBytesWritten = 0L
     private var currentProgress = 0
 
@@ -120,10 +115,22 @@ class UploadTask(
     }
 
     private suspend fun launchTask() = coroutineScope {
+        val chunkConfig = try {
+            fileChunkSizeManager.computeChunkConfig(
+                fileSize = uploadFile.fileSize,
+                defaultFileChunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong(),
+            )
+        } catch (exception: IllegalArgumentException) {
+            uploadFile.resetUploadTokenAndCancelSession()
+            fileChunkSizeManager.computeChunkConfig(fileSize = uploadFile.fileSize)
+        }
+
+        val totalChunks = chunkConfig.totalChunks
+
         context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))?.buffered()?.use { fileInputStream ->
 
             val uploadedChunks = uploadFile.getValidChunks()
-            val isNewUploadSession = uploadedChunks?.needToResetUpload() ?: true
+            val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
 
             val uploadHost = if (isNewUploadSession) {
                 uploadFile.prepareUploadSession(totalChunks)
@@ -143,7 +150,7 @@ class UploadTask(
             previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
 
             uploadChunks(
-                totalChunks = totalChunks,
+                chunkConfig = chunkConfig,
                 validChunksIds = uploadedChunks?.validChunksIds,
                 isNewUploadSession = isNewUploadSession,
                 inputStream = fileInputStream,
@@ -155,27 +162,32 @@ class UploadTask(
     }
 
     private suspend fun uploadChunks(
-        totalChunks: Int,
+        chunkConfig: FileChunkSizeManager.ChunkConfig,
         validChunksIds: List<Int>?,
         isNewUploadSession: Boolean,
         inputStream: BufferedInputStream,
         uploadHost: String,
     ) = coroutineScope {
-        val requestSemaphore = Semaphore(limitParallelRequest)
-        val byteArrayPool = ArrayBlockingQueue<ByteArray>(limitParallelRequest)
+        val requestSemaphore = Semaphore(chunkConfig.parallelChunks)
+        val byteArrayPool = ArrayBlockingQueue<ByteArray>(chunkConfig.parallelChunks)
 
-        for (chunkNumber in 1..totalChunks) {
+        for (chunkNumber in 1..chunkConfig.totalChunks) {
             requestSemaphore.acquire()
             if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
                 SentryLog.d("kDrive", "chunk:$chunkNumber ignored")
-                inputStream.skip(chunkSize)
+                inputStream.skip(chunkConfig.fileChunkSize)
                 requestSemaphore.release()
                 continue
             }
 
             SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
 
-            val data = getReusableByteArray(byteArrayPool, inputStream, isLastChunk = chunkNumber == totalChunks)
+            val data = getReusableByteArray(
+                byteArrayPool = byteArrayPool,
+                chunkSize = chunkConfig.fileChunkSize,
+                inputStream = inputStream,
+                isLastChunk = chunkNumber == chunkConfig.totalChunks,
+            )
             val count = inputStream.read(data, 0, data.size)
 
             if (count == -1) {
@@ -203,6 +215,7 @@ class UploadTask(
 
     private fun getReusableByteArray(
         byteArrayPool: ArrayBlockingQueue<ByteArray>,
+        chunkSize: Long,
         inputStream: BufferedInputStream,
         isLastChunk: Boolean,
     ): ByteArray {
@@ -259,7 +272,7 @@ class UploadTask(
         }
     }
 
-    private fun ValidChunks.needToResetUpload(): Boolean {
+    private fun ValidChunks.needToResetUpload(chunkSize: Long): Boolean {
         return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize.toInt()) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
