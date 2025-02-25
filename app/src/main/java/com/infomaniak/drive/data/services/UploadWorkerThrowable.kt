@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.services
 
 import androidx.work.ListenableWorker.Result
+import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
@@ -30,7 +31,6 @@ import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotificat
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -52,7 +52,7 @@ object UploadWorkerThrowable {
             currentUploadFile?.quotaExceededNotification(applicationContext)
             Result.failure()
 
-        } catch (exception: UploadTask.AllowedFileSizeExceededException) {
+        } catch (exception: AllowedFileSizeExceededException) {
             currentUploadFile?.allowedFileSizeExceededNotification(applicationContext)
             Result.failure()
 
