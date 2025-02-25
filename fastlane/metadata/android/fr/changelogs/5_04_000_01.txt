@@ -1,0 +1,2 @@
+- Correction d'un problème de suppression de fichiers lorsque trop de fichiers sont en file d'attente
+- Ajout du tableau de bord de myKSuite

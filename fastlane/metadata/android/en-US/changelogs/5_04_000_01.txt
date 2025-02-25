@@ -1,0 +1,2 @@
+- Fix files deletion issue when too much files are queued
+- Add myKSuite dashboard
