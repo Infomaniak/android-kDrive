@@ -32,6 +32,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
@@ -39,6 +41,7 @@ import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Office
@@ -51,6 +54,7 @@ import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -197,7 +201,19 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                         showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name), showAboveFab = true)
                         apiResponse.data?.let { file -> requireContext().openOnlyOfficeActivity(file) }
                     } else {
-                        showSnackbar(R.string.errorFileAlreadyExists, showAboveFab = true)
+                        val error = apiResponse.translateError()
+                        val quotaErrorCode = ErrorCode.apiErrorCodes.firstOrNull { it.code == ErrorCode.QUOTA_EXCEEDED_ERROR }
+                        if (error == quotaErrorCode?.translateRes) {
+                            val navController = findNavController()
+                            showSnackbar(
+                                error,
+                                showAboveFab = true,
+                                actionButtonTitle = R.string.buttonUpgrade,
+                                onActionClicked = { navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive) },
+                            )
+                        } else {
+                            showSnackbar(error, showAboveFab = true)
+                        }
                     }
                     mainViewModel.refreshActivities.value = true
                     dialog.dismiss()
