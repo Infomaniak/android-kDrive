@@ -54,6 +54,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
@@ -65,6 +66,8 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -538,4 +541,13 @@ fun Fragment.observeAndDisplayNetworkAvailability(
 fun Fragment.setupRootPendingFilesIndicator(countLiveData: LiveData<Int>, pendingFilesView: PendingFilesView) {
     pendingFilesView.setUploadFileInProgress(this, OTHER_ROOT_ID)
     countLiveData.observe(viewLifecycleOwner, pendingFilesView::updateUploadFileInProgress)
+}
+
+fun MainActivity.showQuotasExceededSnackbar(navController: NavController) {
+    showSnackbar(
+        title = R.string.errorQuotaExceeded,
+        anchor = getMainFab(),
+        actionButtonTitle = R.string.buttonUpgrade,
+        onActionClicked = { navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive) },
+    )
 }

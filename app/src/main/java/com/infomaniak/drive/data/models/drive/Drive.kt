@@ -119,6 +119,8 @@ open class Drive(
     inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (!isFreeTier || quotas.canCreateDropbox)
     inline val canCreateShareLink get() = !isFreeTier || quotas.canCreateShareLink
 
+    inline val isDriveFull get() = usedSize >= size
+
     fun isUserAdmin(): Boolean = role == DriveUser.Role.ADMIN
 
     fun isDriveUser(): Boolean = role != DriveUser.Role.NONE && role != DriveUser.Role.EXTERNAL
