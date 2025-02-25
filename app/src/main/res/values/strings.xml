@@ -179,6 +179,7 @@
     <string name="buttonSwitchDrive">Change drive</string>
     <string name="buttonTakePhotoOrVideo">Take a photo or video</string>
     <string name="buttonToggleDisplay">Switch to grid or list mode</string>
+    <string name="buttonUpgrade">Upgrade</string>
     <string name="buttonUpgradeOffer">Upgrade my plan</string>
     <string name="buttonUpload">Upload from phone</string>
     <string name="buttonValid">Validate</string>
@@ -603,6 +604,7 @@
     <string name="selectMediaFoldersTitle">Folders to save</string>
     <string name="settingsOnlyWifiSyncDescription">Uploads and updates of offline files will only be done with a Wi-Fi connection.</string>
     <string name="settingsOnlyWifiSyncTitle">WiFi-only transfer</string>
+    <string name="settingsSectionGeneral">General</string>
     <string name="settingsTitle">Settings</string>
     <string name="shareFileInputUserAndEmail">Invite a user or an email address…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Users can only view the document.</string>
@@ -705,6 +707,7 @@
     <string name="trashActionDelete">Delete permanently</string>
     <string name="trashActionRestoreFileIn">Recover in</string>
     <string name="trashActionRestoreFileOriginalPlace">Recover to the original location</string>
+    <string name="trashAutoClearDescription">Trash is cleaned automatically every 30 days.</string>
     <string name="trashNoFile">No deleted files</string>
     <string name="trashTitle">Trash</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">

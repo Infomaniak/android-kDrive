@@ -21,6 +21,8 @@
     android:id="@+id/main_navigation"
     app:startDestination="@id/homeFragment">
 
+    <include app:graph="@navigation/my_ksuite_navigation" />
+
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.infomaniak.drive.ui.home.HomeFragment"
@@ -507,6 +509,11 @@
         <action
             android:id="@+id/action_settingsFragment_to_aboutSettingsFragment"
             app:destination="@id/aboutSettingsFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_MyKSuiteDashboardFragment"
+            app:destination="@+id/myKSuiteDashboardFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit" />
     </fragment>
 
     <activity
@@ -704,18 +711,6 @@
         tools:layout="@layout/fragment_bottom_sheet_information" />
 
     <dialog
-        android:id="@+id/secureLinkShareBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SecureLinkShareBottomSheetDialog"
-        android:label="SecureLinkShareBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_information" />
-
-    <dialog
-        android:id="@+id/dropBoxBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.DropBoxBottomSheetDialog"
-        android:label="DropBoxBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_information" />
-
-    <dialog
         android:id="@+id/updateAvailableBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.UpdateAvailableBottomSheetDialog"
         android:label="UpdateAvailableBottomSheetDialog"
@@ -905,12 +900,6 @@
     </dialog>
 
     <dialog
-        android:id="@+id/colorFolderUpgradeBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderUpgradeBottomSheetDialog"
-        android:label="ColorFolderUpgradeBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_information" />
-
-    <dialog
         android:id="@+id/categoryInfoActionsBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog"
         android:label="CategoryInfoActionsBottomSheetDialog"
@@ -1067,4 +1056,12 @@
             app:destination="@id/fileListFragment" />
     </fragment>
 
+    <fragment
+        android:id="@+id/myKSuiteDashboardFragment"
+        android:name="com.infomaniak.drive.ui.menu.settings.KSuiteDashboardFragment"
+        android:label="MyKSuiteDashboardFragment">
+        <argument
+            android:name="dashboardData"
+            app:argType="com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData" />
+    </fragment>
 </navigation>

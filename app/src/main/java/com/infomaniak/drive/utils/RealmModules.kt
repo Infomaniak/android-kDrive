@@ -50,6 +50,7 @@ object RealmModules {
             Drive::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class,
             Team::class, TeamDetails::class, DriveTeamsCategories::class, Category::class, CategoryRights::class,
             DriveCapabilities::class, DrivePack::class, DrivePackCapabilities::class, DriveRights::class, DriveAccount::class,
+            DriveQuotas::class, DriveQuota::class,
         ]
     )
     class DriveFilesModule

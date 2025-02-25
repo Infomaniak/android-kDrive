@@ -18,4 +18,6 @@
 <resources>
     <color name="iconColor">#88969F</color>
     <color name="disabledButtonBackgroundColor">@android:color/white</color>
+    <color name="myKSuiteChipOnBackground">#333333</color>
+    <color name="myKSuiteChipOnCardBackground">#1A1A1A</color>
 </resources>

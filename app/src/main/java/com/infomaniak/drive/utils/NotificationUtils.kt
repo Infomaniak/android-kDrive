@@ -46,7 +46,7 @@ object NotificationUtils : NotificationUtilsCore() {
     }
 
     fun Context.trashOperationProgressNotification(): NotificationCompat.Builder {
-        return progressNotification(getString(R.string.fileListDeletionStartedSnackbar), R.drawable.ic_delete)
+        return progressNotification(getString(R.string.fileListDeletionStartedSnackbar), R.drawable.ic_bin)
     }
 
     fun Context.downloadProgressNotification(): NotificationCompat.Builder {

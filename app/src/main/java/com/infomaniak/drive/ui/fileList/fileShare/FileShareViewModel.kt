@@ -20,24 +20,41 @@ package com.infomaniak.drive.ui.fileList.fileShare
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class FileShareViewModel : ViewModel() {
 
+    val currentDriveResult = MutableLiveData<Drive>()
     val currentFile = MutableLiveData<File>()
     val availableShareableItems = MutableLiveData<List<Shareable>>()
+
+    private val driveRealm = DriveInfosController.getRealmInstance()
 
     fun fetchCurrentFile(fileId: Int) = liveData(Dispatchers.IO) {
         emit(
             FileController.getFileById(fileId)
                 ?: ApiRepository.getFileDetails(File(id = fileId, driveId = AccountUtils.currentDriveId)).data
         )
+    }
+
+    fun initCurrentDriveLiveData(driveId: Int) = viewModelScope.launch {
+        val drive = DriveInfosController.getDrive(
+            userId = AccountUtils.currentUserId,
+            driveId = driveId,
+            maintenance = false,
+            customRealm = driveRealm,
+        )
+        currentDriveResult.postValue(drive?.freeze())
     }
 
     fun postFileShareCheck(file: File, body: Map<String, Any>) = liveData(Dispatchers.IO) {
@@ -53,5 +70,10 @@ class FileShareViewModel : ViewModel() {
             if (data == true) FileController.updateShareLinkWithRemote(file.id)
             emit(this)
         }
+    }
+
+    override fun onCleared() {
+        driveRealm.close()
+        super.onCleared()
     }
 }

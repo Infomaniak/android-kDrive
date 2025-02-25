@@ -168,6 +168,7 @@
     <string name="buttonSwitchDrive">Changer de drive</string>
     <string name="buttonTakePhotoOrVideo">Prendre une photo ou une vidéo</string>
     <string name="buttonToggleDisplay">Passer en mode grille ou mode liste</string>
+    <string name="buttonUpgrade">Mettre à niveau</string>
     <string name="buttonUpgradeOffer">Mettre à niveau mon offre</string>
     <string name="buttonUpload">Importer depuis le téléphone</string>
     <string name="buttonValid">Valider</string>
@@ -592,6 +593,7 @@
     <string name="selectMediaFoldersTitle">Dossiers à sauvegarder</string>
     <string name="settingsOnlyWifiSyncDescription">Les importations et la mise à jour des fichiers hors ligne seront uniquement effectuées avec une connexion Wi-Fi.</string>
     <string name="settingsOnlyWifiSyncTitle">Transfert uniquement en Wi-Fi</string>
+    <string name="settingsSectionGeneral">Général</string>
     <string name="settingsTitle">Paramètres</string>
     <string name="shareFileInputUserAndEmail">Invitez un utilisateur ou une adresse mail…</string>
     <string name="shareLinkOfficePermissionReadFileDescription">Les utilisateurs peuvent uniquement consulter le document.</string>
@@ -694,6 +696,7 @@
     <string name="trashActionDelete">Supprimer définitivement</string>
     <string name="trashActionRestoreFileIn">Restaurer dans</string>
     <string name="trashActionRestoreFileOriginalPlace">Restaurer à l’emplacement d’origine</string>
+    <string name="trashAutoClearDescription">La corbeille est nettoyée automatiquement tous les 30 jours.</string>
     <string name="trashNoFile">Aucun fichier supprimé</string>
     <string name="trashTitle">Corbeille</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">

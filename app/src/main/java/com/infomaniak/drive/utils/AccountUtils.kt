@@ -203,6 +203,7 @@ object AccountUtils : CredentialManager() {
             }
         }
 
+        MyKSuiteDataUtils.deleteData(user.id)
         removeUser(context, user)
     }
 
@@ -230,11 +231,13 @@ object AccountUtils : CredentialManager() {
 
     fun getAllUsersSync(): List<User> = userDatabase.userDao().getAllSync()
 
-    fun getCurrentDrive(): Drive? {
-        if (currentDriveId != currentDrive?.id) {
-            currentDrive = DriveInfosController.getDrive(currentUserId, currentDriveId, maintenance = false) ?: getFirstDrive()
-        }
+    fun getCurrentDrive(forceRefresh: Boolean = false): Drive? {
+        if (currentDriveId != currentDrive?.id || forceRefresh) refreshCurrentDrive()
         return currentDrive
+    }
+
+    private fun refreshCurrentDrive() {
+        currentDrive = DriveInfosController.getDrive(currentUserId, currentDriveId, maintenance = false) ?: getFirstDrive()
     }
 
     private fun getFirstDrive(): Drive? {
@@ -273,10 +276,12 @@ object AccountUtils : CredentialManager() {
     fun isEnableAppSync(): Boolean = UploadFile.getAppSyncSettings() != null
 
     fun getPersonalFolderTitle(context: Context): String {
-        return if (getCurrentDrive()?.isFreePack == true || getCurrentDrive()?.isSoloPack == true) {
-            context.getString(R.string.localizedFilenamePrivateSpace)
+        val folderTitle = if (getCurrentDrive()?.isSingleUserDrive == true) {
+            R.string.localizedFilenamePrivateSpace
         } else {
-            context.getString(R.string.localizedFilenamePrivateTeamSpace)
+            R.string.localizedFilenamePrivateTeamSpace
         }
+
+        return context.getString(folderTitle)
     }
 }

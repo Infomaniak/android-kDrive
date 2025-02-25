@@ -43,6 +43,8 @@ open class Drive(
     private var _role: String = "",
     @SerializedName("capabilities")
     private var _capabilities: DriveCapabilities? = DriveCapabilities(),
+    @SerializedName("quota")
+    private var _quotas: DriveQuotas? = DriveQuotas(),
     var sharedWithMe: Boolean = false,
     var userId: Int = 0,
     @SerializedName("categories_permissions")
@@ -97,14 +99,27 @@ open class Drive(
     val rights: DriveRights
         get() = _rights ?: DriveRights()
 
+    val quotas: DriveQuotas
+        get() = _quotas ?: DriveQuotas()
+
     val role: DriveUser.Role?
         get() = enumValueOfOrNull<DriveUser.Role>(_role)
 
+    // Old offer pack, now replaced by My kSuite
     inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
-
+    // Old offer pack, now replaced by My kSuite Plus
     inline val isSoloPack get() = pack?.type == DrivePack.DrivePackType.SOLO
+    inline val isMyKSuitePack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE
+    inline val isMyKSuitePlusPack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE_PLUS
+    inline val isFreeTier get() = isFreePack || isMyKSuitePack
+    inline val isSingleUserDrive get() = isFreeTier || isMyKSuitePlusPack || isSoloPack
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
+
+    inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (!isFreeTier || quotas.canCreateDropbox)
+    inline val canCreateShareLink get() = !isFreeTier || quotas.canCreateShareLink
+
+    inline val isDriveFull get() = usedSize >= size
 
     fun isUserAdmin(): Boolean = role == DriveUser.Role.ADMIN
 

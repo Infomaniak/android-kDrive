@@ -449,7 +449,7 @@
                 android:id="@+id/deleteFile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:icon="@drawable/ic_delete"
+                app:icon="@drawable/ic_bin"
                 app:text="@string/modalMoveTrashTitle" />
 
             <com.infomaniak.drive.views.BottomSheetItemView

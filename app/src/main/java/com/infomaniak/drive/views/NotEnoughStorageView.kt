@@ -24,14 +24,13 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.navigation.findNavController
+import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.data.models.drive.DrivePack
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.formatShortBinarySize
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 
 class NotEnoughStorageView @JvmOverloads constructor(
     context: Context,
@@ -44,7 +43,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
     @SuppressLint("SetTextI18n")
     fun setup(currentDrive: Drive) = with(binding) {
         currentDrive.apply {
-            val storagePercentage = if (size > 0L) (usedSize.toFloat() / size) * 100.0f else 0.0f
+            val storagePercentage = if (size > 0L) (usedSize.toDouble() / size).toFloat() * 100.0f else 0.0f
             if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
                 this@NotEnoughStorageView.isVisible = true
 
@@ -53,18 +52,13 @@ class NotEnoughStorageView @JvmOverloads constructor(
                 progressIndicator.progress = (storagePercentage).toInt()
                 title.text = "$usedStorage / $totalStorage"
 
-                when (pack?.type) {
-                    DrivePack.DrivePackType.SOLO, DrivePack.DrivePackType.FREE -> {
-                        description.setText(R.string.notEnoughStorageDescription1)
-                        upgradeOffer.isVisible = true
-                        upgradeOffer.setOnClickListener {
-                            context.openUrl(ApiRoutes.upgradeDrive(AccountUtils.currentDriveId))
-                        }
-                    }
-                    else -> {
-                        description.setText(R.string.notEnoughStorageDescription2)
-                        upgradeOffer.isGone = true
-                    }
+                if (isSingleUserDrive) {
+                    description.setText(R.string.notEnoughStorageDescription1)
+                    upgradeOffer.isVisible = true
+                    upgradeOffer.setOnClickListener { findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive) }
+                } else {
+                    description.setText(R.string.notEnoughStorageDescription2)
+                    upgradeOffer.isGone = true
                 }
 
                 close.setOnClickListener {

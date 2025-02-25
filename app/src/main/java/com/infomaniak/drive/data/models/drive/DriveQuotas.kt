@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,32 +18,16 @@
 package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 
 @RealmClass(embedded = true)
-open class DrivePack(
-    var id: Int = 0,
-    var name: String = "",
-    @SerializedName("capabilities")
-    private var _capabilities: DrivePackCapabilities? = DrivePackCapabilities()
+open class DriveQuotas(
+    var dropbox: DriveQuota? = null,
+    @SerializedName("shared_link")
+    var sharedLink: DriveQuota? = null,
 ) : RealmObject() {
 
-    val capabilities: DrivePackCapabilities
-        get() = _capabilities ?: DrivePackCapabilities()
-
-    val type: DrivePackType? get() = enumValueOfOrNull<DrivePackType>(name.uppercase())
-
-    enum class DrivePackType {
-        SOLO,
-        TEAM,
-        PRO,
-        FREE,
-        KSUITE_STANDARD,
-        KSUITE_PRO,
-        KSUITE_ENTREPRISE,
-        MY_KSUITE,
-        MY_KSUITE_PLUS,
-    }
+    inline val canCreateDropbox get() = dropbox?.let { it.current < it.max } ?: true
+    inline val canCreateShareLink get() = sharedLink?.let { it.current < it.max } ?: true
 }
