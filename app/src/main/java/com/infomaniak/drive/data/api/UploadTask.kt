@@ -416,9 +416,8 @@ class UploadTask(
 
     private fun UploadFile.resetUploadTokenAndCancelSession() {
         uploadToken?.let {
-            with(ApiRepository.cancelSession(driveId, it, okHttpClient)) {
-                if (data != null) resetUploadToken()
-            }
+            ApiRepository.cancelSession(driveId, it, okHttpClient)
+            resetUploadToken()
         }
     }
 
