@@ -114,35 +114,24 @@ class UploadTask(
     }
 
     private suspend fun launchTask() = coroutineScope {
-        val chunkConfig = try {
-            fileChunkSizeManager.computeChunkConfig(
-                fileSize = uploadFile.fileSize,
-                defaultFileChunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong(),
-            )
-        } catch (exception: IllegalArgumentException) {
-            uploadFile.resetUploadTokenAndCancelSession()
-            fileChunkSizeManager.computeChunkConfig(fileSize = uploadFile.fileSize)
-        }
-
+        val chunkConfig = getChunkConfig()
         val totalChunks = chunkConfig.totalChunks
+        val uploadedChunks = uploadFile.getValidChunks()
+        val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
+
+        val uploadHost = if (isNewUploadSession) {
+            uploadFile.prepareUploadSession(totalChunks)
+        } else {
+            uploadFile.uploadHost
+        }!!
+
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = UploadWorker.BREADCRUMB_TAG
+            message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
+            level = SentryLevel.INFO
+        })
 
         context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))?.buffered()?.use { fileInputStream ->
-
-            val uploadedChunks = uploadFile.getValidChunks()
-            val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
-
-            val uploadHost = if (isNewUploadSession) {
-                uploadFile.prepareUploadSession(totalChunks)
-            } else {
-                uploadFile.uploadHost
-            }!!
-
-
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = UploadWorker.BREADCRUMB_TAG
-                message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
-                level = SentryLevel.INFO
-            })
 
             SentryLog.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
 
@@ -158,6 +147,18 @@ class UploadTask(
         }
 
         if (isActive) onFinish(uploadFile.getUriObject())
+    }
+
+    private fun getChunkConfig(): FileChunkSizeManager.ChunkConfig {
+        return try {
+            fileChunkSizeManager.computeChunkConfig(
+                fileSize = uploadFile.fileSize,
+                defaultFileChunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong(),
+            )
+        } catch (exception: IllegalArgumentException) {
+            uploadFile.resetUploadTokenAndCancelSession()
+            fileChunkSizeManager.computeChunkConfig(fileSize = uploadFile.fileSize)
+        }
     }
 
     private suspend fun uploadChunks(
