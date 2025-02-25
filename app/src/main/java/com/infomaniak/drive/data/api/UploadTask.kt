@@ -37,7 +37,6 @@ import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
-import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
@@ -422,12 +421,6 @@ class UploadTask(
             }
         }
     }
-
-    /**
-     * Returns half the available memory in the ram, to avoid [OutOfMemoryError]
-     * @return half available memory
-     */
-    private fun getAvailableHalfMemory() = context.getAvailableMemory().availMem / 2
 
     fun previousChunkBytesWritten() = previousChunkBytesWritten
 
