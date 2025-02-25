@@ -271,7 +271,13 @@ class MainActivity : BaseActivity() {
 
     private fun setupFab(fab: FloatingActionButton, shouldShowSmallFab: Boolean = false) {
         val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
-        fab.setOnClickListener { navController.navigate(R.id.addFileBottomSheetDialog, args) }
+        fab.setOnClickListener {
+            if (AccountUtils.getCurrentDrive()?.isDriveFull == true) {
+                showQuotasExceededSnackbar(navController)
+            } else {
+                navController.navigate(R.id.addFileBottomSheetDialog, args)
+            }
+        }
     }
 
     private fun setupDrivePermissions() {

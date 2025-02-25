@@ -32,8 +32,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
@@ -48,6 +46,7 @@ import com.infomaniak.drive.data.models.File.Office
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetAddFileBinding
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
@@ -204,13 +203,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                         val error = apiResponse.translateError()
                         val quotaErrorCode = ErrorCode.apiErrorCodes.firstOrNull { it.code == ErrorCode.QUOTA_EXCEEDED_ERROR }
                         if (error == quotaErrorCode?.translateRes) {
-                            val navController = findNavController()
-                            showSnackbar(
-                                error,
-                                showAboveFab = true,
-                                actionButtonTitle = R.string.buttonUpgrade,
-                                onActionClicked = { navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive) },
-                            )
+                            (requireActivity() as? MainActivity)?.showQuotasExceededSnackbar(findNavController())
                         } else {
                             showSnackbar(error, showAboveFab = true)
                         }
