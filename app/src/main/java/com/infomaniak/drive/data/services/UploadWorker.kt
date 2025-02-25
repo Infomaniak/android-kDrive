@@ -29,6 +29,8 @@ import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.FileChunkSizeManager
+import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.MediaFolder
@@ -163,10 +165,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
-        for (uploadFile in uploadFiles) {
+
+        for ((index, uploadFile) in uploadFiles.withIndex()) {
             SentryLog.d(TAG, "startSyncFiles> size: ${uploadFile.fileSize}")
 
-            if (uploadFile.initUpload()) {
+            val fileUploadedWithSuccess = uploadFile.initUpload(isLastFile = index == uploadFiles.lastIndex)
+            if (fileUploadedWithSuccess) {
                 SentryLog.i(TAG, "startSyncFiles: file uploaded with success")
                 successNames.add(uploadFile.fileName)
                 successCount++
@@ -203,7 +207,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun UploadFile.initUpload() = withContext(Dispatchers.IO) {
+    private suspend fun UploadFile.initUpload(isLastFile: Boolean) = withContext(Dispatchers.IO) {
         val uri = getUriObject()
 
         currentUploadFile = this@initUpload
@@ -216,6 +220,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             } else {
                 initUploadSchemeContent(uri)
             }
+        } catch (exception: AllowedFileSizeExceededException) {
+            Sentry.withScope { scope ->
+                scope.setExtra("half heap", "${FileChunkSizeManager.getHalfHeapMemory()}")
+                scope.setExtra("available ram memory", "${applicationContext.getAvailableMemory().availMem}")
+                scope.setExtra("available service memory", "${applicationContext.getAvailableMemory().threshold}")
+                SentryLog.e(TAG, "total chunks exceeded", exception)
+            }
+            if (isLastFile) throw exception
+            false
         } catch (exception: Exception) {
             SentryLog.w(TAG, "initUpload: failed", exception)
             handleException(exception)

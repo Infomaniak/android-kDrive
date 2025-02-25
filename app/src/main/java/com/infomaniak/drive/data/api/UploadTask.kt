@@ -103,15 +103,6 @@ class UploadTask(
                 scope.level = SentryLevel.WARNING
                 Sentry.captureException(exception)
             }
-        } catch (exception: FileChunkSizeManager.AllowedFileSizeExceededException) {
-            SentryLog.w(TAG, "total chunks exceeded", exception)
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                scope.setExtra("half heap", "${getAvailableHalfMemory()}")
-                scope.setExtra("available ram memory", "${context.getAvailableMemory().availMem}")
-                scope.setExtra("available service memory", "${context.getAvailableMemory().threshold}")
-                Sentry.captureException(exception)
-            }
         } catch (exception: UploadNotTerminated) {
             SentryLog.w(TAG, "upload not terminated", exception)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
@@ -429,7 +420,6 @@ class UploadTask(
 
     fun lastProgress() = currentProgress
 
-    class AllowedFileSizeExceededException : Exception()
     class FolderNotFoundException : Exception()
     class LockErrorException : Exception()
     class NetworkException : Exception()
