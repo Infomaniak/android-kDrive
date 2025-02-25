@@ -59,8 +59,6 @@ class FileChunkSizeManager(
 
     private fun adjustChunkSizeByAvailableMemory(fileChunkSize: Long): Long = fileChunkSize.coerceAtMost(getHalfHeapMemory())
 
-    private fun getHalfHeapMemory(): Long = Runtime.getRuntime().maxMemory() / 2
-
     class AllowedFileSizeExceededException : Exception()
 
     companion object {
@@ -69,6 +67,8 @@ class FileChunkSizeManager(
         private const val OPTIMAL_TOTAL_CHUNKS = 200
         private const val MAX_CHUNK_COUNT = 10_000
         private const val MAX_PARALLEL_CHUNKS = 4
+
+        fun getHalfHeapMemory(): Long = Runtime.getRuntime().maxMemory() / 2
     }
 
 }
