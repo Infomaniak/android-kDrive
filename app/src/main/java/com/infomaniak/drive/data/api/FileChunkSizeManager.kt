@@ -84,7 +84,7 @@ class FileChunkSizeManager(
     private fun adjustChunkSizeByAvailableMemory(fileChunkSize: Long, halfAvailableMemory: Long): Long {
         return fileChunkSize.coerceAtMost(halfAvailableMemory)
     }
-    
+
     data class ChunkConfig(
         val fileChunkSize: Long,
         val totalChunks: Int,
