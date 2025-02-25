@@ -29,6 +29,7 @@ import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentBottomSheetTrashedFileActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -113,6 +114,12 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
+    private fun getErrorMessage(fileResult: FileResult) = when (fileResult.errorCode) {
+        ApiErrorCode.AN_ERROR_HAS_OCCURRED -> R.string.errorRestore
+        ErrorCode.CONFLICT_ERROR -> R.string.errorConflict
+        else -> fileResult.errorResId
+    }
+
     private fun restoreResult(fileResult: FileResult, originalPlace: Boolean, folderName: String? = null) {
         if (fileResult.isSuccess) {
             val title = if (originalPlace) R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess
@@ -125,8 +132,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
             showSnackbar(resources.getQuantityString(title, 1, *args.toTypedArray()))
             dismissAndRemoveFileFromList()
         } else {
-            val snackbarText = if (fileResult.errorCode == ApiErrorCode.AN_ERROR_HAS_OCCURRED) R.string.errorRestore
-            else fileResult.errorResId
+            val snackbarText = getErrorMessage(fileResult)
 
             snackbarText?.let { text -> showSnackbar(text) }
             findNavController().popBackStack()
