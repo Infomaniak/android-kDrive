@@ -47,7 +47,7 @@ class FileChunkSizeManager(
         require(totalChunks <= maxChunkCount)
 
         return ChunkConfig(
-            fileChunkSize = computeChunkSize(fileSize, halfAvailableMemory),
+            fileChunkSize = fileChunkSize,
             totalChunks = totalChunks,
             parallelChunks = computeParallelChunks(totalChunks, fileChunkSize, halfAvailableMemory.toDouble())
         )
