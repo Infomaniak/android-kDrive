@@ -127,7 +127,7 @@ class UploadTask(
 
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = UploadWorker.BREADCRUMB_TAG
-            message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
+            message = "start ${uploadFile.uri} with $totalChunks chunks and $uploadedChunks uploadedChunks"
             level = SentryLevel.INFO
         })
 
