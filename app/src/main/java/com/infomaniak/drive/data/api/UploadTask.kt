@@ -65,7 +65,6 @@ class UploadTask(
     private val context: Context,
     private val uploadFile: UploadFile,
     private val setProgress: KSuspendFunction1<Data, Unit>,
-    private val onProgress: ((progress: Int) -> Unit)? = null,
 ) {
 
     private val fileChunkSizeManager = FileChunkSizeManager()
@@ -309,8 +308,6 @@ class UploadTask(
             )
             throw WrittenBytesExceededException()
         }
-
-        onProgress?.invoke(progress)
 
         ensureActive()
 
