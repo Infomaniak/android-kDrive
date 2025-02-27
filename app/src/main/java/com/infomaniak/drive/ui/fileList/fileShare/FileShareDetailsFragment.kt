@@ -230,7 +230,7 @@ class FileShareDetailsFragment : Fragment() {
         shareLink = newShareLink
         val (permissionsGroup, currentPermission) = FileDetailsInfoFragment.selectPermissions(
             isFolder = file.isFolder(),
-            isOnlyOffice = file.hasOnlyoffice,
+            isOnlyOffice = file.hasOnlyOffice,
             shareLinkExist = shareLink != null,
         )
         safeNavigate(
@@ -249,7 +249,7 @@ class FileShareDetailsFragment : Fragment() {
                 fileId = file.id,
                 driveId = file.driveId,
                 shareLink = newShareLink,
-                isOnlyOfficeFile = file.hasOnlyoffice,
+                isOnlyOfficeFile = file.hasOnlyOffice,
                 isFolder = file.isFolder(),
             )
         )

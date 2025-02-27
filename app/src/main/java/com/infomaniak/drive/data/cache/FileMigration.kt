@@ -249,7 +249,7 @@ class FileMigration : RealmMigration {
                 renameField("createdAt", File::addedAt.name)
                 renameField("fileCreatedAt", File::createdAt.name)
                 renameField("nameNaturalSorting", File::sortedName.name)
-                renameField("onlyoffice", File::hasOnlyoffice.name)
+                renameField("onlyoffice", File::hasOnlyOffice.name)
 
                 addField(File::parentId.name, Int::class.java, FieldAttribute.REQUIRED)
                 addRealmObjectField(File::conversion.name, fileConversionSchema)

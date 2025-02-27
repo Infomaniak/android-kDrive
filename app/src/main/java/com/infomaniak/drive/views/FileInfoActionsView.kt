@@ -28,7 +28,6 @@ import androidx.annotation.CallSuper
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.navigation.fragment.findNavController
@@ -133,7 +132,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 || isSharedWithMe
                 || currentFile.getVisibilityType() == IS_TEAM_SPACE
                 || currentFile.getVisibilityType() == IS_SHARED_SPACE
-        editDocument.isVisible = (currentFile.hasOnlyoffice && rights.canWrite)
+        editDocument.isVisible = (currentFile.hasOnlyOffice && rights.canWrite)
                 || (currentFile.conversion?.whenOnlyoffice == true)
         leaveShare.isVisible = rights.canLeave == true
         cancelExternalImport.isVisible = file.isImporting()

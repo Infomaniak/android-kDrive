@@ -196,7 +196,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         shareLink = newShareLink
         val (permissionsGroup, currentPermission) = selectPermissions(
             isFolder = file.isFolder(),
-            isOnlyOffice = file.hasOnlyoffice,
+            isOnlyOffice = file.hasOnlyOffice,
             shareLinkExist = newShareLink != null,
         )
         findNavController().navigate(
@@ -215,7 +215,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
                 fileId = file.id,
                 driveId = file.driveId,
                 shareLink = newShareLink,
-                isOnlyOfficeFile = file.hasOnlyoffice,
+                isOnlyOfficeFile = file.hasOnlyOffice,
                 isFolder = file.isFolder(),
             )
         )

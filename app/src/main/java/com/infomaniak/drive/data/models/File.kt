@@ -137,8 +137,8 @@ open class File(
 
     ) : RealmObject(), Parcelable {
 
-    val hasThumbnail inline get() = supportedBy?.contains(SupportedByType.THUMBNAIL.apiValue) ?: false
-    val hasOnlyoffice inline get() = supportedBy?.contains(SupportedByType.ONLYOFFICE.apiValue) ?: false
+    val hasThumbnail inline get() = supportedBy?.contains(SupportedByType.THUMBNAIL.apiValue) == true
+    val hasOnlyOffice inline get() = supportedBy?.contains(SupportedByType.ONLYOFFICE.apiValue) == true
 
     @LinkingObjects("children")
     val localParent: RealmResults<File>? = null
@@ -171,7 +171,7 @@ open class File(
     }
 
     fun isOnlyOfficePreview(): Boolean {
-        return hasOnlyoffice || conversion?.whenOnlyoffice == true
+        return hasOnlyOffice || conversion?.whenOnlyoffice == true
     }
 
     fun isDropBox() = getVisibilityType() == VisibilityType.IS_DROPBOX

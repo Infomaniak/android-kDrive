@@ -163,7 +163,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         return context.getString(resId, permission, fileName, password, validityDate)
     }
 
-    private fun File.getTypeName(context: Context): String = context.getString(getTypeName(isFolder(), hasOnlyoffice))
+    private fun File.getTypeName(context: Context): String = context.getString(getTypeName(isFolder(), hasOnlyOffice))
 
     companion object {
 
