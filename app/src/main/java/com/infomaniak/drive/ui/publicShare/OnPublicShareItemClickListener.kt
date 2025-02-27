@@ -21,9 +21,9 @@ import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.MatomoDrive.ACTION_DOWNLOAD_NAME
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
-import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
@@ -99,7 +99,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
         }
     }
 
-    private fun executeDownloadAction(downloadAction: DownloadAction, cacheFile: IOFile) = runCatching {
+    private suspend fun executeDownloadAction(downloadAction: DownloadAction, cacheFile: IOFile) = runCatching {
         currentContext.trackPublicShareActionEvent(downloadAction.matomoValue)
         val uri = FileProvider.getUriForFile(currentContext, currentContext.getString(R.string.FILE_AUTHORITY), cacheFile)
 

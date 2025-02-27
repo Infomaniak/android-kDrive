@@ -20,6 +20,7 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
 import com.dd.plist.NSString
@@ -44,6 +45,9 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.safeNavigate
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -109,7 +113,7 @@ object FilePresenter {
         }
     }
 
-    fun Fragment.openBookmarkIntent(file: File) {
+    fun Fragment.openBookmarkIntent(file: File) = lifecycleScope.launch {
         runCatching {
             val storedFileUri = file.getCloudAndFileUris(requireContext()).second
             requireActivity().openBookmarkIntent(file.name, storedFileUri)
@@ -121,11 +125,13 @@ object FilePresenter {
         }
     }
 
-    fun Context.openBookmarkIntent(fileName: String, uri: Uri) {
-        val url = if (fileName.endsWith(".url")) {
-            getUrlFromUrlFile(context = this, uri)
-        } else {
-            getUrlFromWebloc(context = this, uri)
+    suspend fun Context.openBookmarkIntent(fileName: String, uri: Uri) {
+        val url = withContext(Dispatchers.IO) {
+            if (fileName.endsWith(".url")) {
+                getUrlFromUrlFile(context = this@openBookmarkIntent, uri)
+            } else {
+                getUrlFromWebloc(context = this@openBookmarkIntent, uri)
+            }
         }
 
         if (url.isValidUrl()) openUrl(url) else throw Exception("It's not a valid url")
