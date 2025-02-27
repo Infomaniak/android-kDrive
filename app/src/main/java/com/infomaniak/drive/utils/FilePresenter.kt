@@ -127,7 +127,7 @@ object FilePresenter {
 
     suspend fun Context.openBookmarkIntent(fileName: String, uri: Uri) {
         val url = withContext(Dispatchers.IO) {
-            if (fileName.endsWith(".url")) {
+            if (fileName.isUrlFile()) {
                 getUrlFromUrlFile(context = this@openBookmarkIntent, uri)
             } else {
                 getUrlFromWebloc(context = this@openBookmarkIntent, uri)

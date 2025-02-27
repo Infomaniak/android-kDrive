@@ -33,12 +33,10 @@ import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.FileVersion
-import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.downloadFile
 import com.infomaniak.lib.core.utils.contains
 import com.infomaniak.lib.core.utils.guessMimeType
 import io.realm.RealmList
@@ -240,7 +238,7 @@ open class File(
         return if (extension == name) null else ".$extension"
     }
 
-    fun isBookmark() = name.endsWith(".url") || name.endsWith(".webloc")
+    fun isBookmark() = name.isUrlFile() || name.isWeblocFile()
 
     fun isPendingUploadFolder() = isFromUploads && isFolder()
 
