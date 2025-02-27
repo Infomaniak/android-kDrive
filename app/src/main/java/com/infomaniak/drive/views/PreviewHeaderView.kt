@@ -106,8 +106,10 @@ class PreviewHeaderView @JvmOverloads constructor(
         }
     }
 
-    fun setPageNumberVisibility(isVisible: Boolean) {
-        binding.pageNumberChip.isVisible = isVisible
+    fun setPageNumberVisibility(isVisible: Boolean) = with(binding.pageNumberChip) {
+        this.isVisible = isVisible
+        // Set `isFocusable` here instead of in XML file because setting it in the XML doesn't seem to affect the Chip.
+        isFocusable = false
     }
 
     fun setPageNumberValue(currentPage: Int, totalPage: Int) {
