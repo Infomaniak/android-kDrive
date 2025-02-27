@@ -58,7 +58,7 @@ import java.util.Date
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
 
-    private val failedNames = mutableListOf<String>()
+    private val failedNamesMap = mutableMapOf<String, String>()
     private val successNames = mutableListOf<String>()
     private var failedCount = 0
     private var successCount = 0
@@ -77,7 +77,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         if (runAttemptCount >= MAX_RETRY_COUNT) return Result.failure()
 
         return runUploadCatching {
-            var syncNewPendingUploads = false
+            var syncNewPendingUploads: Boolean
             var result: Result
             var retryError = 0
             var lastUploadFileName = ""
@@ -167,30 +167,48 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
 
         for ((index, uploadFile) in uploadFiles.withIndex()) {
-            SentryLog.d(TAG, "startSyncFiles> size: ${uploadFile.fileSize}")
-
-            val fileUploadedWithSuccess = uploadFile.initUpload(isLastFile = index == uploadFiles.lastIndex)
-            if (fileUploadedWithSuccess) {
-                SentryLog.i(TAG, "startSyncFiles: file uploaded with success")
-                successNames.add(uploadFile.fileName)
-                successCount++
-            } else {
-                SentryLog.i(TAG, "startSyncFiles: file upload failed")
-                failedNames.add(uploadFile.fileName)
-                failedCount++
-            }
+            val isLastFile = index == uploadFiles.lastIndex
+            startUpload(uploadFile, isLastFile)
 
             pendingCount--
 
-            if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) break
+            // Stop recursion if all files have been processed and there are only errors.
+            if (isLastFile && failedNamesMap.count() == UploadFile.getAllPendingUploadsCount()) break
+            // If there is a new file during the sync and it has has priority (ex: Manual uploads),
+            // then we start again in order to process the priority files first.
+            if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext startSyncFiles()
         }
 
         uploadedCount = successCount
 
         SentryLog.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
 
-        currentUploadFile?.showUploadedFilesNotification(applicationContext, successCount, successNames, failedCount, failedNames)
+        currentUploadFile?.showUploadedFilesNotification(
+            context = applicationContext,
+            successCount = successCount,
+            successNames = successNames,
+            failedCount = failedCount,
+            failedNames = failedNamesMap.values,
+        )
         if (uploadedCount > 0) Result.success() else Result.failure()
+    }
+
+    private suspend fun startUpload(uploadFile: UploadFile, isLastFile: Boolean) {
+        SentryLog.d(TAG, "startSyncFiles> size: ${uploadFile.fileSize}")
+
+        val fileUploadedWithSuccess = uploadFile.initUpload(isLastFile)
+        if (fileUploadedWithSuccess) {
+            SentryLog.i(TAG, "startSyncFiles: file uploaded with success")
+            successNames.add(uploadFile.fileName)
+            if (failedNamesMap[uploadFile.uri] != null) failedNamesMap.remove(uploadFile.uri)
+            successCount++
+        } else {
+            SentryLog.i(TAG, "startSyncFiles: file upload failed")
+            if (failedNamesMap[uploadFile.uri] == null) {
+                failedNamesMap[uploadFile.uri] = uploadFile.fileName
+                failedCount++
+            }
+        }
     }
 
     private fun checkUploadCountReliability(realm: Realm) {
