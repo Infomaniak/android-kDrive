@@ -39,6 +39,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
+import com.infomaniak.drive.ui.fileList.preview.PreviewPDFFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderAdapter
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
@@ -124,16 +125,23 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
-
                     currentFile = previewSliderAdapter.getFile(position)
                     previewSliderViewModel.currentPreview = currentFile
-                    with(header) {
-                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
-                        toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
+
+                    var shouldDisplayPageNumber = false
+
+                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
+                        this.trackScreen()
+                        shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
                     }
 
+                    with(header) {
+                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
+                        setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
+                        toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
+                    }
                     setPrintButtonVisibility(isGone = !currentFile.isPDF())
+
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
                     updateBottomSheetWithCurrentFile()
                 }

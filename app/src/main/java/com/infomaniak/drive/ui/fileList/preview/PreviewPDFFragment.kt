@@ -79,6 +79,8 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     private var pdfFile: IOFile? = null
     private var isDownloading = false
+    private var totalPageCount: Int? = null
+    private var currentPageIndex: Int? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPdfBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -177,16 +179,20 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                             // We can arrive here with a file different from a real PDF like OpenOffice documents
                             val canPrintFile = externalFileUri != null || file.extensionType == ExtensionType.PDF.value
                             shouldHidePrintOption(isGone = !canPrintFile)
-                            binding.downloadLayout.root.isGone = true
+
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
+
                             pdfViewPrintListener = this@PreviewPDFFragment
+
+                            binding.downloadLayout.root.isGone = true
+
+                            totalPageCount = pageCount
+                            setPageNumberChipVisibility(true)
                         }
                         onPageChange { currentPage, pageCount ->
-                            updatePageNumber(
-                                currentPage = currentPage,
-                                totalPage = pageCount,
-                            )
+                            currentPageIndex = currentPage
+                            updatePageNumber(currentPage = currentPage, totalPage = pageCount)
                         }
                         onReadyForPrinting { pagesAsBitmap ->
                             val fileName = if (isExternalFile()) fileName else file.name
@@ -201,10 +207,17 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         }
                         load()
                     }
-
-                    setPageNumberChipVisibility(isVisible = true)
                 }
             }
+        }
+    }
+
+    fun tryToUpdatePageCount(): Boolean {
+        return if (currentPageIndex != null && totalPageCount != null) {
+            updatePageNumber(currentPage = currentPageIndex!!, totalPage = totalPageCount!!)
+            true
+        } else {
+            false
         }
     }
 
