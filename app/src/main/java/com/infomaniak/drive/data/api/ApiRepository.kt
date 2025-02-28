@@ -44,6 +44,7 @@ import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.networking.HttpClient.okHttpClientLongTimeout
 import okhttp3.OkHttpClient
 import com.infomaniak.core.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
@@ -478,7 +479,8 @@ object ApiRepository : ApiRepositoryCore() {
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
         callApi(ApiRoutes.restoreTrashFile(file), POST, body)
 
-    fun emptyTrash(driveId: Int): ApiResponse<Boolean> = callApi(ApiRoutes.emptyTrash(driveId), DELETE)
+    fun emptyTrash(driveId: Int): ApiResponse<Boolean> =
+        callApi(ApiRoutes.emptyTrash(driveId), method = DELETE, okHttpClient = okHttpClientLongTimeout)
 
     fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURLV2(file), DELETE)
 
