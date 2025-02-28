@@ -39,6 +39,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
+import com.infomaniak.drive.ui.fileList.preview.PreviewPDFFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderAdapter
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
@@ -124,7 +125,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.trackScreen()
+                    val fragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")
+                    fragment?.trackScreen()
 
                     currentFile = previewSliderAdapter.getFile(position)
                     previewSliderViewModel.currentPreview = currentFile
@@ -136,6 +138,12 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     setPrintButtonVisibility(isGone = !currentFile.isPDF())
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
                     updateBottomSheetWithCurrentFile()
+
+                    (fragment as? PreviewPDFFragment)?.let {
+                        binding.header.setPageNumberVisibility(it.tryToUpdatePageCount())
+                    } ?: run {
+                        binding.header.setPageNumberVisibility(false)
+                    }
                 }
             })
         }
