@@ -264,15 +264,17 @@ class PublicShareListFragment : FileListFragment() {
         )
     }
 
-    private fun executeOpenBookmarkAction(cacheFile: IOFile?) = runCatching {
-        val uri = FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), cacheFile!!)
-        with(requireContext()) {
-            trackPublicShareActionEvent(ACTION_OPEN_BOOKMARK_NAME)
-            openBookmarkIntent(cacheFile.name, uri)
+    private fun executeOpenBookmarkAction(cacheFile: IOFile?) = lifecycleScope.launch {
+        runCatching {
+            val uri = FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), cacheFile!!)
+            with(requireContext()) {
+                trackPublicShareActionEvent(ACTION_OPEN_BOOKMARK_NAME)
+                openBookmarkIntent(cacheFile.name, uri)
+            }
+        }.onFailure { exception ->
+            exception.printStackTrace()
+            showSnackbar(title = R.string.errorGetBookmarkURL, anchor = importButton)
         }
-    }.onFailure { exception ->
-        exception.printStackTrace()
-        showSnackbar(title = R.string.errorGetBookmarkURL, anchor = importButton)
     }
 
     private fun downloadAllFiles() {

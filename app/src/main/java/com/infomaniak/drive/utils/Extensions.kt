@@ -551,3 +551,7 @@ fun MainActivity.showQuotasExceededSnackbar(navController: NavController) {
         onActionClicked = { navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive) },
     )
 }
+
+fun String.isUrlFile() = endsWith(".url", ignoreCase = true)
+
+fun String.isWeblocFile() = endsWith(".webloc", ignoreCase = true)
