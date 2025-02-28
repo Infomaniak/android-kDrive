@@ -20,6 +20,7 @@ package com.infomaniak.drive
 import android.app.Activity
 import android.content.Context
 import androidx.fragment.app.Fragment
+import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.lib.core.MatomoCore
 import com.infomaniak.lib.core.MatomoCore.TrackerAction
 import org.matomo.sdk.Tracker
@@ -84,5 +85,17 @@ object MatomoDrive : MatomoCore {
 
     fun Activity.trackDeepLink(name: String) {
         trackEvent("deepLink", name)
+    }
+
+    fun Fragment.trackMyKSuiteEvent(name: String) {
+        trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE, name)
+    }
+
+    fun Context.trackMyKSuiteEvent(name: String) {
+        trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE, name)
+    }
+
+    fun Context.trackMyKSuiteUpgradeBottomSheetEvent(name: String) {
+        trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE_UPGRADE_BOTTOMSHEET, name)
     }
 }

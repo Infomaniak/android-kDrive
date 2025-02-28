@@ -25,12 +25,12 @@ import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
-import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
 import com.infomaniak.drive.utils.formatShortBinarySize
+import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 
 class NotEnoughStorageView @JvmOverloads constructor(
     context: Context,
@@ -55,7 +55,12 @@ class NotEnoughStorageView @JvmOverloads constructor(
                 if (isSingleUserDrive) {
                     description.setText(R.string.notEnoughStorageDescription1)
                     upgradeOffer.isVisible = true
-                    upgradeOffer.setOnClickListener { findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive) }
+                    upgradeOffer.setOnClickListener {
+                        context.openMyKSuiteUpgradeBottomSheet(
+                            navController = findNavController(),
+                            matomoTrackerName = MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME,
+                        )
+                    }
                 } else {
                     description.setText(R.string.notEnoughStorageDescription2)
                     upgradeOffer.isGone = true

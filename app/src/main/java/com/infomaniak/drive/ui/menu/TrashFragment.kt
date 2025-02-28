@@ -20,12 +20,9 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
-import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -36,6 +33,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.TrashMultiSelectActionsBotto
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SnackbarUtils
@@ -181,7 +179,7 @@ class TrashFragment : FileSubTypeListFragment() {
     private fun setupAutoClearUpgradeLayout() {
         binding.trashAutoClearLayout.isVisible = AccountUtils.getCurrentDrive()?.isFreeTier == true
         binding.trashAutoClearUpgradeButton.setOnClickListener {
-            findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+            openMyKSuiteUpgradeBottomSheet("trashStorageLimit")
         }
     }
 

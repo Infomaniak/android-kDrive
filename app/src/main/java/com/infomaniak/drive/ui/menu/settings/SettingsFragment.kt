@@ -29,9 +29,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
@@ -118,7 +120,7 @@ class SettingsFragment : Fragment() {
             }
 
             dashboardSettings.setOnClickListener {
-                trackSettingsEvent("openMyKSuiteDashboard")
+                trackMyKSuiteEvent(MatomoMyKSuite.OPEN_DASHBOARD_NAME)
                 openMyKSuiteDashboard(myKSuiteData)
             }
         }

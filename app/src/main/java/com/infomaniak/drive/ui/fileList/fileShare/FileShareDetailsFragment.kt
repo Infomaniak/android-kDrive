@@ -29,8 +29,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
@@ -317,7 +315,7 @@ class FileShareDetailsFragment : Fragment() {
             val canCreateShareLink = drive.canCreateShareLink || hasShareLink
 
             binding.shareLinkContainer.setupMyKSuitePlusChip(canCreateShareLink) {
-                findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+                openMyKSuiteUpgradeBottomSheet("shareLinkQuotaExceeded")
             }
         }
     }
