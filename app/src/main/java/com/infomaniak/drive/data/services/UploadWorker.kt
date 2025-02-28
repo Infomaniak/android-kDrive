@@ -174,7 +174,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
             // Stop recursion if all files have been processed and there are only errors.
             if (isLastFile && failedNamesMap.count() == UploadFile.getAllPendingUploadsCount()) break
-            // If there is a new file during the sync and it has has priority (ex: Manual uploads),
+            // If there is a new file during the sync and it has priority (ex: Manual uploads),
             // then we start again in order to process the priority files first.
             if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext startSyncFiles()
         }
