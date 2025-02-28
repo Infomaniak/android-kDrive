@@ -30,6 +30,7 @@
     <string name="addPassword">Proteger mediante contraseña</string>
     <string name="alertRemoveUserDescription">¿Estás seguro/a de que deseas retirar al usuario “%s” de esta aplicación?</string>
     <string name="alertRemoveUserTitle">Retirar al usuario</string>
+    <string name="all3DModel">Modelo 3D</string>
     <string name="allActivated">Activado</string>
     <string name="allAddExpirationDateTitle">Añadir una fecha de caducidad</string>
     <string name="allAllDriveUsers">Todos los usuarios del kDrive</string>
@@ -40,6 +41,7 @@
     <string name="allDateCustom">Personalizado</string>
     <string name="allDeletedFilePattern">\'Eliminado el \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Desactivado</string>
+    <string name="allEmail">Correo electrónico</string>
     <string name="allEmptyInputError">Este campo no puede estar vacío</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Función no disponible desde F-Droid</string>
     <string name="allFileAddFavoris">%s añadido a favoritos</string>
@@ -224,7 +226,7 @@
     <string name="createFolderValidUntilDescription">Una vez transcurrida la fecha, los usuarios ya no podrán transferir archivos.</string>
     <string name="createPrivateFolderSucces">Carpeta creada correctamente</string>
     <string name="deletePicturesDescription">La aplicación te pedirá regularmente que borres las fotos de tu dispositivo que ya están sincronizadas en tu kDrive. Tendrás que autorizar manualmente la supresión</string>
-    <string name="deletePicturesTitle">Borrar fotos (Beta)</string>
+    <string name="deletePicturesTitle">Borrar fotos</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">El producto ha caducado desde el %s. Por favor, renuévelo para gestionarlo y acceder a sus datos.</item>
         <item quantity="other">Todos sus productos han caducado. Por favor, renuévelos para gestionarlos y acceder a sus datos.</item>
@@ -449,8 +451,6 @@
     <string name="fileShareLinkSettingsTitle">Parámetros avanzados del enlace de uso compartido</string>
     <string name="fileTypeFilterTitle">Tipo de archivo</string>
     <string name="filtersTitle">Filtros</string>
-    <string name="folderColorDescription">Cambia el color de tus carpetas para personalizar y organizar mejor tu kDrive a tu gusto.</string>
-    <string name="folderColorTitle">Color de los respaldos</string>
     <string name="folderDescription">Carpeta privada o compartida</string>
     <string name="galleryTitle">Galería</string>
     <string name="hintInputDirName">Nombre de la carpeta</string>
@@ -585,8 +585,6 @@
     <string name="searchNoFile">Ningún resultado. Cambia los criterios de búsqueda</string>
     <string name="searchTitle">Buscar</string>
     <string name="searchViewHint">Buscar un archivo…</string>
-    <string name="secureLinkShareDescription">Protege tus usos compartidos con una contraseña y establece un plazo de validez de los enlaces para aún mayor seguridad.</string>
-    <string name="secureLinkShareTitle">Enlaces de uso compartido seguros</string>
     <string name="selectDriveTitle">Seleccionar un kDrive</string>
     <string name="selectFolderTitle">Seleccionar una carpeta</string>
     <string name="selectMediaFoldersDescription">Selecciona las carpetas de tu dispositivo de las que debe hacerse una copia de seguridad automática en tu kDrive.</string>
@@ -696,7 +694,7 @@
     <string name="trashActionDelete">Eliminar definitivamente</string>
     <string name="trashActionRestoreFileIn">Restaurar en</string>
     <string name="trashActionRestoreFileOriginalPlace">Restaurar en el emplazamiento original</string>
-    <string name="trashAutoClearDescription">La basura se limpia automáticamente cada 30 días.</string>
+    <string name="trashAutoClearDescription">La basura se limpia automáticamente cada 30 días.\n¿Desea aumentar este periodo?</string>
     <string name="trashNoFile">No se ha eliminado ningún archivo</string>
     <string name="trashTitle">Papelera</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
