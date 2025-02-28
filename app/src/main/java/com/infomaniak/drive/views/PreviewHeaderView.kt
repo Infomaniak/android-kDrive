@@ -72,9 +72,7 @@ class PreviewHeaderView @JvmOverloads constructor(
     ) = with(binding) {
         backButton.setOnClickListener { onBackClicked?.invoke() }
         openWithButton.setOnClickListener { onOpenWithClicked?.invoke() }
-        editButton.apply {
-            setOnClickListener { onEditClicked?.invoke() }
-        }
+        editButton.setOnClickListener { onEditClicked?.invoke() }
     }
 
     fun setupWindowInsetsListener(
