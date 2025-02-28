@@ -30,6 +30,7 @@
     <string name="addPassword">Mit Passwort schützen</string>
     <string name="alertRemoveUserDescription">Sind Sie sicher, den Benutzer “%s” von dieser Anwendung entfernen zu wollen?</string>
     <string name="alertRemoveUserTitle">Benutzer entfernen</string>
+    <string name="all3DModel">3D-Modell</string>
     <string name="allActivated">Aktiviert</string>
     <string name="allAddExpirationDateTitle">Ablaufdatum hinzufügen</string>
     <string name="allAllDriveUsers">Alle kDrive-Benutzer</string>
@@ -40,6 +41,7 @@
     <string name="allDateCustom">Kundenspezifisch</string>
     <string name="allDeletedFilePattern">\'Gelöscht am \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Deaktiviert</string>
+    <string name="allEmail">E-Mail</string>
     <string name="allEmptyInputError">Dieses Feld darf nicht leer sein</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Funktion nicht verfügbar seit F-Droid</string>
     <string name="allFileAddFavoris">%s zu Favoriten hinzugefügt</string>
@@ -224,7 +226,7 @@
     <string name="createFolderValidUntilDescription">Nach Verstreichen dieses Datums können die Benutzer keine Dateien mehr übertragen.</string>
     <string name="createPrivateFolderSucces">Ordner erfolgreich angelegt</string>
     <string name="deletePicturesDescription">Die Anwendung wird Sie regelmässig auffordern Fotos von Ihrem Gerät zu löschen, die bereits auf Ihrem kDrive synchronisiert sind. Sie müssen die Löschung jeweils manuell autorisieren\n</string>
-    <string name="deletePicturesTitle">Fotos löschen (Beta)</string>
+    <string name="deletePicturesTitle">Fotos löschen</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">Das Produkt ist seit dem %s abgelaufen. Bitte erneuern Sie ihn, um ihn zu verwalten und auf seine Daten zuzugreifen.</item>
         <item quantity="other">Alle Ihre Produkte sind abgelaufen. Bitte erneuern Sie diese, um sie zu verwalten und auf ihre Daten zuzugreifen.</item>
@@ -449,8 +451,6 @@
     <string name="fileShareLinkSettingsTitle">Erweiterte Einstellungen des Freigabelinks</string>
     <string name="fileTypeFilterTitle">Dateityp</string>
     <string name="filtersTitle">Filter</string>
-    <string name="folderColorDescription">Ändern Sie die Farbe Ihrer Ordner, um Ihr kDrive nach Ihren Wünschen zu gestalten und besser zu organisieren.</string>
-    <string name="folderColorTitle">Ordnerfarben</string>
     <string name="folderDescription">Privater oder freigegebener Ordner</string>
     <string name="galleryTitle">Galerie</string>
     <string name="hintInputDirName">Name des Ordners</string>
@@ -585,8 +585,6 @@
     <string name="searchNoFile">Kein Ergebnis, bitte ändern Sie Ihre Suchkriterien</string>
     <string name="searchTitle">Suchen</string>
     <string name="searchViewHint">Datei suchen…</string>
-    <string name="secureLinkShareDescription">Sichern Sie Ihre Freigaben mit einem Passwort und legen Sie für noch mehr Sicherheit ein Gültigkeitsdatum für Ihre Links fest.</string>
-    <string name="secureLinkShareTitle">Sichere Freigabelinks</string>
     <string name="selectDriveTitle">kDrive auswählen</string>
     <string name="selectFolderTitle">Ordner auswählen</string>
     <string name="selectMediaFoldersDescription">Wählen Sie die Ordner auf Ihrem Gerät aus, die automatisch auf Ihrem kDrive gesichert werden sollen.</string>
@@ -696,7 +694,7 @@
     <string name="trashActionDelete">Endgültig löschen</string>
     <string name="trashActionRestoreFileIn">Wiederherstellen in</string>
     <string name="trashActionRestoreFileOriginalPlace">Am ursprünglichen Ort wiederherstellen</string>
-    <string name="trashAutoClearDescription">Der Papierkorb wird alle 30 Tage automatisch gereinigt.</string>
+    <string name="trashAutoClearDescription">Der Papierkorb wird automatisch alle 30 Tage gereinigt.\nMöchten Sie diesen Zeitraum verlängern?</string>
     <string name="trashNoFile">Keine Datei gelöscht</string>
     <string name="trashTitle">Papierkorb</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">

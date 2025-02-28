@@ -41,6 +41,7 @@
     <string name="addPassword">Protect with a password</string>
     <string name="alertRemoveUserDescription">Are you sure you want to remove the user “%s” from this application?</string>
     <string name="alertRemoveUserTitle">Remove user</string>
+    <string name="all3DModel">3D Model</string>
     <string name="allActivated">Enabled</string>
     <string name="allAddExpirationDateTitle">Add an expiry date</string>
     <string name="allAllDriveUsers">All kDrive users</string>
@@ -51,6 +52,7 @@
     <string name="allDateCustom">Custom</string>
     <string name="allDeletedFilePattern">\'Deleted on \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disabled</string>
+    <string name="allEmail">Email</string>
     <string name="allEmptyInputError">This field cannot be empty</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Feature not available since F-Droid</string>
     <string name="allFileAddFavoris">%s added to favorites</string>
@@ -235,7 +237,7 @@
     <string name="createFolderValidUntilDescription">Once the date has passed, users will no longer be able to transfer files.</string>
     <string name="createPrivateFolderSucces">Folder created successfully</string>
     <string name="deletePicturesDescription">The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion\n</string>
-    <string name="deletePicturesTitle">Delete photos (Beta)</string>
+    <string name="deletePicturesTitle">Delete photos</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">The product has expired since %s. Please renew it to manage it and access its data.</item>
         <item quantity="other">All your products have expired. Please renew them to manage them and access their data.</item>
@@ -460,8 +462,6 @@
     <string name="fileShareLinkSettingsTitle">Advanced sharing link settings</string>
     <string name="fileTypeFilterTitle">File type</string>
     <string name="filtersTitle">Filters</string>
-    <string name="folderColorDescription">Change the colour of your folders to personalise and better organise your kDrive to your liking.</string>
-    <string name="folderColorTitle">Folder Colour</string>
     <string name="folderDescription">Private or shared folder</string>
     <string name="galleryTitle">Gallery</string>
     <string name="hintInputDirName">Folder name</string>
@@ -596,8 +596,6 @@
     <string name="searchNoFile">No results, please amend your search criteria</string>
     <string name="searchTitle">Search</string>
     <string name="searchViewHint">Search for a file…</string>
-    <string name="secureLinkShareDescription">Protect your shares with a password and set a validity period for your links for even more security.</string>
-    <string name="secureLinkShareTitle">Secure sharing links</string>
     <string name="selectDriveTitle">Select a kDrive</string>
     <string name="selectFolderTitle">Select a folder</string>
     <string name="selectMediaFoldersDescription">Select the folders on your device that should be automatically saved to your kDrive.</string>
@@ -707,7 +705,7 @@
     <string name="trashActionDelete">Delete permanently</string>
     <string name="trashActionRestoreFileIn">Recover in</string>
     <string name="trashActionRestoreFileOriginalPlace">Recover to the original location</string>
-    <string name="trashAutoClearDescription">Trash is cleaned automatically every 30 days.</string>
+    <string name="trashAutoClearDescription">Trash is cleaned automatically every 30 days.\nWould you like to increase this period?</string>
     <string name="trashNoFile">No deleted files</string>
     <string name="trashTitle">Trash</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">

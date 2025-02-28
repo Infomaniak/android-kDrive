@@ -30,6 +30,7 @@
     <string name="addPassword">Proteggi con una password</string>
     <string name="alertRemoveUserDescription">Rimuovere veramente l’utente “%s” da questa applicazione?</string>
     <string name="alertRemoveUserTitle">Rimuovi utente</string>
+    <string name="all3DModel">Modello 3D</string>
     <string name="allActivated">Attivato</string>
     <string name="allAddExpirationDateTitle">Aggiungi una data di scadenza</string>
     <string name="allAllDriveUsers">Tutti gli utenti del kDrive</string>
@@ -40,6 +41,7 @@
     <string name="allDateCustom">Personalizzato</string>
     <string name="allDeletedFilePattern">\'Cancellato il \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disattivato</string>
+    <string name="allEmail">E-mail</string>
     <string name="allEmptyInputError">Il campo deve essere compilato</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Funzione non disponibile da F-Droid</string>
     <string name="allFileAddFavoris">%s aggiunto ai preferiti</string>
@@ -142,7 +144,7 @@
     <string name="buttonNoDriveAnotherUser">Utilizza un altro profilo Infomaniak</string>
     <string name="buttonNoDriveFreeTest">Prova gratuitamente</string>
     <string name="buttonOpenDocument">Aprire documento</string>
-    <string name="buttonOpenInBrowser">Aprire nel browser</string>
+    <string name="buttonOpenInBrowser">Apri nel browser</string>
     <string name="buttonOpenReadOnly">Aprire in modalità di sola lettura</string>
     <string name="buttonPlayerFfwd">Vai avanti di alcuni secondi</string>
     <string name="buttonPlayerNext">Avanti</string>
@@ -224,7 +226,7 @@
     <string name="createFolderValidUntilDescription">Dopo tale data, gli utenti non potranno più trasferire i file.</string>
     <string name="createPrivateFolderSucces">Cartella creata con successo</string>
     <string name="deletePicturesDescription">L’applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione</string>
-    <string name="deletePicturesTitle">Cancellare le foto (Beta)</string>
+    <string name="deletePicturesTitle">Cancellare le foto</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">Il prodotto è scaduto dal %s. Rinnovalo per gestirlo e accedere ai suoi dati.</item>
         <item quantity="other">Tutti i tuoi prodotti sono scaduti. Rinnovateli per gestirli e accedere ai loro dati.</item>
@@ -449,8 +451,6 @@
     <string name="fileShareLinkSettingsTitle">Impostazioni avanzate del link di condivisione</string>
     <string name="fileTypeFilterTitle">Tipo di file</string>
     <string name="filtersTitle">Filtri</string>
-    <string name="folderColorDescription">Cambia il colore delle tue cartelle per personalizzare e organizzare meglio il tuo kDrive a tuo piacimento.</string>
-    <string name="folderColorTitle">Colore delle cartelle</string>
     <string name="folderDescription">Cartella personale o condivisa</string>
     <string name="galleryTitle">Galleria</string>
     <string name="hintInputDirName">Nome della cartella</string>
@@ -536,7 +536,7 @@
     <string name="notificationUploadDownloadChannelName">Importazioni e download</string>
     <string name="notificationUploadServiceChannelName">Servizi per l’importazione di file</string>
     <string name="obtainkDriveAdAlreadyGotAccount">Ho già un account</string>
-    <string name="obtainkDriveAdDescription">Archiviate le vostre foto, i vostri documenti e le vostre e-mail in Svizzera con un’azienda indipendente che rispetta la vostra privacy.</string>
+    <string name="obtainkDriveAdDescription">Archiviate le tue foto, i tuoi documenti e le tue e-mail in Svizzera con un’azienda indipendente che rispetta la tua privacy.</string>
     <string name="obtainkDriveAdFreeTrialButton">Prova gratuita</string>
     <string name="obtainkDriveAdListing1">15 GB gratuiti, poi 2 TB fino a 106 TB</string>
     <string name="obtainkDriveAdListing2">Creazione e collaborazione online di documenti Word, Excel e PowerPoint</string>
@@ -564,9 +564,9 @@
     <string name="previewPdfPages">%1$d di %2$d</string>
     <string name="previewVideoSourceError">File video non supportato dal lettore</string>
     <string name="publicShareImportationInProgress">Download in corso nella cartella selezionata</string>
-    <string name="publicShareOutdatedLinkDescription">Il link è stato disattivato o è scaduto.\nPer accedere ai file, inviate un messaggio all’utente che ha condiviso il link in modo che possa riattivarlo.</string>
+    <string name="publicShareOutdatedLinkDescription">Il link è stato disattivato o è scaduto.\nPer accedere ai file, invia un messaggio all’utente che ha condiviso il link in modo che possa riattivarlo.</string>
     <string name="publicShareOutdatedLinkTitle">I file non sono più disponibili</string>
-    <string name="publicSharePasswordNeededDescription">Inserite la password che vi è stata fornita per accedere al contenuto.</string>
+    <string name="publicSharePasswordNeededDescription">Inserisci la password che ti è stata fornita per accedere al contenuto.</string>
     <string name="publicSharePasswordNeededTitle">Contenuto sicuro</string>
     <string name="publicSharePasswordNotSupportedDescription">I link protetti da password non sono ancora disponibili nell’applicazione mobile.</string>
     <string name="publicSharedLinkTitle">Link di condivisione pubblica</string>
@@ -585,8 +585,6 @@
     <string name="searchNoFile">Nessun risultato. Utilizza altri criteri di ricerca</string>
     <string name="searchTitle">Ricerca</string>
     <string name="searchViewHint">Cerca un file…</string>
-    <string name="secureLinkShareDescription">Proteggi le tue condivisioni con una password e fissa una data di validità dei tuoi link a garanzia di una maggiore sicurezza.</string>
-    <string name="secureLinkShareTitle">Link di condivisione protetti</string>
     <string name="selectDriveTitle">Selezionare un kDrive</string>
     <string name="selectFolderTitle">Selezionare una cartella</string>
     <string name="selectMediaFoldersDescription">Seleziona le cartelle sul tuo dispositivo che devono essere automaticamente salvate sul tuo kDrive.</string>
@@ -696,7 +694,7 @@
     <string name="trashActionDelete">Elimina definitivamente</string>
     <string name="trashActionRestoreFileIn">Ripristina in</string>
     <string name="trashActionRestoreFileOriginalPlace">Ripristina nell’ubicazione di origine</string>
-    <string name="trashAutoClearDescription">La pulizia dei rifiuti avviene automaticamente ogni 30 giorni.</string>
+    <string name="trashAutoClearDescription">La pulizia dei rifiuti avviene automaticamente ogni 30 giorni.\nVuoi aumentare questo periodo?</string>
     <string name="trashNoFile">Nessun file eliminato</string>
     <string name="trashTitle">Cestino</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">

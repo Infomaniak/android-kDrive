@@ -30,6 +30,7 @@
     <string name="addPassword">Protéger avec un mot de passe</string>
     <string name="alertRemoveUserDescription">Êtes vous sûr(e) de vouloir retirer l’utilisateur “%s” de cette application ?</string>
     <string name="alertRemoveUserTitle">Retirer l’utilisateur</string>
+    <string name="all3DModel">Modèle 3D</string>
     <string name="allActivated">Activé</string>
     <string name="allAddExpirationDateTitle">Ajouter une date d’expiration</string>
     <string name="allAllDriveUsers">Tous les utilisateurs du kDrive</string>
@@ -40,6 +41,7 @@
     <string name="allDateCustom">Personnalisé</string>
     <string name="allDeletedFilePattern">\'Supprimé le \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Désactivé</string>
+    <string name="allEmail">E-mail</string>
     <string name="allEmptyInputError">Ce champ ne peut pas être vide</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Fonctionnalité indisponible depuis F-Droid</string>
     <string name="allFileAddFavoris">%s ajouté aux favoris</string>
@@ -224,7 +226,7 @@
     <string name="createFolderValidUntilDescription">Une fois la date passée, les utilisateurs ne pourront plus transférer de fichiers.</string>
     <string name="createPrivateFolderSucces">Dossier créé avec succès</string>
     <string name="deletePicturesDescription">L’application vous proposera régulièrement de supprimer les photos de votre appareil déjà synchronisées sur votre kDrive. Vous devrez systématiquement autoriser manuellement la suppression</string>
-    <string name="deletePicturesTitle">Supprimer les photos (Beta)</string>
+    <string name="deletePicturesTitle">Supprimer les photos</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">Le produit a expiré depuis le %s. Veuillez le renouveler pour le gérer et accéder à ses données.</item>
         <item quantity="other">Tous vos produits ont expiré. Veuillez les renouveler pour les gérer et accéder à leurs données.</item>
@@ -449,8 +451,6 @@
     <string name="fileShareLinkSettingsTitle">Paramètres avancés du lien de partage</string>
     <string name="fileTypeFilterTitle">Type de fichier</string>
     <string name="filtersTitle">Filtres</string>
-    <string name="folderColorDescription">Changer la couleur de vos dossiers pour personnaliser et mieux organiser votre kDrive selon vos envies.</string>
-    <string name="folderColorTitle">Couleurs des dossiers</string>
     <string name="folderDescription">Dossier privé ou partagé</string>
     <string name="galleryTitle">Galerie</string>
     <string name="hintInputDirName">Nom du dossier</string>
@@ -585,8 +585,6 @@
     <string name="searchNoFile">Aucun résultat, veuillez modifier vos critères de recherche</string>
     <string name="searchTitle">Rechercher</string>
     <string name="searchViewHint">Rechercher un fichier…</string>
-    <string name="secureLinkShareDescription">Protégez vos partages avec un mot de passe et fixez une date de validité à vos liens pour encore plus de sécurité.</string>
-    <string name="secureLinkShareTitle">Liens de partage sécurisés</string>
     <string name="selectDriveTitle">Sélectionner un kDrive</string>
     <string name="selectFolderTitle">Sélectionner un dossier</string>
     <string name="selectMediaFoldersDescription">Sélectionnez les dossiers de votre appareil qui doivent être sauvegardés automatiquement dans votre kDrive.</string>
@@ -696,7 +694,7 @@
     <string name="trashActionDelete">Supprimer définitivement</string>
     <string name="trashActionRestoreFileIn">Restaurer dans</string>
     <string name="trashActionRestoreFileOriginalPlace">Restaurer à l’emplacement d’origine</string>
-    <string name="trashAutoClearDescription">La corbeille est nettoyée automatiquement tous les 30 jours.</string>
+    <string name="trashAutoClearDescription">La corbeille est nettoyée automatiquement tous les 30 jours.\nSouhaitez-vous augmenter ce délai ?</string>
     <string name="trashNoFile">Aucun fichier supprimé</string>
     <string name="trashTitle">Corbeille</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
