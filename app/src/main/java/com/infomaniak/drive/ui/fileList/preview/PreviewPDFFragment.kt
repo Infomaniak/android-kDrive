@@ -179,15 +179,16 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                             // We can arrive here with a file different from a real PDF like OpenOffice documents
                             val canPrintFile = externalFileUri != null || file.extensionType == ExtensionType.PDF.value
                             shouldHidePrintOption(isGone = !canPrintFile)
-                            totalPageCount = pageCount
-                            currentPageIndex = 1
 
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
+
                             pdfViewPrintListener = this@PreviewPDFFragment
 
-                            setPageNumberChipVisibility(true)
                             binding.downloadLayout.root.isGone = true
+
+                            totalPageCount = pageCount
+                            setPageNumberChipVisibility(true)
                         }
                         onPageChange { currentPage, pageCount ->
                             currentPageIndex = currentPage

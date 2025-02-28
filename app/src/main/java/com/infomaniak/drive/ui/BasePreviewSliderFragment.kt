@@ -125,25 +125,25 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    val fragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")
-                    fragment?.trackScreen()
-
                     currentFile = previewSliderAdapter.getFile(position)
                     previewSliderViewModel.currentPreview = currentFile
+
+                    var shouldDisplayPageNumber = false
+
+                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
+                        this.trackScreen()
+                        shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
+                    }
+
                     with(header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
+                        setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
                         toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
                     }
-
                     setPrintButtonVisibility(isGone = !currentFile.isPDF())
+
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
                     updateBottomSheetWithCurrentFile()
-
-                    (fragment as? PreviewPDFFragment)?.let {
-                        binding.header.setPageNumberVisibility(it.tryToUpdatePageCount())
-                    } ?: run {
-                        binding.header.setPageNumberVisibility(false)
-                    }
                 }
             })
         }
