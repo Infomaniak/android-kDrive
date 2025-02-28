@@ -156,9 +156,9 @@ object UploadNotifications {
     fun UploadFile.showUploadedFilesNotification(
         context: Context,
         successCount: Int,
-        successNames: MutableList<String>,
+        successNames: Collection<String>,
         failedCount: Int,
-        failedNames: MutableList<String>
+        failedNames: Collection<String>
     ) = with(context.resources) {
         val total = successCount + failedCount
         val description = when {

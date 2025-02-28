@@ -21,6 +21,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
@@ -36,7 +37,6 @@ import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
-import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
@@ -47,6 +47,7 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
@@ -57,16 +58,17 @@ import okhttp3.Response
 import java.io.BufferedInputStream
 import java.io.FileNotFoundException
 import java.util.Date
-import kotlin.math.ceil
+import java.util.concurrent.ArrayBlockingQueue
+import kotlin.reflect.KSuspendFunction1
 
 class UploadTask(
     private val context: Context,
     private val uploadFile: UploadFile,
-    private val worker: UploadWorker,
-    private val onProgress: ((progress: Int) -> Unit)? = null
+    private val setProgress: KSuspendFunction1<Data, Unit>,
 ) {
 
-    private var limitParallelRequest = 4
+    private val fileChunkSizeManager = FileChunkSizeManager()
+
     private var previousChunkBytesWritten = 0L
     private var currentProgress = 0
 
@@ -75,7 +77,7 @@ class UploadTask(
     private var uploadNotificationElapsedTime = ELAPSED_TIME
     private var uploadNotificationStartTime = 0L
 
-    suspend fun start() = withContext(Dispatchers.IO) {
+    suspend fun start(): Boolean {
         notificationManagerCompat = NotificationManagerCompat.from(context)
 
         uploadNotification = context.uploadProgressNotification()
@@ -85,22 +87,13 @@ class UploadTask(
         }
 
         try {
-            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask(this)
-            return@withContext true
+            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask()
+            return true
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
             SentryLog.w(TAG, "file not found", exception)
             Sentry.withScope { scope ->
                 scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
-            }
-        } catch (exception: TotalChunksExceededException) {
-            SentryLog.w(TAG, "total chunks exceeded", exception)
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                scope.setExtra("half heap", "${getAvailableHalfMemory()}")
-                scope.setExtra("available ram memory", "${context.getAvailableMemory().availMem}")
-                scope.setExtra("available service memory", "${context.getAvailableMemory().threshold}")
                 Sentry.captureException(exception)
             }
         } catch (exception: UploadNotTerminated) {
@@ -116,85 +109,119 @@ class UploadTask(
         } finally {
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         }
-        return@withContext false
+        return false
     }
 
-    private suspend fun launchTask(coroutineScope: CoroutineScope) = withContext(Dispatchers.IO) {
-        val uri = uploadFile.getUriObject()
-        context.contentResolver.openInputStream(uploadFile.getOriginalUri(context)).use { fileInputStream ->
-            initChunkSize(uploadFile.fileSize)
+    private suspend fun launchTask() = coroutineScope {
+        val chunkConfig = getChunkConfig()
+        val totalChunks = chunkConfig.totalChunks
+        val uploadedChunks = uploadFile.getValidChunks()
+        val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
 
-            val uploadedChunks = uploadFile.getValidChunks()
-            val isNewUploadSession = uploadedChunks?.needToResetUpload() ?: true
-            val totalChunks = ceil(uploadFile.fileSize.toDouble() / chunkSize).toInt()
+        val uploadHost = if (isNewUploadSession) {
+            uploadFile.prepareUploadSession(totalChunks)
+        } else {
+            uploadFile.uploadHost
+        }!!
 
-            val uploadHost = if (isNewUploadSession) {
-                uploadFile.prepareUploadSession(totalChunks)
-            } else {
-                chunkSize = uploadedChunks!!.validChuckSize
-                uploadFile.uploadHost
-            }!!
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = UploadWorker.BREADCRUMB_TAG
+            message = "start ${uploadFile.uri} with $totalChunks chunks and $uploadedChunks uploadedChunks"
+            level = SentryLevel.INFO
+        })
 
-            BufferedInputStream(fileInputStream, chunkSize * 2).use { input ->
-                val chunkParentJob = Job()
-                val requestSemaphore = Semaphore(limitParallelRequest)
+        context.contentResolver.openInputStream(uploadFile.getOriginalUri(context))?.buffered()?.use { fileInputStream ->
 
-                if (totalChunks > TOTAL_CHUNKS) throw TotalChunksExceededException()
+            SentryLog.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
 
-                Sentry.addBreadcrumb(Breadcrumb().apply {
-                    category = UploadWorker.BREADCRUMB_TAG
-                    message = "start ${uploadFile.fileName} with $totalChunks chunks and $uploadedChunks uploadedChunks"
-                    level = SentryLevel.INFO
-                })
+            previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
 
-                SentryLog.d("kDrive", " upload task started with total chunk: $totalChunks, valid: $uploadedChunks")
-
-                val validChunksIds = uploadedChunks?.validChunksIds
-                previousChunkBytesWritten = uploadedChunks?.uploadedSize ?: 0
-
-                for (chunkNumber in 1..totalChunks) {
-                    requestSemaphore.acquire()
-                    if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
-                        SentryLog.d("kDrive", "chunk:$chunkNumber ignored")
-                        input.skip(chunkSize.toLong())
-                        requestSemaphore.release()
-                        continue
-                    }
-
-                    SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
-                    var data = ByteArray(chunkSize)
-                    val count = input.read(data, 0, chunkSize)
-                    if (count == -1) {
-                        requestSemaphore.release()
-                        continue
-                    }
-
-                    data = if (count == chunkSize) data else data.copyOf(count)
-
-                    val url = with(uploadFile) {
-                        uploadChunkUrl(
-                            driveId = driveId,
-                            uploadToken = uploadToken,
-                            chunkNumber = chunkNumber,
-                            currentChunkSize = count,
-                            uploadHost = uploadHost,
-                        )
-                    }
-
-                    SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
-
-                    @Suppress("DeferredResultUnused")
-                    coroutineScope.async(chunkParentJob) {
-                        uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
-                    }
-                }
-                chunkParentJob.complete()
-                chunkParentJob.join()
-            }
+            uploadChunks(
+                chunkConfig = chunkConfig,
+                validChunksIds = uploadedChunks?.validChunksIds,
+                isNewUploadSession = isNewUploadSession,
+                inputStream = fileInputStream,
+                uploadHost = uploadHost,
+            )
         }
 
-        coroutineScope.ensureActive()
-        onFinish(uri)
+        if (isActive) onFinish(uploadFile.getUriObject())
+    }
+
+    private fun getChunkConfig(): FileChunkSizeManager.ChunkConfig {
+        return try {
+            fileChunkSizeManager.computeChunkConfig(
+                fileSize = uploadFile.fileSize,
+                defaultFileChunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong(),
+            )
+        } catch (exception: IllegalArgumentException) {
+            uploadFile.resetUploadTokenAndCancelSession()
+            fileChunkSizeManager.computeChunkConfig(fileSize = uploadFile.fileSize)
+        }
+    }
+
+    private suspend fun uploadChunks(
+        chunkConfig: FileChunkSizeManager.ChunkConfig,
+        validChunksIds: List<Int>?,
+        isNewUploadSession: Boolean,
+        inputStream: BufferedInputStream,
+        uploadHost: String,
+    ) = coroutineScope {
+        val requestSemaphore = Semaphore(chunkConfig.parallelChunks)
+        val byteArrayPool = ArrayBlockingQueue<ByteArray>(chunkConfig.parallelChunks)
+
+        for (chunkNumber in 1..chunkConfig.totalChunks) {
+            requestSemaphore.acquire()
+            if (validChunksIds?.contains(chunkNumber) == true && !isNewUploadSession) {
+                SentryLog.d("kDrive", "chunk:$chunkNumber ignored")
+                inputStream.skip(chunkConfig.fileChunkSize)
+                requestSemaphore.release()
+                continue
+            }
+
+            SentryLog.i("kDrive", "Upload > File chunks number: $chunkNumber has permission")
+
+            val data = getReusableByteArray(
+                byteArrayPool = byteArrayPool,
+                chunkSize = chunkConfig.fileChunkSize,
+                inputStream = inputStream,
+                isLastChunk = chunkNumber == chunkConfig.totalChunks,
+            )
+            val count = inputStream.read(data, 0, data.size)
+
+            if (count == -1) {
+                requestSemaphore.release()
+                continue
+            }
+
+            val url = with(uploadFile) {
+                uploadChunkUrl(
+                    driveId = driveId,
+                    uploadToken = uploadToken,
+                    chunkNumber = chunkNumber,
+                    currentChunkSize = count,
+                    uploadHost = uploadHost,
+                )
+            }
+
+            SentryLog.d("kDrive", "Upload > Start upload ${uploadFile.fileName} to $url data size:${data.size}")
+
+            launch {
+                uploadChunkRequest(requestSemaphore, data.toRequestBody(), url)
+            }
+        }
+    }
+
+    private fun getReusableByteArray(
+        byteArrayPool: ArrayBlockingQueue<ByteArray>,
+        chunkSize: Long,
+        inputStream: BufferedInputStream,
+        isLastChunk: Boolean,
+    ): ByteArray {
+        val currentChunkSize = if (isLastChunk) inputStream.available() else chunkSize.toInt()
+        val reusableByteArray = if (isLastChunk) null else byteArrayPool.poll()
+
+        return reusableByteArray ?: ByteArray(currentChunkSize)
     }
 
     private suspend fun onFinish(uri: Uri) = with(uploadFile) {
@@ -213,60 +240,39 @@ class UploadTask(
         notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
     }
 
-    private fun uploadChunkRequest(
+    private suspend fun uploadChunkRequest(
         requestSemaphore: Semaphore,
         requestBody: RequestBody,
         url: String,
-    ) {
+    ) = coroutineScope {
+        val progressChannel = Channel<Int>(Channel.UNLIMITED)
+
+        val progressJob = launch {
+            for (currentBytes in progressChannel) {
+                progressMutex.withLock { updateProgress(currentBytes) }
+            }
+        }
+
         val uploadRequestBody = ProgressRequestBody(requestBody) { currentBytes, _, _ ->
-            runBlocking { progressMutex.withLock { updateProgress(currentBytes) } }
+            progressChannel.trySend(currentBytes)
         }
 
         val request = Request.Builder().url(url)
             .headers(HttpUtils.getHeaders(contentType = null))
             .post(uploadRequestBody).build()
 
-        val response = uploadFile.okHttpClient.newCall(request).execute()
-        manageApiResponse(response)
-        requestSemaphore.release()
-    }
-
-    private fun initChunkSize(fileSize: Long) {
-        val fileChunkSize = ceil(fileSize.toDouble() / OPTIMAL_TOTAL_CHUNKS).toInt()
-
-        when {
-            fileChunkSize < CHUNK_MIN_SIZE -> chunkSize = CHUNK_MIN_SIZE
-            fileChunkSize <= CHUNK_MAX_SIZE -> chunkSize = fileChunkSize
-            fileChunkSize > CHUNK_MAX_SIZE -> {
-                val totalChunks = ceil(fileSize.toDouble() / CHUNK_MAX_SIZE)
-                if (totalChunks <= TOTAL_CHUNKS) {
-                    chunkSize = CHUNK_MAX_SIZE
-                } else {
-                    Sentry.withScope { scope ->
-                        scope.level = SentryLevel.WARNING
-                        scope.setExtra("fileSize", "$fileSize")
-                        Sentry.captureMessage("Max chunk size exceeded, file size exceed $MAX_TOTAL_CHUNKS_SIZE")
-                    }
-                    throw AllowedFileSizeExceededException()
-                }
-            }
-        }
-
-        val availableHalfMemory = getAvailableHalfMemory()
-
-        if (chunkSize >= availableHalfMemory) {
-            chunkSize = availableHalfMemory.toInt()
-        }
-
-        if (chunkSize == 0) throw OutOfMemoryError("chunk size is 0")
-
-        if (chunkSize * limitParallelRequest >= availableHalfMemory) {
-            limitParallelRequest = 1 // We limit it to 1 because if we have more it throws OOF exceptions
+        try {
+            val response = uploadFile.okHttpClient.newCall(request).execute()
+            manageApiResponse(response)
+        } finally {
+            progressChannel.cancel()
+            progressJob.join()
+            requestSemaphore.release()
         }
     }
 
-    private fun ValidChunks.needToResetUpload(): Boolean {
-        return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize) {
+    private fun ValidChunks.needToResetUpload(chunkSize: Long): Boolean {
+        return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize.toInt()) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
         } else uploadFile.uploadHost == null
@@ -303,9 +309,6 @@ class UploadTask(
             throw WrittenBytesExceededException()
         }
 
-        onProgress?.invoke(progress)
-
-        if (worker.isStopped) throw CancellationException()
         ensureActive()
 
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
@@ -330,7 +333,7 @@ class UploadTask(
     }
 
     private suspend fun shareProgress(progress: Int = 0, isUploaded: Boolean = false) {
-        worker.setProgress(
+        setProgress(
             workDataOf(
                 UploadWorker.FILENAME to uploadFile.fileName,
                 UploadWorker.PROGRESS to progress,
@@ -411,23 +414,15 @@ class UploadTask(
 
     private fun UploadFile.resetUploadTokenAndCancelSession() {
         uploadToken?.let {
-            with(ApiRepository.cancelSession(driveId, it, okHttpClient)) {
-                if (data != null) resetUploadToken()
-            }
+            ApiRepository.cancelSession(driveId, it, okHttpClient)
+            resetUploadToken()
         }
     }
-
-    /**
-     * Returns half the available memory in the ram, to avoid [OutOfMemoryError]
-     * @return half available memory
-     */
-    private fun getAvailableHalfMemory() = context.getAvailableMemory().availMem / 2
 
     fun previousChunkBytesWritten() = previousChunkBytesWritten
 
     fun lastProgress() = currentProgress
 
-    class AllowedFileSizeExceededException : Exception()
     class FolderNotFoundException : Exception()
     class LockErrorException : Exception()
     class NetworkException : Exception()
@@ -435,7 +430,6 @@ class UploadTask(
     class ProductBlockedException : Exception()
     class ProductMaintenanceException : Exception()
     class QuotaExceededException : Exception()
-    class TotalChunksExceededException : Exception()
     class UploadErrorException : Exception()
     class UploadNotTerminated(message: String) : Exception(message)
     class WrittenBytesExceededException : Exception()
@@ -445,15 +439,7 @@ class UploadTask(
         private val TAG = UploadTask::class.java.simpleName
         private val progressMutex = Mutex()
 
-        private const val CHUNK_MIN_SIZE: Int = 1 * 1024 * 1024
-        private const val CHUNK_MAX_SIZE: Int = 50 * 1024 * 1024 // 50 Mo and max file size to upload 500Gb
-        private const val OPTIMAL_TOTAL_CHUNKS: Int = 200
-        private const val TOTAL_CHUNKS: Int = 10_000
-        private const val MAX_TOTAL_CHUNKS_SIZE: Long = CHUNK_MAX_SIZE.toLong() * TOTAL_CHUNKS.toLong()
-
         const val LIMIT_EXCEEDED_ERROR_CODE = "limit_exceeded_error"
-
-        var chunkSize: Int = CHUNK_MIN_SIZE
 
         enum class ConflictOption {
             @SerializedName("error")
