@@ -1,0 +1,7 @@
+- Allow keyboard navigation
+- New icon file
+- Improve upload capacities
+- Better display of some errors
+- Fix opening of url files
+- Display the correct page number in the preview slider
+- Use better timeout for trash emptying

@@ -1,0 +1,7 @@
+- Permet la navigation au clavier
+- Nouvel icône de fichier
+- Amélioration des capacités de téléchargement
+- Meilleur affichage de certaines erreurs
+- Correction de l'ouverture des fichiers URL
+- Affichage du bon numéro de page dans le curseur de prévisualisation
+- Utilise un meilleur délai pour le vidage de la corbeille
