@@ -25,7 +25,6 @@ import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
 import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteUpgradeBottomSheetEvent
 
-
 fun Fragment.openMyKSuiteUpgradeBottomSheet(matomoTrackerName: String) {
     requireActivity().openMyKSuiteUpgradeBottomSheet(findNavController(), matomoTrackerName)
 }
