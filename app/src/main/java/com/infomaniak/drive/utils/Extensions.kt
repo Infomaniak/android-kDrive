@@ -66,8 +66,7 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -548,7 +547,7 @@ fun MainActivity.showQuotasExceededSnackbar(navController: NavController) {
         title = R.string.errorQuotaExceeded,
         anchor = getMainFab(),
         actionButtonTitle = R.string.buttonUpgrade,
-        onActionClicked = { navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive) },
+        onActionClicked = { openMyKSuiteUpgradeBottomSheet(navController, MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME) },
     )
 }
 

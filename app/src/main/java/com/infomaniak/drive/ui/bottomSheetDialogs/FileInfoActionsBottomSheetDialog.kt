@@ -30,8 +30,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
@@ -189,7 +187,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                     )
                 )
             } else {
-                findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+                openMyKSuiteUpgradeBottomSheet("convertToDropbox")
             }
         }
     }
@@ -405,7 +403,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
         fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
             if (AccountUtils.getCurrentDrive()?.isFreeTier == true) {
-                findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+                openMyKSuiteUpgradeBottomSheet("colorFolder")
             } else {
                 safeNavigate(
                     R.id.colorFolderBottomSheetDialog,

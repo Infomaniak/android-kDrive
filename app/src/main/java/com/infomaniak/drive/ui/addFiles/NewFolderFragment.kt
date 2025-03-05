@@ -27,11 +27,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentNewFolderBinding
+import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -93,7 +92,7 @@ class NewFolderFragment : Fragment() {
                 if (canCreateDropbox) {
                     safeNavigate(R.id.createDropBoxFolderFragment)
                 } else {
-                    findNavController().openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+                    openMyKSuiteUpgradeBottomSheet("dropboxQuotaExceeded")
                 }
             }
         }

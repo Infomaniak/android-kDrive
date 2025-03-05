@@ -68,6 +68,7 @@ import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
+import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
@@ -273,6 +274,7 @@ class MainActivity : BaseActivity() {
         val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
         fab.setOnClickListener {
             if (AccountUtils.getCurrentDrive()?.isDriveFull == true) {
+                trackMyKSuiteEvent("tryAddingFileWithDriveFull")
                 showQuotasExceededSnackbar(navController)
             } else {
                 navController.navigate(R.id.addFileBottomSheetDialog, args)
