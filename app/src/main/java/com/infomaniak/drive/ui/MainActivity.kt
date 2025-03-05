@@ -273,8 +273,8 @@ class MainActivity : BaseActivity() {
     private fun setupFab(fab: FloatingActionButton, shouldShowSmallFab: Boolean = false) {
         val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
         fab.setOnClickListener {
-            trackMyKSuiteEvent("tryAddingFileWithDriveFull")
             if (AccountUtils.getCurrentDrive()?.isDriveFull == true) {
+                trackMyKSuiteEvent("tryAddingFileWithDriveFull")
                 showQuotasExceededSnackbar(navController)
             } else {
                 navController.navigate(R.id.addFileBottomSheetDialog, args)
