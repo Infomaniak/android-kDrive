@@ -170,7 +170,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         pageSnap(false)
                         scrollHandle(scrollHandle)
                         pageSeparatorSpacing(PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP)
-                        startEndSpacing(START_END_SPACING_DP, START_END_SPACING_DP)
+                        startEndSpacing(START_SPACING_DP, END_SPACING_DP)
                         zoom(MIN_ZOOM, MID_ZOOM, MAX_ZOOM)
                         swipeHorizontal(false)
                         touchPriority(true)
@@ -341,7 +341,8 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
 
     companion object {
         private const val PDF_VIEW_HANDLE_TEXT_INDICATOR_SIZE_DP = 16
-        private const val START_END_SPACING_DP = 150
+        private const val START_SPACING_DP = 150
+        private const val END_SPACING_DP = 75
         private const val MIN_ZOOM = 0.93f
         private const val MID_ZOOM = 3f
         private const val MAX_ZOOM = 6f
