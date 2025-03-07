@@ -44,16 +44,14 @@ import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.util.concurrent.ListenableFuture
+import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
-import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
-import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderAdapter
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
+import com.infomaniak.drive.ui.fileList.preview.*
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackService
 import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 import com.infomaniak.drive.utils.*
@@ -217,21 +215,23 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     previewSliderViewModel.currentPreview = file
 
 
-					with(header) {
+                    var shouldDisplayPageNumber = false
+
+                    val selectedFragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
+                        this.trackScreen()
+                        shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
+                    }
+
+                    with(header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
                         setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
                         toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
                     }
 
-
                     setPrintButtonVisibility(isGone = !currentFile.isPDF())
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
                     updateBottomSheetWithCurrentFile()
 
-					val selectedFragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
-                        this.trackScreen()
-                        shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
-                    }
 
                     // Implementation of onFragmentUnselected to handle resume of media to the same position, only
                     // for PreviewPlaybackFragment.
