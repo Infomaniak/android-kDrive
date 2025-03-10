@@ -82,4 +82,5 @@ enum class FileActivityType {
     COLLABORATIVE_FOLDER_UPDATE,
     @SerializedName("collaborative_folder_delete")
     COLLABORATIVE_FOLDER_DELETE,
+    UNKNOWN,
 }
