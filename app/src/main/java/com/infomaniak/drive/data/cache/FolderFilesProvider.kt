@@ -31,6 +31,7 @@ import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.realm.RealmQuery
 import io.sentry.Sentry
@@ -42,6 +43,8 @@ import okhttp3.OkHttpClient
 import java.util.Calendar
 
 object FolderFilesProvider {
+
+    private val TAG = FolderFilesProvider::class.java.simpleName
 
     // Bump this when we want to force-refresh files that are too old.
     // Example: We did it when we added Categories & Colored folders, to automatically display them when updating the app.
@@ -396,7 +399,7 @@ object FolderFilesProvider {
     ) {
         val actionFile = actionFiles[fileId]
 
-        when (action) {
+        when (actionType) {
             FileActivityType.FILE_DELETE,
             FileActivityType.FILE_MOVE_OUT,
             FileActivityType.FILE_TRASH -> {
@@ -408,6 +411,9 @@ object FolderFilesProvider {
                 }
             }
             else -> {
+                if (actionType == FileActivityType.UNKNOWN) {
+                    SentryLog.e(TAG, "The action with value '$actionType' is unknown")
+                }
                 // The file has not yet been managed and is not the parent folder.
                 if (returnResponse[fileId] == null && actionFile?.id != currentFolder.id) {
                     upsertAction(realm, currentFolder, actionFile)
@@ -421,7 +427,7 @@ object FolderFilesProvider {
         FileController.getParentFile(fileId = fileId, realm = realm)?.let { localFolder ->
             if (localFolder.id != currentFolder.id) return@let
 
-            if (action == FileActivityType.FILE_MOVE_OUT) {
+            if (actionType == FileActivityType.FILE_MOVE_OUT) {
                 FileController.updateFile(localFolder.id, realm) { it.children.remove(actionFile) }
             } else {
                 FileController.removeFile(fileId, customRealm = realm, recursive = false)
