@@ -173,14 +173,14 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     }
 
     private fun getThumbnailUri(): Uri {
-        return Uri.parse(ApiRoutes.getThumbnailUrl(file))
+        return ApiRoutes.getThumbnailUrl(file).toUri()
     }
 
     private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
         return if (offlineFile != null && offlineIsComplete) {
             offlineFile.toUri()
         } else {
-            Uri.parse(ApiRoutes.getDownloadFileUrl(file))
+            ApiRoutes.getDownloadFileUrl(file).toUri()
         }
     }
 
