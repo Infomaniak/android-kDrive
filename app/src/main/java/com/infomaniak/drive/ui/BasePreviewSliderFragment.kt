@@ -232,7 +232,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
                     updateBottomSheetWithCurrentFile()
 
-
                     // Implementation of onFragmentUnselected to handle resume of media to the same position, only
                     // for PreviewPlaybackFragment.
                     childFragmentManager.fragments.filterIsInstance<PreviewPlaybackFragment>().forEach { fragment ->
