@@ -36,6 +36,11 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
 
     override suspend fun fetchData(): MyKSuiteData? = runCatching {
         MyKSuiteDataUtils.requestKSuiteData()
+
+        // Don't try to fetch the my kSuite Data if the user doesn't have a my kSuite offer
+        val currentDrive = AccountUtils.getCurrentDrive()
+        if (currentDrive?.isMyKSuitePack != true && currentDrive?.isMyKSuitePlusPack != true) return@runCatching null
+
         val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClient)
         if (apiResponse.data != null) {
             MyKSuiteDataUtils.upsertKSuiteData(apiResponse.data!!)
