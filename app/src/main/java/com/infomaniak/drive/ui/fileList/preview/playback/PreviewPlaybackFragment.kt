@@ -61,25 +61,29 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     private val offlineIsComplete by lazy { isOfflineFileComplete(offlineFile) }
 
     @RequiresApi(Build.VERSION_CODES.N)
-    private val playerListener = PlayerListener(activity, isPlayingChanged = { isPlaying ->
-        if (isPlaying) {
-            toggleFullscreen()
-            activity?.window?.addFlags(flagKeepScreenOn)
-        } else {
-            activity?.window?.clearFlags(flagKeepScreenOn)
-        }
-    }, onError = { playbackExceptionMessage ->
-        _binding?.errorLayout?.let { errorLayout ->
-            when (playbackExceptionMessage) {
-                "Source error" -> errorLayout.previewDescription.setText(R.string.previewVideoSourceError)
-                else -> errorLayout.previewDescription.setText(R.string.previewLoadError)
+    private val playerListener = PlayerListener(
+        activity,
+        isPlayingChanged = { isPlaying ->
+            if (isPlaying) {
+                toggleFullscreen()
+                activity?.window?.addFlags(flagKeepScreenOn)
+            } else {
+                activity?.window?.clearFlags(flagKeepScreenOn)
             }
-            errorLayout.bigOpenWithButton.isVisible = true
-            errorLayout.root.isVisible = true
-            errorLayout.previewDescription.isVisible = true
-        }
-        _binding?.playerView?.isGone = true
-    })
+        },
+        onError = { playbackExceptionMessage ->
+            _binding?.errorLayout?.let { errorLayout ->
+                when (playbackExceptionMessage) {
+                    "Source error" -> errorLayout.previewDescription.setText(R.string.previewVideoSourceError)
+                    else -> errorLayout.previewDescription.setText(R.string.previewLoadError)
+                }
+                errorLayout.bigOpenWithButton.isVisible = true
+                errorLayout.root.isVisible = true
+                errorLayout.previewDescription.isVisible = true
+            }
+            _binding?.playerView?.isGone = true
+        },
+    )
 
     private var isInPictureInPictureMode = false
 
@@ -173,14 +177,14 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     }
 
     private fun getThumbnailUri(): Uri {
-        return Uri.parse(ApiRoutes.getThumbnailUrl(file))
+        return ApiRoutes.getThumbnailUrl(file).toUri()
     }
 
     private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
         return if (offlineFile != null && offlineIsComplete) {
             offlineFile.toUri()
         } else {
-            Uri.parse(ApiRoutes.getDownloadFileUrl(file))
+            ApiRoutes.getDownloadFileUrl(file).toUri()
         }
     }
 
