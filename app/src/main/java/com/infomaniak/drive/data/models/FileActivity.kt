@@ -141,7 +141,7 @@ open class FileActivity(
         FileActivityType.FILE_UNCATEGORIZE -> R.string.fileDetailsActivityFileUncategorize
         FileActivityType.FILE_COLOR_UPDATE -> R.string.fileDetailsActivityFileColorUpdate
         FileActivityType.FILE_COLOR_DELETE -> R.string.fileDetailsActivityFileColorDelete
-        null -> null
+        else -> null
     }
 
     fun getDay(context: Context): String {
