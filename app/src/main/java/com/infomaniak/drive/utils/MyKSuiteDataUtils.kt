@@ -37,7 +37,7 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
     override suspend fun fetchData(): MyKSuiteData? = runCatching {
         MyKSuiteDataUtils.requestKSuiteData()
 
-        // Doesn't try to fetch the kSuite Data is user doesn't have a kSuite
+        // Don't try to fetch the my kSuite Data if the user doesn't have a my kSuite offer
         val currentDrive = AccountUtils.getCurrentDrive()
         if (currentDrive?.isMyKSuitePack != true && currentDrive?.isMyKSuitePlusPack != true) return@runCatching null
 
