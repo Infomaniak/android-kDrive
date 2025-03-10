@@ -94,7 +94,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
 
-    // If the user click want to navigate back and something is playing, we don't want to start PIP
+    // If the user want to navigate back and something is playing, we don't want to start PIP
     private var canStartPictureInPicture = true
 
     // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
