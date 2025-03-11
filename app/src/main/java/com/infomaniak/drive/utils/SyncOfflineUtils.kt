@@ -25,8 +25,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivityType
-import com.infomaniak.drive.data.models.FileActivityType.FILE_MOVE_OUT
-import com.infomaniak.drive.data.models.FileActivityType.FILE_RENAME
+import com.infomaniak.drive.data.models.FileActivityType.*
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.FileLastActivityBody
@@ -47,7 +46,7 @@ object SyncOfflineUtils {
     private const val API_LIMIT_FILES_ACTION_BODY = 500
     private const val API_V3_ROOT_FOLDER_NAME = "Private"
 
-    private val renameActions = setOf(FILE_RENAME, FILE_MOVE_OUT)
+    private val renameActions = setOf(FILE_RENAME, FILE_RENAME_ALIAS, FILE_MOVE_OUT)
 
     fun startSyncOffline(context: Context, syncOfflineFilesJob: CompletableJob) {
         // Delete all offline storage files prior to APIv3. For more info, see deleteLegacyOfflineFolder kDoc

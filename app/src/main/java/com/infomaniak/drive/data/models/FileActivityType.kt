@@ -26,6 +26,8 @@ enum class FileActivityType {
     FILE_CREATE,
     @SerializedName("file_rename")
     FILE_RENAME,
+    @SerializedName("file_rename_alias")
+    FILE_RENAME_ALIAS,
     @SerializedName("file_move")
     FILE_MOVE_IN,
     @SerializedName("file_move_out")
@@ -76,11 +78,19 @@ enum class FileActivityType {
     COMMENT_UNLIKE,
     @SerializedName("comment_resolve")
     COMMENT_RESOLVE,
+    @SerializedName("collaborative_folder_access")
+    COLLABORATIVE_FOLDER_ACCESS,
     @SerializedName("collaborative_folder_create")
     COLLABORATIVE_FOLDER_CREATE,
     @SerializedName("collaborative_folder_update")
     COLLABORATIVE_FOLDER_UPDATE,
     @SerializedName("collaborative_folder_delete")
     COLLABORATIVE_FOLDER_DELETE,
+    @SerializedName("collaborative_user_access")
+    COLLABORATIVE_USER_ACCESS,
+    @SerializedName("collaborative_user_create")
+    COLLABORATIVE_USER_CREATE,
+    @SerializedName("collaborative_user_delete")
+    COLLABORATIVE_USER_DELETE,
     UNKNOWN,
 }
