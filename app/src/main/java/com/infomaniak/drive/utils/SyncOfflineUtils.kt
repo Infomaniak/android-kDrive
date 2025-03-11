@@ -36,7 +36,8 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.sentry.Sentry
-import kotlinx.coroutines.CompletableJob
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import java.util.Date
 
@@ -48,11 +49,11 @@ object SyncOfflineUtils {
 
     private val renameActions = setOf(FILE_RENAME, FILE_RENAME_ALIAS, FILE_MOVE_OUT)
 
-    fun startSyncOffline(context: Context, syncOfflineFilesJob: CompletableJob) {
+    suspend fun startSyncOffline(context: Context) = coroutineScope {
         // Delete all offline storage files prior to APIv3. For more info, see deleteLegacyOfflineFolder kDoc
         deleteLegacyOfflineFolder(context)
         DriveInfosController.getDrives(AccountUtils.currentUserId).forEach { drive ->
-            syncOfflineFilesJob.ensureActive()
+            ensureActive()
             val userDrive = UserDrive(driveId = drive.id)
 
             FileController.getRealmInstance(userDrive).use { realm ->
@@ -61,10 +62,10 @@ object SyncOfflineUtils {
                 // The api doesn't support sending a list of files that exceeds a certain limit,
                 // so we chunk the files in relation to this limit.
                 localFiles.chunked(API_LIMIT_FILES_ACTION_BODY).forEach {
-                    syncOfflineFilesJob.ensureActive()
+                    ensureActive()
                     processChunk(
                         context = context,
-                        syncOfflineFilesJob = syncOfflineFilesJob,
+                        coroutineScope = this,
                         userDrive = userDrive,
                         localFilesMap = it.associateBy { file -> file.id },
                         realm = realm,
@@ -89,7 +90,7 @@ object SyncOfflineUtils {
 
     private fun processChunk(
         context: Context,
-        syncOfflineFilesJob: CompletableJob,
+        coroutineScope: CoroutineScope,
         userDrive: UserDrive,
         localFilesMap: Map<Int, File>,
         realm: Realm,
@@ -112,26 +113,26 @@ object SyncOfflineUtils {
             val fileActionsIds = mutableSetOf<Int>()
 
             lastFilesActions?.forEach { fileAction ->
-                syncOfflineFilesJob.ensureActive()
+                coroutineScope.ensureActive()
                 fileActionsIds.add(fileAction.fileId)
                 handleFileAction(context, fileAction, localFilesMap, userDrive, realm)
             }
 
             // Check if any of the files that don't have fileActions require synchronization.
-            handleFilesWithoutActions(context, localFilesMap, fileActionsIds, userDrive, realm, syncOfflineFilesJob)
+            handleFilesWithoutActions(context, localFilesMap, fileActionsIds, userDrive, realm, coroutineScope)
         }
     }
 
     private fun handleFilesWithoutActions(
         context: Context,
         localFilesMap: Map<Int, File>,
-        fileActionsIds: MutableSet<Int>,
+        fileActionsIds: Set<Int>,
         userDrive: UserDrive,
         realm: Realm,
-        syncOfflineFilesJob: CompletableJob,
+        coroutineScope: CoroutineScope,
     ) {
         for (file in localFilesMap.values) {
-            syncOfflineFilesJob.ensureActive()
+            coroutineScope.ensureActive()
             if (fileActionsIds.contains(file.id)) continue
             val ioFile = file.getOfflineFile(context, userDrive.userId) ?: continue
 
