@@ -134,9 +134,13 @@ open class FileActivity(
         FileActivityType.COMMENT_LIKE -> R.string.fileDetailsActivityFileCommentLike
         FileActivityType.COMMENT_UNLIKE -> R.string.fileDetailsActivityFileCommentUnlike
         FileActivityType.COMMENT_RESOLVE -> R.string.fileDetailsActivityFileCommentUpdate
+        FileActivityType.COLLABORATIVE_FOLDER_ACCESS -> R.string.fileActivityCollaborativeFolderAccess
         FileActivityType.COLLABORATIVE_FOLDER_CREATE -> R.string.fileActivityCollaborativeFolderCreate
         FileActivityType.COLLABORATIVE_FOLDER_UPDATE -> R.string.fileActivityCollaborativeFolderUpdate
         FileActivityType.COLLABORATIVE_FOLDER_DELETE -> R.string.fileActivityCollaborativeFolderDelete
+        FileActivityType.COLLABORATIVE_USER_ACCESS -> R.string.fileActivityCollaborativeUserAccess
+        FileActivityType.COLLABORATIVE_USER_CREATE -> R.string.fileActivityCollaborativeUserCreate
+        FileActivityType.COLLABORATIVE_USER_DELETE -> R.string.fileActivityCollaborativeUserDelete
         FileActivityType.FILE_CATEGORIZE -> R.string.fileDetailsActivityFileCategorize
         FileActivityType.FILE_UNCATEGORIZE -> R.string.fileDetailsActivityFileUncategorize
         FileActivityType.FILE_COLOR_UPDATE -> R.string.fileDetailsActivityFileColorUpdate
