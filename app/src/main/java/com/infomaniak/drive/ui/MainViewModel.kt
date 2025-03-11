@@ -121,7 +121,7 @@ class MainViewModel(
 
     private var rootFilesJob: Job = Job()
     private var getFileDetailsJob = Job()
-    private var syncOfflineFilesJob = Job()
+    private var syncOfflineFilesJob: Job? = null
     private var setCurrentFolderJob = Job()
 
     val deleteFilesFromGallery = SingleLiveEvent<List<Int>>()
@@ -520,15 +520,14 @@ class MainViewModel(
     }
 
     fun syncOfflineFiles() {
-        syncOfflineFilesJob.cancel()
-        syncOfflineFilesJob = Job()
-        viewModelScope.launch(Dispatchers.IO + syncOfflineFilesJob) {
-            SyncOfflineUtils.startSyncOffline(getContext(), syncOfflineFilesJob)
+        syncOfflineFilesJob?.cancel()
+        syncOfflineFilesJob = viewModelScope.launch(Dispatchers.IO) {
+            SyncOfflineUtils.startSyncOffline(getContext())
         }
     }
 
     fun cancelSyncOfflineFiles() {
-        syncOfflineFilesJob.cancel()
+        syncOfflineFilesJob?.cancel()
     }
 
     // Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()
