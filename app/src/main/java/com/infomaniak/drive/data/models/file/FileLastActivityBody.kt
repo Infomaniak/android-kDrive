@@ -27,6 +27,7 @@ data class FileLastActivityBody(
         FileActivityType.FILE_MOVE_OUT,
         FileActivityType.FILE_UPDATE,
         FileActivityType.FILE_RENAME,
+        FileActivityType.FILE_RENAME_ALIAS,
     ),
     var files: List<FileActionBody> = emptyList(),
 ) {

@@ -47,7 +47,7 @@ object SyncOfflineUtils {
     private const val API_LIMIT_FILES_ACTION_BODY = 500
     private const val API_V3_ROOT_FOLDER_NAME = "Private"
 
-    private val renameActions = setOf(FILE_RENAME, FILE_MOVE_OUT)
+    private val renameActions = setOf(FILE_RENAME, FILE_RENAME_ALIAS, FILE_MOVE_OUT)
 
     fun startSyncOffline(context: Context, syncOfflineFilesJob: CompletableJob) {
         // Delete all offline storage files prior to APIv3. For more info, see deleteLegacyOfflineFolder kDoc

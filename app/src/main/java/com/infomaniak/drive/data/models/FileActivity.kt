@@ -80,7 +80,7 @@ open class FileActivity(
         FileActivityType.FILE_CREATE -> {
             if (isFolder) R.string.fileDetailsActivityFolderCreate else R.string.fileDetailsActivityFileCreate
         }
-        FileActivityType.FILE_RENAME -> {
+        FileActivityType.FILE_RENAME, FileActivityType.FILE_RENAME_ALIAS -> {
             if (isFolder) R.string.fileDetailsActivityFolderRename else R.string.fileDetailsActivityFileRename
         }
         FileActivityType.FILE_MOVE_IN,

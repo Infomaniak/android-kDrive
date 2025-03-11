@@ -26,6 +26,8 @@ enum class FileActivityType {
     FILE_CREATE,
     @SerializedName("file_rename")
     FILE_RENAME,
+    @SerializedName("file_rename_alias")
+    FILE_RENAME_ALIAS,
     @SerializedName("file_move")
     FILE_MOVE_IN,
     @SerializedName("file_move_out")
