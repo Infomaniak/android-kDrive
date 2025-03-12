@@ -25,24 +25,23 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
-import io.realm.Realm
-import io.realm.RealmConfiguration
-import io.realm.RealmQuery
-import io.realm.Sort
+import io.realm.*
 import io.realm.kotlin.oneOf
 
 object DriveInfosController {
 
     private const val DB_NAME = "DrivesInfos.realm"
 
-    private val realmConfiguration = RealmConfiguration.Builder()
+    val baseDriveInfosRealmConfigurationBuilder: RealmConfiguration.Builder = RealmConfiguration.Builder()
         .name(DB_NAME)
         .schemaVersion(DriveMigration.DB_VERSION) // Must be bumped when the schema changes
-        .migration(DriveMigration())
         .modules(RealmModules.DriveFilesModule())
+
+    private val realmConfiguration = baseDriveInfosRealmConfigurationBuilder
+        .migration(DriveMigration())
         .build()
 
-    fun getRealmInstance(): Realm = Realm.getInstance(realmConfiguration)
+    fun getRealmInstance(): Realm = HandleSchemaVersionBelowZero.getInstance(realmConfiguration)
 
     private fun ArrayList<Drive>.initDriveForRealm(
         drive: Drive,
