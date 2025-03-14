@@ -31,7 +31,7 @@ object HandleSchemaVersionBelowZero {
         .deleteRealmIfMigrationNeeded()
         .build()
 
-    fun getInstance(realmConfiguration: RealmConfiguration): Realm {
+    fun getRealmInstance(realmConfiguration: RealmConfiguration): Realm {
         var originalMigrationException: Throwable? = null
 
         return runCatching {
