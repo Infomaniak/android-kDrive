@@ -27,7 +27,7 @@ object HandleSchemaVersionBelowZero {
         .migration(DetectTooOldSchemaMigration())
         .build()
 
-    private val deleteTooOldSchemaVersionRealmConfiguration = DriveInfosController.baseDriveInfosRealmConfigurationBuilder
+    private val deleteRealmConfiguration = DriveInfosController.baseDriveInfosRealmConfigurationBuilder
         .deleteRealmIfMigrationNeeded()
         .build()
 
@@ -41,7 +41,7 @@ object HandleSchemaVersionBelowZero {
             Realm.getInstance(throwOldSchemaVersionRealmConfiguration)
         }.getOrElse {
             if (it is OldSchemaVersion && it.oldVersion == 0L) {
-                Realm.getInstance(deleteTooOldSchemaVersionRealmConfiguration)
+                Realm.getInstance(deleteRealmConfiguration)
             } else {
                 throw requireNotNull(originalMigrationException) { "This field must have been set when the first runCatching has failed" }
             }
