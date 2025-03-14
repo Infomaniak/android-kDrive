@@ -25,7 +25,10 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
-import io.realm.*
+import io.realm.Realm
+import io.realm.RealmConfiguration
+import io.realm.RealmQuery
+import io.realm.Sort
 import io.realm.kotlin.oneOf
 
 object DriveInfosController {
@@ -41,7 +44,7 @@ object DriveInfosController {
         .migration(DriveMigration())
         .build()
 
-    fun getRealmInstance(): Realm = HandleSchemaVersionBelowZero.getInstance(realmConfiguration)
+    fun getRealmInstance(): Realm = HandleSchemaVersionBelowZero.getRealmInstance(realmConfiguration)
 
     private fun ArrayList<Drive>.initDriveForRealm(
         drive: Drive,
