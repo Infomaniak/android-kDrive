@@ -35,14 +35,16 @@ object DriveInfosController {
 
     private const val DB_NAME = "DrivesInfos.realm"
 
-    private val realmConfiguration = RealmConfiguration.Builder()
+    val baseDriveInfosRealmConfigurationBuilder: RealmConfiguration.Builder = RealmConfiguration.Builder()
         .name(DB_NAME)
         .schemaVersion(DriveMigration.DB_VERSION) // Must be bumped when the schema changes
-        .migration(DriveMigration())
         .modules(RealmModules.DriveFilesModule())
+
+    private val realmConfiguration = baseDriveInfosRealmConfigurationBuilder
+        .migration(DriveMigration())
         .build()
 
-    fun getRealmInstance(): Realm = Realm.getInstance(realmConfiguration)
+    fun getRealmInstance(): Realm = HandleSchemaVersionBelowZero.getRealmInstance(realmConfiguration)
 
     private fun ArrayList<Drive>.initDriveForRealm(
         drive: Drive,
