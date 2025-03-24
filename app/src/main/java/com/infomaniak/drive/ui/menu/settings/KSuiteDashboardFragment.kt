@@ -20,10 +20,9 @@ package com.infomaniak.drive.ui.menu.settings
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.core.myksuite.ui.views.MyKSuiteDashboardFragment
 import com.infomaniak.drive.ui.MyKSuiteViewModel
-import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.getDashboardData
 
 class KSuiteDashboardFragment : MyKSuiteDashboardFragment() {
 
@@ -34,13 +33,7 @@ class KSuiteDashboardFragment : MyKSuiteDashboardFragment() {
 
         myKSuiteViewModel.refreshMyKSuite()
         myKSuiteViewModel.myKSuiteDataResult.observe(viewLifecycleOwner) { myKSuiteData ->
-            resetContent(
-                dashboardData = MyKSuiteUiUtils.getDashboardData(
-                    context = requireContext(),
-                    myKSuiteData = myKSuiteData,
-                    avatarUri = AccountUtils.currentUser?.avatar ?: "",
-                )
-            )
+            resetContent(dashboardData = getDashboardData(myKSuiteData))
         }
     }
 }

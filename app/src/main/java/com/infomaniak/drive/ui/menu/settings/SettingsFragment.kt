@@ -30,7 +30,6 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
@@ -43,6 +42,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.getDashboardData
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeBinding
@@ -127,7 +127,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun openMyKSuiteDashboard(myKSuiteData: MyKSuiteData) {
-        val data = MyKSuiteUiUtils.getDashboardData(requireContext(), myKSuiteData, AccountUtils.currentUser?.avatar)
+        val data = getDashboardData(myKSuiteData = myKSuiteData)
         safeNavigate(directions = SettingsFragmentDirections.actionSettingsFragmentToMyKSuiteDashboardFragment(data))
     }
 
