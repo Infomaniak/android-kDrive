@@ -130,6 +130,8 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
                 binding.playerView.controllerHideOnTouch = false
 
+                binding.playerView.setShowSubtitleButton(true)
+
                 mediaController.seekTo((parentFragment as BasePreviewSliderFragment).positionForMedium[file.id] ?: 0L)
             } else {
                 isInPictureInPictureMode = false
