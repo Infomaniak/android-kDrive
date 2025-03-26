@@ -141,6 +141,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        binding.playerView.player?.release()
         _binding = null
     }
 
