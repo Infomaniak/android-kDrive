@@ -51,6 +51,7 @@ class PlaybackService : MediaSessionService() {
         // when the user willingly quits the PreviewPlaybackFragment.
         override fun onDisconnected(session: MediaSession, controller: MediaSession.ControllerInfo) {
             super.onDisconnected(session, controller)
+            release()
             stopSelf()
         }
     }
@@ -87,12 +88,16 @@ class PlaybackService : MediaSessionService() {
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
 
     override fun onDestroy() {
+        release()
+        super.onDestroy()
+    }
+
+    private fun release() {
         mediaSession?.run {
             player.release()
             release()
             mediaSession = null
         }
-        super.onDestroy()
     }
 
     private fun getRenderersFactory(): RenderersFactory {
