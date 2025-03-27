@@ -103,7 +103,7 @@ object MediaFoldersProvider {
                             realm = realm,
                             folderId = folderId,
                             folderName = folderName,
-                            path = path,
+                            folderPath = path,
                             coroutineScope = coroutineScope,
                         )?.let { folders[folderId] = it }
                     }
@@ -130,7 +130,7 @@ object MediaFoldersProvider {
                             realm = realm,
                             folderId = folderId,
                             folderName = folderName,
-                            path = path,
+                            folderPath = path,
                             coroutineScope = coroutineScope,
                         )?.let { folders[folderId] = it }
                     }
@@ -143,23 +143,23 @@ object MediaFoldersProvider {
         realm: Realm,
         folderId: Long,
         folderName: String,
-        path: String,
+        folderPath: String,
         coroutineScope: Job?,
     ): MediaFolder? {
         coroutineScope?.ensureActive()
-        if (path.startsWith("Android/media/${BuildConfig.APPLICATION_ID}")) return null
+        if (folderPath.startsWith("Android/media/${BuildConfig.APPLICATION_ID}")) return null
         return MediaFolder.findById(realm, folderId)?.let { mediaFolder ->
             mediaFolder.apply {
-                if (name != folderName || this.path != path) storeOrUpdate(path)
+                if (name != folderName || path != folderPath) storeOrUpdate(folderPath)
             }
         } ?: let {
             val isFirstConfiguration = !AccountUtils.isEnableAppSync()
-            val isSynced = isFirstConfiguration && path.contains("${Environment.DIRECTORY_DCIM}/")
+            val isSynced = isFirstConfiguration && folderPath.contains("${Environment.DIRECTORY_DCIM}/")
             MediaFolder(
                 id = folderId,
                 name = folderName,
                 isSynced = isSynced,
-                path = path,
+                path = folderPath,
             ).also(MediaFolder::storeOrUpdate)
         }
     }
