@@ -38,6 +38,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.ui.MainActivity.SystemBarsColorScheme
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.DownloadProgressViewModel.Companion.PROGRESS_COMPLETE
@@ -57,7 +58,7 @@ fun Activity.setupBottomSheetFileBehavior(
     isDraggable: Boolean,
     isFitToContents: Boolean = false,
 ) {
-    setColorNavigationBar(true)
+    setColorNavigationBar(SystemBarsColorScheme.AppBar)
     bottomSheetBehavior.apply {
         isHideable = true
         this.isDraggable = isDraggable
@@ -70,9 +71,7 @@ fun Activity.setupBottomSheetFileBehavior(
                             ContextCompat.getColor(this@setupBottomSheetFileBehavior, R.color.previewBackgroundTransparent)
                         window?.lightNavigationBar(false)
                     }
-                    else -> {
-                        setColorNavigationBar(true)
-                    }
+                    else -> setColorNavigationBar(SystemBarsColorScheme.AppBar)
                 }
             }
 

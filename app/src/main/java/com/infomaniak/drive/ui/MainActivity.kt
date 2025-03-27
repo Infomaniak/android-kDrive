@@ -450,12 +450,16 @@ class MainActivity : BaseActivity() {
         }
 
         when (destination.id) {
-            R.id.fileDetailsFragment, RMyKSuite.id.myKSuiteDashboardFragment -> {
-                setColorNavigationBar(true)
+            RMyKSuite.id.myKSuiteDashboardFragment -> {
+                setColorStatusBar(SystemBarsColorScheme.MyKSuite)
+                setColorNavigationBar(SystemBarsColorScheme.MyKSuite)
+            }
+            R.id.fileDetailsFragment -> {
+                setColorNavigationBar(SystemBarsColorScheme.AppBar)
             }
             R.id.fileShareLinkSettingsFragment -> {
-                setColorStatusBar(true)
-                setColorNavigationBar(true)
+                setColorStatusBar(SystemBarsColorScheme.AppBar)
+                setColorNavigationBar(SystemBarsColorScheme.AppBar)
             }
             R.id.downloadProgressDialog, R.id.previewSliderFragment, R.id.selectPermissionBottomSheetDialog -> Unit
             else -> {
@@ -630,6 +634,10 @@ class MainActivity : BaseActivity() {
 
     fun clickOnBottomBarFolders() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
+    }
+
+    enum class SystemBarsColorScheme {
+        AppBar, Default, MyKSuite
     }
 
     companion object {
