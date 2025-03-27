@@ -87,9 +87,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
     private fun loadFolders() = with(binding) {
         swipeRefreshLayout.isRefreshing = true
         mediaViewModel.elementsToRemove.observe(viewLifecycleOwner) { elementsToRemove ->
-            mediaFolderList.post {
-                mediaFoldersAdapter.removeItemsById(elementsToRemove)
-            }
+            mediaFolderList.post { mediaFoldersAdapter.removeItemsById(elementsToRemove) }
         }
         mediaViewModel.getAllMediaFolders(requireActivity().contentResolver)
             .observe(viewLifecycleOwner) { (isComplete, mediaFolders) ->
@@ -155,6 +153,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
 
         private fun List<MediaFolder>.removeObsoleteMediaFolders(realm: Realm, upToDateMediasIds: List<Long>) {
             val deletedMediaFolderList = mutableListOf<Long>()
+
             realm.executeTransaction { currentRealm ->
                 forEach { cachedFile ->
                     if (!upToDateMediasIds.contains(cachedFile.id)) {
@@ -163,7 +162,8 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
                     }
                 }
             }
-            elementsToRemove.postValue(deletedMediaFolderList)
+
+            if (deletedMediaFolderList.isNotEmpty()) elementsToRemove.postValue(deletedMediaFolderList)
         }
     }
 }
