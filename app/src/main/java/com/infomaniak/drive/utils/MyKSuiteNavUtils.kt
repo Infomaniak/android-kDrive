@@ -18,12 +18,17 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
+import android.graphics.Color
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData
+import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteUpgradeBottomSheetEvent
+import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorResBasedOnId
 
 fun Fragment.openMyKSuiteUpgradeBottomSheet(matomoTrackerName: String) {
     requireActivity().openMyKSuiteUpgradeBottomSheet(findNavController(), matomoTrackerName)
@@ -32,4 +37,17 @@ fun Fragment.openMyKSuiteUpgradeBottomSheet(matomoTrackerName: String) {
 fun Context.openMyKSuiteUpgradeBottomSheet(navController: NavController, matomoTrackerName: String) {
     trackMyKSuiteUpgradeBottomSheetEvent(matomoTrackerName)
     navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+}
+
+fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData): MyKSuiteDashboardScreenData {
+    val backgroundColor = requireContext().getBackgroundColorResBasedOnId(id = AccountUtils.currentUser?.id ?: -1)
+
+    return MyKSuiteUiUtils.getDashboardData(
+        context = requireContext(),
+        myKSuiteData = myKSuiteData,
+        avatarUri = AccountUtils.currentUser?.avatar,
+        userInitials = AccountUtils.currentUser?.getInitials(),
+        iconColor = Color.WHITE,
+        userInitialsBackgroundColor = backgroundColor,
+    )
 }
