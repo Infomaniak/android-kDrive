@@ -21,6 +21,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.data.models.MediaFolder
@@ -31,14 +32,14 @@ class MediaFoldersAdapter(
     private val onSwitchChanged: (mediaFolder: MediaFolder, isChecked: Boolean) -> Unit,
 ) : Adapter<MediaFoldersViewHolder>() {
 
-    private var itemList: ArrayList<MediaFolder> = arrayListOf()
+    private val items = mutableListOf<MediaFolder>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaFoldersViewHolder {
         return MediaFoldersViewHolder(ItemMediaFolderBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun onBindViewHolder(holder: MediaFoldersViewHolder, position: Int): Unit = with(holder.binding) {
-        val mediaFolder = itemList[position]
+        val mediaFolder = items[position]
 
         var path = mediaFolder.path.substringBeforeLast(mediaFolder.name)
         if (!path.startsWith("/")) path = "/$path"
@@ -60,24 +61,57 @@ class MediaFoldersAdapter(
         }
     }
 
-    override fun getItemCount(): Int = itemList.size
+    override fun getItemCount(): Int = items.size
 
-    fun addAll(newItemList: ArrayList<MediaFolder>) {
-        val beforeItemCount = itemCount
-        itemList.addAll(newItemList)
-        notifyItemRangeInserted(beforeItemCount, newItemList.size)
+    fun addAll(addedItems: ArrayList<MediaFolder>) {
+
+        val oldList = items.toList()
+        items.addAll(addedItems)
+
+        notifyAdapter(oldList, items)
     }
 
-    fun removeItemsById(idList: List<Long>) {
-        idList.forEach { id ->
-            itemList.indexOfFirst { it.id == id }.let { index ->
-                if (index != -1) {
-                    itemList.removeAt(index)
-                    notifyItemRemoved(index)
-                }
-            }
+    fun removeItemsById(ids: List<Long>) {
+
+        val oldList = items.toList()
+
+        ids.forEach { id ->
+            val index = items.indexOfFirst { it.id == id }
+            if (index != -1) items.removeAt(index)
         }
+
+        notifyAdapter(oldList, items)
+    }
+
+    private fun notifyAdapter(oldList: List<MediaFolder>, newList: List<MediaFolder>) {
+        DiffUtil.calculateDiff(MediaFoldersDiffCallback(oldList, newList)).dispatchUpdatesTo(this)
     }
 
     class MediaFoldersViewHolder(val binding: ItemMediaFolderBinding) : ViewHolder(binding.root)
+
+    private class MediaFoldersDiffCallback(
+        private val oldList: List<MediaFolder>,
+        private val newList: List<MediaFolder>,
+    ) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldIndex: Int, newIndex: Int): Boolean {
+            return newList[newIndex].id == oldList[oldIndex].id
+        }
+
+        override fun areContentsTheSame(oldIndex: Int, newIndex: Int): Boolean {
+            val oldItem = oldList[oldIndex]
+            val newItem = newList[newIndex]
+
+            return when {
+                newItem.isSynced != oldItem.isSynced -> false
+                newItem.name != oldItem.name -> false
+                newItem.path != oldItem.path -> false
+                else -> true // Don't update
+            }
+        }
+    }
 }
