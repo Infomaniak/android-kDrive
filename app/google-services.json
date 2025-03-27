@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "355767057795",
     "project_id": "kdrive-e4dbe",
-    "storage_bucket": "kdrive-e4dbe.appspot.com"
+    "storage_bucket": "kdrive-e4dbe.firebasestorage.app"
   },
   "client": [
     {
@@ -10,6 +10,43 @@
         "mobilesdk_app_id": "1:355767057795:android:910c4caef8ed905d8f0ab6",
         "android_client_info": {
           "package_name": "com.infomaniak.drive"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "355767057795-h6pmg5hq87bnjbtlrds8lvbua0o6o44n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDedMW4ViDkJUTsv4oLHRgY8LFb6GCPa8s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "355767057795-h6pmg5hq87bnjbtlrds8lvbua0o6o44n.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "355767057795-ul4amh9a72n15opilo4ujulgch94c88f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.infomaniak.drive",
+                "app_store_id": "1482778676"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:355767057795:android:66ba0f22e278c31d8f0ab6",
+        "android_client_info": {
+          "package_name": "com.infomaniak.drive.debug"
         }
       },
       "oauth_client": [
