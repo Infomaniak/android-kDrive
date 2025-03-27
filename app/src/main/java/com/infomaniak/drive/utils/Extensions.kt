@@ -166,12 +166,7 @@ fun Activity.toggleSystemBar(show: Boolean) {
 
 fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
-        val color = when (colorScheme) {
-            SystemBarsColorScheme.Default -> R.color.background
-            SystemBarsColorScheme.AppBar -> R.color.appBar
-            SystemBarsColorScheme.MyKSuite -> R.color.myKSuiteDashboardStatusBarBackground
-        }
-        statusBarColor = ContextCompat.getColor(this@setColorStatusBar, color)
+        statusBarColor = ContextCompat.getColor(this@setColorStatusBar, colorScheme.statusBarColor)
         lightStatusBar(!isNightModeEnabled())
     } else {
         statusBarColor = Color.BLACK
@@ -181,12 +176,7 @@ fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsCo
 fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
     val nightModeEnabled = isNightModeEnabled()
     if (nightModeEnabled || VERSION.SDK_INT >= VERSION_CODES.O) {
-        val color = when (colorScheme) {
-            SystemBarsColorScheme.Default -> R.color.background
-            SystemBarsColorScheme.AppBar -> R.color.appBar
-            SystemBarsColorScheme.MyKSuite -> R.color.myKSuiteDashboardNavigationBarBackground
-        }
-        navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
+        navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
         lightNavigationBar(!nightModeEnabled)
     } else {
         navigationBarColor = Color.BLACK

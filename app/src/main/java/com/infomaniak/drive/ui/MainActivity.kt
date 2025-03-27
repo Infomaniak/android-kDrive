@@ -41,6 +41,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
+import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -636,8 +637,13 @@ class MainActivity : BaseActivity() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
     }
 
-    enum class SystemBarsColorScheme {
-        AppBar, Default, MyKSuite
+    enum class SystemBarsColorScheme(@ColorRes val statusBarColor: Int, @ColorRes val navigationBarColor: Int = statusBarColor) {
+        AppBar(R.color.appBar),
+        Default(R.color.background),
+        MyKSuite(
+            statusBarColor = R.color.myKSuiteDashboardStatusBarBackground,
+            navigationBarColor = R.color.myKSuiteDashboardNavigationBarBackground,
+        )
     }
 
     companion object {
