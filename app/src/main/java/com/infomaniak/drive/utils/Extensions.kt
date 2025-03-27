@@ -83,6 +83,7 @@ import com.infomaniak.drive.databinding.ItemUserBinding
 import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
 import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.MainActivity.SystemBarsColorScheme
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
@@ -163,20 +164,19 @@ fun Activity.toggleSystemBar(show: Boolean) {
     }
 }
 
-fun Activity.setColorStatusBar(appBar: Boolean = false) = with(window) {
+fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
     if (VERSION.SDK_INT >= VERSION_CODES.M) {
-        statusBarColor = ContextCompat.getColor(this@setColorStatusBar, if (appBar) R.color.appBar else R.color.background)
+        statusBarColor = ContextCompat.getColor(this@setColorStatusBar, colorScheme.statusBarColor)
         lightStatusBar(!isNightModeEnabled())
     } else {
         statusBarColor = Color.BLACK
     }
 }
 
-fun Activity.setColorNavigationBar(appBar: Boolean = false) = with(window) {
+fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
     val nightModeEnabled = isNightModeEnabled()
     if (nightModeEnabled || VERSION.SDK_INT >= VERSION_CODES.O) {
-        val color = if (appBar) R.color.appBar else R.color.background
-        navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, color)
+        navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
         lightNavigationBar(!nightModeEnabled)
     } else {
         navigationBarColor = Color.BLACK

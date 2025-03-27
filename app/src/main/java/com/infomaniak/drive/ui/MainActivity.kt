@@ -41,6 +41,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
+import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -103,7 +104,6 @@ import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.infomaniak.core.myksuite.R as RMyKSuite
 
 class MainActivity : BaseActivity() {
 
@@ -419,11 +419,10 @@ class MainActivity : BaseActivity() {
         destination.addSentryBreadcrumb()
 
         val shouldHideBottomNavigation =
-            navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation ?: false
-        val shouldShowSmallFab = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
+            navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation == true
+        val shouldShowSmallFab = (navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
             ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
-            ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
-            ?: false
+            ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab) == true
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
 
@@ -450,12 +449,16 @@ class MainActivity : BaseActivity() {
         }
 
         when (destination.id) {
-            R.id.fileDetailsFragment, RMyKSuite.id.myKSuiteDashboardFragment -> {
-                setColorNavigationBar(true)
+            R.id.myKSuiteDashboardFragment -> {
+                setColorStatusBar(SystemBarsColorScheme.MyKSuite)
+                setColorNavigationBar(SystemBarsColorScheme.MyKSuite)
+            }
+            R.id.fileDetailsFragment -> {
+                setColorNavigationBar(SystemBarsColorScheme.AppBar)
             }
             R.id.fileShareLinkSettingsFragment -> {
-                setColorStatusBar(true)
-                setColorNavigationBar(true)
+                setColorStatusBar(SystemBarsColorScheme.AppBar)
+                setColorNavigationBar(SystemBarsColorScheme.AppBar)
             }
             R.id.downloadProgressDialog, R.id.previewSliderFragment, R.id.selectPermissionBottomSheetDialog -> Unit
             else -> {
@@ -630,6 +633,15 @@ class MainActivity : BaseActivity() {
 
     fun clickOnBottomBarFolders() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
+    }
+
+    enum class SystemBarsColorScheme(@ColorRes val statusBarColor: Int, @ColorRes val navigationBarColor: Int = statusBarColor) {
+        AppBar(R.color.appBar),
+        Default(R.color.background),
+        MyKSuite(
+            statusBarColor = R.color.myKSuiteDashboardStatusBarBackground,
+            navigationBarColor = R.color.myKSuiteDashboardNavigationBarBackground,
+        ),
     }
 
     companion object {
