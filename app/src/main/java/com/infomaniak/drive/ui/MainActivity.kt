@@ -104,7 +104,6 @@ import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.infomaniak.core.myksuite.R as RMyKSuite
 
 class MainActivity : BaseActivity() {
 
@@ -420,11 +419,10 @@ class MainActivity : BaseActivity() {
         destination.addSentryBreadcrumb()
 
         val shouldHideBottomNavigation =
-            navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation ?: false
-        val shouldShowSmallFab = navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
+            navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation == true
+        val shouldShowSmallFab = (navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
             ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
-            ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
-            ?: false
+            ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab) == true
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
 
@@ -451,7 +449,7 @@ class MainActivity : BaseActivity() {
         }
 
         when (destination.id) {
-            RMyKSuite.id.myKSuiteDashboardFragment -> {
+            R.id.myKSuiteDashboardFragment -> {
                 setColorStatusBar(SystemBarsColorScheme.MyKSuite)
                 setColorNavigationBar(SystemBarsColorScheme.MyKSuite)
             }
@@ -643,7 +641,7 @@ class MainActivity : BaseActivity() {
         MyKSuite(
             statusBarColor = R.color.myKSuiteDashboardStatusBarBackground,
             navigationBarColor = R.color.myKSuiteDashboardNavigationBarBackground,
-        )
+        ),
     }
 
     companion object {
