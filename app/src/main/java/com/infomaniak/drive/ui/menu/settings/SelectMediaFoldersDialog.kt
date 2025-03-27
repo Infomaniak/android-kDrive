@@ -130,11 +130,7 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
                         }
 
                         val localMediaFolders = ArrayList(
-                            MediaFoldersProvider.getAllMediaFolders(
-                                realm = realm,
-                                contentResolver = contentResolver,
-                                coroutineScope = getMediaFilesJob
-                            )
+                            MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob),
                         )
                         cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders.map { it.id })
 
