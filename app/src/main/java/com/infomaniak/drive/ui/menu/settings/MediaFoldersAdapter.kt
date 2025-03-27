@@ -54,7 +54,7 @@ class MediaFoldersAdapter(
         mediaFolderSwitch.apply {
             isChecked = mediaFolder.isSynced
             isVisible = true
-            setOnCheckedChangeListener { _, isChecked ->
+            setOnClickListener {
                 onSwitchChanged(mediaFolder, isChecked)
                 mediaFolder.isSynced = isChecked
             }
