@@ -29,7 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.annotation.CallSuper
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -44,6 +43,7 @@ import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -85,9 +85,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     private val pipParams: PictureInPictureParams? by lazy { getPictureInPictureParams() }
 
-    private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
-
-    var positionForMedium: MutableMap<Int?, Long?> = mutableMapOf()
+    var positionsForMedia: MutableMap<Int, Long> = mutableMapOf()
 
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
@@ -168,67 +166,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        if (isInPictureInPictureMode) {
-            toggleBottomSheet(false)
-        }
-    }
-
-    @OptIn(UnstableApi::class)
-    fun getMediaController(callback: (MediaController) -> Unit) {
-        if (mediaController == null) {
-            val context = requireContext()
-            val playbackSessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
-            mediaControllerFuture = MediaController.Builder(context, playbackSessionToken).buildAsync().apply {
-                addListener(
-                    getRunnable(callback),
-                    mainExecutor,
-                )
-            }
-        } else {
-            callback(mediaController!!)
-        }
-    }
-
-    private fun initViewPager() = with(binding) {
-        viewPager.apply {
-            adapter = previewSliderAdapter
-            offscreenPageLimit = 1
-
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                @RequiresApi(Build.VERSION_CODES.N)
-                @OptIn(UnstableApi::class)
-                override fun onPageSelected(position: Int) {
-
-                    currentFile = previewSliderAdapter.getFile(position)
-                    previewSliderViewModel.currentPreview = currentFile
-
-                    var shouldDisplayPageNumber = false
-
-                    val selectedFragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
-                        this.trackScreen()
-                        shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
-                    }
-
-                    with(header) {
-                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
-                        setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
-                        toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
-                    }
-
-                    setPrintButtonVisibility(isGone = !currentFile.isPDF())
-                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
-                    updateBottomSheetWithCurrentFile()
-
-                    // Implementation of onFragmentUnselected to handle resume of media to the same position, only
-                    // for PreviewPlaybackFragment.
-                    childFragmentManager.fragments.filterIsInstance<PreviewPlaybackFragment>().forEach { fragment ->
-                        if (fragment != selectedFragment) {
-                            (fragment as? PreviewPlaybackFragment)?.onFragmentUnselected()
-                        }
-                    }
-                }
-            })
-        }
+        if (isInPictureInPictureMode) toggleBottomSheet(false)
     }
 
     override fun onStart() {
@@ -273,6 +211,65 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
 
         super.onDestroy()
+    }
+
+    @OptIn(UnstableApi::class)
+    fun getMediaController(callback: (MediaController) -> Unit) {
+        if (mediaController == null) {
+            val context = requireContext()
+            val playbackSessionToken = SessionToken(context, ComponentName(context, PlaybackService::class.java))
+            mediaControllerFuture = MediaController.Builder(context, playbackSessionToken).buildAsync().apply {
+                addListener(
+                    getRunnable(callback),
+                    MoreExecutors.directExecutor(),
+                )
+            }
+        } else {
+            callback(mediaController!!)
+        }
+    }
+
+    private fun initViewPager() = with(binding) {
+        viewPager.apply {
+            adapter = previewSliderAdapter
+            offscreenPageLimit = 1
+
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                @RequiresApi(Build.VERSION_CODES.N)
+                @OptIn(UnstableApi::class)
+                override fun onPageSelected(position: Int) {
+
+                    currentFile = previewSliderAdapter.getFile(position)
+                    previewSliderViewModel.currentPreview = currentFile
+
+                    var shouldDisplayPageNumber = false
+
+                    val selectedFragment =
+                        childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
+                            this.trackScreen()
+                            shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
+                        }
+
+                    with(header) {
+                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
+                        setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
+                        toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
+                    }
+
+                    setPrintButtonVisibility(isGone = !currentFile.isPDF())
+                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
+                    updateBottomSheetWithCurrentFile()
+
+                    // Implementation of onFragmentUnselected to handle resume of media to the same position, only
+                    // for PreviewPlaybackFragment.
+                    childFragmentManager.fragments.filterIsInstance<PreviewPlaybackFragment>().forEach { fragment ->
+                        if (fragment != selectedFragment) {
+                            (fragment as? PreviewPlaybackFragment)?.onFragmentUnselected()
+                        }
+                    }
+                }
+            })
+        }
     }
 
     private fun addBackPressedCallback() {
