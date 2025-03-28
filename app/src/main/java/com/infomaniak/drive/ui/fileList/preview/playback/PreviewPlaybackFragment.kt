@@ -58,6 +58,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
             null
         }
     }
+
     private val offlineIsComplete by lazy { isOfflineFileComplete(offlineFile) }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -72,14 +73,14 @@ open class PreviewPlaybackFragment : PreviewFragment() {
             }
         },
         onError = { playbackExceptionMessage ->
-            _binding?.errorLayout?.let { errorLayout ->
+            _binding?.errorLayout?.apply {
                 when (playbackExceptionMessage) {
-                    "Source error" -> errorLayout.previewDescription.setText(R.string.previewVideoSourceError)
-                    else -> errorLayout.previewDescription.setText(R.string.previewLoadError)
+                    "Source error" -> previewDescription.setText(R.string.previewVideoSourceError)
+                    else -> previewDescription.setText(R.string.previewLoadError)
                 }
-                errorLayout.bigOpenWithButton.isVisible = true
-                errorLayout.root.isVisible = true
-                errorLayout.previewDescription.isVisible = true
+                bigOpenWithButton.isVisible = true
+                root.isVisible = true
+                previewDescription.isVisible = true
             }
             _binding?.playerView?.isGone = true
         },
@@ -137,6 +138,15 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 isInPictureInPictureMode = false
             }
         }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Compute the percentage of the video the user watched before exiting
+        getMediaController { mediaController ->
+            val currentMediaPercentage = mediaController.currentPosition.times(100)
+            val currentMediaDuration = mediaController.contentDuration
+            requireContext().trackMediaPlayerEvent("duration", currentMediaPercentage.div(currentMediaDuration + 1).toFloat())
+        }
     }
 
     override fun onDestroyView() {
@@ -153,8 +163,8 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     fun onFragmentUnselected() {
         getMediaController { mediaController ->
-            mediaController.pause()
             if (mediaController.currentMediaItem?.mediaId?.toInt() == file.id) {
+                mediaController.pause()
                 (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] = mediaController.currentPosition
             }
             binding.playerView.player = null
