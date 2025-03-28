@@ -253,6 +253,14 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                             shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
                         }
 
+                    // Implementation of onFragmentUnselected to handle resume of media to the same position, only
+                    // for PreviewPlaybackFragment.
+                    childFragmentManager.fragments.filterIsInstance<PreviewPlaybackFragment>().forEach { fragment ->
+                        if (fragment != selectedFragment) {
+                            (fragment as? PreviewPlaybackFragment)?.onFragmentUnselected()
+                        }
+                    }
+
                     with(header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
                         setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
@@ -262,14 +270,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     setPrintButtonVisibility(isGone = !currentFile.isPDF())
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
                     updateBottomSheetWithCurrentFile()
-
-                    // Implementation of onFragmentUnselected to handle resume of media to the same position, only
-                    // for PreviewPlaybackFragment.
-                    childFragmentManager.fragments.filterIsInstance<PreviewPlaybackFragment>().forEach { fragment ->
-                        if (fragment != selectedFragment) {
-                            (fragment as? PreviewPlaybackFragment)?.onFragmentUnselected()
-                        }
-                    }
                 }
             })
         }
