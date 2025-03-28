@@ -29,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.annotation.CallSuper
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -86,6 +87,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     override lateinit var currentFile: File
 
     private val pipParams: PictureInPictureParams? by lazy { getPictureInPictureParams() }
+
+    private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
 
     var positionsForMedia: MutableMap<Int, Long> = mutableMapOf()
 
