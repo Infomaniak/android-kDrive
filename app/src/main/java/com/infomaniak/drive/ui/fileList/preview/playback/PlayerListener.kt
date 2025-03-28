@@ -22,6 +22,7 @@ import android.content.Context
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.lib.core.utils.SentryLog
 
 class PlayerListener(
     private val activity: Activity?,
@@ -40,11 +41,13 @@ class PlayerListener(
     }
 
     private fun handlePlayerError(playbackException: PlaybackException) {
-        playbackException.printStackTrace()
+        SentryLog.d(TAG, "Error during media playback", playbackException)
         onError(playbackException.message)
     }
 
     companion object {
+
+        private const val TAG = "PlayerListener"
 
         fun Context.trackMediaPlayerEvent(name: String, value: Float? = null) {
             trackEvent("mediaPlayer", name, value = value)
