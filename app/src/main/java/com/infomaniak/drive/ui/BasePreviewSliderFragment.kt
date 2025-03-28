@@ -193,7 +193,9 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         if (noPreviewList()) return
         previewSliderViewModel.currentPreview = currentFile
 
-        if (canStartPictureInPicture && mediaController?.isPlaying == true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val isMediaMusic = mediaController?.mediaMetadata?.mediaType == MediaMetadata.MEDIA_TYPE_MUSIC
+        val isMediaPlaying = mediaController?.isPlaying == true
+        if (canStartPictureInPicture && isMediaMusic && isMediaPlaying && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pipParams?.let { requireActivity().enterPictureInPictureMode(it) }
         }
     }
