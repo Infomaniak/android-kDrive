@@ -44,7 +44,6 @@ import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -94,7 +93,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private var mediaController: MediaController? = null
 
     // If the user want to navigate back and something is playing, we don't want to start PIP
-    private var canStartPictureInPicture = true
+    private var hasNavigateBack = false
 
     // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
     // it implements
@@ -182,9 +181,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         if (noPreviewList()) return
         previewSliderViewModel.currentPreview = currentFile
 
-        val isMediaMusic = mediaController?.mediaMetadata?.mediaType == MediaMetadata.MEDIA_TYPE_MUSIC
-        val isMediaPlaying = mediaController?.isPlaying == true
-        if (canStartPictureInPicture && isMediaMusic && isMediaPlaying && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (canStartPictureInPicture() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pipParams?.let { requireActivity().enterPictureInPictureMode(it) }
         }
     }
@@ -233,6 +230,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             callback(mediaController!!)
         }
     }
+
+    private fun canStartPictureInPicture() = !hasNavigateBack && currentFile.isVideo() && mediaController?.isPlaying == true
 
     private fun initViewPager() = with(binding) {
         viewPager.apply {
@@ -284,7 +283,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     }
 
     private fun navigateBack() {
-        canStartPictureInPicture = false
+        hasNavigateBack = true
         findNavController().popBackStack()
     }
 
