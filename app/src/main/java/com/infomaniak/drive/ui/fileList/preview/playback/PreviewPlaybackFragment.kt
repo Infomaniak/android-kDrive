@@ -125,15 +125,18 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 mediaController.removeListener(playerListener)
                 mediaController.addListener(playerListener)
 
-                mediaController.setMediaItem(getMediaItem(offlineFile, offlineIsComplete))
+                    mediaController.setMediaItem(
+                        getMediaItem(offlineFile, offlineIsComplete),
+                        (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] ?: 0L,
+                    )
+
+                    //switchTargetView(mediaController, binding.playerView, binding.playerView)
 
                 binding.playerView.player = mediaController
                 binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
                 binding.playerView.controllerHideOnTouch = false
 
                 binding.playerView.setShowSubtitleButton(true)
-
-                mediaController.seekTo((parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] ?: 0L)
             } else {
                 isInPictureInPictureMode = false
             }
