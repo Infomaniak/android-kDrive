@@ -502,7 +502,14 @@ fun Fragment.setupDriveToolbar(
     switchDriveLayout: LayoutSwitchDriveBinding,
     appBar: AppBarLayout,
 ) {
-    collapsingToolbarLayout.title = AccountUtils.getCurrentDrive()!!.name
+    val currentDrive = AccountUtils.getCurrentDrive(forceRefresh = true)
+    if (currentDrive == null) {
+        switchDriveLayout.root.isGone = true
+        addNoDrivesBreadcrumbsToSentry()
+        return
+    }
+
+    collapsingToolbarLayout.title = currentDrive.name
     switchDriveLayout.setupSwitchDriveButton(this)
 
     appBar.addOnOffsetChangedListener { _, verticalOffset ->
@@ -554,3 +561,26 @@ fun MainActivity.showQuotasExceededSnackbar(navController: NavController) {
 fun String.isUrlFile() = endsWith(".url", ignoreCase = true)
 
 fun String.isWeblocFile() = endsWith(".webloc", ignoreCase = true)
+
+//region private
+private fun addNoDrivesBreadcrumbsToSentry() {
+    Sentry.captureMessage("Current drive is null, it should not happen") { scope ->
+        scope.setExtra("CurrentDriveId", AccountUtils.currentDriveId.toString())
+        scope.setExtra("CurrentUserId", AccountUtils.currentUserId.toString())
+
+        val driveCount = runCatching {
+            DriveInfosController.getDrivesCount(AccountUtils.currentUserId, AccountUtils.currentDriveId)
+        }.getOrNull()
+        scope.setTag("Number of drive in realm", driveCount.toString())
+
+        AccountUtils.currentUser?.apiToken?.let { apiToken ->
+            val scrubbedAccessToken = apiToken.accessToken.replaceRange(2..apiToken.accessToken.length - 2, "*")
+            scope.setExtra("Access token", scrubbedAccessToken)
+            val scrubbedRefreshToken = apiToken.refreshToken?.let { refreshToken ->
+                refreshToken.replaceRange(2..refreshToken.length - 2, "*")
+            }
+            scope.setExtra("Refresh token", scrubbedRefreshToken.toString())
+        }
+    }
+}
+//endregion
