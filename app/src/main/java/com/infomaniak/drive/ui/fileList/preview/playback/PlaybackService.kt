@@ -75,7 +75,7 @@ class PlaybackService : MediaSessionService() {
 
     // The user dismissed the app from the recent tasks
     override fun onTaskRemoved(rootIntent: Intent?) {
-        val player = mediaSession?.player!!
+        mediaSession?.player?.let { player ->
         if (!player.playWhenReady
             || player.mediaItemCount == 0
             || player.playbackState == Player.STATE_ENDED
@@ -84,6 +84,7 @@ class PlaybackService : MediaSessionService() {
             release()
             stopSelf()
         }
+    }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
