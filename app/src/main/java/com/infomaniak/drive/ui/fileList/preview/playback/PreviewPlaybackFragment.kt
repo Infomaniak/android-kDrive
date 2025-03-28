@@ -132,7 +132,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
                 binding.playerView.setShowSubtitleButton(true)
 
-                mediaController.seekTo((parentFragment as BasePreviewSliderFragment).positionForMedium[file.id] ?: 0L)
+                mediaController.seekTo((parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] ?: 0L)
             } else {
                 isInPictureInPictureMode = false
             }
@@ -155,7 +155,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         getMediaController { mediaController ->
             mediaController.pause()
             if (mediaController.currentMediaItem?.mediaId?.toInt() == file.id) {
-                (parentFragment as BasePreviewSliderFragment).positionForMedium[file.id] = mediaController.currentPosition
+                (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] = mediaController.currentPosition
             }
             binding.playerView.player = null
         }

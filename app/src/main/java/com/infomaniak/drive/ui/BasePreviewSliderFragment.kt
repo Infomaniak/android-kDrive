@@ -29,7 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.annotation.CallSuper
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -44,6 +43,7 @@ import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -87,9 +87,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     private val pipParams: PictureInPictureParams? by lazy { getPictureInPictureParams() }
 
-    private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
-
-    var positionForMedium: MutableMap<Int?, Long?> = mutableMapOf()
+    var positionsForMedia: MutableMap<Int, Long> = mutableMapOf()
 
     private var mediaControllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
@@ -179,9 +177,51 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        if (isInPictureInPictureMode) {
-            toggleBottomSheet(false)
+        if (isInPictureInPictureMode) toggleBottomSheet(false)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        requireActivity().setupStatusBarForPreview()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (noPreviewList()) return
+        previewSliderViewModel.currentPreview = currentFile
+
+        if (canStartPictureInPicture && mediaController?.isPlaying == true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            pipParams?.let { requireActivity().enterPictureInPictureMode(it) }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    override fun onStop() {
+        clearEdgeToEdge()
+        super.onStop()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
+        _binding = null
+    }
+
+    override fun onDestroy() {
+        // Reset current preview file list
+        if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
+            mainViewModel.currentPreviewFileList = LinkedHashMap()
+        }
+
+        // Release Player
+        mediaController?.apply {
+            release()
+            mediaController = null
+            mediaControllerFuture?.let { MediaController.releaseFuture(it) }
+            mediaControllerFuture = null
+        }
+
+        super.onDestroy()
     }
 
     @OptIn(UnstableApi::class)
@@ -193,6 +233,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 addListener(
                     getRunnable(callback),
                     mainExecutor,
+                    MoreExecutors.directExecutor(),
                 )
             }
         } else {
@@ -214,6 +255,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     currentFile = file
                     previewSliderViewModel.currentPreview = file
 
+                    currentFile = previewSliderAdapter.getFile(position)
+                    previewSliderViewModel.currentPreview = currentFile
 
                     var shouldDisplayPageNumber = false
 
@@ -221,6 +264,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                         this.trackScreen()
                         shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
                     }
+                    val selectedFragment =
+                        childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
+                            this.trackScreen()
+                            shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
+                        }
 
                     with(header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
@@ -283,6 +331,17 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             mediaController = null
             mediaControllerFuture?.let { MediaController.releaseFuture(it) }
             mediaControllerFuture = null
+    private fun addBackPressedCallback() {
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner) { navigateBack() }
+        viewLifecycleOwner.lifecycleScope.launch {
+            bottomSheetUpdates.collectLatest { file ->
+                when (val fileActionBottomSheet = bottomSheetView) {
+                    is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(file)
+                    is ExternalFileInfoActionsView -> fileActionBottomSheet.updateWithExternalFile(file)
+                }
+            }
         }
 
         super.onDestroy()
