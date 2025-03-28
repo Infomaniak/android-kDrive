@@ -81,6 +81,7 @@ class PlaybackService : MediaSessionService() {
             || player.playbackState == Player.STATE_ENDED
             || !player.isPlaying
         ) {
+            release()
             stopSelf()
         }
     }
