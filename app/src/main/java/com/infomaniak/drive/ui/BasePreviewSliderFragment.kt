@@ -180,7 +180,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        if (isInPictureInPictureMode) toggleBottomSheet(false)
+        if (isInPictureInPictureMode) toggleFullscreen()
     }
 
     override fun onStart() {
