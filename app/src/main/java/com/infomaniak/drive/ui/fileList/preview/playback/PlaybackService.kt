@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.preview.playback
 
+import android.app.PendingIntent
 import android.content.Intent
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.Player
@@ -35,8 +36,10 @@ import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.infomaniak.drive.R
+import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.NotificationUtilsCore
 
 @UnstableApi
 class PlaybackService : MediaSessionService() {
@@ -58,6 +61,7 @@ class PlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
+        
         exoPlayer = ExoPlayer.Builder(this, getRenderersFactory())
             .setMediaSourceFactory(DefaultMediaSourceFactory(getDataSourceFactory()))
             .setTrackSelector(getTrackSelector())
@@ -65,9 +69,11 @@ class PlaybackService : MediaSessionService() {
                 addAnalyticsListener(EventLogger())
                 setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
                 playWhenReady = false
+
                 mediaSession = MediaSession.Builder(this@PlaybackService, this)
                     .setCallback(mediaSessionCallback)
                     .setBitmapLoader(getBitmapLoader())
+                    .setSessionActivity(getPendingIntent())
                     .build()
                 prepare()
             }
@@ -76,15 +82,15 @@ class PlaybackService : MediaSessionService() {
     // The user dismissed the app from the recent tasks
     override fun onTaskRemoved(rootIntent: Intent?) {
         mediaSession?.player?.let { player ->
-        if (!player.playWhenReady
-            || player.mediaItemCount == 0
-            || player.playbackState == Player.STATE_ENDED
-            || !player.isPlaying
-        ) {
-            release()
-            stopSelf()
+            if (!player.playWhenReady
+                || player.mediaItemCount == 0
+                || player.playbackState == Player.STATE_ENDED
+                || !player.isPlaying
+            ) {
+                release()
+                stopSelf()
+            }
         }
-    }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
@@ -92,6 +98,22 @@ class PlaybackService : MediaSessionService() {
     override fun onDestroy() {
         release()
         super.onDestroy()
+    }
+
+    private fun getPendingIntent(): PendingIntent {
+
+        val intent = Intent(this@PlaybackService, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_LAUNCHER)
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+
+        return PendingIntent.getActivity(
+            this@PlaybackService,
+            0,
+            intent,
+            NotificationUtilsCore.pendingIntentFlags
+        )
     }
 
     private fun release() {
