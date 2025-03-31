@@ -1,0 +1,3 @@
+- Add initials to myKSuite avatar
+- Media folders now correctly load on first launch
+- Fix system bars colors in dark mode for my kSuite dashboard

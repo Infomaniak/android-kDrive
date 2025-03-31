@@ -1,0 +1,3 @@
+- Ajout des initiales à l'avatar de myKSuite
+- Les dossiers médias se chargent désormais correctement lors du premier lancement
+- Correction des couleurs des barres système en mode sombre pour le tableau de bord de my kSuite
