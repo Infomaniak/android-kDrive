@@ -94,6 +94,7 @@ class MainViewModel(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val isNetworkAvailable = NetworkAvailability(this@MainViewModel.getContext()).isNetworkAvailable
+        .distinctUntilChanged()
         .mapLatest {
             onNetworkAvailabilityChanged(it)
             it
