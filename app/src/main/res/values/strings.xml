@@ -41,7 +41,7 @@
     <string name="addPassword">Protect with a password</string>
     <string name="alertRemoveUserDescription">Are you sure you want to remove the user “%s” from this application?</string>
     <string name="alertRemoveUserTitle">Remove user</string>
-    <string name="all3DModel">3D Model</string>
+    <string name="all3DModel">3D Models</string>
     <string name="allActivated">Enabled</string>
     <string name="allAddExpirationDateTitle">Add an expiry date</string>
     <string name="allAllDriveUsers">All kDrive users</string>

@@ -30,7 +30,7 @@
     <string name="addPassword">Proteger mediante contraseña</string>
     <string name="alertRemoveUserDescription">¿Estás seguro/a de que deseas retirar al usuario “%s” de esta aplicación?</string>
     <string name="alertRemoveUserTitle">Retirar al usuario</string>
-    <string name="all3DModel">Modelo 3D</string>
+    <string name="all3DModel">Modelos 3D</string>
     <string name="allActivated">Activado</string>
     <string name="allAddExpirationDateTitle">Añadir una fecha de caducidad</string>
     <string name="allAllDriveUsers">Todos los usuarios del kDrive</string>
