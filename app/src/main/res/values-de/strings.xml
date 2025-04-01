@@ -30,7 +30,7 @@
     <string name="addPassword">Mit Passwort schützen</string>
     <string name="alertRemoveUserDescription">Sind Sie sicher, den Benutzer “%s” von dieser Anwendung entfernen zu wollen?</string>
     <string name="alertRemoveUserTitle">Benutzer entfernen</string>
-    <string name="all3DModel">3D-Modell</string>
+    <string name="all3DModel">3D-Modelle</string>
     <string name="allActivated">Aktiviert</string>
     <string name="allAddExpirationDateTitle">Ablaufdatum hinzufügen</string>
     <string name="allAllDriveUsers">Alle kDrive-Benutzer</string>
