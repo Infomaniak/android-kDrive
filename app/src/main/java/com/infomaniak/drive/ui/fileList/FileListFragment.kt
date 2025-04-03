@@ -30,6 +30,7 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle.State
 import androidx.lifecycle.lifecycleScope
@@ -60,6 +61,7 @@ import com.infomaniak.drive.databinding.FragmentFileListBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.dropbox.DropboxViewModel
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
@@ -88,6 +90,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected val fileListViewModel: FileListViewModel by viewModels()
 
     private val navigationArgs: FileListFragmentArgs by navArgs()
+    private val dropboxViewModel: DropboxViewModel by activityViewModels()
 
     internal var folderId = ROOT_ID
     internal var folderName: String = "/"
@@ -173,7 +176,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             }
         }
 
-        mainViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
+        dropboxViewModel.createDropBoxSuccess.observe(viewLifecycleOwner) { dropBox ->
             safeNavigate(
                 FileListFragmentDirections.actionFileListFragmentToDropBoxResultBottomSheetDialog(
                     url = dropBox.url,

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileList
+package com.infomaniak.drive.ui.dropbox
 
 import android.os.Bundle
 import android.text.Editable
@@ -37,7 +37,6 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentManageDropboxBinding
-import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
@@ -56,15 +55,16 @@ open class ManageDropboxFragment : Fragment() {
 
     protected var binding: FragmentManageDropboxBinding by safeBinding()
 
-    private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
-    private var currentDropBox: DropBox? = null
-    protected val mainViewModel: MainViewModel by activityViewModels()
+    protected val dropboxViewModel: DropboxViewModel by activityViewModels()
 
+    protected open var isManageDropBox = true
+
+    private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
+
+    private var currentDropBox: DropBox? = null
     private var validationCount = 0
     private var hasErrors = false
     private var needNewPassword = false
-
-    protected open var isManageDropBox = true
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentManageDropboxBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -97,7 +97,7 @@ open class ManageDropboxFragment : Fragment() {
             if (isManageDropBox) {
                 file.dropbox?.url?.let { url -> shareLinkContainer.binding.shareLinkUrl.setUrl(url) }
 
-                mainViewModel.getDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
+                dropboxViewModel.getDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse?.isSuccess() == true) {
                         apiResponse.data?.let { updateUi(file, it) }
                     } else {
@@ -172,7 +172,7 @@ open class ManageDropboxFragment : Fragment() {
             setOnClickListener {
                 trackDropboxEvent("convertToFolder")
                 showProgressCatching(ContextCompat.getColor(requireContext(), R.color.title))
-                mainViewModel.deleteDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
+                dropboxViewModel.deleteDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
                         findNavController().popBackStack()
                     } else {
@@ -197,7 +197,7 @@ open class ManageDropboxFragment : Fragment() {
                 }
                 currentDropBox?.let {
                     showProgressCatching()
-                    mainViewModel.updateDropBox(file, it).observe(viewLifecycleOwner) { apiResponse ->
+                    dropboxViewModel.updateDropBox(file, it).observe(viewLifecycleOwner) { apiResponse ->
                         if (apiResponse.isSuccess()) {
                             findNavController().popBackStack()
                         } else {

@@ -21,12 +21,14 @@ import android.os.Bundle
 import android.view.View
 import android.widget.CompoundButton
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.*
 import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.ui.dropbox.DropboxViewModel
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.animateRotation
 import com.infomaniak.drive.utils.showOrHideEmptyError
@@ -38,6 +40,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 class CreateDropBoxFolderFragment : CreateFolderFragment() {
+
+    private val dropboxViewModel: DropboxViewModel by activityViewModels()
 
     var showAdvancedSettings = false
 
@@ -71,7 +75,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
     private fun createDropBoxFolder() {
         createDropBox(onDropBoxCreated = { file ->
-            mainViewModel.createDropBoxSuccess.value = file.dropbox
+            dropboxViewModel.createDropBoxSuccess.value = file.dropbox
             if (newFolderViewModel.currentPermission == ONLY_ME) {
                 findNavController().popBackStack(R.id.newFolderFragment, true)
             } else {
@@ -99,7 +103,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
             createFolder(false) { file, _ ->
                 file?.let {
-                    mainViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)
+                    dropboxViewModel.createDropBoxFolder(file, emailWhenFinished, limitFileSize, password, validUntil)
                         .observe(viewLifecycleOwner) { apiResponse ->
                             when (apiResponse?.result) {
                                 ApiResponseStatus.SUCCESS -> apiResponse.data?.let { dropBox ->
