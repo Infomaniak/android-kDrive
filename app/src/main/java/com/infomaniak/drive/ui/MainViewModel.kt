@@ -30,6 +30,7 @@ import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
@@ -223,17 +224,27 @@ class MainViewModel(
 
         if (apiResponse.isSuccess()) {
             FileController.updateFile(file.id) { it.shareLink = apiResponse.data }
+            updateShareLinkDriveQuota(shouldIncrease = true)
         }
         emit(apiResponse)
     }
 
     fun deleteFileShareLink(file: File) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.deleteFileShareLink(file)
-        if (apiResponse.isSuccess()) FileController.updateFile(file.id) {
-            it.shareLink = null
-            it.rights?.canBecomeShareLink = true
+        if (apiResponse.isSuccess()) {
+            FileController.updateFile(file.id) {
+                it.shareLink = null
+                it.rights?.canBecomeShareLink = true
+            }
+            updateShareLinkDriveQuota(shouldIncrease = false)
         }
         emit(apiResponse)
+    }
+
+    private fun updateShareLinkDriveQuota(shouldIncrease: Boolean) {
+        DriveInfosController.updateDrive {
+            it.quotas.sharedLink?.apply { if (shouldIncrease) current++ else current-- }
+        }
     }
 
     fun getShareLink(file: File) = liveData(Dispatchers.IO) {
