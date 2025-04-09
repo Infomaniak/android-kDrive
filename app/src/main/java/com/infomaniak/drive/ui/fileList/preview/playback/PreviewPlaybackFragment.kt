@@ -17,7 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.preview.playback
 
-import android.net.Uri
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -25,23 +25,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
-import androidx.core.net.toUri
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.ui.fileList.preview.PreviewFragment
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLER_SHOW_TIMEOUT_MS
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPlayer
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaController
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.setMediaSession
 import com.infomaniak.drive.ui.fileList.preview.playback.PlayerListener.Companion.trackMediaPlayerEvent
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.shouldExcludeFromRecents
 
 @UnstableApi
 open class PreviewPlaybackFragment : PreviewFragment() {
@@ -66,6 +69,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         activity,
         isPlayingChanged = { isPlaying ->
             if (isPlaying) {
+                //TODO do this only for video
                 toggleFullscreen()
                 activity?.window?.addFlags(flagKeepScreenOn)
             } else {
@@ -86,7 +90,9 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         },
     )
 
-    private var isInPictureInPictureMode = false
+    private val exoPlayer: ExoPlayer by lazy { requireContext().getExoPlayer() }
+    private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
+    //private var isInPictureInPictureMode = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPlaybackBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -120,25 +126,42 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onResume() {
         super.onResume()
-        getMediaController { mediaController ->
-            if (!mediaController.isPlaying && !isInPictureInPictureMode) {
-                mediaController.removeListener(playerListener)
-                mediaController.addListener(playerListener)
 
-                mediaController.setMediaItem(
-                    getMediaItem(offlineFile, offlineIsComplete),
+        PlaybackUtils.activePlayer = exoPlayer
+        requireContext().setMediaSession(file.isVideo())
+
+        requireContext().getMediaController(mainExecutor) {
+            if (exoPlayer.currentMediaItem == null) {
+                exoPlayer.removeListener(playerListener)
+                exoPlayer.addListener(playerListener)
+
+                exoPlayer.setMediaItem(
+                    getMediaItem(file, offlineFile, offlineIsComplete),
                     (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] ?: 0L,
                 )
 
-                //switchTargetView(mediaController, binding.playerView, binding.playerView)
-
-                binding.playerView.player = mediaController
+                binding.playerView.player = exoPlayer
                 binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
                 binding.playerView.controllerHideOnTouch = false
 
-                binding.playerView.setShowSubtitleButton(true)
-            } else {
-                isInPictureInPictureMode = false
+                // We'll open a new activity for videos in order to handle PIP perfectly
+                if (file.isVideo()) {
+                    binding.playerView.findViewById<View>(R.id.exo_rew_with_amount).isVisible = false
+                    binding.playerView.findViewById<View>(R.id.exo_ffwd_with_amount).isVisible = false
+                    binding.playerView.findViewById<View>(R.id.exo_progress).isVisible = false
+                    binding.playerView.findViewById<View>(R.id.exo_bottom_bar).isVisible = false
+                    binding.playerView.findViewById<View>(R.id.exo_play_pause).setOnClickListener {
+                        requireActivity().shouldExcludeFromRecents(true)
+                        startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
+                            putExtras(
+                                VideoActivityArgs(
+                                    fileId = file.id,
+                                    userDrive = previewSliderViewModel.userDrive
+                                ).toBundle()
+                            )
+                        })
+                    }
+                }
             }
         }
     }
@@ -146,11 +169,11 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     override fun onDestroy() {
         super.onDestroy()
         // Compute the percentage of the video the user watched before exiting
-        getMediaController { mediaController ->
-            val currentMediaPercentage = mediaController.currentPosition.times(100)
-            val currentMediaDuration = mediaController.contentDuration
-            requireContext().trackMediaPlayerEvent("duration", currentMediaPercentage.div(currentMediaDuration + 1).toFloat())
-        }
+        //getMediaController { mediaController ->
+        val currentMediaPercentage = exoPlayer.currentPosition.times(100)
+        val currentMediaDuration = exoPlayer.contentDuration
+        requireContext().trackMediaPlayerEvent("duration", currentMediaPercentage.div(currentMediaDuration + 1).toFloat())
+        //}
     }
 
     override fun onDestroyView() {
@@ -159,53 +182,14 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         _binding = null
     }
 
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-
-        if (!this.isInPictureInPictureMode) this.isInPictureInPictureMode = isInPictureInPictureMode
-    }
-
     fun onFragmentUnselected() {
-        getMediaController { mediaController ->
-            if (mediaController.currentMediaItem?.mediaId?.toInt() == file.id) {
-                mediaController.pause()
-                (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] = mediaController.currentPosition
-            }
-            binding.playerView.player = null
+        if (exoPlayer.currentMediaItem?.mediaId?.toInt() == file.id) {
+            exoPlayer.pause()
+            (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] = exoPlayer.currentPosition
         }
     }
+
+    fun getPlayer() = binding.playerView.player
 
     private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { file.isOfflineAndIntact(it) } ?: false
-
-    private fun getMediaItem(offlineFile: IOFile?, offlineIsComplete: Boolean): MediaItem {
-        val uri = getUri(offlineFile, offlineIsComplete)
-        val mediaMetadataBuilder = MediaMetadata.Builder()
-            .setTitle(file.name)
-
-        if (file.getFileType() == ExtensionType.VIDEO) {
-            mediaMetadataBuilder.setArtworkUri(getThumbnailUri())
-        }
-
-        return MediaItem.Builder()
-            .setMediaId(file.id.toString())
-            .setMediaMetadata(mediaMetadataBuilder.build())
-            .setUri(uri)
-            .build()
-    }
-
-    private fun getThumbnailUri(): Uri {
-        return ApiRoutes.getThumbnailUrl(file).toUri()
-    }
-
-    private fun getUri(offlineFile: IOFile?, offlineIsComplete: Boolean): Uri {
-        return if (offlineFile != null && offlineIsComplete) {
-            offlineFile.toUri()
-        } else {
-            ApiRoutes.getDownloadFileUrl(file).toUri()
-        }
-    }
-
-    companion object {
-        private const val CONTROLLER_SHOW_TIMEOUT_MS = 2000
-    }
 }
