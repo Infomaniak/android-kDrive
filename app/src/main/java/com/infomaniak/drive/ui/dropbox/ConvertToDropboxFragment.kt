@@ -24,8 +24,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.DropBox
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
@@ -50,6 +53,10 @@ class ConvertToDropboxFragment : ManageDropboxFragment() {
 
         settings.expirationDateInput.init(fragmentManager = parentFragmentManager)
 
+        setupSaveButton(file)
+    }
+
+    private fun setupSaveButton(file: File) = with(binding) {
         enableSaveButton()
         saveButton.initProgress(viewLifecycleOwner)
         saveButton.setOnClickListener {
@@ -67,16 +74,18 @@ class ConvertToDropboxFragment : ManageDropboxFragment() {
                     password = if (passwordSwitch.isChecked) passwordTextInput.text?.toString() else null,
                     limitFileSize = limitFileSize?.let { Utils.convertGigaByteToBytes(it) },
                     validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
-                ).observe(viewLifecycleOwner) { apiResponse ->
-                    if (apiResponse.isSuccess()) {
-                        dropboxViewModel.createDropBoxSuccess.value = apiResponse.data
-                        findNavController().popBackStack()
-                    } else {
-                        showSnackbar(apiResponse.translateError())
-                    }
-                    saveButton.hideProgressCatching(R.string.buttonSave)
-                }
+                ).observe(viewLifecycleOwner) { apiResponse -> onDropboxCreated(apiResponse) }
             }
         }
+    }
+
+    private fun onDropboxCreated(apiResponse: ApiResponse<DropBox>) {
+        if (apiResponse.isSuccess()) {
+            dropboxViewModel.createDropBoxSuccess.value = apiResponse.data
+            findNavController().popBackStack()
+        } else {
+            showSnackbar(apiResponse.translateError())
+        }
+        binding.saveButton.hideProgressCatching(R.string.buttonSave)
     }
 }
