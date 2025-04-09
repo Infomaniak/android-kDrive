@@ -451,7 +451,6 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun onRenameFile(
-        mainViewModel: MainViewModel,
         newName: String,
         onSuccess: ((action: CancellableAction) -> Unit)? = null,
         onError: ((translatedError: String) -> Unit)? = null

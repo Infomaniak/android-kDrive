@@ -26,6 +26,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
@@ -56,16 +57,17 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
     private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileShareDetailsFragmentArgs by navArgs()
 
+    private lateinit var file: File
+
     private lateinit var availableShareableItemsAdapter: AvailableShareableItemsAdapter
     private lateinit var sharedItemsAdapter: SharedItemsAdapter
 
-    private lateinit var file: File
     private lateinit var allUserList: List<DriveUser>
     private lateinit var allTeams: List<Team>
     private var shareLink: ShareLink? = null
 
     override val shareLinkContainerView get() = _binding?.shareLinkContainer
-    override val shareLinkViewModel: ShareLinkViewModel by activityViewModels()
+    override val shareLinkViewModel: ShareLinkViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentFileShareDetailsBinding.inflate(inflater, container, false).also { _binding = it }.root

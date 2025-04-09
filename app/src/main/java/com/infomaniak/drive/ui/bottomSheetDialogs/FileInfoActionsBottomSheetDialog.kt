@@ -284,7 +284,6 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) {
         if (isResumed) {
             binding.fileInfoActionsView.onRenameFile(
-                mainViewModel = mainViewModel,
                 newName = newName,
                 onSuccess = { action ->
                     mainViewModel.refreshActivities.value = true
@@ -297,7 +296,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 onError = { translatedError ->
                     transmitActionAndPopBack(translatedError)
                     onApiResponse()
-                })
+                }
+            )
         } else {
             onApiResponse()
         }

@@ -263,7 +263,6 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) {
         binding.bottomSheetFileInfos.onRenameFile(
-            mainViewModel = mainViewModel,
             newName = newName,
             onSuccess = {
                 toggleBottomSheet(shouldShow = true)
@@ -274,7 +273,8 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 toggleBottomSheet(shouldShow = true)
                 showSnackbar(translatedError)
                 onApiResponse()
-            })
+            }
+        )
     }
 
     override fun onDeleteFile(onApiResponse: () -> Unit) {
