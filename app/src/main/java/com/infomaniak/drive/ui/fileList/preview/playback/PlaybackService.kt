@@ -17,66 +17,31 @@
  */
 package com.infomaniak.drive.ui.fileList.preview.playback
 
-import android.app.PendingIntent
 import android.content.Intent
-import androidx.media3.common.AudioAttributes
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.common.util.Util
-import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DataSourceBitmapLoader
-import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.okhttp.OkHttpDataSource
-import androidx.media3.exoplayer.DefaultRenderersFactory
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.RenderersFactory
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
-import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.infomaniak.drive.R
-import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.utils.NotificationUtilsCore
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.setServiceOnDisconnect
 
 @UnstableApi
 class PlaybackService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
-    private var exoPlayer: ExoPlayer? = null
-
-    private val mediaSessionCallback = object : MediaSession.Callback {
-
-        // When the user returns from the PreviewPlaybackFragment, we want to stop
-        // the service because it does not make sense to have the media notification
-        // when the user willingly quits the PreviewPlaybackFragment.
-        override fun onDisconnected(session: MediaSession, controller: MediaSession.ControllerInfo) {
-            super.onDisconnected(session, controller)
-            release()
-            stopSelf()
-        }
-    }
+    //private var exoPlayer: ExoPlayer? = null
 
     override fun onCreate() {
         super.onCreate()
-        
-        exoPlayer = ExoPlayer.Builder(this, getRenderersFactory())
-            .setMediaSourceFactory(DefaultMediaSourceFactory(getDataSourceFactory()))
-            .setTrackSelector(getTrackSelector())
-            .build().apply {
-                addAnalyticsListener(EventLogger())
-                setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
-                playWhenReady = false
 
-                mediaSession = MediaSession.Builder(this@PlaybackService, this)
-                    .setCallback(mediaSessionCallback)
-                    .setBitmapLoader(getBitmapLoader())
-                    .setSessionActivity(getPendingIntent())
-                    .build()
-                prepare()
-            }
+        setServiceOnDisconnect {
+            release()
+            stopSelf()
+        }
+
+        //exoPlayer = getExoPlayer().apply {
+        //setMediaSession(this)
+        mediaSession = PlaybackUtils.mediaSession
+        //}
     }
 
     // The user dismissed the app from the recent tasks
@@ -100,22 +65,6 @@ class PlaybackService : MediaSessionService() {
         super.onDestroy()
     }
 
-    private fun getPendingIntent(): PendingIntent {
-
-        val intent = Intent(this@PlaybackService, MainActivity::class.java).apply {
-            action = Intent.ACTION_MAIN
-            addCategory(Intent.CATEGORY_LAUNCHER)
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-
-        return PendingIntent.getActivity(
-            this@PlaybackService,
-            0,
-            intent,
-            NotificationUtilsCore.pendingIntentFlags
-        )
-    }
-
     private fun release() {
         mediaSession?.run {
             player.release()
@@ -124,26 +73,4 @@ class PlaybackService : MediaSessionService() {
         }
     }
 
-    private fun getRenderersFactory(): RenderersFactory {
-        return DefaultRenderersFactory(this)
-            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-    }
-
-    private fun getDataSourceFactory(): DataSource.Factory {
-        val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
-            setUserAgent(Util.getUserAgent(this@PlaybackService, getString(R.string.app_name)))
-            setDefaultRequestProperties(HttpUtils.getHeaders().toMap())
-        }
-        return DefaultDataSource.Factory(this, okHttpDataSource)
-    }
-
-    private fun getBitmapLoader(): DataSourceBitmapLoader {
-        return DataSourceBitmapLoader(DataSourceBitmapLoader.DEFAULT_EXECUTOR_SERVICE.get(), getDataSourceFactory())
-    }
-
-    private fun getTrackSelector(): DefaultTrackSelector {
-        return DefaultTrackSelector(this).apply {
-            setParameters(buildUponParameters().setMaxVideoSizeSd())
-        }
-    }
 }
