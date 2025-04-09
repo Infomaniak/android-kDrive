@@ -275,6 +275,7 @@
     <string name="errorFilesLimitExceeded">Limit of files in folder reached</string>
     <string name="errorGetBookmarkURL">Non-recoverable link</string>
     <string name="errorLeaveShare">Error when stopping sharing</string>
+    <string name="errorLimitExceeded">Limit exceeded</string>
     <string name="errorLoadingOfficeEditor">Unable to load the document editor</string>
     <string name="errorModification">Error when modifying</string>
     <string name="errorMove">Move error</string>

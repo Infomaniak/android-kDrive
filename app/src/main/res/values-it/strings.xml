@@ -264,6 +264,7 @@
     <string name="errorFilesLimitExceeded">Limite file raggiunto nella cartella</string>
     <string name="errorGetBookmarkURL">Link non recuperabile</string>
     <string name="errorLeaveShare">Errore durante l’abbandono della condivisione</string>
+    <string name="errorLimitExceeded">Limite raggiunto</string>
     <string name="errorLoadingOfficeEditor">Impossibile caricare l’editor dei documenti</string>
     <string name="errorModification">Errore durante la modifica</string>
     <string name="errorMove">Errore durante lo spostamento</string>

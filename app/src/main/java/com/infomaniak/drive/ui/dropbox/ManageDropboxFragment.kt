@@ -98,9 +98,8 @@ open class ManageDropboxFragment : Fragment() {
                 file.dropbox?.url?.let { url -> shareLinkContainer.binding.shareLinkUrl.setUrl(url) }
 
                 dropboxViewModel.getDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
-                    if (apiResponse?.isSuccess() == true) {
-                        apiResponse.data?.let { updateUi(file, it) }
-                    } else {
+                    apiResponse.data?.let { updateUi(file, it) } ?: run {
+                        findNavController().popBackStack()
                         showSnackbar(apiResponse.translateError())
                     }
                 }

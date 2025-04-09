@@ -264,6 +264,7 @@
     <string name="errorFilesLimitExceeded">Limit der Dateien im Ordner erreicht</string>
     <string name="errorGetBookmarkURL">Link nicht wiederherstellbar</string>
     <string name="errorLeaveShare">Fehler beim Abbrechen der Freigabe</string>
+    <string name="errorLimitExceeded">Limit erreicht</string>
     <string name="errorLoadingOfficeEditor">Der Dokumenteneditor kann nicht geladen werden</string>
     <string name="errorModification">Fehler bei der Änderung</string>
     <string name="errorMove">Fehler beim Verschieben</string>
