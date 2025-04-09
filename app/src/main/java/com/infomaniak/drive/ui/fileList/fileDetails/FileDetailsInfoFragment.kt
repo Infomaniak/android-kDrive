@@ -28,6 +28,7 @@ import android.view.ViewGroup
 import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
@@ -40,23 +41,30 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.databinding.FragmentFileDetailsInfosBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.ui.fileList.ShareLinkManageable
+import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.isPositive
+import com.infomaniak.drive.utils.loadAvatar
+import com.infomaniak.drive.utils.navigateToParentFolder
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
-class FileDetailsInfoFragment : FileDetailsSubFragment() {
+class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
 
-    private var binding: FragmentFileDetailsInfosBinding by safeBinding()
+    private var _binding: FragmentFileDetailsInfosBinding? = null
+    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
-    private lateinit var file: File
     private var shareLink: ShareLink? = null
+    private lateinit var file: File
+
+    override val shareLinkContainerView get() = _binding?.shareLinkContainer
+    override val shareLinkViewModel: ShareLinkViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentFileDetailsInfosBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentFileDetailsInfosBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
@@ -125,9 +133,9 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
                 val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
                 val isPublic = isPublicPermission(permission)
                 if (isPublic && shareLink == null) {
-                    createShareLink()
+                    createShareLink(file)
                 } else if (!isPublic && shareLink != null) {
-                    deleteShareLink()
+                    deleteShareLink(file)
                 }
             }
         }
@@ -294,30 +302,14 @@ class FileDetailsInfoFragment : FileDetailsSubFragment() {
         }
     }
 
-    private fun createShareLink() {
-        mainViewModel.createShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
-            if (apiResponse.isSuccess()) {
-                binding.shareLinkContainer.update(apiResponse.data)
-            } else {
-                showSnackbar(apiResponse.translateError())
-            }
-        }
-    }
-
-    private fun deleteShareLink() {
-        mainViewModel.deleteFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
-            val success = apiResponse.data == true
-            if (success) {
-                binding.shareLinkContainer.update(null)
-            } else {
-                showSnackbar(apiResponse.translateError())
-            }
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         addCommentButton.isGone = true
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {
