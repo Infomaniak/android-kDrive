@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.view.isGone
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -40,6 +41,7 @@ import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.MainViewModel.FileResult
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.*
@@ -54,6 +56,7 @@ import kotlinx.coroutines.launch
 class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
 
     private val navigationArgs: PreviewSliderFragmentArgs by navArgs()
+    private val shareLinkViewModel: ShareLinkViewModel by viewModels()
     override val previewSliderViewModel: PreviewSliderViewModel by navGraphViewModels(R.id.previewSliderFragment)
 
     override val bottomSheetView: FileInfoActionsView
@@ -100,6 +103,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             init(
                 ownerFragment = this@PreviewSliderFragment,
                 mainViewModel = mainViewModel,
+                shareLinkViewModel = shareLinkViewModel,
                 onItemClickListener = this@PreviewSliderFragment,
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = userDrive.sharedWithMe,
@@ -258,12 +262,15 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     }
 
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) {
-        binding.bottomSheetFileInfos.onRenameFile(mainViewModel, newName,
+        binding.bottomSheetFileInfos.onRenameFile(
+            mainViewModel = mainViewModel,
+            newName = newName,
             onSuccess = {
                 toggleBottomSheet(shouldShow = true)
                 showSnackbar(getString(R.string.allFileRename, currentFile.name))
                 onApiResponse()
-            }, onError = { translatedError ->
+            },
+            onError = { translatedError ->
                 toggleBottomSheet(shouldShow = true)
                 showSnackbar(translatedError)
                 onApiResponse()

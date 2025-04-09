@@ -25,6 +25,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -44,6 +45,7 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_A
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_MAIN_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.CANCELLABLE_TITLE_KEY
 import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.REFRESH_FAVORITE_FILE
+import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragmentArgs
@@ -62,6 +64,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     private lateinit var drivePermissions: DrivePermissions
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val shareLinkViewModel: ShareLinkViewModel by viewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
 
     override val ownerFragment = this
@@ -92,6 +95,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             init(
                 ownerFragment = this@FileInfoActionsBottomSheetDialog,
                 mainViewModel = mainViewModel,
+                shareLinkViewModel = shareLinkViewModel,
                 onItemClickListener = this@FileInfoActionsBottomSheetDialog,
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = navigationArgs.userDrive.sharedWithMe,
@@ -279,7 +283,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) {
         if (isResumed) {
-            binding.fileInfoActionsView.onRenameFile(mainViewModel, newName,
+            binding.fileInfoActionsView.onRenameFile(
+                mainViewModel = mainViewModel,
+                newName = newName,
                 onSuccess = { action ->
                     mainViewModel.refreshActivities.value = true
                     transmitActionAndPopBack(
@@ -287,7 +293,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                         action.setDriveAndReturn(currentFile.driveId)
                     )
                     onApiResponse()
-                }, onError = { translatedError ->
+                },
+                onError = { translatedError ->
                     transmitActionAndPopBack(translatedError)
                     onApiResponse()
                 })

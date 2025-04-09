@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.CallSuper
@@ -51,6 +50,7 @@ import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
+import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
@@ -73,6 +73,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     private var observeDownloadOffline: LiveData<MutableList<WorkInfo>>? = null
     private lateinit var currentFile: File
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var shareLinkViewModel: ShareLinkViewModel
 
     private lateinit var ownerFragment: Fragment
     private lateinit var onItemClickListener: OnItemClickListener
@@ -86,12 +87,14 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun init(
         ownerFragment: Fragment,
         mainViewModel: MainViewModel,
+        shareLinkViewModel: ShareLinkViewModel,
         onItemClickListener: OnItemClickListener,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         isSharedWithMe: Boolean = false,
     ) {
         this.isSharedWithMe = isSharedWithMe
         this.mainViewModel = mainViewModel
+        this.shareLinkViewModel = shareLinkViewModel
         this.onItemClickListener = onItemClickListener
         this.ownerFragment = ownerFragment
         this.selectFolderResultLauncher = selectFolderResultLauncher
@@ -178,7 +181,7 @@ class FileInfoActionsView @JvmOverloads constructor(
     }
 
     fun scrollToTop() {
-        binding.scrollView.fullScroll(View.FOCUS_UP)
+        binding.scrollView.fullScroll(FOCUS_UP)
     }
 
     private fun isGoToFolderVisible(): Boolean {
@@ -314,7 +317,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             currentFile.shareLink != null -> onSuccess?.invoke(currentFile.shareLink?.url!!)
             else -> {
                 showCopyPublicLinkLoader(true)
-                mainViewModel.createShareLink(currentFile).observe(ownerFragment) { postShareResponse ->
+                shareLinkViewModel.createShareLink(currentFile).observe(ownerFragment) { postShareResponse ->
                     when {
                         postShareResponse?.isSuccess() == true -> {
                             postShareResponse.data?.let { shareLink ->

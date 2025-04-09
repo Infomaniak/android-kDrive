@@ -28,6 +28,7 @@ import android.view.ViewGroup
 import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
@@ -40,7 +41,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.databinding.FragmentFileDetailsInfosBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.ui.fileList.FileShareManageable
+import com.infomaniak.drive.ui.fileList.ShareLinkManageable
+import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.drive.utils.loadAvatar
@@ -50,15 +52,16 @@ import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
 
-class FileDetailsInfoFragment : FileDetailsSubFragment(), FileShareManageable {
+class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
 
     private var _binding: FragmentFileDetailsInfosBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     private var shareLink: ShareLink? = null
+    private lateinit var file: File
 
     override val shareLinkContainerView get() = _binding?.shareLinkContainer
-    override lateinit var file: File
+    override val shareLinkViewModel: ShareLinkViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentFileDetailsInfosBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -130,9 +133,9 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), FileShareManageable {
                 val permission = bundle.getParcelable<Permission>(SelectPermissionBottomSheetDialog.PERMISSION_BUNDLE_KEY)
                 val isPublic = isPublicPermission(permission)
                 if (isPublic && shareLink == null) {
-                    createShareLink()
+                    createShareLink(file)
                 } else if (!isPublic && shareLink != null) {
-                    deleteShareLink()
+                    deleteShareLink(file)
                 }
             }
         }

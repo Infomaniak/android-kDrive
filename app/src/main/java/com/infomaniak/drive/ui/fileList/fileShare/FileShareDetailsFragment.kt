@@ -38,7 +38,8 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDia
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.SHAREABLE_BUNDLE_KEY
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.PermissionsGroup
-import com.infomaniak.drive.ui.fileList.FileShareManageable
+import com.infomaniak.drive.ui.fileList.ShareLinkManageable
+import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsInfoFragment
 import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Companion.SHARE_SELECTION_KEY
 import com.infomaniak.drive.utils.*
@@ -46,24 +47,25 @@ import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.hideKeyboard
 import com.infomaniak.lib.core.utils.safeNavigate
 
-class FileShareDetailsFragment : Fragment(), FileShareManageable {
+class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
 
     private var _binding: FragmentFileShareDetailsBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     private val fileShareViewModel: FileShareViewModel by navGraphViewModels(R.id.fileShareDetailsFragment)
-    override val mainViewModel: MainViewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: FileShareDetailsFragmentArgs by navArgs()
 
     private lateinit var availableShareableItemsAdapter: AvailableShareableItemsAdapter
     private lateinit var sharedItemsAdapter: SharedItemsAdapter
 
+    private lateinit var file: File
     private lateinit var allUserList: List<DriveUser>
     private lateinit var allTeams: List<Team>
     private var shareLink: ShareLink? = null
 
     override val shareLinkContainerView get() = _binding?.shareLinkContainer
-    override lateinit var file: File
+    override val shareLinkViewModel: ShareLinkViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentFileShareDetailsBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -150,7 +152,7 @@ class FileShareDetailsFragment : Fragment(), FileShareManageable {
             }
         }
 
-        mainViewModel.getShareLink(file).observe(viewLifecycleOwner) {
+        shareLinkViewModel.getShareLink(file).observe(viewLifecycleOwner) {
             it?.data?.let(::setupShareLink)
         }
     }
@@ -162,9 +164,9 @@ class FileShareDetailsFragment : Fragment(), FileShareManageable {
                 val permission = bundle.getParcelable<Permission>(PERMISSION_BUNDLE_KEY)
                 val isPublic = FileDetailsInfoFragment.isPublicPermission(permission)
                 if (isPublic && shareLink == null) {
-                    createShareLink()
+                    createShareLink(file)
                 } else if (!isPublic && shareLink != null) {
-                    deleteShareLink()
+                    deleteShareLink(file)
                 }
             }
         }

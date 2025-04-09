@@ -64,7 +64,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         }
     }
 
-    fun update(shareLink: ShareLink? = null) {
+    fun update(shareLink: ShareLink?) {
         this.shareLink = shareLink
         if (shareLink == null) urlValue = ""
         selectUi()

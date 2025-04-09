@@ -19,19 +19,17 @@ package com.infomaniak.drive.ui.fileList
 
 import androidx.fragment.app.Fragment
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 
-interface FileShareManageable {
+interface ShareLinkManageable {
 
-    val mainViewModel: MainViewModel
+    val shareLinkViewModel: ShareLinkViewModel
     val shareLinkContainerView: ShareLinkContainerView?
-    var file: File
 
-    fun Fragment.createShareLink() {
-        mainViewModel.createShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
+    fun Fragment.createShareLink(file: File) {
+        shareLinkViewModel.createShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.isSuccess()) {
                 shareLinkContainerView?.update(apiResponse.data)
             } else {
@@ -40,8 +38,8 @@ interface FileShareManageable {
         }
     }
 
-    fun Fragment.deleteShareLink() {
-        mainViewModel.deleteFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
+    fun Fragment.deleteShareLink(file: File) {
+        shareLinkViewModel.deleteFileShareLink(file).observe(viewLifecycleOwner) { apiResponse ->
             if (apiResponse.data == true) {
                 shareLinkContainerView?.update(null)
             } else {
