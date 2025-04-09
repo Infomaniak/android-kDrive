@@ -266,7 +266,7 @@ class FileShareDetailsFragment : Fragment() {
             if (apiResponse.isSuccess()) {
                 binding.shareLinkContainer.update(apiResponse.data)
             } else {
-                showSnackbar(R.string.errorShareLink)
+                showSnackbar(apiResponse.translateError())
             }
         }
     }

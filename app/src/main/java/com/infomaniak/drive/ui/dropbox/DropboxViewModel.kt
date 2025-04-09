@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.google.gson.JsonObject
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
@@ -51,7 +52,10 @@ class DropboxViewModel : ViewModel() {
         validUntil?.let { body.put("valid_until", validUntil) }
 
         with(ApiRepository.postDropBox(file, body)) {
-            if (isSuccess()) FileController.updateDropBox(file.id, data)
+            if (isSuccess()) {
+                FileController.updateDropBox(file.id, data)
+                updateDropboxDriveQuota(shouldIncrease = true)
+            }
             emit(this)
         }
     }
@@ -76,6 +80,14 @@ class DropboxViewModel : ViewModel() {
     }
 
     fun deleteDropBox(file: File) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.deleteDropBox(file))
+        val apiResponse = ApiRepository.deleteDropBox(file)
+        if (apiResponse.isSuccess()) updateDropboxDriveQuota(shouldIncrease = false)
+        emit(apiResponse)
+    }
+
+    private fun updateDropboxDriveQuota(shouldIncrease: Boolean) {
+        DriveInfosController.updateDrive {
+            it.quotas.dropbox?.apply { if (shouldIncrease) current++ else current-- }
+        }
     }
 }
