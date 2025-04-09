@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -15,14 +15,14 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:background="@color/previewBackground"
-    tools:context=".ui.fileList.preview.playback.PreviewPlaybackFragment">
+    android:background="@color/previewBackground"
+    tools:context=".ui.fileList.preview.playback.VideoActivity">
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
@@ -31,7 +31,7 @@
         app:show_next_button="false"
         app:show_previous_button="false"
         app:show_shuffle_button="false"
-        app:show_subtitle_button="false"
+        app:show_subtitle_button="true"
         app:surface_type="texture_view" />
 
     <include
@@ -42,4 +42,4 @@
         android:layout_centerInParent="true"
         android:visibility="gone" />
 
-</RelativeLayout>
+</FrameLayout>
