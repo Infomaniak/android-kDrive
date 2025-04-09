@@ -954,7 +954,7 @@
 
     <fragment
         android:id="@+id/manageDropboxFragment"
-        android:name="com.infomaniak.drive.ui.fileList.ManageDropboxFragment"
+        android:name="com.infomaniak.drive.ui.dropbox.ManageDropboxFragment"
         android:label="ManageDropboxFragment"
         tools:layout="@layout/fragment_manage_dropbox">
         <argument
@@ -967,7 +967,7 @@
 
     <fragment
         android:id="@+id/convertToDropBoxFragment"
-        android:name="com.infomaniak.drive.ui.fileList.ConvertToDropBoxFragment"
+        android:name="com.infomaniak.drive.ui.dropbox.ConvertToDropboxFragment"
         android:label="ManageDropboxFragment"
         tools:layout="@layout/fragment_manage_dropbox">
         <argument

@@ -20,14 +20,12 @@ package com.infomaniak.drive.ui
 import android.app.Application
 import android.content.Context
 import android.provider.MediaStore
-import androidx.collection.arrayMapOf
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.*
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
-import com.google.gson.JsonObject
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
@@ -81,8 +79,6 @@ class MainViewModel(
     var currentPreviewFileList = LinkedHashMap<Int, File>()
 
     private val _pendingUploadsCount = MutableLiveData<Int?>(null)
-
-    val createDropBoxSuccess = SingleLiveEvent<DropBox>()
 
     val navigateFileListTo = SingleLiveEvent<File>()
 
@@ -229,53 +225,6 @@ class MainViewModel(
             FileController.updateFile(file.id) { it.shareLink = apiResponse.data }
         }
         emit(apiResponse)
-    }
-
-    fun getDropBox(file: File) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.getDropBox(file))
-    }
-
-    fun createDropBoxFolder(
-        file: File,
-        emailWhenFinished: Boolean,
-        limitFileSize: Long? = null,
-        password: String? = null,
-        validUntil: Long? = null
-    ) = liveData(Dispatchers.IO) {
-        val body = arrayMapOf(
-            "email_when_finished" to emailWhenFinished,
-            "limit_file_size" to limitFileSize,
-            "password" to password
-        )
-        validUntil?.let { body.put("valid_until", validUntil) }
-
-        with(ApiRepository.postDropBox(file, body)) {
-            if (isSuccess()) FileController.updateDropBox(file.id, data)
-            emit(this)
-        }
-    }
-
-    fun updateDropBox(file: File, newDropBox: DropBox) = liveData(Dispatchers.IO) {
-        val data = JsonObject().apply {
-            addProperty("email_when_finished", newDropBox.newHasNotification)
-            addProperty("valid_until", newDropBox.newValidUntil?.time?.let { it / 1000 })
-            addProperty("limit_file_size", newDropBox.newLimitFileSize)
-
-            if (newDropBox.newPassword && !newDropBox.newPasswordValue.isNullOrBlank()) {
-                addProperty("password", newDropBox.newPasswordValue)
-            } else if (!newDropBox.newPassword) {
-                val password: String? = null
-                addProperty("password", password)
-            }
-        }
-        with(ApiRepository.updateDropBox(file, data)) {
-            if (isSuccess()) FileController.updateDropBox(file.id, newDropBox)
-            emit(this)
-        }
-    }
-
-    fun deleteDropBox(file: File) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.deleteDropBox(file))
     }
 
     fun deleteFileShareLink(file: File) = liveData(Dispatchers.IO) {

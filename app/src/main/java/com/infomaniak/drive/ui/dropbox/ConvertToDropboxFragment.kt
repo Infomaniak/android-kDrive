@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.fileList
+package com.infomaniak.drive.ui.dropbox
 
 import android.os.Bundle
 import android.view.View
@@ -31,7 +31,7 @@ import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.showProgressCatching
 
-class ConvertToDropBoxFragment : ManageDropboxFragment() {
+class ConvertToDropboxFragment : ManageDropboxFragment() {
 
     private val navigationArgs: ManageDropboxFragmentArgs by navArgs()
     override var isManageDropBox = false
@@ -61,7 +61,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
                 }
 
                 saveButton.showProgressCatching()
-                mainViewModel.createDropBoxFolder(
+                dropboxViewModel.createDropBoxFolder(
                     file = file,
                     emailWhenFinished = emailWhenFinishedSwitch.isChecked,
                     password = if (passwordSwitch.isChecked) passwordTextInput.text?.toString() else null,
@@ -69,7 +69,7 @@ class ConvertToDropBoxFragment : ManageDropboxFragment() {
                     validUntil = if (expirationDateSwitch.isChecked) expirationDateInput.getCurrentTimestampValue() else null
                 ).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
-                        mainViewModel.createDropBoxSuccess.value = apiResponse.data
+                        dropboxViewModel.createDropBoxSuccess.value = apiResponse.data
                         findNavController().popBackStack()
                     } else {
                         showSnackbar(apiResponse.translateError())
