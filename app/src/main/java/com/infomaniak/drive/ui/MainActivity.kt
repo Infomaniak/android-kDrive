@@ -21,6 +21,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -42,6 +43,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
 import androidx.annotation.ColorRes
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -50,6 +52,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -85,6 +88,7 @@ import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
+import com.infomaniak.drive.ui.fileList.preview.playback.VideoActivity.Companion.TAG
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.NavigationUiUtils.setupWithNavControllerCustom
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -360,6 +364,7 @@ class MainActivity : BaseActivity() {
     }
     //endregion
 
+    @OptIn(UnstableApi::class)
     override fun onResume() {
         super.onResume()
 
@@ -373,6 +378,16 @@ class MainActivity : BaseActivity() {
 
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
+
+        finishPIPActivity()
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun finishPIPActivity() {
+        Intent().apply {
+            action = TAG
+            LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
+        }
     }
 
     private fun launchNextDeleteRequest() {

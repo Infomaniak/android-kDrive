@@ -101,8 +101,14 @@
 
         <activity
             android:name=".ui.MainActivity"
-            android:supportsPictureInPicture="true"
             android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize" />
+
+        <activity
+            android:name=".ui.fileList.preview.playback.VideoActivity"
+            android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:supportsPictureInPicture="true" />
 
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
@@ -114,7 +120,7 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
-                <action android:name="androidx.media3.session.MediaSessionService"/>
+                <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
 
