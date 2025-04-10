@@ -10,7 +10,7 @@ android {
 
     namespace 'com.infomaniak.drive'
 
-    compileSdk 34
+    compileSdk 35
 
     ndkVersion "28.0.13004108"
 
@@ -146,11 +146,11 @@ dependencies {
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
     implementation 'androidx.webkit:webkit:1.13.0'
 
-    def exoplayer_version = '2.19.1'
-    implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
-    implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
-    implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
-    implementation "com.google.android.exoplayer:extension-okhttp:$exoplayer_version"
+    def media3_version = '1.6.0'
+    implementation "androidx.media3:media3-exoplayer:$media3_version"
+    implementation "androidx.media3:media3-ui:$media3_version"
+    implementation "androidx.media3:media3-datasource-okhttp:$media3_version"
+    implementation "androidx.media3:media3-session:$media3_version"
 
     implementation 'com.airbnb.android:lottie:6.6.4'
     implementation 'com.github.Infomaniak:android-pdfview:3.2.11'
