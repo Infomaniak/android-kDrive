@@ -32,5 +32,5 @@ data class FileAction(
     val parentId: Int,
     val path: String,
 ) : Parcelable {
-    val actionType get() = enumValueOfOrNull<FileActivityType>(actionString) ?: FileActivityType.UNKNOWN
+    val actionType get() = enumValueOfOrNull<FileActivityType>(actionString.uppercase()) ?: FileActivityType.UNKNOWN
 }
