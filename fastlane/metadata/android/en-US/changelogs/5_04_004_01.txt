@@ -1,0 +1,3 @@
+- Fix files not refreshing by themselves
+- Better dropboxes errors handling
+- Manage myKSuite quotas locally

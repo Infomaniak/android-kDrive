@@ -1,0 +1,3 @@
+- Correction des fichiers ne s'actualisent pas d'eux-mêmes
+- Amélioration de la gestion d'erreurs des dropboxes
+- Gestion locale des quotas de myKSuite
