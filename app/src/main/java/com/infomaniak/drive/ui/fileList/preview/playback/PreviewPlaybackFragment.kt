@@ -69,7 +69,6 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         activity,
         isPlayingChanged = { isPlaying ->
             if (isPlaying) {
-                //TODO do this only for video
                 toggleFullscreen()
                 activity?.window?.addFlags(flagKeepScreenOn)
             } else {
@@ -92,7 +91,6 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private val exoPlayer: ExoPlayer by lazy { requireContext().getExoPlayer() }
     private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
-    //private var isInPictureInPictureMode = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPlaybackBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -153,12 +151,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                     binding.playerView.findViewById<View>(R.id.exo_play_pause).setOnClickListener {
                         requireActivity().shouldExcludeFromRecents(true)
                         startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
-                            putExtras(
-                                VideoActivityArgs(
-                                    fileId = file.id,
-                                    userDrive = previewSliderViewModel.userDrive
-                                ).toBundle()
-                            )
+                            putExtras(VideoActivityArgs(fileId = file.id).toBundle())
                         })
                     }
                 }
@@ -169,11 +162,9 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     override fun onDestroy() {
         super.onDestroy()
         // Compute the percentage of the video the user watched before exiting
-        //getMediaController { mediaController ->
         val currentMediaPercentage = exoPlayer.currentPosition.times(100)
         val currentMediaDuration = exoPlayer.contentDuration
         requireContext().trackMediaPlayerEvent("duration", currentMediaPercentage.div(currentMediaDuration + 1).toFloat())
-        //}
     }
 
     override fun onDestroyView() {

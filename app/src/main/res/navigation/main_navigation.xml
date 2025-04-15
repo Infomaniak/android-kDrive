@@ -357,11 +357,6 @@
         android:label="VideoActivity"
         tools:layout="@layout/activity_video">
         <argument
-            android:name="userDrive"
-            android:defaultValue="@null"
-            app:argType="com.infomaniak.drive.data.models.UserDrive"
-            app:nullable="true" />
-        <argument
             android:name="fileId"
             app:argType="integer" />
     </activity>

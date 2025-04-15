@@ -63,10 +63,10 @@ object PlaybackUtils {
 
     var activePlayer: ExoPlayer? = null
     var mediaSession: MediaSession? = null
-    var onServiceDisconnect: (() -> Unit)? = null
 
-    var mediaControllerFuture: ListenableFuture<MediaController>? = null
-    var mediaController: MediaController? = null
+    private var onServiceDisconnect: (() -> Unit)? = null
+    private var mediaControllerFuture: ListenableFuture<MediaController>? = null
+    private var mediaController: MediaController? = null
 
     fun setServiceOnDisconnect(onDisconnect: () -> Unit) {
         this.onServiceDisconnect = onDisconnect
@@ -84,6 +84,18 @@ object PlaybackUtils {
         } else {
             callback(mediaController!!)
         }
+    }
+
+    fun releasePlayer() {
+        activePlayer?.release()
+        activePlayer = null
+        mediaControllerFuture?.let { MediaController.releaseFuture(it) }
+        mediaControllerFuture = null
+        mediaController?.release()
+        mediaController = null
+        mediaSession?.release()
+        mediaSession = null
+        onServiceDisconnect = null
     }
 
     private fun getRunnable(callback: (MediaController) -> Unit): Runnable {
@@ -210,20 +222,6 @@ object PlaybackUtils {
 
     private fun Context.getBitmapLoader(): DataSourceBitmapLoader {
         return DataSourceBitmapLoader(DataSourceBitmapLoader.DEFAULT_EXECUTOR_SERVICE.get(), getDataSourceFactory())
-    }
-
-    fun gcd(p: Int, q: Int): Int {
-        return if (q == 0) p
-        else gcd(q, p % q)
-    }
-
-    fun getRatio(a: Int, b: Int): Rational {
-        val gcd = gcd(a, b)
-        //return if (a > b) {
-        return Rational(a / gcd, b / gcd)
-        //} else {
-        //return  Rational(b / gcd, a / gcd)
-        //}
     }
 
     fun getPictureInPictureParams(ratio: Rational): PictureInPictureParams? {

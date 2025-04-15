@@ -26,7 +26,6 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.annotation.CallSuper
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -34,7 +33,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.session.MediaController
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
@@ -84,14 +82,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     override lateinit var currentFile: File
 
-    //private val pipParams: PictureInPictureParams? by lazy { getPictureInPictureParams() }
-
-    private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
-
     var positionsForMedia: MutableMap<Int, Long> = mutableMapOf()
-
-    //private var mediaControllerFuture: ListenableFuture<MediaController>? = null
-    //private var mediaController: MediaController? = null
 
     // If the user want to navigate back and something is playing, we don't want to start PIP
     private var hasNavigateBack = false
@@ -110,8 +101,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             },
         )
     }
-
-    var lastSelectedFragment: Fragment? = null
 
     @SuppressLint("ClickableViewAccessibility")
     @CallSuper
@@ -196,29 +185,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         super.onPause()
         if (noPreviewList()) return
         previewSliderViewModel.currentPreview = currentFile
-
-        if (canStartPictureInPicture() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            (selectedFragment as? PreviewPlaybackFragment)?.getPlayer()?.let { currentPlayer ->
-                currentPlayer.currentMediaItem?.let { mediaItem ->
-                    //getMediaController { mediaController ->
-                    //mediaController.setMediaItem(mediaItem)
-                    //}
-                }
-                //pipParams?.let { requireActivity().enterPictureInPictureMode(it) }
-            }
-        }
-    }
-
-    @OptIn(UnstableApi::class)
-    override fun onResume() {
-        super.onResume()
-        (selectedFragment as? PreviewPlaybackFragment)?.getPlayer()?.let { currentPlayer ->
-            currentPlayer.currentMediaItem?.let {
-                //mediaController?.release()
-                //mediaController = null
-                //endMediaSession()
-            }
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -232,7 +198,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         super.onDestroyView()
         _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
         _binding = null
-        PlaybackUtils.mediaSession = null
     }
 
     override fun onDestroy() {
@@ -242,19 +207,10 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
 
         // Release Player
-        PlaybackUtils.mediaController?.apply {
-            release()
-            PlaybackUtils.mediaController = null
-            PlaybackUtils.mediaControllerFuture?.let { MediaController.releaseFuture(it) }
-            PlaybackUtils.mediaControllerFuture = null
-        }
+        PlaybackUtils.releasePlayer()
 
         super.onDestroy()
     }
-
-    @OptIn(UnstableApi::class)
-    private fun canStartPictureInPicture() =
-        !hasNavigateBack && currentFile.isVideo() && (selectedFragment as? PreviewPlaybackFragment)?.getPlayer()?.isPlaying == true
 
     private fun initViewPager() = with(binding) {
         viewPager.apply {

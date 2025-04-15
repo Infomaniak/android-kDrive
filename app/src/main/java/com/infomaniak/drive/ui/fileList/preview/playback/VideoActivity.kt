@@ -41,11 +41,10 @@ import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPla
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaController
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getPictureInPictureParams
-import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getRatio
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.setMediaSession
 import com.infomaniak.drive.utils.setupStatusBarForPreview
 import com.infomaniak.drive.utils.shouldExcludeFromRecents
 import com.infomaniak.drive.utils.toggleSystemBar
-
 
 @UnstableApi
 class VideoActivity : AppCompatActivity() {
@@ -56,14 +55,10 @@ class VideoActivity : AppCompatActivity() {
 
     private val flagKeepScreenOn by lazy { WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private val playerListener = PlayerListener(
         this,
         isPlayingChanged = { isPlaying ->
             if (isPlaying) {
-                exoPlayer.videoFormat?.let { videoFormat ->
-                    videoRatio = getRatio(videoFormat.width, videoFormat.height)
-                }
                 setPIPParams()
                 window?.addFlags(flagKeepScreenOn)
             } else {
@@ -86,8 +81,15 @@ class VideoActivity : AppCompatActivity() {
 
     private val executor by lazy { ContextCompat.getMainExecutor(this) }
     private val exoPlayer: ExoPlayer by lazy { getExoPlayer() }
-
-    private var videoRatio = Rational(1, 1)
+    private val videoRatio by lazy {
+        exoPlayer.videoFormat?.let { videoFormat ->
+            if (videoFormat.width > videoFormat.height) {
+                Rational(16, 9)
+            } else {
+                Rational(9, 16)
+            }
+        }
+    }
 
     private val finishPlayerReceiver = object : BroadcastReceiver() {
 
@@ -104,11 +106,13 @@ class VideoActivity : AppCompatActivity() {
 
         shouldExcludeFromRecents(true)
 
+        PlaybackUtils.activePlayer = exoPlayer
+
         binding.playerView.player = exoPlayer
         binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
         binding.playerView.controllerHideOnTouch = false
 
-        applicationContext.getMediaController(executor) {
+        getMediaController(executor) {
             exoPlayer.addListener(playerListener)
 
             loadVideo(intent)
@@ -137,17 +141,19 @@ class VideoActivity : AppCompatActivity() {
 
     private fun setPIPParams() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            getPictureInPictureParams(videoRatio)?.let {
-                setPictureInPictureParams(it)
+            videoRatio?.let {
+                getPictureInPictureParams(it)?.let { pictureInPictureParams ->
+                    setPictureInPictureParams(pictureInPictureParams)
+                }
             }
         }
     }
 
     private fun loadVideo(intent: Intent) {
         intent.extras?.let { VideoActivityArgs.fromBundle(it) }?.let {
-            it.userDrive
             if (it.fileId > 0) {
                 viewModel.currentFile = viewModel.getCurrentFile(it.fileId)
+                setMediaSession(isMediaVideo = viewModel.currentFile?.isVideo() == true)
                 exoPlayer.setMediaItem(getMediaItem(viewModel.currentFile!!, viewModel.offlineFile, viewModel.offlineIsComplete))
             } else {
                 finish()
