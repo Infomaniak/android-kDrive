@@ -132,6 +132,7 @@
     <string name="buttonEmpty">Svuota</string>
     <string name="buttonEmptyTrash">Svuota il cestino</string>
     <string name="buttonFileRights">Condivisione e diritti</string>
+    <string name="buttonGoToSettings">Vai alle impostazioni</string>
     <string name="buttonLeaveShare">Lascia la quota</string>
     <string name="buttonLike">Mi piace</string>
     <string name="buttonLogin">Connettiti</string>
@@ -553,6 +554,7 @@
     <string name="onBoardingTitle2">Collabora su una stessa punto e accresci la tua efficienza</string>
     <string name="onBoardingTitle3">Salva i tuoi ricordi in modo sicuro</string>
     <string name="pdfIsLocked">Il PDF è bloccato</string>
+    <string name="photoAccessDeniedDescription">L’accesso alle tue foto è disattivato. Puoi modificare questo parametro nelle impostazioni</string>
     <string name="picturesNoFile">Al momento non ci sono foto</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparazione all’importazione di 1 file</item>
