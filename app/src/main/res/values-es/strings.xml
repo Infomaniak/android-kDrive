@@ -132,6 +132,7 @@
     <string name="buttonEmpty">Vaciar</string>
     <string name="buttonEmptyTrash">Vaciar la papelera</string>
     <string name="buttonFileRights">Uso compartido y derechos</string>
+    <string name="buttonGoToSettings">Ir a los ajustes</string>
     <string name="buttonLeaveShare">Dejar de compartir</string>
     <string name="buttonLike">Me gusta</string>
     <string name="buttonLogin">Conectarse</string>
@@ -553,6 +554,7 @@
     <string name="onBoardingTitle2">Trabaja en grupo en un mismo lugar y gana en eficacia</string>
     <string name="onBoardingTitle3">Haz copia de seguridad de tus recuerdos</string>
     <string name="pdfIsLocked">Tu PDF está bloqueado</string>
+    <string name="photoAccessDeniedDescription">El acceso a tus fotos está desactivado. Puedes cambiar este parámetro en los ajustes</string>
     <string name="picturesNoFile">Todavía no hay fotos</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparando la importación de 1 archivo</item>

@@ -132,6 +132,7 @@
     <string name="buttonEmpty">Leeren</string>
     <string name="buttonEmptyTrash">Papierkorb leeren</string>
     <string name="buttonFileRights">Freigabe und Rechte</string>
+    <string name="buttonGoToSettings">Zu den Einstellungen gehen</string>
     <string name="buttonLeaveShare">Freigabe verlassen</string>
     <string name="buttonLike">Gefällt mir</string>
     <string name="buttonLogin">Anmelden</string>
@@ -553,6 +554,7 @@
     <string name="onBoardingTitle2">Arbeiten Sie am selben Ort zusammen und werden Sie effizienter</string>
     <string name="onBoardingTitle3">Speichern Sie Ihre Erinnerungen völlig sicher</string>
     <string name="pdfIsLocked">Ihr PDF ist gesperrt</string>
+    <string name="photoAccessDeniedDescription">Der Zugriff auf Ihre Fotos ist deaktiviert, Sie können diesen Parameter unter Einstellungen ändern</string>
     <string name="picturesNoFile">Derzeit kein Foto</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Vorbereitung auf den Import von 1 Datei</item>

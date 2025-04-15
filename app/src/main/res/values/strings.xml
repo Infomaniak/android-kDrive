@@ -143,6 +143,7 @@
     <string name="buttonEmpty">Empty</string>
     <string name="buttonEmptyTrash">Empty recycle bin</string>
     <string name="buttonFileRights">Sharing and rights</string>
+    <string name="buttonGoToSettings">Go to Settings</string>
     <string name="buttonLeaveShare">Leave share</string>
     <string name="buttonLike">Like</string>
     <string name="buttonLogin">Log in</string>
@@ -564,6 +565,7 @@
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
     <string name="pdfIsLocked">Your PDF is locked</string>
+    <string name="photoAccessDeniedDescription">Access to your photos is disabled: you can change this in the Settings</string>
     <string name="picturesNoFile">No photo at this time</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparing to upload 1 file</item>
