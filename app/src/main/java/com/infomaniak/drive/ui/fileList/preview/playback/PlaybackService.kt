@@ -27,9 +27,6 @@ import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.setServic
 @UnstableApi
 class PlaybackService : MediaSessionService() {
 
-    private var mediaSession: MediaSession? = null
-    //private var exoPlayer: ExoPlayer? = null
-
     override fun onCreate() {
         super.onCreate()
 
@@ -37,16 +34,11 @@ class PlaybackService : MediaSessionService() {
             release()
             stopSelf()
         }
-
-        //exoPlayer = getExoPlayer().apply {
-        //setMediaSession(this)
-        mediaSession = PlaybackUtils.mediaSession
-        //}
     }
 
     // The user dismissed the app from the recent tasks
     override fun onTaskRemoved(rootIntent: Intent?) {
-        mediaSession?.player?.let { player ->
+        PlaybackUtils.mediaSession?.player?.let { player ->
             if (!player.playWhenReady
                 || player.mediaItemCount == 0
                 || player.playbackState == Player.STATE_ENDED
@@ -58,7 +50,7 @@ class PlaybackService : MediaSessionService() {
         }
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = PlaybackUtils.mediaSession
 
     override fun onDestroy() {
         release()
@@ -66,11 +58,6 @@ class PlaybackService : MediaSessionService() {
     }
 
     private fun release() {
-        mediaSession?.run {
-            player.release()
-            release()
-            mediaSession = null
-        }
+        PlaybackUtils.releasePlayer()
     }
-
 }
