@@ -17,10 +17,13 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
@@ -52,11 +55,8 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.hideProgressCatching
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgressCatching
-import com.infomaniak.lib.core.utils.whenResultIsOk
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
@@ -69,6 +69,8 @@ class SyncSettingsActivity : BaseActivity() {
     private val binding: ActivitySyncSettingsBinding by lazy { ActivitySyncSettingsBinding.inflate(layoutInflater) }
 
     private val uiSettings by lazy { UiSettings(this) }
+
+    private val drivePermissions by lazy { DrivePermissions().also { it.registerPermissions(this) } }
 
     private val syncSettingsViewModel: SyncSettingsViewModel by viewModels()
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
@@ -89,10 +91,6 @@ class SyncSettingsActivity : BaseActivity() {
 
         setOnBackPressed()
 
-        val permission = DrivePermissions().apply {
-            registerPermissions(this@SyncSettingsActivity)
-        }
-
         activateSyncSwitch.isChecked = AccountUtils.isEnableAppSync()
         saveSettingVisibility(activateSyncSwitch.isChecked)
 
@@ -112,7 +110,7 @@ class SyncSettingsActivity : BaseActivity() {
             savePicturesDate = uiSettings.syncSettingsDate,
         )
 
-        setupListeners(permission, oldSyncVideoValue, oldCreateDatedSubFoldersValue, oldDeleteAfterSyncValue)
+        setupListeners(oldSyncVideoValue, oldCreateDatedSubFoldersValue, oldDeleteAfterSyncValue)
 
         syncVideoSwitch.isChecked = oldSyncVideoValue
         createDatedSubFoldersSwitch.isChecked = oldCreateDatedSubFoldersValue
@@ -138,7 +136,6 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun ActivitySyncSettingsBinding.setupListeners(
-        permission: DrivePermissions,
         oldSyncVideoValue: Boolean,
         oldCreateDatedSubFoldersValue: Boolean,
         oldDeleteAfterSyncValue: Boolean,
@@ -149,9 +146,13 @@ class SyncSettingsActivity : BaseActivity() {
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
             saveSettingVisibility(isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
-            if (isChecked) permission.checkSyncPermissions()
+            if (isChecked && !drivePermissions.checkUserChoiceStoragePermission()) {
+                drivePermissions.checkSyncPermissions()
+            }
             changeSaveButtonStatus()
         }
+
+        photoAccessDeniedButton.setOnClickListener { context.openSystemStorageSettings() }
 
         mediaFolders.setOnClickListener {
             SelectMediaFoldersDialog().show(supportFragmentManager, "SyncSettingsSelectMediaFoldersDialog")
@@ -184,7 +185,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         saveButton.initProgress(this@SyncSettingsActivity)
         saveButton.setOnClickListener {
-            if (permission.checkSyncPermissions()) saveSettings()
+            if (drivePermissions.checkSyncPermissions()) saveSettings()
         }
     }
 
@@ -326,7 +327,10 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun saveSettingVisibility(isVisible: Boolean) = with(binding) {
-        photoAccessDeniedLayout.isVisible = isVisible
+        val hasPermissions = drivePermissions.checkSyncPermissions(requestPermission = false)
+        photoAccessDeniedLayout.isVisible = isVisible && !hasPermissions
+        settingsLayout.isVisible = isVisible && hasPermissions
+
         mediaFoldersSettingsVisibility(isVisible && syncSettingsViewModel.syncFolderId.value != null)
         saveSettingsTitle.isVisible = isVisible
         saveSettingsLayout.isVisible = isVisible
@@ -450,5 +454,9 @@ class SyncSettingsActivity : BaseActivity() {
 
     private fun trackPhotoSyncEvent(name: String, value: Boolean? = null) {
         trackEvent("photoSync", name, value = value?.toFloat())
+    }
+
+    fun Context.openSystemStorageSettings() {
+        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)))
     }
 }

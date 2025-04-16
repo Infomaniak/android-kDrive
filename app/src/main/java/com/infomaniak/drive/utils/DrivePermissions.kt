@@ -108,6 +108,14 @@ class DrivePermissions {
         return checkWriteStoragePermission(requestPermission)
     }
 
+    fun checkUserChoiceStoragePermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            activity.hasPermissions(arrayOf(READ_MEDIA_VISUAL_USER_SELECTED))
+        } else {
+            false
+        }
+    }
+
     /**
      * Checks if the user has already confirmed write permission
      */
