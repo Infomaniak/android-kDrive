@@ -326,6 +326,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun saveSettingVisibility(isVisible: Boolean) = with(binding) {
+        photoAccessDeniedLayout.isVisible = isVisible
         mediaFoldersSettingsVisibility(isVisible && syncSettingsViewModel.syncFolderId.value != null)
         saveSettingsTitle.isVisible = isVisible
         saveSettingsLayout.isVisible = isVisible
