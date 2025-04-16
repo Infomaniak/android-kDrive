@@ -98,436 +98,459 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:text="@string/photoAccessDeniedDescription"
-                android:visibility="gone" />
-
-            <com.google.android.material.button.MaterialButton
-                style="@style/TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginBottom="@dimen/marginStandardMedium"
-                android:text="@string/buttonGoToSettings"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/saveSettingsTitle"
-                style="@style/Subtitle2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:text="@string/syncSettingsSaveOn"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/saveSettingsLayout"
-                style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:layout_marginTop="@dimen/marginStandardSmall"
-                android:layout_marginBottom="@dimen/marginStandard"
-                android:visibility="gone"
-                tools:visibility="visible">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
+                    android:id="@+id/photoAccessDeniedLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/selectDrive"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/buttonHeight"
-                        android:background="?selectableItemBackground">
-
-                        <ImageView
-                            android:id="@+id/driveIcon"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_marginStart="@dimen/marginStandard"
-                            android:src="@drawable/ic_drive"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-
-                        <TextView
-                            android:id="@+id/driveName"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandardMedium"
-                            android:ellipsize="end"
-                            android:maxLines="2"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/switchDrive"
-                            app:layout_constraintStart_toEndOf="@id/driveIcon"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:text="@string/selectDriveTitle" />
-
-                        <ImageView
-                            android:id="@+id/switchDrive"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            android:src="@drawable/ic_chevron_right"
-                            android:visibility="gone"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription"
-                            tools:visibility="visible" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <View
-                        android:id="@+id/selectDivider"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider"
-                        android:visibility="gone"
-                        tools:visibility="visible" />
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/selectPath"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/buttonHeight"
-                        android:background="?selectableItemBackground"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-                        <ImageView
-                            android:id="@+id/folderIcon"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_marginStart="@dimen/marginStandard"
-                            android:src="@drawable/ic_folder_filled"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-
-                        <TextView
-                            android:id="@+id/pathName"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandardMedium"
-                            android:ellipsize="end"
-                            android:maxLines="2"
-                            android:text="@string/selectFolderTitle"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/switchPath"
-                            app:layout_constraintStart_toEndOf="@id/folderIcon"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/switchPath"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            android:src="@drawable/ic_chevron_right"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:ignore="ContentDescription" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:id="@+id/mediaFoldersSettingsTitle"
-                style="@style/Subtitle2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:text="@string/selectMediaFoldersTitle"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/mediaFoldersSettingsLayout"
-                style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:layout_marginTop="@dimen/marginStandardSmall"
-                android:layout_marginBottom="@dimen/marginStandard"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/mediaFolders"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/buttonHeight"
-                    android:background="?selectableItemBackground"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
                     tools:visibility="visible">
 
                     <TextView
-                        android:id="@+id/mediaFoldersTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
+                        android:id="@+id/photoAccessDeniedTitle"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/marginStandard"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/mediaFoldersChevron"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:text="@string/noSelectMediaFolders" />
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:text="@string/photoAccessDeniedDescription" />
 
-                    <ImageView
-                        android:id="@+id/mediaFoldersChevron"
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/photoAccessDeniedButton"
+                        style="@style/TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/marginStandardMedium"
-                        android:src="@drawable/ic_chevron_right"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:id="@+id/syncSettingsTitle"
-                style="@style/Subtitle2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:text="@string/settingsTitle"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/syncSettingsLayout"
-                style="@style/CardViewInfomaniak"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/marginStandard"
-                android:layout_marginTop="@dimen/marginStandardSmall"
-                android:layout_marginBottom="@dimen/marginStandard"
-                android:visibility="gone"
-                tools:visibility="visible">
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="@dimen/marginStandardMedium"
+                        android:text="@string/buttonGoToSettings" />
+                </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:id="@+id/settingsLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/syncVideo"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/buttonHeight">
-
-                        <TextView
-                            android:id="@+id/syncVideoTitle"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandard"
-                            android:text="@string/syncSettingsButtonSyncVideo"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/syncVideoSwitch"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/syncVideoSwitch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <TextView
+                        android:id="@+id/saveSettingsTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="?selectableItemBackground"
-                        android:paddingVertical="@dimen/marginStandardMedium">
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:text="@string/syncSettingsSaveOn"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
-                        <TextView
-                            android:id="@+id/createDatedSubFoldersTitle"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandard"
-                            android:text="@string/createDatedSubFoldersTitle"
-                            app:layout_constraintBottom_toBottomOf="@id/createDatedSubFoldersSwitch"
-                            app:layout_constraintEnd_toStartOf="@id/createDatedSubFoldersSwitch"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/createDatedSubFoldersSwitch" />
-
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/createDatedSubFoldersSwitch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            app:layout_constraintBottom_toTopOf="@id/createDatedSubFoldersDescription"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/createDatedSubFoldersDescription"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="@dimen/marginStandard"
-                            android:text="@string/createDatedSubFoldersDescription"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/createDatedSubFoldersSwitch"
-                            app:layout_constraintVertical_chainStyle="packed" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/saveSettingsLayout"
+                        style="@style/CardViewInfomaniak"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="?selectableItemBackground"
-                        android:paddingVertical="@dimen/marginStandardMedium">
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginTop="@dimen/marginStandardSmall"
+                        android:layout_marginBottom="@dimen/marginStandard"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
-                        <TextView
-                            android:id="@+id/deletePicturesAfterSyncTitle"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/marginStandard"
-                            android:text="@string/deletePicturesTitle"
-                            app:layout_constraintBottom_toBottomOf="@id/deletePicturesAfterSyncSwitch"
-                            app:layout_constraintEnd_toStartOf="@id/deletePicturesAfterSyncSwitch"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@id/deletePicturesAfterSyncSwitch" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
 
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/deletePicturesAfterSyncSwitch"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/marginStandardMedium"
-                            app:layout_constraintBottom_toTopOf="@id/deletePicturesAfterSyncDescription"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/selectDrive"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/buttonHeight"
+                                android:background="?selectableItemBackground">
 
-                        <TextView
-                            android:id="@+id/deletePicturesAfterSyncDescription"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginHorizontal="@dimen/marginStandard"
-                            android:text="@string/deletePicturesDescription"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/deletePicturesAfterSyncSwitch"
-                            app:layout_constraintVertical_chainStyle="packed" />
+                                <ImageView
+                                    android:id="@+id/driveIcon"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_marginStart="@dimen/marginStandard"
+                                    android:src="@drawable/ic_drive"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    tools:ignore="ContentDescription" />
 
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                                <TextView
+                                    android:id="@+id/driveName"
+                                    style="@style/Subtitle2"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/marginStandardMedium"
+                                    android:ellipsize="end"
+                                    android:maxLines="2"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toStartOf="@id/switchDrive"
+                                    app:layout_constraintStart_toEndOf="@id/driveIcon"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    tools:text="@string/selectDriveTitle" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
+                                <ImageView
+                                    android:id="@+id/switchDrive"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="@dimen/marginStandardMedium"
+                                    android:src="@drawable/ic_chevron_right"
+                                    android:visibility="gone"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    tools:ignore="ContentDescription"
+                                    tools:visibility="visible" />
+                            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/syncDate"
+                            <View
+                                android:id="@+id/selectDivider"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/divider"
+                                android:visibility="gone"
+                                tools:visibility="visible" />
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/selectPath"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/buttonHeight"
+                                android:background="?selectableItemBackground"
+                                android:visibility="gone"
+                                tools:visibility="visible">
+
+                                <ImageView
+                                    android:id="@+id/folderIcon"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_marginStart="@dimen/marginStandard"
+                                    android:src="@drawable/ic_folder_filled"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    tools:ignore="ContentDescription" />
+
+                                <TextView
+                                    android:id="@+id/pathName"
+                                    style="@style/Subtitle2"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/marginStandardMedium"
+                                    android:ellipsize="end"
+                                    android:maxLines="2"
+                                    android:text="@string/selectFolderTitle"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toStartOf="@id/switchPath"
+                                    app:layout_constraintStart_toEndOf="@id/folderIcon"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+                                <ImageView
+                                    android:id="@+id/switchPath"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="@dimen/marginStandardMedium"
+                                    android:src="@drawable/ic_chevron_right"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    tools:ignore="ContentDescription" />
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:id="@+id/mediaFoldersSettingsTitle"
+                        style="@style/Subtitle2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:animateLayoutChanges="true"
-                        android:background="?selectableItemBackground"
-                        android:paddingHorizontal="@dimen/marginStandard"
-                        android:paddingTop="@dimen/marginStandard"
-                        android:paddingBottom="@dimen/marginStandardMedium">
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:text="@string/selectMediaFoldersTitle"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
-                        <TextView
-                            android:id="@+id/syncDateTitle"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:text="@string/syncSettingsButtonSaveDate"
-                            app:layout_constraintEnd_toStartOf="@id/syncDateValue"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/syncDateValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/marginStandardSmall"
-                            app:layout_constraintBottom_toTopOf="@id/syncDatePicker"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:text="@string/syncSettingsSaveDateNowValue" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/syncDatePicker"
-                            style="@style/ButtonInfomaniak"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:backgroundTint="@color/backgroundSecondary"
-                            android:textColor="@color/title"
-                            android:visibility="gone"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toBottomOf="@+id/syncDateValue"
-                            tools:text="25 janv. 2022"
-                            tools:visibility="visible" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/syncPeriodicity"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/mediaFoldersSettingsLayout"
+                        style="@style/CardViewInfomaniak"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="?selectableItemBackground"
-                        android:padding="@dimen/marginStandard">
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginTop="@dimen/marginStandardSmall"
+                        android:layout_marginBottom="@dimen/marginStandard"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
-                        <TextView
-                            android:id="@+id/syncPeriodicityTitle"
-                            style="@style/Subtitle2"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:text="@string/syncSettingsButtonSyncPeriodicity"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/syncPeriodicityValue"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/mediaFolders"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/buttonHeight"
+                            android:background="?selectableItemBackground"
+                            tools:visibility="visible">
 
-                        <TextView
-                            android:id="@+id/syncPeriodicityValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:text="@string/syncSettingsSyncPeriodicityInstantValue" />
+                            <TextView
+                                android:id="@+id/mediaFoldersTitle"
+                                style="@style/Subtitle2"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/marginStandard"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toStartOf="@id/mediaFoldersChevron"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                tools:text="@string/noSelectMediaFolders" />
 
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                            <ImageView
+                                android:id="@+id/mediaFoldersChevron"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="@dimen/marginStandardMedium"
+                                android:src="@drawable/ic_chevron_right"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                tools:ignore="ContentDescription" />
 
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <TextView
+                        android:id="@+id/syncSettingsTitle"
+                        style="@style/Subtitle2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:text="@string/settingsTitle"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/syncSettingsLayout"
+                        style="@style/CardViewInfomaniak"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/marginStandard"
+                        android:layout_marginTop="@dimen/marginStandardSmall"
+                        android:layout_marginBottom="@dimen/marginStandard"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical">
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/syncVideo"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/buttonHeight">
+
+                                <TextView
+                                    android:id="@+id/syncVideoTitle"
+                                    style="@style/Subtitle2"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/marginStandard"
+                                    android:text="@string/syncSettingsButtonSyncVideo"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toStartOf="@id/syncVideoSwitch"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+                                <com.google.android.material.switchmaterial.SwitchMaterial
+                                    android:id="@+id/syncVideoSwitch"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="@dimen/marginStandardMedium"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/divider" />
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="?selectableItemBackground"
+                                android:paddingVertical="@dimen/marginStandardMedium">
+
+                                <TextView
+                                    android:id="@+id/createDatedSubFoldersTitle"
+                                    style="@style/Subtitle2"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/marginStandard"
+                                    android:text="@string/createDatedSubFoldersTitle"
+                                    app:layout_constraintBottom_toBottomOf="@id/createDatedSubFoldersSwitch"
+                                    app:layout_constraintEnd_toStartOf="@id/createDatedSubFoldersSwitch"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="@id/createDatedSubFoldersSwitch" />
+
+                                <com.google.android.material.switchmaterial.SwitchMaterial
+                                    android:id="@+id/createDatedSubFoldersSwitch"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="@dimen/marginStandardMedium"
+                                    app:layout_constraintBottom_toTopOf="@id/createDatedSubFoldersDescription"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+                                <TextView
+                                    android:id="@+id/createDatedSubFoldersDescription"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginHorizontal="@dimen/marginStandard"
+                                    android:text="@string/createDatedSubFoldersDescription"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@id/createDatedSubFoldersSwitch"
+                                    app:layout_constraintVertical_chainStyle="packed" />
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/divider" />
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="?selectableItemBackground"
+                                android:paddingVertical="@dimen/marginStandardMedium">
+
+                                <TextView
+                                    android:id="@+id/deletePicturesAfterSyncTitle"
+                                    style="@style/Subtitle2"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/marginStandard"
+                                    android:text="@string/deletePicturesTitle"
+                                    app:layout_constraintBottom_toBottomOf="@id/deletePicturesAfterSyncSwitch"
+                                    app:layout_constraintEnd_toStartOf="@id/deletePicturesAfterSyncSwitch"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="@id/deletePicturesAfterSyncSwitch" />
+
+                                <com.google.android.material.switchmaterial.SwitchMaterial
+                                    android:id="@+id/deletePicturesAfterSyncSwitch"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="@dimen/marginStandardMedium"
+                                    app:layout_constraintBottom_toTopOf="@id/deletePicturesAfterSyncDescription"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+                                <TextView
+                                    android:id="@+id/deletePicturesAfterSyncDescription"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginHorizontal="@dimen/marginStandard"
+                                    android:text="@string/deletePicturesDescription"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@id/deletePicturesAfterSyncSwitch"
+                                    app:layout_constraintVertical_chainStyle="packed" />
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/divider" />
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/syncDate"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:animateLayoutChanges="true"
+                                android:background="?selectableItemBackground"
+                                android:paddingHorizontal="@dimen/marginStandard"
+                                android:paddingTop="@dimen/marginStandard"
+                                android:paddingBottom="@dimen/marginStandardMedium">
+
+                                <TextView
+                                    android:id="@+id/syncDateTitle"
+                                    style="@style/Subtitle2"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/syncSettingsButtonSaveDate"
+                                    app:layout_constraintEnd_toStartOf="@id/syncDateValue"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+                                <TextView
+                                    android:id="@+id/syncDateValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="@dimen/marginStandardSmall"
+                                    app:layout_constraintBottom_toTopOf="@id/syncDatePicker"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    tools:text="@string/syncSettingsSaveDateNowValue" />
+
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/syncDatePicker"
+                                    style="@style/ButtonInfomaniak"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:backgroundTint="@color/backgroundSecondary"
+                                    android:textColor="@color/title"
+                                    android:visibility="gone"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@+id/syncDateValue"
+                                    tools:text="25 janv. 2022"
+                                    tools:visibility="visible" />
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@color/divider" />
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
+                                android:id="@+id/syncPeriodicity"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="?selectableItemBackground"
+                                android:padding="@dimen/marginStandard">
+
+                                <TextView
+                                    android:id="@+id/syncPeriodicityTitle"
+                                    style="@style/Subtitle2"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/syncSettingsButtonSyncPeriodicity"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toStartOf="@id/syncPeriodicityValue"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent" />
+
+                                <TextView
+                                    android:id="@+id/syncPeriodicityValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    tools:text="@string/syncSettingsSyncPeriodicityInstantValue" />
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveButton"
