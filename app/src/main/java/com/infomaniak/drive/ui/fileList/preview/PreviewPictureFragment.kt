@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -27,9 +28,10 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
-import coil.load
+import coil.request.ErrorResult
 import coil.request.ImageRequest
-import com.infomaniak.drive.R
+import coil.request.ImageRequest.Listener
+import coil.request.SuccessResult
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
@@ -45,7 +47,16 @@ class PreviewPictureFragment : PreviewFragment() {
 
     private var binding: FragmentPreviewPictureBinding by safeBinding()
     private val loadTimer by lazy {
-        createRefreshTimer(milliseconds = 400) { binding.noThumbnailLayout.root.isVisible = true }
+        createRefreshTimer(milliseconds = LOADER_TIMEOUT_MS) {
+            binding.loader.isGone = true
+            binding.noThumbnailLayout.root.isVisible = true
+            binding.imageView.isGone = true
+        }
+    }
+    private val previewRequestListener = object : Listener {
+        override fun onStart(request: ImageRequest) = binding.onPreviewRequestStart()
+        override fun onSuccess(request: ImageRequest, result: SuccessResult) = binding.onPreviewRequestSuccess()
+        override fun onError(request: ImageRequest, result: ErrorResult) = binding.onPreviewRequestError()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -58,10 +69,7 @@ class PreviewPictureFragment : PreviewFragment() {
         if (noCurrentFile()) return
 
         noThumbnailLayout.apply {
-            previewDescription.isGone = true
             fileIcon.setImageResource(file.getFileType().icon)
-
-            bigOpenWithButton.isGone = true
             bigOpenWithButton.setOnClickListener { openWithClicked() }
         }
 
@@ -77,39 +85,59 @@ class PreviewPictureFragment : PreviewFragment() {
     }
 
     private fun loadImage() = with(binding) {
-        val imageViewDisposable = imageView.load(ApiRoutes.getThumbnailUrl(file)) { placeholder(R.drawable.coil_hack) }
+
+        suspend fun setImageDrawable(drawable: Drawable) = withContext(Dispatchers.Main) {
+            imageView.setImageDrawable(drawable)
+        }
+
         val imageLoader = Coil.imageLoader(requireContext())
+        val thumbnailPreviewRequest = buildThumbnailPreviewRequest()
         val previewRequest = buildPreviewRequest()
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            imageLoader.execute(previewRequest).drawable?.let { drawable ->
-                if (!imageViewDisposable.isDisposed) imageViewDisposable.dispose()
-                withContext(Dispatchers.Main) { imageView.load(drawable) { crossfade(false) } }
-            }
+            imageLoader.execute(thumbnailPreviewRequest).drawable?.let { setImageDrawable(it) }
+            imageLoader.execute(previewRequest).drawable?.let { setImageDrawable(it) }
         }
     }
 
-    private fun buildPreviewRequest(): ImageRequest = with(binding) {
-        loadTimer.start()
+    private fun buildThumbnailPreviewRequest(): ImageRequest {
+        return ImageRequest.Builder(requireContext())
+            .data(ApiRoutes.getThumbnailUrl(file))
+            .listener(previewRequestListener)
+            .build()
+    }
+
+    private fun buildPreviewRequest(): ImageRequest {
         val offlineFile = if (file.isOffline) getOfflineFile() else null
 
         return ImageRequest.Builder(requireContext())
             .data(offlineFile ?: ApiRoutes.getImagePreviewUrl(file))
-            .listener(
-                onError = { _, _ ->
-                    noThumbnailLayout.apply {
-                        fileName.text = file.name
-                        previewDescription.isVisible = true
-                        bigOpenWithButton.isVisible = true
-                    }
-                    imageView.isGone = true
-                },
-                onSuccess = { _, _ ->
-                    loadTimer.cancel()
-                    noThumbnailLayout.root.isGone = true
-                },
-            )
+            .listener(previewRequestListener)
             .build()
+    }
+
+    private fun FragmentPreviewPictureBinding.onPreviewRequestStart() {
+        if (imageView.isVisible.not() && noThumbnailLayout.root.isVisible.not()) {
+            loader.isVisible = true
+            loadTimer.start()
+        }
+    }
+
+    private fun FragmentPreviewPictureBinding.onPreviewRequestSuccess() {
+        loadTimer.cancel()
+        loader.isGone = true
+        noThumbnailLayout.root.isGone = true
+        imageView.isVisible = true
+    }
+
+    private fun FragmentPreviewPictureBinding.onPreviewRequestError() {
+        loadTimer.cancel()
+        loader.isGone = true
+        noThumbnailLayout.apply {
+            fileName.text = file.name
+            root.isVisible = true
+        }
+        imageView.isGone = true
     }
 
     private fun getOfflineFile(): IOFile? {
@@ -149,5 +177,9 @@ class PreviewPictureFragment : PreviewFragment() {
 
             setOnClickListener { toggleFullscreen() }
         }
+    }
+
+    companion object {
+        private const val LOADER_TIMEOUT_MS = 30_000L
     }
 }

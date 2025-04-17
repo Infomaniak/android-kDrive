@@ -22,6 +22,15 @@
     android:layout_height="match_parent"
     tools:context=".ui.fileList.preview.PreviewPictureFragment">
 
+    <ProgressBar
+        android:id="@+id/loader"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
     <include
         android:id="@+id/noThumbnailLayout"
         layout="@layout/fragment_preview_others"
@@ -35,6 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
+        android:visibility="gone"
         tools:src="@tools:sample/backgrounds/scenic" />
 
 </RelativeLayout>
