@@ -22,15 +22,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:background="@color/previewBackground"
-    tools:context=".ui.fileList.preview.PreviewVideoFragment">
+    tools:context=".ui.fileList.preview.playback.PreviewPlaybackFragment">
 
-    <com.google.android.exoplayer2.ui.StyledPlayerView
+    <androidx.media3.ui.PlayerView
         android:id="@+id/playerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:show_next_button="false"
         app:show_previous_button="false"
         app:show_shuffle_button="false"
+        app:show_subtitle_button="false"
         app:surface_type="texture_view" />
 
     <include
@@ -40,4 +41,5 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:visibility="gone" />
+
 </RelativeLayout>

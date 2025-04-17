@@ -18,16 +18,21 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.CallSuper
+import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
@@ -38,11 +43,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
-import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
-import com.infomaniak.drive.ui.fileList.preview.PreviewPDFFragment
-import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderAdapter
-import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
+import com.infomaniak.drive.ui.fileList.preview.*
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
@@ -55,6 +58,7 @@ import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@OptIn(UnstableApi::class)
 abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
 
     protected var _binding: FragmentPreviewSliderBinding? = null
@@ -71,7 +75,15 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private var isOverlayShown = true
 
     override val currentContext by lazy { requireContext() }
+
+    private var selectedFragment: Fragment? = null
+
     override lateinit var currentFile: File
+
+    var positionsForMedia: MutableMap<Int, Long> = mutableMapOf()
+
+    // If the user want to navigate back and something is playing, we don't want to start PIP
+    private var hasNavigateBack = false
 
     // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
     // it implements
@@ -102,7 +114,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         header.apply {
             setupWindowInsetsListener(root, bottomSheetView) { pdfContainer.setMargins(right = it?.right ?: 0) }
             setup(
-                onBackClicked = findNavController()::popBackStack,
+                onBackClicked = ::navigateBack,
                 onOpenWithClicked = ::openWith,
                 onEditClicked = { openOnlyOfficeDocument(currentFile, mainViewModel.hasNetwork) },
             )
@@ -119,34 +131,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             userDrive = previewSliderViewModel.userDrive,
         )
 
-        viewPager.apply {
-            adapter = previewSliderAdapter
-            offscreenPageLimit = 1
-
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    currentFile = previewSliderAdapter.getFile(position)
-                    previewSliderViewModel.currentPreview = currentFile
-
-                    var shouldDisplayPageNumber = false
-
-                    childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
-                        this.trackScreen()
-                        shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
-                    }
-
-                    with(header) {
-                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
-                        setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
-                        toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
-                    }
-                    setPrintButtonVisibility(isGone = !currentFile.isPDF())
-
-                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
-                    updateBottomSheetWithCurrentFile()
-                }
-            })
-        }
+        initViewPager()
 
         previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
             if (!currentFile.isOnlyOfficePreview()) header.toggleOpenWithVisibility(isVisible = !isDownloading)
@@ -167,6 +152,16 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 viewPager.setCurrentItem(0, false)
             }
         }
+
+        addBackPressedCallback()
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        if (isInPictureInPictureMode) {
+            binding.header.toggleVisibility(isVisible = false)
+            toggleBottomSheet(shouldShow = false)
+        }
     }
 
     override fun onStart() {
@@ -174,17 +169,20 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         requireActivity().setupStatusBarForPreview()
     }
 
+    @OptIn(UnstableApi::class)
     override fun onPause() {
         super.onPause()
         if (noPreviewList()) return
         previewSliderViewModel.currentPreview = currentFile
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onStop() {
         clearEdgeToEdge()
         super.onStop()
     }
 
+    @OptIn(UnstableApi::class)
     override fun onDestroyView() {
         super.onDestroyView()
         _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
@@ -197,7 +195,64 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             mainViewModel.currentPreviewFileList = LinkedHashMap()
         }
 
+        // Release Player
+        PlaybackUtils.releasePlayer()
+
         super.onDestroy()
+    }
+
+    private fun initViewPager() = with(binding) {
+        viewPager.apply {
+            adapter = previewSliderAdapter
+            offscreenPageLimit = 1
+
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                @RequiresApi(Build.VERSION_CODES.N)
+                @OptIn(UnstableApi::class)
+                override fun onPageSelected(position: Int) {
+
+                    currentFile = previewSliderAdapter.getFile(position)
+                    previewSliderViewModel.currentPreview = currentFile
+
+                    var shouldDisplayPageNumber = false
+
+                    selectedFragment =
+                        childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
+                            this.trackScreen()
+                            shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
+                        }
+
+                    // Implementation of onFragmentUnselected to handle resume of media to the same position, only
+                    // for PreviewPlaybackFragment.
+                    childFragmentManager.fragments.filterIsInstance<PreviewPlaybackFragment>().forEach { fragment ->
+                        if (fragment != selectedFragment) {
+                            fragment.onFragmentUnselected()
+                        }
+                    }
+
+                    with(header) {
+                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
+                        setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
+                        toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
+                    }
+
+                    setPrintButtonVisibility(isGone = !currentFile.isPDF())
+                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
+                    updateBottomSheetWithCurrentFile()
+                }
+            })
+        }
+    }
+
+    private fun addBackPressedCallback() {
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner) { navigateBack() }
+    }
+
+    private fun navigateBack() {
+        hasNavigateBack = true
+        findNavController().popBackStack()
     }
 
     protected fun noPreviewList() = mainViewModel.currentPreviewFileList.isEmpty()
