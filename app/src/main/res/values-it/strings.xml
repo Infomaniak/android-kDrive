@@ -69,7 +69,7 @@
     <string name="allPathTitle">Ubicazione</string>
     <string name="allPdf">PDF</string>
     <string name="allPermissionNeeded">Per poterli importare e salvarli, occorre autorizzare l’accesso ai tuoi file</string>
-    <string name="allPermissionNeededAndroid13">Per poterli importare e salvarli, occorre autorizzare l’accesso ai tuoi media file. Ma anche consentire le notifiche per seguire i progressi.</string>
+    <string name="allPermissionNeededAndroid13">Per poterli importare e salvarli, occorre autorizzare l’accesso a tuti i media file. Ma anche consentire le notifiche per seguire i progressi.</string>
     <string name="allPictures">Immagini</string>
     <string name="allRootName">Root del kDrive %s</string>
     <string name="allToday">Oggi</string>
