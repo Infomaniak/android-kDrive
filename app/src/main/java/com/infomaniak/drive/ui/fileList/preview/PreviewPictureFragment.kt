@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -84,22 +85,18 @@ class PreviewPictureFragment : PreviewFragment() {
     }
 
     private fun loadImage() = with(binding) {
+
+        suspend fun setImageDrawable(drawable: Drawable) = withContext(Dispatchers.Main) {
+            imageView.setImageDrawable(drawable)
+        }
+
         val imageLoader = Coil.imageLoader(requireContext())
-        val previewRequest = buildPreviewRequest()
         val thumbnailPreviewRequest = buildThumbnailPreviewRequest()
+        val previewRequest = buildPreviewRequest()
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            imageLoader.execute(thumbnailPreviewRequest).drawable?.let { drawable ->
-                withContext(Dispatchers.Main) {
-                    imageView.setImageDrawable(drawable)
-                }
-            }
-
-            imageLoader.execute(previewRequest).drawable?.let { drawable ->
-                withContext(Dispatchers.Main) {
-                    imageView.setImageDrawable(drawable)
-                }
-            }
+            imageLoader.execute(thumbnailPreviewRequest).drawable?.let { setImageDrawable(it) }
+            imageLoader.execute(previewRequest).drawable?.let { setImageDrawable(it) }
         }
     }
 
