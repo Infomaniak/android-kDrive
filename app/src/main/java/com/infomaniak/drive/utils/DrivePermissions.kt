@@ -26,8 +26,9 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES
+import android.os.Build.VERSION_CODES.CUR_DEVELOPMENT
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
@@ -37,7 +38,7 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.extensions.addPermission
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog
@@ -56,7 +57,7 @@ class DrivePermissions {
     private val backgroundSyncPermissionsBottomSheetDialog by lazy { BackgroundSyncPermissionsBottomSheetDialog() }
 
     private val permissionNeeded = when {
-        Build.VERSION.SDK_INT >= VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
+        SDK_INT >= VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
         else -> R.string.allPermissionNeeded
     }
 
@@ -109,7 +110,7 @@ class DrivePermissions {
     }
 
     fun checkUserChoiceStoragePermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        return if (SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
             activity.hasPermissions(arrayOf(READ_MEDIA_VISUAL_USER_SELECTED))
         } else {
             false
@@ -122,7 +123,7 @@ class DrivePermissions {
     @SuppressLint("NewApi")
     fun checkWriteStoragePermission(requestPermission: Boolean = true): Boolean {
         return when {
-            Build.VERSION.SDK_INT < VERSION_CODES.M -> true
+            SDK_INT < VERSION_CODES.M -> true
             activity.hasPermissions(permissions) -> true
             else -> {
                 if (requestPermission) registerForActivityResult.launch(permissions)
@@ -138,7 +139,7 @@ class DrivePermissions {
         return with(activity) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager?
             when {
-                Build.VERSION.SDK_INT < VERSION_CODES.M -> true
+                SDK_INT < VERSION_CODES.M -> true
                 powerManager?.isIgnoringBatteryOptimizations(packageName) != false -> true
                 else -> {
                     if (requestPermission) requestBatteryOptimizationPermission()
@@ -170,14 +171,15 @@ class DrivePermissions {
 
     companion object {
 
-        @SuppressLint("InlinedApi")
         val permissions = buildSet {
-            addPermission(WRITE_EXTERNAL_STORAGE, maxSdk = VERSION_CODES.TIRAMISU)
-            addPermission(ACCESS_MEDIA_LOCATION, minSdk = VERSION_CODES.Q)
-            addPermission(POST_NOTIFICATIONS, minSdk = VERSION_CODES.TIRAMISU)
-            addPermission(READ_MEDIA_IMAGES, minSdk = VERSION_CODES.TIRAMISU)
-            addPermission(READ_MEDIA_VIDEO, minSdk = VERSION_CODES.TIRAMISU)
-            addPermission(READ_MEDIA_VISUAL_USER_SELECTED, minSdk = VERSION_CODES.UPSIDE_DOWN_CAKE)
+            if (SDK_INT in BuildConfig.MIN_SDK..<33) add(WRITE_EXTERNAL_STORAGE)
+            if (SDK_INT in 29..<CUR_DEVELOPMENT) add(ACCESS_MEDIA_LOCATION)
+            if (SDK_INT in 33..<CUR_DEVELOPMENT) {
+                add(POST_NOTIFICATIONS)
+                add(READ_MEDIA_IMAGES)
+                add(READ_MEDIA_VIDEO)
+            }
+            if (SDK_INT in 34..<CUR_DEVELOPMENT) add(READ_MEDIA_VISUAL_USER_SELECTED)
         }.toTypedArray()
 
         fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>, message: Int) {
