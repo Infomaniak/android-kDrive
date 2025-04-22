@@ -554,7 +554,6 @@
     <string name="onBoardingTitle2">Travaillez ensemble au même endroit et gagnez en efficacité</string>
     <string name="onBoardingTitle3">Sauvegardez vos souvenirs en sécurité</string>
     <string name="pdfIsLocked">Votre PDF est verrouillé</string>
-    <string name="photoAccessDeniedDescription">L’accès à vos photos est désactivé, vous pouvez changer ce paramètre dans les réglages</string>
     <string name="picturesNoFile">Aucune photo pour le moment</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Préparation de l’importation de 1 fichier</item>
