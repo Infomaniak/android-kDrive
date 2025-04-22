@@ -1,0 +1,1 @@
+- Supprime le clignotement du type de fichier lors du chargement d'un aperçu d'image
