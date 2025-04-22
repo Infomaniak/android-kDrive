@@ -25,8 +25,7 @@ import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
+import androidx.core.view.*
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
@@ -44,6 +43,7 @@ import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.SyncSettings.IntervalType
 import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
 import com.infomaniak.drive.databinding.ActivitySyncSettingsBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
@@ -120,6 +120,8 @@ class SyncSettingsActivity : BaseActivity() {
         observeSaveOldPictures(oldSaveOldPicturesValue)
 
         observeSyncIntervalType(oldIntervalTypeValue)
+
+        binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withPadding = false)
     }
 
     override fun onResume() {

@@ -38,6 +38,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
@@ -133,6 +134,8 @@ class LoginActivity : AppCompatActivity() {
         }
 
         handleNavigationFlags()
+
+        binding.root.enableEdgeToEdge(withTop = false)
     }
 
     private fun startAccountCreation() {

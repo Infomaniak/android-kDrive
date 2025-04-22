@@ -80,6 +80,7 @@ import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
@@ -202,6 +203,8 @@ class MainActivity : BaseActivity() {
             targetActivity = this,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
+
+        binding.root.enableEdgeToEdge(withPadding = true, withTop = false)
     }
 
     override fun onStart() {

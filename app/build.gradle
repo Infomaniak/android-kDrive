@@ -10,7 +10,7 @@ android {
 
     namespace 'com.infomaniak.drive'
 
-    compileSdk 34
+    compileSdk 35
 
     ndkVersion "28.0.13004108"
 
@@ -18,7 +18,7 @@ android {
         testInstrumentationRunnerArguments runnerBuilder: 'de.mannodermaus.junit5.AndroidJUnit5Builder'
         applicationId 'com.infomaniak.drive'
         minSdkVersion 24
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode 5_05_000_01
         versionName '5.5.0'
 
