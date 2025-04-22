@@ -17,13 +17,10 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
@@ -152,7 +149,7 @@ class SyncSettingsActivity : BaseActivity() {
             changeSaveButtonStatus()
         }
 
-        photoAccessDeniedButton.setOnClickListener { context.openSystemStorageSettings() }
+        photoAccessDeniedButton.setOnClickListener { startAppSettingsConfig() }
 
         mediaFolders.setOnClickListener {
             SelectMediaFoldersDialog().show(supportFragmentManager, "SyncSettingsSelectMediaFoldersDialog")
@@ -455,9 +452,5 @@ class SyncSettingsActivity : BaseActivity() {
 
     private fun trackPhotoSyncEvent(name: String, value: Boolean? = null) {
         trackEvent("photoSync", name, value = value?.toFloat())
-    }
-
-    fun Context.openSystemStorageSettings() {
-        startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null)))
     }
 }
