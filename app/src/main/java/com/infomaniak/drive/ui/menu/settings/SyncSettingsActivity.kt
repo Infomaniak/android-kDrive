@@ -67,7 +67,7 @@ class SyncSettingsActivity : BaseActivity() {
 
     private val uiSettings by lazy { UiSettings(this) }
 
-    private val drivePermissions by lazy { DrivePermissions().also { it.registerPermissions(this) } }
+    private val drivePermissions = DrivePermissions().also { it.registerPermissions(this) }
 
     private val syncSettingsViewModel: SyncSettingsViewModel by viewModels()
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
@@ -89,16 +89,15 @@ class SyncSettingsActivity : BaseActivity() {
         setOnBackPressed()
 
         activateSyncSwitch.isChecked = AccountUtils.isEnableAppSync()
-        saveSettingVisibility(activateSyncSwitch.isChecked)
 
         oldSyncSettings = UploadFile.getAppSyncSettings()
 
         initUserAndDrive()
 
         val oldIntervalTypeValue = oldSyncSettings?.getIntervalType() ?: IntervalType.IMMEDIATELY
-        val oldSyncVideoValue = oldSyncSettings?.syncVideo ?: true
-        val oldCreateDatedSubFoldersValue = oldSyncSettings?.createDatedSubFolders ?: false
-        val oldDeleteAfterSyncValue = oldSyncSettings?.deleteAfterSync ?: false
+        val oldSyncVideoValue = oldSyncSettings?.syncVideo != false
+        val oldCreateDatedSubFoldersValue = oldSyncSettings?.createDatedSubFolders == true
+        val oldDeleteAfterSyncValue = oldSyncSettings?.deleteAfterSync == true
         val oldSaveOldPicturesValue = SavePicturesDate.SINCE_NOW
 
         syncSettingsViewModel.init(
@@ -121,6 +120,11 @@ class SyncSettingsActivity : BaseActivity() {
         observeSaveOldPictures(oldSaveOldPicturesValue)
 
         observeSyncIntervalType(oldIntervalTypeValue)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        saveSettingVisibility(binding.activateSyncSwitch.isChecked)
     }
 
     private fun initUserAndDrive() {
