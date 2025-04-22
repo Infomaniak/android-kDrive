@@ -329,6 +329,7 @@ class SyncSettingsActivity : BaseActivity() {
     private fun saveSettingVisibility(isVisible: Boolean) = with(binding) {
         val hasPermissions = drivePermissions.checkSyncPermissions(requestPermission = false)
         photoAccessDeniedLayout.isVisible = isVisible && !hasPermissions
+        photoAccessDeniedTitle.setText(DrivePermissions.permissionNeededDescriptionRes)
         settingsLayout.isVisible = isVisible && hasPermissions
 
         mediaFoldersSettingsVisibility(isVisible && syncSettingsViewModel.syncFolderId.value != null)

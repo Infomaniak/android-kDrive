@@ -23,7 +23,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.DrivePermissions.Companion.resultPermissions
 import com.infomaniak.lib.core.utils.hasPermissions
 
@@ -38,7 +37,7 @@ class CameraPermissions {
             fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
                 val authorized = authorizedPermissions.values.all { it }
                 onPermissionResult?.invoke(authorized)
-                activity.resultPermissions(authorized, cameraPermission, R.string.allPermissionNeeded)
+                activity.resultPermissions(authorized, cameraPermission)
             }
     }
 

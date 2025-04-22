@@ -35,6 +35,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -56,17 +57,12 @@ class DrivePermissions {
 
     private val backgroundSyncPermissionsBottomSheetDialog by lazy { BackgroundSyncPermissionsBottomSheetDialog() }
 
-    private val permissionNeeded = when {
-        SDK_INT >= VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
-        else -> R.string.allPermissionNeeded
-    }
-
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
             val authorized = authorizedPermissions.values.all { it }
             onPermissionResult?.invoke(authorized)
-            activity.resultPermissions(authorized, permissions, permissionNeeded)
+            activity.resultPermissions(authorized, permissions)
         }
     }
 
@@ -76,7 +72,7 @@ class DrivePermissions {
             fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
                 val authorized = authorizedPermissions.values.all { it }
                 onPermissionResult?.invoke(authorized)
-                activity.resultPermissions(authorized, permissions, permissionNeeded)
+                activity.resultPermissions(authorized, permissions)
             }
     }
 
@@ -171,6 +167,13 @@ class DrivePermissions {
 
     companion object {
 
+        @StringRes
+        val permissionNeededDescriptionRes = when {
+            SDK_INT >= VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
+            else -> R.string.allPermissionNeeded
+        }
+
+
         val permissions = buildSet {
             if (SDK_INT in BuildConfig.MIN_SDK..<33) add(WRITE_EXTERNAL_STORAGE)
             if (SDK_INT in 29..<CUR_DEVELOPMENT) add(ACCESS_MEDIA_LOCATION)
@@ -182,11 +185,11 @@ class DrivePermissions {
             if (SDK_INT in 34..<CUR_DEVELOPMENT) add(READ_MEDIA_VISUAL_USER_SELECTED)
         }.toTypedArray()
 
-        fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>, message: Int) {
+        fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>) {
             if (!authorized && !requestPermissionsIsPossible(permissions)) {
                 MaterialAlertDialogBuilder(this, R.style.DialogStyle)
                     .setTitle(R.string.androidPermissionTitle)
-                    .setMessage(message)
+                    .setMessage(permissionNeededDescriptionRes)
                     .setCancelable(false)
                     .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int -> startAppSettingsConfig() }
                     .show()
