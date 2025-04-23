@@ -39,7 +39,6 @@ import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog
@@ -175,7 +174,11 @@ class DrivePermissions {
 
 
         val permissions = buildSet {
-            if (SDK_INT in BuildConfig.MIN_SDK..<33) add(WRITE_EXTERNAL_STORAGE)
+            if (SDK_INT < 33) {
+                // Even if the docs says that it's unless after api 30, it is in fact needed for the related READ_EXTERNAL_STORAGE
+                // permission, which is use up to 32
+                add(WRITE_EXTERNAL_STORAGE)
+            }
             if (SDK_INT in 29..<CUR_DEVELOPMENT) add(ACCESS_MEDIA_LOCATION)
             if (SDK_INT in 33..<CUR_DEVELOPMENT) {
                 add(POST_NOTIFICATIONS)
