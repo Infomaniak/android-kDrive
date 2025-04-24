@@ -154,7 +154,7 @@ dependencies {
 
     implementation 'com.airbnb.android:lottie:6.6.6'
     implementation 'com.github.Infomaniak:android-pdfview:3.2.11'
-    implementation 'com.github.MikeOrtiz:TouchImageView:3.5'
+    implementation 'com.github.MikeOrtiz:TouchImageView:3.7.1'
     implementation 'com.github.rubensousa:gravitysnaphelper:2.2.2'
     implementation 'com.tbuonomo:dotsindicator:5.1.0'
     implementation 'com.wdullaer:materialdatetimepicker:4.2.3'
@@ -165,7 +165,7 @@ dependencies {
 
     implementation 'com.googlecode.plist:dd-plist:1.28'
 
-    implementation 'com.github.hannesa2:paho.mqtt.android:4.2.4'
+    implementation 'com.github.hannesa2:paho.mqtt.android:4.2.4' // Doesn't build when bumped to 4.3 (Waiting SDK 35)
 
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
     testImplementation 'io.github.serpro69:kotlin-faker:1.16.0'
