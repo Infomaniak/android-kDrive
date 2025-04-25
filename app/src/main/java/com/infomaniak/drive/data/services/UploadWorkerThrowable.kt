@@ -30,7 +30,6 @@ import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExce
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -62,7 +61,7 @@ object UploadWorkerThrowable {
             Result.retry()
 
         } catch (exception: CancellationException) { // Work has been cancelled
-            if (applicationContext.isSyncActive()) Result.failure() else Result.retry()
+            Result.retry()
 
         } catch (exception: UploadTask.LockErrorException) {
             currentUploadFile?.lockErrorNotification(applicationContext)
