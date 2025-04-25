@@ -317,6 +317,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private fun UploadFile.handleException(exception: Exception) {
         when (exception) {
+            is CancellationException -> throw exception
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
                 deleteIfExists(keepFile = isSync())
 
