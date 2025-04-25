@@ -238,6 +238,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             } else {
                 initUploadSchemeContent(uri)
             }
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (exception: AllowedFileSizeExceededException) {
             Sentry.withScope { scope ->
                 scope.setExtra("half heap", "${FileChunkSizeManager.getHalfHeapMemory()}")
