@@ -17,7 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
-import android.Manifest
+import android.Manifest.permission.*
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Activity.RESULT_OK
@@ -26,13 +26,16 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES
+import android.os.Build.VERSION_CODES.CUR_DEVELOPMENT
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -53,17 +56,12 @@ class DrivePermissions {
 
     private val backgroundSyncPermissionsBottomSheetDialog by lazy { BackgroundSyncPermissionsBottomSheetDialog() }
 
-    private val permissionNeeded = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
-        else -> R.string.allPermissionNeeded
-    }
-
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
             val authorized = authorizedPermissions.values.all { it }
             onPermissionResult?.invoke(authorized)
-            activity.resultPermissions(authorized, permissions, permissionNeeded)
+            activity.resultPermissions(authorized, permissions)
         }
     }
 
@@ -73,7 +71,7 @@ class DrivePermissions {
             fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
                 val authorized = authorizedPermissions.values.all { it }
                 onPermissionResult?.invoke(authorized)
-                activity.resultPermissions(authorized, permissions, permissionNeeded)
+                activity.resultPermissions(authorized, permissions)
             }
     }
 
@@ -106,13 +104,21 @@ class DrivePermissions {
         return checkWriteStoragePermission(requestPermission)
     }
 
+    fun checkUserChoiceStoragePermission(): Boolean {
+        return if (SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            activity.hasPermissions(arrayOf(READ_MEDIA_VISUAL_USER_SELECTED))
+        } else {
+            false
+        }
+    }
+
     /**
      * Checks if the user has already confirmed write permission
      */
     @SuppressLint("NewApi")
     fun checkWriteStoragePermission(requestPermission: Boolean = true): Boolean {
         return when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
+            SDK_INT < VERSION_CODES.M -> true
             activity.hasPermissions(permissions) -> true
             else -> {
                 if (requestPermission) registerForActivityResult.launch(permissions)
@@ -128,7 +134,7 @@ class DrivePermissions {
         return with(activity) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager?
             when {
-                Build.VERSION.SDK_INT < Build.VERSION_CODES.M -> true
+                SDK_INT < VERSION_CODES.M -> true
                 powerManager?.isIgnoringBatteryOptimizations(packageName) != false -> true
                 else -> {
                     if (requestPermission) requestBatteryOptimizationPermission()
@@ -139,7 +145,7 @@ class DrivePermissions {
     }
 
     @SuppressLint("BatteryLife")
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(VERSION_CODES.M)
     private fun Context.requestBatteryOptimizationPermission() {
         try {
             Intent(
@@ -159,25 +165,34 @@ class DrivePermissions {
     }
 
     companion object {
-        val permissions = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> arrayOf(
-                Manifest.permission.ACCESS_MEDIA_LOCATION,
-                Manifest.permission.POST_NOTIFICATIONS,
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO
-            )
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> arrayOf(
-                Manifest.permission.ACCESS_MEDIA_LOCATION,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            else -> arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+
+        @StringRes
+        val permissionNeededDescriptionRes = when {
+            SDK_INT >= VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
+            else -> R.string.allPermissionNeeded
         }
 
-        fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>, message: Int) {
+
+        val permissions = buildSet {
+            if (SDK_INT < 33) {
+                // Even if the docs says that it's unless after api 30, it is in fact needed for the related READ_EXTERNAL_STORAGE
+                // permission, which is use up to 32
+                add(WRITE_EXTERNAL_STORAGE)
+            }
+            if (SDK_INT in 29..<CUR_DEVELOPMENT) add(ACCESS_MEDIA_LOCATION)
+            if (SDK_INT in 33..<CUR_DEVELOPMENT) {
+                add(POST_NOTIFICATIONS)
+                add(READ_MEDIA_IMAGES)
+                add(READ_MEDIA_VIDEO)
+            }
+            if (SDK_INT in 34..<CUR_DEVELOPMENT) add(READ_MEDIA_VISUAL_USER_SELECTED)
+        }.toTypedArray()
+
+        fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>) {
             if (!authorized && !requestPermissionsIsPossible(permissions)) {
                 MaterialAlertDialogBuilder(this, R.style.DialogStyle)
                     .setTitle(R.string.androidPermissionTitle)
-                    .setMessage(message)
+                    .setMessage(permissionNeededDescriptionRes)
                     .setCancelable(false)
                     .setPositiveButton(R.string.buttonAuthorize) { _: DialogInterface?, _: Int -> startAppSettingsConfig() }
                     .show()

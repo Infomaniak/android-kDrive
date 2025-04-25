@@ -69,7 +69,7 @@
     <string name="allPathTitle">Speicherort</string>
     <string name="allPdf">PDF</string>
     <string name="allPermissionNeeded">Sie müssen den Zugriff auf Ihre Dateien erlauben, um den Import und zu speichern durchführen zu können</string>
-    <string name="allPermissionNeededAndroid13">Sie müssen den Zugriff auf Ihre Mediendateien genehmigen, um den Import und zu speichern durchführen zu können. Erlauben Sie aber auch Benachrichtigungen, um den Fortschritt zu verfolgen.</string>
+    <string name="allPermissionNeededAndroid13">Sie müssen den Zugriff auf alle Ihre Mediendateien genehmigen, um den Import und zu speichern durchführen zu können. Erlauben Sie aber auch Benachrichtigungen, um den Fortschritt zu verfolgen.</string>
     <string name="allPictures">Bilder</string>
     <string name="allRootName">Root des kDrive %s</string>
     <string name="allToday">Heute</string>
@@ -132,6 +132,7 @@
     <string name="buttonEmpty">Leeren</string>
     <string name="buttonEmptyTrash">Papierkorb leeren</string>
     <string name="buttonFileRights">Freigabe und Rechte</string>
+    <string name="buttonGoToSettings">Zu den Einstellungen gehen</string>
     <string name="buttonLeaveShare">Freigabe verlassen</string>
     <string name="buttonLike">Gefällt mir</string>
     <string name="buttonLogin">Anmelden</string>
