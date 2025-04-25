@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.services
 
 import android.content.ContentResolver
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
@@ -122,8 +123,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         val pendingCount = if (this.pendingCount > 0) this.pendingCount else UploadFile.getAllPendingUploadsCount()
-        val currentUploadNotification = UploadNotifications.getCurrentUploadNotification(applicationContext, pendingCount)
-        return ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, currentUploadNotification.build())
+        return progressForegroundInfo(pendingCount)
     }
 
     private fun checkPermissions(): Result? {
@@ -230,7 +230,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         currentUploadFile = this@initUpload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        updateUploadCountNotification(applicationContext)
+        updateUploadCountNotification()
 
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
@@ -308,13 +308,31 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private var uploadCountNotificationJob: Job? = null
-    private fun CoroutineScope.updateUploadCountNotification(context: Context) {
+    private fun CoroutineScope.updateUploadCountNotification() {
         uploadCountNotificationJob?.cancel()
         uploadCountNotificationJob = launch {
             // We wait a little otherwise it is too fast and the notification may not be updated
             delay(NotificationUtils.ELAPSED_TIME)
-            if (isActive) UploadNotifications.setupCurrentUploadNotification(context, pendingCount)
+            val foregroundInfo = progressForegroundInfo(pendingCount)
+            setForegroundAsync(foregroundInfo)
         }
+    }
+
+    private fun progressForegroundInfo(pendingCount: Int): ForegroundInfo {
+        val notification = UploadNotifications.getCurrentUploadNotification(applicationContext, pendingCount).build()
+        val foregroundInfo = when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+                ForegroundInfo(
+                    /* notificationId = */ NotificationUtils.UPLOAD_SERVICE_ID,
+                    /* notification = */ notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
+                )
+            }
+            else -> {
+                ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, notification)
+            }
+        }
+        return foregroundInfo
     }
 
     private fun UploadFile.handleException(exception: Exception) {
