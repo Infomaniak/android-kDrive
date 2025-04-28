@@ -28,8 +28,7 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
+import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
 import android.os.StatFs
 import android.provider.MediaStore
@@ -165,17 +164,13 @@ fun Activity.toggleSystemBar(show: Boolean) {
 }
 
 fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
-    if (VERSION.SDK_INT >= VERSION_CODES.M) {
-        statusBarColor = ContextCompat.getColor(this@setColorStatusBar, colorScheme.statusBarColor)
-        lightStatusBar(!isNightModeEnabled())
-    } else {
-        statusBarColor = Color.BLACK
-    }
+    statusBarColor = ContextCompat.getColor(this@setColorStatusBar, colorScheme.statusBarColor)
+    lightStatusBar(!isNightModeEnabled())
 }
 
 fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
     val nightModeEnabled = isNightModeEnabled()
-    if (nightModeEnabled || VERSION.SDK_INT >= VERSION_CODES.O) {
+    if (nightModeEnabled || SDK_INT >= 26) {
         navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
         lightNavigationBar(!nightModeEnabled)
     } else {
@@ -411,7 +406,7 @@ fun Context.getInfomaniakLogin() = InfomaniakLogin(
 
 //region Worker
 fun OneTimeWorkRequest.Builder.setExpeditedIfAvailable() = apply {
-    if (VERSION.SDK_INT >= VERSION_CODES.S) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+    if (SDK_INT >= 31) setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
 }
 //endregion
 
@@ -445,7 +440,7 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
     }
 
     val decimalSize = when {
-        VERSION.SDK_INT >= VERSION_CODES.O -> size.binaryToDecimal()
+        SDK_INT >= 26 -> size.binaryToDecimal()
         valueOnly -> size.binaryToDecimal()
         else -> size
     }

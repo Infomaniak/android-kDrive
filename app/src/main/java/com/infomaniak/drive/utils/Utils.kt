@@ -23,11 +23,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build.VERSION.SDK_INT
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
-import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -294,7 +292,6 @@ object Utils {
         return openWithIntentExceptkDrive(uri, contentResolver.getType(cloudUri), flags)
     }
 
-    @RequiresApi(24)
     private fun Context.intentExcludingPdfReader(openWithIntent: Intent): Intent {
         val components = arrayOf(ComponentName(this, PreviewPDFActivity::class.java))
         return Intent.createChooser(openWithIntent, null).putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, components)
@@ -327,15 +324,7 @@ object Utils {
         // We only do that when we try to openWith with a PDF because we have our own PDF reader
         // Title in the chooser might not be displayed, at the discretion of the brand manufacturer
         // So we keep the ACTION_VIEW for every type of files EXCEPT PDF files
-        return if (type == "application/pdf") {
-            if (SDK_INT >= 24) {
-                applicationContext.intentExcludingPdfReader(openWithIntent)
-            } else {
-                applicationContext.intentWithInitialComponent(openWithIntent)
-            }
-        } else {
-            openWithIntent
-        }
+        return if (type == "application/pdf") applicationContext.intentExcludingPdfReader(openWithIntent) else openWithIntent
     }
 
     fun moveCacheFileToOffline(file: File, cacheFile: IOFile, offlineFile: IOFile) {

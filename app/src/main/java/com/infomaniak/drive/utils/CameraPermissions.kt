@@ -18,7 +18,6 @@
 package com.infomaniak.drive.utils
 
 import android.Manifest
-import android.os.Build.VERSION.SDK_INT
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.fragment.app.Fragment
@@ -43,7 +42,6 @@ class CameraPermissions {
 
     fun checkCameraPermission(requestPermission: Boolean = true): Boolean {
         return when {
-            SDK_INT < 23 -> true
             activity.hasPermissions(cameraPermission) -> true
             else -> {
                 if (requestPermission) registerForActivityResult.launch(cameraPermission)
