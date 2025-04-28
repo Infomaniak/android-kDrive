@@ -34,6 +34,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentFileShareLinkSettingsBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
@@ -78,6 +79,10 @@ class FileShareLinkSettingsFragment : Fragment() {
         setupUiListeners()
         setupFreeAccountUi()
         setupShareLinkSettingsUi()
+
+        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false) {
+            binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
+        }
     }
 
     private fun initOfficePermission() {

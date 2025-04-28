@@ -121,7 +121,9 @@ class SyncSettingsActivity : BaseActivity() {
 
         observeSyncIntervalType(oldIntervalTypeValue)
 
-        binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withPadding = false)
+        binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
+            binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
+        }
     }
 
     override fun onResume() {

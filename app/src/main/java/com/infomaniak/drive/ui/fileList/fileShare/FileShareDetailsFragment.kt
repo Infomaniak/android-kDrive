@@ -34,6 +34,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.databinding.FragmentFileShareDetailsBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
@@ -47,6 +48,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.hideKeyboard
 import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setMargins
 
 class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
 
@@ -92,6 +94,10 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             refreshUi()
             setBackActionHandlers()
             setBackPressedHandlers()
+        }
+
+        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false) {
+            binding.closeButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
         }
     }
 

@@ -24,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.core.view.updatePadding
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -39,6 +40,7 @@ import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.FragmentGalleryBinding
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
@@ -46,6 +48,7 @@ import com.infomaniak.drive.utils.getAdjustedColumnNumber
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
+import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -151,6 +154,11 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
         mainViewModel.deleteFilesFromGallery.observe(viewLifecycleOwner) { filesId ->
             filesId.forEach(galleryAdapter::deleteByFileId)
+        }
+
+        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false, withTop = false) {
+            binding.galleryRecyclerView.updatePadding(bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + it.bottom)
+            binding.noGalleryLayout.setMargins(bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + it.bottom)
         }
     }
 
