@@ -19,8 +19,10 @@ package com.infomaniak.drive.ui.login
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
@@ -95,6 +97,8 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         lockOrientationForSmallScreens()
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
         setContentView(root)
 
         introViewpager.apply {
@@ -135,7 +139,12 @@ class LoginActivity : AppCompatActivity() {
 
         handleNavigationFlags()
 
-        binding.root.enableEdgeToEdge(withTop = false)
+        binding.signInButton.enableEdgeToEdge(withTop = false) {
+            binding.nextButton.setMargins(bottom = it.bottom)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+        }
     }
 
     private fun startAccountCreation() {

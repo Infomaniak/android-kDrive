@@ -87,7 +87,7 @@ class PreviewHeaderView @JvmOverloads constructor(
                 setMargins(left = left + right, top = top, right = left + right)
                 val topOffset = getTopOffset(bottomSheetView)
                 bottomSheetBehavior.apply {
-                    peekHeight = getDefaultPeekHeight() + bottom
+                    peekHeight = getDefaultPeekHeight()
 
                     if (topOffset > 0) {
                         expandedOffset = topOffset

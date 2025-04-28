@@ -80,7 +80,12 @@ class FileDetailsFragment : FileDetailsSubFragment() {
             statusBarColor = Color.TRANSPARENT
             toggleEdgeToEdge(true)
 
-            requireView().enableEdgeToEdge(shouldConsumeInsets = true, withTop = false, withBottom = false) { insets ->
+            requireView().enableEdgeToEdge(
+                shouldConsumeInsets = true,
+                withPadding = true,
+                withTop = false,
+                withBottom = true
+            ) { insets ->
                 binding.toolbar.setMargins(top = insets.top)
             }
         }

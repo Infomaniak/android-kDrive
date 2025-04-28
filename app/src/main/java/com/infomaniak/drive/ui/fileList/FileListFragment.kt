@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle.State
@@ -274,7 +275,12 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         fileListViewModel.enqueueBulkDownloadWorker(folderId)
 
-        requireView().enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false)
+        requireView().enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
+            binding.fileRecyclerView.updatePadding(
+                bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + it.bottom,
+            )
+            binding.noFilesLayout.setMargins(bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + it.bottom)
+        }
     }
 
     private fun setupToolbars() {

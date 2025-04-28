@@ -107,7 +107,7 @@ open class ManageDropboxFragment : Fragment() {
             }
         }
 
-        binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false)
+        binding.root.enableEdgeToEdge(shouldConsumeInsets = true)
     }
 
     protected fun updateUi(file: File, dropBox: DropBox? = null) = with(binding.settings) {
