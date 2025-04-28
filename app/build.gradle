@@ -195,5 +195,5 @@ dependencies {
     implementation 'io.coil-kt:coil-gif:2.7.0'
 
     // Compose
-    implementation 'androidx.compose.ui:ui-android:1.7.8'
+    implementation 'androidx.compose.ui:ui-android:1.7.8' // Doesn't build when bumped to 1.8.0 (Waiting SDK 35)
 }
