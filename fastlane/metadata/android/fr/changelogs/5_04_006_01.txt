@@ -1,0 +1,2 @@
+- Empêcher les utilisateurs qui n'ont pas autoriser l'accès à toutes les photos d'activer la synchronisation des photos, car elle ne peut pas fonctionner sans l'accès complet
+- Corriger le fait que la synchronisation des photos ne sauvegarde parfois pas certains fichiers

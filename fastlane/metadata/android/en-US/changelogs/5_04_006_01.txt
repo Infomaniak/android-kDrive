@@ -1,0 +1,2 @@
+- Prevent user without full photo access permission to activate the photo sync because it cannot work
+- Fix photo sync sometimes not uploading some of the media
