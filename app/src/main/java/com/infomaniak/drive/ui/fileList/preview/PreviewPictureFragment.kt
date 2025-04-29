@@ -18,7 +18,7 @@
 package com.infomaniak.drive.ui.fileList.preview
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.Drawable
+import android.graphics.drawable.Animatable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -41,7 +41,6 @@ import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class PreviewPictureFragment : PreviewFragment() {
 
@@ -55,7 +54,7 @@ class PreviewPictureFragment : PreviewFragment() {
     }
     private val previewRequestListener = object : Listener {
         override fun onStart(request: ImageRequest) = binding.onPreviewRequestStart()
-        override fun onSuccess(request: ImageRequest, result: SuccessResult) = binding.onPreviewRequestSuccess()
+        override fun onSuccess(request: ImageRequest, result: SuccessResult) = binding.onPreviewRequestSuccess(result)
         override fun onError(request: ImageRequest, result: ErrorResult) = binding.onPreviewRequestError()
     }
 
@@ -84,19 +83,14 @@ class PreviewPictureFragment : PreviewFragment() {
         super.onDestroyView()
     }
 
-    private fun loadImage() = with(binding) {
-
-        suspend fun setImageDrawable(drawable: Drawable) = withContext(Dispatchers.Main) {
-            imageView.setImageDrawable(drawable)
-        }
-
+    private fun loadImage() {
         val imageLoader = Coil.imageLoader(requireContext())
         val thumbnailPreviewRequest = buildThumbnailPreviewRequest()
         val previewRequest = buildPreviewRequest()
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            imageLoader.execute(thumbnailPreviewRequest).drawable?.let { setImageDrawable(it) }
-            imageLoader.execute(previewRequest).drawable?.let { setImageDrawable(it) }
+            imageLoader.execute(thumbnailPreviewRequest)
+            imageLoader.execute(previewRequest)
         }
     }
 
@@ -123,11 +117,14 @@ class PreviewPictureFragment : PreviewFragment() {
         }
     }
 
-    private fun FragmentPreviewPictureBinding.onPreviewRequestSuccess() {
+    private fun FragmentPreviewPictureBinding.onPreviewRequestSuccess(result: SuccessResult) {
         loadTimer.cancel()
         loader.isGone = true
         noThumbnailLayout.root.isGone = true
         imageView.isVisible = true
+        imageView.setImageDrawable(result.drawable)
+        // This is to start the GIF animation. Otherwise, it'll stay at the first frame.
+        (result.drawable as? Animatable)?.start()
     }
 
     private fun FragmentPreviewPictureBinding.onPreviewRequestError() {
