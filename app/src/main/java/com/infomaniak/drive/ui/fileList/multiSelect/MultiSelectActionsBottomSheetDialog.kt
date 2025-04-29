@@ -42,6 +42,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.showSnackbar
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
@@ -196,7 +197,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
                     DownloadManagerUtils.scheduleDownload(requireContext(), downloadURL, ARCHIVE_FILE_NAME)
                 }
             } else {
-                showSnackbar(apiResponse.translatedError)
+                showSnackbar(apiResponse.translateError())
             }
             onActionSelected()
         }

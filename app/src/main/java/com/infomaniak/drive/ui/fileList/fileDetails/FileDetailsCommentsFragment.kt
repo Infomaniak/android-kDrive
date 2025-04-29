@@ -33,6 +33,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.openOnlyOfficeDocument
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.NoItemsLayoutView
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.safeBinding
 
 class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.INoItemsLayoutView {
@@ -168,7 +169,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
                     fileComment.likesCount = fileComment.likesCount - 1
                     commentsAdapter.updateComment(fileComment)
                 } else {
-                    showSnackbar(apiResponse.translatedError)
+                    showSnackbar(apiResponse.translateError())
                 }
             }
         } else {
@@ -184,7 +185,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
                     fileComment.likesCount = fileComment.likesCount + 1
                     commentsAdapter.updateComment(fileComment)
                 } else {
-                    showSnackbar(apiResponse.translatedError)
+                    showSnackbar(apiResponse.translateError())
                 }
             }
         }

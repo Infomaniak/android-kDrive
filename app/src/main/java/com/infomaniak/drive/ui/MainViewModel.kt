@@ -47,6 +47,7 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.NetworkAvailability
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
@@ -322,7 +323,7 @@ class MainViewModel(
                         isSuccess = this.isSuccess(),
                         data = this.data,
                         errorCode = this.error?.code,
-                        errorResId = this.translatedError
+                        errorResId = this.translateError()
                     )
                 )
             }

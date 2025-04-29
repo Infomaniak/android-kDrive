@@ -44,6 +44,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.drive.utils.printPdf
 import com.infomaniak.lib.core.models.ApiResponse
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.pdfview.PDFView
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
@@ -297,7 +298,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                     showPdf()
                 } ?: run {
                     downloadProgressIndicator.isGone = true
-                    previewDescription.setText(apiResponse.translatedError)
+                    previewDescription.setText(apiResponse.translateError())
                     bigOpenWithButton.isVisible = true
                 }
                 previewSliderViewModel.pdfIsDownloading.value = false

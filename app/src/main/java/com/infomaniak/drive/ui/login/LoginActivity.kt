@@ -50,6 +50,7 @@ import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.lib.login.ApiToken
@@ -196,7 +197,7 @@ class LoginActivity : AppCompatActivity() {
                     if (returnValue.error?.description == ErrorCode.NO_DRIVE) {
                         launchNoDriveActivity()
                     } else {
-                        showError(getString(returnValue.translatedError))
+                        showError(getString(returnValue.translateError()))
                     }
                 }
                 else -> Dispatchers.Main { showError(getString(R.string.anErrorHasOccurred)) }
