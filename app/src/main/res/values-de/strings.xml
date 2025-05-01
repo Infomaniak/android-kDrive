@@ -683,7 +683,6 @@
     <string name="syncConfigureTitle">Speichern Sie Ihre Erinnerungen an einem sicheren Ort</string>
     <string name="syncOnlyWifiDescription">Offline-Dateien werden nur mit Wi-Fi synchronisiert</string>
     <string name="syncOnlyWifiTitle">Nur mit Wi-Fi</string>
-    <string name="syncPhotosOnlyWifiDescription">Fotos und Videos werden nur mit Wi-Fi synchronisiert</string>
     <string name="syncSettingsButtonActiveSync">Automatische Sicherung aktivieren</string>
     <string name="syncSettingsButtonSaveDate">Speichern</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisierung</string>
