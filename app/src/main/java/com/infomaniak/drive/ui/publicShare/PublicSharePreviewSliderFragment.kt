@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.data.models.UserDrive
@@ -31,6 +32,8 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
 
 class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicShareItemClickListener {
 
@@ -89,7 +92,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
             isDraggable = publicShareViewModel.canDownloadFiles,
             isFitToContents = true,
         )
-        updateWithExternalFile(currentFile)
+        viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { updateWithExternalFile(currentFile) }
         initOnClickListener(onItemClickListener = this@PublicSharePreviewSliderFragment)
     }
 }

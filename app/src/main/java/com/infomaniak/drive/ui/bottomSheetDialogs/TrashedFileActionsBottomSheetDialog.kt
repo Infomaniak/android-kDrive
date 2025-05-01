@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -44,6 +45,8 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.api.InternalTranslatedErrorCode
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.whenResultIsOk
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
 
 class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -75,7 +78,9 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         currentTrashedFile = trashViewModel.selectedFile.value ?: File()
 
-        currentFile.setFileItem(currentTrashedFile)
+        viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            currentFile.setFileItem(currentTrashedFile)
+        }
         restoreFileIn.setOnClickListener {
             trackTrashEvent("restoreGivenFolder")
             Intent(requireContext(), SelectFolderActivity::class.java).apply {
