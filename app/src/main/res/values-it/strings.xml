@@ -553,6 +553,8 @@
     <string name="onBoardingTitle2">Collabora su una stessa punto e accresci la tua efficienza</string>
     <string name="onBoardingTitle3">Salva i tuoi ricordi in modo sicuro</string>
     <string name="pdfIsLocked">Il PDF è bloccato</string>
+    <string name="photoSyncSuspended">Collegarsi a una rete Wi-Fi o consentire l’utilizzo di dati mobili</string>
+    <string name="photoSyncSuspendedTitle">Backup delle foto sospeso</string>
     <string name="picturesNoFile">Al momento non ci sono foto</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparazione all’importazione di 1 file</item>
@@ -667,6 +669,8 @@
     <string name="switchUserTitle">Cambia utente</string>
     <string name="syncConfigureDescription">Le tue foto, i tuoi video e le tue schermate verranno salvati automaticamente nel tuo kDrive %s.</string>
     <string name="syncConfigureTitle">Salva i tuoi ricordi in un luogo sicuro</string>
+    <string name="syncOnlyWifiDescription">I file offline saranno sincronizzati solo con il Wi-Fi</string>
+    <string name="syncOnlyWifiTitle">Solo con Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Attiva il backup automatico</string>
     <string name="syncSettingsButtonSaveDate">Salva</string>
     <string name="syncSettingsButtonSyncPeriodicity">Sincronizzazione</string>
@@ -687,6 +691,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Ogni ora</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Ogni 15 minuti</string>
     <string name="syncSettingsTitle">Backup foto</string>
+    <string name="syncWifiAndMobileDataDescription">Potrebbero essere applicate tariffe per l’utilizzo dei dati mobili</string>
+    <string name="syncWifiAndMobileDataTitle">Con Wi-Fi e dati mobili</string>
+    <string name="syncWifiPicturesTitle">Sincronizza foto e video</string>
+    <string name="syncWifiSettingsTitle">Sincronizza i file offline</string>
     <string name="themeSettingsDarkLabel">Scuro</string>
     <string name="themeSettingsLightLabel">Chiaro</string>
     <string name="themeSettingsSystemDefaultLabel">Impostazione predefinita del sistema</string>

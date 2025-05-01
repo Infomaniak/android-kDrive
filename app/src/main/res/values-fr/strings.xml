@@ -553,6 +553,8 @@
     <string name="onBoardingTitle2">Travaillez ensemble au même endroit et gagnez en efficacité</string>
     <string name="onBoardingTitle3">Sauvegardez vos souvenirs en sécurité</string>
     <string name="pdfIsLocked">Votre PDF est verrouillé</string>
+    <string name="photoSyncSuspended">Se connecter à un réseau Wi-Fi ou autoriser l’utilisation de données mobiles</string>
+    <string name="photoSyncSuspendedTitle">Sauvegarde des photos suspendue</string>
     <string name="picturesNoFile">Aucune photo pour le moment</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Préparation de l’importation de 1 fichier</item>
@@ -667,6 +669,8 @@
     <string name="switchUserTitle">Changer d’utilisateur</string>
     <string name="syncConfigureDescription">Vos photos, vidéos et captures écran seront enregistrées automatiquement dans votre kDrive %s.</string>
     <string name="syncConfigureTitle">Sauvegardez vos souvenirs en lieu sûr</string>
+    <string name="syncOnlyWifiDescription">Les fichiers hors ligne ne seront synchronisés qu’avec le Wi-Fi</string>
+    <string name="syncOnlyWifiTitle">Avec Wi-Fi uniquement</string>
     <string name="syncSettingsButtonActiveSync">Activer la sauvegarde automatique</string>
     <string name="syncSettingsButtonSaveDate">Enregistrer</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisation</string>
@@ -687,6 +691,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Toutes les heures</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Toutes les 15 minutes</string>
     <string name="syncSettingsTitle">Sauvegarde des photos</string>
+    <string name="syncWifiAndMobileDataDescription">Des frais d’utilisation de données mobiles peuvent s’appliquer</string>
+    <string name="syncWifiAndMobileDataTitle">Avec Wi-Fi et données mobiles</string>
+    <string name="syncWifiPicturesTitle">Synchroniser les photos et les vidéos</string>
+    <string name="syncWifiSettingsTitle">Synchroniser des fichiers hors ligne</string>
     <string name="themeSettingsDarkLabel">Sombre</string>
     <string name="themeSettingsLightLabel">Clair</string>
     <string name="themeSettingsSystemDefaultLabel">Valeur par défaut du système</string>

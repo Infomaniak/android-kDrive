@@ -553,6 +553,8 @@
     <string name="onBoardingTitle2">Arbeiten Sie am selben Ort zusammen und werden Sie effizienter</string>
     <string name="onBoardingTitle3">Speichern Sie Ihre Erinnerungen völlig sicher</string>
     <string name="pdfIsLocked">Ihr PDF ist gesperrt</string>
+    <string name="photoSyncSuspended">Verbinden Sie sich mit einem Wi-Fi-Netzwerk oder erlauben Sie die mobile Datennutzung</string>
+    <string name="photoSyncSuspendedTitle">Fotosicherung ausgesetzt</string>
     <string name="picturesNoFile">Derzeit kein Foto</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Vorbereitung auf den Import von 1 Datei</item>
@@ -667,6 +669,8 @@
     <string name="switchUserTitle">Benutzer wechseln</string>
     <string name="syncConfigureDescription">Ihre Fotos, Videos und Screenshots werden automatisch in Ihrem kDrive %s gespeichert.</string>
     <string name="syncConfigureTitle">Speichern Sie Ihre Erinnerungen an einem sicheren Ort</string>
+    <string name="syncOnlyWifiDescription">Offline-Dateien werden nur mit Wi-Fi synchronisiert</string>
+    <string name="syncOnlyWifiTitle">Nur mit Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Automatische Sicherung aktivieren</string>
     <string name="syncSettingsButtonSaveDate">Speichern</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisierung</string>
@@ -687,6 +691,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Stündlich</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Alle 15 Minuten</string>
     <string name="syncSettingsTitle">Sicherung der Fotos</string>
+    <string name="syncWifiAndMobileDataDescription">Für die mobile Datennutzung können Gebühren anfallen</string>
+    <string name="syncWifiAndMobileDataTitle">Mit Wi-Fi und mobilen Daten</string>
+    <string name="syncWifiPicturesTitle">Fotos und Videos synchronisieren</string>
+    <string name="syncWifiSettingsTitle">Offline-Dateien synchronisieren</string>
     <string name="themeSettingsDarkLabel">Dunkel</string>
     <string name="themeSettingsLightLabel">Hell</string>
     <string name="themeSettingsSystemDefaultLabel">Systemstandard</string>

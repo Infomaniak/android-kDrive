@@ -553,6 +553,8 @@
     <string name="onBoardingTitle2">Trabaja en grupo en un mismo lugar y gana en eficacia</string>
     <string name="onBoardingTitle3">Haz copia de seguridad de tus recuerdos</string>
     <string name="pdfIsLocked">Tu PDF está bloqueado</string>
+    <string name="photoSyncSuspended">Conectarse a una red Wi-Fi o permitir el uso de datos móviles</string>
+    <string name="photoSyncSuspendedTitle">Suspendida la copia de seguridad de fotos</string>
     <string name="picturesNoFile">Todavía no hay fotos</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparando la importación de 1 archivo</item>
@@ -667,6 +669,8 @@
     <string name="switchUserTitle">Cambiar el usuario</string>
     <string name="syncConfigureDescription">Tus fotos, vídeos y capturas de pantalla se guardarán automáticamente en tu kDrive %s.</string>
     <string name="syncConfigureTitle">Haz copia de seguridad de tus recuerdos en un lugar seguro</string>
+    <string name="syncOnlyWifiDescription">Los archivos sin conexión sólo se sincronizarán con Wi-Fi</string>
+    <string name="syncOnlyWifiTitle">Sólo con Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Activar la copia de seguridad automática</string>
     <string name="syncSettingsButtonSaveDate">Guardar</string>
     <string name="syncSettingsButtonSyncPeriodicity">Sincronización</string>
@@ -687,6 +691,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Cada hora</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Cada 15 minutos</string>
     <string name="syncSettingsTitle">Copia de seguridad de las fotos</string>
+    <string name="syncWifiAndMobileDataDescription">Pueden aplicarse tarifas por uso de datos móviles</string>
+    <string name="syncWifiAndMobileDataTitle">Con Wi-Fi y datos móviles</string>
+    <string name="syncWifiPicturesTitle">Sincronizar fotos y vídeos</string>
+    <string name="syncWifiSettingsTitle">Sincronizar archivos sin conexión</string>
     <string name="themeSettingsDarkLabel">Scuro</string>
     <string name="themeSettingsLightLabel">Chiaro</string>
     <string name="themeSettingsSystemDefaultLabel">Predeterminado del sisteme</string>
