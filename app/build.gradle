@@ -131,6 +131,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation project(':Core')
+    implementation project(':Core:FragmentNavigation')
     implementation project(':Core:Legacy')
     implementation project(':Core:Legacy:AppLock')
     implementation project(':Core:Legacy:Stores')

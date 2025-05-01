@@ -28,6 +28,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.MatomoDrive.toFloat
@@ -77,7 +78,7 @@ class SettingsFragment : Fragment() {
         setupMyKSuiteLayout()
 
         syncPicture.setOnClickListener {
-            safeNavigate(R.id.syncSettingsActivity)
+            safelyNavigate(R.id.syncSettingsActivity)
         }
         themeSettings.setOnClickListener {
             openThemeSettings()
@@ -91,7 +92,7 @@ class SettingsFragment : Fragment() {
                 isVisible = true
                 setOnClickListener {
                     trackSettingsEvent("lockApp")
-                    safeNavigate(R.id.appSecurityActivity)
+                    safelyNavigate(R.id.appSecurityActivity)
                 }
             } else {
                 appSecuritySeparator.isGone = true
@@ -99,7 +100,7 @@ class SettingsFragment : Fragment() {
             }
         }
         about.setOnClickListener {
-            safeNavigate(R.id.aboutSettingsFragment)
+            safelyNavigate(R.id.aboutSettingsFragment)
         }
     }
 
