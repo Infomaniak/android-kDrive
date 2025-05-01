@@ -92,7 +92,7 @@ class SettingsFragment : Fragment() {
                 isVisible = true
                 setOnClickListener {
                     trackSettingsEvent("lockApp")
-                    safeNavigate(R.id.appSecurityActivity)
+                    safelyNavigate(R.id.appSecurityActivity)
                 }
             } else {
                 appSecuritySeparator.isGone = true
@@ -100,7 +100,7 @@ class SettingsFragment : Fragment() {
             }
         }
         about.setOnClickListener {
-            safeNavigate(R.id.aboutSettingsFragment)
+            safelyNavigate(R.id.aboutSettingsFragment)
         }
     }
 
