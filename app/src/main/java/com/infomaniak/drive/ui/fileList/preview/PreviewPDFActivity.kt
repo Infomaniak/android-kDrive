@@ -21,6 +21,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -37,6 +38,8 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.setMargins
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
 
 class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
@@ -79,7 +82,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     private fun initBottomSheet() = with(binding) {
         setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
         bottomSheetFileInfos.apply {
-            updateWithExternalFile(getFakeFile())
+            lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { updateWithExternalFile(getFakeFile()) }
             initOnClickListener(this@PreviewPDFActivity)
             isDownloadHidden(isGone = true)
         }

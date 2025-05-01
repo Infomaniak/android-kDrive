@@ -450,7 +450,11 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             updateMultiSelect = { onUpdateMultiSelect() }
         }
 
-        fileAdapter = FileAdapter(multiSelectManager, FileController.emptyList(mainViewModel.realm)).apply {
+        fileAdapter = FileAdapter(
+            multiSelectManager = multiSelectManager,
+            fileList = FileController.emptyList(mainViewModel.realm),
+            lifecycle = viewLifecycleOwner.lifecycle
+        ).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             setHasStableIds(true)
 

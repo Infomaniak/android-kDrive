@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.CallSuper
@@ -29,6 +30,8 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
@@ -58,7 +61,11 @@ import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class FileInfoActionsView @JvmOverloads constructor(
@@ -412,9 +419,29 @@ class FileInfoActionsView @JvmOverloads constructor(
         setOfflineItemUi(file, isOfflineProgress)
     }
 
+    private val fileToShowFlow = MutableSharedFlow<File>(extraBufferCapacity = 1)
+
+    private var viewAddedCoroutine: Job? = null
+
+    override fun onViewAdded(child: View?) {
+        super.onViewAdded(child)
+        val scope = findViewTreeLifecycleOwner()!!.lifecycleScope
+        viewAddedCoroutine = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            fileToShowFlow.collectLatest { file ->
+                binding.fileView.setFileItem(file)
+            }
+        }
+    }
+
+    override fun onViewRemoved(child: View?) {
+        super.onViewRemoved(child)
+        viewAddedCoroutine?.cancel()
+        viewAddedCoroutine = null
+    }
+
     private fun setOfflineItemUi(file: File, isOfflineProgress: Boolean): Unit = with(binding) {
         // Update file item progress
-        if (isOfflineProgress) fileView.progressLayout.setupFileProgress(file) else fileView.setFileItem(file)
+        if (isOfflineProgress) fileView.progressLayout.setupFileProgress(file) else fileToShowFlow.tryEmit(file)
 
         val isPendingOffline = file.isMarkedAsOffline
         val isItemInteractable = !isPendingOffline || file.currentProgress == 100

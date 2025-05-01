@@ -37,6 +37,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.RealmListParceler.*
 import com.infomaniak.drive.utils.Utils.INDETERMINATE_PROGRESS
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.contains
 import com.infomaniak.lib.core.utils.guessMimeType
 import io.realm.RealmList
@@ -365,11 +366,12 @@ open class File(
             categories.sort(FileCategory::addedAt.name).map { it.categoryId }
         } else {
             runCatching {
+                // Because RealmList.sort will crash in case objects are not managed.
                 categories.sortedBy { it.addedAt }.map { it.categoryId }
             }.onFailure {
                 Sentry.withScope { scope ->
                     scope.setExtra("categories", categories.joinToString { "id: ${it.categoryId} addedAt: ${it.addedAt}" })
-                    Sentry.captureException(it)
+                    SentryLog.e("getSortedCategoriesIds", "Failed to do sortBy on unmanaged RealmList??", it)
                 }
             }.getOrDefault(emptyList())
         }

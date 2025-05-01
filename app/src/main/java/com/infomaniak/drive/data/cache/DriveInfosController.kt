@@ -17,7 +17,17 @@
  */
 package com.infomaniak.drive.data.cache
 
+import androidx.collection.IntIntMap
+import androidx.collection.IntList
+import androidx.collection.MutableIntIntMap
+import androidx.collection.buildIntList
+import com.infomaniak.core.DynamicLazyMap
+import com.infomaniak.core.flowForKey
+import com.infomaniak.core.maxElements
+import com.infomaniak.core.sharedFlow
+import com.infomaniak.core.utils.runOnMainThread
 import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.CategoryRights
@@ -30,6 +40,12 @@ import io.realm.RealmConfiguration
 import io.realm.RealmQuery
 import io.realm.Sort
 import io.realm.kotlin.oneOf
+import io.realm.kotlin.toFlow
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.job
 
 object DriveInfosController {
 
@@ -179,6 +195,63 @@ object DriveInfosController {
         } ?: emptyList()
 
         return categories
+    }
+
+    private val realmInstance = DynamicLazyMap<Unit, Realm>(
+        createElement = {
+            runOnMainThread { getRealmInstance() }.also { realm ->
+                coroutineContext.job.invokeOnCompletion { runOnMainThread { realm.close() } }
+            }
+        }
+    )
+
+    private val driveCategories: DynamicLazyMap<Int, SharedFlow<List<Category>?>> = DynamicLazyMap.sharedFlow(
+        cacheManager = DynamicLazyMap.CacheManager.maxElements(maxCacheSize = 20),
+        coroutineScope = MainScope(),
+        createFlow = { driveId: Int ->
+            realmInstance.useElement(Unit) {
+                it.getDrivesQuery(
+                    userId = AccountUtils.currentUserId,
+                    driveId = driveId
+                ).findFirst().toFlow().map {
+                    if (it?.categoryRights?.canReadOnFile == true) it.categories else null
+                }
+            }
+        }
+    )
+
+    data class CategoriesRequest(
+        val driveId: Int,
+        val categoriesIds: IntList,
+    )
+
+    fun categoriesFor(file: File): Flow<List<Category>?> = categoriesFor(
+        driveId = file.driveId,
+        categoriesIds = buildIntList(initialCapacity = file.categories.size) {
+            file.categories.forEach { add(it.categoryId) }
+        }
+    )
+
+    fun categoriesFor(driveId: Int, categoriesIds: IntList): Flow<List<Category>?> {
+        return categories.flowForKey(CategoriesRequest(driveId, categoriesIds))
+    }
+
+    private val categories: DynamicLazyMap<CategoriesRequest, SharedFlow<List<Category>?>> = DynamicLazyMap.sharedFlow(
+        cacheManager = DynamicLazyMap.CacheManager.maxElements(maxCacheSize = 1000),
+        coroutineScope = MainScope(),
+        createFlow = { request ->
+            val idsToIndexes = request.categoriesIds.asMapOfIndexes()
+            driveCategories.flowForKey(request.driveId).map { categories ->
+                categories?.toMutableList()?.also {
+                    it.removeAll { category -> category.id !in request.categoriesIds }
+                    it.sortBy { category -> idsToIndexes[category.id] }
+                }
+            }
+        }
+    )
+
+    private fun IntList.asMapOfIndexes(): IntIntMap = MutableIntIntMap(initialCapacity = size).also { map ->
+        forEachIndexed { index, number -> map[number] = index }
     }
 
     fun getCategoriesFromIds(driveId: Int, categoriesIds: Array<Int>): List<Category> {
