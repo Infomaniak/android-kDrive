@@ -248,6 +248,12 @@
         android:label="SwitchDriveDialog"
         tools:layout="@layout/fragment_bottom_sheet_select" />
 
+    <dialog
+        android:id="@+id/syncFilesBottomSheetDialog"
+        android:name="com.infomaniak.drive.views.SyncFilesBottomSheetDialog"
+        android:label="SyncFilesBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_select" />
+
     <fragment
         android:id="@+id/activityFilesFragment"
         android:name="com.infomaniak.drive.ui.home.ActivityFilesFragment"

@@ -327,6 +327,55 @@
                         android:background="@color/divider" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/fileSync"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?selectableItemBackground"
+                        android:paddingHorizontal="@dimen/marginStandard"
+                        android:paddingVertical="@dimen/marginStandardSmall"
+                        android:paddingBottom="@dimen/marginStandard">
+
+                        <TextView
+                            android:id="@+id/fileSyncTitle"
+                            style="@style/Subtitle2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:paddingVertical="@dimen/marginStandardMedium"
+                            android:text="@string/syncWifiSettingsTitle"
+                            app:layout_constraintBottom_toTopOf="@id/fileSyncDesc"
+                            app:layout_constraintEnd_toStartOf="@id/fileSyncEnd"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ImageView
+                            android:id="@+id/fileSyncEnd"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_chevron_right"
+                            app:layout_constraintBottom_toTopOf="@id/fileSyncDesc"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:id="@+id/fileSyncDesc"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="@string/syncOnlyWifiDescription"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/fileSyncEnd"
+                            app:layout_constraintVertical_chainStyle="packed" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/about"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
