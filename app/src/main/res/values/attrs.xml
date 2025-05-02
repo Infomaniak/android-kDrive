@@ -75,5 +75,7 @@
         <attr name="icon" />
         <attr name="iconTint" format="color" />
         <attr name="text" format="string" />
+        <attr name="descText" format="string" />
+        <attr name="desc" format="string" />
     </declare-styleable>
 </resources>

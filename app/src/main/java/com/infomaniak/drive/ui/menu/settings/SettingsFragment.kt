@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.collection.arrayMapOf
 import androidx.core.view.isGone
@@ -45,6 +46,7 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.getDashboardData
 import com.infomaniak.lib.applock.LockActivity
+import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -53,6 +55,13 @@ class SettingsFragment : Fragment() {
 
     private var binding: FragmentSettingsBinding by safeBinding()
 
+    private lateinit var drivePermissions: DrivePermissions
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setupDrivePermission()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSettingsBinding.inflate(inflater, container, false).also { binding = it }.root
     }
@@ -60,20 +69,14 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
+        listenBackNavigationResultBottomSheet()
+
         toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
 
-        val drivePermissions = DrivePermissions().apply {
-            registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
-        }
-
-        onlyWifiSyncValue.isChecked = AppSettings.onlyWifiSync
-        onlyWifiSyncValue.setOnCheckedChangeListener { _, isChecked ->
-            trackSettingsEvent("onlyWifiTransfer", isChecked)
-            AppSettings.onlyWifiSync = isChecked
-            requireActivity().launchAllUpload(drivePermissions)
-        }
+        val syncOption = if (AppSettings.onlyWifiSync) SyncFilesOption.ONLY_WIFI else SyncFilesOption.ALL_DATA
+        binding.fileSyncValue.text = requireContext().getString(syncOption.title)
 
         setupMyKSuiteLayout()
 
@@ -181,5 +184,33 @@ class SettingsFragment : Fragment() {
 
     private fun trackSettingsEvent(name: String, value: Boolean? = null) {
         trackEvent("settings", name, value = value?.toFloat())
+    }
+
+    private fun performSyncUpdate() {
+        requireActivity().launchAllUpload(drivePermissions)
+    }
+
+    private fun listenBackNavigationResultBottomSheet() {
+        getBackNavigationResult<SyncFilesOption>(KEY_BACK_ACTION_BOTTOM_SHEET) { result ->
+            AppSettings.onlyWifiSync = result == SyncFilesOption.ONLY_WIFI
+            binding.fileSyncValue.text = requireContext().getString(result.title)
+            performSyncUpdate()
+        }
+    }
+
+    private fun setupDrivePermission() {
+        drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@SettingsFragment) { authorized ->
+                if (authorized) requireActivity().syncImmediately()
+            }
+        }
+    }
+
+    companion object {
+        const val KEY_BACK_ACTION_BOTTOM_SHEET = "syncFilesBottomSheetDialog"
+
+        enum class SyncFilesOption(@StringRes val title: Int) {
+            ONLY_WIFI(title = R.string.syncOnlyWifiTitle), ALL_DATA(title = R.string.syncWifiAndMobileDataTitle),
+        }
     }
 }

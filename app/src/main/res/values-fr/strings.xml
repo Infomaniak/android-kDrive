@@ -669,8 +669,8 @@
     <string name="switchUserTitle">Changer d’utilisateur</string>
     <string name="syncConfigureDescription">Vos photos, vidéos et captures écran seront enregistrées automatiquement dans votre kDrive %s.</string>
     <string name="syncConfigureTitle">Sauvegardez vos souvenirs en lieu sûr</string>
-    <string name="syncOnlyWifiDescription">Les fichiers hors ligne ne seront synchronisés qu’avec le Wi-Fi</string>
-    <string name="syncOnlyWifiTitle">Avec Wi-Fi uniquement</string>
+    <string name="syncOnlyWifiDescription">Les fichiers hors ligne ne seront synchronisés uniquement via le Wi-Fi</string>
+    <string name="syncOnlyWifiTitle">Via Wi-Fi uniquement</string>
     <string name="syncSettingsButtonActiveSync">Activer la sauvegarde automatique</string>
     <string name="syncSettingsButtonSaveDate">Enregistrer</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisation</string>
@@ -692,9 +692,9 @@
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Toutes les 15 minutes</string>
     <string name="syncSettingsTitle">Sauvegarde des photos</string>
     <string name="syncWifiAndMobileDataDescription">Des frais d’utilisation de données mobiles peuvent s’appliquer</string>
-    <string name="syncWifiAndMobileDataTitle">Avec Wi-Fi et données mobiles</string>
-    <string name="syncWifiPicturesTitle">Synchroniser les photos et les vidéos</string>
-    <string name="syncWifiSettingsTitle">Synchroniser des fichiers hors ligne</string>
+    <string name="syncWifiAndMobileDataTitle">Via Wi-Fi et données mobiles</string>
+    <string name="syncWifiPicturesTitle">Synchroniser les photos et vidéos</string>
+    <string name="syncWifiSettingsTitle">Synchroniser les fichiers hors ligne</string>
     <string name="themeSettingsDarkLabel">Sombre</string>
     <string name="themeSettingsLightLabel">Clair</string>
     <string name="themeSettingsSystemDefaultLabel">Valeur par défaut du système</string>
