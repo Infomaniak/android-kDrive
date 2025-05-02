@@ -18,36 +18,39 @@
 package com.infomaniak.drive.views
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.annotation.StringRes
-import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.ui.menu.SyncFilesBottomSheetAdapter
+import android.view.ViewGroup
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.databinding.FragmentBottomSheetSyncFilesBinding
+import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.KEY_BACK_ACTION_BOTTOM_SHEET
+import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.SyncFilesOption
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.setBackNavigationResult
 
-class SyncFilesBottomSheetDialog : SelectBottomSheetDialog() {
+class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
 
-    private val uiSettings by lazy { UiSettings(requireContext()) }
+    var binding: FragmentBottomSheetSyncFilesBinding by safeBinding()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
-        super.onViewCreated(view, savedInstanceState)
-
-        selectTitle.setText(R.string.syncWifiSettingsTitle)
-
-        selectRecyclerView.adapter =
-            SyncFilesBottomSheetAdapter(
-                syncOptions = uiSettings.syncFilesSettings,
-                onItemClicked = {
-                    uiSettings.syncFilesSettings = it
-                    dismiss()
-                },
-                context = requireContext(),
-            )
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return FragmentBottomSheetSyncFilesBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    companion object {
-        enum class SyncFilesOption(@StringRes val titleRes: Int, @StringRes val descriptionRes: Int) {
-            ONLY_WIFI(titleRes = R.string.syncOnlyWifiTitle, descriptionRes = R.string.syncOnlyWifiDescription),
-            ALL_DATA(titleRes = R.string.syncWifiAndMobileDataTitle, descriptionRes = R.string.syncWifiAndMobileDataDescription),
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        with(binding.syncOnlyWifi) {
+            isActive = AppSettings.onlyWifiSync
+            setOnClickListener {
+                setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, SyncFilesOption.ONLY_WIFI)
+            }
         }
+
+        with(binding.syncWithAll) {
+            isActive = !AppSettings.onlyWifiSync
+            setOnClickListener {
+                setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, SyncFilesOption.ALL_DATA)
+            }
+        }
+        super.onViewCreated(view, savedInstanceState)
     }
 }
