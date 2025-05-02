@@ -248,4 +248,32 @@ class SettingsFragment : Fragment() {
         private val URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION = "login.${ApiEnvironment.current.host}"
         private val TERMINATE_ACCOUNT_FULL_URL = "$AUTOLOG_URL/?url=$TERMINATE_ACCOUNT_URL"
     }
+
+    private fun performSyncUpdate() {
+        requireActivity().launchAllUpload(drivePermissions)
+    }
+
+    private fun listenBackNavigationResultBottomSheet() {
+        getBackNavigationResult<SyncFilesOption>(KEY_BACK_ACTION_BOTTOM_SHEET) { result ->
+            AppSettings.onlyWifiSync = result == SyncFilesOption.ONLY_WIFI
+            binding.fileSyncValue.text = requireContext().getString(result.title)
+            performSyncUpdate()
+        }
+    }
+
+    private fun setupDrivePermission() {
+        drivePermissions = DrivePermissions().apply {
+            registerPermissions(this@SettingsFragment) { authorized ->
+                if (authorized) requireActivity().syncImmediately()
+            }
+        }
+    }
+
+    companion object {
+        const val KEY_BACK_ACTION_BOTTOM_SHEET = "syncFilesBottomSheetDialog"
+
+        enum class SyncFilesOption(@StringRes val title: Int) {
+            ONLY_WIFI(title = R.string.syncOnlyWifiTitle), ALL_DATA(title = R.string.syncWifiAndMobileDataTitle),
+        }
+    }
 }
