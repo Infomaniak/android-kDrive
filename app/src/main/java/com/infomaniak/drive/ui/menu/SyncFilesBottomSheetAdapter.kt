@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -45,7 +46,7 @@ class SyncFilesBottomSheetAdapter(
         val syncOption = SyncFilesOption.entries[position]
         itemSelectText.text = context.getString(syncOption.titleRes)
         itemSelectDescription.text = context.getString(syncOption.descriptionRes)
-        itemSelectActiveIcon.isVisible = syncOptions == syncOption
+        itemSelectActiveIcon.isInvisible = syncOptions != syncOption
         root.setOnClickListener { onItemClicked(syncOption) }
     }
 
