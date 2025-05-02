@@ -21,9 +21,12 @@ import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.ui.menu.SyncFilesBottomSheetAdapter
 
 class SyncFilesBottomSheetDialog : SelectBottomSheetDialog() {
+
+    private val uiSettings by lazy { UiSettings(requireContext()) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
@@ -31,7 +34,14 @@ class SyncFilesBottomSheetDialog : SelectBottomSheetDialog() {
         selectTitle.setText(R.string.syncWifiSettingsTitle)
 
         selectRecyclerView.adapter =
-            SyncFilesBottomSheetAdapter(syncOptions = SyncFilesOption.ALL_DATA, onItemClicked = {}, context = requireContext())
+            SyncFilesBottomSheetAdapter(
+                syncOptions = uiSettings.syncFilesSettings,
+                onItemClicked = {
+                    uiSettings.syncFilesSettings = it
+                    dismiss()
+                },
+                context = requireContext(),
+            )
     }
 
     companion object {
