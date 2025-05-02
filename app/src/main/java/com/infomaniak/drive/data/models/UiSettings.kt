@@ -25,6 +25,7 @@ import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.ui.home.RootFileTreeCategory
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.views.SyncFilesBottomSheetDialog.Companion.SyncFilesOption
 import com.infomaniak.lib.core.networking.AccessTokenUsageInterceptor.ApiCallRecord
 import com.infomaniak.lib.core.utils.SharedValues
 import com.infomaniak.lib.core.utils.sharedValue
@@ -65,6 +66,7 @@ class UiSettings(context: Context) : SharedValues {
     var sortType by sharedValue("sortType", SortType.NAME_AZ)
     var accessTokenApiCallRecord by sharedValue<ApiCallRecord>("accessTokenApiCallRecord", null)
     var syncSettingsDate by sharedValue("syncSettingsDate", SavePicturesDate.SINCE_NOW)
+    var syncFilesSettings by sharedValue("syncSettingsDate", SyncFilesOption.ALL_DATA)
 
     data class SaveExternalFilesData(
         val userId: Int,
