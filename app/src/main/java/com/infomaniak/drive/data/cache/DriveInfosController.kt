@@ -25,7 +25,6 @@ import com.infomaniak.core.DynamicLazyMap
 import com.infomaniak.core.flowForKey
 import com.infomaniak.core.maxElements
 import com.infomaniak.core.sharedFlow
-import com.infomaniak.core.utils.runOnMainThread
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Team
@@ -35,6 +34,7 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
+import com.infomaniak.drive.utils.runOnMainThread
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmQuery
