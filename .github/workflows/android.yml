@@ -54,6 +54,12 @@ jobs:
       - name: Clean gradle cache
         run: ./gradlew clean
 
+      # Making sure the app compiles
+      - name: Build app
+        run: |
+          ./gradlew buildFdroidDebug
+          ./gradlew buildStandardDebug
+
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
