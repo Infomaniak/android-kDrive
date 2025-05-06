@@ -20,7 +20,7 @@ package com.infomaniak.drive.utils
 import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.collection.ArrayMap
@@ -47,19 +47,19 @@ object MediaFoldersProvider {
     const val VIDEO_BUCKET_DISPLAY_NAME = MediaStore.Video.Media.BUCKET_DISPLAY_NAME
 
     val imagesExternalUri: Uri =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        if (SDK_INT >= 29) MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 
     val videosExternalUri: Uri =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        if (SDK_INT >= 29) MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
 
     val audiosExternalUri: Uri =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        if (SDK_INT >= 29) MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
         else MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
 
     private val MEDIA_PATH_COLUMN =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.RELATIVE_PATH
+        if (SDK_INT >= 29) MediaStore.MediaColumns.RELATIVE_PATH
         else MediaStore.MediaColumns.DATA
 
     private const val imagesSortOrder = "$IMAGES_BUCKET_DISPLAY_NAME ASC"

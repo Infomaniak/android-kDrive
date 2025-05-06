@@ -29,7 +29,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.FileObserver
 import android.provider.DocumentsContract
@@ -139,7 +139,7 @@ class MainActivity : BaseActivity() {
 
         val offlineFolder = File.getOfflineFolder(this)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (SDK_INT >= 29) {
             object : FileObserver(offlineFolder) {
                 override fun onEvent(event: Int, path: String?) = onEvent()
             }
@@ -367,7 +367,7 @@ class MainActivity : BaseActivity() {
 
     private fun launchNextDeleteRequest() {
         val filesUris = pendingFilesUrisQueue.firstOrNull() ?: return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (SDK_INT >= 30) {
             val deletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUris)
             filesDeletionResult.launch(IntentSenderRequest.Builder(deletionRequest.intentSender).build())
         }
@@ -385,7 +385,7 @@ class MainActivity : BaseActivity() {
         }
 
         fun onConfirmation(filesUploadedRecently: ArrayList<UploadFile>, filesUriToDelete: List<Uri>) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (SDK_INT >= 30) {
                 lifecycleScope.launch {
                     pendingFilesUrisQueue.clear()
                     pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))

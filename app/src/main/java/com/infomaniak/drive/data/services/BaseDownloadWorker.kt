@@ -19,7 +19,7 @@ package com.infomaniak.drive.data.services
 
 import android.app.job.JobParameters
 import android.content.Context
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -81,7 +81,7 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
         throwable.printStackTrace()
         return when (throwable) {
             is CancellationException -> {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && stopReason == JobParameters.STOP_REASON_TIMEOUT) {
+                if (SDK_INT >= 31 && stopReason == JobParameters.STOP_REASON_TIMEOUT) {
                     SentryLog.e(workerTag(), "Stopped because a time out error", throwable)
                     Result.retry()
                 } else {

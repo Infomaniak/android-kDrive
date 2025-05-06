@@ -20,7 +20,7 @@ package com.infomaniak.drive
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import androidx.appcompat.app.AppCompatDelegate
@@ -93,8 +93,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
                     detectLeakedClosableObjects()
                     detectLeakedRegistrationObjects()
                     detectFileUriExposure()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) detectContentUriWithoutPermission()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) detectCredentialProtectedWhileLocked()
+                    if (SDK_INT >= 26) detectContentUriWithoutPermission()
+                    if (SDK_INT >= 29) detectCredentialProtectedWhileLocked()
                 }.build()
             )
         } else {
@@ -162,7 +162,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     override fun newImageLoader(): ImageLoader {
-        val factory = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        val factory = if (SDK_INT >= 28) {
             ImageDecoderDecoder.Factory()
         } else {
             GifDecoder.Factory()

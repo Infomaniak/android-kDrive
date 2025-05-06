@@ -25,7 +25,7 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -546,7 +546,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                             FastScrollDirection.HORIZONTAL ->
                                 it.addRule(ABOVE, trackView.id)
                             FastScrollDirection.VERTICAL -> {
-                                if (Build.VERSION.SDK_INT > 16)
+                                if (SDK_INT > 16)
                                     it.addRule(START_OF, trackView.id)
                                 else
                                     it.addRule(LEFT_OF, trackView.id)
@@ -558,7 +558,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                             FastScrollDirection.HORIZONTAL ->
                                 it.addRule(BELOW, trackView.id)
                             FastScrollDirection.VERTICAL -> {
-                                if (Build.VERSION.SDK_INT > 16)
+                                if (SDK_INT > 16)
                                     it.addRule(END_OF, trackView.id)
                                 else
                                     it.addRule(RIGHT_OF, trackView.id)

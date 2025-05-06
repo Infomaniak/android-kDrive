@@ -20,7 +20,7 @@ package com.infomaniak.drive.data.models
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
@@ -98,7 +98,7 @@ open class UploadFile(
         val uriObject = getUriObject()
         return when {
             DocumentsContract.isDocumentUri(context, uriObject) -> uriObject
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> MediaStore.setRequireOriginal(uriObject)
+            SDK_INT >= 29 -> MediaStore.setRequireOriginal(uriObject)
             else -> uriObject
         }
     }

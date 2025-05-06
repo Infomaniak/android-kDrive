@@ -20,7 +20,7 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.fragment.app.FragmentActivity
@@ -38,7 +38,7 @@ import java.util.Date
 object SyncUtils {
 
     val DATE_TAKEN: String =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) MediaStore.MediaColumns.DATE_TAKEN
+        if (SDK_INT >= 29) MediaStore.MediaColumns.DATE_TAKEN
         else "datetaken"
 
     inline val Context.uploadFolder get() = IOFile(cacheDir, UploadWorker.UPLOAD_FOLDER).apply { if (!exists()) mkdirs() }
@@ -144,13 +144,13 @@ object SyncUtils {
         if (UploadFile.getAppSyncSettings()?.syncImmediately == true) {
             SentryLog.d("kDrive", "start content observer!")
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) MediaObserverWorker.scheduleWork(this)
+            if (SDK_INT >= 24) MediaObserverWorker.scheduleWork(this)
             else startService(Intent(applicationContext, MediaObserverService::class.java))
         }
     }
 
     private fun Context.cancelContentObserver() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (SDK_INT >= 24) {
             MediaObserverWorker.cancelWork(applicationContext)
         } else {
             applicationContext.stopService(Intent(applicationContext, MediaObserverService::class.java))
