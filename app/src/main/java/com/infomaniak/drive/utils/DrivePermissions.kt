@@ -85,9 +85,14 @@ class DrivePermissions {
 
     /**
      * Check if the sync has all permissions to work
+     *
+     * @param requestPermission Whether or not the app should just check if it has the permissions,
+     * or requests it if it's not the case
+     * @param showBatteryDialog We want to be able to show the battery dialog even if we don't request the mandatory permissions
+     *
      * @return [Boolean] true if the sync has all permissions or false
      */
-    fun checkSyncPermissions(requestPermission: Boolean = true): Boolean {
+    fun checkSyncPermissions(requestPermission: Boolean = true, showBatteryDialog: Boolean = true): Boolean {
 
         fun displayBatteryDialog() {
             with(backgroundSyncPermissionsBottomSheetDialog) {
@@ -97,7 +102,7 @@ class DrivePermissions {
             }
         }
 
-        if (UiSettings(activity).mustDisplayBatteryDialog || !checkBatteryLifePermission(false)) {
+        if (showBatteryDialog && (UiSettings(activity).mustDisplayBatteryDialog || !checkBatteryLifePermission(false))) {
             displayBatteryDialog()
         }
 

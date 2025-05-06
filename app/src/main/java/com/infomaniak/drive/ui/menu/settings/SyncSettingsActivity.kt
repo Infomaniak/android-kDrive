@@ -124,7 +124,7 @@ class SyncSettingsActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        saveSettingVisibility(binding.activateSyncSwitch.isChecked)
+        saveSettingVisibility(isVisible = binding.activateSyncSwitch.isChecked, showBatteryDialog = false)
     }
 
     private fun initUserAndDrive() {
@@ -145,10 +145,12 @@ class SyncSettingsActivity : BaseActivity() {
 
         activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
         activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
-            saveSettingVisibility(isChecked)
+            saveSettingVisibility(isVisible = isChecked, showBatteryDialog = isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
             if (isChecked && !drivePermissions.checkUserChoiceStoragePermission()) {
-                drivePermissions.checkSyncPermissions()
+                // We only request permissions if user haven't chosen the "selected image" permission to avoid spamming him
+                // with this files choosing UI
+                drivePermissions.checkWriteStoragePermission()
             }
             changeSaveButtonStatus()
         }
@@ -186,7 +188,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         saveButton.initProgress(this@SyncSettingsActivity)
         saveButton.setOnClickListener {
-            if (drivePermissions.checkSyncPermissions()) saveSettings()
+            if (drivePermissions.checkSyncPermissions(showBatteryDialog = false)) saveSettings()
         }
     }
 
@@ -327,8 +329,8 @@ class SyncSettingsActivity : BaseActivity() {
         selectDrive.setOnClickListener { SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog") }
     }
 
-    private fun saveSettingVisibility(isVisible: Boolean) = with(binding) {
-        val hasPermissions = drivePermissions.checkSyncPermissions(requestPermission = false)
+    private fun saveSettingVisibility(isVisible: Boolean, showBatteryDialog: Boolean) = with(binding) {
+        val hasPermissions = drivePermissions.checkSyncPermissions(requestPermission = false, showBatteryDialog)
         photoAccessDeniedLayout.isVisible = isVisible && !hasPermissions
         photoAccessDeniedTitle.setText(DrivePermissions.permissionNeededDescriptionRes)
         settingsLayout.isVisible = isVisible && hasPermissions
