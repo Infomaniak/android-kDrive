@@ -55,7 +55,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.util.*
+import java.util.UUID
 
 class DownloadOfflineFileManager(
     private val userDrive: UserDrive,

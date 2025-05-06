@@ -65,7 +65,6 @@
                 android:id="@+id/noNetworkInclude"
                 layout="@layout/layout_no_network_small" />
 
-
             <com.infomaniak.drive.views.PendingFilesView
                 android:id="@+id/rootFilesUploadFileInProgressView"
                 android:layout_width="match_parent"

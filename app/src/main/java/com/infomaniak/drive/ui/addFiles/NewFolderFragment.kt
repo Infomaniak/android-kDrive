@@ -58,7 +58,6 @@ class NewFolderFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-
         newFolderViewModel.currentDriveLiveData().observe(viewLifecycleOwner) { drive ->
             initPrivateFolder(drive?.sharedWithMe == true)
             initCommonFolder(drive)
