@@ -188,7 +188,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         saveButton.initProgress(this@SyncSettingsActivity)
         saveButton.setOnClickListener {
-            if (drivePermissions.checkSyncPermissions()) saveSettings()
+            if (drivePermissions.checkSyncPermissions(showBatteryDialog = false)) saveSettings()
         }
     }
 
