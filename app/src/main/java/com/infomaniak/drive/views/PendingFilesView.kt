@@ -56,7 +56,6 @@ class PendingFilesView @JvmOverloads constructor(
                 .setBottomRightCorner(CornerFamily.ROUNDED, radius)
                 .build()
 
-
             binding.itemViewFile.apply {
                 filePreview.isGone = true
                 fileProgression.isVisible = true

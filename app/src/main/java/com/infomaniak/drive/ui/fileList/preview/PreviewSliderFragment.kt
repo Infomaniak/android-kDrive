@@ -211,7 +211,6 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         }
     }
 
-
     override fun downloadFileClicked() {
         super<BasePreviewSliderFragment>.downloadFileClicked()
         currentContext.downloadFile(drivePermissions, currentFile) { toggleBottomSheet(shouldShow = true) }

@@ -177,7 +177,6 @@ class DrivePermissions {
             else -> R.string.allPermissionNeeded
         }
 
-
         val permissions = buildSet {
             if (SDK_INT < 33) {
                 // Even if the docs says that it's unless after api 30, it is in fact needed for the related READ_EXTERNAL_STORAGE

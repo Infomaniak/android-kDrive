@@ -36,8 +36,8 @@
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:touchscreenBlocksFocus="true"
-            android:saveEnabled="false" />
+            android:saveEnabled="false"
+            android:touchscreenBlocksFocus="true" />
 
         <com.infomaniak.drive.views.PreviewHeaderView
             android:id="@+id/header"

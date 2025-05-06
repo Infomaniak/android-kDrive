@@ -51,7 +51,6 @@ The structure of the app, its algorithms and the general functioning are common 
 | `USE_BIOMETRIC` | Used to (un)lock the app.
 | `REQUEST_INSTALL_PACKAGES` | Allow users to execute an APK from kDrive app.
 
-
 ## Tests
 
 In order to test the app with Unit and UI tests, you have to copy `Env-Example` class in AndroidTest package and name it `Env`.\
