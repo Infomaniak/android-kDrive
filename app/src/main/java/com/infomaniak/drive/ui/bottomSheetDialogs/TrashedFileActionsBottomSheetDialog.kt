@@ -41,7 +41,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.utils.ApiErrorCode
+import com.infomaniak.lib.core.api.InternalTranslatedErrorCode
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.whenResultIsOk
 
@@ -115,7 +115,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun getErrorMessage(fileResult: FileResult) = when (fileResult.errorCode) {
-        ApiErrorCode.AN_ERROR_HAS_OCCURRED -> R.string.errorRestore
+        InternalTranslatedErrorCode.UnknownError.code -> R.string.errorRestore
         ErrorCode.CONFLICT_ERROR -> R.string.errorConflict
         else -> fileResult.errorResId
     }

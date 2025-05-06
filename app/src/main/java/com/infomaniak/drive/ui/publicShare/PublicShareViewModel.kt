@@ -172,7 +172,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
     fun buildArchive(archiveBody: ArchiveUUID.ArchiveBody) = viewModelScope.launch(Dispatchers.IO) {
         val apiResponse = ApiRepository.buildPublicShareArchive(driveId, publicShareUuid, archiveBody)
-        val result = apiResponse.data?.let { archiveUuid -> null to archiveUuid } ?: (apiResponse.translatedError to null)
+        val result = apiResponse.data?.let { archiveUuid -> null to archiveUuid } ?: (apiResponse.translateError() to null)
 
         buildArchiveResult.postValue(result)
     }

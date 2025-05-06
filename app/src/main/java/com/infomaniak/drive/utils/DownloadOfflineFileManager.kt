@@ -45,6 +45,7 @@ import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.util.UUID
+import java.util.*
 
 class DownloadOfflineFileManager(
     private val userDrive: UserDrive,
@@ -128,9 +129,9 @@ class DownloadOfflineFileManager(
         } else {
             if (fileDetails.error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
 
-            val translatedError = fileDetails.translatedError
+            val translateError = fileDetails.translateError()
             val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
-            val translatedErrorText = if (translatedError == 0) "" else context.getString(translatedError)
+            val translatedErrorText = context.getString(translateError)
             val responseJson = ApiController.gson.toJson(fileDetails, responseGsonType)
             throw RemoteFileException("$responseJson $translatedErrorText")
         }

@@ -42,6 +42,7 @@ import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -405,8 +406,7 @@ class UploadTask(
                 } else {
                     val responseType = object : TypeToken<ApiResponse<T>>() {}.type
                     val responseJson = gson.toJson(this, responseType)
-                    val translatedError = if (translatedError == 0) "" else context.getString(translatedError)
-                    throw Exception("$responseJson translatedError: $translatedError")
+                    throw Exception("$responseJson translateError: ${context.getString(translateError())}")
                 }
             }
         }

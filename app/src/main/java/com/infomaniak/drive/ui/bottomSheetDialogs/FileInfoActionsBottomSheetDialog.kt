@@ -54,6 +54,7 @@ import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -375,7 +376,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
         mainViewModel.cancelExternalImport(currentFile.externalImport!!.id).observe(viewLifecycleOwner) { apiResponse ->
             if (!apiResponse.isSuccess()) {
-                showSnackbar(requireContext().getString(apiResponse.translatedError), showAboveFab = true)
+                showSnackbar(requireContext().getString(apiResponse.translateError()), showAboveFab = true)
             }
             findNavController().popBackStack()
         }
