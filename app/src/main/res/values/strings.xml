@@ -82,7 +82,6 @@
     <string name="allPermissionNeeded">You must allow access to your files to be able to upload and save them</string>
     <string name="allPermissionNeededAndroid13">You must authorize access to all your media files to be able to upload and save them. But also allow notifications to follow the progress.</string>
     <string name="allPictures">Images</string>
-    <string name="allRootName">kDrive %s root</string>
     <string name="allToday">Today</string>
     <string name="allTrashActionCancelled">Deletion cancelled</string>
     <plurals name="allUploadFinishedDescription">

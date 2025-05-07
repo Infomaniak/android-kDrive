@@ -129,10 +129,6 @@ object Utils {
         )
     }
 
-    fun getRootName(context: Context): String {
-        return context.getString(R.string.allRootName, AccountUtils.getCurrentDrive()?.name)
-    }
-
     fun createPromptNameDialog(
         context: Context,
         @StringRes title: Int,
@@ -295,23 +291,6 @@ object Utils {
     private fun Context.intentExcludingPdfReader(openWithIntent: Intent): Intent {
         val components = arrayOf(ComponentName(this, PreviewPDFActivity::class.java))
         return Intent.createChooser(openWithIntent, null).putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, components)
-    }
-
-    private fun Context.intentWithInitialComponent(openWithIntent: Intent): Intent {
-        val openWithIntentLists = mutableListOf<Intent>()
-        packageManager.queryIntentActivities(openWithIntent, 0).takeIf { it.isNotEmpty() }?.forEach { resInfo ->
-            val resInfoPackageName = resInfo.activityInfo.packageName
-            if (!resInfoPackageName.lowercase().contains(packageName)) {
-                with(Intent(openWithIntent)) {
-                    setPackage(resInfoPackageName)
-                    openWithIntentLists.add(this)
-                }
-            }
-        }
-
-        return Intent.createChooser(openWithIntentLists.removeAt(0), getString(R.string.openWith)).apply {
-            putExtra(Intent.EXTRA_INITIAL_INTENTS, openWithIntentLists.toTypedArray())
-        }
     }
 
     fun Context.openWithIntentExceptkDrive(uri: Uri, type: String?, flags: Int): Intent {
