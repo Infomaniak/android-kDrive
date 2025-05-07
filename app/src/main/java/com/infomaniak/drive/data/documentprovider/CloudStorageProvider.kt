@@ -26,8 +26,10 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.net.Uri
-import android.os.*
-import android.os.Build.VERSION.SDK_INT
+import android.os.CancellationSignal
+import android.os.Handler
+import android.os.ParcelFileDescriptor
+import android.os.PowerManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.provider.Settings
