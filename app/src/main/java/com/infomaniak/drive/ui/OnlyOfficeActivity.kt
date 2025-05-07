@@ -20,7 +20,7 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
@@ -97,7 +97,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
     @SuppressLint("RequiresFeature")
     private fun setDarkMode() = with(binding) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+        if (SDK_INT >= 29 &&
             WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)
         ) {
             WebSettingsCompat.setAlgorithmicDarkeningAllowed(webView.settings, isNightModeEnabled())

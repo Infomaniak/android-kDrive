@@ -22,7 +22,7 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import androidx.core.app.NotificationManagerCompat
@@ -321,7 +321,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private fun progressForegroundInfo(pendingCount: Int): ForegroundInfo {
         val notification = UploadNotifications.getCurrentUploadNotification(applicationContext, pendingCount).build()
         val foregroundInfo = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+            SDK_INT >= 29 -> {
                 ForegroundInfo(
                     /* notificationId = */ NotificationUtils.UPLOAD_SERVICE_ID,
                     /* notification = */ notification,
@@ -414,8 +414,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private fun moreCustomConditions(): String = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0 AND ${MediaStore.MediaColumns.IS_TRASHED} = 0"
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0"
+        SDK_INT >= 30 -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0 AND ${MediaStore.MediaColumns.IS_TRASHED} = 0"
+        SDK_INT >= 29 -> "AND ${MediaStore.MediaColumns.IS_PENDING} = 0"
         else -> ""
     }
 
@@ -450,7 +450,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     }
                 }
         }.onFailure { exception ->
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q || exception !is IllegalArgumentException) {
+            if (SDK_INT < 29 || exception !is IllegalArgumentException) {
                 throw exception
             }
         }

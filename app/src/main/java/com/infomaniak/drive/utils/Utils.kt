@@ -23,7 +23,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.view.LayoutInflater
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
@@ -294,7 +294,7 @@ object Utils {
         return openWithIntentExceptkDrive(uri, contentResolver.getType(cloudUri), flags)
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
+    @RequiresApi(24)
     private fun Context.intentExcludingPdfReader(openWithIntent: Intent): Intent {
         val components = arrayOf(ComponentName(this, PreviewPDFActivity::class.java))
         return Intent.createChooser(openWithIntent, null).putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, components)
@@ -328,7 +328,7 @@ object Utils {
         // Title in the chooser might not be displayed, at the discretion of the brand manufacturer
         // So we keep the ACTION_VIEW for every type of files EXCEPT PDF files
         return if (type == "application/pdf") {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (SDK_INT >= 24) {
                 applicationContext.intentExcludingPdfReader(openWithIntent)
             } else {
                 applicationContext.intentWithInitialComponent(openWithIntent)

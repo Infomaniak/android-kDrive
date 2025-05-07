@@ -20,7 +20,7 @@ package com.infomaniak.drive.utils
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import androidx.core.app.NotificationCompat
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.NotificationUtilsCore
@@ -105,7 +105,7 @@ object NotificationUtils : NotificationUtilsCore() {
     }
 
     fun Context.initNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (SDK_INT >= 26) {
             val channelList = ArrayList<NotificationChannel>()
 
             val uploadServiceChannel = buildNotificationChannel(

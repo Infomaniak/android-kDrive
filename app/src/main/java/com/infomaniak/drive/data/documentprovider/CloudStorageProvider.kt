@@ -27,6 +27,7 @@ import android.database.MatrixCursor
 import android.graphics.Point
 import android.net.Uri
 import android.os.*
+import android.os.Build.VERSION.SDK_INT
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.provider.Settings
@@ -643,7 +644,7 @@ class CloudStorageProvider : DocumentsProvider() {
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager?
 
             if (
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                SDK_INT >= 23
                 && powerManager?.isIgnoringBatteryOptimizations(context.packageName) == false
             ) {
 
@@ -724,7 +725,7 @@ class CloudStorageProvider : DocumentsProvider() {
             flags = flags or
                     DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
                     DocumentsContract.Document.FLAG_SUPPORTS_RENAME
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (SDK_INT >= 24) {
                 flags = flags or
                         DocumentsContract.Document.FLAG_SUPPORTS_COPY or
                         DocumentsContract.Document.FLAG_SUPPORTS_MOVE

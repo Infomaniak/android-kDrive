@@ -18,7 +18,7 @@
 package com.infomaniak.drive.utils
 
 import android.Manifest
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.fragment.app.Fragment
@@ -43,7 +43,7 @@ class NotificationPermission {
 
     fun checkNotificationPermission(requestPermission: Boolean = true): Boolean {
         return when {
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU -> true
+            SDK_INT < 33 -> true
             activity.hasPermissions(notificationPermission) -> true
             else -> {
                 if (requestPermission) registerForActivityResult.launch(notificationPermission)

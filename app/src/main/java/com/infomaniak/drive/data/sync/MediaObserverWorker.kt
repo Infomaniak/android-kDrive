@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.sync
 
 import android.content.Context
-import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.work.*
 import com.infomaniak.drive.data.models.MediaFolder
@@ -36,7 +35,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
-@RequiresApi(api = Build.VERSION_CODES.N)
+@RequiresApi(api = 24)
 class MediaObserverWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
@@ -59,7 +58,7 @@ class MediaObserverWorker(appContext: Context, params: WorkerParameters) : Corou
         return ForegroundInfo(TAG.hashCode(), notification)
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    @RequiresApi(api = 24)
     companion object {
         private const val TAG = "MediaObserverWorker"
 

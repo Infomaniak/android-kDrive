@@ -20,7 +20,7 @@ package com.infomaniak.drive.data.services
 import android.app.Notification
 import android.content.Context
 import android.content.pm.ServiceInfo
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.CountDownTimer
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.app.NotificationCompat
@@ -63,9 +63,9 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
             setContentTitle(applicationContext.getString(bulkOperationType.title, 0, totalFiles))
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (SDK_INT >= 29) {
             val notification = createNotificationBuilder().apply {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (SDK_INT >= 31) {
                     foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
                 }
             }.build()
