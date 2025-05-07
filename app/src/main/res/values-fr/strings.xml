@@ -71,7 +71,6 @@
     <string name="allPermissionNeeded">Vous devez autoriser l’accès à vos fichiers pour pouvoir les importer et les enregistrer</string>
     <string name="allPermissionNeededAndroid13">Vous devez autoriser l’accès à tous vos fichiers médias pour pouvoir les importer et les enregistrer. Mais aussi autoriser les notifications pour suivre la progression.</string>
     <string name="allPictures">Images</string>
-    <string name="allRootName">Racine du kDrive %s</string>
     <string name="allToday">Aujourd’hui</string>
     <string name="allTrashActionCancelled">Suppression annulée</string>
     <plurals name="allUploadFinishedDescription">

@@ -56,7 +56,7 @@ import com.infomaniak.lib.core.networking.AccessTokenUsageInterceptor
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpClientConfig
 import com.infomaniak.lib.core.utils.CoilUtils
-import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.pendingIntentFlags
+import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.stores.AppUpdateScheduler
@@ -174,7 +174,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     private val refreshTokenError: (User) -> Unit = { user ->
         val hashCode = UUID.randomUUID().hashCode()
         val openAppIntent = Intent(this, LaunchActivity::class.java).clearStack()
-        val pendingIntent = PendingIntent.getActivity(this, hashCode, openAppIntent, pendingIntentFlags)
+        val pendingIntent = PendingIntent.getActivity(this, hashCode, openAppIntent, PENDING_INTENT_FLAGS)
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         buildGeneralNotification(getString(R.string.refreshTokenError)).apply {
             setContentIntent(pendingIntent)

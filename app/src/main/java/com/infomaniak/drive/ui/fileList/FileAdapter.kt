@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.content.Context
-import android.os.Build.VERSION.SDK_INT
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -435,12 +434,7 @@ open class FileAdapter(
 
     private fun addSelectedFile(file: File) = with(multiSelectManager) {
         if (isSelectAllOn) {
-            if (SDK_INT >= 24) {
-                exceptedItemsIds.removeIf { it == file.id }
-            } else {
-                val index = exceptedItemsIds.indexOf(file.id)
-                if (index != -1) exceptedItemsIds.removeAt(index) else return@with
-            }
+            exceptedItemsIds.removeIf { it == file.id }
         } else {
             selectedItemsIds.add(file.id)
             selectedItems.add(file)

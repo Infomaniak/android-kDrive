@@ -27,14 +27,12 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES
 import android.os.Build.VERSION_CODES.CUR_DEVELOPMENT
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
-import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -110,7 +108,7 @@ class DrivePermissions {
     }
 
     fun checkUserChoiceStoragePermission(): Boolean {
-        return if (SDK_INT >= VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        return if (SDK_INT >= 34) {
             activity.hasPermissions(arrayOf(READ_MEDIA_VISUAL_USER_SELECTED))
         } else {
             false
@@ -123,7 +121,6 @@ class DrivePermissions {
     @SuppressLint("NewApi")
     fun checkWriteStoragePermission(requestPermission: Boolean = true): Boolean {
         return when {
-            SDK_INT < VERSION_CODES.M -> true
             activity.hasPermissions(permissions) -> true
             else -> {
                 if (requestPermission) registerForActivityResult.launch(permissions)
@@ -139,7 +136,6 @@ class DrivePermissions {
         return with(activity) {
             val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager?
             when {
-                SDK_INT < VERSION_CODES.M -> true
                 powerManager?.isIgnoringBatteryOptimizations(packageName) != false -> true
                 else -> {
                     if (requestPermission) requestBatteryOptimizationPermission()
@@ -150,7 +146,6 @@ class DrivePermissions {
     }
 
     @SuppressLint("BatteryLife")
-    @RequiresApi(VERSION_CODES.M)
     private fun Context.requestBatteryOptimizationPermission() {
         try {
             Intent(
@@ -173,7 +168,7 @@ class DrivePermissions {
 
         @StringRes
         val permissionNeededDescriptionRes = when {
-            SDK_INT >= VERSION_CODES.TIRAMISU -> R.string.allPermissionNeededAndroid13
+            SDK_INT >= 33 -> R.string.allPermissionNeededAndroid13
             else -> R.string.allPermissionNeeded
         }
 

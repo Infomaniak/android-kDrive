@@ -18,12 +18,10 @@
 package com.infomaniak.drive.data.sync
 
 import android.content.Context
-import androidx.annotation.RequiresApi
 import androidx.work.*
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.UploadWorker.Companion.showSyncConfigNotification
-import com.infomaniak.drive.data.sync.MediaObserverService.Companion.TRIGGER_CONTENT_DELAY
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.NotificationUtils.fileObserveServiceNotification
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
@@ -35,7 +33,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
-@RequiresApi(api = 24)
 class MediaObserverWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
@@ -58,9 +55,9 @@ class MediaObserverWorker(appContext: Context, params: WorkerParameters) : Corou
         return ForegroundInfo(TAG.hashCode(), notification)
     }
 
-    @RequiresApi(api = 24)
     companion object {
         private const val TAG = "MediaObserverWorker"
+        private const val TRIGGER_CONTENT_DELAY = 5_000L
 
         fun scheduleWork(context: Context) {
             val workRequest = OneTimeWorkRequestBuilder<MediaObserverWorker>().build()

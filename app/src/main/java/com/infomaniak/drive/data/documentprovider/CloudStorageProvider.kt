@@ -26,8 +26,10 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.net.Uri
-import android.os.*
-import android.os.Build.VERSION.SDK_INT
+import android.os.CancellationSignal
+import android.os.Handler
+import android.os.ParcelFileDescriptor
+import android.os.PowerManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.provider.Settings
@@ -643,10 +645,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager?
 
-            if (
-                SDK_INT >= 23
-                && powerManager?.isIgnoringBatteryOptimizations(context.packageName) == false
-            ) {
+            if (powerManager?.isIgnoringBatteryOptimizations(context.packageName) == false) {
 
                 // Cancel previous notification
                 context.cancelNotification(syncPermissionNotifId)
@@ -660,10 +659,10 @@ class CloudStorageProvider : DocumentsProvider() {
                             syncPermissionNotifId,
                             Intent(
                                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                                Uri.parse("package:${context.packageName}")
+                                Uri.parse("package:${context.packageName}"),
                             ),
-                            NotificationUtilsCore.pendingIntentFlags
-                        )
+                            NotificationUtilsCore.PENDING_INTENT_FLAGS,
+                        ),
                     )
                     NotificationManagerCompat.from(context).notifyCompat(context, syncPermissionNotifId, build())
                 }
@@ -715,7 +714,9 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val mimetype = if (file == null || file.isFolder()) {
             DocumentsContract.Document.MIME_TYPE_DIR
-        } else file.getMimeType()
+        } else {
+            file.getMimeType()
+        }
 
         if (file?.isFolder() == false && file.hasThumbnail) {
             flags = flags or DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
@@ -724,12 +725,9 @@ class CloudStorageProvider : DocumentsProvider() {
         if (file != null) {
             flags = flags or
                     DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
-                    DocumentsContract.Document.FLAG_SUPPORTS_RENAME
-            if (SDK_INT >= 24) {
-                flags = flags or
-                        DocumentsContract.Document.FLAG_SUPPORTS_COPY or
-                        DocumentsContract.Document.FLAG_SUPPORTS_MOVE
-            }
+                    DocumentsContract.Document.FLAG_SUPPORTS_RENAME or
+                    DocumentsContract.Document.FLAG_SUPPORTS_COPY or
+                    DocumentsContract.Document.FLAG_SUPPORTS_MOVE
         }
 
         val fileName = context?.let { file?.getDisplayName(it) } ?: ""
