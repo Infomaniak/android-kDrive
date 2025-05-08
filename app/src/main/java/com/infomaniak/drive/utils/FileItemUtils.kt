@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
+import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.databinding.CardviewFileGridBinding
 import com.infomaniak.drive.databinding.CardviewFolderGridBinding
 import com.infomaniak.drive.databinding.ItemCategoriesLayoutBinding
@@ -49,35 +50,40 @@ import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.utils.context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false) {
+suspend fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false): Nothing {
+    setFileItemWithoutCategories(file = file, isGrid = isGrid)
+    categoriesLayout.displayCategoriesForFile(file)
+}
+
+fun ItemFileBinding.setFileItemWithoutCategories(file: File, isGrid: Boolean = false) {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
     displaySize(file)
     filePreview.displayIcon(file, isGrid, progressLayout)
-    categoriesLayout.displayCategories(file)
     displayExternalImport(file, filePreview, fileProgression, fileDate)
 }
 
-fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
+suspend fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = false): Nothing {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout)
-    categoriesLayout.displayCategories(file)
     displayExternalImport(file, filePreview, fileProgression)
+    categoriesLayout.displayCategoriesForFile(file)
 }
 
-fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false) {
+suspend fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false): Nothing {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     filePreview.displayIcon(file, isGrid, progressLayout, filePreview2)
-    categoriesLayout.displayCategories(file)
+    categoriesLayout.displayCategoriesForFile(file)
 }
 
 private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
@@ -154,24 +160,29 @@ fun getTintedDrawable(context: Context, icon: Int, tint: String): Drawable {
     return ContextCompat.getDrawable(context, icon)!!.mutate().apply { setTint(tint.toColorInt()) }
 }
 
-private fun ItemCategoriesLayoutBinding.displayCategories(file: File) = with(root) {
-    val canReadCategoryOnFile = DriveInfosController.getCategoryRights(file.driveId).canReadOnFile
-    val categories = file.getCategories()
+private suspend fun ItemCategoriesLayoutBinding.displayCategoriesForFile(file: File): Nothing {
+    DriveInfosController.categoriesFor(file).collect { categories ->
+        displayCategories(categories)
+    }
+    awaitCancellation()
+}
 
-    if (!canReadCategoryOnFile || categories.isEmpty()) {
+private fun ItemCategoriesLayoutBinding.displayCategories(categories: List<Category>?) = with(root) {
+    if (categories.isNullOrEmpty()) {
         isGone = true
+        return@with
     } else {
-        forEachIndexed { index, view ->
-            with(view as CategoryIconView) {
-                val category = categories.getOrNull(index)
-                if (index < MAX_DISPLAYED_CATEGORIES - 1) {
-                    setCategoryIconOrHide(category)
-                } else {
-                    setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES)
-                }
+        isVisible = true
+    }
+    forEachIndexed { index, view ->
+        with(view as CategoryIconView) {
+            val category = categories.getOrNull(index)
+            if (index < MAX_DISPLAYED_CATEGORIES - 1) {
+                setCategoryIconOrHide(category)
+            } else {
+                setRemainingCategoriesNumber(category, categories.size - MAX_DISPLAYED_CATEGORIES)
             }
         }
-        isVisible = true
     }
 }
 

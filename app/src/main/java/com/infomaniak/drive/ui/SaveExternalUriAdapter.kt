@@ -30,7 +30,7 @@ import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.ui.SaveExternalUriAdapter.SaveExternalUriViewHolder
 import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.drive.utils.setFileItemWithoutCategories
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.setMargins
 
@@ -50,7 +50,7 @@ class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Adapter
             isFromUploads = true,
         )
 
-        itemViewFile.setFileItem(file)
+        itemViewFile.setFileItemWithoutCategories(file)
         root.apply {
             initView(position)
             setOnClickListener { onItemClicked(file, position) }
