@@ -124,7 +124,7 @@
 
     <!--BottomSheetDialogTheme-->
 
-    <style name="BottomSheetDialogTheme.Base" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+    <style name="BottomSheetDialogTheme.Base" parent="ThemeOverlay.Material3.BottomSheetDialog">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowIsFloating">false</item>
         <item name="bottomSheetStyle">@style/BottomSheetDialogTheme.ModalStyle</item>
@@ -137,7 +137,7 @@
 
     <style name="BottomSheetDialogTheme" parent="BottomSheetDialogTheme.Base" />
 
-    <style name="BottomSheetDialogTheme.ModalStyle" parent="Widget.MaterialComponents.BottomSheet">
+    <style name="BottomSheetDialogTheme.ModalStyle" parent="Widget.Material3.BottomSheet">
         <item name="backgroundTint">@color/appBar</item>
         <item name="shapeAppearanceOverlay">@style/BottomSheetDialogTheme.ShapeAppearanceOverlay</item>
     </style>
@@ -170,7 +170,7 @@
 
     <style name="FullScreenBottomSheetDialogTheme" parent="FullScreenBottomSheetDialogTheme.Base" />
 
-    <style name="FullScreenBottomSheetDialogTheme.ModalStyle" parent="Widget.MaterialComponents.BottomSheet">
+    <style name="FullScreenBottomSheetDialogTheme.ModalStyle" parent="Widget.Material3.BottomSheet">
         <item name="backgroundTint">@color/background</item>
     </style>
 

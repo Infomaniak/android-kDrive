@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -26,10 +27,12 @@ import androidx.navigation.fragment.NavHostFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityPublicShareBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.setColorNavigationBar
 import com.infomaniak.drive.utils.setColorStatusBar
+import com.infomaniak.lib.core.utils.setMargins
 
 class PublicShareActivity : AppCompatActivity() {
 
@@ -44,6 +47,12 @@ class PublicShareActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
+        binding.root.enableEdgeToEdge(withTop = false, withBottom = false) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+            binding.mainPublicShareButton.setMargins(bottom = it.bottom)
+        }
     }
 
     override fun onDestroy() {
@@ -62,7 +71,6 @@ class PublicShareActivity : AppCompatActivity() {
 
         val isMainButtonVisible = destination.id == R.id.publicShareListFragment && publicShareViewModel.canDownloadFiles
         binding.mainPublicShareButton.isVisible = isMainButtonVisible
-
     }
 
     fun getMainButton() = binding.mainPublicShareButton

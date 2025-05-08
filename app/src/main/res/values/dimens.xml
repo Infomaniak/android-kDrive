@@ -18,6 +18,7 @@
 <resources>
 
     <dimen name="bottomNavigationRadius">30dp</dimen>
+    <dimen name="bottomNavigationMargin">22dp</dimen>
     <dimen name="h1">28sp</dimen>
     <dimen name="h3">16sp</dimen>
     <dimen name="userAvatarOverlap">-6dp</dimen>

@@ -21,7 +21,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
@@ -29,6 +28,7 @@ import androidx.fragment.app.Fragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBottomSheetDialog
 import com.infomaniak.lib.core.utils.safeBinding
@@ -44,9 +44,11 @@ class MenuGalleryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ViewCompat.requestApplyInsets(binding.galleryListCoordinator)
+
         val galleryFragment = addGalleryFragment()
         setUi(galleryFragment)
+
+        binding.galleryListCoordinator.enableEdgeToEdge(withBottom = false)
     }
 
     private fun addGalleryFragment(): GalleryFragment = with(childFragmentManager) {

@@ -19,8 +19,10 @@ package com.infomaniak.drive.ui.login
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.StringRes
@@ -38,6 +40,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
@@ -94,6 +97,8 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         lockOrientationForSmallScreens()
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
         setContentView(root)
 
         introViewpager.apply {
@@ -133,6 +138,13 @@ class LoginActivity : AppCompatActivity() {
         }
 
         handleNavigationFlags()
+
+        binding.signInButton.enableEdgeToEdge(withTop = false) {
+            binding.nextButton.setMargins(bottom = it.bottom)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+        }
     }
 
     private fun startAccountCreation() {

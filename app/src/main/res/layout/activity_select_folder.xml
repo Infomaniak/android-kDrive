@@ -34,6 +34,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/select_folder_navigation" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@drawable/background_bottom_view"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"
         style="@style/ButtonInfomaniak"

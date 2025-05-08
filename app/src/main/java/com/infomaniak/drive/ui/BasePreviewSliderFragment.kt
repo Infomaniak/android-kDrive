@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -37,6 +38,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.*
 import com.infomaniak.drive.utils.*
@@ -161,6 +163,12 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 }
                 currentFile = files.values.first()
                 viewPager.setCurrentItem(0, false)
+            }
+        }
+
+        binding.header.enableEdgeToEdge(withBottom = false) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                requireActivity().window.isNavigationBarContrastEnforced = true
             }
         }
     }

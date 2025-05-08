@@ -43,7 +43,8 @@
                 android:layout_height="?attr/actionBarSize"
                 android:touchscreenBlocksFocus="false"
                 app:layout_collapseMode="pin"
-                app:menu="@menu/file_list_menu">
+                app:menu="@menu/file_list_menu"
+                app:titleCentered="true">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/emptyTrash"

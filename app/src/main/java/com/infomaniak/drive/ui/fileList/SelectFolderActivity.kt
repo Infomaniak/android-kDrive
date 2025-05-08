@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.core.view.isGone
@@ -31,9 +32,11 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ActivitySelectFolderBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.setMargins
 
 class SelectFolderActivity : BaseActivity() {
 
@@ -82,6 +85,12 @@ class SelectFolderActivity : BaseActivity() {
                 )?.let {
                     initiateNavigationToCurrentFolder(folderId, currentUserDrive)
                 }
+            }
+        }
+        binding.root.enableEdgeToEdge(withTop = false, withBottom = false) {
+            binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
             }
         }
     }

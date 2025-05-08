@@ -29,6 +29,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.FileObserver
@@ -80,6 +81,7 @@ import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
@@ -96,6 +98,7 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
@@ -429,7 +432,15 @@ class MainActivity : BaseActivity() {
         // TODO: Find a better way to do this. Currently, we need to put that
         //  here and not in the preview slider fragment because of APIs <= 27.
         if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
-            binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
+            binding.root.enableEdgeToEdge(withTop = false, withBottom = false) {
+                binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    window.isNavigationBarContrastEnforced = false
+                }
+                binding.bottomNavigation.setMargins(
+                    bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + it.bottom,
+                )
+            }
         }
 
         when (destination.id) {

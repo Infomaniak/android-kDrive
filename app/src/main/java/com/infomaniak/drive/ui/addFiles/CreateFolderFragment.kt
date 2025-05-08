@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.databinding.FragmentCreateFolderBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
@@ -77,6 +78,8 @@ open class CreateFolderFragment : Fragment() {
         folderNameTextWatcher = folderNameValueInput.doOnTextChanged { _, _, _, _ ->
             toggleCreateFolderButton()
         }
+
+        binding.root.enableEdgeToEdge()
     }
 
     override fun onDestroyView() {

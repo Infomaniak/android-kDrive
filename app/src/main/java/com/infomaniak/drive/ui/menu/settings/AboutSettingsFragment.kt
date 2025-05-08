@@ -25,6 +25,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.databinding.FragmentSettingsAboutBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeBinding
 
@@ -56,6 +57,8 @@ class AboutSettingsFragment : Fragment() {
         }
 
         appVersionDescription.text = "v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}"
+
+        binding.root.enableEdgeToEdge()
     }
 
     companion object {

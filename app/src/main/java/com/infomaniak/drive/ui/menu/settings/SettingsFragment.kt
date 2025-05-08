@@ -38,6 +38,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentSettingsBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
@@ -102,6 +103,7 @@ class SettingsFragment : Fragment() {
         about.setOnClickListener {
             safelyNavigate(R.id.aboutSettingsFragment)
         }
+        binding.root.enableEdgeToEdge()
     }
 
     private fun toggleMyKSuiteLayoutVisibility(isVisible: Boolean) {
