@@ -17,10 +17,10 @@
  */
 package com.infomaniak.drive.data.cache
 
-import androidx.collection.IntIntMap
 import androidx.collection.IntList
-import androidx.collection.MutableIntIntMap
+import androidx.collection.IntObjectMap
 import androidx.collection.buildIntList
+import androidx.collection.buildIntObjectMap
 import com.infomaniak.core.DynamicLazyMap
 import com.infomaniak.core.flowForKey
 import com.infomaniak.core.maxElements
@@ -209,7 +209,7 @@ object DriveInfosController {
         }
     }
 
-    private val driveCategories: DynamicLazyMap<Int, SharedFlow<List<Category>?>> = DynamicLazyMap.sharedFlow(
+    private val driveCategories: DynamicLazyMap<Int, SharedFlow<IntObjectMap<Category>?>> = DynamicLazyMap.sharedFlow(
         cacheManager = DynamicLazyMap.CacheManager.maxElements(maxCacheSize = 20),
         coroutineScope = MainScope(),
         createFlow = { driveId: Int ->
@@ -218,7 +218,9 @@ object DriveInfosController {
                     userId = AccountUtils.currentUserId,
                     driveId = driveId
                 ).findFirst().toFlow().map { drive ->
-                    if (drive?.categoryRights?.canReadOnFile == true) drive.categories else null
+                    if (drive?.categoryRights?.canReadOnFile == true) buildIntObjectMap {
+                        drive.categories.forEach { category -> this[category.id] = category }
+                    } else null
                 }
             }
         }
@@ -244,19 +246,18 @@ object DriveInfosController {
         cacheManager = DynamicLazyMap.CacheManager.maxElements(maxCacheSize = 1000),
         coroutineScope = MainScope(),
         createFlow = { request ->
-            val idsToIndexes = request.categoriesIds.asMapOfIndexes()
             driveCategories.flowForKey(request.driveId).map { categories ->
-                categories?.toMutableList()?.also {
-                    it.removeAll { category -> category.id !in request.categoriesIds }
-                    it.sortBy { category -> idsToIndexes[category.id] }
+                when (categories) {
+                    null -> null
+                    else -> buildList(capacity = request.categoriesIds.size) {
+                        request.categoriesIds.forEach { categoryId ->
+                            categories[categoryId]?.let { add(it) }
+                        }
+                    }
                 }
             }
         }
     )
-
-    private fun IntList.asMapOfIndexes(): IntIntMap = MutableIntIntMap(initialCapacity = size).also { map ->
-        forEachIndexed { index, number -> map[number] = index }
-    }
 
     fun getCategoriesFromIds(driveId: Int, categoriesIds: Array<Int>): List<Category> {
         if (categoriesIds.isEmpty()) return emptyList()
