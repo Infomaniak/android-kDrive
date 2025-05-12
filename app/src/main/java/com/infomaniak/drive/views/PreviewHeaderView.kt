@@ -32,7 +32,6 @@ import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.PreviewHeaderViewBinding
-import com.infomaniak.lib.core.utils.setMargins
 import kotlin.math.max
 
 class PreviewHeaderView @JvmOverloads constructor(
