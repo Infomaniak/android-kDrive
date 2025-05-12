@@ -37,7 +37,7 @@ fun View.onApplyWindowInsetsListener(
     }
 }
 
-fun getInsetsFrom(windowInsetsCompat: WindowInsetsCompat): Insets {
+private fun getInsetsFrom(windowInsetsCompat: WindowInsetsCompat): Insets {
     val systemBarsInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
     val cutoutInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.displayCutout())
     return Insets.max(systemBarsInsets, cutoutInsets)
