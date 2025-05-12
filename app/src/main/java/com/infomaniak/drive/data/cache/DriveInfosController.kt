@@ -17,7 +17,16 @@
  */
 package com.infomaniak.drive.data.cache
 
+import androidx.collection.IntList
+import androidx.collection.IntObjectMap
+import androidx.collection.buildIntList
+import androidx.collection.buildIntObjectMap
+import com.infomaniak.core.DynamicLazyMap
+import com.infomaniak.core.flowForKey
+import com.infomaniak.core.maxElements
+import com.infomaniak.core.sharedFlow
 import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.CategoryRights
@@ -25,11 +34,16 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
+import com.infomaniak.drive.utils.runOnMainThread
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmQuery
 import io.realm.Sort
 import io.realm.kotlin.oneOf
+import io.realm.kotlin.toFlow
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.job
 
 object DriveInfosController {
 
@@ -180,6 +194,70 @@ object DriveInfosController {
 
         return categories
     }
+
+    private val realmInstance = DynamicLazyMap<Unit, Realm>(
+        createElement = {
+            runOnMainThread { getRealmInstance() }.also { realm ->
+                coroutineContext.job.invokeOnCompletion { runOnMainThread { realm.close() } }
+            }
+        }
+    )
+
+    private fun <R> realmFlow(createFlow: (Realm) -> Flow<R>): Flow<R> = flow {
+        realmInstance.useElement(Unit) { realm ->
+            emitAll(createFlow(realm))
+        }
+    }
+
+    private val driveCategories: DynamicLazyMap<Int, SharedFlow<IntObjectMap<Category>?>> = DynamicLazyMap.sharedFlow(
+        cacheManager = DynamicLazyMap.CacheManager.maxElements(maxCacheSize = 20),
+        coroutineScope = MainScope(),
+        createFlow = { driveId: Int ->
+            realmFlow { realm ->
+                realm.getDrivesQuery(
+                    userId = AccountUtils.currentUserId,
+                    driveId = driveId
+                ).findFirst().toFlow().map { drive ->
+                    if (drive?.categoryRights?.canReadOnFile == true) buildIntObjectMap {
+                        drive.categories.forEach { category -> this[category.id] = category }
+                    } else null
+                }
+            }
+        }
+    )
+
+    private data class CategoriesRequest(
+        val driveId: Int,
+        val categoriesIds: IntList,
+    )
+
+    fun categoriesFor(file: File): Flow<List<Category>?> = categoriesFor(
+        driveId = file.driveId,
+        categoriesIds = buildIntList(initialCapacity = file.categories.size) {
+            file.categories.forEach { add(it.categoryId) }
+        }
+    )
+
+    fun categoriesFor(driveId: Int, categoriesIds: IntList): Flow<List<Category>?> {
+        return categories.flowForKey(CategoriesRequest(driveId, categoriesIds))
+    }
+
+    private val categories: DynamicLazyMap<CategoriesRequest, SharedFlow<List<Category>?>> = DynamicLazyMap.sharedFlow(
+        cacheManager = DynamicLazyMap.CacheManager.maxElements(maxCacheSize = 1000),
+        coroutineScope = MainScope(),
+        createFlow = { request ->
+            driveCategories.flowForKey(request.driveId).map { categories ->
+                when (categories) {
+                    null -> null
+                    else -> buildList(capacity = request.categoriesIds.size) {
+                        request.categoriesIds.forEach { categoryId ->
+                            categories[categoryId]?.let { add(it) }
+                        }
+                    }
+                }
+            }
+        }
+    )
 
     fun getCategoriesFromIds(driveId: Int, categoriesIds: Array<Int>): List<Category> {
         if (categoriesIds.isEmpty()) return emptyList()

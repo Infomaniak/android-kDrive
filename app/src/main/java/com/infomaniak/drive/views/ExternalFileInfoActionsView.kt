@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
 
     private val binding by lazy { ViewExternalFileInfoActionsBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    fun updateWithExternalFile(file: File) {
+    suspend fun updateWithExternalFile(file: File): Nothing {
         binding.fileView.setFileItem(file)
     }
 

@@ -27,7 +27,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
@@ -48,7 +47,8 @@ import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnItemClickListener {
@@ -121,8 +121,9 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
-                    currentFile = previewSliderAdapter.getFile(position)
-                    previewSliderViewModel.currentPreview = currentFile
+                    val file = previewSliderAdapter.getFile(position)
+                    currentFile = file
+                    previewSliderViewModel.currentPreview = file
 
                     var shouldDisplayPageNumber = false
 
@@ -132,14 +133,14 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     }
 
                     with(header) {
-                        toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
+                        toggleEditVisibility(isVisible = file.isOnlyOfficePreview())
                         setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
-                        toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
+                        toggleOpenWithVisibility(isVisible = !isPublicShare && !file.isOnlyOfficePreview())
                     }
-                    setPrintButtonVisibility(isGone = !currentFile.isPDF())
+                    setPrintButtonVisibility(isGone = !file.isPDF())
 
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
-                    updateBottomSheetWithCurrentFile()
+                    bottomSheetUpdates.tryEmit(file)
                 }
             })
         }
@@ -161,6 +162,15 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 }
                 currentFile = files.values.first()
                 viewPager.setCurrentItem(0, false)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            bottomSheetUpdates.collectLatest { file ->
+                when (val fileActionBottomSheet = bottomSheetView) {
+                    is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(file)
+                    is ExternalFileInfoActionsView -> fileActionBottomSheet.updateWithExternalFile(file)
+                }
             }
         }
     }
@@ -224,14 +234,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
     }
 
-    private fun updateBottomSheetWithCurrentFile() = viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-        lifecycle.withResumed {
-            when (val fileActionBottomSheet = bottomSheetView) {
-                is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(currentFile)
-                is ExternalFileInfoActionsView -> fileActionBottomSheet.updateWithExternalFile(currentFile)
-            }
-        }
-    }
+    private val bottomSheetUpdates = MutableSharedFlow<File>(extraBufferCapacity = 1)
 
     private fun clearEdgeToEdge() = with(requireActivity()) {
         toggleSystemBar(true)

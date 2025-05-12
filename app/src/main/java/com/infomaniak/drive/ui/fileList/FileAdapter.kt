@@ -24,6 +24,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -50,12 +52,15 @@ import io.realm.OrderedRealmCollection
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmRecyclerViewAdapter
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
     var fileList: OrderedRealmCollection<File> = RealmList(),
-) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true) {
+    override val lifecycle: Lifecycle
+) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true), LifecycleOwner {
 
     private var fileAsyncListDiffer: AsyncListDiffer<File>? = null
 
@@ -314,10 +319,12 @@ open class FileAdapter(
             cardView.setCorners(position, itemCount)
         }
 
-        when (binding) {
-            is CardviewFileListBinding -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(file, isGrid)
-            is CardviewFileGridBinding -> (binding as CardviewFileGridBinding).setFileItem(file, isGrid)
-            is CardviewFolderGridBinding -> (binding as CardviewFolderGridBinding).setFileItem(file, isGrid)
+        currentBindScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            when (binding) {
+                is CardviewFileListBinding -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(file, isGrid)
+                is CardviewFileGridBinding -> (binding as CardviewFileGridBinding).setFileItem(file, isGrid)
+                is CardviewFolderGridBinding -> (binding as CardviewFolderGridBinding).setFileItem(file, isGrid)
+            }
         }
 
         checkIfEnableFile(file)

@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.R
@@ -30,6 +31,8 @@ import com.infomaniak.drive.databinding.FragmentBottomSheetPublicShareFileAction
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.safeBinding
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
 
 class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), OnPublicShareItemClickListener {
 
@@ -78,7 +81,7 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), OnP
             findNavController().popBackStack()
             return@with
         }
-        updateWithExternalFile(currentFile)
+        viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { updateWithExternalFile(currentFile) }
         initOnClickListener(onItemClickListener = this@PublicShareFileActionsBottomSheetDialog)
         isPrintingHidden(isGone = true)
         if (currentFile.isFolder()) displayFolderActions()
