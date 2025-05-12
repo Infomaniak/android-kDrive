@@ -224,7 +224,7 @@ object DriveInfosController {
         }
     )
 
-    data class CategoriesRequest(
+    private data class CategoriesRequest(
         val driveId: Int,
         val categoriesIds: IntList,
     )
