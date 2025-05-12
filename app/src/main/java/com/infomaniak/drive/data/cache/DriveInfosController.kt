@@ -42,9 +42,7 @@ import io.realm.Sort
 import io.realm.kotlin.oneOf
 import io.realm.kotlin.toFlow
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.job
 
 object DriveInfosController {
@@ -205,16 +203,22 @@ object DriveInfosController {
         }
     )
 
+    private fun <R> realmFlow(createFlow: (Realm) -> Flow<R>): Flow<R> = flow {
+        realmInstance.useElement(Unit) { realm ->
+            emitAll(createFlow(realm))
+        }
+    }
+
     private val driveCategories: DynamicLazyMap<Int, SharedFlow<List<Category>?>> = DynamicLazyMap.sharedFlow(
         cacheManager = DynamicLazyMap.CacheManager.maxElements(maxCacheSize = 20),
         coroutineScope = MainScope(),
         createFlow = { driveId: Int ->
-            realmInstance.useElement(Unit) {
-                it.getDrivesQuery(
+            realmFlow { realm ->
+                realm.getDrivesQuery(
                     userId = AccountUtils.currentUserId,
                     driveId = driveId
-                ).findFirst().toFlow().map {
-                    if (it?.categoryRights?.canReadOnFile == true) it.categories else null
+                ).findFirst().toFlow().map { drive ->
+                    if (drive?.categoryRights?.canReadOnFile == true) drive.categories else null
                 }
             }
         }
