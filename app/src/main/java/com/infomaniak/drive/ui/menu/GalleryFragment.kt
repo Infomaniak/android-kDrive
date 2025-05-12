@@ -40,7 +40,7 @@ import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.FragmentGalleryBinding
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
-import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
@@ -156,9 +156,13 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             filesId.forEach(galleryAdapter::deleteByFileId)
         }
 
-        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false, withTop = false) {
-            binding.galleryRecyclerView.updatePadding(bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + it.bottom)
-            binding.noGalleryLayout.setMargins(bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + it.bottom)
+        binding.galleryRecyclerView.onApplyWindowInsetsListener { galleryRecyclerView, windowInsets ->
+            galleryRecyclerView.updatePadding(
+                bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom,
+            )
+            binding.noGalleryLayout.setMargins(
+                bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + windowInsets.bottom,
+            )
         }
     }
 

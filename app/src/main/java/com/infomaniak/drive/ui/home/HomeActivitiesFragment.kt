@@ -31,7 +31,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeActivitiesBinding
-import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
@@ -66,9 +66,11 @@ class HomeActivitiesFragment : Fragment() {
         }
         observeLastActivities()
 
-        binding.root.enableEdgeToEdge(withPadding = true, withTop = false, withBottom = false) {
-            binding.homeTabsRecyclerView.updatePadding(
-                bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + it.bottom,
+        binding.homeTabsRecyclerView.onApplyWindowInsetsListener { view, windowInsets ->
+            view.updatePadding(
+                left = windowInsets.left,
+                right = windowInsets.right,
+                bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom,
             )
         }
     }

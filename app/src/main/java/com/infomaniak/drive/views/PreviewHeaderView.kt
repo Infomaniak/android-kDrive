@@ -84,7 +84,6 @@ class PreviewHeaderView @JvmOverloads constructor(
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, windowInsets ->
             with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
                 // We add the same margins here on the left and right to have the view centered
-                setMargins(left = left + right, top = top, right = left + right)
                 val topOffset = getTopOffset(bottomSheetView)
                 bottomSheetBehavior.apply {
                     peekHeight = getDefaultPeekHeight()

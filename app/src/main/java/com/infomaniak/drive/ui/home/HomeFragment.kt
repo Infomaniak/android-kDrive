@@ -30,7 +30,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeBinding
-import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.Shortcuts
@@ -85,7 +84,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         }
 
         setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, homeUploadFileInProgressView)
-        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false)
     }
 
     override fun onResume() {

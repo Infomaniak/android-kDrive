@@ -167,12 +167,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             }
         }
 
-        binding.header.enableEdgeToEdge(withBottom = false) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                requireActivity().window.isNavigationBarContrastEnforced = true
-
-            }
-        }
+        binding.header.enableEdgeToEdge(withBottom = false, withRight = false)
 
         viewLifecycleOwner.lifecycleScope.launch {
             bottomSheetUpdates.collectLatest { file ->

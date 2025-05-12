@@ -40,10 +40,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDia
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.toPx
+import com.infomaniak.lib.core.utils.*
 
 class SearchFiltersFragment : Fragment() {
 
@@ -74,7 +71,9 @@ class SearchFiltersFragment : Fragment() {
         setSaveButton()
         listenToFiltersUpdates()
 
-        binding.root.enableEdgeToEdge(shouldConsumeInsets = true)
+        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false) { insets ->
+            binding.saveButton.setMargins(bottom = insets.bottom)
+        }
     }
 
     private fun initializeFilters() = with(searchFiltersViewModel) {

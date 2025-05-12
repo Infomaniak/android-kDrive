@@ -24,36 +24,57 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import com.infomaniak.lib.core.utils.setMargins
 
+fun View.onApplyWindowInsetsListener(
+    shouldConsumeInsets: Boolean = false,
+    callback: (View, Insets) -> Unit,
+) {
+    ViewCompat.setOnApplyWindowInsetsListener(this) { view, windowInsets ->
+        val combinedInsets = getInsetsFrom(windowInsets)
+
+        callback(view, combinedInsets)
+
+        if (shouldConsumeInsets) WindowInsetsCompat.CONSUMED else windowInsets
+    }
+}
+
+fun getInsetsFrom(windowInsetsCompat: WindowInsetsCompat): Insets {
+    val systemBarsInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
+    val cutoutInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.displayCutout())
+    return Insets.max(systemBarsInsets, cutoutInsets)
+}
+
 fun View.enableEdgeToEdge(
     shouldConsumeInsets: Boolean = false,
     withPadding: Boolean = false,
+    withLeft: Boolean = true,
     withTop: Boolean = true,
+    withRight: Boolean = true,
     withBottom: Boolean = true,
     customBehavior: ((Insets) -> Unit)? = null,
 ) {
-    ViewCompat.setOnApplyWindowInsetsListener(this) { view, windowInsets ->
-        with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
+    onApplyWindowInsetsListener(shouldConsumeInsets) { view, windowInsets ->
+        with(windowInsets) {
+            val leftInset = if (withLeft) left else 0
             val topInset = if (withTop) top else 0
+            val rightInset = if (withRight) right else 0
             val bottomInset = if (withBottom) bottom else 0
             if (withPadding) {
                 view.updatePadding(
-                    left = left,
+                    left = leftInset,
                     top = topInset,
-                    right = right,
+                    right = rightInset,
                     bottom = bottomInset,
                 )
             } else {
                 view.setMargins(
-                    left = left,
+                    left = leftInset,
                     top = topInset,
-                    right = right,
+                    right = rightInset,
                     bottom = bottomInset,
                 )
             }
 
             customBehavior?.invoke(this)
         }
-
-        if (shouldConsumeInsets) WindowInsetsCompat.CONSUMED else windowInsets
     }
 }

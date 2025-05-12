@@ -81,7 +81,7 @@ import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
-import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
@@ -432,14 +432,9 @@ class MainActivity : BaseActivity() {
         // TODO: Find a better way to do this. Currently, we need to put that
         //  here and not in the preview slider fragment because of APIs <= 27.
         if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
-            binding.root.enableEdgeToEdge(withTop = false, withBottom = false) {
-                binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    window.isNavigationBarContrastEnforced = false
-                }
-                binding.bottomNavigation.setMargins(
-                    bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + it.bottom,
-                )
+            binding.bottomNavigation.onApplyWindowInsetsListener { view, windowInsets ->
+                if (SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = false
+                view.setMargins(bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + windowInsets.bottom)
             }
         }
 

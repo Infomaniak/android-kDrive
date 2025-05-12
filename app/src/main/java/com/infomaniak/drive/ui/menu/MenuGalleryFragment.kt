@@ -48,7 +48,7 @@ class MenuGalleryFragment : Fragment() {
         val galleryFragment = addGalleryFragment()
         setUi(galleryFragment)
 
-        binding.galleryListCoordinator.enableEdgeToEdge(withBottom = false)
+        binding.root.enableEdgeToEdge(withBottom = false)
     }
 
     private fun addGalleryFragment(): GalleryFragment = with(childFragmentManager) {

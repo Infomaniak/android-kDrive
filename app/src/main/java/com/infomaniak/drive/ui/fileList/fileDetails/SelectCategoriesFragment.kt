@@ -96,7 +96,9 @@ class SelectCategoriesFragment : Fragment() {
             }
         }
 
-        binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false)
+        binding.root.enableEdgeToEdge(withBottom = false) {
+            binding.categoriesRecyclerView.setMargins(bottom = it.bottom)
+        }
     }
 
     private fun setCategoriesAdapter(canEditCategory: Boolean, canDeleteCategory: Boolean) {
