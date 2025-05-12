@@ -54,10 +54,11 @@ fun View.enableEdgeToEdge(
 ) {
     onApplyWindowInsetsListener(shouldConsumeInsets) { view, windowInsets ->
         with(windowInsets) {
-            val leftInset = if (withLeft) left else 0
-            val topInset = if (withTop) top else 0
-            val rightInset = if (withRight) right else 0
-            val bottomInset = if (withBottom) bottom else 0
+            val leftInset = left.getOrDefault(withRealInset = withLeft)
+            val topInset = top.getOrDefault(withRealInset = withTop)
+            val rightInset = right.getOrDefault(withRealInset = withRight)
+            val bottomInset = bottom.getOrDefault(withRealInset = withBottom)
+
             if (withPadding) {
                 view.updatePadding(
                     left = leftInset,
@@ -78,3 +79,5 @@ fun View.enableEdgeToEdge(
         }
     }
 }
+
+private fun Int.getOrDefault(withRealInset: Boolean): Int = if (withRealInset) this else 0
