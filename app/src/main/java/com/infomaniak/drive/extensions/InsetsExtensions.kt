@@ -29,18 +29,14 @@ fun View.onApplyWindowInsetsListener(
     callback: (View, Insets) -> Unit,
 ) {
     ViewCompat.setOnApplyWindowInsetsListener(this) { view, windowInsets ->
-        val combinedInsets = getInsetsFrom(windowInsets)
+        val systemBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+        val cutoutInsets = windowInsets.getInsets(WindowInsetsCompat.Type.displayCutout())
+        val combinedInsets = Insets.max(systemBarsInsets, cutoutInsets)
 
         callback(view, combinedInsets)
 
         if (shouldConsumeInsets) WindowInsetsCompat.CONSUMED else windowInsets
     }
-}
-
-private fun getInsetsFrom(windowInsetsCompat: WindowInsetsCompat): Insets {
-    val systemBarsInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.systemBars())
-    val cutoutInsets = windowInsetsCompat.getInsets(WindowInsetsCompat.Type.displayCutout())
-    return Insets.max(systemBarsInsets, cutoutInsets)
 }
 
 fun View.enableEdgeToEdge(
