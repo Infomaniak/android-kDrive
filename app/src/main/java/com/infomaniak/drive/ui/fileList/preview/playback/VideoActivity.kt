@@ -21,12 +21,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
+import android.os.Build.VERSION.*
 import android.os.Bundle
 import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
@@ -98,7 +97,6 @@ class VideoActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -140,7 +138,7 @@ class VideoActivity : AppCompatActivity() {
     }
 
     private fun setPIPParams() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (SDK_INT >= 26) {
             videoRatio?.let {
                 getPictureInPictureParams(it)?.let { pictureInPictureParams ->
                     setPictureInPictureParams(pictureInPictureParams)

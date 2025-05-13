@@ -18,20 +18,17 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.CallSuper
 import androidx.annotation.OptIn
-import androidx.annotation.RequiresApi
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.withResumed
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
@@ -77,6 +74,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private var isOverlayShown = true
 
     override val currentContext by lazy { requireContext() }
+
+    private val bottomSheetUpdates = MutableSharedFlow<File>(extraBufferCapacity = 1)
 
     private var selectedFragment: Fragment? = null
 
@@ -187,7 +186,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         previewSliderViewModel.currentPreview = currentFile
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onStop() {
         clearEdgeToEdge()
         super.onStop()
@@ -218,16 +216,13 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             offscreenPageLimit = 1
 
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                @RequiresApi(Build.VERSION_CODES.N)
+
                 @OptIn(UnstableApi::class)
                 override fun onPageSelected(position: Int) {
 
 					val file = previewSliderAdapter.getFile(position)
                     currentFile = file
                     previewSliderViewModel.currentPreview = file
-
-                    currentFile = previewSliderAdapter.getFile(position)
-                    previewSliderViewModel.currentPreview = currentFile
 
                     var shouldDisplayPageNumber = false
 
@@ -252,7 +247,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
                     setPrintButtonVisibility(isGone = !currentFile.isPDF())
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
-                    updateBottomSheetWithCurrentFile()
+                    bottomSheetUpdates.tryEmit(file)
                 }
             })
         }
@@ -301,16 +296,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         requireActivity()
             .onBackPressedDispatcher
             .addCallback(viewLifecycleOwner) { navigateBack() }
-        viewLifecycleOwner.lifecycleScope.launch {
-            bottomSheetUpdates.collectLatest { file ->
-                when (val fileActionBottomSheet = bottomSheetView) {
-                    is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(file)
-                    is ExternalFileInfoActionsView -> fileActionBottomSheet.updateWithExternalFile(file)
-                }
-            }
-        }
-
-        super.onDestroy()
     }
 
     private fun navigateBack() {
@@ -343,17 +328,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             BottomSheetBehavior.STATE_COLLAPSED
         } else {
             BottomSheetBehavior.STATE_HIDDEN
-        }
-    }
-
-    private val bottomSheetUpdates = MutableSharedFlow<File>(extraBufferCapacity = 1)
-    
-    private fun updateBottomSheetWithCurrentFile() = viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-        lifecycle.withResumed {
-            when (val fileActionBottomSheet = bottomSheetView) {
-                is FileInfoActionsView -> fileActionBottomSheet.updateCurrentFile(currentFile)
-                is ExternalFileInfoActionsView -> fileActionBottomSheet.updateWithExternalFile(currentFile)
-            }
         }
     }
 

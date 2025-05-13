@@ -64,7 +64,6 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private val offlineIsComplete by lazy { isOfflineFileComplete(offlineFile) }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private val playerListener = PlayerListener(
         activity,
         isPlayingChanged = { isPlaying ->
@@ -121,7 +120,6 @@ open class PreviewPlaybackFragment : PreviewFragment() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onResume() {
         super.onResume()
 
@@ -142,7 +140,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
                 binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
                 binding.playerView.controllerHideOnTouch = false
 
-                // We'll open a new activity for videos in order to handle PIP perfectly
+                // We'll open a new activity for videos to handle PIP perfectly
                 if (file.isVideo()) {
                     binding.playerView.findViewById<View>(R.id.exo_rew_with_amount).isVisible = false
                     binding.playerView.findViewById<View>(R.id.exo_ffwd_with_amount).isVisible = false
@@ -179,8 +177,6 @@ open class PreviewPlaybackFragment : PreviewFragment() {
             (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] = exoPlayer.currentPosition
         }
     }
-
-    fun getPlayer() = binding.playerView.player
 
     private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { file.isOfflineAndIntact(it) } ?: false
 }

@@ -53,7 +53,7 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.utils.NotificationUtilsCore
+import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import java.util.concurrent.Executor
 
 @UnstableApi
@@ -202,7 +202,7 @@ object PlaybackUtils {
             this,
             0,
             intent,
-            NotificationUtilsCore.pendingIntentFlags
+            PENDING_INTENT_FLAGS
         )
     }
 
