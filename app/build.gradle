@@ -145,7 +145,7 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$work_version"
 
     implementation 'androidx.concurrent:concurrent-futures-ktx:1.2.0'
-    implementation 'androidx.lifecycle:lifecycle-process:2.8.7'
+    implementation 'androidx.lifecycle:lifecycle-process:2.8.7' // Waiting for Api 35
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
     implementation 'androidx.webkit:webkit:1.13.0'
 
