@@ -21,13 +21,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build.VERSION.*
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.util.Rational
 import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -37,10 +36,8 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityVideoBinding
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLER_SHOW_TIMEOUT_MS
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPlayer
-import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaController
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getPictureInPictureParams
-import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.setMediaSession
 import com.infomaniak.drive.utils.setupStatusBarForPreview
 import com.infomaniak.drive.utils.shouldExcludeFromRecents
 import com.infomaniak.drive.utils.toggleSystemBar
@@ -78,7 +75,6 @@ class VideoActivity : AppCompatActivity() {
         },
     )
 
-    private val executor by lazy { ContextCompat.getMainExecutor(this) }
     private val exoPlayer: ExoPlayer by lazy { getExoPlayer() }
     private val videoRatio by lazy {
         exoPlayer.videoFormat?.let { videoFormat ->
@@ -104,22 +100,18 @@ class VideoActivity : AppCompatActivity() {
 
         shouldExcludeFromRecents(true)
 
-        PlaybackUtils.activePlayer = exoPlayer
-
         binding.playerView.player = exoPlayer
         binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
         binding.playerView.controllerHideOnTouch = false
 
-        getMediaController(executor) {
-            exoPlayer.addListener(playerListener)
+        exoPlayer.addListener(playerListener)
 
-            loadVideo(intent)
-            exoPlayer.playWhenReady = true
+        loadVideo(intent)
+        exoPlayer.playWhenReady = true
 
-            binding.playerView.player = exoPlayer
-            binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
-            binding.playerView.controllerHideOnTouch = false
-        }
+        binding.playerView.player = exoPlayer
+        binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
+        binding.playerView.controllerHideOnTouch = false
 
         toggleSystemBar(show = false)
 
@@ -151,7 +143,6 @@ class VideoActivity : AppCompatActivity() {
         intent.extras?.let { VideoActivityArgs.fromBundle(it) }?.let {
             if (it.fileId > 0) {
                 viewModel.currentFile = viewModel.getCurrentFile(it.fileId)
-                setMediaSession(isMediaVideo = viewModel.currentFile?.isVideo() == true)
                 exoPlayer.setMediaItem(getMediaItem(viewModel.currentFile!!, viewModel.offlineFile, viewModel.offlineIsComplete))
             } else {
                 finish()

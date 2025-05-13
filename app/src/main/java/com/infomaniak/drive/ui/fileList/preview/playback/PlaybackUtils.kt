@@ -110,12 +110,12 @@ object PlaybackUtils {
         }
     }
 
-    fun Context.setMediaSession(isMediaVideo: Boolean) {
+    fun Context.setMediaSession() {
         if (mediaSession == null) {
             mediaSession = MediaSession.Builder(this, activePlayer!!)
                 .setCallback(getMediaSessionCallback())
                 .setBitmapLoader(getBitmapLoader())
-                .setSessionActivity(getPendingIntent(isMediaVideo))
+                .setSessionActivity(getPendingIntent())
                 .build()
         } else {
             mediaSession?.player = activePlayer!!
@@ -194,9 +194,9 @@ object PlaybackUtils {
         }
     }
 
-    private fun Context.getPendingIntent(isMediaVideo: Boolean): PendingIntent {
+    private fun Context.getPendingIntent(): PendingIntent {
 
-        val intent = getIntentForMedia(isMediaVideo)
+        val intent = getIntentForMedia()
 
         return PendingIntent.getActivity(
             this,
@@ -206,17 +206,11 @@ object PlaybackUtils {
         )
     }
 
-    private fun Context.getIntentForMedia(isMediaVideo: Boolean): Intent {
-        return if (isMediaVideo) {
-            Intent(this, VideoActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            }
-        } else {
-            Intent(this, MainActivity::class.java).apply {
-                action = Intent.ACTION_MAIN
-                addCategory(Intent.CATEGORY_LAUNCHER)
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-            }
+    private fun Context.getIntentForMedia(): Intent {
+        return Intent(this, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_LAUNCHER)
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         }
     }
 
