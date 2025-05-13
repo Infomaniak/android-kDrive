@@ -32,6 +32,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
@@ -44,6 +45,7 @@ import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -94,6 +96,12 @@ class RootFilesFragment : Fragment() {
         setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, rootFilesUploadFileInProgressView)
 
         navigateToLastVisitedFileTreeCategory()
+
+        binding.root.enableEdgeToEdge(withBottom = false) { windowInsets ->
+            binding.cardView.setMargins(
+                bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom
+            )
+        }
     }
 
     private fun setupItems() = with(binding) {

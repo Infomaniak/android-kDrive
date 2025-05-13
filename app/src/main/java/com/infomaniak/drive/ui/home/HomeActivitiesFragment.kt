@@ -68,8 +68,6 @@ class HomeActivitiesFragment : Fragment() {
 
         binding.homeTabsRecyclerView.onApplyWindowInsetsListener { view, windowInsets ->
             view.updatePadding(
-                left = windowInsets.left,
-                right = windowInsets.right,
                 bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom,
             )
         }

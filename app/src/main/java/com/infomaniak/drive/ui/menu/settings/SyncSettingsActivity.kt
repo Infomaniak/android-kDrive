@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu.settings
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -122,6 +123,7 @@ class SyncSettingsActivity : BaseActivity() {
         observeSyncIntervalType(oldIntervalTypeValue)
 
         binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
+            if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
             binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
         }
     }
