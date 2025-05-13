@@ -18,13 +18,11 @@
 package com.infomaniak.drive.ui.fileList.preview.playback
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -123,38 +121,50 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     override fun onResume() {
         super.onResume()
 
-        PlaybackUtils.activePlayer = exoPlayer
-        requireContext().setMediaSession(file.isVideo())
+        //To avoid having the notification when we play a video, we have to avoid using the MediaController
+        if (file.isVideo().not()) {
+            PlaybackUtils.activePlayer = exoPlayer
+            requireContext().setMediaSession()
+            requireActivity().shouldExcludeFromRecents(false)
+            requireContext().getMediaController(mainExecutor) {
+                if (exoPlayer.currentMediaItem == null) setMediaToExoPlayer()
+            }
+        } else {
+            setMediaToExoPlayer()
+            initVideoPlayerUI()
+        }
+    }
 
-        requireContext().getMediaController(mainExecutor) {
-            if (exoPlayer.currentMediaItem == null) {
-                exoPlayer.removeListener(playerListener)
-                exoPlayer.addListener(playerListener)
+    private fun initVideoPlayerUI() {
+        with(binding.playerView) {
+            // Hiding ExoPlayer interface elements because we'll play the video in a separate Activity
+            findViewById<View>(R.id.exo_rew_with_amount).isVisible = false
+            findViewById<View>(R.id.exo_ffwd_with_amount).isVisible = false
+            findViewById<View>(R.id.exo_progress).isVisible = false
+            findViewById<View>(R.id.exo_bottom_bar).isVisible = false
 
-                exoPlayer.setMediaItem(
-                    getMediaItem(file, offlineFile, offlineIsComplete),
-                    (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] ?: 0L,
-                )
-
-                binding.playerView.player = exoPlayer
-                binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
-                binding.playerView.controllerHideOnTouch = false
-
-                // We'll open a new activity for videos to handle PIP perfectly
-                if (file.isVideo()) {
-                    binding.playerView.findViewById<View>(R.id.exo_rew_with_amount).isVisible = false
-                    binding.playerView.findViewById<View>(R.id.exo_ffwd_with_amount).isVisible = false
-                    binding.playerView.findViewById<View>(R.id.exo_progress).isVisible = false
-                    binding.playerView.findViewById<View>(R.id.exo_bottom_bar).isVisible = false
-                    binding.playerView.findViewById<View>(R.id.exo_play_pause).setOnClickListener {
-                        requireActivity().shouldExcludeFromRecents(true)
-                        startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
-                            putExtras(VideoActivityArgs(fileId = file.id).toBundle())
-                        })
-                    }
-                }
+            // We'll open a new activity for videos to handle PIP perfectly
+            findViewById<View>(R.id.exo_play_pause).setOnClickListener {
+                requireActivity().shouldExcludeFromRecents(true)
+                startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
+                    putExtras(VideoActivityArgs(fileId = file.id).toBundle())
+                })
             }
         }
+    }
+
+    private fun setMediaToExoPlayer() {
+        exoPlayer.removeListener(playerListener)
+        exoPlayer.addListener(playerListener)
+
+        exoPlayer.setMediaItem(
+            getMediaItem(file, offlineFile, offlineIsComplete),
+            (parentFragment as BasePreviewSliderFragment).positionsForMedia[file.id] ?: 0L,
+        )
+
+        binding.playerView.player = exoPlayer
+        binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
+        binding.playerView.controllerHideOnTouch = false
     }
 
     override fun onDestroy() {
