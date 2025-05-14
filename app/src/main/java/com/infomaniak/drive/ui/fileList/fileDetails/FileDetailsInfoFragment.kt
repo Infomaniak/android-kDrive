@@ -110,8 +110,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
 
         setBackActionHandlers()
 
-        requireView().onApplyWindowInsetsListener { view, windowInsets ->
-            binding.scrollingContent.setMargins(bottom = windowInsets.bottom)
+        binding.scrollingContent.onApplyWindowInsetsListener { view, windowInsets ->
+            view.setMargins(bottom = windowInsets.bottom)
         }
     }
 
