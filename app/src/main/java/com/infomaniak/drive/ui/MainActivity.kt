@@ -206,7 +206,10 @@ class MainActivity : BaseActivity() {
         )
 
         binding.bottomNavigation.onApplyWindowInsetsListener { view, windowInsets ->
-            view.setMargins(bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + windowInsets.bottom)
+            view.setMargins(
+                bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + windowInsets.bottom,
+            )
+            binding.searchFab.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + windowInsets.bottom)
         }
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
