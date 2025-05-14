@@ -18,20 +18,16 @@
 package com.infomaniak.drive.ui
 
 import android.content.Intent
-import android.os.Build
-import android.os.Build.VERSION.*
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
-import androidx.core.view.updatePadding
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.utils.setMargins
 
 class SwitchUserActivity : AppCompatActivity() {
 
