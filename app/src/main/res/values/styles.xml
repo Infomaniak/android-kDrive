@@ -149,7 +149,6 @@
 
     <style name="BottomSheetStyle" parent="BottomSheetDialogTheme.ModalStyle">
         <item name="shapeAppearance">?attr/shapeAppearanceLargeComponent</item>
-        <item name="paddingBottomSystemWindowInsets">false</item>
         <item name="behavior_hideable">false</item>
         <item name="behavior_draggable">true</item>
         <item name="behavior_skipCollapsed">false</item>
