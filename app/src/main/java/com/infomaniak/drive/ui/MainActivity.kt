@@ -204,6 +204,11 @@ class MainActivity : BaseActivity() {
             targetActivity = this,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
+
+        binding.bottomNavigation.onApplyWindowInsetsListener { view, windowInsets ->
+            view.setMargins(bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + windowInsets.bottom)
+        }
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onStart() {
@@ -427,15 +432,6 @@ class MainActivity : BaseActivity() {
             ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab) == true
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
-
-        // TODO: Find a better way to do this. Currently, we need to put that
-        //  here and not in the preview slider fragment because of APIs <= 27.
-        if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
-            binding.bottomNavigation.onApplyWindowInsetsListener { view, windowInsets ->
-                if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
-                view.setMargins(bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + windowInsets.bottom)
-            }
-        }
 
         when (destination.id) {
             R.id.favoritesFragment,

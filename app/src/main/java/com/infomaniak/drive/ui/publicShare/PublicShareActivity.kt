@@ -48,9 +48,9 @@ class PublicShareActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
         binding.root.enableEdgeToEdge(withTop = false, withBottom = false) {
-            if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
             binding.mainPublicShareButton.setMargins(bottom = it.bottom)
         }
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onDestroy() {

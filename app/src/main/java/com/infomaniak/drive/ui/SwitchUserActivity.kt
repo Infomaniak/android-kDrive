@@ -57,8 +57,7 @@ class SwitchUserActivity : AppCompatActivity() {
             startActivity(Intent(this@SwitchUserActivity, LoginActivity::class.java))
         }
 
-        binding.scrollingContent.enableEdgeToEdge {
-            if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
-        }
+        binding.scrollingContent.enableEdgeToEdge()
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 }

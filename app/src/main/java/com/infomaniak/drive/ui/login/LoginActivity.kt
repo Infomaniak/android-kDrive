@@ -142,8 +142,8 @@ class LoginActivity : AppCompatActivity() {
 
         binding.signInButton.enableEdgeToEdge(withTop = false) {
             binding.nextButton.setMargins(bottom = it.bottom)
-            if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         }
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     private fun startAccountCreation() {
