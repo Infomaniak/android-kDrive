@@ -19,8 +19,7 @@ package com.infomaniak.drive.ui.login
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.Build.VERSION.*
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
