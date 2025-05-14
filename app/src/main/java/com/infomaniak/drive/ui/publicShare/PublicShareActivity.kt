@@ -17,7 +17,7 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
-import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -48,9 +48,7 @@ class PublicShareActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
         binding.root.enableEdgeToEdge(withTop = false, withBottom = false) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
             binding.mainPublicShareButton.setMargins(bottom = it.bottom)
         }
     }

@@ -29,7 +29,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.StateListDrawable
 import android.net.Uri
-import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.FileObserver
@@ -433,7 +432,7 @@ class MainActivity : BaseActivity() {
         //  here and not in the preview slider fragment because of APIs <= 27.
         if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
             binding.bottomNavigation.onApplyWindowInsetsListener { view, windowInsets ->
-                if (SDK_INT >= Build.VERSION_CODES.Q) window.isNavigationBarContrastEnforced = false
+                if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
                 view.setMargins(bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + windowInsets.bottom)
             }
         }

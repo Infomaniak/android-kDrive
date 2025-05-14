@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.login
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Build.VERSION.*
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
@@ -141,9 +142,7 @@ class LoginActivity : AppCompatActivity() {
 
         binding.signInButton.enableEdgeToEdge(withTop = false) {
             binding.nextButton.setMargins(bottom = it.bottom)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         }
     }
 
