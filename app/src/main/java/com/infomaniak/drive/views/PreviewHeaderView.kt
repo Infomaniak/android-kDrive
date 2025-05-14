@@ -24,14 +24,13 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.graphics.Insets
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.PreviewHeaderViewBinding
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import kotlin.math.max
 
 class PreviewHeaderView @JvmOverloads constructor(
@@ -79,26 +78,24 @@ class PreviewHeaderView @JvmOverloads constructor(
         bottomSheetView: View,
         callback: ((insets: Insets?) -> Unit)? = null,
     ) {
+
         val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView)
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { _, windowInsets ->
-            with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                // We add the same margins here on the left and right to have the view centered
-                val topOffset = getTopOffset(bottomSheetView)
-                bottomSheetBehavior.apply {
-                    peekHeight = getDefaultPeekHeight()
+        rootView.onApplyWindowInsetsListener { _, windowInsets ->
+            // We add the same margins here on the left and right to have the view centered
+            val topOffset = getTopOffset(bottomSheetView)
+            bottomSheetBehavior.apply {
+                peekHeight = getDefaultPeekHeight(windowInsets)
 
-                    if (topOffset > 0) {
-                        expandedOffset = topOffset
-                        maxHeight = rootView.height - topOffset
-                    }
+                if (topOffset > 0) {
+                    expandedOffset = topOffset
+                    maxHeight = rootView.height - topOffset
                 }
-                // Add padding to the bottom to allow the last element of the
-                // list to be displayed right over the android navigation bar
-                bottomSheetView.setPadding(0, 0, 0, bottom)
-                callback?.invoke(this)
             }
+            // Add padding to the bottom to allow the last element of the
+            // list to be displayed right over the android navigation bar
+            bottomSheetView.setPadding(0, 0, 0, bottom)
 
-            windowInsets
+            callback?.invoke(windowInsets)
         }
     }
 
@@ -129,12 +126,12 @@ class PreviewHeaderView @JvmOverloads constructor(
         return if (rootView.height < bottomSheetView.height) max(top, rootView.height - bottomSheetView.height) else 0
     }
 
-    private fun getDefaultPeekHeight(): Int {
+    private fun getDefaultPeekHeight(windowInsets: Insets): Int {
         val typedArray = context.theme.obtainStyledAttributes(
             R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
         )
         val peekHeight = typedArray.getDimensionPixelSize(0, 0)
         typedArray.recycle()
-        return peekHeight
+        return peekHeight + windowInsets.bottom
     }
 }
