@@ -23,5 +23,5 @@ dependencyResolutionManagement {
 rootProject.name = "kDrive"
 include ':app'
 include ':Core:FragmentNavigation', ':Core:Legacy', ':Core:Legacy:AppLock', ':Core:Legacy:Stores'
-include ':Core:MyKSuite', ':Core:RecyclerView', ':Core:Network',':Core:Sentry', ':Core:Thumbnails'
-include ':Core:UserAvatar'
+include ':Core:MyKSuite', ':Core:RecyclerView', ':Core:Network', ':Core:Sentry', ':Core:Thumbnails'
+include 'Core:Ktor', ':Core:UserAvatar'
