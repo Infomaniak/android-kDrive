@@ -71,6 +71,8 @@ android {
     flavorDimensions += "distribution"
     productFlavors {
         create("standard") {
+            //TODO: Move the line below in the plugins block, or find an alternative,
+            // because this is not actually applied conditionally.
             apply(plugin = "com.google.gms.google-services")
 
             isDefault = true
