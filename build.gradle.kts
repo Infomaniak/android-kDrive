@@ -1,23 +1,32 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
 
-    project.ext.kotlinVersion = '2.1.21'
+    extra.apply {
+        set("appCompileSdk", 35) // Ensure any extra configChanges are added into Activities' manifests.
+        set("appTargetSdk", 35)
+        set("appMinSdk", 24)
+        set("legacyMinSdk", 24) // Duplicated from `Core/Legacy/build.gradle` : `legacyMinSdk = 24`
+        set("javaVersion", JavaVersion.VERSION_17)
+    }
 
     dependencies {
-        classpath 'androidx.navigation:navigation-safe-args-gradle-plugin:2.9.0'
-        classpath 'io.realm:realm-gradle-plugin:10.15.1'
-        classpath 'com.android.tools.build:gradle:8.8.2'
-        classpath 'com.google.gms:google-services:4.4.2'
-        classpath 'de.mannodermaus.gradle.plugins:android-junit5:1.9.3.0'
+        classpath("androidx.navigation:navigation-safe-args-gradle-plugin:2.9.0")
+        classpath("io.realm:realm-gradle-plugin:10.15.1")
+        classpath("com.android.tools.build:gradle:8.8.2")
+        classpath("com.google.gms:google-services:4.4.2")
+        classpath("de.mannodermaus.gradle.plugins:android-junit5:1.9.3.0")
     }
 }
 
 plugins {
-    id 'io.sentry.android.gradle' version '5.5.0' apply false
-    alias core.plugins.compose.compiler version "$kotlinVersion" apply false
-    id 'org.jetbrains.kotlin.android' version "$kotlinVersion" apply false
-    id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlinVersion" apply false
-    id 'com.google.devtools.ksp' version '2.1.21-2.0.1' apply false
+    val kotlinVersion = "2.1.21"
+    id("io.sentry.android.gradle") version "5.5.0" apply false
+    alias(core.plugins.compose.compiler) version kotlinVersion apply false
+    id("org.jetbrains.kotlin.android") version kotlinVersion apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion apply false
+    id("com.google.devtools.ksp") version "2.1.21-2.0.1" apply false
 }
 
-tasks.register('clean', Delete) { delete rootProject.layout.buildDirectory }
+tasks.register<Delete>("clean") {
+    delete(rootProject.layout.buildDirectory)
+}
