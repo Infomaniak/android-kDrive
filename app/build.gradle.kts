@@ -74,10 +74,6 @@ android {
             apply(plugin = "com.google.gms.google-services")
 
             isDefault = true
-
-            dependencies {
-                implementation("com.geniusscansdk:gssdk:5.6.1")
-            }
         }
         create("fdroid")
         create("preprod") {
@@ -169,6 +165,7 @@ dependencies {
     implementation("com.github.realm:realm-android-adapters:v4.0.0")
 
     "standardImplementation"("com.google.firebase:firebase-messaging-ktx:24.1.1")
+    "standardImplementation"("com.geniusscansdk:gssdk:5.6.1")
 
     implementation("com.googlecode.plist:dd-plist:1.28")
 
