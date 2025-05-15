@@ -151,6 +151,7 @@ dependencies {
 
     implementation(project(":Core"))
     implementation(project(":Core:FragmentNavigation"))
+    implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))
     implementation(project(":Core:Legacy:AppLock"))
     implementation(project(":Core:Legacy:Stores"))
@@ -158,6 +159,8 @@ dependencies {
     implementation(project(":Core:Network"))
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:RecyclerView"))
+
+    implementation(core.ktor.client.okhttp)
 
     val work_version = "2.9.1" // Keep the same version as the one in Core
     implementation("androidx.work:work-runtime-ktx:$work_version")

@@ -30,7 +30,6 @@ import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
 import androidx.work.*
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.FileChunkSizeManager
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.models.AppSettings
@@ -54,7 +53,7 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
-import java.util.Date
+import java.util.*
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
@@ -242,7 +241,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             throw exception
         } catch (exception: AllowedFileSizeExceededException) {
             Sentry.withScope { scope ->
-                scope.setExtra("half heap", "${FileChunkSizeManager.getHalfHeapMemory()}")
+                scope.setExtra("half heap", "${Runtime.getRuntime().maxMemory() / 2}")
                 scope.setExtra("available ram memory", "${applicationContext.getAvailableMemory().availMem}")
                 scope.setExtra("available service memory", "${applicationContext.getAvailableMemory().threshold}")
                 SentryLog.e(TAG, "total chunks exceeded", exception)
