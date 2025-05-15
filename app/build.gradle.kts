@@ -1,4 +1,4 @@
-import java.util.*
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -91,9 +91,7 @@ android {
 
     gradle.buildFinished {
         try {
-            exec {
-                commandLine("say", "Ok")
-            }
+            exec { commandLine("say", "Ok") }
         } catch (_: Throwable) {
         }
     }
@@ -104,9 +102,7 @@ android {
     }
 
     testOptions.unitTests.all {
-        it.testLogging {
-            events("passed", "skipped", "failed", "standardOut", "standardError")
-        }
+        it.testLogging { events("passed", "skipped", "failed", "standardOut", "standardError") }
     }
 }
 
@@ -116,8 +112,7 @@ val envProperties = rootProject.file("env.properties").takeIf { it.exists() }?.l
     Properties().also { it.load(file.reader()) }
 }
 
-val sentryAuthToken = envProperties?.getProperty("sentryAuthToken")
-    .takeUnless { it.isNullOrBlank() }
+val sentryAuthToken = envProperties?.getProperty("sentryAuthToken").takeUnless { it.isNullOrBlank() }
     ?: if (isRelease) error("The `sentryAuthToken` property in `env.properties` must be specified (see `env.example.properties`).") else ""
 
 sentry {
