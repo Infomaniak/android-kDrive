@@ -132,7 +132,7 @@ sentry {
     // during a build. If you disable this, you'll need to manually
     // upload the mapping files with sentry-cli when you do a release.
     // Default is enabled.
-    autoUpload = true
+    autoUploadProguardMapping = true
 
     // Disables or enables the automatic configuration of Native Symbols
     // for Sentry. This executes sentry-cli automatically so
