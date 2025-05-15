@@ -1,3 +1,5 @@
+import java.util.*
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,6 +7,7 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     id("realm-android")
+    id("io.sentry.android.gradle")
     id("de.mannodermaus.android-junit5")
 }
 
@@ -107,7 +110,24 @@ android {
     }
 }
 
+val isRelease = gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) }
+
+val envProperties = rootProject.file("env.properties").takeIf { it.exists() }?.let { file ->
+    Properties().also { it.load(file.reader()) }
+}
+
+val sentryAuthToken = envProperties?.getProperty("sentryAuthToken")
+    .takeUnless { it.isNullOrBlank() }
+    ?: if (isRelease) error("The `sentryAuthToken` property in `env.properties` must be specified (see `env.example.properties`).") else ""
+
 sentry {
+    org = "sentry"
+    projectName = "kdrive-android"
+    authToken = sentryAuthToken
+    url = "https://sentry-mobile.infomaniak.com"
+    includeDependenciesReport = false
+    includeSourceContext = isRelease
+
     // Enables or disables the automatic upload of mapping files
     // during a build. If you disable this, you'll need to manually
     // upload the mapping files with sentry-cli when you do a release.
@@ -118,13 +138,13 @@ sentry {
     // for Sentry. This executes sentry-cli automatically so
     // you don't need to do it manually.
     // Default is disabled.
-    uploadNativeSymbols = true
+    uploadNativeSymbols = isRelease
 
     // Does or doesn't include the source code of native code for Sentry.
     // This executes sentry-cli with the --include-sources param. automatically so
     // you don't need to do it manually.
     // Default is disabled.
-    includeNativeSources = true
+    includeNativeSources = isRelease
 }
 
 dependencies {
