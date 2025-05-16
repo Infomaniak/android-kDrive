@@ -75,9 +75,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     override val currentContext by lazy { requireContext() }
 
     private val bottomSheetUpdates = MutableSharedFlow<File>(extraBufferCapacity = 1)
-
-    private var selectedFragment: Fragment? = null
-
+    
     override lateinit var currentFile: File
 
     var positionsForMedia: MutableMap<Int, Long> = mutableMapOf()
