@@ -22,6 +22,14 @@
     android:layout_height="match_parent"
     tools:context=".ui.login.IntroFragment">
 
+    <View
+        android:id="@+id/dummyView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/background"
+        app:layout_constraintBottom_toTopOf="@id/waveBackground"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:id="@+id/waveBackground"
         android:layout_width="match_parent"
@@ -30,9 +38,8 @@
         android:src="@drawable/ic_back_wave_1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.5"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dummyView"
         tools:ignore="ContentDescription" />
 
     <View
@@ -66,7 +73,7 @@
         app:layout_constraintBottom_toTopOf="@id/iconLayout"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintStart_toEndOf="@id/start"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toTopOf="@id/waveBackground"
         app:layout_constraintVertical_chainStyle="packed"
         tools:ignore="ContentDescription" />
 

@@ -28,6 +28,7 @@ import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.Insets
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.infomaniak.drive.R
@@ -53,9 +54,16 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     var isExpanded = true
     var isNewState = false
 
+    private var leftInsets = 0
+
     fun setExpandedColor(title: Int, subTitle: Int) {
         expandedTitleColor = title
         expandedSubTitleColor = subTitle
+    }
+
+    fun onWindowInsetsChanged(insets: Insets, subtitleToolbarView: SubtitleToolbarView, appBarLayout: View) {
+        leftInsets = insets.left
+        animateView(subtitleToolbarView, appBarLayout)
     }
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: SubtitleToolbarView, dependency: View): Boolean {
@@ -65,17 +73,22 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
     override fun onDependentViewChanged(
         coordinatorLayout: CoordinatorLayout,
         subtitleToolbarView: SubtitleToolbarView,
-        appBarLayout: View
+        appBarLayout: View,
     ): Boolean {
+        animateView(subtitleToolbarView, appBarLayout)
+        return true
+    }
+
+    private fun animateView(subtitleToolbarView: SubtitleToolbarView, appBarLayout: View) {
         val maxScroll = (appBarLayout as AppBarLayout).totalScrollRange
-        val appBarLayoutYPosition = abs(appBarLayout.getY())
+        val appBarLayoutYPosition = abs(appBarLayout.y)
         val percentage = appBarLayoutYPosition / maxScroll.toFloat()
 
         val toolbar = appBarLayout.findViewById<MaterialToolbar>(R.id.toolbar)
         val toolbarTitle = subtitleToolbarView.findViewById<TextView>(R.id.title)
         val toolbarSubTitle = subtitleToolbarView.findViewById<TextView>(R.id.subTitle)
 
-        var childPosition = ((appBarLayout.getHeight() + appBarLayout.getY())
+        var childPosition = ((appBarLayout.height + appBarLayout.y)
                 - subtitleToolbarView.height
                 - (getToolbarHeight(context) - subtitleToolbarView.height)
                 * percentage / 2)
@@ -86,14 +99,14 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
         val halfMaxScroll = maxScroll / 2
         if (appBarLayoutYPosition >= halfMaxScroll) {
             val layoutPercentage = (appBarLayoutYPosition - halfMaxScroll) / abs(halfMaxScroll)
-            layoutParams.leftMargin = (layoutPercentage * collapsedTitleMarginStart).toInt() + expandedTitleMarginStart
-
+            layoutParams.leftMargin =
+                (layoutPercentage * collapsedTitleMarginStart).toInt() + leftInsets + expandedTitleMarginStart
             toolbarTitle.setTextSize(
                 TypedValue.COMPLEX_UNIT_PX,
                 getTranslationOffset(layoutPercentage)
             )
         } else {
-            layoutParams.leftMargin = expandedTitleMarginStart
+            layoutParams.leftMargin = leftInsets + expandedTitleMarginStart
         }
 
         subtitleToolbarView.layoutParams = layoutParams
@@ -112,8 +125,6 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
         }
 
         toolbarTitle.typeface = if (percentage < 1) expandedTitleFont else collapsedTitleFont
-
-        return true
     }
 
     private fun textColorAnimation(textView: TextView, startColor: Int, endColor: Int) {

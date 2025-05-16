@@ -40,6 +40,7 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.databinding.FragmentFileDetailsInfosBinding
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.ShareLinkManageable
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
@@ -51,6 +52,7 @@ import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setMargins
 
 class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
 
@@ -107,6 +109,10 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
         }
 
         setBackActionHandlers()
+
+        binding.scrollingContent.onApplyWindowInsetsListener { view, windowInsets ->
+            view.setMargins(bottom = windowInsets.bottom)
+        }
     }
 
     private fun displayFolderContentCount(folder: File) = with(binding) {

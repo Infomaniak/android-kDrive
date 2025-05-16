@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.databinding.FragmentSelectCategoriesBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.CategoryInfoActionsBottomSheetDialogArgs
@@ -93,6 +94,10 @@ class SelectCategoriesFragment : Fragment() {
             } else {
                 findNavController().popBackStack()
             }
+        }
+
+        binding.root.enableEdgeToEdge(withBottom = false) {
+            binding.categoriesRecyclerView.setMargins(bottom = it.bottom)
         }
     }
 

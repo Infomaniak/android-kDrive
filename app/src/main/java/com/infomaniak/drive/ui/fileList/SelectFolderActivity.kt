@@ -31,9 +31,11 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ActivitySelectFolderBinding
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.setMargins
 
 class SelectFolderActivity : BaseActivity() {
 
@@ -83,6 +85,10 @@ class SelectFolderActivity : BaseActivity() {
                     initiateNavigationToCurrentFolder(folderId, currentUserDrive)
                 }
             }
+        }
+
+        binding.saveButton.onApplyWindowInsetsListener { view, windowInsets ->
+            view.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + windowInsets.bottom)
         }
     }
 

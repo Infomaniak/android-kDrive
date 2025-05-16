@@ -27,9 +27,9 @@ import androidx.activity.addCallback
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.view.ViewCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle.State
@@ -59,6 +59,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWorkerSucceeded
 import com.infomaniak.drive.databinding.FragmentFileListBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
@@ -223,10 +224,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             }
         }
 
-        with(binding) {
-            swipeRefreshLayout.setOnRefreshListener(this@FileListFragment)
-            ViewCompat.requestApplyInsets(fileListCoordinator) // Restore coordinator state
-        }
+        binding.swipeRefreshLayout.setOnRefreshListener(this@FileListFragment)
         setToolbarTitle()
         setPublicFolderSubtitle()
 
@@ -276,6 +274,13 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
         setupBackActionHandler()
 
         fileListViewModel.enqueueBulkDownloadWorker(folderId)
+
+        requireView().enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
+            binding.fileRecyclerView.updatePadding(
+                bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + it.bottom,
+            )
+            binding.noFilesLayout.setMargins(bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + it.bottom)
+        }
     }
 
     private fun setupToolbars() {

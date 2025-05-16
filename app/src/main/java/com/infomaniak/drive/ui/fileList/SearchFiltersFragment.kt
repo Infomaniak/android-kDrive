@@ -34,15 +34,13 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.databinding.FragmentSearchFiltersBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterDateBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.toPx
+import com.infomaniak.lib.core.utils.*
 
 class SearchFiltersFragment : Fragment() {
 
@@ -72,6 +70,10 @@ class SearchFiltersFragment : Fragment() {
         setClearButton()
         setSaveButton()
         listenToFiltersUpdates()
+
+        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false) { insets ->
+            binding.saveButton.setMargins(bottom = insets.bottom)
+        }
     }
 
     private fun initializeFilters() = with(searchFiltersViewModel) {

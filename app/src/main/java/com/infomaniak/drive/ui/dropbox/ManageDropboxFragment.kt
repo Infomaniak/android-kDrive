@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentManageDropboxBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
@@ -105,6 +106,8 @@ open class ManageDropboxFragment : Fragment() {
                 }
             }
         }
+
+        binding.root.enableEdgeToEdge(shouldConsumeInsets = true)
     }
 
     protected fun updateUi(file: File, dropBox: DropBox? = null) = with(binding.settings) {

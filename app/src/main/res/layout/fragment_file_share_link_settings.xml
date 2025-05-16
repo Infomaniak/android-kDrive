@@ -254,6 +254,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/marginStandardMedium"
+                android:layout_marginBottom="@dimen/recyclerViewPaddingBottom"
                 android:background="?selectableItemBackground"
                 android:paddingHorizontal="@dimen/marginStandard"
                 android:paddingBottom="@dimen/marginStandardMedium">

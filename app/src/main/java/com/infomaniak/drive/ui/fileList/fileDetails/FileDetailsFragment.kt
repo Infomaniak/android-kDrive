@@ -25,8 +25,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.graphics.Insets
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
@@ -40,6 +39,7 @@ import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentFileDetailsBinding
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.utils.TabViewPagerUtils
 import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.utils.getFolderIcon
@@ -79,19 +79,21 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         super.onStart()
         activity?.window?.apply {
             statusBarColor = Color.TRANSPARENT
-            toggleEdgeToEdge(true)
 
-            // Corrects the layout so it still takes into account system bars in edge-to-edge mode
-            ViewCompat.setOnApplyWindowInsetsListener(requireView()) { view, windowInsets ->
-                with(windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())) {
-                    binding.toolbar.setMargins(top = top)
-                    view.setMargins(bottom = bottom)
-                }
+            requireView().onApplyWindowInsetsListener { _, windowInsets ->
+                binding.toolbar.setMargins(left = windowInsets.left, top = windowInsets.top)
+                binding.tabsContent.setMargins(left = windowInsets.left, right = windowInsets.right)
+                binding.addCommentButton.setMargins(bottom = windowInsets.bottom)
 
-                // Return CONSUMED if you don't want the window insets to keep being passed down to descendant views
-                WindowInsetsCompat.CONSUMED
+                updateCollapsingToolbarInsets(windowInsets)
             }
         }
+    }
+
+    private fun updateCollapsingToolbarInsets(windowInsets: Insets) {
+        val params = binding.subtitleToolbar.root.layoutParams as CoordinatorLayout.LayoutParams
+        val collapsingToolbarBehavior = params.behavior as? CollapsingSubTitleToolbarBehavior
+        collapsingToolbarBehavior?.onWindowInsetsChanged(windowInsets, binding.subtitleToolbar.root, binding.appBar)
     }
 
     override fun onPause() {

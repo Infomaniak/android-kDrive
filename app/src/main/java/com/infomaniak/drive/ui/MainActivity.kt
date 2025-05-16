@@ -80,6 +80,7 @@ import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
@@ -96,6 +97,7 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
@@ -202,6 +204,14 @@ class MainActivity : BaseActivity() {
             targetActivity = this,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
+
+        binding.bottomNavigation.onApplyWindowInsetsListener { view, windowInsets ->
+            view.setMargins(
+                bottom = resources.getDimension(R.dimen.bottomNavigationMargin).toInt() + windowInsets.bottom,
+            )
+            binding.searchFab.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + windowInsets.bottom)
+        }
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onStart() {
@@ -425,12 +435,6 @@ class MainActivity : BaseActivity() {
             ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab) == true
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
-
-        // TODO: Find a better way to do this. Currently, we need to put that
-        //  here and not in the preview slider fragment because of APIs <= 27.
-        if (destination.id != R.id.previewSliderFragment && destination.id != R.id.fileDetailsFragment) {
-            binding.bottomNavigation.setOnApplyWindowInsetsListener(null)
-        }
 
         when (destination.id) {
             R.id.favoritesFragment,

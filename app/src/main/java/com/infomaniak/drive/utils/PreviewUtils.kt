@@ -47,7 +47,9 @@ import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
 import com.infomaniak.drive.utils.PreviewPDFUtils.PasswordProtectedException
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
+import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.lightNavigationBar
+import com.infomaniak.lib.core.utils.lightStatusBar
 import okhttp3.Response
 import java.io.BufferedInputStream
 
@@ -65,6 +67,8 @@ fun Activity.setupBottomSheetFileBehavior(
         this.isFitToContents = isFitToContents
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
+                window.lightStatusBar(!isNightModeEnabled() && bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
+
                 when (bottomSheetBehavior.state) {
                     BottomSheetBehavior.STATE_HIDDEN -> {
                         window?.navigationBarColor =

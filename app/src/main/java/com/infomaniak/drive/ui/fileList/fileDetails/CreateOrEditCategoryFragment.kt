@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentCreateOrEditCategoryBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.getScreenSizeInDp
@@ -69,6 +70,8 @@ class CreateOrEditCategoryFragment : Fragment() {
         createOrEditCategoryViewModel.init(navigationArgs.filesIds).observe(viewLifecycleOwner) { hasNoFiles ->
             if (hasNoFiles) findNavController().popBackStack()
         }
+
+        binding.root.enableEdgeToEdge()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
