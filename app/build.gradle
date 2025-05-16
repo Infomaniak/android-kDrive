@@ -6,6 +6,7 @@ apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'realm-android'
 apply plugin: 'de.mannodermaus.android-junit5'
 
+
 android {
 
     namespace 'com.infomaniak.drive'
@@ -40,9 +41,6 @@ android {
         buildConfigField 'String', 'SHOP_URL', '"https://shop.infomaniak.com/order/"'
         buildConfigField 'String', 'SUPPORT_URL', '"https://support.infomaniak.com/"'
 
-        resValue 'string', 'CLOUD_STORAGE_AUTHORITY', 'com.infomaniak.drive.documents'
-        resValue 'string', 'FILE_AUTHORITY', 'com.infomaniak.drive.files'
-
         resValue 'string', 'EXPOSED_UPLOAD_DIR', 'upload_media'
         resValue 'string', 'EXPOSED_OFFLINE_DIR', 'offline_storage'
         resValue 'string', 'EXPOSED_PUBLIC_SHARE_DIR', 'public_share'
@@ -59,10 +57,34 @@ android {
 
     kotlinOptions { jvmTarget = javaVersion }
 
+    def debugKeystoreFile = rootProject.file("debug.keystore")
+    signingConfigs {
+        debug {
+            storeFile = debugKeystoreFile
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+            storePassword = "android"
+        }
+    }
+
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            resValue 'string', 'CLOUD_STORAGE_AUTHORITY', 'com.infomaniak.drive.documents'
+            resValue 'string', 'FILE_AUTHORITY', 'com.infomaniak.drive.files'
+            resValue 'string', 'applicationId', 'com.infomaniak.drive'
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+            signingConfig = signingConfigs.debug
+
+            resValue 'string', 'CLOUD_STORAGE_AUTHORITY', 'com.infomaniak.drive.debug.documents'
+            resValue 'string', 'FILE_AUTHORITY', 'com.infomaniak.drive.debug.files'
+            resValue 'string', 'applicationId', 'com.infomaniak.drive.debug'
         }
     }
 
