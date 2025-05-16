@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
-import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.annotation.CallSuper
 import androidx.annotation.OptIn
@@ -179,7 +178,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         requireActivity().setupStatusBarForPreview()
     }
 
-    @OptIn(UnstableApi::class)
     override fun onPause() {
         super.onPause()
         if (noPreviewList()) return
@@ -220,16 +218,17 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                 @OptIn(UnstableApi::class)
                 override fun onPageSelected(position: Int) {
 
-					val file = previewSliderAdapter.getFile(position)
+                    val file = previewSliderAdapter.getFile(position)
                     currentFile = file
                     previewSliderViewModel.currentPreview = file
 
                     var shouldDisplayPageNumber = false
 
-                    val selectedFragment = childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
-                        this.trackScreen()
-                        shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
-                    }
+                    val selectedFragment =
+                        childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
+                            this.trackScreen()
+                            shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
+                        }
 
                     // Implementation of onFragmentUnselected to handle resume of media to the same position, only
                     // for PreviewPlaybackFragment.
@@ -253,50 +252,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        requireActivity().setupStatusBarForPreview()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (noPreviewList()) return
-        previewSliderViewModel.currentPreview = currentFile
-
-        if (canStartPictureInPicture && mediaController?.isPlaying == true && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            pipParams?.let { requireActivity().enterPictureInPictureMode(it) }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.N)
-    override fun onStop() {
-        clearEdgeToEdge()
-        super.onStop()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
-        _binding = null
-    }
-
-    override fun onDestroy() {
-        // Reset current preview file list
-        if (findNavController().previousBackStackEntry?.destination?.id != R.id.searchFragment) {
-            mainViewModel.currentPreviewFileList = LinkedHashMap()
-        }
-
-        // Release Player
-        mediaController?.apply {
-            release()
-            mediaController = null
-            mediaControllerFuture?.let { MediaController.releaseFuture(it) }
-            mediaControllerFuture = null
-    private fun addBackPressedCallback() {
-        requireActivity()
-            .onBackPressedDispatcher
-            .addCallback(viewLifecycleOwner) { navigateBack() }
-    }
 
     private fun navigateBack() {
         hasNavigateBack = true
