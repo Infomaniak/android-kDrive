@@ -74,8 +74,7 @@ android {
     flavorDimensions += "distribution"
     productFlavors {
         create("standard") {
-            //TODO: Move the line below in the plugins block, or find an alternative,
-            // because this is not actually applied conditionally.
+            // TODO: Move the line below in the plugins block, or find an alternative, because this is not actually applied conditionally.
             apply(plugin = "com.google.gms.google-services")
 
             isDefault = true
@@ -89,10 +88,8 @@ android {
         }
     }
 
-    // There is no sane replacement for gradle.buildFinished, as of Gradle 8, unfortunately.
-    // See this closed issue: https://github.com/gradle/gradle/issues/20151
-    // This block is not essential, so we can remove it if needed, or replace it
-    // with a trusted Gradle plugin providing the same functionality.
+    // As of Gradle 8, there is no sane replacement for gradle.buildFinished. See this closed issue: https://github.com/gradle/gradle/issues/20151
+    // This block is not essential, so we can remove it if needed, or replace it with a trusted Gradle plugin providing the same functionality.
     @Suppress("Deprecation")
     gradle.buildFinished {
         try {
@@ -128,21 +125,18 @@ sentry {
     includeDependenciesReport = false
     includeSourceContext = isRelease
 
-    // Enables or disables the automatic upload of mapping files
-    // during a build. If you disable this, you'll need to manually
-    // upload the mapping files with sentry-cli when you do a release.
+    // Enables or disables the automatic upload of mapping files during a build.
+    // If you disable this, you'll need to manually upload the mapping files with sentry-cli when you do a release.
     // Default is enabled.
     autoUploadProguardMapping = true
 
-    // Disables or enables the automatic configuration of Native Symbols
-    // for Sentry. This executes sentry-cli automatically so
-    // you don't need to do it manually.
+    // Disables or enables the automatic configuration of Native Symbols for Sentry.
+    // This executes sentry-cli automatically so you don't need to do it manually.
     // Default is disabled.
     uploadNativeSymbols = isRelease
 
     // Does or doesn't include the source code of native code for Sentry.
-    // This executes sentry-cli with the --include-sources param. automatically so
-    // you don't need to do it manually.
+    // This executes sentry-cli with the --include-sources param. automatically so you don't need to do it manually.
     // Default is disabled.
     includeNativeSources = isRelease
 }
