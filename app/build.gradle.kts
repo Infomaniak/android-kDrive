@@ -11,19 +11,24 @@ plugins {
     id("de.mannodermaus.android-junit5")
 }
 
+val appCompileSdk: Int by rootProject.extra
+val appTargetSdk: Int by rootProject.extra
+val appMinSdk: Int by rootProject.extra
+val javaVersion: JavaVersion by rootProject.extra
+
 android {
 
     namespace = "com.infomaniak.drive"
 
-    compileSdk = 35
+    compileSdk = appCompileSdk
 
     ndkVersion = "28.0.13004108"
 
     defaultConfig {
         testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
         applicationId = "com.infomaniak.drive"
-        minSdk = 24
-        targetSdk = 35
+        minSdk = appMinSdk
+        targetSdk = appTargetSdk
         versionCode = 5_05_000_01
         versionName = "5.5.0"
 
@@ -54,8 +59,6 @@ android {
 
         androidResources.localeFilters += arrayOf("en", "de", "es", "fr", "it")
     }
-
-    val javaVersion = JavaVersion.VERSION_17
 
     compileOptions {
         sourceCompatibility = javaVersion
