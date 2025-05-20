@@ -1,0 +1,4 @@
+- Fixed .gif files that would no longer play
+- Improved some error display
+- Updated application logo icons
+- Improved performance on Honor devices!

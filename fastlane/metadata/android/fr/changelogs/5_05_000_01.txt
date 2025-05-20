@@ -1,0 +1,4 @@
+- Correction des .gif qui ne se lançaient plus
+- Meilleure affichage de certaines erreurs
+- Mise à jour des icônes du logo de l'application
+- Amélioration des performances sur appareils Honor !

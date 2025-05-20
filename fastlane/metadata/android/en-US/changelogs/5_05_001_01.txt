@@ -1,4 +1,2 @@
-- Fixed .gif files that would no longer play
-- Improved some error display
-- Updated application logo icons
-- Improved performance on Honor devices!
+- Fix rare crash that could occur on view recycling
+- Support edge to edge mode in the whole app
