@@ -71,7 +71,7 @@ class PublicShareListFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
 
-    private var drivePermissions = DrivePermissions()
+    private val drivePermissions = DrivePermissions()
     private inline val importButton get() = (requireActivity() as PublicShareActivity).getMainButton()
     private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk(::onDriveAndFolderSelected)

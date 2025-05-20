@@ -517,8 +517,11 @@ class MainViewModel(
     }
 
     private fun moveIfOfflineFileOrDelete(file: File, ioFile: IOFile, newParent: File) {
-        if (file.isOffline) ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
-        else ioFile.delete()
+        if (file.isOffline) {
+            ioFile.renameTo(IOFile("${newParent.getRemotePath()}/${file.name}"))
+        } else {
+            ioFile.delete()
+        }
     }
 
     private fun saveCurrentFolder() {
