@@ -409,13 +409,13 @@ class SyncSettingsActivity : BaseActivity() {
                 }
 
                 trackPhotoSyncEvent(if (activateSyncSwitch.isChecked) "enabled" else "disabled")
-            }.onFailure {
-                it.printStackTrace()
+            }.onFailure { exception ->
                 showSnackbar(R.string.anErrorHasOccurred)
-                Sentry.captureException(it) { scope ->
+                Sentry.withScope { scope ->
                     scope.setTag("syncIntervalType", syncSettingsViewModel.syncIntervalType.value?.title.toString())
                     scope.setTag("createMonthFolder", createDatedSubFoldersSwitch.isChecked.toString())
                     scope.setTag("deletePhoto", deletePicturesAfterSyncSwitch.isChecked.toString())
+                    SentryLog.e("SyncSettings", "An error has occurred when save settings", exception)
                 }
             }
 
