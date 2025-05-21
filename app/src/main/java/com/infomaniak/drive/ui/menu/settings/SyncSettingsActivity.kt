@@ -393,33 +393,34 @@ class SyncSettingsActivity : BaseActivity() {
 
     private fun saveSettings() = with(binding) {
         saveButton.showProgressCatching()
-        lifecycleScope.launch(Dispatchers.IO) {
-            runCatching {
+
+        lifecycleScope.launch {
+            val result = runCatching {
                 if (activateSyncSwitch.isChecked) {
                     val syncSettings = generateSyncSettings()
                     trackPhotoSyncEvents(syncSettings)
                     syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
-                    UploadFile.setAppSyncSettings(syncSettings)
-                    activateAutoSync(syncSettings)
+                    Dispatchers.IO {
+                        UploadFile.setAppSyncSettings(syncSettings)
+                        activateAutoSync(syncSettings)
+                    }
                 } else {
-                    disableAutoSync()
+                    Dispatchers.IO { disableAutoSync() }
                 }
 
                 trackPhotoSyncEvent(if (activateSyncSwitch.isChecked) "enabled" else "disabled")
-            }.onFailure {
-                it.printStackTrace()
+            }.onFailure { exception ->
                 showSnackbar(R.string.anErrorHasOccurred)
-                Sentry.captureException(it) { scope ->
+                Sentry.withScope { scope ->
                     scope.setTag("syncIntervalType", syncSettingsViewModel.syncIntervalType.value?.title.toString())
                     scope.setTag("createMonthFolder", createDatedSubFoldersSwitch.isChecked.toString())
                     scope.setTag("deletePhoto", deletePicturesAfterSyncSwitch.isChecked.toString())
+                    SentryLog.e("SyncSettings", "An error has occurred when save settings", exception)
                 }
             }
 
-            Dispatchers.Main {
-                saveButton.hideProgressCatching(R.string.buttonSave)
-                finish()
-            }
+            saveButton.hideProgressCatching(R.string.buttonSave)
+            if (result.isSuccess) finish()
         }
     }
 
