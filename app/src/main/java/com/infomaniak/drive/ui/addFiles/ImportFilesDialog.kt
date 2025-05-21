@@ -65,8 +65,10 @@ class ImportFilesDialog : DialogFragment() {
 
         return MaterialAlertDialogBuilder(requireContext(), R.style.DialogStyle)
             .setView(dialogBinding.root)
-            .create().also {
-                lifecycleScope.launch { importFiles() }
+            .create().also { dialog ->
+                dialog.setOnShowListener {
+                    lifecycleScope.launch { importFiles() }
+                }
             }
     }
 
@@ -94,12 +96,12 @@ class ImportFilesDialog : DialogFragment() {
             runCatching {
                 initUpload(uri)
             }.onFailure { exception ->
-                exception.printStackTrace()
+                if (exception is CancellationException) throw exception
 
                 if (exception is NotEnoughRamException) {
                     isMemoryError = true
                 } else {
-                    Sentry.captureException(exception)
+                    SentryLog.e(TAG, "An error has occurred during importFiles", exception)
                 }
             }
         }
@@ -111,6 +113,7 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
+        ensureActive()
         fun captureWithSentry(cursorState: String) {
             // We have cases where importation has failed,
             // but we've added enough information to know the cause.
@@ -123,6 +126,7 @@ class ImportFilesDialog : DialogFragment() {
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (isLowMemory()) throw NotEnoughRamException()
 
+            ensureActive()
             if (cursor.moveToFirst()) {
                 processCursorData(cursor, uri)
             } else {
