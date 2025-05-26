@@ -70,7 +70,6 @@ import java.io.InputStream
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.minusAssign
-import kotlin.concurrent.atomics.plusAssign
 import kotlin.reflect.KSuspendFunction1
 import kotlin.time.Duration.Companion.seconds
 
@@ -292,7 +291,6 @@ class UploadTask(
                 onUpload { bytesSentTotal, contentLength ->
                     val bytesJustSent = bytesSentTotal - oldBytesSentTotal
                     oldBytesSentTotal = bytesSentTotal
-                    uploadedBytes += bytesJustSent
                     val currentTotalBytes = uploadedBytes.addAndFetch(bytesJustSent)
                     if (currentTotalBytes > uploadFile.fileSize) {
                         uploadFile.resetUploadTokenAndCancelSession()
