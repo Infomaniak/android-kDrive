@@ -1,0 +1,1 @@
+- Corrige l'animation de chargement infini lors de l'enregistrement des paramètres de synchronisation et de l'importation de fichiers

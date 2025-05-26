@@ -1,0 +1,1 @@
+- Avoid infinite loading animation when saving synchronisation settings and importing files
