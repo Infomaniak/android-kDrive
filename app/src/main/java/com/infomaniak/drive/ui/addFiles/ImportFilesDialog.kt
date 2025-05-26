@@ -144,25 +144,31 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun processCursorData(cursor: Cursor, uri: Uri) = coroutineScope {
-        SentryLog.i(TAG, "processCursorData: uri=$uri")
-        val fileName = cursor.getFileName(uri)
-        val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
+        var outputFile: IOFile? = null
+        runCatching {
+            SentryLog.i(TAG, "processCursorData: uri=$uri")
+            val fileName = cursor.getFileName(uri)
+            val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
 
-        val outputFile = getOutputFile(uri, fileModifiedAt)
-        ensureActive()
-        UploadFile(
-            uri = outputFile.toUri().toString(),
-            driveId = navArgs.driveId,
-            fileCreatedAt = fileCreatedAt,
-            fileModifiedAt = fileModifiedAt,
-            fileName = fileName,
-            fileSize = outputFile.length(),
-            remoteFolder = navArgs.folderId,
-            type = UploadFile.Type.UPLOAD.name,
-            userId = AccountUtils.currentUserId,
-        ).store()
-        successCount++
-        currentImportFile = null
+            outputFile = getOutputFile(uri, fileModifiedAt)
+            ensureActive()
+            UploadFile(
+                uri = outputFile.toUri().toString(),
+                driveId = navArgs.driveId,
+                fileCreatedAt = fileCreatedAt,
+                fileModifiedAt = fileModifiedAt,
+                fileName = fileName,
+                fileSize = outputFile.length(),
+                remoteFolder = navArgs.folderId,
+                type = UploadFile.Type.UPLOAD.name,
+                userId = AccountUtils.currentUserId,
+            ).store()
+            successCount++
+            currentImportFile = null
+        }.onFailure { exception ->
+            if (outputFile?.exists() == true) outputFile.delete()
+            throw exception
+        }
     }
 
     private fun isLowMemory(): Boolean {
