@@ -244,7 +244,7 @@ class UploadTask(
         val chunkIndex = chunkNumber - 1
         val chunkSize = chunkConfig.fileChunkSize
         val totalChunks = chunkConfig.totalChunks
-        val isLastChunk =  chunkNumber == totalChunks
+        val isLastChunk = chunkNumber == totalChunks
         val currentChunkSize = when {
             isLastChunk -> (uploadFile.fileSize % chunkSize).let { if (it == 0L) chunkSize else it }
             else -> chunkSize
