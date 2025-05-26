@@ -55,6 +55,7 @@ import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.utils.io.*
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -280,7 +281,12 @@ class UploadTask(
     ) {
         var oldBytesSentTotal = 0L
         try {
-            val response = httpClient.post(url) {
+            // We are using `preparePost` + `execute` instead of just `post` because `post` tries to save the call,
+            // and it is triggering an internal error because of a mismatch between the response contentLength,
+            // and the size of the ByteArray of the body.
+            // With `preparePost`, `execute`, and `bodyAsChannel()`, we are not getting the issue,
+            // and the size seem to match, so it might be a ktor or OkHttp internal issue worth reporting.
+            httpClient.preparePost(url) {
                 headers {
                     HttpUtils.getHeaders(contentType = null).forEach { (name, value) ->
                         append(name, value)
@@ -302,8 +308,9 @@ class UploadTask(
                     }
                     uploadedBytesUpdates.tryEmit(Unit)
                 }
+            }.execute { response ->
+                manageApiResponse(response)
             }
-            manageApiResponse(response)
         } catch (t: Throwable) {
             uploadedBytes -= oldBytesSentTotal
             uploadedBytesUpdates.tryEmit(Unit)
@@ -322,7 +329,14 @@ class UploadTask(
         val isSuccessful = response.status.isSuccess()
         SentryLog.i("UploadTask", "response successful $isSuccessful")
         if (!isSuccessful) {
-            val bodyResponse = response.bodyAsText()
+            val bytes = response.bodyAsChannel().toByteArray().also { bytes ->
+                val expectedContentLength = response.contentLength() ?: bytes.size
+                if (expectedContentLength != bytes.size) SentryLog.e(
+                    tag = "UploadTask",
+                    msg = "Backend provided contentLength was $expectedContentLength bytes, but received ${bytes.size}"
+                )
+            }
+            val bodyResponse = String(bytes)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
                 gson.fromJson(bodyResponse, ApiResponse::class.java)
