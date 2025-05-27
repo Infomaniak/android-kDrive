@@ -62,6 +62,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
                 this.shareLink?.let { shareLink -> onSettingsClicked?.invoke(shareLink) }
             }
             binding.shareLinkButton.setOnClickListener {
+                // if `shareLink` isn't null it means that it's public share. Otherwise we create a private link.
                 this.shareLink?.url?.let(context::shareText) ?: run {
                     context.shareText("${BuildConfig.SHARE_URL_V1}drive/${file.driveId}/redirect/${file.id}")
                 }
