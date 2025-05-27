@@ -110,7 +110,10 @@ class ImportFilesDialog : DialogFragment() {
                         isLowDeviceStorage = true
                         stopProcessing = true
                     }
-                    exception is NotEnoughRamException -> isMemoryError = true
+                    exception is NotEnoughRamException -> {
+                        isMemoryError = true
+                        stopProcessing = true
+                    }
                     else -> SentryLog.e(TAG, "An error has occurred during importFiles", exception)
                 }
             }
