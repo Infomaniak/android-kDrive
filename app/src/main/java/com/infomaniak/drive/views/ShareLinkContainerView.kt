@@ -24,6 +24,7 @@ import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.core.utils.format
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -60,7 +61,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
             binding.shareLinkSettings.setOnClickListener {
                 this.shareLink?.let { shareLink -> onSettingsClicked?.invoke(shareLink) }
             }
-            binding.shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
+            binding.shareLinkButton.setOnClickListener {
+                this.shareLink?.url?.let(context::shareText) ?: run {
+                    context.shareText("${BuildConfig.SHARE_URL_V1}drive/${file.driveId}/redirect/${file.id}")
+                }
+            }
         }
     }
 
@@ -108,6 +113,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
             iconId = R.drawable.ic_folder_dropbox,
             title = context.getString(R.string.dropboxSharedLinkTitle),
             containerVisibility = false,
+            settingsVisibility = false,
             status = context.getString(R.string.dropboxSharedLinkDescription),
         )
     }
@@ -116,7 +122,8 @@ class ShareLinkContainerView @JvmOverloads constructor(
         setUi(
             iconId = R.drawable.ic_lock,
             title = context.getString(R.string.restrictedSharedLinkTitle),
-            containerVisibility = false,
+            containerVisibility = true,
+            settingsVisibility = false,
             status = context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context)),
         )
     }
@@ -126,14 +133,16 @@ class ShareLinkContainerView @JvmOverloads constructor(
             iconId = R.drawable.ic_unlock,
             title = context.getString(R.string.publicSharedLinkTitle),
             containerVisibility = true,
+            settingsVisibility = true,
             status = getShareLinkPublicRightDescription(),
         )
     }
 
-    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, status: String) = with(binding) {
+    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, settingsVisibility: Boolean, status: String) = with(binding) {
         shareLinkIcon.setImageResource(iconId)
         shareLinkTitle.text = title
         shareLinkBottomContainer.isVisible = containerVisibility
+        shareLinkSettings.isVisible = settingsVisibility
         shareLinkStatus.text = status
     }
 
