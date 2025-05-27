@@ -45,6 +45,8 @@ import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
 import kotlinx.coroutines.*
+import splitties.init.appCtx
+import java.io.IOException
 import java.util.Date
 
 class ImportFilesDialog : DialogFragment() {
@@ -58,6 +60,7 @@ class ImportFilesDialog : DialogFragment() {
     private var successCount = 0
 
     private var isMemoryError: Boolean = false
+    private var isLowDeviceStorage: Boolean = false
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val countMessage = requireContext().resources.getQuantityString(R.plurals.preparingToUpload, importCount, importCount)
@@ -77,10 +80,12 @@ class ImportFilesDialog : DialogFragment() {
         val errorCount = importCount - successCount
 
         if (errorCount > 0) {
-            val errorMessage = if (isMemoryError) {
-                getString(R.string.uploadOutOfMemoryError)
-            } else {
-                resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
+            val errorMessage = when {
+                isLowDeviceStorage -> getString(R.string.errorDeviceStorage)
+                isMemoryError -> getString(R.string.uploadOutOfMemoryError)
+                else -> {
+                    resources.getQuantityString(R.plurals.snackBarUploadError, errorCount, errorCount)
+                }
             }
 
             showSnackbar(errorMessage, showAboveFab = true)
@@ -92,24 +97,30 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun importFiles() {
-        navArgs.uris.forEach { uri ->
+        val iterator = navArgs.uris.iterator()
+        var stopProcessing = false
+
+        while (iterator.hasNext() && !stopProcessing) {
             runCatching {
-                initUpload(uri)
+                initUpload(iterator.next())
             }.onFailure { exception ->
                 if (exception is CancellationException) throw exception
-
-                if (exception is NotEnoughRamException) {
-                    isMemoryError = true
-                } else {
-                    SentryLog.e(TAG, "An error has occurred during importFiles", exception)
+                when {
+                    exception is IOException && exception.message?.contains("ENOSPC|No space left".toRegex()) == true -> {
+                        isLowDeviceStorage = true
+                        stopProcessing = true
+                    }
+                    exception is NotEnoughRamException -> {
+                        isMemoryError = true
+                        stopProcessing = true
+                    }
+                    else -> SentryLog.e(TAG, "An error has occurred during importFiles", exception)
                 }
             }
         }
 
-        lifecycle.withResumed {
-            if (successCount > 0) requireContext().syncImmediately()
-            dismiss()
-        }
+        if (successCount > 0) appCtx.syncImmediately()
+        dismiss()
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
@@ -136,25 +147,31 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun processCursorData(cursor: Cursor, uri: Uri) = coroutineScope {
-        SentryLog.i(TAG, "processCursorData: uri=$uri")
-        val fileName = cursor.getFileName(uri)
-        val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
+        var outputFile: IOFile? = null
+        runCatching {
+            SentryLog.i(TAG, "processCursorData: uri=$uri")
+            val fileName = cursor.getFileName(uri)
+            val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
 
-        val outputFile = getOutputFile(uri, fileModifiedAt)
-        ensureActive()
-        UploadFile(
-            uri = outputFile.toUri().toString(),
-            driveId = navArgs.driveId,
-            fileCreatedAt = fileCreatedAt,
-            fileModifiedAt = fileModifiedAt,
-            fileName = fileName,
-            fileSize = outputFile.length(),
-            remoteFolder = navArgs.folderId,
-            type = UploadFile.Type.UPLOAD.name,
-            userId = AccountUtils.currentUserId,
-        ).store()
-        successCount++
-        currentImportFile = null
+            outputFile = getOutputFile(uri, fileModifiedAt)
+            ensureActive()
+            UploadFile(
+                uri = outputFile.toUri().toString(),
+                driveId = navArgs.driveId,
+                fileCreatedAt = fileCreatedAt,
+                fileModifiedAt = fileModifiedAt,
+                fileName = fileName,
+                fileSize = outputFile.length(),
+                remoteFolder = navArgs.folderId,
+                type = UploadFile.Type.UPLOAD.name,
+                userId = AccountUtils.currentUserId,
+            ).store()
+            successCount++
+            currentImportFile = null
+        }.onFailure { exception ->
+            if (outputFile?.exists() == true) outputFile.delete()
+            throw exception
+        }
     }
 
     private fun isLowMemory(): Boolean {

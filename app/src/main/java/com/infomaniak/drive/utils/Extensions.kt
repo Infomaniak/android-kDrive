@@ -111,7 +111,7 @@ typealias IOFile = java.io.File
 typealias IsComplete = Boolean
 typealias Position = Int
 
-fun getAvailableStorageInBytes(): Long = with(StatFs(Environment.getDataDirectory().path)) {
+fun getAvailableStorageInBytes(path: String = Environment.getDataDirectory().path): Long = with(StatFs(path)) {
     return@with availableBlocksLong * blockSizeLong
 }
 
