@@ -24,6 +24,7 @@ rootProject.name = "kDrive"
 include ':app',
         ':Core:Compose:MaterialThemeFromXml',
         ':Core:FragmentNavigation',
+        ':Core:Ktor',
         ':Core:Legacy',
         ':Core:Legacy:AppLock',
         ':Core:Legacy:Stores',
