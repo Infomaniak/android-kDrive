@@ -22,6 +22,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -112,7 +113,6 @@ class ShareLinkContainerView @JvmOverloads constructor(
             iconId = R.drawable.ic_folder_dropbox,
             title = context.getString(R.string.dropboxSharedLinkTitle),
             containerVisibility = false,
-            settingsVisibility = false,
             status = context.getString(R.string.dropboxSharedLinkDescription),
         )
     }
@@ -121,10 +121,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
         setUi(
             iconId = R.drawable.ic_lock,
             title = context.getString(R.string.restrictedSharedLinkTitle),
-            containerVisibility = true,
-            settingsVisibility = false,
+            containerVisibility = false,
             status = context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context)),
         )
+        binding.shareLinkSettings.isInvisible = true
+        binding.shareLinkButton.isVisible = true
     }
 
     private fun setPublicUi() {
@@ -132,17 +133,15 @@ class ShareLinkContainerView @JvmOverloads constructor(
             iconId = R.drawable.ic_unlock,
             title = context.getString(R.string.publicSharedLinkTitle),
             containerVisibility = true,
-            settingsVisibility = true,
             status = getShareLinkPublicRightDescription(),
         )
     }
 
-    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, settingsVisibility: Boolean, status: String) {
+    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, status: String) {
         with(binding) {
             shareLinkIcon.setImageResource(iconId)
             shareLinkTitle.text = title
             shareLinkBottomContainer.isVisible = containerVisibility
-            shareLinkSettings.isVisible = settingsVisibility
             shareLinkStatus.text = status
         }
     }
