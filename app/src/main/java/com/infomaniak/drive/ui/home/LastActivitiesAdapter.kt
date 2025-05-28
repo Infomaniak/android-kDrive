@@ -49,7 +49,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 
     override fun getItemCount(): Int = super.getItemCount() + 1
 
-    override fun getItemViewType(position: Int): Int = if (position == 0) VIEW_TYPE_SUBTITLE else super.getItemViewType(position)
+    override fun getItemViewType(position: Int): Int = if (position == 0) VIEW_TYPE_SUBTITLE else super.getItemViewType(position-1)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LastActivitiesViewHolder {
         return when (viewType) {
@@ -74,7 +74,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             dateValue.resetLoader()
         } else {
             root.stopLoading()
-            val fileActivity = itemList[position]
+            val fileActivity = itemList[position-1]
             fileActivity.user?.let { user -> createActivity(fileActivity, user) }
         }
     }
