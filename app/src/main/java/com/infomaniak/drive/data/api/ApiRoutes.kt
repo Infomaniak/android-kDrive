@@ -292,6 +292,8 @@ object ApiRoutes {
     /** Share link */
     //region Share link
     fun shareLink(file: File) = "${fileURLV2(file)}/link"
+
+    fun restrictedShareLink(file: File) = "${SHARE_URL_V1}drive/${file.driveId}/redirect/${file.id}"
     //endregion
 
     /** Public Share */
