@@ -24,9 +24,9 @@ import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.core.utils.format
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes.restrictedShareLink
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.ViewShareLinkContainerBinding
@@ -63,9 +63,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
             }
             binding.shareLinkButton.setOnClickListener {
                 // if `shareLink` isn't null it means that it's public share. Otherwise we create a private link.
-                this.shareLink?.url?.let(context::shareText) ?: run {
-                    context.shareText("${BuildConfig.SHARE_URL_V1}drive/${file.driveId}/redirect/${file.id}")
-                }
+                context.shareText(text = this.shareLink?.url ?: restrictedShareLink(file))
             }
         }
     }
@@ -139,12 +137,14 @@ class ShareLinkContainerView @JvmOverloads constructor(
         )
     }
 
-    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, settingsVisibility: Boolean, status: String) = with(binding) {
-        shareLinkIcon.setImageResource(iconId)
-        shareLinkTitle.text = title
-        shareLinkBottomContainer.isVisible = containerVisibility
-        shareLinkSettings.isVisible = settingsVisibility
-        shareLinkStatus.text = status
+    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, settingsVisibility: Boolean, status: String) {
+        with(binding) {
+            shareLinkIcon.setImageResource(iconId)
+            shareLinkTitle.text = title
+            shareLinkBottomContainer.isVisible = containerVisibility
+            shareLinkSettings.isVisible = settingsVisibility
+            shareLinkStatus.text = status
+        }
     }
 
     private fun getShareLinkPublicRightDescription(): String {
