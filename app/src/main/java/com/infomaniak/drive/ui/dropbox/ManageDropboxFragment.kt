@@ -86,7 +86,6 @@ open class ManageDropboxFragment : Fragment() {
             shareLinkIcon.isGone = true
             shareLinkStatus.isGone = true
             shareLinkSwitch.isGone = true
-            shareLinkSettings.isGone = true
         }
 
         disableButton.isEnabled = false
