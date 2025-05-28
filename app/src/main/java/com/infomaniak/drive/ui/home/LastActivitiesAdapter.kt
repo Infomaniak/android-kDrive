@@ -49,7 +49,9 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 
     override fun getItemCount(): Int = super.getItemCount() + 1
 
-    override fun getItemViewType(position: Int): Int = if (position == 0) VIEW_TYPE_SUBTITLE else super.getItemViewType(position-1)
+    override fun getItemViewType(position: Int): Int {
+        return if (position == 0) VIEW_TYPE_SUBTITLE else super.getItemViewType(position = getItemPositionInActivities(position))
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LastActivitiesViewHolder {
         return when (viewType) {
@@ -74,7 +76,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             dateValue.resetLoader()
         } else {
             root.stopLoading()
-            val fileActivity = itemList[position-1]
+            val fileActivity = itemList[getItemPositionInActivities(position)]
             fileActivity.user?.let { user -> createActivity(fileActivity, user) }
         }
     }
@@ -195,6 +197,8 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
     }
 
     private fun getFileTypeIcon(file: File?) = file?.getFileType()?.icon ?: R.drawable.ic_file
+
+    private fun getItemPositionInActivities(position: Int): Int = position - 1
 
     open class LastActivitiesViewHolder(open val binding: ViewBinding) : ViewHolder(binding.root)
     class SubtitleViewHolder(override val binding: ItemLastActivitiesSubtitleBinding) : LastActivitiesViewHolder(binding)
