@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.api
 
 import kotlin.math.ceil
-import kotlin.math.floor
 import kotlin.math.min
 
 class FileChunkSizeManager(
@@ -40,8 +39,7 @@ class FileChunkSizeManager(
      * @throws AllowedFileSizeExceededException If the file is large enough to chunk with the current config.
      */
     fun computeChunkConfig(fileSize: Long, defaultFileChunkSize: Long? = null): ChunkConfig {
-        val halfAvailableMemory = getHalfHeapMemory()
-        val fileChunkSize = defaultFileChunkSize ?: computeChunkSize(fileSize, halfAvailableMemory)
+        val fileChunkSize = defaultFileChunkSize ?: computeChunkSize(fileSize)
         val totalChunks = computeFileChunks(fileSize, fileChunkSize)
 
         require(totalChunks <= maxChunkCount)
@@ -49,7 +47,7 @@ class FileChunkSizeManager(
         return ChunkConfig(
             fileChunkSize = fileChunkSize,
             totalChunks = totalChunks,
-            parallelChunks = computeParallelChunks(totalChunks, fileChunkSize, halfAvailableMemory.toDouble())
+            parallelChunks = computeParallelChunks(totalChunks)
         )
     }
 
@@ -62,7 +60,7 @@ class FileChunkSizeManager(
      *
      * @throws AllowedFileSizeExceededException
      */
-    private fun computeChunkSize(fileSize: Long, halfAvailableMemory: Long): Long {
+    private fun computeChunkSize(fileSize: Long): Long {
         var fileChunkSize = ceil(fileSize.toDouble() / optimalTotalChunks).toLong()
 
         if (fileChunkSize > chunkMaxSize) {
@@ -71,18 +69,14 @@ class FileChunkSizeManager(
 
         if (fileChunkSize > chunkMaxSize) throw AllowedFileSizeExceededException()
 
-        return adjustChunkSizeByAvailableMemory(fileChunkSize.coerceAtLeast(chunkMinSize), halfAvailableMemory)
+        return fileChunkSize.coerceAtLeast(chunkMinSize)
     }
 
     private fun computeFileChunks(fileSize: Long, fileChunkSize: Long): Int = ceil(fileSize.toDouble() / fileChunkSize).toInt()
 
-    private fun computeParallelChunks(totalChunks: Int, fileChunkSize: Long, halfAvailableMemory: Double): Int {
+    private fun computeParallelChunks(totalChunks: Int): Int {
         if (totalChunks == 1) return 1
-        return floor(halfAvailableMemory / fileChunkSize).toInt().coerceIn(1, min(totalChunks, maxParallelChunks))
-    }
-
-    private fun adjustChunkSizeByAvailableMemory(fileChunkSize: Long, halfAvailableMemory: Long): Long {
-        return fileChunkSize.coerceAtMost(halfAvailableMemory)
+        return min(totalChunks, maxParallelChunks)
     }
 
     data class ChunkConfig(
@@ -99,8 +93,6 @@ class FileChunkSizeManager(
         private const val OPTIMAL_TOTAL_CHUNKS = 200
         private const val MAX_CHUNK_COUNT = 10_000
         private const val MAX_PARALLEL_CHUNKS = 4
-
-        fun getHalfHeapMemory(): Long = Runtime.getRuntime().maxMemory() / 2
     }
 
 }

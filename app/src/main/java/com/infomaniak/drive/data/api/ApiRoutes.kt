@@ -24,7 +24,7 @@ import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.lib.core.BuildConfig
 import java.net.URLEncoder
-import java.util.Date
+import java.util.*
 
 object ApiRoutes {
 
@@ -383,7 +383,7 @@ object ApiRoutes {
 
     private fun uploadFileUrl(driveId: Int) = "${driveURL(driveId)}/upload"
 
-    fun uploadChunkUrl(uploadHost: String, driveId: Int, uploadToken: String?, chunkNumber: Int, currentChunkSize: Int): String {
+    fun uploadChunkUrl(uploadHost: String, driveId: Int, uploadToken: String?, chunkNumber: Int, currentChunkSize: Long): String {
         val chunkParam = "?chunk_number=$chunkNumber&chunk_size=$currentChunkSize"
         return addChunkToSession(uploadHost, driveId, uploadToken!!) + chunkParam
     }
