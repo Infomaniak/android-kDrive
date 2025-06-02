@@ -17,80 +17,43 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.google.gson.annotations.SerializedName
+import com.infomaniak.core.utils.ApiEnum
 
-enum class FileActivityType {
-    @SerializedName("file_access")
-    FILE_ACCESS,
-    @SerializedName("file_create")
-    FILE_CREATE,
-    @SerializedName("file_rename")
-    FILE_RENAME,
-    @SerializedName("file_rename_alias")
-    FILE_RENAME_ALIAS,
-    @SerializedName("file_move")
-    FILE_MOVE_IN,
-    @SerializedName("file_move_out")
-    FILE_MOVE_OUT,
-    @SerializedName("file_trash")
-    FILE_TRASH,
-    @SerializedName("file_restore")
-    FILE_RESTORE,
-    @SerializedName("file_delete")
-    FILE_DELETE,
-    @SerializedName("file_update")
-    FILE_UPDATE,
-    @SerializedName("file_favorite_create")
-    FILE_FAVORITE_CREATE,
-    @SerializedName("file_favorite_remove")
-    FILE_FAVORITE_REMOVE,
-    @SerializedName("file_share_create")
-    FILE_SHARE_CREATE,
-    @SerializedName("file_share_update")
-    FILE_SHARE_UPDATE,
-    @SerializedName("file_share_delete")
-    FILE_SHARE_DELETE,
-    @SerializedName("file_categorize")
-    FILE_CATEGORIZE,
-    @SerializedName("file_uncategorize")
-    FILE_UNCATEGORIZE,
-    @SerializedName("file_color_update")
-    FILE_COLOR_UPDATE,
-    @SerializedName("file_color_delete")
-    FILE_COLOR_DELETE,
-    @SerializedName("share_link_create")
-    SHARE_LINK_CREATE,
-    @SerializedName("share_link_update")
-    SHARE_LINK_UPDATE,
-    @SerializedName("share_link_delete")
-    SHARE_LINK_DELETE,
-    @SerializedName("share_link_show")
-    SHARE_LINK_SHOW,
-    @SerializedName("comment_create")
-    COMMENT_CREATE,
-    @SerializedName("comment_update")
-    COMMENT_UPDATE,
-    @SerializedName("comment_delete")
-    COMMENT_DELETE,
-    @SerializedName("comment_like")
-    COMMENT_LIKE,
-    @SerializedName("comment_unlike")
-    COMMENT_UNLIKE,
-    @SerializedName("comment_resolve")
-    COMMENT_RESOLVE,
-    @SerializedName("collaborative_folder_access")
-    COLLABORATIVE_FOLDER_ACCESS,
-    @SerializedName("collaborative_folder_create")
-    COLLABORATIVE_FOLDER_CREATE,
-    @SerializedName("collaborative_folder_update")
-    COLLABORATIVE_FOLDER_UPDATE,
-    @SerializedName("collaborative_folder_delete")
-    COLLABORATIVE_FOLDER_DELETE,
-    @SerializedName("collaborative_user_access")
-    COLLABORATIVE_USER_ACCESS,
-    @SerializedName("collaborative_user_create")
-    COLLABORATIVE_USER_CREATE,
-    @SerializedName("collaborative_user_delete")
-    COLLABORATIVE_USER_DELETE,
-    UNKNOWN,
+enum class FileActivityType(override val apiValue: String) : ApiEnum {
+    FILE_ACCESS(apiValue = "file_access"),
+    FILE_CREATE(apiValue = "file_create"),
+    FILE_RENAME(apiValue = "file_rename"),
+    FILE_RENAME_ALIAS(apiValue = "file_rename_alias"),
+    FILE_MOVE_IN(apiValue = "file_move"),
+    FILE_MOVE_OUT(apiValue = "file_move_out"),
+    FILE_TRASH(apiValue = "file_trash"),
+    FILE_RESTORE(apiValue = "file_restore"),
+    FILE_DELETE(apiValue = "file_delete"),
+    FILE_UPDATE(apiValue = "file_update"),
+    FILE_FAVORITE_CREATE(apiValue = "file_favorite_create"),
+    FILE_FAVORITE_REMOVE(apiValue = "file_favorite_remove"),
+    FILE_SHARE_CREATE(apiValue = "file_share_create"),
+    FILE_SHARE_UPDATE(apiValue = "file_share_update"),
+    FILE_SHARE_DELETE(apiValue = "file_share_delete"),
+    FILE_CATEGORIZE(apiValue = "file_categorize"),
+    FILE_UNCATEGORIZE(apiValue = "file_uncategorize"),
+    FILE_COLOR_UPDATE(apiValue = "file_color_update"),
+    FILE_COLOR_DELETE(apiValue = "file_color_delete"),
+    SHARE_LINK_CREATE(apiValue = "share_link_create"),
+    SHARE_LINK_UPDATE(apiValue = "share_link_update"),
+    SHARE_LINK_DELETE(apiValue = "share_link_delete"),
+    SHARE_LINK_SHOW(apiValue = "share_link_show"),
+    COMMENT_CREATE(apiValue = "comment_create"),
+    COMMENT_UPDATE(apiValue = "comment_update"),
+    COMMENT_DELETE(apiValue = "comment_delete"),
+    COMMENT_LIKE(apiValue = "comment_like"),
+    COMMENT_UNLIKE(apiValue = "comment_unlike"),
+    COMMENT_RESOLVE(apiValue = "comment_resolve"),
+    COLLABORATIVE_FOLDER_ACCESS(apiValue = "collaborative_folder_access"),
+    COLLABORATIVE_FOLDER_CREATE(apiValue = "collaborative_folder_create"),
+    COLLABORATIVE_FOLDER_UPDATE(apiValue = "collaborative_folder_update"),
+    COLLABORATIVE_FOLDER_DELETE(apiValue = "collaborative_folder_delete"),
+    COLLABORATIVE_USER_ACCESS(apiValue = "collaborative_user_access"),
+    COLLABORATIVE_USER_CREATE(apiValue = "collaborative_user_create"),
+    COLLABORATIVE_USER_DELETE(apiValue = "collaborative_user_delete"),
 }

@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.utils.enumValueOfOrNull
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -32,5 +31,9 @@ data class FileAction(
     val parentId: Int,
     val path: String,
 ) : Parcelable {
-    val actionType get() = enumValueOfOrNull<FileActivityType>(actionString.uppercase()) ?: FileActivityType.UNKNOWN
+    val actionType get() = getAction(actionString)
+}
+
+private fun getAction(actionString: String): FileActivityType? {
+    return FileActivityType.entries.find { it.apiValue == actionString }
 }

@@ -411,7 +411,7 @@ object FolderFilesProvider {
                 }
             }
             else -> {
-                if (actionType == FileActivityType.UNKNOWN) {
+                if (actionType == null) {
                     SentryLog.e(TAG, "The action with value '$actionString' is unknown")
                 }
                 // The file has not yet been managed and is not the parent folder.
