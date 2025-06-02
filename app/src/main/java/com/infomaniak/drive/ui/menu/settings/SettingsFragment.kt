@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -31,6 +32,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
@@ -46,6 +48,9 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.getDashboardData
 import com.infomaniak.lib.applock.LockActivity
+import com.infomaniak.lib.bugtracker.BugTrackerActivity
+import com.infomaniak.lib.bugtracker.BugTrackerActivityArgs
+import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -61,9 +66,7 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         val drivePermissions = DrivePermissions().apply {
             registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
@@ -78,15 +81,9 @@ class SettingsFragment : Fragment() {
 
         setupMyKSuiteLayout()
 
-        syncPicture.setOnClickListener {
-            safelyNavigate(R.id.syncSettingsActivity)
-        }
-        themeSettings.setOnClickListener {
-            openThemeSettings()
-        }
-        notifications.setOnClickListener {
-            requireContext().openAppNotificationSettings()
-        }
+        syncPicture.setOnClickListener { safelyNavigate(R.id.syncSettingsActivity) }
+        themeSettings.setOnClickListener { openThemeSettings() }
+        notifications.setOnClickListener { requireContext().openAppNotificationSettings() }
         appSecurity.apply {
             if (LockActivity.hasBiometrics()) {
                 appSecuritySeparator.isVisible = true
@@ -100,9 +97,8 @@ class SettingsFragment : Fragment() {
                 isGone = true
             }
         }
-        about.setOnClickListener {
-            safelyNavigate(R.id.aboutSettingsFragment)
-        }
+        about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
+        feedback.setOnClickListener { navigateToBugReport() }
         binding.root.enableEdgeToEdge()
     }
 
@@ -138,12 +134,12 @@ class SettingsFragment : Fragment() {
         val items = arrayOf(
             getString(R.string.themeSettingsLightLabel),
             getString(R.string.themeSettingsDarkLabel),
-            getString(R.string.themeSettingsSystemDefaultLabel)
+            getString(R.string.themeSettingsSystemDefaultLabel),
         )
         val nightMode = arrayMapOf(
             Pair(0, AppCompatDelegate.MODE_NIGHT_NO),
             Pair(1, AppCompatDelegate.MODE_NIGHT_YES),
-            Pair(2, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            Pair(2, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM),
         )
         var defaultNightMode = AppCompatDelegate.getDefaultNightMode()
         val startSelectItemPosition = nightMode.filter { it.value == defaultNightMode }.keys.first()
@@ -176,6 +172,26 @@ class SettingsFragment : Fragment() {
             else -> R.string.themeSettingsSystemLabel
         }
         binding.themeSettingsValue.setText(themeTextValue)
+    }
+
+    private fun navigateToBugReport() {
+        if (AccountUtils.currentUser?.isStaff == true) {
+            Intent(requireContext(), BugTrackerActivity::class.java).apply {
+                putExtras(
+                    BugTrackerActivityArgs(
+                        user = AccountUtils.currentUser!!,
+                        appBuildNumber = BuildConfig.VERSION_NAME,
+                        bucketIdentifier = BuildConfig.BUGTRACKER_DRIVE_BUCKET_ID,
+                        projectName = BuildConfig.BUGTRACKER_DRIVE_PROJECT_NAME,
+                        repoGitHub = BuildConfig.GITHUB_REPO,
+                    ).toBundle(),
+                )
+            }.also(::startActivity)
+        } else {
+            // TODO: Est-ce qu'on veut rajouter le userReport ici, ou pas ? Si non, bien penser à cacher la UI quand on n'est pas staff.
+            trackSettingsEvent("feedback")
+            context?.openUrl(requireContext().getString(R.string.urlUserReportAndroid))
+        }
     }
 
     private fun trackSettingsEvent(name: String, value: Boolean? = null) {

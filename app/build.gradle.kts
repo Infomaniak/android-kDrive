@@ -50,6 +50,10 @@ android {
         buildConfigField("String", "SHOP_URL", "\"https://shop.infomaniak.com/order/\"")
         buildConfigField("String", "SUPPORT_URL", "\"https://support.infomaniak.com/\"")
 
+        buildConfigField ("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app-mobile-drive\"")
+        buildConfigField ("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
+        buildConfigField ("String", "GITHUB_REPO", "\"android-kdrive\"")
+
         resValue("string", "CLOUD_STORAGE_AUTHORITY", "com.infomaniak.drive.documents")
         resValue("string", "FILE_AUTHORITY", "com.infomaniak.drive.files")
 
@@ -151,6 +155,7 @@ dependencies {
     implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))
     implementation(project(":Core:Legacy:AppLock"))
+    implementation(project(":Core:Legacy:BugTracker"))
     implementation(project(":Core:Legacy:Stores"))
     implementation(project(":Core:MyKSuite"))
     implementation(project(":Core:Network"))
