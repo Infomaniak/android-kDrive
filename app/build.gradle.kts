@@ -50,7 +50,7 @@ android {
         buildConfigField("String", "SHOP_URL", "\"https://shop.infomaniak.com/order/\"")
         buildConfigField("String", "SUPPORT_URL", "\"https://support.infomaniak.com/\"")
 
-        buildConfigField ("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app-mobile-drive\"")
+        buildConfigField ("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
         buildConfigField ("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
         buildConfigField ("String", "GITHUB_REPO", "\"android-kdrive\"")
 

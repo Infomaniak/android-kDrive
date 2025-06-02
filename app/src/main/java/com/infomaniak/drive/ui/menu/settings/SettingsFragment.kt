@@ -98,7 +98,7 @@ class SettingsFragment : Fragment() {
             }
         }
         about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
-        feedback.setOnClickListener { navigateToBugReport() }
+        feedback.setOnClickListener { navigateToFeedback() }
         binding.root.enableEdgeToEdge()
     }
 
@@ -174,7 +174,7 @@ class SettingsFragment : Fragment() {
         binding.themeSettingsValue.setText(themeTextValue)
     }
 
-    private fun navigateToBugReport() {
+    private fun navigateToFeedback() {
         if (AccountUtils.currentUser?.isStaff == true) {
             Intent(requireContext(), BugTrackerActivity::class.java).apply {
                 putExtras(
@@ -188,7 +188,6 @@ class SettingsFragment : Fragment() {
                 )
             }.also(::startActivity)
         } else {
-            // TODO: Est-ce qu'on veut rajouter le userReport ici, ou pas ? Si non, bien penser à cacher la UI quand on n'est pas staff.
             trackSettingsEvent("feedback")
             context?.openUrl(requireContext().getString(R.string.urlUserReportAndroid))
         }
