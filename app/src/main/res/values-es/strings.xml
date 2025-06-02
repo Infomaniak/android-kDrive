@@ -130,6 +130,7 @@
     <string name="buttonEdit">Editar</string>
     <string name="buttonEmpty">Vaciar</string>
     <string name="buttonEmptyTrash">Vaciar la papelera</string>
+    <string name="buttonFeedback">Comentarios</string>
     <string name="buttonFileRights">Uso compartido y derechos</string>
     <string name="buttonGoToSettings">Ir a los ajustes</string>
     <string name="buttonLeaveShare">Dejar de compartir</string>
