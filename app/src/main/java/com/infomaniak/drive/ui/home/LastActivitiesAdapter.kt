@@ -198,6 +198,7 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 
     private fun getFileTypeIcon(file: File?) = file?.getFileType()?.icon ?: R.drawable.ic_file
 
+    // We need to correct activity index into itemList because the subtitle position is 0
     private fun getItemPositionInActivities(position: Int): Int = position - 1
 
     open class LastActivitiesViewHolder(open val binding: ViewBinding) : ViewHolder(binding.root)
