@@ -34,9 +34,6 @@ data class FileAction(
     val actionType get() = getAction(actionString)
 }
 
-
-private fun getAction(actionString: String) : FileActivityType? {
-    return FileActivityType.entries.find(predicate = {
-        it.apiValue == actionString
-    })
+private fun getAction(actionString: String): FileActivityType? {
+    return FileActivityType.entries.find { it.apiValue == actionString }
 }
