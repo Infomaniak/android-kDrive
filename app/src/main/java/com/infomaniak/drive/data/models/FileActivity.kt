@@ -23,7 +23,6 @@ import com.infomaniak.core.utils.FORMAT_FULL_DATE
 import com.infomaniak.core.utils.FORMAT_HOUR_MINUTES
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
@@ -158,12 +157,7 @@ open class FileActivity(
         }
     }
 
-    fun getHour(): String {
-        return createdAt.format(FORMAT_HOUR_MINUTES)
-    }
+    fun getHour(): String = createdAt.format(FORMAT_HOUR_MINUTES)
 
-    fun getAction(): FileActivityType? {
-        return if (action == "file_move") FileActivityType.FILE_MOVE_IN
-        else enumValueOfOrNull<FileActivityType>(action.uppercase())
-    }
+    private fun getAction(): FileActivityType? = FileActivityType.fromAction(action)
 }

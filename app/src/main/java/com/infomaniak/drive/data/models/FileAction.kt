@@ -31,9 +31,5 @@ data class FileAction(
     val parentId: Int,
     val path: String,
 ) : Parcelable {
-    val actionType get() = getAction(actionString)
-}
-
-private fun getAction(actionString: String): FileActivityType? {
-    return FileActivityType.entries.find { it.apiValue == actionString }
+    val actionType get() = FileActivityType.fromAction(actionString)
 }
