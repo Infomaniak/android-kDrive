@@ -176,11 +176,12 @@ dependencies {
     val splitties_version = "3.0.0"
     implementation("com.louiscad.splitties:splitties-mainthread:$splitties_version")
 
-    val exoplayer_version = "2.19.1"
-    implementation("com.google.android.exoplayer:exoplayer-core:$exoplayer_version")
-    implementation("com.google.android.exoplayer:exoplayer-ui:$exoplayer_version")
-    implementation("com.google.android.exoplayer:exoplayer:$exoplayer_version")
-    implementation("com.google.android.exoplayer:extension-okhttp:$exoplayer_version")
+    val exoplayer_version = "1.7.1"
+    implementation("androidx.media3:media3-exoplayer:$exoplayer_version")
+    implementation("androidx.media3:media3-exoplayer-dash:$exoplayer_version")
+    implementation("androidx.media3:media3-ui:$exoplayer_version")
+    implementation("androidx.media3:media3-datasource-okhttp:$exoplayer_version")
+    implementation("androidx.media3:media3-session:$exoplayer_version")
 
     implementation("com.airbnb.android:lottie:6.6.6")
     implementation("com.github.Infomaniak:android-pdfview:3.2.11")
