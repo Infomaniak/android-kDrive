@@ -49,13 +49,18 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
-import io.ktor.client.plugins.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.utils.io.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.onUpload
+import io.ktor.client.plugins.retry
+import io.ktor.client.request.headers
+import io.ktor.client.request.preparePost
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.contentLength
+import io.ktor.http.isSuccess
+import io.ktor.utils.io.toByteArray
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -84,7 +89,7 @@ class UploadTask(
 
     private var currentProgress = 0
 
-    private val uploadedBytes = AtomicLong(value = 0)
+    private val uploadedBytes = AtomicLong(value = 0L)
     private val uploadedBytesUpdates = MutableSharedFlow<Unit>(extraBufferCapacity = 1, replay = 1).also {
         it.tryEmit(Unit)
     }
@@ -152,24 +157,27 @@ class UploadTask(
 
         uploadedBytes.store(uploadedChunks?.uploadedSize ?: 0L)
 
-        raceOf({
-            uploadChunks(
-                chunkConfig = chunkConfig,
-                validChunksIds = uploadedChunks?.validChunksIds ?: emptyList(),
-                isNewUploadSession = isNewUploadSession,
-                getInputStream = {
-                    val uri = uploadFile.getOriginalUri(context)
-                    context.contentResolver.openInputStream(uri)
-                        ?: throw IOException("The provider for the following Uri recently crashed: $uri")
-                },
-                uploadHost = uploadHost,
-            )
-        }, {
-            uploadedBytesUpdates.rateLimit(minInterval = 1.seconds / 5).collect { _ ->
-                updateProgress()
-            }
-            awaitCancellation()
-        })
+        raceOf(
+            {
+                uploadChunks(
+                    chunkConfig = chunkConfig,
+                    validChunksIds = uploadedChunks?.validChunksIds ?: emptyList(),
+                    isNewUploadSession = isNewUploadSession,
+                    getInputStream = {
+                        val uri = uploadFile.getOriginalUri(context)
+                        context.contentResolver.openInputStream(uri)
+                            ?: throw IOException("The provider for the following Uri recently crashed: $uri")
+                    },
+                    uploadHost = uploadHost,
+                )
+            },
+            {
+                uploadedBytesUpdates.rateLimit(minInterval = 1.seconds / 5).collect { _ ->
+                    updateProgress()
+                }
+                awaitCancellation()
+            },
+        )
 
         if (isActive) onFinish(uploadFile.getUriObject())
     }
@@ -195,9 +203,7 @@ class UploadTask(
     ) = coroutineScope {
         val requestSemaphore = Semaphore(chunkConfig.parallelChunks)
         val httpClient = HttpClient(OkHttp) {
-            engine {
-                preconfigured = uploadFile.okHttpClient
-            }
+            engine { preconfigured = uploadFile.okHttpClient }
         }
 
         for (chunkNumber in 1..chunkConfig.totalChunks) launch {
@@ -212,7 +218,7 @@ class UploadTask(
                     httpClient = httpClient,
                     uploadHost = uploadHost,
                     chunkConfig = chunkConfig,
-                    chunkNumber = chunkNumber
+                    chunkNumber = chunkNumber,
                 )
             }
         }
@@ -239,7 +245,7 @@ class UploadTask(
         httpClient: HttpClient,
         uploadHost: String,
         chunkConfig: FileChunkSizeManager.ChunkConfig,
-        chunkNumber: Int
+        chunkNumber: Int,
     ): Unit = coroutineScope {
         val chunkIndex = chunkNumber - 1
         val chunkSize = chunkConfig.fileChunkSize
@@ -261,14 +267,14 @@ class UploadTask(
             Dispatchers.IO {
                 stream.skipExactly(
                     numberOfBytes = chunkSize * chunkIndex,
-                    coroutineContext = coroutineContext
+                    coroutineContext = coroutineContext,
                 )
             }
             uploadChunkUnchecked(
                 preSkippedStream = stream,
                 httpClient = httpClient,
                 url = url,
-                length = currentChunkSize
+                length = currentChunkSize,
             )
         }
     }
@@ -302,7 +308,7 @@ class UploadTask(
                         uploadFile.resetUploadTokenAndCancelSession()
                         SentryLog.d(
                             "UploadWorker",
-                            "progress >> expected file size exceeded: $currentTotalBytes/${uploadFile.fileSize}"
+                            "progress >> expected file size exceeded: $currentTotalBytes/${uploadFile.fileSize}",
                         )
                         throw WrittenBytesExceededException()
                     }
@@ -322,7 +328,9 @@ class UploadTask(
         return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize.toInt()) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
-        } else uploadFile.uploadHost == null
+        } else {
+            uploadFile.uploadHost == null
+        }
     }
 
     private suspend fun manageApiResponse(response: HttpResponse) {
@@ -333,14 +341,14 @@ class UploadTask(
                 val expectedContentLength = response.contentLength() ?: bytes.size
                 if (expectedContentLength != bytes.size) SentryLog.e(
                     tag = "UploadTask",
-                    msg = "Backend provided contentLength was $expectedContentLength bytes, but received ${bytes.size}"
+                    msg = "Backend provided contentLength was $expectedContentLength bytes, but received ${bytes.size}",
                 )
             }
             val bodyResponse = String(bytes)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
                 gson.fromJson(bodyResponse, ApiResponse::class.java)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 ApiResponse<Any>(error = ApiError(description = bodyResponse))
             }
             apiResponse.manageUploadErrors()
@@ -354,7 +362,7 @@ class UploadTask(
 
         SentryLog.i(
             "kDrive",
-            " upload >> ${progress}%, totalBytesWritten:$totalBytesWritten, fileSize:${uploadFile.fileSize}"
+            " upload >> ${progress}%, totalBytesWritten:$totalBytesWritten, fileSize:${uploadFile.fileSize}",
         )
 
         currentCoroutineContext().ensureActive()
@@ -368,7 +376,9 @@ class UploadTask(
                 uploadNotificationStartTime = System.currentTimeMillis()
                 uploadNotificationElapsedTime = 0L
             }
-        } else uploadNotificationElapsedTime = System.currentTimeMillis() - uploadNotificationStartTime
+        } else {
+            uploadNotificationElapsedTime = System.currentTimeMillis() - uploadNotificationStartTime
+        }
 
         if (progress in 1..100) shareProgress(progress)
     }
@@ -397,7 +407,7 @@ class UploadTask(
             lastModifiedAt = fileModifiedAt.time / 1000,
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
-            totalSize = fileSize
+            totalSize = fileSize,
         )
 
         return ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient).also {
