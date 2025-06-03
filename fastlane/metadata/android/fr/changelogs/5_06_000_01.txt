@@ -1,0 +1,3 @@
+- Téléchargement en continu
+- Correction des mises à jour des activités récentes des fichiers
+- Évite les plantages lors de l'importation de fichiers quand la mémoire de stockage est pleine
