@@ -141,7 +141,7 @@ class VideoActivity : AppCompatActivity() {
     private fun loadVideo(intent: Intent) {
         intent.extras?.let { VideoActivityArgs.fromBundle(it) }?.fileId?.let { videoFileId ->
             if (videoFileId > 0) {
-                viewModel.currentFile = viewModel.getCurrentFile(videoFileId)
+                viewModel.loadFile(videoFileId)
                 exoPlayer.setMediaItem(getMediaItem(viewModel.currentFile!!, viewModel.offlineFile, viewModel.offlineIsComplete))
             } else {
                 finish()

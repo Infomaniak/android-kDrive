@@ -40,13 +40,13 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
 
     private val userDrive by lazy { UserDrive() }
 
-    private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { currentFile?.isOfflineAndIntact(it) } ?: false
-
-    fun getCurrentFile(fileId: Int): File? = runCatching {
-        FileController.getFileById(fileId, userDrive)
-    }.getOrElse { _ ->
-        null
+    fun loadFile(fileId: Int) {
+        currentFile = runCatching {
+            FileController.getFileById(fileId, userDrive)
+        }.getOrElse { _ ->
+            null
+        }
     }
 
-    fun noCurrentFile() = currentFile == null
+    private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { currentFile?.isOfflineAndIntact(it) } ?: false
 }
