@@ -89,25 +89,17 @@ object PlaybackUtils {
     fun releasePlayer() {
         activePlayer?.release()
         activePlayer = null
+
         mediaControllerFuture?.let { MediaController.releaseFuture(it) }
         mediaControllerFuture = null
+
         mediaController?.release()
         mediaController = null
+
         mediaSession?.release()
         mediaSession = null
-        onServiceDisconnect = null
-    }
 
-    private fun getRunnable(callback: (MediaController) -> Unit): Runnable {
-        return Runnable {
-            if (mediaController == null) {
-                mediaController = mediaControllerFuture?.get()?.apply {
-                    callback(this)
-                }
-            } else {
-                callback(mediaController!!)
-            }
-        }
+        onServiceDisconnect = null
     }
 
     fun Context.setMediaSession() {
@@ -148,6 +140,34 @@ object PlaybackUtils {
             .setMediaMetadata(mediaMetadataBuilder.build())
             .setUri(uri)
             .build()
+    }
+
+    fun getPictureInPictureParams(ratio: Rational): PictureInPictureParams? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            val pipParams = PictureInPictureParams.Builder()
+                .setAspectRatio(ratio)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                pipParams.setAutoEnterEnabled(true)
+            }
+
+            pipParams.build()
+        } else {
+            null
+        }
+    }
+
+    private fun getRunnable(callback: (MediaController) -> Unit): Runnable {
+        return Runnable {
+            if (mediaController == null) {
+                mediaController = mediaControllerFuture?.get()?.apply {
+                    callback(this)
+                }
+            } else {
+                callback(mediaController!!)
+            }
+        }
     }
 
     private fun getThumbnailUri(file: File): Uri {
@@ -194,17 +214,7 @@ object PlaybackUtils {
         }
     }
 
-    private fun Context.getPendingIntent(): PendingIntent {
-
-        val intent = getIntentForMedia()
-
-        return PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PENDING_INTENT_FLAGS
-        )
-    }
+    private fun Context.getPendingIntent() = PendingIntent.getActivity(this, 0, getIntentForMedia(), PENDING_INTENT_FLAGS)
 
     private fun Context.getIntentForMedia(): Intent {
         return Intent(this, MainActivity::class.java).apply {
@@ -216,21 +226,5 @@ object PlaybackUtils {
 
     private fun Context.getBitmapLoader(): DataSourceBitmapLoader {
         return DataSourceBitmapLoader(DataSourceBitmapLoader.DEFAULT_EXECUTOR_SERVICE.get(), getDataSourceFactory())
-    }
-
-    fun getPictureInPictureParams(ratio: Rational): PictureInPictureParams? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-            val pipParams = PictureInPictureParams.Builder()
-                .setAspectRatio(ratio)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                pipParams.setAutoEnterEnabled(true)
-            }
-
-            pipParams.build()
-        } else {
-            null
-        }
     }
 }
