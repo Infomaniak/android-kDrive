@@ -169,7 +169,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Compute the percentage of the video the user watched before exiting
+        // Compute the percentage of the media the user watched before exiting
         val currentMediaPercentage = exoPlayer.currentPosition.times(100)
         val currentMediaDuration = exoPlayer.contentDuration
         requireContext().trackMediaPlayerEvent("duration", currentMediaPercentage.div(currentMediaDuration + 1).toFloat())
