@@ -18,15 +18,14 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.content.ContentResolver
+import android.util.Log
 import androidx.lifecycle.*
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import io.realm.Realm
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.*
+import java.io.File
 
 class SelectMediaFoldersViewModel : ViewModel() {
 
@@ -43,9 +42,8 @@ class SelectMediaFoldersViewModel : ViewModel() {
                         if (cacheMediaFolders.isNotEmpty()) emit(false to cacheMediaFolders)
                     }
 
-                    val localMediaFolders = ArrayList(
-                        MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob),
-                    )
+                    val localMediaFolders = getLocalMediaFolders(realm, contentResolver, getMediaFilesJob, cacheMediaFolders)
+
                     cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders.map { it.id })
 
                     viewModelScope.launch(Dispatchers.Main) {
@@ -54,6 +52,33 @@ class SelectMediaFoldersViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    private fun getLocalMediaFolders(
+        realm: Realm,
+        contentResolver: ContentResolver,
+        getMediaFilesJob: Job,
+        cacheMediaFolders: ArrayList<MediaFolder>,
+    ): ArrayList<MediaFolder> {
+
+        // TODO: Looks like it doesn't work
+        fun MediaFolder.exists(): Boolean = File(path).exists()
+
+        val localFolders = ArrayList(
+            MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob),
+        )
+
+        // TODO: Without the `exists` check, it causes another issue: the Folder won't ever be removed from the list,
+        //  even if the user really wants to delete it from the filesystem
+        val previouslySyncedCacheFolders = cacheMediaFolders.filter {
+            it.isSynced // && it.exists()
+        }
+
+        val list = ArrayList(localFolders + previouslySyncedCacheFolders)
+        Log.e("TOTO", "Cache: ${cacheMediaFolders.map { "${it.name} - ${it.isSynced}" }}")
+        Log.e("TOTO", "Final: ${list.map { "${it.name} - ${it.isSynced}" }}")
+
+        return list
     }
 
     override fun onCleared() {
