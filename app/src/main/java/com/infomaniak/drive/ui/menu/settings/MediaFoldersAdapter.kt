@@ -66,7 +66,10 @@ class MediaFoldersAdapter(
     fun addAll(addedItems: ArrayList<MediaFolder>) {
 
         val oldList = items.toList()
-        items.addAll(addedItems)
+
+        val newList = (oldList + addedItems).sortedBy { it.name.lowercase() }
+        items.clear()
+        items.addAll(newList)
 
         notifyAdapter(oldList, items)
     }
