@@ -104,6 +104,7 @@ class VideoActivity : AppCompatActivity() {
             player = exoPlayer
             controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
             controllerHideOnTouch = false
+            showController()
         }
 
         exoPlayer.addListener(playerListener)
