@@ -100,18 +100,16 @@ class VideoActivity : AppCompatActivity() {
 
         shouldExcludeFromRecents(true)
 
-        binding.playerView.player = exoPlayer
-        binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
-        binding.playerView.controllerHideOnTouch = false
+        with(binding.playerView) {
+            player = exoPlayer
+            controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
+            controllerHideOnTouch = false
+        }
 
         exoPlayer.addListener(playerListener)
-
-        loadVideo(intent)
         exoPlayer.playWhenReady = true
 
-        binding.playerView.player = exoPlayer
-        binding.playerView.controllerShowTimeoutMs = CONTROLLER_SHOW_TIMEOUT_MS
-        binding.playerView.controllerHideOnTouch = false
+        loadVideo(intent)
 
         toggleSystemBar(show = false)
 
@@ -140,9 +138,9 @@ class VideoActivity : AppCompatActivity() {
     }
 
     private fun loadVideo(intent: Intent) {
-        intent.extras?.let { VideoActivityArgs.fromBundle(it) }?.let {
-            if (it.fileId > 0) {
-                viewModel.currentFile = viewModel.getCurrentFile(it.fileId)
+        intent.extras?.let { VideoActivityArgs.fromBundle(it) }?.fileId?.let { videoFileId ->
+            if (videoFileId > 0) {
+                viewModel.currentFile = viewModel.getCurrentFile(videoFileId)
                 exoPlayer.setMediaItem(getMediaItem(viewModel.currentFile!!, viewModel.offlineFile, viewModel.offlineIsComplete))
             } else {
                 finish()
