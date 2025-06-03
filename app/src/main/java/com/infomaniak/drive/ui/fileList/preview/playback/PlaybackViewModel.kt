@@ -36,8 +36,9 @@ class PlaybackViewModel(application: Application) : AndroidViewModel(application
 
     val offlineIsComplete by lazy { isOfflineFileComplete(offlineFile) }
 
-    var userDrive = UserDrive()
     var currentFile: File? = null
+
+    private val userDrive by lazy { UserDrive() }
 
     private fun isOfflineFileComplete(offlineFile: IOFile?) = offlineFile?.let { currentFile?.isOfflineAndIntact(it) } ?: false
 
