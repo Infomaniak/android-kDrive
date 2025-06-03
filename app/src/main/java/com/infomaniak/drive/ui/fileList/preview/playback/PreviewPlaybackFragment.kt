@@ -89,6 +89,13 @@ open class PreviewPlaybackFragment : PreviewFragment() {
     private val exoPlayer: ExoPlayer by lazy { requireContext().getExoPlayer() }
     private val mainExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
 
+    private val exoPlayerUIToHide = listOf(
+        R.id.exo_rew_with_amount,
+        R.id.exo_ffwd_with_amount,
+        R.id.exo_progress,
+        R.id.exo_bottom_bar,
+    )
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentPreviewPlaybackBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
@@ -137,11 +144,9 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
     private fun initVideoPlayerUI() {
         with(binding.playerView) {
+
             // Hiding ExoPlayer interface elements because we'll play the video in a separate Activity
-            findViewById<View>(R.id.exo_rew_with_amount).isVisible = false
-            findViewById<View>(R.id.exo_ffwd_with_amount).isVisible = false
-            findViewById<View>(R.id.exo_progress).isVisible = false
-            findViewById<View>(R.id.exo_bottom_bar).isVisible = false
+            exoPlayerUIToHide.forEach { uiID -> findViewById<View>(uiID).isVisible = false }
 
             // We'll open a new activity for videos to handle PIP perfectly
             findViewById<View>(R.id.exo_play_pause).setOnClickListener {
