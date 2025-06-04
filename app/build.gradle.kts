@@ -151,6 +151,7 @@ sentry {
 dependencies {
 
     implementation(project(":Core"))
+    implementation(project(":Core:CrossAppLogin"))
     implementation(project(":Core:FragmentNavigation"))
     implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))
