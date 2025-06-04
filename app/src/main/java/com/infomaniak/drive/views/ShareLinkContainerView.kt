@@ -113,6 +113,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
             iconId = R.drawable.ic_folder_dropbox,
             title = context.getString(R.string.dropboxSharedLinkTitle),
             containerVisibility = false,
+            shareSettings = false,
             status = context.getString(R.string.dropboxSharedLinkDescription),
         )
     }
@@ -122,6 +123,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
             iconId = R.drawable.ic_lock,
             title = context.getString(R.string.restrictedSharedLinkTitle),
             containerVisibility = false,
+            shareSettings = false,
             status = context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context)),
         )
         binding.shareLinkSettings.isInvisible = true
@@ -133,15 +135,17 @@ class ShareLinkContainerView @JvmOverloads constructor(
             iconId = R.drawable.ic_unlock,
             title = context.getString(R.string.publicSharedLinkTitle),
             containerVisibility = true,
+            shareSettings = true,
             status = getShareLinkPublicRightDescription(),
         )
     }
 
-    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, status: String) {
+    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, shareSettings: Boolean, status: String) {
         with(binding) {
             shareLinkIcon.setImageResource(iconId)
             shareLinkTitle.text = title
             shareLinkBottomContainer.isVisible = containerVisibility
+            shareLinkSettings.isVisible = shareSettings
             shareLinkStatus.text = status
         }
     }
