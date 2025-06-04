@@ -74,12 +74,12 @@
                         android:layout_height="wrap_content"
                         android:text="@string/aboutPrivacyTitle"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/privacyEndButton"
+                        app:layout_constraintEnd_toStartOf="@id/privacyChevron"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/privacyEndButton"
+                        android:id="@+id/privacyChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_chevron_right"
@@ -110,12 +110,12 @@
                         android:layout_height="wrap_content"
                         android:text="@string/aboutSourceCodeTitle"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/sourceCodeEndButton"
+                        app:layout_constraintEnd_toStartOf="@id/sourceCodeChevron"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/sourceCodeEndButton"
+                        android:id="@+id/sourceCodeChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_chevron_right"
@@ -146,7 +146,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/aboutLicenseTitle"
                         app:layout_constraintBottom_toTopOf="@id/licenseDescription"
-                        app:layout_constraintEnd_toStartOf="@id/licenseEndButton"
+                        app:layout_constraintEnd_toStartOf="@id/licenseChevron"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -157,12 +157,12 @@
                         android:layout_marginTop="6dp"
                         android:text="@string/aboutLicenseDescription"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/licenseEndButton"
+                        app:layout_constraintEnd_toStartOf="@id/licenseChevron"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/licenseTitle" />
 
                     <ImageView
-                        android:id="@+id/licenseEndButton"
+                        android:id="@+id/licenseChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_chevron_right"

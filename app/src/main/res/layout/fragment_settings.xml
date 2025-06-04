@@ -225,12 +225,12 @@
                             android:layout_height="wrap_content"
                             android:text="@string/notificationTitle"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/notificationsEnd"
+                            app:layout_constraintEnd_toStartOf="@id/notificationsChevron"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageView
-                            android:id="@+id/notificationsEnd"
+                            android:id="@+id/notificationsChevron"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/ic_chevron_right"
@@ -342,12 +342,12 @@
                             android:layout_height="wrap_content"
                             android:text="@string/aboutTitle"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/aboutEndButton"
+                            app:layout_constraintEnd_toStartOf="@id/aboutChevron"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageView
-                            android:id="@+id/aboutEndButton"
+                            android:id="@+id/aboutChevron"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/ic_chevron_right"
@@ -378,12 +378,12 @@
                             android:layout_height="wrap_content"
                             android:text="@string/buttonFeedback"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toStartOf="@id/feedbackButton"
+                            app:layout_constraintEnd_toStartOf="@id/feedbackChevron"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
                         <ImageView
-                            android:id="@+id/feedbackButton"
+                            android:id="@+id/feedbackChevron"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/ic_chevron_right"

@@ -119,12 +119,12 @@
                         android:maxLines="1"
                         android:text="@string/searchFiltersSelectDate"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/dateFilterEndIcon"
+                        app:layout_constraintEnd_toStartOf="@id/dateFilterChevron"
                         app:layout_constraintStart_toEndOf="@id/dateFilterStartIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/dateFilterEndIcon"
+                        android:id="@+id/dateFilterChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_chevron_right"
@@ -185,12 +185,12 @@
                         android:maxLines="1"
                         android:text="@string/searchFiltersSelectType"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/typeFilterEndIcon"
+                        app:layout_constraintEnd_toStartOf="@id/typeFilterChevron"
                         app:layout_constraintStart_toEndOf="@id/typeFilterStartIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/typeFilterEndIcon"
+                        android:id="@+id/typeFilterChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:src="@drawable/ic_chevron_right"
