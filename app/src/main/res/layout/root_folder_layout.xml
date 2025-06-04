@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2025 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardView"
+            style="@style/CardViewInfomaniak"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandard"
+            android:layout_marginTop="@dimen/marginStandard"
+            android:layout_marginEnd="@dimen/marginStandard">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@drawable/divider"
+                android:orientation="vertical"
+                android:showDividers="middle">
+
+                <com.infomaniak.drive.ui.menu.MenuItemView
+                    android:id="@+id/organizationFolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:icon="@drawable/ic_folder_common_documents"
+                    app:title="@string/localizedFilenameTeamSpace"
+                    tools:visibility="visible" />
+
+                <com.infomaniak.drive.ui.menu.MenuItemView
+                    android:id="@+id/personalFolder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:icon="@drawable/ic_folder_filled"
+                    app:iconColor="@color/iconColor"
+                    app:title="@string/localizedFilenamePrivateTeamSpace"
+                    tools:visibility="visible" />
+
+                <com.infomaniak.drive.ui.menu.MenuItemView
+                    android:id="@+id/favorites"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_star_unfilled"
+                    app:title="@string/favoritesTitle" />
+
+                <com.infomaniak.drive.ui.menu.MenuItemView
+                    android:id="@+id/recentChanges"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_clock"
+                    app:title="@string/lastEditsTitle" />
+
+                <com.infomaniak.drive.ui.menu.MenuItemView
+                    android:id="@+id/sharedWithMeFiles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_folder_select_2"
+                    app:title="@string/sharedWithMeTitle" />
+
+                <com.infomaniak.drive.ui.menu.MenuItemView
+                    android:id="@+id/myShares"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_folder_select"
+                    app:title="@string/mySharesTitle" />
+
+                <com.infomaniak.drive.ui.menu.MenuItemView
+                    android:id="@+id/offlineFile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_offline"
+                    app:title="@string/offlineFileTitle" />
+
+                <com.infomaniak.drive.ui.menu.MenuItemView
+                    android:id="@+id/trashbin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:icon="@drawable/ic_bin"
+                    app:iconColor="@color/iconColor"
+                    app:title="@string/trashTitle" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
