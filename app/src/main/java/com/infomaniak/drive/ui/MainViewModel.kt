@@ -588,6 +588,5 @@ class MainViewModel(
     companion object {
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
-        private const val TIMEOUT_MS_NETWORK_AVAILABILITY_MS = 500L
     }
 }
