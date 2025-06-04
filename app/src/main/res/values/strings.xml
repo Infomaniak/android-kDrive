@@ -141,6 +141,7 @@
     <string name="buttonEdit">Edit</string>
     <string name="buttonEmpty">Empty</string>
     <string name="buttonEmptyTrash">Empty recycle bin</string>
+    <string name="buttonFeedback">Feedback</string>
     <string name="buttonFileRights">Sharing and rights</string>
     <string name="buttonGoToSettings">Go to Settings</string>
     <string name="buttonLeaveShare">Leave share</string>

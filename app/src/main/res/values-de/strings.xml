@@ -130,6 +130,7 @@
     <string name="buttonEdit">Bearbeiten</string>
     <string name="buttonEmpty">Leeren</string>
     <string name="buttonEmptyTrash">Papierkorb leeren</string>
+    <string name="buttonFeedback">Rückmeldung</string>
     <string name="buttonFileRights">Freigabe und Rechte</string>
     <string name="buttonGoToSettings">Zu den Einstellungen gehen</string>
     <string name="buttonLeaveShare">Freigabe verlassen</string>
