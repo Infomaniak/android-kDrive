@@ -199,12 +199,12 @@
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/switchUserTitle"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/changeUserEndIcon"
+                        app:layout_constraintEnd_toStartOf="@id/changeUserChevron"
                         app:layout_constraintStart_toEndOf="@id/changeUserIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/changeUserEndIcon"
+                        android:id="@+id/changeUserChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/marginStandard"
@@ -246,12 +246,12 @@
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/settingsTitle"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/settingsEndIcon"
+                        app:layout_constraintEnd_toStartOf="@id/settingsChevron"
                         app:layout_constraintStart_toEndOf="@id/settingsIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/settingsEndIcon"
+                        android:id="@+id/settingsChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/marginStandard"
@@ -293,12 +293,12 @@
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/supportTitle"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/supportEndIcon"
+                        app:layout_constraintEnd_toStartOf="@id/supportChevron"
                         app:layout_constraintStart_toEndOf="@id/supportIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/supportEndIcon"
+                        android:id="@+id/supportChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/marginStandard"
@@ -340,12 +340,12 @@
                         android:layout_marginEnd="@dimen/marginStandard"
                         android:text="@string/buttonLogout"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/logoutEndIcon"
+                        app:layout_constraintEnd_toStartOf="@id/logoutChevron"
                         app:layout_constraintStart_toEndOf="@id/logoutIcon"
                         app:layout_constraintTop_toTopOf="parent" />
 
                     <ImageView
-                        android:id="@+id/logoutEndIcon"
+                        android:id="@+id/logoutChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/marginStandard"
