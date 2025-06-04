@@ -17,11 +17,15 @@
  */
 package com.infomaniak.drive.data.models
 
+import com.infomaniak.core.flowOnLazyClosable
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import io.realm.kotlin.toFlow
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 open class AppSettings(
     var _appLaunchesCount: Int = 0,
@@ -49,6 +53,18 @@ open class AppSettings(
                     realm.copyFromRealm(it, 0)
                 }
             } ?: AppSettings()
+        }
+
+        val currentUserIdFlow: Flow<Int> = flow {
+            val flow = getRealmInstance()
+                .where(AppSettings::class.java)
+                .findFirst()
+                .toFlow()
+                .map { it?._currentUserId ?: -1 }
+            emitAll(flow)
+        }.flowOnLazyClosable {
+            @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
+            newSingleThreadContext("RealmDispatcher")
         }
 
         fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
