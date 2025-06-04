@@ -274,14 +274,4 @@ object AccountUtils : CredentialManager() {
     }
 
     fun isEnableAppSync(): Boolean = UploadFile.getAppSyncSettings() != null
-
-    fun getPersonalFolderTitle(context: Context): String {
-        val folderTitle = if (getCurrentDrive()?.isSingleUserDrive == true) {
-            R.string.localizedFilenamePrivateSpace
-        } else {
-            R.string.localizedFilenamePrivateTeamSpace
-        }
-
-        return context.getString(folderTitle)
-    }
 }

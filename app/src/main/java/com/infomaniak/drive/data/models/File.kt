@@ -349,7 +349,7 @@ open class File(
 
     fun getDisplayName(context: Context): String {
         return when (getVisibilityType()) {
-            VisibilityType.IS_PRIVATE -> AccountUtils.getPersonalFolderTitle(context)
+            VisibilityType.IS_PRIVATE -> context.getString(R.string.localizedFilenamePrivateTeamSpace)
             VisibilityType.IS_TEAM_SPACE -> context.getString(R.string.localizedFilenameTeamSpace)
             else -> name
         }
