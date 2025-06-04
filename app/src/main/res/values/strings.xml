@@ -481,8 +481,7 @@
     <string name="inputExpirationTime">Expiration time</string>
     <string name="kDrivePdfViewer">kDrive PDF Viewer</string>
     <string name="lastEditsTitle">Most recent changes</string>
-    <string name="localizedFilenamePrivateSpace">My files</string>
-    <string name="localizedFilenamePrivateTeamSpace">My personal folder</string>
+    <string name="localizedFilenamePrivateTeamSpace">My folder</string>
     <string name="localizedFilenameTeamSpace">Common folders</string>
     <string name="locateButton">Locate</string>
     <string name="manageCategoriesCreateTitle">Create %s</string>

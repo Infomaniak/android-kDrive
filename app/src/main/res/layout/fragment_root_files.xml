@@ -111,7 +111,7 @@
                             android:visibility="gone"
                             app:icon="@drawable/ic_folder_filled"
                             app:iconColor="@color/iconColor"
-                            app:title="@string/localizedFilenamePrivateSpace"
+                            app:title="@string/localizedFilenamePrivateTeamSpace"
                             tools:visibility="visible" />
 
                         <com.infomaniak.drive.ui.menu.MenuItemView

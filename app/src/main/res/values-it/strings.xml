@@ -470,8 +470,7 @@
     <string name="inputExpirationTime">Tempo di scadenza</string>
     <string name="kDrivePdfViewer">Visualizzatore di PDF kDrive</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
-    <string name="localizedFilenamePrivateSpace">I miei file</string>
-    <string name="localizedFilenamePrivateTeamSpace">La mia cartella personale</string>
+    <string name="localizedFilenamePrivateTeamSpace">La mia cartella</string>
     <string name="localizedFilenameTeamSpace">Cartelle comuni</string>
     <string name="locateButton">Localizzare</string>
     <string name="manageCategoriesCreateTitle">Crea %s</string>
