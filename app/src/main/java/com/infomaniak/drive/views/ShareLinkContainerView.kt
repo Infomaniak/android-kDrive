@@ -112,7 +112,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
         setUi(
             iconId = R.drawable.ic_folder_dropbox,
             title = context.getString(R.string.dropboxSharedLinkTitle),
-            containerVisibility = false,
+            shareButtonVisibility = false,
             shareSettings = false,
             status = context.getString(R.string.dropboxSharedLinkDescription),
         )
@@ -122,30 +122,28 @@ class ShareLinkContainerView @JvmOverloads constructor(
         setUi(
             iconId = R.drawable.ic_lock,
             title = context.getString(R.string.restrictedSharedLinkTitle),
-            containerVisibility = false,
+            shareButtonVisibility = true,
             shareSettings = false,
             status = context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context)),
         )
-        binding.shareLinkSettings.isInvisible = true
-        binding.shareLinkButton.isVisible = true
     }
 
     private fun setPublicUi() {
         setUi(
             iconId = R.drawable.ic_unlock,
             title = context.getString(R.string.publicSharedLinkTitle),
-            containerVisibility = true,
+            shareButtonVisibility = true,
             shareSettings = true,
             status = getShareLinkPublicRightDescription(),
         )
     }
 
-    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, shareSettings: Boolean, status: String) {
+    private fun setUi(iconId: Int, title: String, shareButtonVisibility: Boolean, shareSettings: Boolean, status: String) {
         with(binding) {
             shareLinkIcon.setImageResource(iconId)
             shareLinkTitle.text = title
-            shareLinkBottomContainer.isVisible = containerVisibility
-            shareLinkSettings.isVisible = shareSettings
+            shareLinkButton.isVisible = shareButtonVisibility
+            shareLinkSettings.isInvisible = !shareSettings
             shareLinkStatus.text = status
         }
     }
