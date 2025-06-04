@@ -56,7 +56,9 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 import java.util.Date
 
 class MainViewModel(
@@ -88,20 +90,9 @@ class MainViewModel(
     val updateVisibleFiles = MutableLiveData<Boolean>()
     val isBulkDownloadRunning = MutableLiveData<Boolean>()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val isNetworkAvailable = NetworkAvailability(this@MainViewModel.getContext()).isNetworkAvailable
-        .distinctUntilChanged()
-        .mapLatest {
-            onNetworkAvailabilityChanged(it)
-            it
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = TIMEOUT_MS_NETWORK_AVAILABILITY_MS),
-            initialValue = null
-        )
-
-    inline val hasNetwork get() = isNetworkAvailable.value != false
+    val isNetworkAvailable = NetworkAvailability(this@MainViewModel.getContext()).isNetworkAvailable.distinctUntilChanged()
+    var hasNetwork: Boolean = true
+        private set
 
     var mustOpenUploadShortcut: Boolean = true
         get() = savedStateHandle[SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY] ?: field
@@ -122,6 +113,15 @@ class MainViewModel(
     private var setCurrentFolderJob = Job()
 
     val deleteFilesFromGallery = SingleLiveEvent<List<Int>>()
+
+    init {
+        viewModelScope.launch {
+            isNetworkAvailable.collect {
+                onNetworkAvailabilityChanged(it)
+                hasNetwork = it
+            }
+        }
+    }
 
     private fun getContext() = getApplication<MainApplication>()
 
