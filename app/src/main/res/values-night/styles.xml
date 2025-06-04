@@ -31,4 +31,6 @@
         <item name="android:statusBarColor">@color/background</item>
     </style>
 
+    <style name="AppTheme.BugTracker" parent="AppTheme.BugTrackerBase" />
+
 </resources>
