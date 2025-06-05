@@ -22,10 +22,12 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.api.ApiRoutes.restrictedShareLink
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.ViewShareLinkContainerBinding
@@ -60,7 +62,10 @@ class ShareLinkContainerView @JvmOverloads constructor(
             binding.shareLinkSettings.setOnClickListener {
                 this.shareLink?.let { shareLink -> onSettingsClicked?.invoke(shareLink) }
             }
-            binding.shareLinkButton.setOnClickListener { this.shareLink?.url?.let(context::shareText) }
+            binding.shareLinkButton.setOnClickListener {
+                // if `shareLink` isn't null it means that it's public share. Otherwise we create a private link.
+                context.shareText(text = this.shareLink?.url ?: restrictedShareLink(file))
+            }
         }
     }
 
@@ -107,16 +112,19 @@ class ShareLinkContainerView @JvmOverloads constructor(
         setUi(
             iconId = R.drawable.ic_folder_dropbox,
             title = context.getString(R.string.dropboxSharedLinkTitle),
-            containerVisibility = false,
+            shareButtonVisibility = false,
+            shareSettings = false,
             status = context.getString(R.string.dropboxSharedLinkDescription),
         )
+        binding.shareLinkSettings.isGone = true
     }
 
     private fun setRestrictedUi() {
         setUi(
             iconId = R.drawable.ic_lock,
             title = context.getString(R.string.restrictedSharedLinkTitle),
-            containerVisibility = false,
+            shareButtonVisibility = true,
+            shareSettings = false,
             status = context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context)),
         )
     }
@@ -125,16 +133,20 @@ class ShareLinkContainerView @JvmOverloads constructor(
         setUi(
             iconId = R.drawable.ic_unlock,
             title = context.getString(R.string.publicSharedLinkTitle),
-            containerVisibility = true,
+            shareButtonVisibility = true,
+            shareSettings = true,
             status = getShareLinkPublicRightDescription(),
         )
     }
 
-    private fun setUi(iconId: Int, title: String, containerVisibility: Boolean, status: String) = with(binding) {
-        shareLinkIcon.setImageResource(iconId)
-        shareLinkTitle.text = title
-        shareLinkBottomContainer.isVisible = containerVisibility
-        shareLinkStatus.text = status
+    private fun setUi(iconId: Int, title: String, shareButtonVisibility: Boolean, shareSettings: Boolean, status: String) {
+        with(binding) {
+            shareLinkIcon.setImageResource(iconId)
+            shareLinkTitle.text = title
+            shareLinkButton.isVisible = shareButtonVisibility
+            shareLinkSettings.isInvisible = !shareSettings
+            shareLinkStatus.text = status
+        }
     }
 
     private fun getShareLinkPublicRightDescription(): String {
