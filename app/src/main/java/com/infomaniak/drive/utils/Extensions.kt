@@ -178,6 +178,14 @@ fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBa
     }
 }
 
+fun Activity.shouldExcludeFromRecents(exclude: Boolean) {
+    val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val tasks = am.appTasks
+    if (tasks != null && tasks.size > 0) {
+        tasks[0].setExcludeFromRecents(exclude)
+    }
+}
+
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
 
 fun ItemUserBinding.setUserView(
