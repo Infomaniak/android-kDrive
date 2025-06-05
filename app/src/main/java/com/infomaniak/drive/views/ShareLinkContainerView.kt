@@ -116,6 +116,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
             shareSettings = false,
             status = context.getString(R.string.dropboxSharedLinkDescription),
         )
+        binding.shareLinkSettings.isGone = true
     }
 
     private fun setRestrictedUi() {
