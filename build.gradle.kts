@@ -31,15 +31,15 @@ plugins {
 }
 
 ktlint {
-    ignoreFailures.set(false)
-    android.set(true)
     version.set("1.6.0")
+    android.set(true)
+    ignoreFailures.set(false)
         reporter(ReporterType.PLAIN)
     reporters {
 }
     }
 
-allprojects {
+subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }
 
