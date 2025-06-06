@@ -27,14 +27,12 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ActivitySelectFolderBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.setMargins
 
 class SelectFolderActivity : BaseActivity() {
@@ -42,13 +40,10 @@ class SelectFolderActivity : BaseActivity() {
     private val binding: ActivitySelectFolderBinding by lazy { ActivitySelectFolderBinding.inflate(layoutInflater) }
 
     private val navHostFragment by lazy { supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment }
-    private val navController by lazy { navHostFragment.navController }
 
     private val selectFolderViewModel: SelectFolderViewModel by viewModels()
     private val mainViewModel: MainViewModel by viewModels()
     private val navigationArgs: SelectFolderActivityArgs by navArgs()
-
-    private val navigationIds = mutableListOf<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +52,6 @@ class SelectFolderActivity : BaseActivity() {
         val userId = navigationArgs.userId
         val driveId = navigationArgs.driveId
         val customArgs = navigationArgs.customArgs
-        val currentFolderId = navigationArgs.folderId.getIntOrNull()
         val disabledFolderId = navigationArgs.disabledFolderId.getIntOrNull()
 
         // We're doing this in the mainthread because the FileListFragment rely on mainViewModel.selectFolderUserDrive.
@@ -75,16 +69,6 @@ class SelectFolderActivity : BaseActivity() {
 
             setSaveButton(customArgs)
 
-            currentFolderId?.let { folderId ->
-                // Simply navigate when the folder exists in the local database
-                FileController.getFileProxyById(
-                    fileId = folderId,
-                    userDrive = currentUserDrive,
-                    customRealm = getCustomRealm(currentUserDrive),
-                )?.let {
-                    initiateNavigationToCurrentFolder(folderId, currentUserDrive)
-                }
-            }
         }
 
         binding.saveButton.onApplyWindowInsetsListener { view, windowInsets ->
@@ -108,34 +92,6 @@ class SelectFolderActivity : BaseActivity() {
                 setResult(RESULT_OK, this)
             }
             finish()
-        }
-    }
-
-    private fun getCustomRealm(currentUserDrive: UserDrive) = if (currentUserDrive.sharedWithMe) null else mainViewModel.realm
-
-    private fun initiateNavigationToCurrentFolder(folderId: Int, userDrive: UserDrive) {
-        generateNavigationIds(folderId, userDrive)
-        navigateToCurrentFolder()
-    }
-
-    private fun generateNavigationIds(folderId: Int, userDrive: UserDrive) = with(navigationIds) {
-        add(folderId)
-        addNavigationIdsRecursively(folderId, userDrive)
-        reverse()
-    }
-
-    private fun MutableList<Int>.addNavigationIdsRecursively(folderId: Int, userDrive: UserDrive) {
-        FileController.getParentFileProxy(folderId, userDrive, getCustomRealm(userDrive))?.id?.let { parentId ->
-            if (parentId != Utils.ROOT_ID) {
-                add(parentId)
-                addNavigationIdsRecursively(parentId, userDrive)
-            }
-        }
-    }
-
-    private fun navigateToCurrentFolder() {
-        navigationIds.forEach { folderId ->
-            navController.navigate(SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId))
         }
     }
 
