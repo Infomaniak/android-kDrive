@@ -1,0 +1,5 @@
+# Kotlin Ktlint
+root = true
+[*.{kt,kts}]
+ktlint_code_style = ktlint_official
+ktlint_standard_no-wildcard-imports = disabled
