@@ -1,3 +1,5 @@
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
 
@@ -25,6 +27,20 @@ plugins {
     alias(core.plugins.dagger.hilt) apply false
     alias(core.plugins.ksp) apply false
     alias(core.plugins.navigation.safeargs) apply false
+    id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
+}
+
+ktlint {
+    ignoreFailures.set(false)
+    android.set(true)
+    version.set("1.6.0")
+        reporter(ReporterType.PLAIN)
+    reporters {
+}
+    }
+
+subprojects {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }
 
 tasks.register<Delete>("clean") {
