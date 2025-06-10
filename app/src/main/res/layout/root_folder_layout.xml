@@ -30,9 +30,8 @@
             style="@style/CardViewInfomaniak"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:layout_marginTop="@dimen/marginStandard"
-            android:layout_marginEnd="@dimen/marginStandard">
+            android:layout_marginHorizontal="@dimen/horizontalMarginRoot"
+            android:layout_marginTop="@dimen/marginStandard">
 
             <LinearLayout
                 android:layout_width="match_parent"
