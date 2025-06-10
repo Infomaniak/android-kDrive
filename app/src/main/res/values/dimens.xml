@@ -24,6 +24,7 @@
     <dimen name="userAvatarOverlap">-6dp</dimen>
     <dimen name="categoryIconOverlap">-8dp</dimen>
     <dimen name="coloredChipSize">56dp</dimen>
+    <dimen name="horizontalMarginRoot">@dimen/marginStandard</dimen>
 
     <integer name="defaultMaxLengthFileName">254</integer>
 
