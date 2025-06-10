@@ -27,7 +27,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
-import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
@@ -58,7 +57,7 @@ class SelectRootFolderFragment : Fragment() {
         return FragmentSelectRootFolderBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         collapsingToolbarLayout.title = "Sélectionner un dossier"
@@ -80,15 +79,14 @@ class SelectRootFolderFragment : Fragment() {
 
         observeFiles()
 
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        binding.root.enableEdgeToEdge(withBottom = false) { windowInsets ->
-            binding.rootFolderLayout.cardView.setMargins(
+        root.enableEdgeToEdge(withBottom = false) { windowInsets ->
+            rootFolderLayout.cardView.setMargins(
                 bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom
             )
         }
+
+        toolbar.setNavigationOnClickListener { requireActivity().finish() }
+
     }
 
     private fun setupRecentFolderView() {
