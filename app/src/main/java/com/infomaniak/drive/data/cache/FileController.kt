@@ -154,6 +154,19 @@ object FileController {
             .toFlow()
     }
 
+    fun getRecentFolders(): Flow<List<File>> {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::type.name, Type.DIRECTORY.value)
+                .greaterThan(File::id.name, ROOT_ID)
+                .greaterThan(File::parentId.name, ROOT_ID)
+                .sort(File::lastModifiedAt.name, Sort.DESCENDING)
+                .limit(3)
+                .findAllAsync()
+                .toFlow()
+        }
+    }
+
     //region isMarkedAsOffline
     fun hasFilesMarkedAsOffline(folderId: Int): Boolean {
         return getRealmInstance().use { realm ->
