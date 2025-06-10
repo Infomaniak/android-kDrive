@@ -29,8 +29,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_06_000_01
-        versionName = "5.6.0"
+        versionCode = 5_06_001_01
+        versionName = "5.6.1"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -50,9 +50,9 @@ android {
         buildConfigField("String", "SHOP_URL", "\"https://shop.infomaniak.com/order/\"")
         buildConfigField("String", "SUPPORT_URL", "\"https://support.infomaniak.com/\"")
 
-        buildConfigField ("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
-        buildConfigField ("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
-        buildConfigField ("String", "GITHUB_REPO", "\"android-kdrive\"")
+        buildConfigField("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
+        buildConfigField("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
+        buildConfigField("String", "GITHUB_REPO", "\"android-kdrive\"")
 
         resValue("string", "CLOUD_STORAGE_AUTHORITY", "com.infomaniak.drive.documents")
         resValue("string", "FILE_AUTHORITY", "com.infomaniak.drive.files")
