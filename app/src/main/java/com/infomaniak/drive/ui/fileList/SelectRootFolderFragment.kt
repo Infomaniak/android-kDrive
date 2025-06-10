@@ -116,19 +116,20 @@ class SelectRootFolderFragment : Fragment() {
     }
 
     private suspend fun setupRecentFolderView(files: List<File>) = coroutineScope {
-        recentFoldersBindings!!.forEachIndexed { index, binding ->
+        files.forEachIndexed { index, file ->
+            val binding = recentFoldersBindings!!.getOrElse(index) { return@coroutineScope }
             launch(start = CoroutineStart.UNDISPATCHED) {
                 try {
                     binding.root.isVisible = true
                     binding.root.setOnClickListener {
                         safeNavigate(
                             SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
-                                files[index].id,
-                                files[index].name
+                                file.id,
+                                file.name
                             )
                         )
                     }
-                    binding.itemViewFile.setFileItem(file = files[index])
+                    binding.itemViewFile.setFileItem(file = file)
                 } finally {
                     binding.root.isVisible = false
                 }
