@@ -21,13 +21,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.CardviewFileListBinding
@@ -36,11 +37,12 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
-import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 
 class SelectRootFolderFragment : Fragment() {
 
@@ -48,6 +50,8 @@ class SelectRootFolderFragment : Fragment() {
     private val fileListViewModel: FileListViewModel by viewModels()
 
     private val uiSettings by lazy { UiSettings(requireContext()) }
+
+    private var recentFoldersBindings: List<CardviewFileListBinding>? = null
 
     private var commonFolderToOpen: FolderToOpen? = null
     private var personalFolderToOpen: FolderToOpen? = null
@@ -69,6 +73,12 @@ class SelectRootFolderFragment : Fragment() {
         rootFolderLayout.offlineFile.isGone = true
         rootFolderLayout.trashbin.isGone = true
 
+        recentFoldersBindings = List(3) {
+            CardviewFileListBinding.inflate(layoutInflater)
+        }.onEach { recentFolderBinding ->
+            recentFolderBinding.root.isVisible = false
+            binding.recentListLayout.addView(recentFolderBinding.root, 0)
+        }
         setupRecentFolderView()
 
         with((activity as SelectFolderActivity).getSaveButton()) {
@@ -89,18 +99,33 @@ class SelectRootFolderFragment : Fragment() {
 
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        recentFoldersBindings = null
+    }
+
     private fun setupRecentFolderView() {
-        // Test function
-        binding.recentFolderTitle.isVisible = true
-        val container: LinearLayout = binding.recentListLayout
+        viewLifecycleOwner.lifecycleScope.launch {
+            FileController.getRecentFolders().collectLatest { files ->
+                binding.recentFolderTitle.isGone = files.isEmpty()
+                binding.recentListLayout.isGone = files.isEmpty()
 
-        val folder1Binding = CardviewFileListBinding.inflate(layoutInflater)
-        val folder2Binding = CardviewFileListBinding.inflate(layoutInflater)
-        val folder3Binding = CardviewFileListBinding.inflate(layoutInflater)
+                setupRecentFolderView(files)
+            }
+        }
+    }
 
-        container.addView(folder1Binding.root, 0)
-        container.addView(folder2Binding.root, 1 )
-        container.addView(folder3Binding.root, 2)
+    private suspend fun setupRecentFolderView(files: List<File>) = coroutineScope {
+        recentFoldersBindings!!.forEachIndexed { index, binding ->
+            launch(start = CoroutineStart.UNDISPATCHED) {
+                try {
+                    binding.root.isVisible = true
+                    binding.itemViewFile.setFileItem(file = files[index])
+                } finally {
+                    binding.root.isVisible = false
+                }
+            }
+        }
     }
 
     private fun setupItems() = with(binding) {
@@ -124,7 +149,7 @@ class SelectRootFolderFragment : Fragment() {
             safeNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment())
         }
 
-        rootFolderLayout. myShares.setOnClickListener {
+        rootFolderLayout.myShares.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = MyShares
             safeNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment())
         }
