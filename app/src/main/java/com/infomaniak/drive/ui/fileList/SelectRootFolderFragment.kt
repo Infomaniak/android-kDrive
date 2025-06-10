@@ -51,7 +51,7 @@ class SelectRootFolderFragment : Fragment() {
 
     private val uiSettings by lazy { UiSettings(requireContext()) }
 
-    private var recentFoldersBindings: List<CardviewFileListBinding>? = null
+    private val recentFoldersBindings = mutableListOf<CardviewFileListBinding>()
 
     private var commonFolderToOpen: FolderToOpen? = null
     private var personalFolderToOpen: FolderToOpen? = null
@@ -69,17 +69,19 @@ class SelectRootFolderFragment : Fragment() {
         val currentDrive = AccountUtils.getCurrentDrive(forceRefresh = true)
         rootFolderTitle.text = currentDrive?.name
 
-        rootFolderLayout.recentChanges.isGone = true
-        rootFolderLayout.offlineFile.isGone = true
-        rootFolderLayout.trashbin.isGone = true
-
-        recentFoldersBindings = List(3) {
-            CardviewFileListBinding.inflate(layoutInflater)
-        }.onEach { recentFolderBinding ->
-            recentFolderBinding.root.isVisible = false
-            binding.recentListLayout.addView(recentFolderBinding.root, 0)
+        rootFolderLayout.apply {
+            recentChanges.isGone = true
+            offlineFile.isGone = true
+            trashbin.isGone = true
         }
-        setupRecentFolderView()
+
+        repeat(3) {
+            recentFoldersBindings.add(
+                CardviewFileListBinding.inflate(layoutInflater)
+                    .apply { this.root.isGone = true }
+                    .also { binding.recentListLayout.addView(it.root, 0) }
+            )
+        }
 
         with((activity as SelectFolderActivity).getSaveButton()) {
             isGone = true
@@ -96,12 +98,16 @@ class SelectRootFolderFragment : Fragment() {
         }
 
         toolbar.setNavigationOnClickListener { requireActivity().finish() }
+    }
 
+    override fun onResume() {
+        super.onResume()
+        setupRecentFolderView()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        recentFoldersBindings = null
+        recentFoldersBindings.clear()
     }
 
     private fun setupRecentFolderView() {
@@ -117,7 +123,7 @@ class SelectRootFolderFragment : Fragment() {
 
     private suspend fun setupRecentFolderView(files: List<File>) = coroutineScope {
         files.forEachIndexed { index, file ->
-            val binding = recentFoldersBindings!!.getOrElse(index) { return@coroutineScope }
+            val binding = recentFoldersBindings.getOrElse(index) { return@coroutineScope }
             launch(start = CoroutineStart.UNDISPATCHED) {
                 try {
                     binding.root.isVisible = true
@@ -125,13 +131,13 @@ class SelectRootFolderFragment : Fragment() {
                         safeNavigate(
                             SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
                                 file.id,
-                                file.name
+                                file.name,
                             )
                         )
                     }
                     binding.itemViewFile.setFileItem(file = file)
                 } finally {
-                    binding.root.isVisible = false
+                    binding.root.isGone = true
                 }
             }
         }
