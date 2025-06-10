@@ -97,6 +97,8 @@ class SelectFolderActivity : BaseActivity() {
         }
     }
 
+    fun getSaveButton() = binding.saveButton
+
     fun showSaveButton() {
         binding.saveButton.isVisible = true
     }
