@@ -120,6 +120,14 @@ class SelectRootFolderFragment : Fragment() {
             launch(start = CoroutineStart.UNDISPATCHED) {
                 try {
                     binding.root.isVisible = true
+                    binding.root.setOnClickListener {
+                        safeNavigate(
+                            SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
+                                files[index].id,
+                                files[index].name
+                            )
+                        )
+                    }
                     binding.itemViewFile.setFileItem(file = files[index])
                 } finally {
                     binding.root.isVisible = false
