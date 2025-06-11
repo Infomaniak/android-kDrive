@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
@@ -38,15 +39,17 @@ import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setFileItem
-import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class SelectRootFolderFragment : Fragment() {
 
-    private var binding: FragmentSelectRootFolderBinding by safeBinding()
+    private var _binding: FragmentSelectRootFolderBinding? = null
+    private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
+
     private val fileListViewModel: FileListViewModel by viewModels()
 
     private val uiSettings by lazy { UiSettings(requireContext()) }
@@ -55,10 +58,10 @@ class SelectRootFolderFragment : Fragment() {
 
     private var commonFolderToOpen: FolderToOpen? = null
     private var personalFolderToOpen: FolderToOpen? = null
-    private val hasFolderToOpenBeenSet: CompletableJob = Job()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentSelectRootFolderBinding.inflate(inflater, container, false).also { binding = it }.root
+        inflateCardviewFileListBinding()
+        return FragmentSelectRootFolderBinding.inflate(inflater, container, false).also { _binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
@@ -75,13 +78,7 @@ class SelectRootFolderFragment : Fragment() {
             trashbin.isGone = true
         }
 
-        repeat(3) {
-            recentFoldersBindings.add(
-                CardviewFileListBinding.inflate(layoutInflater)
-                    .apply { this.root.isGone = true }
-                    .also { binding.recentListLayout.addView(it.root, 0) }
-            )
-        }
+        setupRecentFoldersViews()
 
         with((activity as SelectFolderActivity).getSaveButton()) {
             isGone = true
@@ -100,47 +97,46 @@ class SelectRootFolderFragment : Fragment() {
         toolbar.setNavigationOnClickListener { requireActivity().finish() }
     }
 
-    override fun onResume() {
-        super.onResume()
-        setupRecentFolderView()
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         recentFoldersBindings.clear()
+        _binding = null
     }
 
-    private fun setupRecentFolderView() {
+    private fun inflateCardviewFileListBinding() {
+        repeat(3) {
+            recentFoldersBindings.add(
+                CardviewFileListBinding.inflate(layoutInflater)
+                    .apply { this.root.isGone = true }
+                    .also { binding.recentListLayout.addView(it.root, 0) }
+            )
+        }
+    }
+
+    private fun setupRecentFoldersViews() {
         viewLifecycleOwner.lifecycleScope.launch {
             FileController.getRecentFolders().collectLatest { files ->
-                binding.recentFolderTitle.isGone = files.isEmpty()
-                binding.recentListLayout.isGone = files.isEmpty()
+                _binding?.let {
+                    it.recentFolderTitle.isGone = files.isEmpty()
+                    it.recentListLayout.isGone = files.isEmpty()
 
-                setupRecentFolderView(files)
-            }
+                    files.forEachIndexed { index, file ->
+                        val binding = recentFoldersBindings.getOrElse(index) { return@collectLatest }
+                        launch(start = CoroutineStart.UNDISPATCHED) { binding.setupRecentFolderView(file) }
         }
     }
-
-    private suspend fun setupRecentFolderView(files: List<File>) = coroutineScope {
-        files.forEachIndexed { index, file ->
-            val binding = recentFoldersBindings.getOrElse(index) { return@coroutineScope }
-            launch(start = CoroutineStart.UNDISPATCHED) {
-                try {
-                    binding.root.isVisible = true
-                    binding.root.setOnClickListener {
-                        safeNavigate(
-                            SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
-                                file.id,
-                                file.name,
-                            )
-                        )
                     }
-                    binding.itemViewFile.setFileItem(file = file)
-                } finally {
-                    binding.root.isGone = true
                 }
             }
+
+    private suspend fun CardviewFileListBinding.setupRecentFolderView(file: File) {
+        root.isVisible = true
+        root.setOnClickListener {
+            safelyNavigate(
+                SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(file.id, file.name)
+            )
         }
+        itemViewFile.setFileItem(file = file)
     }
 
     private fun setupItems() = with(binding) {
@@ -186,13 +182,12 @@ class SelectRootFolderFragment : Fragment() {
         fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
             personalFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
         }
-        hasFolderToOpenBeenSet.complete()
     }
 
     private fun fileListDirections(
         folderToOpen: FolderToOpen,
     ): NavDirections = SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
         folderId = folderToOpen.id,
-        folderName = folderToOpen.name
+        folderName = folderToOpen.name,
     )
 }
