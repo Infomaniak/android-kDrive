@@ -16,6 +16,7 @@ plugins {
     alias(core.plugins.compose.compiler)
     alias(core.plugins.kotlin.parcelize)
     alias(core.plugins.sentry.plugin)
+	id("org.jlleitschuh.gradle.ktlint")
 }
 
 val appCompileSdk: Int by rootProject.extra
@@ -193,6 +194,7 @@ dependencies {
     implementation(core.infomaniak.core.ui.view)
     implementation(core.infomaniak.core.ui.view.edgetoedge)
     implementation(core.infomaniak.core.webview)
+    ktlintRuleset(project(":Core:KtlintCustomRules"))
 
     implementation(project(":Core:Legacy"))
 
@@ -250,7 +252,6 @@ dependencies {
     implementation("com.pinterest.ktlint:ktlint-rule-engine-core:1.6.0")
     implementation("com.pinterest.ktlint:ktlint-cli:1.6.0")
     implementation("com.pinterest.ktlint:ktlint-cli-ruleset-core:1.6.0")
-
 
     testImplementation(libs.kotlin.faker)
     testImplementation(libs.mock.web.server)
