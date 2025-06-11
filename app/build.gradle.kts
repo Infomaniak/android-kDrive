@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.apply
 import java.util.Properties
 
 plugins {
@@ -9,6 +10,7 @@ plugins {
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
     alias(libs.plugins.sentry)
+	id("org.jlleitschuh.gradle.ktlint")
 }
 
 val appCompileSdk: Int by rootProject.extra
@@ -149,6 +151,7 @@ sentry {
 }
 
 dependencies {
+    ktlintRuleset(project(":Core:KtlintCustomRules"))
 
     implementation(project(":Core"))
     implementation(project(":Core:Avatar"))
@@ -202,7 +205,6 @@ dependencies {
     implementation("com.pinterest.ktlint:ktlint-rule-engine-core:1.6.0")
     implementation("com.pinterest.ktlint:ktlint-cli:1.6.0")
     implementation("com.pinterest.ktlint:ktlint-cli-ruleset-core:1.6.0")
-
 
     testImplementation(libs.kotlin.faker)
     testImplementation(libs.mock.web.server)
