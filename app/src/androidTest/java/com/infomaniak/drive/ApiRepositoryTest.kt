@@ -64,6 +64,7 @@ import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.ApiTestUtils.getCategory
 import com.infomaniak.drive.utils.ApiTestUtils.putNewFileInTrash
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import java.util.UUID
@@ -83,7 +84,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     @DisplayName("Check if remote user profile is correctly retrieved")
-    fun getUserProfileFromRemote() {
+    fun getUserProfileFromRemote() = runTest {
         with(getUserProfile(okHttpClient)) {
             assertApiResponseData(this)
             assertEquals(userDrive.userId, data?.id, "User ids should be the same")
@@ -102,7 +103,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     @DisplayName("Create a category then delete it")
-    fun createCategory() {
+    fun createCategory() = runTest {
         val color = "#0000FF"
         val name = "testCreateCategory-$randomSuffix}"
         val categoryId = createCategory(userDrive.driveId, name, color).let {
@@ -125,8 +126,8 @@ class ApiRepositoryTest : KDriveTest() {
         // Delete the category
         assertApiResponseData(deleteCategory(userDrive.driveId, categoryId))
         assertNull(
-            getCategory(userDrive.driveId).data?.find { cat -> cat.id == categoryId },
-            "The category shouldn't be found anymore",
+            actual = getCategory(userDrive.driveId).data?.find { cat -> cat.id == categoryId },
+            message = "The category shouldn't be found anymore",
         )
     }
 
@@ -136,7 +137,7 @@ class ApiRepositoryTest : KDriveTest() {
         var color = "#0000FF"
         var name = "category-$randomSuffix}"
         val categoryId = createCategory(userDrive.driveId, name, color).let {
-            assertNotNull(it.data)
+            assertNotNull(actual = it.data)
             it.data!!.id
         }
 
@@ -334,7 +335,7 @@ class ApiRepositoryTest : KDriveTest() {
 
         @Test
         @DisplayName("Like a file's comment then unlike it")
-        fun likesCommentOnFile() {
+        fun likesCommentOnFile() = runTest {
             val commentBody = helloWorld
             val commentID = postFileComment(testFile, commentBody).let {
                 assertApiResponseData(it)
@@ -344,15 +345,15 @@ class ApiRepositoryTest : KDriveTest() {
             // Likes the comment
             with(postLikeComment(testFile, commentID)) {
                 assertApiResponseData(this)
-                assertTrue(data ?: false)
+                assertTrue(data == true)
             }
 
             // Gets the comment
             with(getFileComments(testFile, null)) {
                 assertApiResponseData(this)
                 val comment = data!!.find { comment -> comment.id == commentID }
-                assertNotNull(comment, "Comment should not be null")
-                assertTrue(comment?.liked ?: false, "Comment should be liked")
+                assertNotNull(actual = comment, message = "Comment should not be null")
+                assertTrue(comment.liked, "Comment should be liked")
             }
 
             // Unlike the comment
@@ -364,8 +365,8 @@ class ApiRepositoryTest : KDriveTest() {
             // Make sure data has been updated
             with(getFileComments(testFile, null)) {
                 val comment = data?.find { commentRes -> commentRes.id == commentID }
-                assertNotNull(comment, "Comment should not be null")
-                assertFalse(comment?.liked ?: true, "Comment should not be liked anymore")
+                assertNotNull(actual = comment, message = "Comment should not be null")
+                assertFalse(comment.liked, "Comment should not be liked anymore")
             }
         }
 
@@ -402,7 +403,7 @@ class ApiRepositoryTest : KDriveTest() {
             // Creates the share link
             with(createShareLink(testFile, body)) {
                 assertApiResponseData(this)
-                assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
+                assertNotNull(actual = data?.capabilities, message = "The data's capabilities cannot be null")
                 assertEquals(ShareLink.ShareLinkFilePermission.PUBLIC, data!!.right, "Permission should be public")
 
                 with(data?.capabilities!!) {
@@ -433,7 +434,7 @@ class ApiRepositoryTest : KDriveTest() {
             // Makes sure modification has been made
             with(ApiRepository.getShareLink(testFile)) {
                 assertApiResponseData(this)
-                assertNotNull(data?.capabilities, "The data's capabilities cannot be null")
+                assertNotNull(actual = data?.capabilities, message = "The data's capabilities cannot be null")
                 assertEquals(ShareLink.ShareLinkFilePermission.PUBLIC, data!!.right, "Permission should be public")
 
                 with(data?.capabilities!!) {
@@ -462,7 +463,10 @@ class ApiRepositoryTest : KDriveTest() {
             addCategory(testFile, category.id)
             with(getFileDetails(testFile)) {
                 assertApiResponseData(this)
-                assertNotNull(data!!.categories.find { it.categoryId == category.id }, "The test category should be found")
+                assertNotNull(
+                    actual = data!!.categories.find { it.categoryId == category.id },
+                    message = "The test category should be found"
+                )
             }
 
             // Delete the category before removing it from the test file
@@ -507,7 +511,7 @@ class ApiRepositoryTest : KDriveTest() {
         }
 
         private fun createCategoryForTest() = with(createCategory(userDrive.driveId, "testCategory-$randomSuffix", "#FFF")) {
-            assertNotNull(data, "Category should not be null")
+            assertNotNull(actual = data, message = "Category should not be null")
             data!!
         }
 
@@ -559,7 +563,7 @@ class ApiRepositoryTest : KDriveTest() {
 
                 // Makes sure the folder contains the file
                 with(getFileDetails(file)) {
-                    assertNotNull(data)
+                    assertNotNull(actual = data)
                     assertEquals(data?.parentId, id, "The file should be contained in the test folder")
                 }
             }
@@ -585,7 +589,7 @@ class ApiRepositoryTest : KDriveTest() {
         @DisplayName("Create a folder then convert it to dropbox")
         fun createDropboxFromFolder() {
             // No dropbox yet
-            assertNull(getDropBox(testFolder).data, "not dropbox should be returned, data should be null")
+            assertNull(actual = getDropBox(testFolder).data, message = "not dropbox should be returned, data should be null")
 
             val maxSize = 16384L
 
@@ -617,7 +621,7 @@ class ApiRepositoryTest : KDriveTest() {
             }
             with(updateDropBox(testFolder, updateBody)) {
                 assertApiResponseData(this)
-                assertTrue(data ?: false)
+                assertTrue(data == true)
             }
 
             // Make sure the dropbox has been updated
@@ -635,11 +639,11 @@ class ApiRepositoryTest : KDriveTest() {
             // Delete the dropbox
             assertApiResponseData(deleteDropBox(testFolder))
             // Assert no dropbox left
-            assertNull(getDropBox(testFolder).data, "not dropbox should be returned, data should be null")
+            assertNull(actual = getDropBox(testFolder).data, message = "not dropbox should be returned, data should be null")
         }
     }
 
-    companion object {
+    private companion object {
         const val helloWorld = "Hello World"
     }
 }

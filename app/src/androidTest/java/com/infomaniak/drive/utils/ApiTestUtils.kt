@@ -62,7 +62,7 @@ object ApiTestUtils {
         }
     }
 
-    fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
+    suspend fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
         return ApiController.callApi(ApiRoutes.categories(driveId), ApiController.ApiMethod.GET)
     }
 
