@@ -125,7 +125,8 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
         safeNavigate(
             CreateDropBoxFolderFragmentDirections.actionCreateDropBoxFolderFragmentToFileShareDetailsFragment(
-                fileId = file.id, ignoreCreateFolderStack = true
+                fileId = file.id,
+                ignoreCreateFolderStack = true
             )
         )
     }

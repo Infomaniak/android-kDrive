@@ -22,9 +22,9 @@ import com.infomaniak.core.myksuite.ui.data.MyKSuiteDataManager
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SentryLog
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
-import kotlin.coroutines.cancellation.CancellationException
 
 object MyKSuiteDataUtils : MyKSuiteDataManager() {
 

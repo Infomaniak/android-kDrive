@@ -40,9 +40,9 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
 import io.realm.kotlin.oneOf
 import io.sentry.Sentry
+import java.util.Date
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import java.util.Date
 
 open class UploadFile(
     @PrimaryKey var uri: String = "",
@@ -146,7 +146,11 @@ open class UploadFile(
     }
 
     enum class Type {
-        SYNC, UPLOAD, SHARED_FILE, SYNC_OFFLINE, CLOUD_STORAGE
+        SYNC,
+        UPLOAD,
+        SHARED_FILE,
+        SYNC_OFFLINE,
+        CLOUD_STORAGE
     }
 
     companion object {

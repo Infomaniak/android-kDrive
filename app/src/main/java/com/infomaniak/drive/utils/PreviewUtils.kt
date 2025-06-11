@@ -50,8 +50,8 @@ import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
 import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
-import okhttp3.Response
 import java.io.BufferedInputStream
+import okhttp3.Response
 
 private const val BUFFER_SIZE = 8192
 

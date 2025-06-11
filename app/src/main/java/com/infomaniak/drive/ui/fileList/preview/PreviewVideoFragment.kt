@@ -133,7 +133,7 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         exoPlayer?.apply {
             addAnalyticsListener(EventLogger(trackSelector))
-            setAudioAttributes(AudioAttributes.DEFAULT,  /* handleAudioFocus= */true)
+            setAudioAttributes(AudioAttributes.DEFAULT, /* handleAudioFocus= */true)
             playWhenReady = false
 
             playerView.player = this

@@ -143,11 +143,13 @@ class LaunchActivity : AppCompatActivity() {
     private fun handleNotificationDestinationIntent() {
         navigationArgs?.let {
             if (it.destinationUserId != 0 && it.destinationDriveId != 0) {
-                Sentry.addBreadcrumb(Breadcrumb().apply {
-                    category = UploadWorker.BREADCRUMB_TAG
-                    message = "Upload notification has been clicked"
-                    level = SentryLevel.INFO
-                })
+                Sentry.addBreadcrumb(
+                    Breadcrumb().apply {
+                        category = UploadWorker.BREADCRUMB_TAG
+                        message = "Upload notification has been clicked"
+                        level = SentryLevel.INFO
+                    }
+                )
                 DriveInfosController.getDrive(driveId = it.destinationDriveId, maintenance = false)?.let { drive ->
                     setOpenSpecificFile(
                         userId = drive.userId,

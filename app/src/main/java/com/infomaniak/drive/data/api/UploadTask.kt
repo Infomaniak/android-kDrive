@@ -64,12 +64,6 @@ import io.ktor.utils.io.toByteArray
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
-import splitties.coroutines.raceOf
-import splitties.experimental.ExperimentalSplittiesApi
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -78,6 +72,12 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.minusAssign
 import kotlin.reflect.KSuspendFunction1
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import splitties.coroutines.raceOf
+import splitties.experimental.ExperimentalSplittiesApi
 
 class UploadTask(
     private val context: Context,
@@ -146,12 +146,13 @@ class UploadTask(
             uploadFile.uploadHost
         }!!
 
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = UploadWorker.BREADCRUMB_TAG
-            message = "start ${uploadFile.uri} with $totalChunks chunks and $uploadedChunks uploadedChunks"
-            level = SentryLevel.INFO
-        })
-
+        Sentry.addBreadcrumb(
+            Breadcrumb().apply {
+                category = UploadWorker.BREADCRUMB_TAG
+                message = "start ${uploadFile.uri} with $totalChunks chunks and $uploadedChunks uploadedChunks"
+                level = SentryLevel.INFO
+            }
+        )
 
         SentryLog.d("kDrive", " upload task started with total chunks: $totalChunks, valid: $uploadedChunks")
 
@@ -339,10 +340,12 @@ class UploadTask(
         if (!isSuccessful) {
             val bytes = response.bodyAsChannel().toByteArray().also { bytes ->
                 val expectedContentLength = response.contentLength() ?: bytes.size
-                if (expectedContentLength != bytes.size) SentryLog.e(
-                    tag = "UploadTask",
-                    msg = "Backend provided contentLength was $expectedContentLength bytes, but received ${bytes.size}",
-                )
+                if (expectedContentLength != bytes.size) {
+                    SentryLog.e(
+                        tag = "UploadTask",
+                        msg = "Backend provided contentLength was $expectedContentLength bytes, but received ${bytes.size}",
+                    )
+                }
             }
             val bodyResponse = String(bytes)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
@@ -362,7 +365,7 @@ class UploadTask(
 
         SentryLog.i(
             "kDrive",
-            " upload >> ${progress}%, totalBytesWritten:$totalBytesWritten, fileSize:${uploadFile.fileSize}",
+            " upload >> $progress%, totalBytesWritten:$totalBytesWritten, fileSize:${uploadFile.fileSize}",
         )
 
         currentCoroutineContext().ensureActive()
@@ -370,7 +373,7 @@ class UploadTask(
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
             uploadNotification.apply {
                 setContentIntent(uploadFile.progressPendingIntent(context))
-                setContentText("${progress}%")
+                setContentText("$progress%")
                 setProgress(100, progress, false)
                 notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
                 uploadNotificationStartTime = System.currentTimeMillis()
@@ -411,8 +414,10 @@ class UploadTask(
         )
 
         return ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient).also {
-            if (it.isSuccess()) it.data?.token?.let { uploadToken ->
-                uploadFile.updateUploadToken(uploadToken, it.data!!.uploadHost)
+            if (it.isSuccess()) {
+                it.data?.token?.let { uploadToken ->
+                    uploadFile.updateUploadToken(uploadToken, it.data!!.uploadHost)
+                }
             } else {
                 it.manageUploadErrors()
             }

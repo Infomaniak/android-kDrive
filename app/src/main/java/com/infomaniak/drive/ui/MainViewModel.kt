@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,11 +55,11 @@ import io.realm.kotlin.toFlow
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import java.util.Date
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
-import java.util.Date
 
 class MainViewModel(
     appContext: Application,
@@ -228,19 +228,18 @@ class MainViewModel(
         emit(ApiRepository.createOfficeFile(driveId, folderId, createFile))
     }
 
-    fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) =
-        liveData(Dispatchers.IO) {
-            with(ApiRepository.postFavoriteFile(file)) {
-                emit(FileResult(this.isSuccess()))
+    fun addFileToFavorites(file: File, userDrive: UserDrive? = null, onSuccess: (() -> Unit)? = null) = liveData(Dispatchers.IO) {
+        with(ApiRepository.postFavoriteFile(file)) {
+            emit(FileResult(this.isSuccess()))
 
-                if (isSuccess()) {
-                    FileController.updateFile(file.id, userDrive = userDrive) {
-                        it.isFavorite = true
-                    }
-                    onSuccess?.invoke()
+            if (isSuccess()) {
+                FileController.updateFile(file.id, userDrive = userDrive) {
+                    it.isFavorite = true
                 }
+                onSuccess?.invoke()
             }
         }
+    }
 
     fun deleteFileFromFavorites(file: File, userDrive: UserDrive? = null, onSuccess: ((File) -> Unit)? = null) =
         liveData(Dispatchers.IO) {
@@ -505,11 +504,13 @@ class MainViewModel(
 
     private suspend fun onNetworkAvailabilityChanged(isNetworkAvailable: Boolean) {
         SentryLog.d("Internet availability", if (isNetworkAvailable) "Available" else "Unavailable")
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = "Network"
-            message = "Internet access is available : $isNetworkAvailable"
-            level = if (isNetworkAvailable) SentryLevel.INFO else SentryLevel.WARNING
-        })
+        Sentry.addBreadcrumb(
+            Breadcrumb().apply {
+                category = "Network"
+                message = "Internet access is available : $isNetworkAvailable"
+                level = if (isNetworkAvailable) SentryLevel.INFO else SentryLevel.WARNING
+            }
+        )
         if (isNetworkAvailable) {
             AccountUtils.updateCurrentUserAndDrives(this@MainViewModel.getContext())
             restartUploadWorkerIfNeeded()

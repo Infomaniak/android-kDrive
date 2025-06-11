@@ -30,10 +30,10 @@ import com.infomaniak.drive.ui.fileList.SearchFragment.VisibilityMode
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import io.realm.OrderedRealmCollection
+import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
-import java.util.Date
 
 class SearchViewModel : ViewModel() {
 

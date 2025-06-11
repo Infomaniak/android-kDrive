@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -81,10 +80,12 @@ object AccountUtils : CredentialManager() {
             field = user
             currentUserId = user?.id ?: -1
             getCurrentDrive()
-            Sentry.setUser(io.sentry.protocol.User().apply {
-                id = currentUserId.toString()
-                email = user?.email
-            })
+            Sentry.setUser(
+                io.sentry.protocol.User().apply {
+                    id = currentUserId.toString()
+                    email = user?.email
+                }
+            )
             InfomaniakCore.bearerToken = user?.apiToken?.accessToken.toString()
         }
 
@@ -168,7 +169,8 @@ object AccountUtils : CredentialManager() {
                 reloadApp()
             }
         } else if (internalDrives.none { drive -> !drive.maintenance } ||
-            internalDrives.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
+            internalDrives.any { drive -> drive.maintenance && drive.id == currentDriveId }
+        ) {
             reloadApp()
         }
     }

@@ -52,8 +52,8 @@ import io.realm.Realm
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.*
 import java.util.*
+import kotlinx.coroutines.*
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
@@ -106,7 +106,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 // Update next iteration
                 retryError = if (currentUploadFile?.fileName == lastUploadFileName) retryError + 1 else 0
                 lastUploadFileName = currentUploadFile?.fileName ?: ""
-
             } while (syncNewPendingUploads && retryError < MAX_RETRY_COUNT)
 
             if (retryError == MAX_RETRY_COUNT) {
@@ -322,8 +321,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val foregroundInfo = when {
             SDK_INT >= 29 -> {
                 ForegroundInfo(
-                    /* notificationId = */ NotificationUtils.UPLOAD_SERVICE_ID,
-                    /* notification = */ notification,
+                    /* notificationId = */
+                    NotificationUtils.UPLOAD_SERVICE_ID,
+                    /* notification = */
+                    notification,
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
                 )
             }
@@ -360,8 +361,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val lastUploadDate = UploadFile.getLastDate(applicationContext)
         val args = initArgs(lastUploadDate)
         val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
-                "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
-                "OR ${MediaStore.MediaColumns.DATE_MODIFIED} >= ? )"
+            "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
+            "OR ${MediaStore.MediaColumns.DATE_MODIFIED} >= ? )"
         var customSelection: String
         var customArgs: Array<String>
 
@@ -373,11 +374,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
                     ensureActive()
                     // Add log
-                    Sentry.addBreadcrumb(Breadcrumb().apply {
-                        category = BREADCRUMB_TAG
-                        message = "sync ${mediaFolder.id}"
-                        level = SentryLevel.DEBUG
-                    })
+                    Sentry.addBreadcrumb(
+                        Breadcrumb().apply {
+                            category = BREADCRUMB_TAG
+                            message = "sync ${mediaFolder.id}"
+                            level = SentryLevel.DEBUG
+                        }
+                    )
                     SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
 
                     // Sync media folder
@@ -429,19 +432,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     ) {
 
         val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " +
-                MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
-                MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
+            MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
+            MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
 
         runCatching {
             contentResolver.query(contentUri, null, selection, args, sortOrder)
                 ?.use { cursor ->
                     val messageLog = "getLocalLastMediasAsync > $contentUri from ${mediaFolder.name} ${cursor.count} found"
                     SentryLog.d(TAG, messageLog)
-                    Sentry.addBreadcrumb(Breadcrumb().apply {
-                        category = BREADCRUMB_TAG
-                        message = messageLog
-                        level = SentryLevel.INFO
-                    })
+                    Sentry.addBreadcrumb(
+                        Breadcrumb().apply {
+                            category = BREADCRUMB_TAG
+                            message = messageLog
+                            level = SentryLevel.INFO
+                        }
+                    )
 
                     while (cursor.moveToNext()) {
                         coroutineScope.ensureActive()
@@ -470,11 +475,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         val messageLog = "localMediaFound > $fileName found in folder ${mediaFolder.name}"
         SentryLog.d(TAG, messageLog)
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = BREADCRUMB_TAG
-            message = messageLog
-            level = SentryLevel.INFO
-        })
+        Sentry.addBreadcrumb(
+            Breadcrumb().apply {
+                category = BREADCRUMB_TAG
+                message = messageLog
+                level = SentryLevel.INFO
+            }
+        )
 
         if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
             UploadFile(

@@ -59,11 +59,11 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import java.net.URLDecoder
+import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLDecoder
-import java.util.Date
 
 class SaveExternalFilesActivity : BaseActivity() {
 
@@ -248,8 +248,8 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun fetchFolder() = with(selectDriveViewModel) {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
-            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null
-                || folderId == null
+            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null ||
+                folderId == null
             ) {
                 null
             } else {
@@ -398,10 +398,10 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun isValidFields(): Boolean {
         return (isMultiple || !binding.fileNameEdit.showOrHideEmptyError() || navigationArgs.isPublicShare) &&
-                selectDriveViewModel.selectedUserId.value != null &&
-                selectDriveViewModel.selectedDrive.value != null &&
-                saveExternalFilesViewModel.folderId.value != null &&
-                saveExternalFilesViewModel.folderId.value != OTHER_ROOT_ID
+            selectDriveViewModel.selectedUserId.value != null &&
+            selectDriveViewModel.selectedDrive.value != null &&
+            saveExternalFilesViewModel.folderId.value != null &&
+            saveExternalFilesViewModel.folderId.value != OTHER_ROOT_ID
     }
 
     private fun activeSelectDrive() = with(binding) {
@@ -426,7 +426,6 @@ class SaveExternalFilesActivity : BaseActivity() {
                     storeText(userId, driveId, folderId)
                 }
                 else -> false
-
             }
         } catch (exception: Exception) {
             exception.printStackTrace()

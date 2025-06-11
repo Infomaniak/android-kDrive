@@ -46,5 +46,4 @@ class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
 
         secondaryActionButton.isGone = true
     }
-
 }

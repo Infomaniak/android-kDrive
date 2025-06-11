@@ -98,7 +98,6 @@ object NavigationUiUtils {
                     }
                 }
             }
-
         })
     }
 

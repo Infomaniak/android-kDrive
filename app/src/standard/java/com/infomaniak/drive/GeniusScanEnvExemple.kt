@@ -20,5 +20,4 @@ package com.infomaniak.drive
 object GeniusScanEnvExemple {
 
     const val GENIUS_SCAN_KEY = ""
-
 }

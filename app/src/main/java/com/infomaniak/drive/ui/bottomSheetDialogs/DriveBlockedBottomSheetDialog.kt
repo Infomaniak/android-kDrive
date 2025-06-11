@@ -50,5 +50,4 @@ class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
         }
         secondaryActionButton.setText(R.string.buttonClose)
     }
-
 }

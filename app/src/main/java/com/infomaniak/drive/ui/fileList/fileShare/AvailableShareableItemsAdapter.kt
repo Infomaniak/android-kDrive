@@ -145,10 +145,10 @@ class AvailableShareableItemsAdapter(
             val finalUserList = initialList
                 .filter {
                     it.getFilterValue().standardize().contains(searchTerm) ||
-                            ((it is DriveUser) && it.email.standardize().contains(searchTerm))
+                        ((it is DriveUser) && it.email.standardize().contains(searchTerm))
                 }.filterNot { displayedItem ->
                     notShareableIds.any { it == displayedItem.id } ||
-                            notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
+                        notShareableEmails.any { displayedItem is DriveUser && it == displayedItem.email }
                 }
 
             return FilterResults().apply {

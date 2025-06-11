@@ -45,12 +45,12 @@ import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.showToast
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 import java.net.URL
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class OnlyOfficeActivity : AppCompatActivity() {
 
@@ -159,7 +159,6 @@ class OnlyOfficeActivity : AppCompatActivity() {
                     .build()
                 callback.onLayoutFinished(printDocumentInfo, true)
             }
-
         }
 
         (this.getSystemService(Context.PRINT_SERVICE) as PrintManager).apply {

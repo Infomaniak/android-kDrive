@@ -74,11 +74,16 @@ class SharedItemsAdapter(
         externalUserLabel.apply {
             if (userFileAccess.isExternalUser) {
                 text = context.getString(
-                    if (userFileAccess.status == UserFileAccess.UserFileAccessStatus.PENDING) R.string.shareUserNotAccepted
-                    else R.string.shareUserExternal
+                    if (userFileAccess.status == UserFileAccess.UserFileAccessStatus.PENDING) {
+                        R.string.shareUserNotAccepted
+                    } else {
+                        R.string.shareUserExternal
+                    }
                 )
                 isVisible = true
-            } else isGone = true
+            } else {
+                isGone = true
+            }
         }
 
         if (file.createdBy == userFileAccess.id) {

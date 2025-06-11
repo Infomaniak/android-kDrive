@@ -17,13 +17,13 @@
  */
 package com.infomaniak.drive.data.api
 
+import java.io.IOException
 import okhttp3.MediaType
 import okhttp3.RequestBody
 import okhttp3.internal.http.CallServerInterceptor
 import okio.BufferedSink
 import okio.buffer
 import okio.sink
-import java.io.IOException
 
 class ProgressRequestBody(
     private val requestBody: RequestBody,

@@ -203,7 +203,8 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
             file = file,
             shareLink = file.shareLink,
             onTitleClicked = { newShareLink -> handleOnShareLinkTitleClicked(newShareLink) },
-            onSettingsClicked = { newShareLink -> handleOnShareLinkSettingsClicked(newShareLink) })
+            onSettingsClicked = { newShareLink -> handleOnShareLinkSettingsClicked(newShareLink) }
+        )
     }
 
     private fun handleOnShareLinkTitleClicked(newShareLink: ShareLink?) {
@@ -259,7 +260,6 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
                     onClicked = { onCategoriesClicked(file.id) },
                 )
             }
-
         } else {
             categoriesDivider.isGone = true
             categoriesContainer.isGone = true
@@ -339,18 +339,27 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
             val currentPermission = when {
                 isFolder -> {
                     permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS
-                    if (shareLinkExist) ShareLink.ShareLinkFolderPermission.PUBLIC
-                    else ShareLink.ShareLinkFolderPermission.RESTRICTED
+                    if (shareLinkExist) {
+                        ShareLink.ShareLinkFolderPermission.PUBLIC
+                    } else {
+                        ShareLink.ShareLinkFolderPermission.RESTRICTED
+                    }
                 }
                 isOnlyOffice -> {
                     permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_DOCUMENT_SETTINGS
-                    if (shareLinkExist) ShareLink.ShareLinkDocumentPermission.PUBLIC
-                    else ShareLink.ShareLinkDocumentPermission.RESTRICTED
+                    if (shareLinkExist) {
+                        ShareLink.ShareLinkDocumentPermission.PUBLIC
+                    } else {
+                        ShareLink.ShareLinkDocumentPermission.RESTRICTED
+                    }
                 }
                 else -> {
                     permissionsGroup = SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_SETTINGS
-                    if (shareLinkExist) ShareLink.ShareLinkFilePermission.PUBLIC
-                    else ShareLink.ShareLinkFilePermission.RESTRICTED
+                    if (shareLinkExist) {
+                        ShareLink.ShareLinkFilePermission.PUBLIC
+                    } else {
+                        ShareLink.ShareLinkFilePermission.RESTRICTED
+                    }
                 }
             }
             return Pair(permissionsGroup, currentPermission)

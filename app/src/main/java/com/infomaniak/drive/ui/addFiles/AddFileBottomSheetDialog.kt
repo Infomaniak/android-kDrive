@@ -58,11 +58,11 @@ import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
+import java.io.IOException
+import java.util.Date
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.IOException
-import java.util.Date
 
 class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -248,7 +248,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private fun createMediaFile(isVideo: Boolean): Uri {
         val date = Date()
         val timeStamp: String = date.format(FORMAT_NEW_FILE)
-        val fileName = "${timeStamp}.${if (isVideo) "mp4" else "jpg"}"
+        val fileName = "$timeStamp.${if (isVideo) "mp4" else "jpg"}"
 
         val fileData = IOFile(createExposedTempUploadDir(), fileName).apply {
             if (exists()) delete()

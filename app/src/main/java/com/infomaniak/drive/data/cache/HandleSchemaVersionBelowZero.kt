@@ -43,7 +43,9 @@ object HandleSchemaVersionBelowZero {
             if (it is OldSchemaVersion && it.oldVersion == 0L) {
                 Realm.getInstance(deleteRealmConfiguration)
             } else {
-                throw requireNotNull(originalMigrationException) { "This field must have been set when the first runCatching has failed" }
+                throw requireNotNull(originalMigrationException) {
+                    "This field must have been set when the first runCatching has failed"
+                }
             }
         }
     }

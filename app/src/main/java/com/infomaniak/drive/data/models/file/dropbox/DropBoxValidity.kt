@@ -21,8 +21,8 @@ import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
-import kotlinx.parcelize.Parcelize
 import java.util.Date
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RealmClass(embedded = true)

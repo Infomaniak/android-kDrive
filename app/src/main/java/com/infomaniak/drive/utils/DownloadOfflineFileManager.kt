@@ -48,6 +48,7 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -55,7 +56,6 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.util.UUID
 
 class DownloadOfflineFileManager(
     private val userDrive: UserDrive,
@@ -274,9 +274,12 @@ class DownloadOfflineFileManager(
         fun createDownloadNotification(context: Context, id: UUID, title: String): NotificationCompat.Builder {
             val cancelPendingIntent = WorkManager.getInstance(context).createCancelPendingIntent(id)
             val cancelAction = NotificationCompat.Action(
-                /* icon = */ null,
-                /* title = */ context.getString(R.string.buttonCancel),
-                /* intent = */ cancelPendingIntent
+                /* icon = */
+                null,
+                /* title = */
+                context.getString(R.string.buttonCancel),
+                /* intent = */
+                cancelPendingIntent
             )
             return context.downloadProgressNotification().apply {
                 setOngoing(true)
@@ -322,17 +325,22 @@ class DownloadOfflineFileManager(
             val originalResponse = chain.proceed(chain.request())
 
             originalResponse.newBuilder()
-                .body(ProgressResponseBody(originalResponse.body!!, object : ProgressResponseBody.ProgressListener {
-                    override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
-                        val currentSystemTimeMillis = System.currentTimeMillis()
-                        val lastUpdate = getMostRecentLastUpdate?.invoke() ?: 0L
-                        if (currentSystemTimeMillis - lastUpdate > MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS) {
-                            onLastUpdateChange?.invoke(currentSystemTimeMillis)
-                            val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
-                            onProgress.invoke(progress)
+                .body(
+                    ProgressResponseBody(
+                        originalResponse.body!!,
+                        object : ProgressResponseBody.ProgressListener {
+                            override fun update(bytesRead: Long, contentLength: Long, done: Boolean) {
+                                val currentSystemTimeMillis = System.currentTimeMillis()
+                                val lastUpdate = getMostRecentLastUpdate?.invoke() ?: 0L
+                                if (currentSystemTimeMillis - lastUpdate > MAX_INTERVAL_BETWEEN_PROGRESS_UPDATE_MS) {
+                                    onLastUpdateChange?.invoke(currentSystemTimeMillis)
+                                    val progress = (bytesRead.toFloat() / contentLength.toFloat() * 100F).toInt()
+                                    onProgress.invoke(progress)
+                                }
+                            }
                         }
-                    }
-                })).build()
+                    )
+                ).build()
         }
     }
 }

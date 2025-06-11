@@ -42,10 +42,10 @@ import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.infomaniak.drive.R
-import kotlinx.coroutines.*
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlinx.coroutines.*
 
 /**
  * Sets a custom scroller for [RecyclerView].
@@ -77,7 +77,9 @@ import kotlin.math.roundToInt
  * */
 
 class RecyclerViewFastScroller @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
 ) : RelativeLayout(context, attrs, defStyleAttr) {
 
     companion object {
@@ -87,7 +89,8 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     }
 
     enum class FastScrollDirection(val value: Int) {
-        HORIZONTAL(1), VERTICAL(0);
+        HORIZONTAL(1),
+        VERTICAL(0);
 
         companion object {
             fun getFastScrollDirectionByValue(value: Int = Defaults.fastScrollDirection.value): FastScrollDirection {
@@ -100,13 +103,15 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     }
 
     private enum class PopupPosition(val value: Int) {
-        BEFORE_TRACK(0), AFTER_TRACK(1);
+        BEFORE_TRACK(0),
+        AFTER_TRACK(1);
 
         companion object {
             fun getPopupPositionByValue(value: Int = Defaults.popupPosition.value): PopupPosition {
                 for (popupPosition: PopupPosition in values()) {
-                    if (popupPosition.value == value)
+                    if (popupPosition.value == value) {
                         return popupPosition
+                    }
                 }
                 return Defaults.popupPosition
             }
@@ -330,8 +335,10 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
             // set default handleImageView drawable if not defined
             handleDrawable =
-                (loadDrawableFromAttributes(R.styleable.RecyclerViewFastScroller_handleDrawable)
-                    ?: ContextCompat.getDrawable(context, Defaults.handleDrawableInt))
+                (
+                    loadDrawableFromAttributes(R.styleable.RecyclerViewFastScroller_handleDrawable)
+                        ?: ContextCompat.getDrawable(context, Defaults.handleDrawableInt)
+                    )
 
             handleVisibilityDuration =
                 attribs.getInt(
@@ -430,13 +437,15 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                                 when (fastScrollDirection) {
                                     FastScrollDirection.HORIZONTAL -> {
                                         val handleRange = handlePosition[0].toFloat()..handlePosition[0] + handleLength
-                                        if (!handleRange.contains(motionEvent.rawX))
+                                        if (!handleRange.contains(motionEvent.rawX)) {
                                             return@OnTouchListener false
+                                        }
                                     }
                                     FastScrollDirection.VERTICAL -> {
                                         val handleRange = handlePosition[1].toFloat()..handlePosition[1] + handleLength
-                                        if (!handleRange.contains(motionEvent.rawY))
+                                        if (!handleRange.contains(motionEvent.rawY)) {
                                             return@OnTouchListener false
+                                        }
                                     }
                                 }
                             }
@@ -482,7 +491,8 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                                     when (fastScrollDirection) {
                                         FastScrollDirection.HORIZONTAL -> handleImageView.x
                                         FastScrollDirection.VERTICAL -> handleImageView.y
-                                    }, position
+                                    },
+                                    position
                                 )
                             }
                             updateTextInPopup(
@@ -787,7 +797,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 previousTotalVisibleItem = max(previousTotalVisibleItem, totalVisibleItems)
                 // check bounds and then set position
                 val position =
-                    if (layoutManager.reverseLayout)
+                    if (layoutManager.reverseLayout) {
                         min(
                             recyclerViewItemCount,
                             max(
@@ -795,7 +805,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                                 recyclerViewItemCount - (newOffset * (recyclerViewItemCount - totalVisibleItems)).roundToInt()
                             )
                         )
-                    else
+                    } else {
                         min(
                             recyclerViewItemCount,
                             max(
@@ -803,6 +813,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                                 (newOffset * (recyclerViewItemCount - totalVisibleItems)).roundToInt()
                             )
                         )
+                    }
 
                 val toScrollPosition =
                     min((this.adapter?.itemCount ?: 0) - (previousTotalVisibleItem + 1), position)
@@ -827,7 +838,9 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
         when (val adapter = recyclerView.adapter) {
             null -> {
-                throw IllegalAccessException("No adapter found, if you have an adapter then try placing if before calling the attachFastScrollerToRecyclerView() method")
+                throw IllegalAccessException(
+                    "No adapter found, if you have an adapter then try placing if before calling the attachFastScrollerToRecyclerView() method"
+                )
             }
             is OnPopupTextUpdate -> popupTextView.text = adapter.onChange(position).toString()
             is OnPopupViewUpdate -> {
@@ -854,10 +867,21 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                         (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
                     if (currentVisiblePos != RecyclerView.NO_POSITION) {
                         outRect.bottom =
-                            (parent.findViewHolderForAdapterPosition(currentVisiblePos)?.itemView?.height
-                                ?: 0)
+                            (
+                                parent.findViewHolderForAdapterPosition(currentVisiblePos)?.itemView?.height
+                                    ?: 0
+                                )
                     }
                 }
+            }
+
+            fun test(
+                i: Int,
+                i1: Int,
+                i2: Int,
+                i4: Int,
+            ): Int {
+                return 0
             }
         }
     }
@@ -990,7 +1014,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         }
     }
 
-    @Keep
     /**
      * Provides the [TextView] along with the current position of the [RecyclerViewFastScroller]
      *
@@ -1003,11 +1026,11 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
      * @see OnPopupTextUpdate
      * @since 1.0
      **/
+    @Keep
     interface OnPopupViewUpdate {
         fun onUpdate(position: Int, popupTextView: TextView)
     }
 
-    @Keep
     /**
      * A simpler callback to just provide the [CharSequence] to be set to the [popupTextView] based on the position.
      *
@@ -1018,17 +1041,18 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
      * @see OnPopupViewUpdate
      * @since 1.0
      **/
+    @Keep
     interface OnPopupTextUpdate {
         fun onChange(position: Int): CharSequence
     }
 
-    @Keep
     /**
      * An interface to listen to different states of the handle in the fastscroller, all the methods in this are only called if [isFastScrollEnabled] is true
      *
      * @since 1.0
      * @see isFastScrollEnabled
      **/
+    @Keep
     interface HandleStateListener {
         /**
          * Called when the handle is pressed and engaged for fastscroll behavior
