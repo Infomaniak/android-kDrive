@@ -339,15 +339,16 @@ class UploadTask(
         if (!isSuccessful) {
             val bytes = response.bodyAsChannel().toByteArray().also { bytes ->
                 val expectedContentLength = response.contentLength() ?: bytes.size
-                if (expectedContentLength != bytes.size) SentryLog.e(
-                    tag = "UploadTask",
-                    msg = "Backend provided contentLength was $expectedContentLength bytes, but received ${bytes.size}",
-                )
+                if (expectedContentLength != bytes.size) Sentry.withScope { scope ->
+                    scope.setExtra("contentLength", expectedContentLength.toString())
+                    scope.setExtra("received", bytes.size.toString())
+                    SentryLog.e(TAG, "Backend provided more or fewer bytes than the contentLength it declared!")
+                }
             }
             val bodyResponse = String(bytes)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
-                gson.fromJson(bodyResponse, ApiResponse::class.java)
+                gson.fromJson(bodyResponse, ApiResponse::class.java)!! // Might be empty when http 502 Bad gateway happens
             } catch (_: Exception) {
                 ApiResponse<Any>(error = ApiError(description = bodyResponse))
             }
