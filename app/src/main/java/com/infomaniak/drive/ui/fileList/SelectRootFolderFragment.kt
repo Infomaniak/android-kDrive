@@ -39,7 +39,6 @@ import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setFileItem
-import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.collectLatest
@@ -123,11 +122,11 @@ class SelectRootFolderFragment : Fragment() {
                     files.forEachIndexed { index, file ->
                         val binding = recentFoldersBindings.getOrElse(index) { return@collectLatest }
                         launch(start = CoroutineStart.UNDISPATCHED) { binding.setupRecentFolderView(file) }
-        }
-    }
                     }
                 }
             }
+        }
+    }
 
     private suspend fun CardviewFileListBinding.setupRecentFolderView(file: File) {
         root.isVisible = true
@@ -142,27 +141,27 @@ class SelectRootFolderFragment : Fragment() {
     private fun setupItems() = with(binding) {
         rootFolderLayout.organizationFolder.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = CommonFolders
-            commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
+            commonFolderToOpen?.let { safelyNavigate(fileListDirections(it)) }
         }
 
         rootFolderLayout.personalFolder.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = PersonalFolder
-            personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
+            personalFolderToOpen?.let { safelyNavigate(fileListDirections(it)) }
         }
 
         rootFolderLayout.favorites.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = Favorites
-            safeNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToFavoritesFragment())
+            safelyNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToFavoritesFragment())
         }
 
         rootFolderLayout.sharedWithMeFiles.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = SharedWithMe
-            safeNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment())
+            safelyNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment())
         }
 
         rootFolderLayout.myShares.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = MyShares
-            safeNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment())
+            safelyNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment())
         }
     }
 
