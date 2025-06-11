@@ -198,6 +198,12 @@ dependencies {
 
     implementation(libs.paho.mqtt.android)
 
+    implementation("com.pinterest.ktlint:ktlint-core:0.49.1")
+    implementation("com.pinterest.ktlint:ktlint-rule-engine-core:1.6.0")
+    implementation("com.pinterest.ktlint:ktlint-cli:1.6.0")
+    implementation("com.pinterest.ktlint:ktlint-cli-ruleset-core:1.6.0")
+
+
     testImplementation(libs.kotlin.faker)
     testImplementation(libs.mock.web.server)
     androidTestImplementation(libs.androidx.ui.automator)
