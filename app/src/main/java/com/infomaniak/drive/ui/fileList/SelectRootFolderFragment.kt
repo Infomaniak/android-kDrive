@@ -71,7 +71,7 @@ class SelectRootFolderFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        collapsingToolbarLayout.title = "Sélectionner un dossier"
+        collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
         val currentDrive = AccountUtils.getCurrentDrive(forceRefresh = true)
         rootFolderTitle.text = currentDrive?.name
