@@ -347,7 +347,7 @@ class UploadTask(
             val bodyResponse = String(bytes)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
-                gson.fromJson(bodyResponse, ApiResponse::class.java)
+                gson.fromJson(bodyResponse, ApiResponse::class.java)!! // Might be empty when http 502 Bad gateway happens
             } catch (_: Exception) {
                 ApiResponse<Any>(error = ApiError(description = bodyResponse))
             }
