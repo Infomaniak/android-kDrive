@@ -24,7 +24,7 @@ jobs:
       run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.6.0/ktlint && chmod a+x ktlint
 
     - name: Run ktlint
-      run: ./ktlint
+      run: ./ktlint --code-style android_studio
 
   instrumentation-tests:
     if: github.event.pull_request.draft == false
