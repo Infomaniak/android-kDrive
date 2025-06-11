@@ -214,8 +214,11 @@ class UploadInProgressFragment : FileListFragment() {
             }
             folderId?.let {
                 UploadFile.cancelAllPendingFilesSessions(folderId = it)
-                if (isPendingFolders()) UploadFile.deleteAll(null)
-                else UploadFile.deleteAll(folderId = it)
+                if (isPendingFolders()) {
+                    UploadFile.deleteAll(null)
+                } else {
+                    UploadFile.deleteAll(folderId = it)
+                }
 
                 fileRecyclerView?.post { fileAdapter.setFiles(listOf()) }
 
@@ -246,7 +249,9 @@ class UploadInProgressFragment : FileListFragment() {
                 popBackStack()
                 popBackStack()
                 false
-            } else true
+            } else {
+                true
+            }
         }
 
         if (notIgnorePendingFoldersIfNeeded()) findNavController().popBackStack()

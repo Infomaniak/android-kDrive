@@ -18,5 +18,6 @@
 package com.infomaniak.drive.utils
 
 enum class SingleOperation {
-    COPY, MOVE
+    COPY,
+    MOVE
 }

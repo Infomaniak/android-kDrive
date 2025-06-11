@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@ import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.FileActivity
+import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import java.util.Date
 
 class HomeViewModel : ViewModel() {
 
@@ -164,8 +164,8 @@ class HomeViewModel : ViewModel() {
 
     private fun ignoreEventActivities(previousActivity: FileActivity, currentActivity: FileActivity): Boolean {
         return previousActivity.user?.id == currentActivity.user?.id &&
-                previousActivity.action == currentActivity.action &&
-                previousActivity.fileId == currentActivity.fileId
+            previousActivity.action == currentActivity.action &&
+            previousActivity.fileId == currentActivity.fileId
     }
 
     data class LastActivityResult(

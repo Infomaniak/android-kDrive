@@ -153,14 +153,16 @@ class SearchFragment : FileListFragment() {
     }
 
     private fun EditText.addTextChangedListener() {
-        addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-            if (searchViewModel.previousSearch != null) {
-                searchViewModel.previousSearch = null
-                return@DebouncingTextWatcher
+        addTextChangedListener(
+            DebouncingTextWatcher(lifecycle) {
+                if (searchViewModel.previousSearch != null) {
+                    searchViewModel.previousSearch = null
+                    return@DebouncingTextWatcher
+                }
+                updateClearButton(it)
+                triggerSearch()
             }
-            updateClearButton(it)
-            triggerSearch()
-        })
+        )
     }
 
     private fun EditText.setOnEditorActionListener() {
@@ -290,7 +292,6 @@ class SearchFragment : FileListFragment() {
                 } else {
                     handleApiCallFailure(folderFilesResult.errorRes)
                 }
-
             } ?: handleLiveDataTriggerWhenInitialized()
 
             isDownloading = false
@@ -402,7 +403,10 @@ class SearchFragment : FileListFragment() {
     }
 
     enum class VisibilityMode {
-        RECENT_SEARCHES, LOADING, NO_RESULTS, RESULTS
+        RECENT_SEARCHES,
+        LOADING,
+        NO_RESULTS,
+        RESULTS
     }
 
     private companion object {

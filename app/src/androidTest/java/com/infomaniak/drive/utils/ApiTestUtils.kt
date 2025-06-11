@@ -31,16 +31,19 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
-import org.junit.jupiter.api.Assertions
 import java.util.UUID
+import org.junit.jupiter.api.Assertions
 
 object ApiTestUtils {
 
     fun assertApiResponseData(response: ApiResponse<*>) {
         with(response) {
             val resultError =
-                if (!isSuccess()) "(result: [${error?.code}] - [${error?.description}] - [${context.getString(translatedError)}])"
-                else ""
+                if (!isSuccess()) {
+                    "(result: [${error?.code}] - [${error?.description}] - [${context.getString(translatedError)}])"
+                } else {
+                    ""
+                }
             Assertions.assertTrue(isSuccess(), "This should succeed $resultError")
             Assertions.assertNull(error, "There should be no error")
             Assertions.assertNotNull(data, "The data cannot be null")

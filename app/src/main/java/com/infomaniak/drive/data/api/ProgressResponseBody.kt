@@ -41,7 +41,6 @@ class ProgressResponseBody(val responseBody: ResponseBody, val progressListener:
                 progressListener.update(totalBytesRead, responseBody.contentLength(), bytesRead == -1L)
                 return bytesRead
             }
-
         }
     }
 

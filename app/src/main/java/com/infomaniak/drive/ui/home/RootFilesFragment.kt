@@ -36,7 +36,6 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
@@ -185,32 +184,33 @@ class RootFilesFragment : Fragment() {
         if (hasDeepLink) return
         if (fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory) {
             uiSettings.lastVisitedRootFileTreeCategory = null
-        } else lifecycleScope.launch {
-            fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory = true
-            when (uiSettings.lastVisitedRootFileTreeCategory) {
-                null -> Unit // Stay here (at the root)
-                CommonFolders -> {
-                    hasFolderToOpenBeenSet.join()
-                    commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
+        } else {
+            lifecycleScope.launch {
+                fileListViewModel.hasNavigatedToLastVisitedFileTreeCategory = true
+                when (uiSettings.lastVisitedRootFileTreeCategory) {
+                    null -> Unit // Stay here (at the root)
+                    CommonFolders -> {
+                        hasFolderToOpenBeenSet.join()
+                        commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
+                    }
+                    PersonalFolder -> {
+                        hasFolderToOpenBeenSet.join()
+                        personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
+                    }
+                    Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
+                    RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
+                    SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
+                    MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
+                    Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
+                    Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
                 }
-                PersonalFolder -> {
-                    hasFolderToOpenBeenSet.join()
-                    personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
-                }
-                Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
-                RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
-                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
-                MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
-                Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
-                Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
             }
         }
     }
 
-    private fun fileListDirections(
-        folderToOpen: FolderToOpen,
-    ): NavDirections = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
-        folderId = folderToOpen.id,
-        folderName = folderToOpen.name
-    )
+    private fun fileListDirections(folderToOpen: FolderToOpen): NavDirections =
+        RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+            folderId = folderToOpen.id,
+            folderName = folderToOpen.name
+        )
 }

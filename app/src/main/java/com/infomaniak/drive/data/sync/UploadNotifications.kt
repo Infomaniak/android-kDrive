@@ -133,8 +133,10 @@ object UploadNotifications {
 
     fun permissionErrorNotification(context: Context) {
         val mainActivityIntent = PendingIntent.getActivity(
-            context, NotificationUtils.UPLOAD_STATUS_ID,
-            Intent(context, MainActivity::class.java).clearStack(), PENDING_INTENT_FLAGS
+            context,
+            NotificationUtils.UPLOAD_STATUS_ID,
+            Intent(context, MainActivity::class.java).clearStack(),
+            PENDING_INTENT_FLAGS
         )
         showNotification(
             context = context,
@@ -264,10 +266,14 @@ object UploadNotifications {
 
     fun Context.syncSettingsActivityPendingIntent(): PendingIntent {
         return PendingIntent.getActivity(
-            /* context = */ this,
-            /* requestCode = */ UUID.randomUUID().hashCode(),
-            /* intent = */ Intent(this, SyncSettingsActivity::class.java).clearStack(),
-            /* flags = */ PENDING_INTENT_FLAGS,
+            /* context = */
+            this,
+            /* requestCode = */
+            UUID.randomUUID().hashCode(),
+            /* intent = */
+            Intent(this, SyncSettingsActivity::class.java).clearStack(),
+            /* flags = */
+            PENDING_INTENT_FLAGS,
         )
     }
 }

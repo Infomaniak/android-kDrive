@@ -54,5 +54,4 @@ object RealmModules {
         ]
     )
     class DriveFilesModule
-
 }

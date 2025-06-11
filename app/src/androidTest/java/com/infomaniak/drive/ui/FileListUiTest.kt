@@ -18,11 +18,11 @@
 package com.infomaniak.drive.ui
 
 import androidx.test.filters.LargeTest
+import java.util.UUID
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 /**
  * UI Tests relative to file list (quick operations, file creation, upload, import, ...)

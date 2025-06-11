@@ -73,7 +73,6 @@ class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {
             }
 
             secondaryActionButton.setText(R.string.buttonBack)
-
         } else {
 
             description.setText(R.string.accessDeniedDescriptionIsNotAdmin)

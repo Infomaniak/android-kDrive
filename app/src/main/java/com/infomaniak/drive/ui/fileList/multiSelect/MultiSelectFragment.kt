@@ -241,7 +241,13 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
         trackBulkActionEvent(matomoCategory, type, fileCount)
 
         val sendActions: (dialog: Dialog?) -> Unit = sendActions(
-            type, areAllFromTheSameFolder, folderId, fileCount, selectedFiles, destinationFolder, color
+            type,
+            areAllFromTheSameFolder,
+            folderId,
+            fileCount,
+            selectedFiles,
+            destinationFolder,
+            color
         )
 
         when (type) {
@@ -442,7 +448,8 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
                 mediator.addSource(
                     addFileToFavorites(
                         file = file,
-                        onSuccess = { onIndividualActionSuccess(type, file.id) }),
+                        onSuccess = { onIndividualActionSuccess(type, file.id) }
+                    ),
                     updateMultiSelectMediator(mediator),
                 )
             }

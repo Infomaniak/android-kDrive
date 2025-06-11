@@ -50,9 +50,9 @@ android {
         buildConfigField("String", "SHOP_URL", "\"https://shop.infomaniak.com/order/\"")
         buildConfigField("String", "SUPPORT_URL", "\"https://support.infomaniak.com/\"")
 
-        buildConfigField ("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
-        buildConfigField ("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
-        buildConfigField ("String", "GITHUB_REPO", "\"android-kdrive\"")
+        buildConfigField("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
+        buildConfigField("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
+        buildConfigField("String", "GITHUB_REPO", "\"android-kdrive\"")
 
         resValue("string", "CLOUD_STORAGE_AUTHORITY", "com.infomaniak.drive.documents")
         resValue("string", "FILE_AUTHORITY", "com.infomaniak.drive.files")
@@ -122,7 +122,10 @@ val envProperties = rootProject.file("env.properties").takeIf { it.exists() }?.l
 }
 
 val sentryAuthToken = envProperties?.getProperty("sentryAuthToken").takeUnless { it.isNullOrBlank() }
-    ?: if (isRelease) error("The `sentryAuthToken` property in `env.properties` must be specified (see `env.example.properties`).") else ""
+
+if (isRelease && sentryAuthToken == null) {
+    error("The `sentryAuthToken` property in `env.properties` must be specified (see `env.example.properties`).")
+}
 
 sentry {
     org = "sentry"

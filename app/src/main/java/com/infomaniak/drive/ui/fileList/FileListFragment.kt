@@ -81,7 +81,9 @@ import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import kotlinx.coroutines.*
 
-open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
+open class FileListFragment :
+    MultiSelectFragment(MATOMO_CATEGORY),
+    SwipeRefreshLayout.OnRefreshListener,
     NoItemsLayoutView.INoItemsLayoutView {
 
     private var _binding: FragmentFileListBinding? = null
@@ -115,8 +117,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
     private val noItemsFoldersTitle: Int by lazy {
-        if (mainViewModel.currentFolder.value?.rights?.canCreateFile == true
-            && findNavController().currentDestination?.id != R.id.trashFragment
+        if (mainViewModel.currentFolder.value?.rights?.canCreateFile == true &&
+            findNavController().currentDestination?.id != R.id.trashFragment
         ) {
             R.string.noFilesDescriptionWithCreationRights
         } else {
@@ -295,13 +297,19 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                 bundle.getParcelable<CancellableAction>(CANCELLABLE_ACTION_KEY)?.let { action ->
                     checkIfNoFiles()
 
-                    val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) ({
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            if (ApiRepository.undoAction(action).data == true && isResumed) {
-                                withContext(Dispatchers.Main) { refreshActivities() }
+                    val onCancelActionClicked: (() -> Unit)? = if (allowCancellation) {
+                        (
+                            {
+                                lifecycleScope.launch(Dispatchers.IO) {
+                                    if (ApiRepository.undoAction(action).data == true && isResumed) {
+                                        withContext(Dispatchers.Main) { refreshActivities() }
+                                    }
+                                }
                             }
-                        }
-                    }) else null
+                            )
+                    } else {
+                        null
+                    }
 
                     showSnackbar(title, showAboveFab = true, onActionClicked = onCancelActionClicked)
                 } ?: run { showSnackbar(title, showAboveFab = true) }
@@ -362,8 +370,8 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
     private fun showUploadedFiles() {
         when {
-            findNavController().currentDestination?.id == R.id.sharedWithMeFragment
-                    && folderId == ROOT_ID -> downloadFiles(true, false)
+            findNavController().currentDestination?.id == R.id.sharedWithMeFragment &&
+                folderId == ROOT_ID -> downloadFiles(true, false)
             else -> refreshActivities()
         }
     }
@@ -817,7 +825,6 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
                     fileAdapter.hideLoading()
                     refreshActivities()
                     result.parentFolder?.let { folder -> fileListViewModel.updateOfflineFilesIfNeeded(folder, result.files) }
-
                 } ?: run {
                     changeNoFilesLayoutVisibility(
                         hideFileList = fileAdapter.itemCount == 0,

@@ -35,8 +35,11 @@ class UserAdapter(
 ) : Adapter<UserViewHolder>() {
 
     override fun getItemViewType(position: Int): Int {
-        return if (isCardView) VIEW_TYPE_CARDVIEW
-        else VIEW_TYPE_NORMAL
+        return if (isCardView) {
+            VIEW_TYPE_CARDVIEW
+        } else {
+            VIEW_TYPE_NORMAL
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {

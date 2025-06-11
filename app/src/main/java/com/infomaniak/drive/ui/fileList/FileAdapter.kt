@@ -52,9 +52,9 @@ import io.realm.OrderedRealmCollection
 import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmRecyclerViewAdapter
+import java.util.UUID
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
@@ -355,12 +355,12 @@ open class FileAdapter(
     }
 
     private fun FileItemViewHolder.setupMenuButton(file: File) = menuButton.apply {
-        isGone = uploadInProgress
-                || selectFolder
-                || file.isFromActivities
-                || file.isFromSearch
-                || (offlineMode && !file.isOffline)
-                || !publicShareCanDownload
+        isGone = uploadInProgress ||
+            selectFolder ||
+            file.isFromActivities ||
+            file.isFromSearch ||
+            (offlineMode && !file.isOffline) ||
+            !publicShareCanDownload
 
         setOnClickListener { onMenuClicked?.invoke(file) }
     }
@@ -486,17 +486,17 @@ open class FileAdapter(
         override fun areContentsTheSame(oldItem: File, newItem: File): Boolean {
 
             val areCategoriesTheSame = oldItem.categories.size == newItem.categories.size &&
-                    oldItem.categories.filterIndexed { index, fileCategory ->
-                        newItem.categories[index]?.categoryId != fileCategory.categoryId
-                    }.isEmpty()
+                oldItem.categories.filterIndexed { index, fileCategory ->
+                    newItem.categories[index]?.categoryId != fileCategory.categoryId
+                }.isEmpty()
 
             return oldItem.name == newItem.name &&
-                    oldItem.isFavorite == newItem.isFavorite &&
-                    oldItem.isOffline == newItem.isOffline &&
-                    oldItem.color == newItem.color &&
-                    oldItem.lastModifiedAt == newItem.lastModifiedAt &&
-                    oldItem.size == newItem.size &&
-                    areCategoriesTheSame
+                oldItem.isFavorite == newItem.isFavorite &&
+                oldItem.isOffline == newItem.isOffline &&
+                oldItem.color == newItem.color &&
+                oldItem.lastModifiedAt == newItem.lastModifiedAt &&
+                oldItem.size == newItem.size &&
+                areCategoriesTheSame
         }
     }
 

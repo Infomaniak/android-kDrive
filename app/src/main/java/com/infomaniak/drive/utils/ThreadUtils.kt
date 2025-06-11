@@ -17,12 +17,12 @@
  */
 package com.infomaniak.drive.utils
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import splitties.mainthread.isMainThread
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import splitties.mainthread.isMainThread
 
 @OptIn(ExperimentalContracts::class)
 inline fun <R> runOnMainThread(crossinline block: () -> R): R {

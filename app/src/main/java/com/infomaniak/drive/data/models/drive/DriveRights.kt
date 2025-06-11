@@ -24,4 +24,3 @@ import io.realm.annotations.RealmClass
 open class DriveRights(
     var technical: Boolean = false,
 ) : RealmObject()
-

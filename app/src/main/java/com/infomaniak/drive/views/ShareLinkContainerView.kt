@@ -154,8 +154,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
         val resId = R.string.shareLinkPublicRightDescription
 
         val permission = context.getString(
-            if (shareLink?.capabilities?.canEdit == true) R.string.shareLinkOfficePermissionWriteTitle
-            else R.string.shareLinkOfficePermissionReadTitle
+            if (shareLink?.capabilities?.canEdit == true) {
+                R.string.shareLinkOfficePermissionWriteTitle
+            } else {
+                R.string.shareLinkOfficePermissionReadTitle
+            }
         ).lowercase()
 
         val fileName = currentFile.getTypeName(context)

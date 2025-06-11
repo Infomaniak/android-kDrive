@@ -94,5 +94,4 @@ class FileChunkSizeManager(
         private const val MAX_CHUNK_COUNT = 10_000
         private const val MAX_PARALLEL_CHUNKS = 4
     }
-
 }

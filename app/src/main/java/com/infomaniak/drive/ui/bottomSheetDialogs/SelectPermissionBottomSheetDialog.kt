@@ -153,7 +153,8 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         saveButton.initProgress(viewLifecycleOwner)
         saveButton.showProgressCatching()
         selectPermissionViewModel.editFileShareLinkOfficePermission(
-            file, canEdit = (permission as EditPermission).apiValue
+            file,
+            canEdit = (permission as EditPermission).apiValue
         ).observe(viewLifecycleOwner) { apiResponse ->
             val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission)
             handleFileShareApiResponse(apiResponse, OFFICE_EDITING_RIGHTS_NAV_KEY, bundle, R.string.errorModification)
@@ -212,7 +213,6 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             val apiResponse = ApiRepository.updateShareLink(file, body)
             if (apiResponse.data == true) FileController.updateShareLinkWithRemote(file.id)
             emit(apiResponse)
-
         }
 
         fun deleteFileShare(file: File, shareable: Shareable) = liveData(Dispatchers.IO) {

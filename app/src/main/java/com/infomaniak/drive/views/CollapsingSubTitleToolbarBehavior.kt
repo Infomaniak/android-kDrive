@@ -88,10 +88,12 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
         val toolbarTitle = subtitleToolbarView.findViewById<TextView>(R.id.title)
         val toolbarSubTitle = subtitleToolbarView.findViewById<TextView>(R.id.subTitle)
 
-        var childPosition = ((appBarLayout.height + appBarLayout.y)
-                - subtitleToolbarView.height
-                - (getToolbarHeight(context) - subtitleToolbarView.height)
-                * percentage / 2)
+        var childPosition = (
+            (appBarLayout.height + appBarLayout.y) -
+                subtitleToolbarView.height -
+                (getToolbarHeight(context) - subtitleToolbarView.height) *
+                percentage / 2
+            )
         childPosition -= expandedTitleMarginBottom * (1f - percentage)
 
         val layoutParams = subtitleToolbarView.layoutParams as CoordinatorLayout.LayoutParams
@@ -129,8 +131,10 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
 
     private fun textColorAnimation(textView: TextView, startColor: Int, endColor: Int) {
         ObjectAnimator.ofInt(
-            textView, "textColor",
-            startColor, endColor
+            textView,
+            "textColor",
+            startColor,
+            endColor
         ).apply {
             setEvaluator(ArgbEvaluator())
             start()
@@ -147,7 +151,9 @@ class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(
             val typedValue = TypedValue()
             return if (context.theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true)) {
                 TypedValue.complexToDimensionPixelSize(typedValue.data, context.resources.displayMetrics)
-            } else 0
+            } else {
+                0
+            }
         }
     }
 }
