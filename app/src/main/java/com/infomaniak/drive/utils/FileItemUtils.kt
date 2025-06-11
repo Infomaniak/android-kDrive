@@ -54,19 +54,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.toPx
+import kotlinx.coroutines.*
 
-suspend fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false): Nothing {
-    setFileItemWithoutCategories(file = file, isGrid = isGrid)
+suspend fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false, iconHorizontalMargin: Int = 10.toPx()): Nothing {
+    setFileItemWithoutCategories(file = file, iconHorizontalMargin = iconHorizontalMargin, isGrid = isGrid)
     categoriesLayout.displayCategoriesForFile(file)
 }
 
-fun ItemFileBinding.setFileItemWithoutCategories(file: File, isGrid: Boolean = false) {
+fun ItemFileBinding.setFileItemWithoutCategories(file: File, iconHorizontalMargin: Int = 10.toPx(), isGrid: Boolean = false) {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
     displaySize(file)
     filePreview.displayIcon(file, isGrid, progressLayout)
+    iconLayout.setMargins(left = iconHorizontalMargin, right = iconHorizontalMargin)
     displayExternalImport(file, filePreview, fileProgression, fileDate)
 }
 
