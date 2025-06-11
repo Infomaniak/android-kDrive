@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.apply
 import java.util.Properties
 
 plugins {
@@ -9,6 +10,7 @@ plugins {
     id("realm-android")
     id("io.sentry.android.gradle")
     id("de.mannodermaus.android-junit5")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 val appCompileSdk: Int by rootProject.extra
@@ -152,6 +154,7 @@ sentry {
 }
 
 dependencies {
+    ktlintRuleset(project(":Core:KtlintCustomRules"))
 
     implementation(project(":Core"))
     implementation(project(":Core:FragmentNavigation"))
@@ -200,11 +203,6 @@ dependencies {
     implementation("com.googlecode.plist:dd-plist:1.28")
 
     implementation("com.github.hannesa2:paho.mqtt.android:4.2.4") // Doesn't build when bumped to 4.3 (Waiting SDK 35)
-
-    implementation("com.pinterest.ktlint:ktlint-core:0.49.1")
-    implementation("com.pinterest.ktlint:ktlint-rule-engine-core:1.6.0")
-    implementation("com.pinterest.ktlint:ktlint-cli:1.6.0")
-    implementation("com.pinterest.ktlint:ktlint-cli-ruleset-core:1.6.0")
 
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("io.github.serpro69:kotlin-faker:1.16.0")
