@@ -164,14 +164,14 @@ object FileController {
             .toFlow()
     }
 
-    fun getRecentFolders(): Flow<List<File>> {
+    fun getRecentFolders(recentFolderNumber: Int): Flow<List<File>> {
         return getRealmInstance().use { realm ->
             realm.where(File::class.java)
                 .equalTo(File::type.name, Type.DIRECTORY.value)
                 .greaterThan(File::id.name, ROOT_ID)
                 .greaterThan(File::parentId.name, ROOT_ID)
                 .sort(File::lastModifiedAt.name, Sort.DESCENDING)
-                .limit(3)
+                .limit(recentFolderNumber.toLong())
                 .findAllAsync()
                 .toFlow()
         }
