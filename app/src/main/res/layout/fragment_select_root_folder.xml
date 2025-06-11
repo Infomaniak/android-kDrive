@@ -82,7 +82,7 @@
                     android:layout_marginHorizontal="@dimen/horizontalMarginRoot"
                     android:layout_marginTop="@dimen/marginStandard"
                     android:layout_marginBottom="@dimen/marginStandardSmall"
-                    android:text="Récents"
+                    android:text="@string/recentTitle"
                     android:visibility="gone"
                     tools:visibility="visible" />
 
@@ -110,7 +110,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/horizontalMarginRoot"
-                    android:text="/" />
+                    tools:text="/" />
 
                 <include
                     android:id="@+id/rootFolderLayout"
