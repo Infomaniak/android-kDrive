@@ -24,7 +24,6 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
@@ -52,7 +51,7 @@ class SelectRootFolderFragment : Fragment() {
 
     private val fileListViewModel: FileListViewModel by viewModels()
 
-    private val selectRootFolderViewModel: SelectRootFolderViewModel by activityViewModels() // ou viewModel ?
+    private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels() 
 
     private val uiSettings by lazy { UiSettings(requireContext()) }
 
