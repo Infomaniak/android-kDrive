@@ -40,6 +40,7 @@ import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.toPx
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -86,6 +87,8 @@ class SelectRootFolderFragment : Fragment() {
         with((activity as SelectFolderActivity).getSaveButton()) {
             isGone = true
         }
+
+        rootFolderLayout.cardView.setMargins(top = 8.toPx())
 
         setupItems()
 
@@ -139,7 +142,8 @@ class SelectRootFolderFragment : Fragment() {
                 SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(file.id, file.name)
             )
         }
-        itemViewFile.setFileItem(file = file)
+        itemViewFile.setFileItem(file = file, iconHorizontalMargin = 16.toPx())
+
     }
 
     private fun setupItems() = with(binding) {
