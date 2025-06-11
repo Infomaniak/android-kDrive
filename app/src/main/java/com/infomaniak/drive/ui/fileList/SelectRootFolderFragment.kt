@@ -24,12 +24,12 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.CardviewFileListBinding
@@ -51,6 +51,8 @@ class SelectRootFolderFragment : Fragment() {
 
     private val fileListViewModel: FileListViewModel by viewModels()
 
+    private val selectRootFolderViewModel: SelectRootFolderViewModel by activityViewModels() // ou viewModel ?
+
     private val uiSettings by lazy { UiSettings(requireContext()) }
 
     private val recentFoldersBindings = mutableListOf<CardviewFileListBinding>()
@@ -59,8 +61,10 @@ class SelectRootFolderFragment : Fragment() {
     private var personalFolderToOpen: FolderToOpen? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        inflateCardviewFileListBinding()
-        return FragmentSelectRootFolderBinding.inflate(inflater, container, false).also { _binding = it }.root
+        return FragmentSelectRootFolderBinding.inflate(inflater, container, false).also {
+            _binding = it
+            inflateCardviewFileListBinding()
+        }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
@@ -103,7 +107,7 @@ class SelectRootFolderFragment : Fragment() {
     }
 
     private fun inflateCardviewFileListBinding() {
-        repeat(3) {
+        repeat(RECENT_FOLDER_NUMBER) {
             recentFoldersBindings.add(
                 CardviewFileListBinding.inflate(layoutInflater)
                     .apply { this.root.isGone = true }
@@ -114,7 +118,7 @@ class SelectRootFolderFragment : Fragment() {
 
     private fun setupRecentFoldersViews() {
         viewLifecycleOwner.lifecycleScope.launch {
-            FileController.getRecentFolders().collectLatest { files ->
+            selectRootFolderViewModel.getRecentFoldersViewModel(limit = RECENT_FOLDER_NUMBER).collectLatest { files ->
                 _binding?.let {
                     it.recentFolderTitle.isGone = files.isEmpty()
                     it.recentListLayout.isGone = files.isEmpty()
@@ -189,4 +193,8 @@ class SelectRootFolderFragment : Fragment() {
         folderId = folderToOpen.id,
         folderName = folderToOpen.name,
     )
+
+    companion object {
+        const val RECENT_FOLDER_NUMBER = 3
+    }
 }
