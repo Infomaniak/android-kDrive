@@ -32,15 +32,12 @@ plugins {
 
 ktlint {
     version.set("1.6.0")
+    outputToConsole.set(true)
     android.set(true)
     ignoreFailures.set(false)
     reporters {
         reporter(ReporterType.PLAIN)
     }
-}
-
-allprojects {
-    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }
 
 tasks.register<Delete>("clean") {
