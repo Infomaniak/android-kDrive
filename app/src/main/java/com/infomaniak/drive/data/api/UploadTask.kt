@@ -339,10 +339,11 @@ class UploadTask(
         if (!isSuccessful) {
             val bytes = response.bodyAsChannel().toByteArray().also { bytes ->
                 val expectedContentLength = response.contentLength() ?: bytes.size
-                if (expectedContentLength != bytes.size) SentryLog.e(
-                    tag = "UploadTask",
-                    msg = "Backend provided contentLength was $expectedContentLength bytes, but received ${bytes.size}",
-                )
+                if (expectedContentLength != bytes.size) Sentry.withScope { scope ->
+                    scope.setExtra("contentLength", expectedContentLength.toString())
+                    scope.setExtra("received", bytes.size.toString())
+                    SentryLog.e(TAG, "Backend provided more bytes than the contentLength!")
+                }
             }
             val bodyResponse = String(bytes)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
