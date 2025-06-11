@@ -546,8 +546,8 @@
                       <LayoutPositions>
                         <option name="myPosition">
                           <Point>
-                            <option name="x" value="1320" />
-                            <option name="y" value="1803" />
+                            <option name="x" value="1308" />
+                            <option name="y" value="2043" />
                           </Point>
                         </option>
                         <option name="myPositions">
@@ -1160,27 +1160,6 @@
                             <option name="x" value="2628" />
                             <option name="y" value="1042" />
                           </Point>
-                        </option>
-                      </LayoutPositions>
-                    </value>
-                  </entry>
-                  <entry key="selectRootFolderFragment">
-                    <value>
-                      <LayoutPositions>
-                        <option name="myPosition">
-                          <Point>
-                            <option name="x" value="989" />
-                            <option name="y" value="2156" />
-                          </Point>
-                        </option>
-                        <option name="myPositions">
-                          <map>
-                            <entry key="action_selectRootFolderFragment_to_fileListFragment">
-                              <value>
-                                <LayoutPositions />
-                              </value>
-                            </entry>
-                          </map>
                         </option>
                       </LayoutPositions>
                     </value>
