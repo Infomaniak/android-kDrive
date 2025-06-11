@@ -42,13 +42,13 @@ import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import io.realm.Realm
+import java.util.UUID
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 /**
  * File Controllers testing class
@@ -203,7 +203,6 @@ class FileControllerTest : KDriveTest() {
             // Compare remote pictures with local pictures
             assertTrue(size == apiResponseData.size, "remote files and local files are different")
         }
-
     }
 
     @Test

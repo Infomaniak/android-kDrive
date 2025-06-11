@@ -47,11 +47,11 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
 import io.sentry.Sentry
+import java.util.Date
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import kotlinx.parcelize.WriteWith
-import java.util.Date
 
 @Parcelize
 open class File(
@@ -134,7 +134,7 @@ open class File(
     var versionCode: Int = 0,
     var lastActionAt: Long = 0,
 
-    ) : RealmObject(), Parcelable {
+) : RealmObject(), Parcelable {
 
     val hasThumbnail inline get() = supportedBy?.contains(SupportedByType.THUMBNAIL.apiValue) ?: false
     val hasOnlyoffice inline get() = supportedBy?.contains(SupportedByType.ONLYOFFICE.apiValue) ?: false
@@ -184,22 +184,26 @@ open class File(
     fun isPDF() = getFileType() == ExtensionType.PDF
 
     fun getFileType(): ExtensionType {
-        return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {
-            ExtensionType.ARCHIVE.value -> ExtensionType.ARCHIVE
-            ExtensionType.AUDIO.value -> ExtensionType.AUDIO
-            ExtensionType.CODE.value -> if (isBookmark()) ExtensionType.URL else ExtensionType.CODE
-            ExtensionType.FONT.value -> ExtensionType.FONT
-            ExtensionType.IMAGE.value -> ExtensionType.IMAGE
-            ExtensionType.PDF.value -> ExtensionType.PDF
-            ExtensionType.PRESENTATION.value -> ExtensionType.PRESENTATION
-            ExtensionType.SPREADSHEET.value -> ExtensionType.SPREADSHEET
-            ExtensionType.TEXT.value -> ExtensionType.TEXT
-            ExtensionType.VIDEO.value -> ExtensionType.VIDEO
-            ExtensionType.FORM.value -> ExtensionType.FORM
-            else -> when {
-                isFolder() -> ExtensionType.FOLDER
-                isBookmark() -> ExtensionType.URL
-                else -> ExtensionType.UNKNOWN
+        return if (isFromUploads) {
+            getFileTypeFromExtension()
+        } else {
+            when (extensionType) {
+                ExtensionType.ARCHIVE.value -> ExtensionType.ARCHIVE
+                ExtensionType.AUDIO.value -> ExtensionType.AUDIO
+                ExtensionType.CODE.value -> if (isBookmark()) ExtensionType.URL else ExtensionType.CODE
+                ExtensionType.FONT.value -> ExtensionType.FONT
+                ExtensionType.IMAGE.value -> ExtensionType.IMAGE
+                ExtensionType.PDF.value -> ExtensionType.PDF
+                ExtensionType.PRESENTATION.value -> ExtensionType.PRESENTATION
+                ExtensionType.SPREADSHEET.value -> ExtensionType.SPREADSHEET
+                ExtensionType.TEXT.value -> ExtensionType.TEXT
+                ExtensionType.VIDEO.value -> ExtensionType.VIDEO
+                ExtensionType.FORM.value -> ExtensionType.FORM
+                else -> when {
+                    isFolder() -> ExtensionType.FOLDER
+                    isBookmark() -> ExtensionType.URL
+                    else -> ExtensionType.UNKNOWN
+                }
             }
         }
     }
@@ -282,7 +286,7 @@ open class File(
 
     fun getOfflineFile(context: Context, userId: Int = AccountUtils.currentUserId): IOFile? {
         val userDrive = UserDrive(userId, driveId)
-        val rootFolder = IOFile(getOfflineFolder(context), "${userId}/$driveId")
+        val rootFolder = IOFile(getOfflineFolder(context), "$userId/$driveId")
         val path = getRemotePath(userDrive)
 
         if (path.isEmpty()) return null
@@ -299,8 +303,11 @@ open class File(
     }
 
     fun deleteCaches(context: Context) {
-        if (isOffline) getOfflineFile(context)?.apply { if (exists()) delete() }
-        else getCacheFile(context).apply { if (exists()) delete() }
+        if (isOffline) {
+            getOfflineFile(context)?.apply { if (exists()) delete() }
+        } else {
+            getCacheFile(context).apply { if (exists()) delete() }
+        }
     }
 
     private fun getPublicShareCache(context: Context): IOFile {
@@ -315,9 +322,9 @@ open class File(
 
     fun isImporting(): Boolean {
         return externalImport?.let {
-            it.status == FileExternalImportStatus.IN_PROGRESS.value
-                    || it.status == FileExternalImportStatus.WAITING.value
-                    || isCancelingImport()
+            it.status == FileExternalImportStatus.IN_PROGRESS.value ||
+                it.status == FileExternalImportStatus.WAITING.value ||
+                isCancelingImport()
         } ?: false
     }
 

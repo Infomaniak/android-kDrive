@@ -56,6 +56,7 @@ class PreviewHeaderView @JvmOverloads constructor(
             connect(R.id.header, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         }
     }
+
     // We do this because we try to match the animation duration of the BottomSheet when we toggle the fullscreen mode.
     private val transition by lazy {
         ChangeBounds().apply {
@@ -128,7 +129,8 @@ class PreviewHeaderView @JvmOverloads constructor(
 
     private fun getDefaultPeekHeight(windowInsets: Insets): Int {
         val typedArray = context.theme.obtainStyledAttributes(
-            R.style.BottomSheetStyle, intArrayOf(R.attr.behavior_peekHeight)
+            R.style.BottomSheetStyle,
+            intArrayOf(R.attr.behavior_peekHeight)
         )
         val peekHeight = typedArray.getDimensionPixelSize(0, 0)
         typedArray.recycle()

@@ -165,7 +165,8 @@ object AccountUtils : CredentialManager() {
                 reloadApp()
             }
         } else if (internalDrives.none { drive -> !drive.maintenance } ||
-            internalDrives.any { drive -> drive.maintenance && drive.id == currentDriveId }) {
+            internalDrives.any { drive -> drive.maintenance && drive.id == currentDriveId }
+        ) {
             reloadApp()
         }
     }

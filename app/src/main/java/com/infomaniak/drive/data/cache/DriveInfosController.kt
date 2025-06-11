@@ -123,11 +123,14 @@ object DriveInfosController {
 
     fun getUsers(userIds: ArrayList<Int>? = arrayListOf()): List<DriveUser> {
         return getRealmInstance().use { realm ->
-            val userList = realm.copyFromRealm(realm.where(DriveUser::class.java).apply {
-                if (!userIds.isNullOrEmpty()) {
-                    this.oneOf(Drive::id.name, userIds.toTypedArray())
-                }
-            }.findAll(), 1)
+            val userList = realm.copyFromRealm(
+                realm.where(DriveUser::class.java).apply {
+                    if (!userIds.isNullOrEmpty()) {
+                        this.oneOf(Drive::id.name, userIds.toTypedArray())
+                    }
+                }.findAll(),
+                1
+            )
             userList?.let { ArrayList(it) } ?: listOf()
         }
     }
@@ -173,7 +176,8 @@ object DriveInfosController {
             realm.copyFromRealm(
                 realm.where(Team::class.java)
                     .sort(Team::id.name, Sort.ASCENDING)
-                    .findAll(), 1
+                    .findAll(),
+                1
             )
         } as ArrayList<Team>? ?: ArrayList()
 
@@ -218,9 +222,13 @@ object DriveInfosController {
                     userId = AccountUtils.currentUserId,
                     driveId = driveId
                 ).findFirst().toFlow().map { drive ->
-                    if (drive?.categoryRights?.canReadOnFile == true) buildIntObjectMap {
-                        drive.categories.forEach { category -> this[category.id] = category }
-                    } else null
+                    if (drive?.categoryRights?.canReadOnFile == true) {
+                        buildIntObjectMap {
+                            drive.categories.forEach { category -> this[category.id] = category }
+                        }
+                    } else {
+                        null
+                    }
                 }
             }
         }

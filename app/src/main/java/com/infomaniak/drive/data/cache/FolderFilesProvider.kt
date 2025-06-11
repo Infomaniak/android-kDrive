@@ -35,12 +35,12 @@ import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.realm.RealmQuery
 import io.sentry.Sentry
+import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
-import java.util.Calendar
 
 object FolderFilesProvider {
 
@@ -173,15 +173,17 @@ object FolderFilesProvider {
 
         transaction(folderFilesProviderResult?.folderFiles ?: arrayListOf())
 
-        if (folderFilesProviderResult?.isComplete == false) getCloudStorageFiles(
-            realm = realm,
-            folderId = folderId,
-            userDrive = userDrive,
-            sortType = sortType,
-            isFirstPage = false,
-            transaction = transaction,
-            okHttpClient = currentOkHttpClient,
-        )
+        if (folderFilesProviderResult?.isComplete == false) {
+            getCloudStorageFiles(
+                realm = realm,
+                folderId = folderId,
+                userDrive = userDrive,
+                sortType = sortType,
+                isFirstPage = false,
+                transaction = transaction,
+                okHttpClient = currentOkHttpClient,
+            )
+        }
     }
 
     fun tryLoadActivitiesFromFolder(folder: File, userDrive: UserDrive, activitiesJob: Job): Boolean {
@@ -215,7 +217,6 @@ object FolderFilesProvider {
                     cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
                     order = folderFilesProviderArgs.order,
                 )
-
             }
             else -> {
                 ApiRepository.getListingFiles(
@@ -325,13 +326,13 @@ object FolderFilesProvider {
 
         fun hasDuplicatesFiles(query: RealmQuery<File>): Boolean = query.count() != query.distinct(File::id.name).count()
 
-        return sourceRestrictionType == ONLY_FROM_REMOTE
-                || folderProxy == null
-                || folderProxy.children.isEmpty()
-                || !folderProxy.isComplete
-                || folderProxy.versionCode <= MIN_VERSION_CODE
-                || folderProxy.children.where().let(::hasDuplicatesFiles)
-                || minDateToIgnoreCache >= folderProxy.responseAt
+        return sourceRestrictionType == ONLY_FROM_REMOTE ||
+            folderProxy == null ||
+            folderProxy.children.isEmpty() ||
+            !folderProxy.isComplete ||
+            folderProxy.versionCode <= MIN_VERSION_CODE ||
+            folderProxy.children.where().let(::hasDuplicatesFiles) ||
+            minDateToIgnoreCache >= folderProxy.responseAt
     }
 
     private tailrec fun loadActivitiesFromFolderRec(

@@ -148,8 +148,8 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
                     fileShareViewModel.availableShareableItems.value?.let { setAll(it) }
 
                     val userIds = share.users.map { it.id } +
-                            share.invitations.mapNotNull { it.user?.id } +
-                            share.teams.map { team -> team.id }
+                        share.invitations.mapNotNull { it.user?.id } +
+                        share.teams.map { team -> team.id }
 
                     notShareableIds = ArrayList(userIds)
                     notShareableEmails = ArrayList(share.invitations.map { invitation -> invitation.email })
@@ -221,7 +221,9 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
     private fun setupShareLink(shareLink: ShareLink? = null) {
         when {
             file.isDropBox() -> setupDropBoxShareLink()
-            file.rights?.canBecomeShareLink == true || file.shareLink?.url?.isNotBlank() == true -> setupNormalShareLink(shareLink)
+            file.rights?.canBecomeShareLink == true || file.shareLink?.url?.isNotBlank() == true -> setupNormalShareLink(
+                shareLink
+            )
             else -> hideShareLinkView()
         }
     }
@@ -237,7 +239,8 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             file = file,
             shareLink = shareLink,
             onTitleClicked = { newShareLink -> handleOnShareLinkTitleClicked(newShareLink) },
-            onSettingsClicked = { newShareLink -> handleOnShareLinkSettingsClicked(newShareLink) })
+            onSettingsClicked = { newShareLink -> handleOnShareLinkSettingsClicked(newShareLink) }
+        )
     }
 
     private fun handleOnShareLinkTitleClicked(newShareLink: ShareLink?) {

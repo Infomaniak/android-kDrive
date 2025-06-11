@@ -28,11 +28,13 @@ import io.sentry.SentryLevel
 
 @SuppressLint("RestrictedApi")
 fun NavDestination.addSentryBreadcrumb() {
-    Sentry.addBreadcrumb(Breadcrumb().apply {
-        category = "Navigation"
-        message = "Accessed to destination : $displayName"
-        level = SentryLevel.INFO
-    })
+    Sentry.addBreadcrumb(
+        Breadcrumb().apply {
+            category = "Navigation"
+            message = "Accessed to destination : $displayName"
+            level = SentryLevel.INFO
+        }
+    )
 }
 
 @SuppressLint("RestrictedApi")

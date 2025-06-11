@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,14 +157,16 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                             )
                         }
                     }
-                } else emit(
-                    FolderFilesResult(
-                        files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
-                        isComplete = true,
-                        isFirstPage = true,
-                        isNewSort = isNewSort,
+                } else {
+                    emit(
+                        FolderFilesResult(
+                            files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
+                            isComplete = true,
+                            isFirstPage = true,
+                            isNewSort = isNewSort,
+                        )
                     )
-                )
+                }
             }
             recursive(isFirstPage = true, isNewSort = isNewSort)
         }
@@ -215,7 +217,6 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 }
             }
         }
-
     }
 
     @Synchronized
@@ -242,8 +243,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         pendingFilesToDelete(adapterPendingFileIds, isFileType)
     }
 
-    private fun pendingFilesToDelete(adapterPendingFileIds: List<Int>, isFileType: Boolean):
-            LiveData<ArrayList<Pair<Position, FileId>>> {
+    private fun pendingFilesToDelete(adapterPendingFileIds: List<Int>, isFileType: Boolean): LiveData<ArrayList<Pair<Position, FileId>>> {
 
         pendingJob.cancel()
         pendingJob = Job()
@@ -252,8 +252,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
             val positions = arrayListOf<Pair<Position, FileId>>()
             UploadFile.getRealmInstance().use { uploadRealm ->
                 val realmUploadFiles =
-                    if (isFileType) UploadFile.getAllPendingUploads(customRealm = uploadRealm)
-                    else UploadFile.getAllPendingFolders(realm = uploadRealm)
+                    if (isFileType) {
+                        UploadFile.getAllPendingUploads(customRealm = uploadRealm)
+                    } else {
+                        UploadFile.getAllPendingFolders(realm = uploadRealm)
+                    }
 
                 adapterPendingFileIds.forEachIndexed { index, fileId ->
                     pendingJob.ensureActive()

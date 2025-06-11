@@ -58,12 +58,14 @@ class MySharesFragment : FileSubTypeListFragment() {
     private fun setupAdapter() {
         fileAdapter.onFileClicked = { file ->
             fileListViewModel.cancelDownloadFiles()
-            if (file.isFolder()) safeNavigate(
-                MySharesFragmentDirections.actionMySharesFragmentSelf(
-                    file.id,
-                    file.name
+            if (file.isFolder()) {
+                safeNavigate(
+                    MySharesFragmentDirections.actionMySharesFragmentSelf(
+                        file.id,
+                        file.name
+                    )
                 )
-            ) else {
+            } else {
                 val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
                 Utils.displayFile(mainViewModel, findNavController(), file, fileList)
             }

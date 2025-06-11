@@ -114,9 +114,9 @@ class FileInfoActionsView @JvmOverloads constructor(
             disabledFileRights.isGone = rightsEnabled
         }
 
-        val isPublicLinkEnabled = rights.canBecomeShareLink && hasNetwork
-                || currentFile.shareLink != null
-                || !file.dropbox?.url.isNullOrBlank()
+        val isPublicLinkEnabled = rights.canBecomeShareLink && hasNetwork ||
+            currentFile.shareLink != null ||
+            !file.dropbox?.url.isNullOrBlank()
 
         sharePublicLink.isEnabled = isPublicLinkEnabled
         disabledPublicLink.isGone = isPublicLinkEnabled
@@ -134,12 +134,12 @@ class FileInfoActionsView @JvmOverloads constructor(
         availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
         deleteFile.isVisible = rights.canDelete == true && !file.isImporting()
         downloadFile.isVisible = rights.canRead == true
-        duplicateFile.isGone = rights.canRead == false
-                || isSharedWithMe
-                || currentFile.getVisibilityType() == IS_TEAM_SPACE
-                || currentFile.getVisibilityType() == IS_SHARED_SPACE
-        editDocument.isVisible = (currentFile.hasOnlyoffice && rights.canWrite)
-                || (currentFile.conversion?.whenOnlyoffice == true)
+        duplicateFile.isGone = rights.canRead == false ||
+            isSharedWithMe ||
+            currentFile.getVisibilityType() == IS_TEAM_SPACE ||
+            currentFile.getVisibilityType() == IS_SHARED_SPACE
+        editDocument.isVisible = (currentFile.hasOnlyoffice && rights.canWrite) ||
+            (currentFile.conversion?.whenOnlyoffice == true)
         leaveShare.isVisible = rights.canLeave == true
         cancelExternalImport.isVisible = file.isImporting()
         moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
@@ -150,8 +150,8 @@ class FileInfoActionsView @JvmOverloads constructor(
     fun updateCurrentFile(file: File) = with(binding) {
         currentFile = file
         refreshBottomSheetUi(currentFile)
-        manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
-                && !file.isDisabled()
+        manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile &&
+            !file.isDisabled()
 
         if (currentFile.isFromActivities) {
             quickActionsLayout.isGone = true
@@ -410,7 +410,9 @@ class FileInfoActionsView @JvmOverloads constructor(
             isActivated = file.isFavorite
             text = context.getString(if (file.isFavorite) R.string.buttonRemoveFavorites else R.string.buttonAddFavorites)
         }
-        sharePublicLinkText.setText(if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink)
+        sharePublicLinkText.setText(
+            if (file.shareLink == null) R.string.buttonCreatePublicLink else R.string.buttonSharePublicLink
+        )
 
         setOfflineItemUi(file, isOfflineProgress)
     }

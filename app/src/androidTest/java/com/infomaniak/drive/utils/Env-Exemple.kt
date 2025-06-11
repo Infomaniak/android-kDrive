@@ -58,5 +58,4 @@ object `Env-Exemple` {
      * User password used to connect on for addUser test
      */
     const val NEW_USER_PASSWORD = ""
-
 }

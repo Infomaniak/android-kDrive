@@ -54,6 +54,7 @@ import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
+import com.infomaniak.lib.core.R as RCore
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -61,7 +62,6 @@ import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import com.infomaniak.lib.core.R as RCore
 
 class PublicShareListFragment : FileListFragment() {
 

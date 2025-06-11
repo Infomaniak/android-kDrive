@@ -179,8 +179,11 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
                     fileComment.liked = true
                     AccountUtils.currentUser?.let {
                         val currentDriveUser = DriveUser(it)
-                        if (fileComment.likes == null) fileComment.likes = arrayListOf(currentDriveUser)
-                        else fileComment.likes?.add(currentDriveUser)
+                        if (fileComment.likes == null) {
+                            fileComment.likes = arrayListOf(currentDriveUser)
+                        } else {
+                            fileComment.likes?.add(currentDriveUser)
+                        }
                     }
                     fileComment.likesCount = fileComment.likesCount + 1
                     commentsAdapter.updateComment(fileComment)

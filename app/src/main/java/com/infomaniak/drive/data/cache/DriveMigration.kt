@@ -55,5 +55,4 @@ class DriveMigration : RealmMigration {
     companion object {
         const val DB_VERSION = 1L // Must be bumped when the schema changes
     }
-
 }

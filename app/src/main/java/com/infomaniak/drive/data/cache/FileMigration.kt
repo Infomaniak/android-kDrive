@@ -97,7 +97,6 @@ class FileMigration : RealmMigration {
                     removeField("fileId")
                     isEmbedded = true
                 }
-
             }.onFailure { exception ->
                 exception.printStackTrace()
                 // On some clients, it happens that isEmbedded is added in an orphan file without knowing why

@@ -100,11 +100,11 @@ import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 typealias FileId = Int
 typealias IOFile = java.io.File
@@ -218,7 +218,8 @@ fun ImageView.animateRotation(isDeployed: Boolean = false) {
                 duration = 200
                 fillAfter = true
                 repeatCount = 0
-            })
+            }
+    )
 }
 
 /**
@@ -317,10 +318,12 @@ fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable: Boolean) {
 }
 
 fun Context.openOnlyOfficeActivity(file: File) {
-    startActivity(Intent(this, OnlyOfficeActivity::class.java).apply {
-        putExtra(OnlyOfficeActivity.ONLYOFFICE_URL_TAG, ApiRoutes.getOnlyOfficeUrl(file))
-        putExtra(OnlyOfficeActivity.ONLYOFFICE_FILENAME_TAG, file.name)
-    })
+    startActivity(
+        Intent(this, OnlyOfficeActivity::class.java).apply {
+            putExtra(OnlyOfficeActivity.ONLYOFFICE_URL_TAG, ApiRoutes.getOnlyOfficeUrl(file))
+            putExtra(OnlyOfficeActivity.ONLYOFFICE_FILENAME_TAG, file.name)
+        }
+    )
 }
 
 fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel) {

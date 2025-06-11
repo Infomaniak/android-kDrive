@@ -34,51 +34,41 @@ import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.CancellationException
 import java.io.IOException
+import kotlinx.coroutines.CancellationException
 
 object UploadWorkerThrowable {
 
     suspend fun UploadWorker.runUploadCatching(block: suspend () -> Result): Result {
         return try {
             block()
-
         } catch (exception: UploadTask.FolderNotFoundException) {
             currentUploadFile?.folderNotFoundNotification(applicationContext)
             Result.failure()
-
         } catch (exception: UploadTask.QuotaExceededException) {
             currentUploadFile?.quotaExceededNotification(applicationContext)
             Result.failure()
-
         } catch (exception: AllowedFileSizeExceededException) {
             currentUploadFile?.allowedFileSizeExceededNotification(applicationContext)
             Result.failure()
-
         } catch (exception: OutOfMemoryError) {
             exception.printStackTrace()
             currentUploadFile?.outOfMemoryNotification(applicationContext)
             Result.retry()
-
         } catch (exception: CancellationException) { // Work has been cancelled
             Result.retry()
-
         } catch (exception: UploadTask.LockErrorException) {
             currentUploadFile?.lockErrorNotification(applicationContext)
             Result.retry()
-
         } catch (exception: UploadTask.ProductBlockedException) {
             currentUploadFile?.productMaintenanceExceptionNotification(applicationContext, false)
             Result.failure()
-
         } catch (exception: UploadTask.ProductMaintenanceException) {
             currentUploadFile?.productMaintenanceExceptionNotification(applicationContext, true)
             Result.failure()
-
         } catch (exception: Exception) {
             exception.printStackTrace()
             handleGenericException(exception)
-
         } finally {
             cancelUploadNotification()
         }
@@ -88,8 +78,8 @@ object UploadWorkerThrowable {
         return when {
 
             exception is UploadTask.WrittenBytesExceededException ||
-                    exception is UploadTask.NotAuthorizedException ||
-                    exception is UploadTask.UploadErrorException -> Result.retry()
+                exception is UploadTask.NotAuthorizedException ||
+                exception is UploadTask.UploadErrorException -> Result.retry()
 
             exception.isNetworkException() || exception is UploadTask.NetworkException -> {
                 currentUploadFile?.networkErrorNotification(applicationContext)
@@ -118,10 +108,12 @@ object UploadWorkerThrowable {
     private fun UploadWorker.cancelUploadNotification() {
         applicationContext.cancelNotification(NotificationUtils.UPLOAD_SERVICE_ID)
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = UploadWorker.BREADCRUMB_TAG
-            message = "finish with $uploadedCount files uploaded"
-            level = SentryLevel.INFO
-        })
+        Sentry.addBreadcrumb(
+            Breadcrumb().apply {
+                category = UploadWorker.BREADCRUMB_TAG
+                message = "finish with $uploadedCount files uploaded"
+                level = SentryLevel.INFO
+            }
+        )
     }
 }

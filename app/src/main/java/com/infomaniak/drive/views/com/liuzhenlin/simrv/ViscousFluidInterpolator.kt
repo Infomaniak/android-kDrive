@@ -51,7 +51,9 @@ class ViscousFluidInterpolator(private val mViscousFluidScale: Float) : Interpol
         val interpolated = mViscousFluidNormalize * viscousFluid(input)
         return if (interpolated > 0) {
             interpolated + mViscousFluidOffset
-        } else interpolated
+        } else {
+            interpolated
+        }
     }
 
     init {

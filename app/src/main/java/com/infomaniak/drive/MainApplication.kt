@@ -64,9 +64,9 @@ import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
+import java.util.UUID
 import kotlinx.coroutines.*
 import org.matomo.sdk.Tracker
-import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
 
@@ -107,7 +107,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         SentryAndroid.init(this) { options: SentryAndroidOptions ->
             // register the callback as an option
             options.beforeSend = SentryOptions.BeforeSendCallback { event: SentryEvent?, _: Any? ->
-                //if the application is in debug mode discard the events
+                // if the application is in debug mode discard the events
                 if (BuildConfig.DEBUG) null else event
             }
         }

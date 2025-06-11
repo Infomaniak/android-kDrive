@@ -62,14 +62,14 @@ import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.io.IOException
 import java.net.URLEncoder
 import java.util.Date
 import java.util.UUID
 import java.util.concurrent.Executors
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class CloudStorageProvider : DocumentsProvider() {
 
@@ -180,9 +180,9 @@ class CloudStorageProvider : DocumentsProvider() {
 
         val userDrive = UserDrive(userId, driveId, sharedWithMe = parentDocumentId.contains("$SHARED_WITHME_FOLDER_ID"))
 
-        val isMySharesRoot = isSharedUri(parentDocumentId)
-                && fileFolderId == Utils.ROOT_ID
-                && parentDocumentId.contains("$MY_SHARES_FOLDER_ID")
+        val isMySharesRoot = isSharedUri(parentDocumentId) &&
+            fileFolderId == Utils.ROOT_ID &&
+            parentDocumentId.contains("$MY_SHARES_FOLDER_ID")
 
         when {
             isRootFolder -> {
@@ -217,7 +217,8 @@ class CloudStorageProvider : DocumentsProvider() {
                     FileController.getMySharedFiles(
                         userDrive = UserDrive(userId, driveId),
                         sortType = sortType,
-                        transaction = { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) })
+                        transaction = { files, _ -> cursor.addFiles(parentDocumentId, uri)(files) }
+                    )
                 }
             }
             else -> {
@@ -351,7 +352,6 @@ class CloudStorageProvider : DocumentsProvider() {
                 generateThumbnail(fileId, file, userId)?.let { parcel ->
                     AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
                 }
-
             } ?: super.openDocumentThumbnail(documentId, sizeHint, signal)
         }
     }
@@ -374,7 +374,6 @@ class CloudStorageProvider : DocumentsProvider() {
             } else if (outputFile.exists()) {
                 parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
             }
-
         } catch (exception: Exception) {
             exception.printStackTrace()
 
@@ -414,7 +413,6 @@ class CloudStorageProvider : DocumentsProvider() {
 
                     // Refresh
                     scheduleRefresh()
-
                 } else {
                     throw RuntimeException("Delete document failed")
                 }
@@ -434,7 +432,6 @@ class CloudStorageProvider : DocumentsProvider() {
                 if (apiResponse.isSuccess()) {
                     // Refresh
                     scheduleRefresh()
-
                 } else {
                     throw RuntimeException("Rename document failed")
                 }
@@ -470,10 +467,11 @@ class CloudStorageProvider : DocumentsProvider() {
 
     override fun moveDocument(sourceDocumentId: String, sourceParentDocumentId: String, targetParentDocumentId: String): String {
         SentryLog.d(
-            TAG, "moveDocument(), " +
-                    "sourceId=$sourceDocumentId, " +
-                    "sourceParentId=$sourceParentDocumentId, " +
-                    "targetParentId=$targetParentDocumentId"
+            TAG,
+            "moveDocument(), " +
+                "sourceId=$sourceDocumentId, " +
+                "sourceParentId=$sourceParentDocumentId, " +
+                "targetParentId=$targetParentDocumentId"
         )
 
         return FileController.getRealmInstance(createUserDrive(sourceDocumentId)).use { realm ->
@@ -496,7 +494,6 @@ class CloudStorageProvider : DocumentsProvider() {
                 scheduleRefresh(sourceParentDocumentId)
 
                 return@use sourceDocumentId
-
             } else {
                 throw RuntimeException("Move document failed")
             }
@@ -672,8 +669,8 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
         val flags = DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
-                DocumentsContract.Root.FLAG_SUPPORTS_RECENTS or
-                DocumentsContract.Root.FLAG_SUPPORTS_SEARCH
+            DocumentsContract.Root.FLAG_SUPPORTS_RECENTS or
+            DocumentsContract.Root.FLAG_SUPPORTS_SEARCH
 
         newRow().apply {
             add(DocumentsContract.Root.COLUMN_ROOT_ID, rootId)
@@ -695,8 +692,11 @@ class CloudStorageProvider : DocumentsProvider() {
             DriveInfosController.getDrives(userId, sharedWithMe = shareWithMe).forEach { drive ->
                 val driveDocument = "${drive.name}$DRIVE_SEPARATOR${drive.id}"
                 val documentId =
-                    if (shareFolderId == null) "$userId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
-                    else "$userId$SEPARATOR$shareFolderId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
+                    if (shareFolderId == null) {
+                        "$userId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
+                    } else {
+                        "$userId$SEPARATOR$shareFolderId$SEPARATOR$driveDocument$SEPARATOR${Utils.ROOT_ID}"
+                    }
                 addFile(null, documentId, drive.name, isRootFolder)
             }
         }
@@ -724,10 +724,10 @@ class CloudStorageProvider : DocumentsProvider() {
 
         if (file != null) {
             flags = flags or
-                    DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
-                    DocumentsContract.Document.FLAG_SUPPORTS_RENAME or
-                    DocumentsContract.Document.FLAG_SUPPORTS_COPY or
-                    DocumentsContract.Document.FLAG_SUPPORTS_MOVE
+                DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
+                DocumentsContract.Document.FLAG_SUPPORTS_RENAME or
+                DocumentsContract.Document.FLAG_SUPPORTS_COPY or
+                DocumentsContract.Document.FLAG_SUPPORTS_MOVE
         }
 
         val fileName = context?.let { file?.getDisplayName(it) } ?: ""
@@ -835,7 +835,9 @@ class CloudStorageProvider : DocumentsProvider() {
             return if (documentId.contains(DRIVE_SEPARATOR)) {
                 val drive = parentDocumentId.substringAfter(SEPARATOR).split(DRIVE_SEPARATOR)
                 DriveDocument(name = drive[0], id = drive[1].toInt())
-            } else DriveDocument(name = "", id = -1)
+            } else {
+                DriveDocument(name = "", id = -1)
+            }
         }
 
         private fun getSortType(sortOrder: String?): File.SortType {

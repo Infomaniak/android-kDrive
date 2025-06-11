@@ -107,6 +107,7 @@ open class Drive(
 
     // Old offer pack, now replaced by My kSuite
     inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
+
     // Old offer pack, now replaced by My kSuite Plus
     inline val isSoloPack get() = pack?.type == DrivePack.DrivePackType.SOLO
     inline val isMyKSuitePack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE

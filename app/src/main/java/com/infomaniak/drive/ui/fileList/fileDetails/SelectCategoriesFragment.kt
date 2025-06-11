@@ -139,13 +139,15 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun setSearchViewTextChangedListener(canCreateCategory: Boolean) = with(binding.searchViewCard) {
-        searchView.addTextChangedListener(DebouncingTextWatcher(lifecycle) {
-            if (isResumed) {
-                clearButton.isInvisible = it.isNullOrEmpty()
-                categoriesAdapter.updateFilter(searchView.text.toString())
-                configureCreateCategoryRow(canCreateCategory, it?.trim())
+        searchView.addTextChangedListener(
+            DebouncingTextWatcher(lifecycle) {
+                if (isResumed) {
+                    clearButton.isInvisible = it.isNullOrEmpty()
+                    categoriesAdapter.updateFilter(searchView.text.toString())
+                    configureCreateCategoryRow(canCreateCategory, it?.trim())
+                }
             }
-        })
+        )
     }
 
     private fun setSearchViewEditorActionListener() = with(binding.searchViewCard.searchView) {

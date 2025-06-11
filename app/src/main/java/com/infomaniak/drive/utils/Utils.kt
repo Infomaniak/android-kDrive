@@ -111,8 +111,11 @@ object Utils {
     ) {
         val title: Int = if (fromTrash) R.string.modalDeleteTitle else R.string.modalMoveTrashTitle
         val message: String = context.resources.getQuantityString(
-            if (fromTrash) R.plurals.modalDeleteDescription
-            else R.plurals.modalMoveTrashDescription,
+            if (fromTrash) {
+                R.plurals.modalDeleteDescription
+            } else {
+                R.plurals.modalMoveTrashDescription
+            },
             fileCount,
             fileName ?: fileCount
         )
@@ -283,8 +286,8 @@ object Utils {
     fun Context.openWithIntentExceptkDrive(file: File, userDrive: UserDrive): Intent {
         val (cloudUri, uri) = file.getCloudAndFileUris(this, userDrive)
         val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
-                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            Intent.FLAG_GRANT_WRITE_URI_PERMISSION or
+            Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
         return openWithIntentExceptkDrive(uri, contentResolver.getType(cloudUri), flags)
     }
 

@@ -47,10 +47,10 @@ import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
+import java.io.Serializable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.Serializable
 
 class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
 
@@ -90,8 +90,11 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
         }
 
         collapsingToolbarLayout.title = getString(
-            if (fileShareViewModel.currentFile.value?.isFolder() == true) R.string.fileShareFolderTitle
-            else R.string.fileShareFileTitle
+            if (fileShareViewModel.currentFile.value?.isFolder() == true) {
+                R.string.fileShareFolderTitle
+            } else {
+                R.string.fileShareFileTitle
+            }
         )
 
         addToSharedElementList(navigationArgs.sharedItem)

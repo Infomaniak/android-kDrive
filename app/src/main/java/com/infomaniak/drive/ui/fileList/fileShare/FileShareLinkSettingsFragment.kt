@@ -176,11 +176,12 @@ class FileShareLinkSettingsFragment : Fragment() {
             isValid = !(hasError && passwordTextLayout.isVisible)
 
             val password = passwordEditText.text
-            if (password?.isNotBlank() == true) shareLink.apply {
-                this.newPassword = password.toString()
-                this.newRight = ShareLink.ShareLinkFilePermission.PASSWORD
+            if (password?.isNotBlank() == true) {
+                shareLink.apply {
+                    this.newPassword = password.toString()
+                    this.newRight = ShareLink.ShareLinkFilePermission.PASSWORD
+                }
             }
-
         } else {
             shareLink.newRight = ShareLink.ShareLinkFilePermission.PUBLIC
         }
@@ -191,8 +192,11 @@ class FileShareLinkSettingsFragment : Fragment() {
     private fun setupFileShareLinkRights() {
         binding.fileShareLinkRights.setOnClickListener {
             val permissionsGroup =
-                if (navigationArgs.isFolder) SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_OFFICE
-                else SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_OFFICE
+                if (navigationArgs.isFolder) {
+                    SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FOLDER_OFFICE
+                } else {
+                    SelectPermissionBottomSheetDialog.PermissionsGroup.SHARE_LINK_FILE_OFFICE
+                }
             safeNavigate(
                 FileShareLinkSettingsFragmentDirections.actionFileShareLinkSettingsFragmentToSelectPermissionBottomSheetDialog(
                     currentPermission = officePermission,

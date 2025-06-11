@@ -105,6 +105,5 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
         val manufacturerWarning = EVIL_MANUFACTURERS.contains(Build.MANUFACTURER.lowercase()) || BuildConfig.DEBUG
 
         private const val SUPPORT_FAQ_BACKGROUND_FUNCTIONING_URL = "https://faq.infomaniak.com/2685"
-
     }
 }

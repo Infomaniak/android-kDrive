@@ -29,9 +29,9 @@ import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.concurrent.TimeUnit
 
 class MediaObserverWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
 

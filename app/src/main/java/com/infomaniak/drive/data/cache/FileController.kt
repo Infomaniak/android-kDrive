@@ -38,11 +38,11 @@ import io.realm.*
 import io.realm.kotlin.oneOf
 import io.realm.kotlin.toFlow
 import io.sentry.Sentry
+import java.util.Calendar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 object FileController {
 
@@ -391,7 +391,9 @@ object FileController {
                 if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
                     files[index].isOffline = true
                     keepCaches.add(file.id)
-                } else offlineFile?.delete()
+                } else {
+                    offlineFile?.delete()
+                }
             }
 
             if (replaceOldData) removeFile(MY_SHARES_FILE_ID, keepCaches, keepFiles, realm)
@@ -507,7 +509,10 @@ object FileController {
             transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
         } else {
             val apiResponse = ApiRepository.getMySharedFiles(
-                AccountUtils.getHttpClient(userDrive.userId), userDrive.driveId, sortType, cursor
+                AccountUtils.getHttpClient(userDrive.userId),
+                userDrive.driveId,
+                sortType,
+                cursor
             )
             if (apiResponse.isSuccess()) {
                 val apiResponseData = apiResponse.data
@@ -566,9 +571,11 @@ object FileController {
                 .sort(FileActivity::createdAt.name, Sort.DESCENDING)
                 .findAll()?.forEach { fileActivity ->
                     fileActivity.userId?.let { userId ->
-                        activityResults.add(realm.copyFromRealm(fileActivity, 1).apply {
-                            user = DriveInfosController.getUsers(arrayListOf(userId)).firstOrNull()
-                        })
+                        activityResults.add(
+                            realm.copyFromRealm(fileActivity, 1).apply {
+                                user = DriveInfosController.getUsers(arrayListOf(userId)).firstOrNull()
+                            }
+                        )
                     }
                 }
         }
@@ -778,8 +785,11 @@ object FileController {
                 .equalTo(File::isOffline.name, true)
                 .notEqualTo(File::type.name, Type.DIRECTORY.value)
                 .findAll()?.let { files ->
-                    if (order == null) files
-                    else getRealmLiveSortedFiles(localFolder = null, order = order, localChildren = files)
+                    if (order == null) {
+                        files
+                    } else {
+                        getRealmLiveSortedFiles(localFolder = null, order = order, localChildren = files)
+                    }
                 } ?: emptyList(realm)
         }
         return customRealm?.let(block) ?: getRealmInstance(userDrive).use(block)

@@ -104,7 +104,9 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
             dismissDialog()
             if (apiResponse.isSuccess()) {
                 setBackNavigationResult(DELETE_CATEGORY_NAV_KEY, categoryId)
-            } else SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
+            } else {
+                SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError())
+            }
         }
     }
 
@@ -118,7 +120,9 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                             localDrive.categories.find(categoryId)?.deleteFromRealm()
                         }
                         ApiResponse(result = ApiResponseStatus.SUCCESS)
-                    } else this
+                    } else {
+                        this
+                    }
                     emit(response)
                 }
             }
@@ -126,7 +130,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
         private fun isAlreadyDeleted(apiResponse: ApiResponse<Boolean>): Boolean {
             return apiResponse.result == ApiResponseStatus.ERROR &&
-                    apiResponse.error?.code?.equals("object_not_found", true) == true
+                apiResponse.error?.code?.equals("object_not_found", true) == true
         }
     }
 
