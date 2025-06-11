@@ -79,8 +79,8 @@
                     style="@style/Subtitle2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandardMedium"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
+                    android:layout_marginHorizontal="@dimen/horizontalMarginRoot"
+                    android:layout_marginTop="@dimen/marginStandard"
                     android:layout_marginBottom="@dimen/marginStandardSmall"
                     android:text="Récents"
                     android:visibility="gone"
@@ -92,7 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/horizontalMarginRoot"
-                    android:layout_marginVertical="@dimen/marginStandard">
+                    android:layout_marginBottom="@dimen/marginStandard">
 
                     <LinearLayout
                         android:id="@+id/recentListLayout"
@@ -109,9 +109,7 @@
                     style="@style/Subtitle2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/marginStandardMedium"
-                    android:layout_marginTop="@dimen/marginStandardSmall"
-                    android:layout_marginBottom="@dimen/marginStandardSmall"
+                    android:layout_marginHorizontal="@dimen/horizontalMarginRoot"
                     android:text="/" />
 
                 <include
