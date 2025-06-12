@@ -62,7 +62,7 @@ object FolderFilesProvider {
 
         val files = when {
             needToLoadFromRemote && sourceRestrictionType != SourceRestrictionType.ONLY_FROM_LOCAL -> {
-                loadFromRemote(realm, folderProxy, folderFilesProviderArgs)
+                loadFromRemote(realm.freeze(), folderProxy, folderFilesProviderArgs)
             }
             folderFilesProviderArgs.isFirstPage -> {
                 loadFromLocal(realm, folderProxy, folderFilesProviderArgs.withChildren, folderFilesProviderArgs.order)
@@ -98,7 +98,7 @@ object FolderFilesProvider {
         FileController.getRealmInstance(userDrive).use { block(it) }
     }
 
-    private tailrec fun loadSharedWithMeFilesRec(
+    private tailrec suspend fun loadSharedWithMeFilesRec(
         realm: Realm,
         okHttpClient: OkHttpClient,
         isRoot: Boolean,
@@ -149,7 +149,6 @@ object FolderFilesProvider {
     }
 
     suspend fun getCloudStorageFiles(
-        realm: Realm,
         folderId: Int,
         userDrive: UserDrive,
         sortType: File.SortType,
@@ -157,7 +156,7 @@ object FolderFilesProvider {
         transaction: (files: ArrayList<File>) -> Unit,
         okHttpClient: OkHttpClient? = null,
     ) {
-        val folderProxy = FileController.getFileById(realm, folderId)
+        val realm = FileController.getRealmInstance(userDrive)
         val folderFilesProviderArgs = FolderFilesProviderArgs(
             folderId = folderId,
             isFirstPage = isFirstPage,
@@ -167,23 +166,36 @@ object FolderFilesProvider {
             userDrive = userDrive,
         )
         val currentOkHttpClient = okHttpClient ?: AccountUtils.getHttpClient(userDrive.userId)
+
+        getCloudStorageFilesRec(
+            realm = realm,
+            folderFilesProviderArgs = folderFilesProviderArgs,
+            transaction = transaction,
+            okHttpClient = currentOkHttpClient,
+        )
+    }
+
+    private tailrec fun getCloudStorageFilesRec(
+        realm: Realm,
+        folderFilesProviderArgs: FolderFilesProviderArgs,
+        transaction: (files: ArrayList<File>) -> Unit,
+        okHttpClient: OkHttpClient,
+    ) {
+        val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
         val folderFilesProviderResult = loadCloudStorageFromRemote(
             realm = realm,
             folderProxy = folderProxy,
             folderFilesProviderArgs = folderFilesProviderArgs,
-            okHttpClient = currentOkHttpClient,
+            okHttpClient = okHttpClient,
         )
 
         transaction(folderFilesProviderResult?.folderFiles ?: arrayListOf())
 
-        if (folderFilesProviderResult?.isComplete == false) getCloudStorageFiles(
+        if (folderFilesProviderResult?.isComplete == false) getCloudStorageFilesRec(
             realm = realm,
-            folderId = folderId,
-            userDrive = userDrive,
-            sortType = sortType,
-            isFirstPage = false,
+            folderFilesProviderArgs = folderFilesProviderArgs,
             transaction = transaction,
-            okHttpClient = currentOkHttpClient,
+            okHttpClient = okHttpClient,
         )
     }
 

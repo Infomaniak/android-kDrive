@@ -200,15 +200,12 @@ class CloudStorageProvider : DocumentsProvider() {
             }
             isSharedWithMeFolder -> {
                 cloudScope.launch(cursor.job) {
-                    FileController.getRealmInstance(userDrive).use { realm ->
-                        FolderFilesProvider.getCloudStorageFiles(
-                            realm = realm.freeze(),
-                            folderId = Utils.ROOT_ID,
-                            userDrive = UserDrive(AccountUtils.currentUserId, AccountUtils.currentDriveId, sharedWithMe = true),
-                            sortType = sortType,
-                            transaction = cursor.addFiles(parentDocumentId, uri, isSharedWithMeFolder = true)
-                        )
-                    }
+                    FolderFilesProvider.getCloudStorageFiles(
+                        folderId = Utils.ROOT_ID,
+                        userDrive = UserDrive(AccountUtils.currentUserId, AccountUtils.currentDriveId, sharedWithMe = true),
+                        sortType = sortType,
+                        transaction = cursor.addFiles(parentDocumentId, uri, isSharedWithMeFolder = true)
+                    )
                 }
             }
             isMySharesDrive -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
@@ -222,15 +219,12 @@ class CloudStorageProvider : DocumentsProvider() {
             }
             else -> {
                 cloudScope.launch(cursor.job) {
-                    FileController.getRealmInstance(userDrive).use { realm ->
-                        FolderFilesProvider.getCloudStorageFiles(
-                            realm = realm.freeze(),
-                            folderId = fileFolderId,
-                            userDrive = userDrive,
-                            sortType = sortType,
-                            transaction = cursor.addFiles(parentDocumentId, uri)
-                        )
-                    }
+                    FolderFilesProvider.getCloudStorageFiles(
+                        folderId = fileFolderId,
+                        userDrive = userDrive,
+                        sortType = sortType,
+                        transaction = cursor.addFiles(parentDocumentId, uri)
+                    )
                 }
             }
         }
