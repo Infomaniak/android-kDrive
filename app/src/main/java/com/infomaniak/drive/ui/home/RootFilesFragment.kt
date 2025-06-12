@@ -36,7 +36,6 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
@@ -96,49 +95,49 @@ class RootFilesFragment : Fragment() {
         navigateToLastVisitedFileTreeCategory()
 
         binding.root.enableEdgeToEdge(withBottom = false) { windowInsets ->
-            binding.cardView.setMargins(
+            binding.rootFolderLayout.cardView.setMargins(
                 bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom
             )
         }
     }
 
     private fun setupItems() = with(binding) {
-        organizationFolder.setOnClickListener {
+        rootFolderLayout.organizationFolder.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = CommonFolders
             commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
         }
 
-        personalFolder.setOnClickListener {
+        rootFolderLayout.personalFolder.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = PersonalFolder
             personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
         }
 
-        favorites.setOnClickListener {
+        rootFolderLayout.favorites.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = Favorites
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
         }
 
-        recentChanges.setOnClickListener {
+        rootFolderLayout.recentChanges.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = RecentChanges
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
         }
 
-        sharedWithMeFiles.setOnClickListener {
+        rootFolderLayout.sharedWithMeFiles.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = SharedWithMe
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
         }
 
-        myShares.setOnClickListener {
+        rootFolderLayout. myShares.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = MyShares
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
         }
 
-        offlineFile.setOnClickListener {
+        rootFolderLayout.offlineFile.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = Offline
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
         }
 
-        trashbin.setOnClickListener {
+        rootFolderLayout.trashbin.setOnClickListener {
             uiSettings.lastVisitedRootFileTreeCategory = Trash
             safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
         }
@@ -146,8 +145,8 @@ class RootFilesFragment : Fragment() {
 
     private fun observeFiles() {
         fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
-            binding.organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
-            binding.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
+            binding.rootFolderLayout.organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
+            binding.rootFolderLayout.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
 
             updateFolderToOpenWhenClicked(fileTypes)
         }
