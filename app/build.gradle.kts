@@ -164,23 +164,23 @@ dependencies {
 
     implementation(core.ktor.client.okhttp)
 
-    val work_version = "2.9.1" // Keep the same version as the one in Core
-    implementation("androidx.work:work-runtime-ktx:$work_version")
-    androidTestImplementation("androidx.work:work-testing:$work_version")
+    val workVersion = "2.9.1" // Keep the same version as the one in Core
+    implementation("androidx.work:work-runtime-ktx:$workVersion")
+    androidTestImplementation("androidx.work:work-testing:$workVersion")
 
     implementation("androidx.concurrent:concurrent-futures-ktx:1.2.0")
-    implementation("androidx.lifecycle:lifecycle-process:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-process:2.9.1")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
-    implementation("androidx.webkit:webkit:1.13.0")
+    implementation("androidx.webkit:webkit:1.14.0")
 
-    val splitties_version = "3.0.0"
-    implementation("com.louiscad.splitties:splitties-mainthread:$splitties_version")
+    val splittiesVersion = "3.0.0"
+    implementation("com.louiscad.splitties:splitties-mainthread:$splittiesVersion")
 
-    val exoplayer_version = "2.19.1"
-    implementation("com.google.android.exoplayer:exoplayer-core:$exoplayer_version")
-    implementation("com.google.android.exoplayer:exoplayer-ui:$exoplayer_version")
-    implementation("com.google.android.exoplayer:exoplayer:$exoplayer_version")
-    implementation("com.google.android.exoplayer:extension-okhttp:$exoplayer_version")
+    val exoplayerVersion = "2.19.1"
+    implementation("com.google.android.exoplayer:exoplayer-core:$exoplayerVersion")
+    implementation("com.google.android.exoplayer:exoplayer-ui:$exoplayerVersion")
+    implementation("com.google.android.exoplayer:exoplayer:$exoplayerVersion")
+    implementation("com.google.android.exoplayer:extension-okhttp:$exoplayerVersion")
 
     implementation("com.airbnb.android:lottie:6.6.6")
     implementation("com.github.Infomaniak:android-pdfview:3.2.11")
@@ -202,29 +202,29 @@ dependencies {
     testImplementation("io.github.serpro69:kotlin-faker:1.16.0")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
 
-    val espresso_version = "3.6.1"
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espresso_version") {
+    val espressoVersion = "3.6.1"
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion") {
         // WorkAround for dependencies issue (see https://github.com/android/android-test/issues/861)
         exclude(group = "org.checkerframework", module = "checker")
     }
-    androidTestImplementation("androidx.test.espresso:espresso-core:$espresso_version")
+    androidTestImplementation("androidx.test.espresso:espresso-core:$espressoVersion")
 
-    val androidx_test_version = "1.6.1"
-    implementation("androidx.test:core-ktx:$androidx_test_version")
-    androidTestImplementation("androidx.test:rules:$androidx_test_version")
+    val androidxTestVersion = "1.6.1"
+    implementation("androidx.test:core-ktx:$androidxTestVersion")
+    androidTestImplementation("androidx.test:rules:$androidxTestVersion")
     androidTestImplementation("androidx.test:runner:1.6.2")
 
-    val jupiter_version = "5.12.2"
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:$jupiter_version")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiter_version")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiter_version")
+    val jupiterVersion = "5.13.1"
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
-    val junit_version = "1.7.0"
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core:$junit_version")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:$junit_version")
+    val junitVersion = "1.7.0"
+    androidTestImplementation("de.mannodermaus.junit5:android-test-core:$junitVersion")
+    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:$junitVersion")
 
     implementation("io.coil-kt:coil-gif:2.7.0")
 
     // Compose
-    implementation("androidx.compose.ui:ui-android:1.7.8") // Doesn't build when bumped to 1.8.0 (Waiting SDK 35)
+    implementation("androidx.compose.ui:ui-android:1.8.2")
 }
