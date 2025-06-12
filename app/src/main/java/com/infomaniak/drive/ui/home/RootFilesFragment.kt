@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -33,6 +32,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.ui.BaseRootFolder
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
@@ -45,21 +45,15 @@ import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
-import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class RootFilesFragment : Fragment() {
+class RootFilesFragment : BaseRootFolder() {
 
     private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
     private val fileListViewModel: FileListViewModel by viewModels()
 
-    private val uiSettings by lazy { UiSettings(requireContext()) }
-
-    private var commonFolderToOpen: FolderToOpen? = null
-    private var personalFolderToOpen: FolderToOpen? = null
-    private val hasFolderToOpenBeenSet: CompletableJob = Job()
+    override val uiSettings by lazy { UiSettings(requireContext()) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentRootFilesBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -80,7 +74,15 @@ class RootFilesFragment : Fragment() {
             }
         }
 
-        setupItems()
+        setupItems(
+            folderLayout = binding.rootFolderLayout,
+            favoritesNav = RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(),
+            sharedWithMeNav = RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(),
+            mySharesNav = RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(),
+            recentChangesNav = RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment(),
+            offlineNav = RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment(),
+            trashNav = RootFilesFragmentDirections.actionFilesFragmentToTrashFragment()
+        )
 
         observeFiles()
         observeNavigateFileListTo()
@@ -101,65 +103,13 @@ class RootFilesFragment : Fragment() {
         }
     }
 
-    private fun setupItems() = with(binding) {
-        rootFolderLayout.organizationFolder.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = CommonFolders
-            commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
-        }
-
-        rootFolderLayout.personalFolder.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = PersonalFolder
-            personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
-        }
-
-        rootFolderLayout.favorites.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = Favorites
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
-        }
-
-        rootFolderLayout.recentChanges.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = RecentChanges
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
-        }
-
-        rootFolderLayout.sharedWithMeFiles.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = SharedWithMe
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
-        }
-
-        rootFolderLayout. myShares.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = MyShares
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
-        }
-
-        rootFolderLayout.offlineFile.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = Offline
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
-        }
-
-        rootFolderLayout.trashbin.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = Trash
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
-        }
-    }
-
-    private fun observeFiles() {
+    override fun observeFiles() {
         fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
             binding.rootFolderLayout.organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
             binding.rootFolderLayout.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
 
-            updateFolderToOpenWhenClicked(fileTypes)
+            updateFolderToOpenWhenClicked(fileTypes = fileTypes, haveBin = true)
         }
-    }
-
-    private fun updateFolderToOpenWhenClicked(fileTypes: Map<File.VisibilityType, File>) {
-        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file ->
-            commonFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
-        }
-        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
-            personalFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
-        }
-        hasFolderToOpenBeenSet.complete()
     }
 
     private fun observeNavigateFileListTo() {
@@ -206,7 +156,7 @@ class RootFilesFragment : Fragment() {
         }
     }
 
-    private fun fileListDirections(
+    override fun fileListDirections(
         folderToOpen: FolderToOpen,
     ): NavDirections = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
         folderId = folderToOpen.id,
