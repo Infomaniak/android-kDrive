@@ -703,9 +703,9 @@ object FileController {
         if (localFolderProxy == null && remoteFolder != null) {
             realm.executeTransaction { newLocalFolderProxy = it.copyToRealm(remoteFolder) }
         }
-        realm.executeTransaction {
+        realm.executeTransaction { mutableRealm ->
             // Restore same children data
-            keepSubFolderChildren(realm, localFolderProxy?.children, remoteFiles)
+            keepSubFolderChildren(mutableRealm, localFolderProxy?.children, remoteFiles)
             // Save to realm
             (localFolderProxy ?: newLocalFolderProxy)?.let { folderProxy ->
                 // Remove old children

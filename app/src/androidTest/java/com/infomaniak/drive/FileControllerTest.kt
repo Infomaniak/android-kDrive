@@ -43,6 +43,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import io.realm.Realm
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
@@ -88,7 +89,7 @@ class FileControllerTest : KDriveTest() {
 
     @Test
     @DisplayName("Check if remote and local files are the same")
-    fun getRootFiles_CanGetRemoteSavedFilesFromRealm() {
+    fun getRootFiles_CanGetRemoteSavedFilesFromRealm() = runTest {
         val remoteFolderFiles = getAndSaveRemoteRootFiles()?.folderFiles
 
         // We check that we get the data saved in realm
@@ -237,7 +238,7 @@ class FileControllerTest : KDriveTest() {
 
     @Test
     @DisplayName("Check if removing realm's root remove all files")
-    fun removeFileCascade_IsCorrect() {
+    fun removeFileCascade_IsCorrect() = runTest {
         getAndSaveRemoteRootFiles()
         getLocalRootFiles().also { localRootFiles ->
 
@@ -280,7 +281,7 @@ class FileControllerTest : KDriveTest() {
         deleteTestFile(file)
     }
 
-    private fun getAndSaveRemoteRootFiles(): FolderFilesProvider.FolderFilesProviderResult? {
+    private suspend fun getAndSaveRemoteRootFiles(): FolderFilesProvider.FolderFilesProviderResult? {
         // Get and save remote root files in realm db test
         return FolderFilesProvider.getFiles(
             FolderFilesProvider.FolderFilesProviderArgs(
@@ -295,7 +296,7 @@ class FileControllerTest : KDriveTest() {
         }
     }
 
-    private fun getLocalRootFiles() =
+    private suspend fun getLocalRootFiles() =
         FolderFilesProvider.getFiles(
             FolderFilesProvider.FolderFilesProviderArgs(
                 folderId = Utils.ROOT_ID,

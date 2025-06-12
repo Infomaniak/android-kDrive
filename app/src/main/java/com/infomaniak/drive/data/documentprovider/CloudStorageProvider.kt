@@ -202,7 +202,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 cloudScope.launch(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
-                            realm = realm,
+                            realm = realm.freeze(),
                             folderId = Utils.ROOT_ID,
                             userDrive = UserDrive(AccountUtils.currentUserId, AccountUtils.currentDriveId, sharedWithMe = true),
                             sortType = sortType,
@@ -224,7 +224,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 cloudScope.launch(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
-                            realm = realm,
+                            realm = realm.freeze(),
                             folderId = fileFolderId,
                             userDrive = userDrive,
                             sortType = sortType,
@@ -541,11 +541,13 @@ class CloudStorageProvider : DocumentsProvider() {
             lastModifiedAt = Date(),
         )
 
-        val apiResponse = ApiController.callApi<ApiResponse<File>>(
-            uploadUrl,
-            ApiController.ApiMethod.POST,
-            okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId, 120) }
-        )
+        val apiResponse = runBlocking {
+            ApiController.callApi<ApiResponse<File>>(
+                uploadUrl,
+                ApiController.ApiMethod.POST,
+                okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId, 120) }
+            )
+        }
         val file = apiResponse.data
 
         if (apiResponse.isSuccess() && file != null) {
