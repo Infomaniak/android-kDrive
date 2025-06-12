@@ -37,6 +37,7 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.TypeOfFolder
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.toPx
@@ -120,7 +121,8 @@ class SelectRootFolderFragment : Fragment() {
 
     private fun setupRecentFoldersViews() {
         viewLifecycleOwner.lifecycleScope.launch {
-            selectRootFolderViewModel.getRecentFoldersViewModel(limit = RECENT_FOLDER_NUMBER).collectLatest { files ->
+            selectRootFolderViewModel.getRecentFoldersViewModel(RECENT_FOLDER_NUMBER)
+            selectRootFolderViewModel.recentFiles.collectLatest { files ->
                 _binding?.let {
                     it.recentFolderTitle.isGone = files.isEmpty()
                     it.recentListLayout.isGone = files.isEmpty()
@@ -141,7 +143,7 @@ class SelectRootFolderFragment : Fragment() {
                 SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(file.id, file.name)
             )
         }
-        itemViewFile.setFileItem(file = file, iconHorizontalMargin = 16.toPx())
+        itemViewFile.setFileItem(file = file, typeFolder = TypeOfFolder.typeRecentFolder)
 
     }
 
