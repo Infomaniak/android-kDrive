@@ -39,7 +39,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.*
-import com.infomaniak.lib.core.api.ApiController.callApi
+import com.infomaniak.lib.core.api.ApiController.callApiBlocking
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
@@ -52,13 +52,22 @@ object ApiRepository : ApiRepositoryCore() {
 
     var PER_PAGE = 200
 
+    private inline fun <reified T> callApi(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+    ): T {
+        return callApiBlocking(url, method, body, okHttpClient)
+    }
+
     private inline fun <reified T> callApiWithCursor(
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): T {
-        return callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
+        return callApiBlocking(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
                 result = ApiResponseStatus.ERROR,
                 error = apiError
@@ -513,10 +522,10 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.cancelExternalImport(driveId, importId), PUT)
     }
 
-    fun getMyKSuiteData(okHttpClient: OkHttpClient): ApiResponse<MyKSuiteData> {
-        return callApi(
+    suspend fun getMyKSuiteData(okHttpClient: OkHttpClient): ApiResponse<MyKSuiteData> {
+        return ApiController.callApi(
             url = MyKSuiteApiRoutes.myKSuiteData(),
-            method = ApiController.ApiMethod.GET,
+            method = GET,
             okHttpClient = okHttpClient,
             useKotlinxSerialization = true,
         )
