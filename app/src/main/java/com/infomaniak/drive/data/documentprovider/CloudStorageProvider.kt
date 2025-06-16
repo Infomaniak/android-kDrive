@@ -814,7 +814,7 @@ class CloudStorageProvider : DocumentsProvider() {
                     Realm.getDefaultInstance()
                 } catch (exception: Exception) {
                     Realm.init(this)
-                    AccountUtils.init(this)
+                    AccountUtils.init()
                 }
             }
         }

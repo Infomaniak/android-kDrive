@@ -53,8 +53,8 @@ object AccountUtils : CredentialManager() {
     override lateinit var userDatabase: UserDatabase
     var reloadApp: ((bundle: Bundle) -> Unit)? = null
 
-    fun init(context: Context) {
-        userDatabase = UserDatabase.getDatabase(context)
+    fun init() {
+        userDatabase = UserDatabase.getDatabase()
         Sentry.setUser(io.sentry.protocol.User().apply { id = currentUserId.toString() })
     }
 
