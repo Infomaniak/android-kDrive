@@ -25,6 +25,7 @@ import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.MatomoDrive.PUBLIC_SHARE_ACTION_CATEGORY
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 
@@ -60,7 +61,8 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
         buildArchiveResult.observe(viewLifecycleOwner) { (error, archiveUuid) ->
             archiveUuid?.let {
                 val downloadURL = ApiRoutes.downloadPublicShareArchive(driveId, publicShareUuid, it.uuid)
-                DownloadManagerUtils.scheduleDownload(requireContext(), downloadURL, ARCHIVE_FILE_NAME)
+                val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
+                DownloadManagerUtils.scheduleDownload(requireContext(), downloadURL, ARCHIVE_FILE_NAME, userBearerToken)
             }
             error?.let { showSnackbar(it, anchor = (requireActivity() as PublicShareActivity).getMainButton()) }
             onActionSelected()
