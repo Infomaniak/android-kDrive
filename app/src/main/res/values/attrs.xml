@@ -76,4 +76,14 @@
         <attr name="iconTint" format="color" />
         <attr name="text" format="string" />
     </declare-styleable>
+
+    <declare-styleable name="ItemSettingView">
+        <attr name="title" />
+        <attr name="icon" />
+        <attr name="itemAction" format="enum">
+            <enum name="none" value="0" />
+            <enum name="chevron" value="1" />
+            <enum name="toggle" value="2" />
+        </attr>
+    </declare-styleable>
 </resources>
