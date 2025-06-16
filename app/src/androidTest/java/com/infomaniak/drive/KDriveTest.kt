@@ -27,7 +27,7 @@ import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.addUser
 import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
-import com.infomaniak.lib.core.InfomaniakCore
+import com.infomaniak.lib.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.login.ApiToken
@@ -36,6 +36,7 @@ import io.realm.RealmConfiguration
 import io.realm.exceptions.RealmFileException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -53,14 +54,24 @@ open class KDriveTest {
 
         @BeforeAll
         @JvmStatic
-        fun beforeAll() {
+        fun beforeAll() = runTest {
             if (Env.USE_CURRENT_USER) {
                 user = runBlocking(Dispatchers.IO) { AccountUtils.requestCurrentUser() }!!
-                InfomaniakCore.bearerToken = user.apiToken.accessToken
             } else {
-                InfomaniakCore.bearerToken = Env.TOKEN
+                val apiToken = ApiToken(
+                    accessToken = Env.TOKEN,
+                    refreshToken = null,
+                    tokenType = "Bearer",
+                    userId = -1,
+                    expiresAt = null,
+                )
 
-                val apiResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoTokenInterceptor)
+                val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor.newBuilder().addInterceptor { chain ->
+                    val newRequest = changeAccessToken(chain.request(), apiToken)
+                    chain.proceed(newRequest)
+                }.build()
+
+                val apiResponse = ApiRepository.getUserProfile(okhttpClient)
                 assertApiResponseData(apiResponse)
                 user = apiResponse.data!!
                 user.apiToken = ApiToken(Env.TOKEN, "", "Bearer", userId = user.id, expiresAt = null)

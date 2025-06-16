@@ -140,7 +140,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         val tokenInterceptorListener = tokenInterceptorListener()
         HttpClientConfig.customInterceptors = listOf(
             AccessTokenUsageInterceptor(
-                tokenInterceptorListener = tokenInterceptorListener,
                 previousApiCall = uiSettings.accessTokenApiCallRecord,
                 updateLastApiCall = { uiSettings.accessTokenApiCallRecord = it },
             ),

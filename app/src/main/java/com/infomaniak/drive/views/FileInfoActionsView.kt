@@ -639,7 +639,13 @@ class FileInfoActionsView @JvmOverloads constructor(
             fun Context.downloadFile(drivePermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
                 if (drivePermissions.checkWriteStoragePermission()) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
-                    DownloadManagerUtils.scheduleDownload(context = this, ApiRoutes.getDownloadFileUrl(file), fileName)
+                    val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
+                    DownloadManagerUtils.scheduleDownload(
+                        context = this,
+                        url = ApiRoutes.getDownloadFileUrl(file),
+                        name = fileName,
+                        userBearerToken = userBearerToken,
+                    )
                     onSuccess?.invoke()
                 }
             }

@@ -39,7 +39,7 @@ import androidx.webkit.WebViewClientCompat
 import androidx.webkit.WebViewFeature
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityOnlyOfficeBinding
-import com.infomaniak.lib.core.InfomaniakCore
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.showToast
@@ -63,7 +63,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
         val url = intent.getStringExtra(ONLYOFFICE_URL_TAG)!!
         val filename = intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)!!
-        val headers = mapOf("Authorization" to "Bearer ${InfomaniakCore.bearerToken}")
+        val headers = mapOf("Authorization" to "Bearer ${AccountUtils.currentUser?.apiToken?.accessToken}")
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 

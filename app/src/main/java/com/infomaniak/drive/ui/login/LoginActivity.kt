@@ -46,7 +46,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.lib.core.InfomaniakCore
+import com.infomaniak.lib.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
@@ -259,8 +259,12 @@ class LoginActivity : AppCompatActivity() {
             AccountUtils.getUserById(apiToken.userId)?.let {
                 return getErrorResponse(R.string.errorUserAlreadyPresent)
             } ?: run {
-                InfomaniakCore.bearerToken = apiToken.accessToken
-                val userProfileResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoTokenInterceptor)
+                val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor.newBuilder().addInterceptor { chain ->
+                    val newRequest = changeAccessToken(chain.request(), apiToken)
+                    chain.proceed(newRequest)
+                }.build()
+                val userProfileResponse = ApiRepository.getUserProfile(okhttpClient)
+
                 if (userProfileResponse.result == ApiResponseStatus.ERROR) {
                     return userProfileResponse
                 } else {
@@ -270,7 +274,7 @@ class LoginActivity : AppCompatActivity() {
                     }
 
                     user?.let {
-                        val allDrivesDataResponse = ApiRepository.getAllDrivesData(HttpClient.okHttpClientNoTokenInterceptor)
+                        val allDrivesDataResponse = ApiRepository.getAllDrivesData(okhttpClient)
 
                         when {
                             allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {

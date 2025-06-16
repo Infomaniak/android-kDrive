@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -34,7 +33,6 @@ import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.auth.CredentialManager
 import com.infomaniak.lib.core.auth.TokenAuthenticator
 import com.infomaniak.lib.core.models.ApiResponseStatus
@@ -55,8 +53,8 @@ object AccountUtils : CredentialManager() {
     override lateinit var userDatabase: UserDatabase
     var reloadApp: ((bundle: Bundle) -> Unit)? = null
 
-    fun init(context: Context) {
-        userDatabase = UserDatabase.getDatabase(context)
+    fun init() {
+        userDatabase = UserDatabase.getDatabase()
         Sentry.setUser(io.sentry.protocol.User().apply { id = currentUserId.toString() })
     }
 
@@ -85,7 +83,6 @@ object AccountUtils : CredentialManager() {
                 id = currentUserId.toString()
                 email = user?.email
             })
-            InfomaniakCore.bearerToken = user?.apiToken?.accessToken.toString()
         }
 
     private var currentDrive: Drive? = null

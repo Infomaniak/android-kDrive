@@ -541,7 +541,7 @@ class CloudStorageProvider : DocumentsProvider() {
             lastModifiedAt = Date(),
         )
 
-        val apiResponse = ApiController.callApi<ApiResponse<File>>(
+        val apiResponse = ApiController.callApiBlocking<ApiResponse<File>>(
             uploadUrl,
             ApiController.ApiMethod.POST,
             okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId, 120) }
@@ -814,7 +814,7 @@ class CloudStorageProvider : DocumentsProvider() {
                     Realm.getDefaultInstance()
                 } catch (exception: Exception) {
                     Realm.init(this)
-                    AccountUtils.init(this)
+                    AccountUtils.init()
                 }
             }
         }
