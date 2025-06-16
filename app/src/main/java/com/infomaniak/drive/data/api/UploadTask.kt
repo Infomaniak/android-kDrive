@@ -138,7 +138,7 @@ class UploadTask(
         val chunkConfig = getChunkConfig()
         val totalChunks = chunkConfig.totalChunks
         val uploadedChunks = uploadFile.getValidChunks()
-        val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
+        val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) != false
 
         val uploadHost = if (isNewUploadSession) {
             uploadFile.prepareUploadSession(totalChunks)
@@ -182,7 +182,7 @@ class UploadTask(
         if (isActive) onFinish(uploadFile.getUriObject())
     }
 
-    private fun getChunkConfig(): FileChunkSizeManager.ChunkConfig {
+    private suspend fun getChunkConfig(): FileChunkSizeManager.ChunkConfig {
         return try {
             fileChunkSizeManager.computeChunkConfig(
                 fileSize = uploadFile.fileSize,
@@ -324,7 +324,7 @@ class UploadTask(
         }
     }
 
-    private fun ValidChunks.needToResetUpload(chunkSize: Long): Boolean {
+    private suspend fun ValidChunks.needToResetUpload(chunkSize: Long): Boolean {
         return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize.toInt()) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
@@ -394,11 +394,11 @@ class UploadTask(
         )
     }
 
-    private fun UploadFile.getValidChunks(): ValidChunks? {
+    private suspend fun UploadFile.getValidChunks(): ValidChunks? {
         return uploadToken?.let { ApiRepository.getValidChunks(uploadFile.driveId, it, okHttpClient).data }
     }
 
-    private fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
+    private suspend fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
         val sessionBody = UploadSession.StartSessionBody(
             conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
@@ -419,7 +419,7 @@ class UploadTask(
         }.data?.uploadHost
     }
 
-    private fun <T> ApiResponse<T>.manageUploadErrors() {
+    private suspend fun <T> ApiResponse<T>.manageUploadErrors() {
         if (error?.exception is ApiController.NetworkException) throw NetworkException()
         when (error?.code) {
             "file_already_exists_error" -> Unit
@@ -462,7 +462,7 @@ class UploadTask(
         }
     }
 
-    private fun UploadFile.resetUploadTokenAndCancelSession() {
+    private suspend fun UploadFile.resetUploadTokenAndCancelSession() {
         uploadToken?.let {
             ApiRepository.cancelSession(driveId, it, okHttpClient)
             resetUploadToken()

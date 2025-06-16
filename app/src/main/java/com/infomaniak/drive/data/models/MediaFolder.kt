@@ -71,8 +71,10 @@ open class MediaFolder(
             } ?: arrayListOf()
         }
 
-        fun getAllSyncedFolders(realm: Realm): List<MediaFolder> {
-            return realm.mediaFolderTable.equalTo(MediaFolder::isSynced.name, true).findAll().freeze() ?: emptyList()
+        fun getAllSyncedFolders(): List<MediaFolder> {
+            return getRealmInstance().use {
+                it.mediaFolderTable.equalTo(MediaFolder::isSynced.name, true).findAll().freeze() ?: emptyList()
+            }
         }
 
         fun getAllSyncedFoldersCount(): Long {

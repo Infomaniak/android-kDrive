@@ -124,15 +124,12 @@ open class UploadFile(
         uploadToken = newUploadToken
     }
 
-    fun deleteIfExists(keepFile: Boolean = false, makeTransaction: Boolean = true, customRealm: Realm? = null) {
-        val block: (Realm) -> Unit? = { realm ->
+    suspend fun deleteIfExists(keepFile: Boolean = false, makeTransaction: Boolean = true) {
+        var uploadToken: String? = null
+        getRealmInstance().use { realm ->
             uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFileProxy ->
-                // Cancel session if exists
-                uploadFileProxy.uploadToken?.let {
-                    with(ApiRepository.cancelSession(uploadFileProxy.driveId, it, okHttpClient)) {
-                        if (error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
-                    }
-                }
+                uploadToken = uploadFileProxy.uploadToken
+
                 // Delete in realm
                 val deleteFromRealm: (Realm) -> Unit = {
                     if (uploadFileProxy.isValid) {
@@ -142,7 +139,13 @@ open class UploadFile(
                 if (makeTransaction) realm.executeTransaction(deleteFromRealm) else deleteFromRealm(realm)
             }
         }
-        customRealm?.let(block) ?: getRealmInstance().use(block)
+
+        if (uploadToken != null) {
+            // Cancel session if exists
+            with(ApiRepository.cancelSession(driveId, uploadToken, okHttpClient)) {
+                if (error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
+            }
+        }
     }
 
     enum class Type {

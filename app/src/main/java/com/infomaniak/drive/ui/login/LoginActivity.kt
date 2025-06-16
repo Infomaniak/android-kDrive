@@ -46,7 +46,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
@@ -259,7 +258,6 @@ class LoginActivity : AppCompatActivity() {
             AccountUtils.getUserById(apiToken.userId)?.let {
                 return getErrorResponse(R.string.errorUserAlreadyPresent)
             } ?: run {
-                InfomaniakCore.bearerToken = apiToken.accessToken
                 val userProfileResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoTokenInterceptor)
                 if (userProfileResponse.result == ApiResponseStatus.ERROR) {
                     return userProfileResponse

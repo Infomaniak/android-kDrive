@@ -50,7 +50,7 @@ class RecentChangesViewModel : ViewModel() {
         }
     }
 
-    private fun getRecentChanges(
+    private suspend fun getRecentChanges(
         cursor: String?,
         isFirstPage: Boolean,
         isNewSort: Boolean = false,

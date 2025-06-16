@@ -53,7 +53,7 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.*
-import java.util.*
+import java.util.Date
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
@@ -334,7 +334,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return foregroundInfo
     }
 
-    private fun UploadFile.handleException(exception: Exception) {
+    private suspend fun UploadFile.handleException(exception: Exception) {
         when (exception) {
             is CancellationException -> throw exception
             is SecurityException, is IllegalStateException, is IllegalArgumentException -> {
@@ -367,47 +367,38 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         SentryLog.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
-        getRealmInstance().use {
-            it.executeTransaction { realm ->
+        MediaFolder.getAllSyncedFolders().forEach { mediaFolder ->
+            ensureActive()
+            // Add log
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = BREADCRUMB_TAG
+                message = "sync ${mediaFolder.id}"
+                level = SentryLevel.DEBUG
+            })
+            SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
 
-                MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
-                    ensureActive()
-                    // Add log
-                    Sentry.addBreadcrumb(Breadcrumb().apply {
-                        category = BREADCRUMB_TAG
-                        message = "sync ${mediaFolder.id}"
-                        level = SentryLevel.DEBUG
-                    })
-                    SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
+            // Sync media folder
+            customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
+            customArgs = args + mediaFolder.id.toString()
 
-                    // Sync media folder
-                    customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
-                    customArgs = args + mediaFolder.id.toString()
+            fetchRecentLocalMediasToSync(
+                syncSettings = syncSettings,
+                contentUri = MediaFoldersProvider.imagesExternalUri,
+                selection = customSelection,
+                args = customArgs,
+                mediaFolder = mediaFolder,
+            )
 
-                    fetchRecentLocalMediasToSync(
-                        coroutineScope = this,
-                        realm = realm,
-                        syncSettings = syncSettings,
-                        contentUri = MediaFoldersProvider.imagesExternalUri,
-                        selection = customSelection,
-                        args = customArgs,
-                        mediaFolder = mediaFolder,
-                    )
+            if (syncSettings.syncVideo) {
+                customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
 
-                    if (syncSettings.syncVideo) {
-                        customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
-
-                        fetchRecentLocalMediasToSync(
-                            coroutineScope = this,
-                            realm = realm,
-                            syncSettings = syncSettings,
-                            contentUri = MediaFoldersProvider.videosExternalUri,
-                            selection = customSelection,
-                            args = customArgs,
-                            mediaFolder = mediaFolder,
-                        )
-                    }
-                }
+                fetchRecentLocalMediasToSync(
+                    syncSettings = syncSettings,
+                    contentUri = MediaFoldersProvider.videosExternalUri,
+                    selection = customSelection,
+                    args = customArgs,
+                    mediaFolder = mediaFolder,
+                )
             }
         }
     }
@@ -418,9 +409,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         else -> ""
     }
 
-    private fun fetchRecentLocalMediasToSync(
-        coroutineScope: CoroutineScope,
-        realm: Realm,
+    private suspend fun fetchRecentLocalMediasToSync(
         syncSettings: SyncSettings,
         contentUri: Uri,
         selection: String,
@@ -444,8 +433,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     })
 
                     while (cursor.moveToNext()) {
-                        coroutineScope.ensureActive()
-                        processFoundLocalMedia(realm, cursor, contentUri, mediaFolder, syncSettings)
+                        currentCoroutineContext().ensureActive()
+                        processFoundLocalMedia(cursor, contentUri, mediaFolder, syncSettings)
                     }
                 }
         }.onFailure { exception ->
@@ -455,8 +444,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun processFoundLocalMedia(
-        realm: Realm,
+    private suspend fun processFoundLocalMedia(
         cursor: Cursor,
         contentUri: Uri,
         mediaFolder: MediaFolder,
@@ -476,7 +464,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             level = SentryLevel.INFO
         })
 
-        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
+        if (UploadFile.canUpload(uri, fileModifiedAt) && fileSize > 0) {
             UploadFile(
                 uri = uri.toString(),
                 driveId = syncSettings.driveId,
@@ -487,14 +475,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 remoteFolder = syncSettings.syncFolder,
                 userId = syncSettings.userId
             ).apply {
-                deleteIfExists(makeTransaction = false, customRealm = realm)
+                deleteIfExists(makeTransaction = false)
                 createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
                 realm.insertOrUpdate(this)
                 SentryLog.i(TAG, "localMediaFound> $fileName saved in realm")
             }
 
             UploadFile.setAppSyncSettings(
-                customRealm = realm,
                 makeTransaction = false,
                 syncSettings = syncSettings.apply {
                     if (fileModifiedAt > lastSync) lastSync = fileModifiedAt

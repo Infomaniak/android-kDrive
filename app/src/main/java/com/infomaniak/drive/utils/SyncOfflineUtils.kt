@@ -23,6 +23,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivityType
 import com.infomaniak.drive.data.models.FileActivityType.*
@@ -39,6 +40,7 @@ import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import java.util.Date
 
 object SyncOfflineUtils {
@@ -56,20 +58,22 @@ object SyncOfflineUtils {
             ensureActive()
             val userDrive = UserDrive(driveId = drive.id)
 
-            FileController.getRealmInstance(userDrive).use { realm ->
-                val localFiles = FileController.getOfflineFiles(order = null, customRealm = realm)
+            withContext(FolderFilesProvider.realmDispatcher) {
+                FileController.getRealmInstance(userDrive).use { realm ->
+                    val localFiles = FileController.getOfflineFiles(order = null, customRealm = realm)
 
-                // The api doesn't support sending a list of files that exceeds a certain limit,
-                // so we chunk the files in relation to this limit.
-                localFiles.chunked(API_LIMIT_FILES_ACTION_BODY).forEach {
-                    ensureActive()
-                    processChunk(
-                        context = context,
-                        coroutineScope = this,
-                        userDrive = userDrive,
-                        localFilesMap = it.associateBy { file -> file.id },
-                        realm = realm,
-                    )
+                    // The api doesn't support sending a list of files that exceeds a certain limit,
+                    // so we chunk the files in relation to this limit.
+                    localFiles.chunked(API_LIMIT_FILES_ACTION_BODY).forEach {
+                        ensureActive()
+                        processChunk(
+                            context = context,
+                            coroutineScope = this,
+                            userDrive = userDrive,
+                            localFilesMap = it.associateBy { file -> file.id },
+                            realm = realm,
+                        )
+                    }
                 }
             }
         }
@@ -88,7 +92,7 @@ object SyncOfflineUtils {
         }
     }
 
-    private fun processChunk(
+    private suspend fun processChunk(
         context: Context,
         coroutineScope: CoroutineScope,
         userDrive: UserDrive,

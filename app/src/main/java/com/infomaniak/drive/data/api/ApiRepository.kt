@@ -52,7 +52,7 @@ object ApiRepository : ApiRepositoryCore() {
 
     var PER_PAGE = 200
 
-    private inline fun <reified T> callApiWithCursor(
+    private suspend inline fun <reified T> callApiWithCursor(
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
@@ -68,30 +68,30 @@ object ApiRepository : ApiRepositoryCore() {
         })
     }
 
-    fun getAllDrivesData(
+    suspend fun getAllDrivesData(
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
         val url = ApiRoutes.getAllDrivesData()
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFavoriteFiles(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+    suspend fun getFavoriteFiles(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
         val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET)
     }
 
-    fun getSharedWithMeFiles(order: SortType, cursor: String?): CursorApiResponse<List<File>> {
+    suspend fun getSharedWithMeFiles(order: SortType, cursor: String?): CursorApiResponse<List<File>> {
         return callApiWithCursor(
             url = "${ApiRoutes.getSharedWithMeFiles(order)}&${loadCursor(cursor)}",
             method = GET
         )
     }
 
-    fun postFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), POST)
+    suspend fun postFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), POST)
 
-    fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), DELETE)
+    suspend fun deleteFavoriteFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.favorite(file), DELETE)
 
-    fun getFolderFiles(
+    suspend fun getFolderFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
         parentId: Int,
@@ -102,7 +102,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getListingFiles(
+    suspend fun getListingFiles(
         okHttpClient: OkHttpClient,
         driveId: Int,
         parentId: Int,
@@ -117,7 +117,7 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     // Increase timeout for this API call because it can take more than 10s to process data
-    fun getFileActivities(
+    suspend fun getFileActivities(
         file: File,
         cursor: String?,
         forFileList: Boolean,
@@ -127,13 +127,13 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun getFilesLastActivities(driveId: Int, body: FileLastActivityBody): ApiResponse<List<LastFileAction>> {
+    suspend fun getFilesLastActivities(driveId: Int, body: FileLastActivityBody): ApiResponse<List<LastFileAction>> {
         val url = "${ApiRoutes.getFilesLastActivities(driveId)}?with=file"
         return callApi(url, POST, body)
     }
 
     // For sync offline service
-    fun getFileActivities(
+    suspend fun getFileActivities(
         driveId: Int,
         fileIds: List<Int>,
         fromDate: Long,
@@ -143,31 +143,35 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileActivities(driveId, formattedFileIds, fromDate), GET, okHttpClient = okHttpClient)
     }
 
-    fun getLastModifiedFiles(driveId: Int, cursor: String? = null): CursorApiResponse<ArrayList<File>> {
+    suspend fun getLastModifiedFiles(driveId: Int, cursor: String? = null): CursorApiResponse<ArrayList<File>> {
         val url = "${ApiRoutes.getLastModifiedFiles(driveId)}&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET)
     }
 
-    fun getLastGallery(driveId: Int, cursor: String?): CursorApiResponse<ArrayList<File>> {
+    suspend fun getLastGallery(driveId: Int, cursor: String?): CursorApiResponse<ArrayList<File>> {
         val types = "&types[]=${ExtensionType.IMAGE.value}&types[]=${ExtensionType.VIDEO.value}"
         val url = "${ApiRoutes.searchFiles(driveId, SortType.RECENT)}$types&${loadCursor(cursor)}"
         return callApiWithCursor(url, GET)
     }
 
-    fun getValidChunks(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<ValidChunks> {
+    suspend fun getValidChunks(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<ValidChunks> {
         val url = "${ApiRoutes.getSession(driveId, uploadToken)}?status[]=${ChunkStatus.OK}&with=chunks"
         return callApi(url, GET, okHttpClient = okHttpClient)
     }
 
-    fun startUploadSession(driveId: Int, body: StartSessionBody, okHttpClient: OkHttpClient): ApiResponse<StartUploadSession> {
+    suspend fun startUploadSession(
+        driveId: Int,
+        body: StartSessionBody,
+        okHttpClient: OkHttpClient,
+    ): ApiResponse<StartUploadSession> {
         return callApi(ApiRoutes.startUploadSession(driveId), POST, body, okHttpClient = okHttpClient)
     }
 
-    fun finishSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<UploadSession> {
+    suspend fun finishSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<UploadSession> {
         return callApi(ApiRoutes.closeSession(driveId, uploadToken), POST, okHttpClient = okHttpClient)
     }
 
-    fun cancelSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<Boolean> {
+    suspend fun cancelSession(driveId: Int, uploadToken: String, okHttpClient: OkHttpClient): ApiResponse<Boolean> {
         return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE, okHttpClient = okHttpClient)
     }
 

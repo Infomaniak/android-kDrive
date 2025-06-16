@@ -120,7 +120,7 @@ class FileControllerTest : KDriveTest() {
 
     @Test
     @DisplayName("Make a file favorite then store it in realm and compare results")
-    fun getFavoriteFiles_CanGetRemoteSavedFilesFromRealm() {
+    fun getFavoriteFiles_CanGetRemoteSavedFilesFromRealm() = runTest {
         // Create a test file and store it in favorite
         val remoteFile = createAndStoreOfficeFile()
         ApiRepository.postFavoriteFile(remoteFile)
@@ -187,7 +187,7 @@ class FileControllerTest : KDriveTest() {
 
     @Test
     @DisplayName("Retrieve remote picture then store it in realm and compare results")
-    fun getPictures_CanGetRemoteSavedFilesFromRealm() {
+    fun getPictures_CanGetRemoteSavedFilesFromRealm() = runTest {
         // Get remote pictures
         val apiResponseData = ApiRepository.getLastGallery(Env.DRIVE_ID, null).let {
             assertApiResponseData(it)
@@ -258,7 +258,7 @@ class FileControllerTest : KDriveTest() {
 
     @Test
     @DisplayName("Check if realm root contains files")
-    fun getTestFileListForFolder() {
+    fun getTestFileListForFolder() = runTest {
         // Get the file list of root folder
         with(getFolderFiles(okHttpClient, userDrive.driveId, Utils.ROOT_ID, order = File.SortType.NAME_AZ)) {
             assertApiResponseData(this)

@@ -72,7 +72,7 @@ class GalleryViewModel : ViewModel() {
         }
     }
 
-    private fun getLastGallery(
+    private suspend fun getLastGallery(
         driveId: Int,
         ignoreCloud: Boolean,
         isFirstPage: Boolean,
@@ -89,7 +89,7 @@ class GalleryViewModel : ViewModel() {
         return FileController.getGalleryDrive() to true
     }
 
-    private fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<ArrayList<File>, Boolean> {
+    private suspend fun fetchApiGallery(driveId: Int, isFirstPage: Boolean, cursor: String?): Pair<ArrayList<File>, Boolean> {
         val apiResponse = ApiRepository.getLastGallery(driveId = driveId, cursor = cursor)
         return if (apiResponse.isSuccess()) {
             currentCursor = apiResponse.cursor

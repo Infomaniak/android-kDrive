@@ -78,7 +78,7 @@ class FileDetailsViewModel : ViewModel() {
 
     private suspend fun <T> LiveDataScope<CursorApiResponse<ArrayList<T>>?>.manageRecursiveApiResponse(
         file: File,
-        apiResponseCallback: (file: File, cursor: String?) -> CursorApiResponse<ArrayList<T>>
+        apiResponseCallback: suspend (file: File, cursor: String?) -> CursorApiResponse<ArrayList<T>>
     ) {
         suspend fun recursive(cursor: String?) {
             with(apiResponseCallback(file, cursor)) {

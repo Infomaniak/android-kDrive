@@ -30,12 +30,16 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
+import com.infomaniak.drive.utils.RealmCoroutine.RealmDispatcher
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.realm.RealmQuery
 import io.sentry.Sentry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.util.Calendar
 
@@ -49,13 +53,12 @@ object FolderFilesProvider {
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
-    private val realmDispatcher get() = Realm.WRITE_EXECUTOR.asCoroutineDispatcher()
-
     suspend fun getFiles(
         folderFilesProviderArgs: FolderFilesProviderArgs,
-    ): FolderFilesProviderResult? = withContext(realmDispatcher) {
+    ): FolderFilesProviderResult? = withContext(RealmDispatcher) {
         val realm = folderFilesProviderArgs.realm ?: FileController.getRealmInstance(folderFilesProviderArgs.userDrive)
 
+        Dispatchers.IO
         val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
         val sourceRestrictionType = folderFilesProviderArgs.sourceRestrictionType
         val needToLoadFromRemote = needToLoadFromRemote(sourceRestrictionType, folderProxy)
@@ -80,7 +83,7 @@ object FolderFilesProvider {
     suspend fun loadSharedWithMeFiles(
         folderFilesProviderArgs: FolderFilesProviderArgs,
         onRecursionStart: (() -> Unit)? = null,
-    ): Unit = withContext(realmDispatcher) {
+    ): Unit = withContext(RealmDispatcher) {
         val userDrive = folderFilesProviderArgs.userDrive
         val folderId = folderFilesProviderArgs.folderId
         val block: suspend (Realm) -> Unit = { realm ->
@@ -175,7 +178,7 @@ object FolderFilesProvider {
         )
     }
 
-    private tailrec fun getCloudStorageFilesRec(
+    private tailrec suspend fun getCloudStorageFilesRec(
         realm: Realm,
         folderFilesProviderArgs: FolderFilesProviderArgs,
         transaction: (files: ArrayList<File>) -> Unit,
@@ -199,17 +202,20 @@ object FolderFilesProvider {
         )
     }
 
-    fun tryLoadActivitiesFromFolder(folder: File, userDrive: UserDrive, activitiesJob: Job): Boolean {
+    suspend fun tryLoadActivitiesFromFolder(
+        folder: File, userDrive: UserDrive,
+        activitiesJob: Job,
+    ): Boolean = withContext(RealmDispatcher) {
         val realm = FileController.getRealmInstance(userDrive)
-        val folderProxy = FileController.getFileById(realm, folder.id) ?: return false
-        if (!folderProxy.isComplete) return false
+        val folderProxy = FileController.getFileById(realm, folder.id) ?: return@withContext false
+        if (!folderProxy.isComplete) return@withContext false
 
-        val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId, 30) }
+        val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, 30)
         val result = loadActivitiesFromFolderRec(activitiesJob, folderProxy, userDrive, okHttpClient)
 
         realm.close()
 
-        return result.isNotEmpty()
+        return@withContext result.isNotEmpty()
     }
 
     private suspend fun loadFromRemote(
@@ -257,7 +263,7 @@ object FolderFilesProvider {
         handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy)
     }
 
-    private fun loadCloudStorageFromRemote(
+    private suspend fun loadCloudStorageFromRemote(
         realm: Realm,
         folderProxy: File?,
         folderFilesProviderArgs: FolderFilesProviderArgs,
@@ -349,7 +355,7 @@ object FolderFilesProvider {
                 || minDateToIgnoreCache >= folderProxy.responseAt
     }
 
-    private tailrec fun loadActivitiesFromFolderRec(
+    private tailrec suspend fun loadActivitiesFromFolderRec(
         activitiesJob: Job,
         folderProxy: File,
         userDrive: UserDrive,

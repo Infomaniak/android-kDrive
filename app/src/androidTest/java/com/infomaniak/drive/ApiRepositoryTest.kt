@@ -78,7 +78,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     @DisplayName("Check if remote drive data are correctly retrieved")
-    fun getDriveData() {
+    fun getDriveData() = runTest {
         assertApiResponseData(getAllDrivesData(okHttpClient))
     }
 
@@ -252,7 +252,7 @@ class ApiRepositoryTest : KDriveTest() {
 
         @Test
         @DisplayName("Add a file to favorite, then remove it")
-        fun manageFavoriteFileLifecycle() {
+        fun manageFavoriteFileLifecycle() = runTest {
             // Creates favorite
             assertApiResponseData(postFavoriteFile(testFile))
 
@@ -273,7 +273,7 @@ class ApiRepositoryTest : KDriveTest() {
 
         @Test
         @DisplayName("Check if the file activities are correctly retrieved")
-        fun getFileActivities() {
+        fun getFileActivities() = runTest {
             with(getFileActivities(testFile, null, false)) {
                 if (isSuccess()) {
                     assertApiResponseData(this)
@@ -359,7 +359,7 @@ class ApiRepositoryTest : KDriveTest() {
             // Unlike the comment
             with(postUnlikeComment(testFile, commentID)) {
                 assertApiResponseData(this)
-                assertTrue(data ?: false)
+                assertTrue(data == true)
             }
 
             // Make sure data has been updated
