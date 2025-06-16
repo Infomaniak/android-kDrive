@@ -64,6 +64,7 @@ import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.ApiTestUtils.getCategory
 import com.infomaniak.drive.utils.ApiTestUtils.putNewFileInTrash
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
 import java.util.UUID
@@ -83,7 +84,7 @@ class ApiRepositoryTest : KDriveTest() {
 
     @Test
     @DisplayName("Check if remote user profile is correctly retrieved")
-    fun getUserProfileFromRemote() {
+    fun getUserProfileFromRemote() = runTest {
         with(getUserProfile(okHttpClient)) {
             assertApiResponseData(this)
             assertEquals(userDrive.userId, data?.id, "User ids should be the same")
