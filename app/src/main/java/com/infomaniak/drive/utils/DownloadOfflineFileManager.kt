@@ -45,6 +45,7 @@ import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
@@ -290,6 +291,7 @@ class DownloadOfflineFileManager(
             okHttpClient: OkHttpClient = HttpClient.okHttpClient,
             downloadInterceptor: Interceptor? = null
         ): Response {
+            @OptIn(ManualAuthorizationRequired::class)
             val request = Request.Builder().url(fileUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
 
             return okHttpClient.newBuilder().apply {

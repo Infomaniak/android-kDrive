@@ -47,6 +47,7 @@ import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscr
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 
 open class PreviewVideoFragment : PreviewFragment() {
 
@@ -204,6 +205,8 @@ open class PreviewVideoFragment : PreviewFragment() {
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
         val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
             setUserAgent(userAgent)
+
+            @OptIn(ManualAuthorizationRequired::class)
             setDefaultRequestProperties(HttpUtils.getHeaders().toMap())
         }
         return DefaultDataSource.Factory(appContext, okHttpDataSource)

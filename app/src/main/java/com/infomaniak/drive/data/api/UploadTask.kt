@@ -47,6 +47,7 @@ import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import io.ktor.client.HttpClient
@@ -294,6 +295,7 @@ class UploadTask(
             // and the size seem to match, so it might be a ktor or OkHttp internal issue worth reporting.
             httpClient.preparePost(url) {
                 headers {
+                    @OptIn(ManualAuthorizationRequired::class)
                     HttpUtils.getHeaders(contentType = null).forEach { (name, value) ->
                         append(name, value)
                     }
