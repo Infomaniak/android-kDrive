@@ -39,6 +39,7 @@ import com.infomaniak.drive.MatomoDrive.buildTracker
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
+import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -65,6 +66,7 @@ import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import org.matomo.sdk.Tracker
 import java.util.UUID
 
@@ -186,15 +188,26 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     private fun tokenInterceptorListener() = object : TokenInterceptorListener {
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val userTokenFlow = AppSettings.getCurrentUserIdFlow()
+            .mapLatest { id -> id?.let { AccountUtils.getUserById(it)?.apiToken } }
+            .catch {
+                // Let user retry without logging him out.
+                // If we send null, the user will be logged out.
+            }
+            .shareIn(applicationScope, SharingStarted.Lazily, replay = 1)
+
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
             AccountUtils.setUserToken(AccountUtils.currentUser!!, apiToken)
         }
 
         override suspend fun onRefreshTokenError() {
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
             refreshTokenError(AccountUtils.currentUser!!)
         }
 
-        override suspend fun getApiToken(): ApiToken? = AccountUtils.currentUser?.apiToken
+        override suspend fun getApiToken(): ApiToken? = userTokenFlow.first()
 
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
