@@ -526,7 +526,34 @@
         android:id="@+id/aboutSettingsFragment"
         android:name="com.infomaniak.drive.ui.menu.settings.AboutSettingsFragment"
         android:label="AboutSettingsFragment"
-        tools:layout="@layout/fragment_settings_about" />
+        tools:layout="@layout/fragment_settings_about">
+        <action
+            android:id="@+id/action_settingsFragment_to_dataManagementSettingFragment"
+            app:destination="@id/dataManagementSettingFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/dataManagementSettingFragment"
+        android:name="com.infomaniak.drive.ui.menu.settings.DataManagementSettingFragment"
+        android:label="DataManagementSettingsFragment"
+        tools:layout="@layout/fragment_data_management_setting">
+        <action
+            android:id="@+id/action_dataManagementSetting_to_dataManagementMatomo"
+            app:destination="@id/dataManagementMatomoFragment" />
+        <action
+            android:id="@+id/action_dataManagementSetting_to_dataManagementSentry"
+            app:destination="@id/dataManagementSentryFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/dataManagementMatomoFragment"
+        android:name="com.infomaniak.drive.ui.menu.settings.DataManagementMatomoSettingFragment"
+        android:label="DataManagementMatomoFragment" />
+
+    <fragment
+        android:id="@+id/dataManagementSentryFragment"
+        android:name="com.infomaniak.drive.ui.menu.settings.DataManagementSentrySettingFragment"
+        android:label="DataManagementMatomoFragment" />
 
     <fragment
         android:id="@+id/fileShareDetailsFragment"

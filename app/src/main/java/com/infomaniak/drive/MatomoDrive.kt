@@ -38,6 +38,8 @@ object MatomoDrive : MatomoCore {
     const val ACTION_SEND_FILE_COPY_NAME = "sendFileCopy"
 
     const val PUBLIC_SHARE_ACTION_CATEGORY = "publicShareAction"
+    const val SETTINGS_DATA_MANAGEMENT = "settingsDataManagement"
+    const val SHOW_SOURCE_CODE = "showSourceCode"
 
     fun Fragment.trackCategoriesEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent("categories", name, action, value)
@@ -97,5 +99,9 @@ object MatomoDrive : MatomoCore {
 
     fun Context.trackMyKSuiteUpgradeBottomSheetEvent(name: String) {
         trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE_UPGRADE_BOTTOMSHEET, name)
+    }
+
+    fun Fragment.trackEventDataManagement(name: String) {
+        trackEvent(SETTINGS_DATA_MANAGEMENT, name)
     }
 }
