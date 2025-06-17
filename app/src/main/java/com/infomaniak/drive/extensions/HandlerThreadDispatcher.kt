@@ -31,6 +31,11 @@ import java.util.concurrent.Executor
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
+/**
+ * Creates an internal [HandlerThread] that will be used to run code from this [kotlinx.coroutines.CoroutineDispatcher].
+ *
+ * Note that this is a closable resource, and closing it will call [HandlerThread.quitSafely].
+ */
 @ExperimentalCoroutinesApi
 @DelicateCoroutinesApi
 class HandlerThreadDispatcher(
@@ -50,7 +55,7 @@ class HandlerThreadDispatcher(
         Handler(handlerThread.looper) // Hidden constructor absent. Fall back to non-async constructor.
     }
 
-    private val dispatcher = handler.asCoroutineDispatcher()
+    private val dispatcher = handler.asCoroutineDispatcher(name = name)
 
     override val executor: Executor = Executor { dispatch(EmptyCoroutineContext, it) }
 
