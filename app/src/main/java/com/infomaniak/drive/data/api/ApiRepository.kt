@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ import com.infomaniak.core.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
 
-    var PER_PAGE = 200
+    var PER_PAGE = 50
 
     private inline fun <reified T> callApi(
         url: String,
@@ -119,7 +119,7 @@ object ApiRepository : ApiRepositoryCore() {
         order: SortType
     ): CursorApiResponse<ListingFiles> {
         val url = when (cursor) {
-            null -> ApiRoutes.getListingFiles(driveId, parentId, order)
+            null -> "${ApiRoutes.getListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
             else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
         }
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
