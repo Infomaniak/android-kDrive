@@ -95,35 +95,37 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         }
 
         try {
-            client.connect(options, userContext = null, object : IMqttActionListener {
-                override fun onSuccess(asyncActionToken: IMqttToken?) {
-                    SentryLog.i("MQTT connection", "Success : true")
-                    coroutineScope.launch {
-                        currentToken?.let {
-                            subscribe(topicFor(it))
-                            completion()
-
-                        }
-
-                        // If there is no more active worker, stop MQTT
-                        timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
-                            if (appContext.isBulkOperationActive() || runningExternalImportIds.size.isPositive()) {
-                                timer.start()
-                            } else {
-                                currentToken?.let { unsubscribe(topicFor(it)) }
-                                client.disconnect()
+            client.connect(
+                options,
+                userContext = null,
+                object : IMqttActionListener {
+                    override fun onSuccess(asyncActionToken: IMqttToken?) {
+                        SentryLog.i("MQTT connection", "Success : true")
+                        coroutineScope.launch {
+                            currentToken?.let {
+                                subscribe(topicFor(it))
+                                completion()
                             }
+
+                            // If there is no more active worker, stop MQTT
+                            timer = Utils.createRefreshTimer(milliseconds = MQTT_AUTO_DISCONNECT_TIMER) {
+                                if (appContext.isBulkOperationActive() || runningExternalImportIds.size.isPositive()) {
+                                    timer.start()
+                                } else {
+                                    currentToken?.let { unsubscribe(topicFor(it)) }
+                                    client.disconnect()
+                                }
+                            }
+                            timer.start()
                         }
-                        timer.start()
+                    }
+
+                    override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
+                        exception?.printStackTrace()
+                        SentryLog.i("MQTT connection", "Success : false")
                     }
                 }
-
-                override fun onFailure(asyncActionToken: IMqttToken?, exception: Throwable?) {
-                    exception?.printStackTrace()
-                    SentryLog.i("MQTT connection", "Success : false")
-                }
-
-            })
+            )
         } catch (e: MqttException) {
             e.printStackTrace()
         }

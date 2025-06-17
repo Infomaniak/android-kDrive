@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,14 +63,16 @@ class MenuUiTest : KDriveUiTest() {
             // Save button
             try {
                 findObject(UiSelector().text("CONNECTION")).clickAndWaitForNewWindow(LONG_TIMEOUT)
-            } catch (exception: UiObjectNotFoundException) {
+            } catch (_: UiObjectNotFoundException) {
                 findObject(UiSelector().text("CONNEXION")).clickAndWaitForNewWindow(LONG_TIMEOUT)
             }
 
             // Close the bottom sheet displayed for categories information
             closeBottomSheetInfoModalIfDisplayed()
             getDeviceViewById("menuFragment").clickAndWaitForNewWindow(SHORT_TIMEOUT)
-            assert(AccountUtils.currentUserId == Env.NEW_USER_ID) { "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}" }
+            assert(AccountUtils.currentUserId == Env.NEW_USER_ID) {
+                "User Id should be ${Env.NEW_USER_ID} but is ${AccountUtils.currentUserId}"
+            }
             swipeDownNestedScrollView()
             getDeviceViewById("logout").clickAndWaitForNewWindow()
             findObject(UiSelector().text(context.getString(R.string.buttonConfirm))).clickAndWaitForNewWindow()

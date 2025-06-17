@@ -95,7 +95,8 @@ class HomeActivitiesFragment : Fragment() {
                             homeViewModel.loadMoreActivities(currentDrive.id)
                         }
                     }
-                })
+                }
+            )
 
             lastActivitiesAdapter.apply {
                 onMoreFilesClicked = { fileActivity, validPreviewFiles ->
@@ -161,5 +162,4 @@ class HomeActivitiesFragment : Fragment() {
             isDownloadingActivities = false
         }
     }
-
 }

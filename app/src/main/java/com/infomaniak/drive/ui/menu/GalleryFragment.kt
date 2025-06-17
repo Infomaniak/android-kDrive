@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -255,8 +255,11 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
             isDownloadingGallery = true
 
             val isNetworkAvailable = mainViewModel.hasNetwork
-            if (isRefresh) galleryViewModel.loadLastGallery(driveId, ignoreCloud = !isNetworkAvailable)
-            else if (isNetworkAvailable) galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
+            if (isRefresh) {
+                galleryViewModel.loadLastGallery(driveId, ignoreCloud = !isNetworkAvailable)
+            } else if (isNetworkAvailable) {
+                galleryViewModel.loadMoreGallery(driveId, ignoreCloud = false)
+            }
         }
     }
 

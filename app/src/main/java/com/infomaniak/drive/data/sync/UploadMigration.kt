@@ -110,7 +110,6 @@ class UploadMigration : RealmMigration {
             oldVersionTemp++
         }
         //endregion
-
     }
 
     companion object {

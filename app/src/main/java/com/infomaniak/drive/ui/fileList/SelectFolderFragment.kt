@@ -90,8 +90,8 @@ class SelectFolderFragment : FileListFragment() {
             with(requireActivity() as SelectFolderActivity) {
                 showSaveButton()
                 val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
-                val enable = folderId != selectFolderViewModel.disableSelectedFolderId
-                        && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
+                val enable = folderId != selectFolderViewModel.disableSelectedFolderId &&
+                    (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
                 enableSaveButton(enable)
             }
         }

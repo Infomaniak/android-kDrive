@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.util.Pair as AndroidPair
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
@@ -38,7 +39,6 @@ import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
 import com.infomaniak.lib.core.utils.safeBinding
 import java.util.Calendar
 import java.util.Date
-import androidx.core.util.Pair as AndroidPair
 
 class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
 

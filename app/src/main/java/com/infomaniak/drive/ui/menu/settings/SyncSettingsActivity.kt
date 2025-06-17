@@ -57,11 +57,11 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import io.sentry.Sentry
+import java.util.Date
+import java.util.TimeZone
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import java.util.Date
-import java.util.TimeZone
 
 class SyncSettingsActivity : BaseActivity() {
 
@@ -360,21 +360,24 @@ class SyncSettingsActivity : BaseActivity() {
 
     private fun changeSaveButtonStatus() = with(binding) {
         val allSyncedFoldersCount = MediaFolder.getAllSyncedFoldersCount().toInt()
-        val isEdited = (editNumber > 0)
-                || (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId)
-                || (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId)
-                || (syncSettingsViewModel.syncFolderId.value != oldSyncSettings?.syncFolder)
-                || (syncSettingsViewModel.saveOldPictures.value != SavePicturesDate.SINCE_NOW)
-                || allSyncedFoldersCount > 0
+        val isEdited = (editNumber > 0) ||
+            (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId) ||
+            (selectDriveViewModel.selectedDrive.value?.id != oldSyncSettings?.driveId) ||
+            (syncSettingsViewModel.syncFolderId.value != oldSyncSettings?.syncFolder) ||
+            (syncSettingsViewModel.saveOldPictures.value != SavePicturesDate.SINCE_NOW) ||
+            allSyncedFoldersCount > 0
         saveButton.isVisible = isEdited
 
-        mediaFoldersTitle.text = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
-        else resources.getQuantityString(R.plurals.mediaFoldersSelected, allSyncedFoldersCount, allSyncedFoldersCount)
+        mediaFoldersTitle.text = if (allSyncedFoldersCount == 0) {
+            getString(R.string.noSelectMediaFolders)
+        } else {
+            resources.getQuantityString(R.plurals.mediaFoldersSelected, allSyncedFoldersCount, allSyncedFoldersCount)
+        }
 
-        saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
-                && (selectDriveViewModel.selectedDrive.value != null)
-                && (syncSettingsViewModel.syncFolderId.value != null)
-                && allSyncedFoldersCount > 0
+        saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null) &&
+            (selectDriveViewModel.selectedDrive.value != null) &&
+            (syncSettingsViewModel.syncFolderId.value != null) &&
+            allSyncedFoldersCount > 0
     }
 
     private fun trackPhotoSyncEvents(syncSettings: SyncSettings) {

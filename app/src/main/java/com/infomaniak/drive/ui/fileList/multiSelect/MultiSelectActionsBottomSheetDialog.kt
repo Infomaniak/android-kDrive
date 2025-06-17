@@ -262,12 +262,16 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
 
     enum class SelectDialogAction {
         MANAGE_CATEGORIES,
-        ADD_FAVORITES, REMOVE_FAVORITES,
-        ADD_OFFLINE, REMOVE_OFFLINE,
+        ADD_FAVORITES,
+        REMOVE_FAVORITES,
+        ADD_OFFLINE,
+        REMOVE_OFFLINE,
         DUPLICATE,
         MOVE,
         COLOR_FOLDER,
-        RESTORE_IN, RESTORE_TO_ORIGIN, DELETE_PERMANENTLY,
+        RESTORE_IN,
+        RESTORE_TO_ORIGIN,
+        DELETE_PERMANENTLY,
     }
 
     protected companion object {

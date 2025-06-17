@@ -122,7 +122,10 @@ val envProperties = rootProject.file("env.properties").takeIf { it.exists() }?.l
 }
 
 val sentryAuthToken = envProperties?.getProperty("sentryAuthToken").takeUnless { it.isNullOrBlank() }
-    ?: if (isRelease) error("The `sentryAuthToken` property in `env.properties` must be specified (see `env.example.properties`).") else ""
+
+if (isRelease && sentryAuthToken == null) {
+    error("The `sentryAuthToken` property in `env.properties` must be specified (see `env.example.properties`).")
+}
 
 sentry {
     org = "sentry"

@@ -47,20 +47,32 @@ object MediaFoldersProvider {
     const val VIDEO_BUCKET_DISPLAY_NAME = MediaStore.Video.Media.BUCKET_DISPLAY_NAME
 
     val imagesExternalUri: Uri =
-        if (SDK_INT >= 29) MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        else MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        if (SDK_INT >= 29) {
+            MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
 
     val videosExternalUri: Uri =
-        if (SDK_INT >= 29) MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        if (SDK_INT >= 29) {
+            MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        }
 
     val audiosExternalUri: Uri =
-        if (SDK_INT >= 29) MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
-        else MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        if (SDK_INT >= 29) {
+            MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
+        } else {
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        }
 
     private val MEDIA_PATH_COLUMN =
-        if (SDK_INT >= 29) MediaStore.MediaColumns.RELATIVE_PATH
-        else MediaStore.MediaColumns.DATA
+        if (SDK_INT >= 29) {
+            MediaStore.MediaColumns.RELATIVE_PATH
+        } else {
+            MediaStore.MediaColumns.DATA
+        }
 
     private const val imagesSortOrder = "$IMAGES_BUCKET_DISPLAY_NAME ASC"
     private val imagesProjection = arrayOf(

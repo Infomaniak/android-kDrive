@@ -67,7 +67,6 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import java.util.UUID
 
 /**
  * Logging activity testing class
@@ -411,7 +410,6 @@ class ApiRepositoryTest : KDriveTest() {
                     assertFalse(canEdit, "Can edit should be false")
                     assertFalse(canSeeStats, "Show stats should be false")
                 }
-
             }
 
             // Get the share link
@@ -423,7 +421,8 @@ class ApiRepositoryTest : KDriveTest() {
 
             // Modifies the share link
             updateShareLink(
-                testFile, shareLink.data!!.ShareLinkSettings(
+                testFile,
+                shareLink.data!!.ShareLinkSettings(
                     right = ShareLink.ShareLinkFilePermission.PUBLIC,
                     canDownload = false,
                     canEdit = true,
@@ -442,7 +441,6 @@ class ApiRepositoryTest : KDriveTest() {
                     assertTrue(canEdit, "can edit should be true")
                     assertTrue(canSeeStats, "show stats should be true")
                 }
-
             }
 
             // Delete the shareLink

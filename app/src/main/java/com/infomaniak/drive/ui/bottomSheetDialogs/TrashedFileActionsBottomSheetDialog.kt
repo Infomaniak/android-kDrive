@@ -127,8 +127,11 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun restoreResult(fileResult: FileResult, originalPlace: Boolean, folderName: String? = null) {
         if (fileResult.isSuccess) {
-            val title = if (originalPlace) R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess
-            else R.plurals.trashedFileRestoreFileInSuccess
+            val title = if (originalPlace) {
+                R.plurals.trashedFileRestoreFileToOriginalPlaceSuccess
+            } else {
+                R.plurals.trashedFileRestoreFileInSuccess
+            }
 
             val args = arrayListOf(currentTrashedFile.name).apply {
                 if (!originalPlace && folderName != null) add(folderName)

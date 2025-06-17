@@ -50,7 +50,9 @@ open class Team(
 
     fun getParsedColor(): Int {
         return Color.parseColor(
-            if (isAllUsers()) "#4051b5" else
+            if (isAllUsers()) {
+                "#4051b5"
+            } else {
                 when (this.color) {
                     0 -> "#F44336"
                     1 -> "#E91E63"
@@ -71,6 +73,7 @@ open class Team(
                     16 -> "#795548"
                     else -> "#E91E63"
                 }
+            }
         )
     }
 

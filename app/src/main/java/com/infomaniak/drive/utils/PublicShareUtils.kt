@@ -54,5 +54,4 @@ object PublicShareUtils {
         }
         activity.showToast(errorMessage)
     }
-
 }

@@ -258,8 +258,11 @@ open class ManageDropboxFragment : Fragment() {
         binding.settings.expirationDateInput.isVisible = isChecked
 
         currentDropBox?.newValidUntil =
-            if (isChecked) currentDropBox?.validUntil ?: Date()
-            else null
+            if (isChecked) {
+                currentDropBox?.validUntil ?: Date()
+            } else {
+                null
+            }
 
         enableSaveButton()
     }

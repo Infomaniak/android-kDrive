@@ -44,10 +44,10 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
-import kotlinx.coroutines.*
-import splitties.init.appCtx
 import java.io.IOException
 import java.util.Date
+import kotlinx.coroutines.*
+import splitties.init.appCtx
 
 class ImportFilesDialog : DialogFragment() {
 

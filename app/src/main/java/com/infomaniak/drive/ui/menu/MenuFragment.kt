@@ -66,10 +66,15 @@ class MenuFragment : Fragment() {
             AccountUtils.getCurrentDrive()?.let { currentDrive ->
                 driveName.text = currentDrive.name
 
-                driveName.setCompoundDrawables(wrap(driveName.compoundDrawablesRelative.first()).apply {
-                    val color = Color.parseColor(currentDrive.preferences.color)
-                    setTint(this, color)
-                }, null, null, null)
+                driveName.setCompoundDrawables(
+                    wrap(driveName.compoundDrawablesRelative.first()).apply {
+                        val color = Color.parseColor(currentDrive.preferences.color)
+                        setTint(this, color)
+                    },
+                    null,
+                    null,
+                    null
+                )
 
                 if (currentDrive.size == 0L) {
                     driveStorageProgress.isInvisible = true

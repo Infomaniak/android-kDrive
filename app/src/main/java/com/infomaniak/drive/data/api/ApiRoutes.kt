@@ -29,67 +29,67 @@ import java.util.*
 object ApiRoutes {
 
     private const val fileWithQuery = "with=capabilities,categories,conversion_capabilities,dropbox,dropbox.capabilities," +
-            "external_import,is_favorite,path,sharelink,sorted_name,supported_by"
+        "external_import,is_favorite,path,sharelink,sorted_name,supported_by"
     private const val fileExtraWithQuery = "$fileWithQuery,users,version"
     private const val activitiesWithQuery = "with=file,file.capabilities,file.categories,file.conversion_capabilities," +
-            "file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name,file.supported_by"
+        "file.dropbox,file.dropbox.capabilities,file.is_favorite,file.sharelink,file.sorted_name,file.supported_by"
     private const val listingFilesWithQuery = "with=files,files.capabilities,files.categories,files.conversion_capabilities," +
-            "files.dropbox,files.dropbox.capabilities,files.external_import,files.is_favorite," +
-            "files.sharelink,files.sorted_name,files.supported_by"
+        "files.dropbox,files.dropbox.capabilities,files.external_import,files.is_favorite," +
+        "files.sharelink,files.sorted_name,files.supported_by"
     const val activitiesWithExtraQuery = "$activitiesWithQuery,file.external_import"
     private const val sharedFileWithQuery = "with=capabilities,conversion_capabilities,supported_by"
 
     private const val ACTIONS = "&actions[]=file_create" +
-            "&actions[]=file_rename" +
-            "&actions[]=file_move" +
-            "&actions[]=file_move_out" +
-            "&actions[]=file_trash" +
-            "&actions[]=file_restore" +
-            "&actions[]=file_delete" +
-            "&actions[]=file_update" +
-            "&actions[]=file_favorite_create" +
-            "&actions[]=file_favorite_remove" +
-            "&actions[]=file_share_create" +
-            "&actions[]=file_share_update" +
-            "&actions[]=file_share_delete" +
-            "&actions[]=file_categorize" +
-            "&actions[]=file_uncategorize" +
-            "&actions[]=file_color_update" +
-            "&actions[]=file_color_delete" +
-            "&actions[]=share_link_create" +
-            "&actions[]=share_link_update" +
-            "&actions[]=share_link_delete" +
-            "&actions[]=collaborative_folder_create" +
-            "&actions[]=collaborative_folder_update" +
-            "&actions[]=collaborative_folder_delete"
+        "&actions[]=file_rename" +
+        "&actions[]=file_move" +
+        "&actions[]=file_move_out" +
+        "&actions[]=file_trash" +
+        "&actions[]=file_restore" +
+        "&actions[]=file_delete" +
+        "&actions[]=file_update" +
+        "&actions[]=file_favorite_create" +
+        "&actions[]=file_favorite_remove" +
+        "&actions[]=file_share_create" +
+        "&actions[]=file_share_update" +
+        "&actions[]=file_share_delete" +
+        "&actions[]=file_categorize" +
+        "&actions[]=file_uncategorize" +
+        "&actions[]=file_color_update" +
+        "&actions[]=file_color_delete" +
+        "&actions[]=share_link_create" +
+        "&actions[]=share_link_update" +
+        "&actions[]=share_link_delete" +
+        "&actions[]=collaborative_folder_create" +
+        "&actions[]=collaborative_folder_update" +
+        "&actions[]=collaborative_folder_delete"
 
     private const val ADDITIONAL_ACTIONS = "&actions[]=file_access" +
-            "&actions[]=comment_create" +
-            "&actions[]=comment_update" +
-            "&actions[]=comment_delete" +
-            "&actions[]=comment_like" +
-            "&actions[]=comment_unlike" +
-            "&actions[]=comment_resolve" +
-            "&actions[]=share_link_show"
+        "&actions[]=comment_create" +
+        "&actions[]=comment_update" +
+        "&actions[]=comment_delete" +
+        "&actions[]=comment_like" +
+        "&actions[]=comment_unlike" +
+        "&actions[]=comment_resolve" +
+        "&actions[]=share_link_show"
 
     private const val driveInitWith =
         "with=drives,users,teams,teams.users,teams.users_count,drives.capabilities,drives.preferences," +
-                "drives.pack,drives.pack.capabilities,drives.pack.limits,drive.limits,drives.settings,drives.k_suite,drives.tags," +
-                "drives.rights,drives.categories,drives.categories_permissions,drives.users,drives.teams,drives.rewind," +
-                "drives.account,drives.quota"
+            "drives.pack,drives.pack.capabilities,drives.pack.limits,drive.limits,drives.settings,drives.k_suite,drives.tags," +
+            "drives.rights,drives.categories,drives.categories_permissions,drives.users,drives.teams,drives.rewind," +
+            "drives.account,drives.quota"
 
     private const val noDefaultAvatar = "no_avatar_default=1"
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
-    private fun driveURLV2(driveId: Int) = "${DRIVE_API_V2}${driveId}"
-    private fun driveURL(driveId: Int) = "${DRIVE_API_V3}${driveId}"
+    private fun driveURLV2(driveId: Int) = "${DRIVE_API_V2}$driveId"
+    private fun driveURL(driveId: Int) = "${DRIVE_API_V3}$driveId"
 
     private fun filesURLV2(driveId: Int) = "${driveURLV2(driveId)}/files"
     private fun filesURL(driveId: Int) = "${driveURL(driveId)}/files"
 
-    private fun fileURLV2(driveId: Int, fileId: FileId) = "${filesURLV2(driveId)}/${fileId}"
-    private fun fileURL(driveId: Int, fileId: FileId) = "${filesURL(driveId)}/${fileId}"
+    private fun fileURLV2(driveId: Int, fileId: FileId) = "${filesURLV2(driveId)}/$fileId"
+    private fun fileURL(driveId: Int, fileId: FileId) = "${filesURL(driveId)}/$fileId"
 
     fun fileURLV2(file: File) = fileURLV2(file.driveId, file.id)
     private fun fileURL(file: File) = fileURL(file.driveId, file.id)
@@ -154,7 +154,7 @@ object ApiRoutes {
 
     fun fileInvitationAccess(file: File, invitationId: Int) = "${driveURLV2(file.driveId)}/files/invitations/$invitationId"
 
-    fun getFileShare(file: File) = "${accessUrl(file)}?${noDefaultAvatar}&with=user"
+    fun getFileShare(file: File) = "${accessUrl(file)}?$noDefaultAvatar&with=user"
 
     fun checkFileShare(file: File) = "${accessUrl(file)}/check"
 
@@ -173,20 +173,20 @@ object ApiRoutes {
     /** Activities */
     //region Activities
     private const val activitiesActions = "actions[]=file_create" +
-            "&actions[]=file_update" +
-            "&actions[]=file_restore" +
-            "&actions[]=file_trash" +
-            "&actions[]=comment_create"
+        "&actions[]=file_update" +
+        "&actions[]=file_restore" +
+        "&actions[]=file_trash" +
+        "&actions[]=comment_create"
 
     fun getLastActivities(driveId: Int) =
-        "${filesURL(driveId)}/activities?${activitiesWithQuery},user&depth=unlimited&${activitiesActions}&${noDefaultAvatar}"
+        "${filesURL(driveId)}/activities?$activitiesWithQuery,user&depth=unlimited&$activitiesActions&$noDefaultAvatar"
 
     fun getFileActivities(file: File, forFileList: Boolean, pagination: String): String {
 
         val baseUrl = "${fileURL(file)}/activities"
-        val baseParameters = "?${noDefaultAvatar}&${pagination}"
+        val baseParameters = "?$noDefaultAvatar&$pagination"
         val sourceDependentParameters = if (forFileList) {
-            "&depth=children&from_date=${file.responseAt}&${activitiesWithExtraQuery}"
+            "&depth=children&from_date=${file.responseAt}&$activitiesWithExtraQuery"
         } else {
             "&with=user"
         }
@@ -196,9 +196,9 @@ object ApiRoutes {
     }
 
     fun getFileActivities(driveId: Int, fileIds: String, fromDate: Long) = "${filesURLV2(driveId)}/activities/batch" +
-            "?${noDefaultAvatar}&${activitiesWithQuery}&file_ids=${fileIds}&from_date=${fromDate}" +
-            "&actions[]=file_rename" +
-            "&actions[]=file_update"
+        "?$noDefaultAvatar&$activitiesWithQuery&file_ids=$fileIds&from_date=$fromDate" +
+        "&actions[]=file_rename" +
+        "&actions[]=file_update"
 
     fun getTrashedFilesActivities(file: File) = "${trashURL(file)}/activities"
     //endregion
@@ -217,7 +217,7 @@ object ApiRoutes {
 
     /** Comment */
     //region Comment
-    private const val withComments = "${noDefaultAvatar}&with=user,likes,responses,responses.user,responses.likes"
+    private const val withComments = "$noDefaultAvatar&with=user,likes,responses,responses.user,responses.likes"
 
     fun fileComments(file: File) = "${fileURLV2(file)}/comments?$withComments"
 
@@ -329,7 +329,7 @@ object ApiRoutes {
 
     private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int): String {
         // For now, this call fails because the back hasn't dev the conversion of office files to pdf for mobile
-        return "${SHARE_URL_V1}share/$driveId/$linkUuid/preview/text/${fileId}"
+        return "${SHARE_URL_V1}share/$driveId/$linkUuid/preview/text/$fileId"
     }
 
     fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
@@ -399,9 +399,9 @@ object ApiRoutes {
         lastModifiedAt: Date? = null,
     ): String {
         var params = "?directory_id=$directoryId" +
-                "&total_size=0" +
-                "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
-                "&conflict=" + conflictOption.toString()
+            "&total_size=0" +
+            "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
+            "&conflict=" + conflictOption.toString()
 
         directoryPath?.let { params += "&directory_path=$it" }
         lastModifiedAt?.let { params += "&last_modified_at=${it.time / 1_000L}" }

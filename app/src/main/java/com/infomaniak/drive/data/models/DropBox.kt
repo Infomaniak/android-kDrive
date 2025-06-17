@@ -23,8 +23,8 @@ import com.infomaniak.drive.data.models.file.dropbox.DropBoxCapabilities
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
-import kotlinx.parcelize.Parcelize
 import java.util.Date
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 @RealmClass(embedded = true)
@@ -46,7 +46,7 @@ open class DropBox(
     var updatedAt: Date? = null,
 ) : RealmObject(), Parcelable {
 
-    inline val hasNotification: Boolean get() = capabilities?.hasNotification == true //when someone upload a file
+    inline val hasNotification: Boolean get() = capabilities?.hasNotification == true // when someone upload a file
     inline val hasPassword: Boolean get() = capabilities?.hasPassword == true
     inline val limitFileSize: Long? get() = capabilities?.size?.limit
     inline val validUntil: Date? get() = capabilities?.validity?.date
@@ -75,5 +75,4 @@ open class DropBox(
         newLimitFileSize = limitFileSize
         newValidUntil = validUntil
     }
-
 }

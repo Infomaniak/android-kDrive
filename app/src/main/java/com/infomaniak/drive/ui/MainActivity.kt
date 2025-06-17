@@ -233,18 +233,21 @@ class MainActivity : BaseActivity() {
     @SuppressLint("ClickableViewAccessibility")
     private fun setupBottomNavigation() = with(binding) {
 
-        val gestureDetector = GestureDetector(this@MainActivity, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onDoubleTap(e: MotionEvent): Boolean {
-                context.trackAccountEvent("switchDoubleTap")
-                mainViewModel.switchToNextUser { navController.navigate(R.id.homeFragment) }
-                return true
-            }
+        val gestureDetector = GestureDetector(
+            this@MainActivity,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDoubleTap(e: MotionEvent): Boolean {
+                    context.trackAccountEvent("switchDoubleTap")
+                    mainViewModel.switchToNextUser { navController.navigate(R.id.homeFragment) }
+                    return true
+                }
 
-            override fun onLongPress(e: MotionEvent) {
-                context.trackAccountEvent("longPressDirectAccess")
-                navController.navigate(R.id.switchUserActivity)
+                override fun onLongPress(e: MotionEvent) {
+                    context.trackAccountEvent("longPressDirectAccess")
+                    navController.navigate(R.id.switchUserActivity)
+                }
             }
-        })
+        )
 
         bottomNavigation.findViewById<View>(R.id.menuFragment).setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
@@ -389,7 +392,7 @@ class MainActivity : BaseActivity() {
             return uploadFiles
                 .filter {
                     !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) &&
-                            !DocumentsContract.isDocumentUri(this, it.getUriObject())
+                        !DocumentsContract.isDocumentUri(this, it.getUriObject())
                 }
                 .map { it.getUriObject() }
         }
@@ -430,9 +433,11 @@ class MainActivity : BaseActivity() {
 
         val shouldHideBottomNavigation =
             navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldHideBottomNavigation == true
-        val shouldShowSmallFab = (navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
-            ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
-            ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab) == true
+        val shouldShowSmallFab = (
+            navigationArgs?.let(FileListFragmentArgs::fromBundle)?.shouldShowSmallFab
+                ?: navigationArgs?.let(AddFileBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
+                ?: navigationArgs?.let(FileInfoActionsBottomSheetDialogArgs::fromBundle)?.shouldShowSmallFab
+            ) == true
 
         handleBottomNavigationVisibility(destination.id, shouldHideBottomNavigation, shouldShowSmallFab)
 

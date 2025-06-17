@@ -165,7 +165,6 @@ class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
             if (file3?.isFolder() == false && fileActivity.mergedFileActivities.size > 2) {
                 fileName3.setOnClickListener { onMoreFilesClicked?.invoke(fileActivity, validPreviewFiles) }
             }
-
         } ?: run {
             cardFilePreview1.isClickable = false
             cardFilePreview2.isClickable = false

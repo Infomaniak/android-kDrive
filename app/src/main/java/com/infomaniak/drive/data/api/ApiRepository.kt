@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.api
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.core.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.*
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
@@ -46,7 +47,6 @@ import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpClient.okHttpClientLongTimeout
 import okhttp3.OkHttpClient
-import com.infomaniak.core.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
 
@@ -393,7 +393,8 @@ object ApiRepository : ApiRepositoryCore() {
                 is Team -> ApiRoutes.teamAccess(file, shareableItem.id)
                 is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
                 else -> ApiRoutes.userAccess(file, shareableItem.id)
-            }, DELETE
+            },
+            DELETE
         )
     }
 
@@ -403,7 +404,9 @@ object ApiRepository : ApiRepositoryCore() {
                 is Team -> ApiRoutes.teamAccess(file, shareableItem.id)
                 is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
                 else -> ApiRoutes.userAccess(file, shareableItem.id)
-            }, PUT, body
+            },
+            PUT,
+            body
         )
     }
 

@@ -41,6 +41,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
 import de.mannodermaus.junit5.ActivityScenarioExtension
+import java.util.concurrent.TimeoutException
 import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -48,7 +49,6 @@ import org.hamcrest.TypeSafeMatcher
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.RegisterExtension
-import java.util.concurrent.TimeoutException
 
 open class KDriveUiTest : KDriveTest() {
 
@@ -138,7 +138,8 @@ open class KDriveUiTest : KDriveTest() {
 
     fun selectDriveInList(instance: Int) {
         UiCollection(UiSelector().resourceId(getViewIdentifier("selectRecyclerView"))).getChildByInstance(
-            UiSelector().resourceId(getViewIdentifier("itemSelectText")), instance
+            UiSelector().resourceId(getViewIdentifier("itemSelectText")),
+            instance
         ).clickAndWaitForNewWindow()
     }
 
@@ -176,11 +177,13 @@ open class KDriveUiTest : KDriveTest() {
      * @param stringRes Id of the text inside the targeted view
      */
     fun checkViewVisibility(isVisible: Boolean, @IdRes viewId: Int? = null, @StringRes stringRes: Int? = null) {
-        val matchers = allOf(arrayListOf<Matcher<View>>().apply {
-            viewId?.let { add(withId(it)) }
-            stringRes?.let { add(withText(it)) }
-            Assertions.assertFalse(isEmpty())
-        })
+        val matchers = allOf(
+            arrayListOf<Matcher<View>>().apply {
+                viewId?.let { add(withId(it)) }
+                stringRes?.let { add(withText(it)) }
+                Assertions.assertFalse(isEmpty())
+            }
+        )
         if (isVisible) onView(isRoot()).perform(waitUntilShown(matchers, LONG_TIMEOUT))
         onView(matchers.first()).check(matches(withEffectiveVisibility(if (isVisible) Visibility.VISIBLE else Visibility.GONE)))
     }

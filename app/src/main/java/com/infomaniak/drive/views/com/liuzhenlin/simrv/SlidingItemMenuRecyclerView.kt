@@ -44,7 +44,8 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class SlidingItemMenuRecyclerView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null,
+    context: Context,
+    attrs: AttributeSet? = null,
     defStyle: Int = 0,
 ) : RecyclerView(context, attrs, defStyle) {
 
@@ -172,7 +173,7 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(
                         i--
                         continue
                     }
-                    itemView = itemView.getChildAt(0) as ViewGroup //kDrive
+                    itemView = itemView.getChildAt(0) as ViewGroup // kDrive
                     if (childHasMenu(itemView)) activeItem = itemView
                     break
                 }
@@ -287,23 +288,30 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(
 
     private fun whenUp(motionEvent: MotionEvent): Boolean? {
 
-        if (isItemDraggable && isItemBeingDragged) activeItem?.let { currentItem ->
+        if (isItemDraggable && isItemBeingDragged) {
+            activeItem?.let { currentItem ->
 
-            val translationX = currentItem.getChildAt(0).translationX
-            val itemMenuWidth = currentItem.getTag(TAG_ITEM_MENU_WIDTH) as Int
-            when (translationX) {
-                0.0f -> Unit // itemView's menu is closed
-                -itemMenuWidth.toFloat() -> { // itemView's menu is totally opened
-                    fullyOpenedItem = currentItem
+                val translationX = currentItem.getChildAt(0).translationX
+                val itemMenuWidth = currentItem.getTag(TAG_ITEM_MENU_WIDTH) as Int
+                when (translationX) {
+                    0.0f -> Unit // itemView's menu is closed
+                    -itemMenuWidth.toFloat() -> { // itemView's menu is totally opened
+                        fullyOpenedItem = currentItem
+                    }
+                    else -> {
+                        handleItemViewMenuPartiallyOpened(
+                            currentItem,
+                            itemMenuWidth,
+                            motionEvent,
+                            translationX
+                        )?.let { return it }
+                    }
                 }
-                else -> {
-                    handleItemViewMenuPartiallyOpened(currentItem, itemMenuWidth, motionEvent, translationX)?.let { return it }
-                }
+
+                clearTouch()
+                cancelParentTouch(motionEvent)
+                return true // Returns true here in case of a fling started in this up event.
             }
-
-            clearTouch()
-            cancelParentTouch(motionEvent)
-            return true // Returns true here in case of a fling started in this up event.
         }
 
         cancelTouch()
@@ -361,9 +369,10 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(
     }
 
     private fun tryHandleItemScrollingEvent(): Boolean {
-        if (activeItem == null /* There's no scrollable itemView being touched by user */
-            || !isItemDraggable /* Unable to scroll it */
-            || scrollState != SCROLL_STATE_IDLE /* The list may be currently scrolling */) {
+        if (activeItem == null || /* There's no scrollable itemView being touched by user */
+            !isItemDraggable || /* Unable to scroll it */
+            scrollState != SCROLL_STATE_IDLE /* The list may be currently scrolling */
+        ) {
             return false
         }
         // The layout's orientation may not be vertical.
@@ -462,12 +471,13 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(
     @JvmOverloads
     fun openItemAtPosition(position: Int, animate: Boolean = true): Boolean {
         var itemView = layoutManager?.findViewByPosition(position) as? ViewGroup ?: return false
-        itemView = itemView.getChildAt(0) as ViewGroup //kDrive
+        itemView = itemView.getChildAt(0) as ViewGroup // kDrive
         if (fullyOpenedItem !== itemView && childHasMenu(itemView)) {
             // First, cancels the item view being touched or previously fully opened (if any)
             if (!cancelTouch(animate)) releaseItemView(animate)
             smoothTranslateItemViewXTo(
-                itemView, -(itemView.getTag(TAG_ITEM_MENU_WIDTH) as Int).toFloat(),
+                itemView,
+                -(itemView.getTag(TAG_ITEM_MENU_WIDTH) as Int).toFloat(),
                 if (animate) itemScrollDuration else 0
             )
             fullyOpenedItem = itemView
@@ -616,7 +626,6 @@ class SlidingItemMenuRecyclerView @JvmOverloads constructor(
                         childrenLayerTypes.keyAt(i).apply {
                             post { setLayerType(childrenLayerTypes.valueAt(i), null) }
                         }
-
                     }
                 }
             }

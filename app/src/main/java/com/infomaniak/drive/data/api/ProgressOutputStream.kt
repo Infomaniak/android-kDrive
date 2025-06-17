@@ -63,5 +63,4 @@ internal class ProgressOutputStream(
     override fun flush() {
         stream?.flush()
     }
-
 }
