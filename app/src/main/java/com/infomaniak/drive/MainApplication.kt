@@ -76,11 +76,13 @@ import splitties.init.injectAsAppCtx
 import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
+    private val uiSettings  by lazy { UiSettings(this) }
 
     init {
         injectAsAppCtx() // Ensures it is always initialized
     }
 
+    val matomoTracker: Tracker by lazy { buildTracker(shouldOptOut = !uiSettings.isMatomoTrackingEnabled) }
     var geniusScanIsReady = false
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
@@ -111,8 +113,12 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         SentryAndroid.init(this) { options: SentryAndroidOptions ->
             // register the callback as an option
             options.beforeSend = SentryOptions.BeforeSendCallback { event: SentryEvent?, _: Any? ->
-                //if the application is in debug mode discard the events
-                if (BuildConfig.DEBUG) null else event
+                when {
+                    //if the application is in debug mode discard the events
+                    BuildConfig.DEBUG -> null
+                    !uiSettings.isSentryTrackingEnabled -> null
+                    else -> event
+                }
             }
         }
 
