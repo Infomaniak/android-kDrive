@@ -125,6 +125,8 @@ class ImportFilesDialog : DialogFragment() {
         }
 
         if (successCount > 0) appCtx.syncImmediately()
+        // TODO: Check if it's enough, see if you can add more comments and see why it can be loaded to the infinite.
+        currentCoroutineContext().ensureActive()
         dismiss()
     }
 
