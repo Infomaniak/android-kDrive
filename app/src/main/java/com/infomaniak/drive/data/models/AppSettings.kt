@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import com.infomaniak.core.flowOnLazyClosable
+import com.infomaniak.drive.extensions.HandlerThreadDispatcher
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.DynamicRealm
 import io.realm.Realm
@@ -25,7 +26,9 @@ import io.realm.RealmConfiguration
 import io.realm.RealmMigration
 import io.realm.RealmObject
 import io.realm.kotlin.toFlow
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
@@ -70,7 +73,7 @@ open class AppSettings(
             emitAll(flow)
         }.flowOnLazyClosable {
             @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
-            newSingleThreadContext("RealmDispatcher")
+            HandlerThreadDispatcher("Realm-currentUserIdFlow")
         }
 
         fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
