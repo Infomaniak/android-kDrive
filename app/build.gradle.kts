@@ -182,7 +182,7 @@ dependencies {
     implementation("com.google.android.exoplayer:exoplayer:$exoplayerVersion")
     implementation("com.google.android.exoplayer:extension-okhttp:$exoplayerVersion")
 
-    implementation("com.airbnb.android:lottie:6.6.6")
+    implementation("com.airbnb.android:lottie:6.6.7")
     implementation("com.github.Infomaniak:android-pdfview:3.2.11")
     implementation("com.github.MikeOrtiz:TouchImageView:3.7.1")
     implementation("com.github.rubensousa:gravitysnaphelper:2.2.2")
@@ -219,7 +219,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
 
-    val junitVersion = "1.7.0"
+    val junitVersion = "1.8.0"
     androidTestImplementation("de.mannodermaus.junit5:android-test-core:$junitVersion")
     androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:$junitVersion")
 
