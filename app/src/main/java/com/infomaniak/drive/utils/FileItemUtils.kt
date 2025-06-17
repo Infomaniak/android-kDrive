@@ -21,7 +21,6 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.ColorRes
 import androidx.annotation.Px
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
@@ -67,8 +66,6 @@ fun ItemFileBinding.setFileItemWithoutCategories(file: File, typeFolder: TypeOfF
     displaySize(file)
     filePreview.displayIcon(file, isGrid, progressLayout)
     iconLayout.setMargins(left = typeFolder.iconHorizontalMargin, right = typeFolder.iconHorizontalMargin)
-    val color = ContextCompat.getColor(context, typeFolder.iconColor)
-    filePreview.setColorFilter(color)
     displayExternalImport(file, filePreview, fileProgression, fileDate)
 }
 
@@ -241,7 +238,7 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
     }
 }
 
-enum class TypeOfFolder(@ColorRes val iconColor: Int, @Px val iconHorizontalMargin: Int){
-    typeFileList(android.R.color.transparent, 10.toPx()),
-    typeRecentFolder(R.color.iconColor, 16.toPx()),;
+enum class TypeOfFolder(@Px val iconHorizontalMargin: Int){
+    typeFileList(10.toPx()),
+    typeRecentFolder(16.toPx()),;
 }
