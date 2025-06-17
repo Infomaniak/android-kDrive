@@ -63,6 +63,7 @@ object MatomoDrive : Matomo {
         SyncModal("syncModal"),
         Trash("trash"),
         TrashFileAction("trashFileAction"),
+    const val SETTINGS_DATA_MANAGEMENT = "settingsDataManagement"
     }
 
     enum class MatomoName(val value: String) {
@@ -271,4 +272,7 @@ object MatomoDrive : Matomo {
         trackScreen(path = this::class.java.name, title = this::class.java.simpleName)
     }
     //endregion
+    fun Fragment.trackEventDataManagement(name: String) {
+        trackEvent(SETTINGS_DATA_MANAGEMENT, name)
+    }
 }
