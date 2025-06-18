@@ -270,11 +270,11 @@ object UploadNotifications {
                 LaunchActivityArgs(
                     destinationUserId = userId,
                     destinationDriveId = driveId,
-                    destinationRemoteFolderId = remoteFolder
+                    destinationRemoteFolderId = getLocate(this@progressPendingIntent)
                 ).toBundle()
             )
         }
-        
+
         return PendingIntent.getActivity(context, NotificationUtils.UPLOAD_STATUS_ID, intent, PENDING_INTENT_FLAGS)
     }
 

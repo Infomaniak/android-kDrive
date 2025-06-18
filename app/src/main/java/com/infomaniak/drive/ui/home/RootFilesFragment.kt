@@ -33,10 +33,9 @@ import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.ObserveNotification
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
-import com.infomaniak.drive.utils.FilePresenter.displayFile
-import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.setupDriveToolbar
@@ -46,7 +45,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.launch
 
-class RootFilesFragment : BaseRootFolderFragment() {
+class RootFilesFragment : BaseRootFolderFragment(), ObserveNotification {
 
     private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -86,7 +85,7 @@ class RootFilesFragment : BaseRootFolderFragment() {
         )
 
         observeFiles(haveBin = true)
-        observeNavigateFileListTo()
+        observeNavigateFileListTo(mainViewModel, viewLifecycleOwner, this@RootFilesFragment, fileListViewModel)
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
             noNetworkBinding = noNetworkInclude,
