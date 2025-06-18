@@ -25,6 +25,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.LaunchActivityArgs
@@ -191,6 +192,21 @@ object UploadNotifications {
         )
     }
 
+    fun getLocate(resources: UploadFile): Int {
+        val regex = Regex("""[^/\\]+""")
+        val matches: List<String>? = resources.remoteSubFolder?.let { regex.findAll(it) }
+            ?.map { it.value }
+            ?.toList()
+
+        var parentId: Int = resources.remoteFolder
+        if (matches != null) {
+            for (matche in matches) {
+                parentId = FileController.getChildrenFileWithName(parentId, matche)[0]
+            }
+        }
+        return parentId
+    }
+
     fun showCancelledByUserNotification(context: Context) {
         showNotification(
             context = context,
@@ -258,7 +274,7 @@ object UploadNotifications {
                 ).toBundle()
             )
         }
-
+        
         return PendingIntent.getActivity(context, NotificationUtils.UPLOAD_STATUS_ID, intent, PENDING_INTENT_FLAGS)
     }
 
