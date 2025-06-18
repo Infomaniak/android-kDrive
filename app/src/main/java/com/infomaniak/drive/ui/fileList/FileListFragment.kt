@@ -60,7 +60,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.databinding.FragmentFileListBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.ObserveNotification
+import com.infomaniak.drive.ui.FileListNavigatoreObservable
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
@@ -83,7 +83,7 @@ import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import kotlinx.coroutines.*
 
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
-    NoItemsLayoutView.INoItemsLayoutView, ObserveNotification {
+    NoItemsLayoutView.INoItemsLayoutView, FileListNavigatoreObservable {
 
     private var _binding: FragmentFileListBinding? = null
     val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -282,6 +282,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             )
             binding.noFilesLayout.setMargins(bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + it.bottom)
         }
+
         observeNavigateFileListTo(mainViewModel, viewLifecycleOwner, this@FileListFragment, fileListViewModel)
     }
 
