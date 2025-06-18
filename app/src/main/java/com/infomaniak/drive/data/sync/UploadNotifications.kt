@@ -192,19 +192,15 @@ object UploadNotifications {
         )
     }
 
-    fun getLocate(resources: UploadFile): Int {
-        val regex = Regex("""[^/\\]+""")
-        val matches: List<String>? = resources.remoteSubFolder?.let { regex.findAll(it) }
-            ?.map { it.value }
-            ?.toList()
-
-        var parentId: Int = resources.remoteFolder
+    fun getDestinationFolderId(resources: UploadFile): Int {
+        val matches = resources.remoteSubFolder?.split("/")
+        var folderId: Int = resources.remoteFolder
         if (matches != null) {
-            for (matche in matches) {
-                parentId = FileController.getChildrenFileWithName(parentId, matche)[0]
+            for (match in matches) {
+                folderId = FileController.getChildrenFileWithName(folderId, match)[0]
             }
         }
-        return parentId
+        return folderId
     }
 
     fun showCancelledByUserNotification(context: Context) {
@@ -270,7 +266,7 @@ object UploadNotifications {
                 LaunchActivityArgs(
                     destinationUserId = userId,
                     destinationDriveId = driveId,
-                    destinationRemoteFolderId = getLocate(this@progressPendingIntent)
+                    destinationRemoteFolderId = getDestinationFolderId(this@progressPendingIntent)
                 ).toBundle()
             )
         }
