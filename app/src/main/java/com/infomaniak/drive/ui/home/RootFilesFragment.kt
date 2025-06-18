@@ -33,11 +33,10 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolder
+import com.infomaniak.drive.ui.FileListNavigatoreObservable
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
-import com.infomaniak.drive.utils.FilePresenter.displayFile
-import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.setupDriveToolbar
@@ -47,7 +46,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.launch
 
-class RootFilesFragment : BaseRootFolder() {
+class RootFilesFragment : BaseRootFolder(), FileListNavigatoreObservable {
 
     private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -85,7 +84,7 @@ class RootFilesFragment : BaseRootFolder() {
         )
 
         observeFiles()
-        observeNavigateFileListTo()
+        observeNavigateFileListTo(mainViewModel, viewLifecycleOwner, this@RootFilesFragment, fileListViewModel)
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
             noNetworkBinding = noNetworkInclude,
@@ -109,21 +108,6 @@ class RootFilesFragment : BaseRootFolder() {
             binding.rootFolderLayout.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
 
             updateFolderToOpenWhenClicked(fileTypes = fileTypes, haveBin = true)
-        }
-    }
-
-    private fun observeNavigateFileListTo() {
-        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
-            if (file.isFolder()) {
-                openFolder(
-                    file = file,
-                    shouldHideBottomNavigation = false,
-                    shouldShowSmallFab = false,
-                    fileListViewModel = fileListViewModel,
-                )
-            } else {
-                displayFile(file, mainViewModel, fileAdapter = null)
-            }
         }
     }
 
