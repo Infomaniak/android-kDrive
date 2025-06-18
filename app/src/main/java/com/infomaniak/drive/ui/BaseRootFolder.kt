@@ -44,8 +44,8 @@ abstract class BaseRootFolder : Fragment() {
         fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
             personalFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
         }
-        if (haveBin != null) {
-            hasFolderToOpenBeenSet?.complete()
+        if (haveBin) {
+            hasFolderToOpenBeenSet.complete()
         }
     }
 
