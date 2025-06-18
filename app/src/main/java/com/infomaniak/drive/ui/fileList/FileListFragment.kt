@@ -68,7 +68,7 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.databinding.FragmentFileListBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.ObserveNotification
+import com.infomaniak.drive.ui.FileListNavigatoreObservable
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
@@ -308,6 +308,7 @@ open class FileListFragment : MultiSelectFragment(
             )
             binding.noFilesLayout.setMargins(bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + it.bottom)
         }
+
         observeNavigateFileListTo(mainViewModel, viewLifecycleOwner, this@FileListFragment, fileListViewModel)
     }
 

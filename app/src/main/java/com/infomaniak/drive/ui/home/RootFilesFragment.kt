@@ -32,8 +32,8 @@ import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
+import com.infomaniak.drive.ui.FileListNavigatoreObservable
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.ObserveNotification
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.CommonFolders
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.Favorites
