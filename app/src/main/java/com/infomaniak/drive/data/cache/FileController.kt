@@ -89,6 +89,17 @@ object FileController {
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
+    fun getChildrenFileWithName(folderId: Int, name: String): List<Int> {
+        return getRealmInstance().use { realm ->
+             realm.where(File::class.java)
+                 .equalTo(File::parentId.name, folderId)
+                 .equalTo(File::name.name, name)
+                .equalTo(File::type.name, Type.DIRECTORY.value)
+                .findAll()
+                .map { it.id }
+        }
+    }
+
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
         return getRealmInstance(userDrive).use { realm ->
             getFileById(realm, fileId)?.let { file ->
