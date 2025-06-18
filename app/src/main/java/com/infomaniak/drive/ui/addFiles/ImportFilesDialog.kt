@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -125,9 +126,8 @@ class ImportFilesDialog : DialogFragment() {
         }
 
         if (successCount > 0) appCtx.syncImmediately()
-        // TODO: Check if it's enough, see if you can add more comments and see why it can be loaded to the infinite.
         currentCoroutineContext().ensureActive()
-        dismiss()
+        dismissAllowingStateLoss()
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
