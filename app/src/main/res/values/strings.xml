@@ -237,6 +237,7 @@
     <string name="createFolderTitle">Create folder</string>
     <string name="createFolderValidUntilDescription">Once the date has passed, users will no longer be able to transfer files.</string>
     <string name="createPrivateFolderSucces">Folder created successfully</string>
+    <string name="deleteMyAccount">Delete my account</string>
     <string name="deletePicturesDescription">The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion\n</string>
     <string name="deletePicturesTitle">Delete photos</string>
     <plurals name="driveBlockedDescription">
