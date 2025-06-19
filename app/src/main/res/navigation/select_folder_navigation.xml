@@ -19,7 +19,91 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/select_folder"
-    app:startDestination="@id/selectFolderFragment">
+    app:startDestination="@id/selectRootFolderFragment">
+
+    <fragment
+        android:id="@+id/selectRootFolderFragment"
+        android:name="com.infomaniak.drive.ui.fileList.SelectRootFolderFragment"
+        android:label="@string/app_name"
+        tools:layout="@layout/fragment_select_root_folder">
+        <action
+            android:id="@+id/selectRootFolderFragmentToSelectFolderFragment"
+            app:destination="@id/selectFolderFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/actionSelectRootFolderFragmentToSharedWithMeFragment"
+            app:destination="@id/sharedWithMeFragment" />
+        <action
+            android:id="@+id/actionSelectRootFolderFragmentToMySharesFragment"
+            app:destination="@id/mySharesFragment" />
+        <action
+            android:id="@+id/actionSelectRootFolderFragmentToFavoritesFragment"
+            app:destination="@id/favoritesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mySharesFragment"
+        android:name="com.infomaniak.drive.ui.menu.MySharesFragment"
+        android:label="MySharesFragment"
+        tools:layout="@layout/fragment_file_list">
+        <argument
+            android:name="folderId"
+            android:defaultValue="1"
+            app:argType="integer" />
+        <argument
+            android:name="folderName"
+            android:defaultValue="/"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_mySharesFragment_self"
+            app:destination="@id/mySharesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/sharedWithMeFragment"
+        android:name="com.infomaniak.drive.ui.menu.SharedWithMeFragment"
+        android:label="SharedWithMeFragment"
+        tools:layout="@layout/fragment_file_list">
+        <argument
+            android:name="folderId"
+            android:defaultValue="1"
+            app:argType="integer" />
+        <argument
+            android:name="folderName"
+            android:defaultValue="/"
+            app:argType="string" />
+        <argument
+            android:name="driveId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_sharedWithMeFragment_to_sortFilesBottomSheetDialog"
+            app:destination="@id/sortFilesBottomSheetDialog" />
+        <action
+            android:id="@+id/action_sharedWithMeFragment_self"
+            app:destination="@id/sharedWithMeFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.infomaniak.drive.ui.fileList.FavoritesFragment"
+        android:label="@string/favoritesTitle"
+        tools:layout="@layout/fragment_file_list">
+        <argument
+            android:name="folderId"
+            android:defaultValue="1"
+            app:argType="integer" />
+        <argument
+            android:name="folderName"
+            android:defaultValue="/"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_favoritesFragment_self"
+            app:destination="@id/favoritesFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/selectFolderFragment"
