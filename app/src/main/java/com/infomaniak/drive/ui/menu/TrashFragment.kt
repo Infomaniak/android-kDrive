@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,10 +117,10 @@ class TrashFragment : FileSubTypeListFragment() {
                 trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
                     dialog.dismiss()
                     if (apiResponse.data == true) {
-                        SnackbarUtils.showSnackbar(requireView(), R.string.snackbarEmptyTrashConfirmation)
+                        showSnackbar(titleId = R.string.snackbarEmptyTrashConfirmation, showAboveFab = true)
                         onRefresh()
                     } else {
-                        showSnackbar(apiResponse.translateError())
+                        showSnackbar(apiResponse.translateError(), showAboveFab = true)
                     }
                 }
             }
