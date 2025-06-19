@@ -24,7 +24,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class UserDrive(
     val userId: Int = AccountUtils.currentUserId,
-    var driveId: Int = AccountUtils.currentDriveId,
+    val driveId: Int = AccountUtils.currentDriveId,
     val sharedWithMe: Boolean = false,
     val driveName: String? = null // SharedWithMe
 ) : Parcelable
