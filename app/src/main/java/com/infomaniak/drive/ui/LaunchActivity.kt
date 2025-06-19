@@ -228,7 +228,6 @@ class LaunchActivity : AppCompatActivity() {
     private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int, isSharedWithMe: Boolean) {
         if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
         if (!isSharedWithMe && driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
-        driveId as Integer?
         mainActivityExtras = MainActivityArgs(destinationFileId = fileId, destinationDriveId = driveId, isDestinationSharedWithMe = isSharedWithMe).toBundle()
     }
 

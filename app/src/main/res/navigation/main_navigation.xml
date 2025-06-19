@@ -343,9 +343,8 @@
             app:argType="integer" />
         <argument
             android:name="destinationDriveId"
-            app:argType="java.lang.Integer"
-            app:nullable="true"
-            android:defaultValue="@null"/>
+            app:argType="integer"
+            android:defaultValue="-1"/>
         <argument
             android:name="isDestinationSharedWithMe"
             android:defaultValue="false"
