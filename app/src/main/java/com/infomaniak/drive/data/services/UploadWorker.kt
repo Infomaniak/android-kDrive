@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,7 +137,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 result = Result.failure()
             }
 
-            SentryLog.d(TAG, "Work finished, result=$result || retryError=$retryError || lastUpload=$lastUploadFileName")
+            var workFinishedMessage = "Work finished, result=$result || retryError=$retryError || lastUpload=$lastUploadFileName"
+            if (SDK_INT >= 31) workFinishedMessage += " || stopReason=$stopReason"
+            SentryLog.d(TAG, workFinishedMessage)
 
             result
         }
