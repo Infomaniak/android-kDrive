@@ -230,7 +230,7 @@ class LaunchActivity : AppCompatActivity() {
         if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
         if (!isSharedWithMe && driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
         val userDrive = UserDrive(sharedWithMe = isSharedWithMe, driveId = driveId)
-        mainActivityExtras = MainActivityArgs(destinationFileId = fileId, destinationUserDrive= userDrive).toBundle()
+        mainActivityExtras = MainActivityArgs(destinationFileId = fileId, destinationUserDrive = userDrive).toBundle()
     }
 
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {
