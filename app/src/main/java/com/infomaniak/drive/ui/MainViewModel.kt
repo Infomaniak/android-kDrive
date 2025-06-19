@@ -202,7 +202,7 @@ class MainViewModel(
             }
         }
     }
-    fun navigateFileListTo(navController: NavController, fileId: Int, driveId: Int = 0, isSharedWithMe: Boolean = false) {
+    fun navigateFileListTo(navController: NavController, fileId: Int, driveId: Int? = null, isSharedWithMe: Boolean = false) {
         // Clear FileListFragment stack
         navController.popBackStack(R.id.rootFilesFragment, false)
 
@@ -211,9 +211,7 @@ class MainViewModel(
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
             var thisDrive = UserDrive(sharedWithMe = isSharedWithMe)
-            if (driveId != 0){
-                thisDrive.driveId = driveId
-            }
+            if (driveId != null) thisDrive.driveId = driveId
             val file = FileController.getFileById(fileId, thisDrive)
                 ?: FileController.getFileDetails(fileId, userDrive =  thisDrive)
                 ?: return@launch
