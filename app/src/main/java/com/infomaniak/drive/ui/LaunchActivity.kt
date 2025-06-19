@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
@@ -228,7 +229,8 @@ class LaunchActivity : AppCompatActivity() {
     private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int, isSharedWithMe: Boolean) {
         if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
         if (!isSharedWithMe && driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
-        mainActivityExtras = MainActivityArgs(destinationFileId = fileId, destinationDriveId = driveId, isDestinationSharedWithMe = isSharedWithMe).toBundle()
+        val userDrive = UserDrive(sharedWithMe = isSharedWithMe, driveId = driveId)
+        mainActivityExtras = MainActivityArgs(destinationFileId = fileId, destinationUserDrive= userDrive).toBundle()
     }
 
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {
