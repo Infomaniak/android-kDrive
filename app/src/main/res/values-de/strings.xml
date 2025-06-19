@@ -226,6 +226,7 @@
     <string name="createFolderTitle">Ordner erstellen</string>
     <string name="createFolderValidUntilDescription">Nach Verstreichen dieses Datums können die Benutzer keine Dateien mehr übertragen.</string>
     <string name="createPrivateFolderSucces">Ordner erfolgreich angelegt</string>
+    <string name="deleteMyAccount">Mein Konto löschen</string>
     <string name="deletePicturesDescription">Die Anwendung wird Sie regelmässig auffordern Fotos von Ihrem Gerät zu löschen, die bereits auf Ihrem kDrive synchronisiert sind. Sie müssen die Löschung jeweils manuell autorisieren\n</string>
     <string name="deletePicturesTitle">Fotos löschen</string>
     <plurals name="driveBlockedDescription">
