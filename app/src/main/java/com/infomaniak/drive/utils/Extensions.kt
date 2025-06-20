@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -181,7 +181,7 @@ fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsCo
 
 fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
     val nightModeEnabled = isNightModeEnabled()
-    if (nightModeEnabled || SDK_INT >= 26) {
+    if (nightModeEnabled) {
         navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
         lightNavigationBar(!nightModeEnabled)
     } else {
@@ -451,7 +451,6 @@ fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): Strin
     }
 
     val decimalSize = when {
-        SDK_INT >= 26 -> size.binaryToDecimal()
         valueOnly -> size.binaryToDecimal()
         else -> size
     }

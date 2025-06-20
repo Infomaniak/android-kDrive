@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,49 +105,47 @@ object NotificationUtils : NotificationUtilsCore() {
     }
 
     fun Context.initNotificationChannel() {
-        if (SDK_INT >= 26) {
-            val channelList = ArrayList<NotificationChannel>()
+        val channelList = ArrayList<NotificationChannel>()
 
-            val uploadServiceChannel = buildNotificationChannel(
-                getString(R.string.notification_channel_id_upload_service),
-                getString(R.string.notificationUploadServiceChannelName),
-                NotificationManager.IMPORTANCE_MIN
-            ).apply {
-                setSound(null, null)
-            }
-            channelList.add(uploadServiceChannel)
-
-            val uploadDownloadChannel = buildNotificationChannel(
-                getString(R.string.notification_channel_id_upload_download),
-                getString(R.string.notificationUploadDownloadChannelName),
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                setSound(null, null)
-            }
-            channelList.add(uploadDownloadChannel)
-
-            val sharedWithMeChannel = buildNotificationChannel(
-                getString(R.string.notification_channel_id_shared),
-                getString(R.string.notificationSharedWithMeChannelName),
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            channelList.add(sharedWithMeChannel)
-
-            val commentChannel = buildNotificationChannel(
-                getString(R.string.notification_channel_id_comment),
-                getString(R.string.notificationCommentChannelName),
-                NotificationManager.IMPORTANCE_HIGH
-            )
-            channelList.add(commentChannel)
-
-            val generalChannel = buildNotificationChannel(
-                getString(R.string.notification_channel_id_general),
-                getString(R.string.notificationGeneralChannelName),
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            channelList.add(generalChannel)
-
-            createNotificationChannels(channelList)
+        val uploadServiceChannel = buildNotificationChannel(
+            getString(R.string.notification_channel_id_upload_service),
+            getString(R.string.notificationUploadServiceChannelName),
+            NotificationManager.IMPORTANCE_MIN
+        ).apply {
+            setSound(null, null)
         }
+        channelList.add(uploadServiceChannel)
+
+        val uploadDownloadChannel = buildNotificationChannel(
+            getString(R.string.notification_channel_id_upload_download),
+            getString(R.string.notificationUploadDownloadChannelName),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            setSound(null, null)
+        }
+        channelList.add(uploadDownloadChannel)
+
+        val sharedWithMeChannel = buildNotificationChannel(
+            getString(R.string.notification_channel_id_shared),
+            getString(R.string.notificationSharedWithMeChannelName),
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        channelList.add(sharedWithMeChannel)
+
+        val commentChannel = buildNotificationChannel(
+            getString(R.string.notification_channel_id_comment),
+            getString(R.string.notificationCommentChannelName),
+            NotificationManager.IMPORTANCE_HIGH
+        )
+        channelList.add(commentChannel)
+
+        val generalChannel = buildNotificationChannel(
+            getString(R.string.notification_channel_id_general),
+            getString(R.string.notificationGeneralChannelName),
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        channelList.add(generalChannel)
+
+        createNotificationChannels(channelList)
     }
 }
