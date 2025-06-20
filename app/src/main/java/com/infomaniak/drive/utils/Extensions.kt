@@ -180,13 +180,8 @@ fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsCo
 }
 
 fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
-    val nightModeEnabled = isNightModeEnabled()
-    if (nightModeEnabled) {
-        navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
-        lightNavigationBar(!nightModeEnabled)
-    } else {
-        navigationBarColor = Color.BLACK
-    }
+    navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
+    lightNavigationBar(!isNightModeEnabled())
 }
 
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
