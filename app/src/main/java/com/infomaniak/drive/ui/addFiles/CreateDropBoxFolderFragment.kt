@@ -26,7 +26,9 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.FolderPermission.*
+import com.infomaniak.drive.data.models.File.FolderPermission.INHERIT
+import com.infomaniak.drive.data.models.File.FolderPermission.ONLY_ME
+import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
 import com.infomaniak.drive.utils.Utils

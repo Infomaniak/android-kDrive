@@ -17,8 +17,32 @@
  */
 package com.infomaniak.drive.utils
 
-import com.infomaniak.drive.data.models.*
-import com.infomaniak.drive.data.models.drive.*
+import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.DropBox
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.data.models.Rights
+import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.SyncSettings
+import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.data.models.TeamDetails
+import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.drive.Category
+import com.infomaniak.drive.data.models.drive.CategoryRights
+import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.models.drive.DriveAccount
+import com.infomaniak.drive.data.models.drive.DriveCapabilities
+import com.infomaniak.drive.data.models.drive.DrivePack
+import com.infomaniak.drive.data.models.drive.DrivePackCapabilities
+import com.infomaniak.drive.data.models.drive.DrivePreferences
+import com.infomaniak.drive.data.models.drive.DriveQuota
+import com.infomaniak.drive.data.models.drive.DriveQuotas
+import com.infomaniak.drive.data.models.drive.DriveRights
+import com.infomaniak.drive.data.models.drive.DriveTeamsCategories
+import com.infomaniak.drive.data.models.drive.DriveUsersCategories
 import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileVersion

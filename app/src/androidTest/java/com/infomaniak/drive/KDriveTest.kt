@@ -23,10 +23,14 @@ import androidx.test.runner.permission.PermissionRequester
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.AccountUtils.addUser
 import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
+import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.Env
+import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient

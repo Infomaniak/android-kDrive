@@ -18,7 +18,11 @@
 package com.infomaniak.drive.data.api
 
 import okhttp3.ResponseBody
-import okio.*
+import okio.Buffer
+import okio.BufferedSource
+import okio.ForwardingSource
+import okio.Source
+import okio.buffer
 
 class ProgressResponseBody(val responseBody: ResponseBody, val progressListener: ProgressListener) : ResponseBody() {
 

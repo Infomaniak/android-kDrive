@@ -37,7 +37,12 @@ import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.liveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings

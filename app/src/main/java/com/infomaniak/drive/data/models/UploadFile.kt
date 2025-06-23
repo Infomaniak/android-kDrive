@@ -35,7 +35,11 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.lib.core.api.ApiController
-import io.realm.*
+import io.realm.Realm
+import io.realm.RealmConfiguration
+import io.realm.RealmObject
+import io.realm.RealmQuery
+import io.realm.RealmResults
 import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
 import io.realm.kotlin.oneOf

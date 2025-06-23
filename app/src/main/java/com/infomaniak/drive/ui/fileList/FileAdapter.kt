@@ -37,7 +37,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.CardviewFileGridBinding
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.CardviewFolderGridBinding
-import com.infomaniak.drive.ui.fileList.FileItemViewHolder.*
+import com.infomaniak.drive.ui.fileList.FileItemViewHolder.FileGridViewHolder
+import com.infomaniak.drive.ui.fileList.FileItemViewHolder.FileListViewHolder
+import com.infomaniak.drive.ui.fileList.FileItemViewHolder.FolderGridViewHolder
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager
 import com.infomaniak.drive.utils.SyncUtils.isSyncActive
 import com.infomaniak.drive.utils.Utils

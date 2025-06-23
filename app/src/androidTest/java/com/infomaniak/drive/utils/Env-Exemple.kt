@@ -17,6 +17,9 @@
  */
 package com.infomaniak.drive.utils
 
+import com.infomaniak.drive.utils.`Env-Exemple`.TOKEN
+import com.infomaniak.drive.utils.`Env-Exemple`.USE_CURRENT_USER
+
 /**
  * File to be copied and completed, it is also necessary to remove the -Example in the file name, so that the tests can work
  */

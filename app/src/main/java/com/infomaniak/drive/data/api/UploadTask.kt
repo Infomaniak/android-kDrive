@@ -65,8 +65,15 @@ import io.ktor.utils.io.toByteArray
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import splitties.coroutines.raceOf
@@ -152,7 +159,6 @@ class UploadTask(
             message = "start ${uploadFile.uri} with $totalChunks chunks and $uploadedChunks uploadedChunks"
             level = SentryLevel.INFO
         })
-
 
         SentryLog.d("kDrive", " upload task started with total chunks: $totalChunks, valid: $uploadedChunks")
 

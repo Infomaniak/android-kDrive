@@ -50,8 +50,13 @@ import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.SnackbarUtils
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setBackNavigationResult
+import com.infomaniak.lib.core.utils.setMargins
 import java.util.Date
 
 class SelectCategoriesFragment : Fragment() {

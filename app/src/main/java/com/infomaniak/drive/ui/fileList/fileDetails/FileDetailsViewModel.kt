@@ -17,10 +17,18 @@
  */
 package com.infomaniak.drive.ui.fileList.fileDetails
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataScope
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.data.models.FileComment
+import com.infomaniak.drive.data.models.FileCount
+import com.infomaniak.drive.data.models.Share
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 

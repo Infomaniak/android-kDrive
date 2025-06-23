@@ -27,7 +27,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.utils.*
+import com.infomaniak.core.utils.day
+import com.infomaniak.core.utils.endOfTheDay
+import com.infomaniak.core.utils.hours
+import com.infomaniak.core.utils.minutes
+import com.infomaniak.core.utils.month
+import com.infomaniak.core.utils.year
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
@@ -42,7 +47,14 @@ import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.showProgressCatching
 import java.util.Calendar
 import java.util.Date
 

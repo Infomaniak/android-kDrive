@@ -18,7 +18,12 @@
 package com.infomaniak.drive.data.cache
 
 import androidx.core.os.bundleOf
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.DropBox
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.Rights
+import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileVersion

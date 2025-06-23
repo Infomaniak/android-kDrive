@@ -33,8 +33,12 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.SnackbarUtils
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.showProgressCatching
 import kotlinx.coroutines.Dispatchers
 
 class AccessDeniedBottomSheetDialog : InformationBottomSheetDialog() {

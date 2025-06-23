@@ -25,7 +25,9 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileActivityType
-import com.infomaniak.drive.data.models.FileActivityType.*
+import com.infomaniak.drive.data.models.FileActivityType.FILE_MOVE_OUT
+import com.infomaniak.drive.data.models.FileActivityType.FILE_RENAME
+import com.infomaniak.drive.data.models.FileActivityType.FILE_RENAME_ALIAS
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.FileLastActivityBody
