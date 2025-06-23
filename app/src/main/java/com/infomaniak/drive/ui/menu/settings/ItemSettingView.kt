@@ -18,8 +18,10 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.widget.CompoundButton
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -33,7 +35,7 @@ class ItemSettingView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val binding by lazy { ViewItemSettingBinding.inflate(LayoutInflater.from(context), this, true)}
+    private val binding by lazy { ViewItemSettingBinding.inflate(LayoutInflater.from(context), this, true) }
 
     private var action: Action = Action.NONE
 
@@ -48,14 +50,18 @@ class ItemSettingView @JvmOverloads constructor(
             with(binding) {
                 action = Action.entries[getInteger(R.styleable.ItemSettingView_itemAction, 0)]
                 title.text = getString(R.styleable.ItemSettingView_title) ?: ""
+                textEnd.text = getString(R.styleable.ItemSettingView_textEnd) ?: ""
+                description.text = getString(R.styleable.ItemSettingView_description) ?: ""
 
                 getDrawable(R.styleable.ItemSettingView_icon).let {
                     icon.setImageDrawable(it)
                     icon.isGone = it == null
                 }
 
+                description.isVisible = description.text.isNotBlank()
                 chevron.isVisible = action == Action.CHEVRON
                 toggle.isVisible = action == Action.TOGGLE
+                textEnd.isVisible = action == Action.TEXT
             }
         }
     }
@@ -73,9 +79,38 @@ class ItemSettingView @JvmOverloads constructor(
         binding.title.text = title
     }
 
+    fun setDescription(description: String) {
+        binding.description.text = description
+    }
+
+    fun getTextEnd(): String {
+        return binding.textEnd.text.toString()
+    }
+
+    fun setTextEnd(textEnd: String) {
+        binding.textEnd.text = textEnd
+    }
+
+    fun setOnCheckedChangeListener(listener: CompoundButton.OnCheckedChangeListener) {
+        binding.toggle.setOnCheckedChangeListener(listener)
+    }
+
+    fun setColorFolder(color: Int) {
+        binding.icon.imageTintList = ColorStateList.valueOf(color)
+    }
+
+    fun setIconEndVisibility(value: Boolean) {
+        binding.iconEnd.isVisible = value
+    }
+
+    fun setSwitchCheck(value: Boolean) {
+        binding.toggle.isChecked = value
+    }
+
     private enum class Action {
         NONE,
         CHEVRON,
         TOGGLE,
+        TEXT,
     }
 }

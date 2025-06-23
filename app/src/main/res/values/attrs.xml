@@ -20,6 +20,8 @@
     <declare-styleable name="CommonAttributes">
         <attr name="icon" format="reference" />
         <attr name="title" format="string" />
+        <attr name="textEnd" format="string" />
+        <attr name="description" format="string" />
     </declare-styleable>
 
     <declare-styleable name="FabBottomNavigationView">
@@ -84,6 +86,9 @@
             <enum name="none" value="0" />
             <enum name="chevron" value="1" />
             <enum name="toggle" value="2" />
+            <enum name="text" value="3" />
         </attr>
+        <attr name="textEnd" />
+        <attr name="description" />
     </declare-styleable>
 </resources>

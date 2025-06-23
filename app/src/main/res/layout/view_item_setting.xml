@@ -19,38 +19,56 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/buttonHeight"
-    android:background="?android:attr/selectableItemBackground">
+    android:layout_height="wrap_content"
+    android:background="?android:attr/selectableItemBackground"
+    android:minHeight="@dimen/buttonHeight">
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginStart="@dimen/marginStandard"
+        android:layout_marginEnd="@dimen/marginStandardMedium"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/ic_drive"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/title"
         style="@style/Subtitle2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/marginStandardMedium"
-        android:layout_marginEnd="@dimen/marginStandard"
+        android:paddingVertical="@dimen/marginStandardSmall"
         android:text="@string/trackingManagementTitle"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/description"
         app:layout_constraintEnd_toStartOf="@id/iconEnd"
         app:layout_constraintStart_toEndOf="@id/icon"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_goneMarginStart="@dimen/marginStandard" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:layout_marginEnd="@dimen/marginStandardMedium"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/title"
+        tools:visibility="visible" />
 
     <FrameLayout
         android:id="@+id/iconEnd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/marginStandardMedium"
+        android:paddingHorizontal="@dimen/marginStandardMedium"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -59,21 +77,31 @@
             android:id="@+id/chevron"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/marginStandard"
             android:src="@drawable/ic_chevron_right"
             android:visibility="gone"
             tools:ignore="ContentDescription" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/toggle"
+        <TextView
+            android:id="@+id/textEnd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toTopOf="@id/onlyWifiSyncDescription"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:text="@string/allDisabled"
+            android:visibility="gone" />
     </FrameLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/marginStandard"
+        android:paddingBottom="@dimen/marginStandardMedium"
+        android:text="@string/settingsOnlyWifiSyncDescription"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/iconEnd"
+        app:layout_constraintStart_toStartOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:visibility="visible" />
 
+</androidx.constraintlayout.widget.ConstraintLayout>

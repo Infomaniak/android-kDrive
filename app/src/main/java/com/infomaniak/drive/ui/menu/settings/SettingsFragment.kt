@@ -83,8 +83,8 @@ class SettingsFragment : Fragment() {
             registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
         }
 
-        onlyWifiSyncValue.isChecked = AppSettings.onlyWifiSync
-        onlyWifiSyncValue.setOnCheckedChangeListener { _, isChecked ->
+        onlyWifiSync.isChecked = AppSettings.onlyWifiSync
+        onlyWifiSync.setOnCheckedChangeListener { _, isChecked ->
             trackSettingsEvent("onlyWifiTransfer", isChecked)
             AppSettings.onlyWifiSync = isChecked
             requireActivity().launchAllUpload(drivePermissions)
@@ -177,7 +177,7 @@ class SettingsFragment : Fragment() {
                 UiSettings(requireContext()).nightMode = defaultNightMode
                 AppCompatDelegate.setDefaultNightMode(defaultNightMode)
                 setThemeSettingsValue()
-                trackSettingsEvent("theme${binding.themeSettingsValue.text}")
+                trackSettingsEvent("theme${binding.themeSettings.getTextEnd()}")
             }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false).show()
@@ -185,8 +185,8 @@ class SettingsFragment : Fragment() {
 
     override fun onResume() = with(binding) {
         super.onResume()
-        syncPictureValue.setText(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
-        appSecurityValue.setText(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
+        syncPicture.setTextEnd(if (AccountUtils.isEnableAppSync()) getString(R.string.allActivated) else getString(R.string.allDisabled))
+        appSecurity.setTextEnd(if (AppSettings.appSecurityLock) getString(R.string.allActivated) else getString(R.string.allDisabled))
         setThemeSettingsValue()
     }
 
@@ -196,7 +196,7 @@ class SettingsFragment : Fragment() {
             AppCompatDelegate.MODE_NIGHT_YES -> R.string.themeSettingsDarkLabel
             else -> R.string.themeSettingsSystemLabel
         }
-        binding.themeSettingsValue.setText(themeTextValue)
+        binding.themeSettings.setTextEnd(getString(themeTextValue))
     }
 
     private fun navigateToFeedback() {
