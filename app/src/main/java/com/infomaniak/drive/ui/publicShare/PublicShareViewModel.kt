@@ -39,10 +39,14 @@ import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.sentry.Sentry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 
 class PublicShareViewModel(application: Application, val savedStateHandle: SavedStateHandle) : AndroidViewModel(application) {
 

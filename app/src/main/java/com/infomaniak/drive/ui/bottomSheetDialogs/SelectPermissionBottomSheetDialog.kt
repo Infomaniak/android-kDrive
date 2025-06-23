@@ -36,14 +36,24 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.data.models.ShareLink.*
+import com.infomaniak.drive.data.models.ShareLink.EditPermission
+import com.infomaniak.drive.data.models.ShareLink.OfficeFilePermission
+import com.infomaniak.drive.data.models.ShareLink.OfficeFolderPermission
+import com.infomaniak.drive.data.models.ShareLink.ShareLinkDocumentPermission
+import com.infomaniak.drive.data.models.ShareLink.ShareLinkFilePermission
+import com.infomaniak.drive.data.models.ShareLink.ShareLinkFolderPermission
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.databinding.FragmentSelectPermissionBinding
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.SnackbarUtils
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.setBackNavigationResult
+import com.infomaniak.lib.core.utils.showProgressCatching
 import kotlinx.coroutines.Dispatchers
 import kotlinx.parcelize.Parcelize
 

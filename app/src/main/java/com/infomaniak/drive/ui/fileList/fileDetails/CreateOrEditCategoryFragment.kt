@@ -37,8 +37,13 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CreateOrEditCategoryAdapter.Companion.COLORS
 import com.infomaniak.drive.utils.getScreenSizeInDp
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.SnackbarUtils
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.showProgressCatching
+import com.infomaniak.lib.core.utils.toDp
 import kotlin.math.max
 
 class CreateOrEditCategoryFragment : Fragment() {

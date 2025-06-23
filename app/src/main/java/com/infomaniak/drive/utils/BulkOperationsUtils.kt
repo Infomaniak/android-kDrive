@@ -18,7 +18,15 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.WorkQuery
+import androidx.work.workDataOf
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.services.BulkOperationWorker
 

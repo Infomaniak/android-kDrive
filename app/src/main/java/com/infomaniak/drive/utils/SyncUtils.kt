@@ -23,7 +23,12 @@ import android.os.Build.VERSION.SDK_INT
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.fragment.app.FragmentActivity
-import androidx.work.*
+import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.WorkQuery
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile

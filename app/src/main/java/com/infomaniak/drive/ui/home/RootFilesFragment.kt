@@ -35,8 +35,14 @@ import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
-import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
-import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.CommonFolders
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.Favorites
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.MyShares
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.Offline
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.PersonalFolder
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.RecentChanges
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.SharedWithMe
+import com.infomaniak.drive.ui.home.RootFileTreeCategory.Trash
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts

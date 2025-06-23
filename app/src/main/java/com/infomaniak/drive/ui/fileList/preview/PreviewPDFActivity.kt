@@ -33,8 +33,14 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.openWith
+import com.infomaniak.drive.utils.saveToKDrive
+import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.setupStatusBarForPreview
+import com.infomaniak.drive.utils.shareFile
+import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.setMargins

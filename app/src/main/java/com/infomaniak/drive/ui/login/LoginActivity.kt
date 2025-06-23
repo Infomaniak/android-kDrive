@@ -52,10 +52,15 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
+import com.infomaniak.lib.core.utils.clearStack
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.showProgressCatching
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.coroutines.CancellationException

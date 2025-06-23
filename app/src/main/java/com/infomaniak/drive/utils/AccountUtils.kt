@@ -42,8 +42,14 @@ import com.infomaniak.lib.core.room.UserDatabase
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.stores.StoresSettingsRepository
 import io.sentry.Sentry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 
 object AccountUtils : CredentialManager() {

@@ -18,7 +18,11 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.content.ContentResolver
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.utils.IsComplete
 import com.infomaniak.drive.utils.MediaFoldersProvider

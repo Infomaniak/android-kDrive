@@ -32,7 +32,13 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.Invitation
+import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.databinding.FragmentFileShareDetailsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
@@ -44,7 +50,11 @@ import com.infomaniak.drive.ui.fileList.ShareLinkManageable
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsInfoFragment
 import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Companion.SHARE_SELECTION_KEY
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.getDriveUsers
+import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.drive.utils.setupAvailableShareableItems
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.hideKeyboard
 import com.infomaniak.lib.core.utils.safeNavigate

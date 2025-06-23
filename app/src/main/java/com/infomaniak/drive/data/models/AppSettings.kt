@@ -18,7 +18,11 @@
 package com.infomaniak.drive.data.models
 
 import com.infomaniak.drive.utils.RealmModules
-import io.realm.*
+import io.realm.DynamicRealm
+import io.realm.Realm
+import io.realm.RealmConfiguration
+import io.realm.RealmMigration
+import io.realm.RealmObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
