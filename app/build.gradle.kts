@@ -192,7 +192,7 @@ dependencies {
     implementation("com.github.realm:realm-android-adapters:v4.0.0")
 
     "standardImplementation"("com.google.firebase:firebase-messaging-ktx:24.1.1")
-    "standardImplementation"("com.geniusscansdk:gssdk:5.6.1")
+    "standardImplementation"("com.geniusscansdk:gssdk:5.11.0")
 
     implementation("com.googlecode.plist:dd-plist:1.28")
 
