@@ -23,6 +23,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.CompoundButton
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.R
@@ -95,7 +96,7 @@ class ItemSettingView @JvmOverloads constructor(
         binding.toggle.setOnCheckedChangeListener(listener)
     }
 
-    fun setColorFolder(color: Int) {
+    fun setColorFolder(@ColorInt color: Int) {
         binding.icon.imageTintList = ColorStateList.valueOf(color)
     }
 

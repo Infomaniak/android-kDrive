@@ -274,6 +274,7 @@ class SyncSettingsActivity : BaseActivity() {
             if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
                 FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
                     selectPath.setTitle(it.name)
+                    selectPath.setColorFolder(Color.parseColor(it.color))
                     changeSaveButtonStatus()
                 }
             } else {
