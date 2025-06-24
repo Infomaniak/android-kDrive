@@ -160,6 +160,7 @@
     <string name="buttonSave">Salva</string>
     <string name="buttonSeeFolder">Mostra la cartella</string>
     <string name="buttonSelectAll">Seleziona tutto</string>
+    <string name="buttonSelectTheFolder">Selezionare la cartella</string>
     <string name="buttonSend">Invia</string>
     <string name="buttonSendCopy">Invia una copia</string>
     <string name="buttonSettingsLockApp">Attiva il blocco</string>
