@@ -403,7 +403,7 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 
 fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
-const val loginUrl = "https://login.infomaniak.com/"
+const val loginUrl = "https://login.preprod.dev.infomaniak.ch/"
 
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
