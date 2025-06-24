@@ -72,6 +72,7 @@
                 android:mimeType="*/*"
                 android:scheme="*" />
         </intent>
+        <package android:name="com.infomaniak.mail" />
     </queries>
 
     <application
