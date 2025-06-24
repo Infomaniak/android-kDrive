@@ -78,6 +78,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -272,7 +273,7 @@ class MainActivity : BaseActivity() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
                 clickOnBottomBarFolders()
-                it.destinationUserDrive?.let { notNullDestinationUserDriveNotNull -> mainViewModel.navigateFileListTo(navController, it.destinationFileId, notNullDestinationUserDriveNotNull) }
+                mainViewModel.navigateFileListTo(navController, it.destinationFileId, it.destinationUserDrive ?: UserDrive(driveId = -1)) 
             }
         }
     }
