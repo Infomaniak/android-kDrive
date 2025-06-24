@@ -59,156 +59,50 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/privacyLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:paddingHorizontal="@dimen/marginStandard"
-                    android:paddingVertical="@dimen/marginStandardMedium">
-
-                    <TextView
-                        android:id="@+id/privacyTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/aboutPrivacyTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/privacyChevron"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/privacyChevron"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_chevron_right"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    app:itemAction="chevron"
+                    app:title="@string/aboutPrivacyTitle" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/divider" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/sourceCodeLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:paddingHorizontal="@dimen/marginStandard"
-                    android:paddingVertical="@dimen/marginStandardMedium">
-
-                    <TextView
-                        android:id="@+id/sourceCodeTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/aboutSourceCodeTitle"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/sourceCodeChevron"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/sourceCodeChevron"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_chevron_right"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    app:itemAction="chevron"
+                    app:title="@string/aboutSourceCodeTitle" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/divider" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/licenseLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:paddingHorizontal="@dimen/marginStandard"
-                    android:paddingVertical="@dimen/marginStandardMedium">
-
-                    <TextView
-                        android:id="@+id/licenseTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/aboutLicenseTitle"
-                        app:layout_constraintBottom_toTopOf="@id/licenseDescription"
-                        app:layout_constraintEnd_toStartOf="@id/licenseChevron"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/licenseDescription"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="@string/aboutLicenseDescription"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toStartOf="@id/licenseChevron"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/licenseTitle" />
-
-                    <ImageView
-                        android:id="@+id/licenseChevron"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_chevron_right"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:ignore="ContentDescription" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    app:description="@string/aboutLicenseDescription"
+                    app:itemAction="chevron"
+                    app:title="@string/aboutLicenseTitle" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/divider" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/appVersionLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?selectableItemBackground"
-                    android:paddingHorizontal="@dimen/marginStandard"
-                    android:paddingVertical="@dimen/marginStandardMedium">
-
-                    <TextView
-                        android:id="@+id/appVersionTitle"
-                        style="@style/Subtitle2"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/aboutAppVersionTitle"
-                        app:layout_constraintBottom_toTopOf="@id/appVersionDescription"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/appVersionDescription"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/appVersionTitle"
-                        tools:text="V 4.0.0 build 1337" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    app:description="V 4.0.0 build 1337"
+                    app:itemAction="none"
+                    app:title="@string/aboutAppVersionTitle" />
 
                 <View
                     android:layout_width="match_parent"
