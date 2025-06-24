@@ -281,6 +281,7 @@ class SyncSettingsActivity : BaseActivity() {
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
             if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
                 FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
+                    selectPath.setIconColor(Color.parseColor(it.color))
                     selectPath.title = it.name
                     changeSaveButtonStatus()
                 }
