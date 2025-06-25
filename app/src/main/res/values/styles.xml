@@ -64,6 +64,18 @@
 
     <style name="AppTheme.Login" parent="AppTheme.LoginBase" />
 
+    <style name="AppTheme.BugTrackerBase" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="collapsingToolbarLayoutStyle">@style/AppTheme.CollapsingToolbarLayoutTheme</item>
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorPrimaryContainer">@color/backgroundSecondary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="toolbarStyle">@style/AppTheme.ToolbarTheme</item>
+    </style>
+
+    <style name="AppTheme.BugTracker" parent="AppTheme.BugTrackerBase">
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
     <style name="WebViewTheme" parent="AppTheme.Login">
         <item name="colorAccent">@color/accent</item>
         <item name="colorCloseIcon">@color/title</item>
