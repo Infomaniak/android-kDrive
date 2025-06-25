@@ -32,7 +32,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.BaseRootFolder
+import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
@@ -47,7 +47,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.launch
 
-class RootFilesFragment : BaseRootFolder() {
+class RootFilesFragment : BaseRootFolderFragment() {
 
     private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()

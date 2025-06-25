@@ -33,7 +33,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.FragmentSelectRootFolderBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.BaseRootFolder
+import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.TypeOfFolder
@@ -44,7 +44,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class SelectRootFolderFragment : BaseRootFolder() {
+class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     private var _binding: FragmentSelectRootFolderBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
