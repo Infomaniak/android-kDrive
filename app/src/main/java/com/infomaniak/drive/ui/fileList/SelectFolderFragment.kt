@@ -51,7 +51,7 @@ class SelectFolderFragment : FileListFragment() {
 
         folderName = if (folderId == ROOT_ID) selectFolderViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
 
-        collapsingToolbarLayout.title = selectFolderViewModel.getFolderName(folderId) ?: "/"
+        collapsingToolbarLayout.title = selectFolderViewModel.getFolderName(folderId)
 
         toolbar.menu.findItem(R.id.addFolderItem).apply {
             setOnMenuItemClickListener {
