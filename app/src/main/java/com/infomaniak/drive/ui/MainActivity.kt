@@ -273,7 +273,11 @@ class MainActivity : BaseActivity() {
         navigationArgs?.let {
             if (it.destinationFileId > 0) {
                 clickOnBottomBarFolders()
-                mainViewModel.navigateFileListTo(navController, it.destinationFileId, it.destinationUserDrive ?: UserDrive(driveId = -1)) 
+                mainViewModel.navigateFileListTo(
+                    navController,
+                    it.destinationFileId,
+                    it.destinationUserDrive ?: UserDrive()
+                )
             }
         }
     }
