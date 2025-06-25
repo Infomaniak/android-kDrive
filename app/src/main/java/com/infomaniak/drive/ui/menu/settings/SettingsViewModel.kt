@@ -17,20 +17,22 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.app.Application
 import android.content.Context
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.models.user.User
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val ioDispatcher: CoroutineDispatcher, private val appContext: Context): ViewModel() {
+class SettingsViewModel(application: Application, private val ioDispatcher: CoroutineDispatcher) : AndroidViewModel(application) {
+
+    private inline val context: Context get() = getApplication<Application>().applicationContext
 
     fun disconnectDeletedUser(currentUser: User) {
         viewModelScope.launch(ioDispatcher) {
-            AccountUtils.removeUserAndDeleteToken(appContext, currentUser)
+            AccountUtils.removeUserAndDeleteToken(context, currentUser)
         }
     }
-
 }
