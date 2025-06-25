@@ -51,11 +51,7 @@ class SelectFolderFragment : FileListFragment() {
 
         folderName = if (folderId == ROOT_ID) selectFolderViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
 
-        collapsingToolbarLayout.title = if (folderId != ROOT_ID) {
-            FileController.getFileById(folderId)?.name
-        } else {
-            selectFolderViewModel.currentDrive?.name
-        }
+        collapsingToolbarLayout.title = selectFolderViewModel.getFolderName(folderId) ?: "/"
 
         toolbar.menu.findItem(R.id.addFolderItem).apply {
             setOnMenuItemClickListener {
