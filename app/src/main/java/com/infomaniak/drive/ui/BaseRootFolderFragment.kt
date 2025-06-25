@@ -28,7 +28,7 @@ import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.Job
 
-abstract class BaseRootFolder : Fragment() {
+abstract class BaseRootFolderFragment : Fragment() {
 
     protected var commonFolderToOpen: FolderToOpen? = null
     protected var personalFolderToOpen: FolderToOpen? = null
@@ -48,8 +48,6 @@ abstract class BaseRootFolder : Fragment() {
             hasFolderToOpenBeenSet.complete()
         }
     }
-
-    abstract fun observeFiles()
 
     fun setupItems(
         folderLayout: RootFolderLayoutBinding,
@@ -104,4 +102,5 @@ abstract class BaseRootFolder : Fragment() {
     }
 
     abstract fun fileListDirections(folderToOpen: FolderToOpen): NavDirections
+    abstract fun observeFiles()
 }
