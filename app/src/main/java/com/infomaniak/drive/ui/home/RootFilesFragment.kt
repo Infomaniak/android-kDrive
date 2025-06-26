@@ -22,15 +22,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
+import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.MainViewModel
@@ -58,7 +57,9 @@ class RootFilesFragment : BaseRootFolderFragment() {
 
     private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val fileListViewModel: FileListViewModel by viewModels()
+    override val fileListViewModel: FileListViewModel by viewModels()
+
+    override val rootFolderLayout: RootFolderLayoutBinding by lazy { binding.rootFolderLayout }
 
     override val uiSettings by lazy { UiSettings(requireContext()) }
 
@@ -91,7 +92,7 @@ class RootFilesFragment : BaseRootFolderFragment() {
             trashNav = RootFilesFragmentDirections.actionFilesFragmentToTrashFragment()
         )
 
-        observeFiles()
+        observeFiles(haveBin = true)
         observeNavigateFileListTo()
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
@@ -107,15 +108,6 @@ class RootFilesFragment : BaseRootFolderFragment() {
             binding.rootFolderLayout.cardView.setMargins(
                 bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom
             )
-        }
-    }
-
-    override fun observeFiles() {
-        fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
-            binding.rootFolderLayout.organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
-            binding.rootFolderLayout.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
-
-            updateFolderToOpenWhenClicked(fileTypes = fileTypes, haveBin = true)
         }
     }
 

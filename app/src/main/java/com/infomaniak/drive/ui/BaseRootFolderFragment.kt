@@ -17,12 +17,14 @@
  */
 package com.infomaniak.drive.ui
 
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
+import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import kotlinx.coroutines.CompletableJob
@@ -34,6 +36,9 @@ abstract class BaseRootFolderFragment : Fragment() {
     protected var personalFolderToOpen: FolderToOpen? = null
 
     protected val hasFolderToOpenBeenSet: CompletableJob = Job()
+
+    abstract val fileListViewModel: FileListViewModel
+    abstract val rootFolderLayout: RootFolderLayoutBinding
 
     abstract val uiSettings: UiSettings
 
@@ -102,5 +107,12 @@ abstract class BaseRootFolderFragment : Fragment() {
     }
 
     abstract fun fileListDirections(folderToOpen: FolderToOpen): NavDirections
-    abstract fun observeFiles()
+    fun observeFiles(haveBin: Boolean = false) {
+        fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
+            rootFolderLayout.organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
+            rootFolderLayout.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
+
+            updateFolderToOpenWhenClicked(fileTypes = fileTypes, haveBin = haveBin)
+        }
+    }
 }
