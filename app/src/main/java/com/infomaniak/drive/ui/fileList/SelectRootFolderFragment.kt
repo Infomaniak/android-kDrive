@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.FragmentSelectRootFolderBinding
+import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
@@ -49,7 +50,9 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     private var _binding: FragmentSelectRootFolderBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
-    private val fileListViewModel: FileListViewModel by viewModels()
+    override val fileListViewModel: FileListViewModel by viewModels()
+
+    override val rootFolderLayout: RootFolderLayoutBinding by lazy { binding.rootFolderLayout }
 
     private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels()
 
@@ -146,15 +149,6 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         }
         itemViewFile.setFileItem(file = file, typeFolder = TypeOfFolder.typeRecentFolder)
 
-    }
-
-    override fun observeFiles() {
-        fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
-            binding.rootFolderLayout.organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
-            binding.rootFolderLayout.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
-
-            updateFolderToOpenWhenClicked(fileTypes = fileTypes)
-        }
     }
 
     override fun fileListDirections(
