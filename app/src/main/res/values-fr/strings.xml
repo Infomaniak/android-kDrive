@@ -160,6 +160,7 @@
     <string name="buttonSave">Enregistrer</string>
     <string name="buttonSeeFolder">Voir le dossier</string>
     <string name="buttonSelectAll">Tout sélectionner</string>
+    <string name="buttonSelectTheFolder">Sélectionner un dossier</string>
     <string name="buttonSend">Envoyer</string>
     <string name="buttonSendCopy">Envoyer une copie</string>
     <string name="buttonSettingsLockApp">Activer le verrouillage</string>
