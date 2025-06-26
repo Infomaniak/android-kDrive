@@ -28,12 +28,20 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isInvisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager2.widget.ViewPager2
+import com.infomaniak.core.Xor
+import com.infomaniak.core.cancellable
+import com.infomaniak.core.login.crossapp.CrossAppLogin
+import com.infomaniak.core.login.crossapp.DerivedTokenGenerator
+import com.infomaniak.core.login.crossapp.DerivedTokenGeneratorImpl
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
+import com.infomaniak.drive.awaitOneLongClick
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -45,6 +53,7 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
+import com.infomaniak.drive.utils.loginUrl
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.lib.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.lib.core.models.ApiError
@@ -52,6 +61,7 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
@@ -67,6 +77,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import kotlinx.serialization.ExperimentalSerializationApi
 
 class LoginActivity : AppCompatActivity() {
 
@@ -133,6 +144,34 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
+        lifecycleScope.launch {
+            @OptIn(ExperimentalSerializationApi::class)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val derivedTokenGenerator: DerivedTokenGenerator = DerivedTokenGeneratorImpl(
+                    coroutineScope = this,
+                    tokenRetrievalUrl = "${loginUrl}token",
+                    hostAppPackageName = BuildConfig.APPLICATION_ID,
+                    clientId = BuildConfig.CLIENT_ID,
+                    userAgent = HttpUtils.getUserAgent
+                )
+                val crossAppLogin = CrossAppLogin.forContext(this@LoginActivity)
+                val externalAccounts = crossAppLogin.retrieveAccountsFromOtherApps()
+                connectButton.text = "${externalAccounts.size} accounts"
+                connectButton.awaitOneLongClick()
+                println("Got ${externalAccounts.size} accounts from other apps:")
+                println("Accounts retrieved: $externalAccounts")
+                externalAccounts.firstOrNull()?.let { account ->
+                    when (val result = derivedTokenGenerator.attemptDerivingOneOfTheseTokens(account.tokens)) {
+                        is Xor.First -> authenticateUser(token = result.value, infomaniakLogin = infomaniakLogin)
+                        is Xor.Second -> {
+                            println(result.value)
+                            connectButton.text = "Ooops"
+                        }
+                    }
+                }
+            }
+        }
+
         signInButton.setOnClickListener {
             trackAccountEvent("openCreationWebview")
             startAccountCreation()
@@ -169,6 +208,42 @@ class LoginActivity : AppCompatActivity() {
         } else {
             connectButton.isEnabled = true
             signInButton.isEnabled = true
+        }
+    }
+
+    private suspend fun authenticateUser(token: ApiToken, infomaniakLogin: InfomaniakLogin) = Dispatchers.Default {
+        when (val returnValue = authenticateUser(this@LoginActivity, token)) {
+            is User -> {
+                val deeplink = navigationArgs?.publicShareDeeplink
+                if (deeplink.isNullOrBlank()) {
+                    trackUserId(AccountUtils.currentUserId)
+                    trackAccountEvent("loggedIn")
+                    launchMainActivity()
+                } else {
+                    PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)
+                }
+
+                return@Default
+            }
+            is ApiResponse<*> -> Dispatchers.Main {
+                if (returnValue.error?.description == ErrorCode.NO_DRIVE) {
+                    launchNoDriveActivity()
+                } else {
+                    showError(getString(returnValue.translateError()))
+                }
+            }
+            else -> Dispatchers.Main { showError(getString(R.string.anErrorHasOccurred)) }
+        }
+
+        runCatching {
+            infomaniakLogin.deleteToken(
+                okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+                token = token,
+            )?.let { errorStatus ->
+                SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
+            }
+        }.cancellable().onFailure { exception ->
+            SentryLog.e(TAG, "Failure on deleteToken", exception)
         }
     }
 
@@ -225,8 +300,7 @@ class LoginActivity : AppCompatActivity() {
                 )?.let { errorStatus ->
                     SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
                 }
-            }.onFailure { exception ->
-                if (exception is CancellationException) throw exception
+            }.cancellable().onFailure { exception ->
                 SentryLog.e(TAG, "Failure on deleteToken", exception)
             }
         }
@@ -279,7 +353,7 @@ class LoginActivity : AppCompatActivity() {
                     }
 
                     user?.let {
-                        val allDrivesDataResponse = ApiRepository.getAllDrivesData(okhttpClient)
+                        val allDrivesDataResponse = Dispatchers.IO { ApiRepository.getAllDrivesData(okhttpClient) }
 
                         when {
                             allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {
@@ -293,7 +367,9 @@ class LoginActivity : AppCompatActivity() {
                             }
                             else -> {
                                 allDrivesDataResponse.data?.let { driveInfo ->
-                                    DriveInfosController.storeDriveInfos(user.id, driveInfo)
+                                    Dispatchers.IO {
+                                        DriveInfosController.storeDriveInfos(user.id, driveInfo)
+                                    }
                                     CloudStorageProvider.notifyRootsChanged(context)
 
                                     AccountUtils.addUser(user)
