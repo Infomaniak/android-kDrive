@@ -25,7 +25,12 @@ import com.infomaniak.drive.utils.FilePresenter.openFolder
 
 interface FileListNavigatoreObservable {
 
-    fun observeNavigateFileListTo(mainViewModel: MainViewModel, viewLifecycleOwner: LifecycleOwner, fragment: Fragment, fileListViewModel: FileListViewModel) {
+    fun observeNavigateFileListTo(
+        mainViewModel: MainViewModel,
+        viewLifecycleOwner: LifecycleOwner,
+        fragment: Fragment,
+        fileListViewModel: FileListViewModel
+    ) {
         mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
             if (file.isFolder()) {
                 fragment.openFolder(
