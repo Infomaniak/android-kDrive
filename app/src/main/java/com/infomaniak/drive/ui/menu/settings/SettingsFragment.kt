@@ -17,16 +17,19 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.collection.arrayMapOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
@@ -42,6 +45,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.AccountUtils.currentUser
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -50,6 +54,9 @@ import com.infomaniak.drive.utils.getDashboardData
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.bugtracker.BugTrackerActivity
 import com.infomaniak.lib.bugtracker.BugTrackerActivityArgs
+import com.infomaniak.lib.core.BuildConfig.AUTOLOG_URL
+import com.infomaniak.lib.core.BuildConfig.TERMINATE_ACCOUNT_URL
+import com.infomaniak.lib.core.ui.WebViewActivity
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeBinding
@@ -58,6 +65,11 @@ import com.infomaniak.lib.core.utils.safeNavigate
 class SettingsFragment : Fragment() {
 
     private var binding: FragmentSettingsBinding by safeBinding()
+
+    private val settingsViewModel: SettingsViewModel by viewModels()
+    private val resultActivityResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) currentUser?.let(settingsViewModel::disconnectDeletedUser)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSettingsBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -99,6 +111,7 @@ class SettingsFragment : Fragment() {
         }
         about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
         feedback.setOnClickListener { navigateToFeedback() }
+        setDeleteAccountClickListener()
         binding.root.enableEdgeToEdge()
     }
 
@@ -122,6 +135,18 @@ class SettingsFragment : Fragment() {
                 trackMyKSuiteEvent(MatomoMyKSuite.OPEN_DASHBOARD_NAME)
                 openMyKSuiteDashboard(myKSuiteData)
             }
+        }
+    }
+
+    private fun setDeleteAccountClickListener() = with(binding) {
+        deleteMyAccount.setOnClickListener {
+            WebViewActivity.startActivity(
+                context = requireContext(),
+                url = TERMINATE_ACCOUNT_FULL_URL,
+                headers = mapOf("Authorization" to "Bearer ${AccountUtils.currentUser?.apiToken?.accessToken}"),
+                urlToQuit = URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION,
+                activityResultLauncher = resultActivityResultLauncher,
+            )
         }
     }
 
@@ -195,5 +220,10 @@ class SettingsFragment : Fragment() {
 
     private fun trackSettingsEvent(name: String, value: Boolean? = null) {
         trackEvent("settings", name, value = value?.toFloat())
+    }
+
+    companion object {
+        private const val URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION = "login.infomaniak.com"
+        private const val TERMINATE_ACCOUNT_FULL_URL = "$AUTOLOG_URL/?url=$TERMINATE_ACCOUNT_URL"
     }
 }

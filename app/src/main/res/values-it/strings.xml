@@ -226,6 +226,7 @@
     <string name="createFolderTitle">Crea una cartella</string>
     <string name="createFolderValidUntilDescription">Dopo tale data, gli utenti non potranno più trasferire i file.</string>
     <string name="createPrivateFolderSucces">Cartella creata con successo</string>
+    <string name="deleteMyAccount">Cancellare il mio account</string>
     <string name="deletePicturesDescription">L’applicazione ti chiederà regolarmente di cancellare le foto dal tuo dispositivo che sono già sincronizzate sul tuo kDrive. Dovrai autorizzare manualmente la cancellazione</string>
     <string name="deletePicturesTitle">Cancellare le foto</string>
     <plurals name="driveBlockedDescription">
