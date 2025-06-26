@@ -36,6 +36,7 @@ import com.infomaniak.drive.ui.FileListNavigatoreObservable
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
+import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.setupDriveToolbar
@@ -45,7 +46,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.launch
 
-class RootFilesFragment : BaseRootFolderFragment(), ObserveNotification {
+class RootFilesFragment : BaseRootFolderFragment(), FileListNavigatoreObservable {
 
     private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -100,21 +101,6 @@ class RootFilesFragment : BaseRootFolderFragment(), ObserveNotification {
             binding.rootFolderLayout.cardView.setMargins(
                 bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom
             )
-        }
-    }
-
-    private fun observeNavigateFileListTo() {
-        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
-            if (file.isFolder()) {
-                openFolder(
-                    file = file,
-                    shouldHideBottomNavigation = false,
-                    shouldShowSmallFab = false,
-                    fileListViewModel = fileListViewModel,
-                )
-            } else {
-                displayFile(file, mainViewModel, fileAdapter = null)
-            }
         }
     }
 
