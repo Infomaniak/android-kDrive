@@ -160,7 +160,7 @@
     <string name="buttonSave">Speichern</string>
     <string name="buttonSeeFolder">Ordner anzeigen</string>
     <string name="buttonSelectAll">Alles auswählen</string>
-    <string name="buttonSelectTheFolder">Wählen Sie den Ordner</string>
+    <string name="buttonSelectTheFolder">Einen Ordner auswählen</string>
     <string name="buttonSend">Versenden</string>
     <string name="buttonSendCopy">Kopie versenden</string>
     <string name="buttonSettingsLockApp">Sperre aktivieren</string>

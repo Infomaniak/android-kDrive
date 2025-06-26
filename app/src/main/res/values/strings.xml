@@ -171,7 +171,7 @@
     <string name="buttonSave">Save</string>
     <string name="buttonSeeFolder">View folder</string>
     <string name="buttonSelectAll">Select all</string>
-    <string name="buttonSelectTheFolder">Select the folder</string>
+    <string name="buttonSelectTheFolder">Select a folder</string>
     <string name="buttonSend">Send</string>
     <string name="buttonSendCopy">Send a copy</string>
     <string name="buttonSettingsLockApp">Enable the lock</string>
