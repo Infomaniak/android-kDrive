@@ -812,9 +812,9 @@ class CloudStorageProvider : DocumentsProvider() {
             mutex.withLock {
                 try {
                     Realm.getDefaultInstance()
-                } catch (exception: Exception) {
+                } catch (_: Exception) {
                     Realm.init(this)
-                    AccountUtils.init()
+                    AccountUtils.init(this)
                 }
             }
         }
