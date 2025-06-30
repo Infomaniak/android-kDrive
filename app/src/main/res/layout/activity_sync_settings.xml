@@ -140,7 +140,9 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="vertical">
+                            android:divider="@drawable/divider"
+                            android:orientation="vertical"
+                            android:showDividers="middle">
 
                             <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                                 android:id="@+id/selectDrive"
@@ -149,14 +151,6 @@
                                 android:minHeight="@dimen/buttonHeight"
                                 app:icon="@drawable/ic_drive"
                                 app:title="@string/selectDriveTitle" />
-
-                            <View
-                                android:id="@+id/selectDivider"
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/divider"
-                                android:visibility="gone"
-                                tools:visibility="visible" />
 
                             <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                                 android:id="@+id/selectPath"
@@ -223,7 +217,9 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="vertical">
+                            android:divider="@drawable/divider"
+                            android:orientation="vertical"
+                            android:showDividers="middle">
 
                             <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                                 android:id="@+id/syncVideo"
@@ -231,11 +227,6 @@
                                 android:layout_height="wrap_content"
                                 app:itemAction="toggle"
                                 app:title="@string/syncSettingsButtonSyncVideo" />
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/divider" />
 
                             <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                                 android:id="@+id/createDatedSubFolders"
@@ -245,23 +236,13 @@
                                 app:itemAction="toggle"
                                 app:title="@string/createDatedSubFoldersTitle" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/divider" />
-
                             <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                                 android:id="@+id/deletePicturesAfterSync"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                app:title="@string/deletePicturesTitle"
+                                app:description="@string/deletePicturesDescription"
                                 app:itemAction="toggle"
-                                app:description="@string/deletePicturesDescription"/>
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/divider" />
+                                app:title="@string/deletePicturesTitle" />
 
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:id="@+id/syncDate"
@@ -308,11 +289,6 @@
                                     tools:visibility="visible" />
 
                             </androidx.constraintlayout.widget.ConstraintLayout>
-
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/divider" />
 
                             <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                                 android:id="@+id/syncPeriodicity"

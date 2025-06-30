@@ -73,7 +73,9 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:divider="@drawable/divider"
+                    android:orientation="vertical"
+                    android:showDividers="middle">
 
                     <TextView
                         android:id="@+id/myKSuiteSettingsEmail"
@@ -83,11 +85,6 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:text="ellen.ripley@ik.me" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/dashboardSettings"
@@ -117,7 +114,9 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:divider="@drawable/divider"
+                    android:orientation="vertical"
+                    android:showDividers="middle">
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/syncPicture"
@@ -127,11 +126,6 @@
                         app:itemAction="text"
                         app:title="@string/syncSettingsTitle" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
-
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/themeSettings"
                         android:layout_width="match_parent"
@@ -140,23 +134,12 @@
                         app:itemAction="text"
                         app:title="@string/themeSettingsTitle" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
-
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/notifications"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:itemAction="chevron"
                         app:title="@string/notificationTitle" />
-
-                    <View
-                        android:id="@+id/appSecuritySeparator"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/appSecurity"
@@ -166,11 +149,6 @@
                         app:itemAction="text"
                         app:title="@string/appSecurityTitle" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
-
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/onlyWifiSync"
                         android:layout_width="match_parent"
@@ -179,22 +157,12 @@
                         app:itemAction="toggle"
                         app:title="@string/settingsOnlyWifiSyncTitle" />
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
-
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/about"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:itemAction="chevron"
                         app:title="@string/aboutTitle" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/feedback"

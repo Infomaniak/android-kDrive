@@ -97,14 +97,12 @@ class SettingsFragment : Fragment() {
         notifications.setOnClickListener { requireContext().openAppNotificationSettings() }
         appSecurity.apply {
             if (LockActivity.hasBiometrics()) {
-                appSecuritySeparator.isVisible = true
                 isVisible = true
                 setOnClickListener {
                     trackSettingsEvent("lockApp")
                     safelyNavigate(R.id.appSecurityActivity)
                 }
             } else {
-                appSecuritySeparator.isGone = true
                 isGone = true
             }
         }
