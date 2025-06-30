@@ -319,8 +319,8 @@
                                 android:id="@+id/syncPeriodicity"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                app:endText="@string/syncSettingsSyncPeriodicityInstantValue"
                                 app:itemAction="text"
-                                app:textEnd="@string/syncSettingsSyncPeriodicityInstantValue"
                                 app:title="@string/syncSettingsButtonSyncPeriodicity" />
 
                         </LinearLayout>
