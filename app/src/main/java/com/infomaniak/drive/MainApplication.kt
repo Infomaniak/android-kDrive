@@ -70,9 +70,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.matomo.sdk.Tracker
+import splitties.init.injectAsAppCtx
 import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
+
+    init {
+        injectAsAppCtx() // Ensures it is always initialized
+    }
 
     val matomoTracker: Tracker by lazy { buildTracker() }
     var geniusScanIsReady = false
