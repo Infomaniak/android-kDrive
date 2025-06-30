@@ -23,7 +23,7 @@ import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 
-interface FileListNavigatoreObservable {
+interface FileListNavigatorObservable {
 
     fun observeNavigateFileListTo(
         mainViewModel: MainViewModel,
