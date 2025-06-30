@@ -82,7 +82,7 @@
             tools:ignore="ContentDescription" />
 
         <TextView
-            android:id="@+id/textEnd"
+            android:id="@+id/endText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/allDisabled"

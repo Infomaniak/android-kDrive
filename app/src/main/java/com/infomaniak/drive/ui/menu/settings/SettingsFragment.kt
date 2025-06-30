@@ -177,7 +177,7 @@ class SettingsFragment : Fragment() {
                 UiSettings(requireContext()).nightMode = defaultNightMode
                 AppCompatDelegate.setDefaultNightMode(defaultNightMode)
                 setThemeSettingsValue()
-                trackSettingsEvent("theme${binding.themeSettings.getTextEnd()}")
+                trackSettingsEvent("theme${binding.themeSettings.endText}")
             }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false).show()
@@ -185,8 +185,8 @@ class SettingsFragment : Fragment() {
 
     override fun onResume() = with(binding) {
         super.onResume()
-        syncPicture.setTextEnd(if (AccountUtils.isEnableAppSync()) getString(R.string.allActivated) else getString(R.string.allDisabled))
-        appSecurity.setTextEnd(if (AppSettings.appSecurityLock) getString(R.string.allActivated) else getString(R.string.allDisabled))
+        syncPicture.endText = getString(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
+        appSecurity.endText = getString(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
         setThemeSettingsValue()
     }
 
@@ -196,7 +196,7 @@ class SettingsFragment : Fragment() {
             AppCompatDelegate.MODE_NIGHT_YES -> R.string.themeSettingsDarkLabel
             else -> R.string.themeSettingsSystemLabel
         }
-        binding.themeSettings.setTextEnd(getString(themeTextValue))
+        binding.themeSettings.endText = getString(themeTextValue)
     }
 
     private fun navigateToFeedback() {

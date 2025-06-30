@@ -158,7 +158,7 @@ class SyncSettingsActivity : BaseActivity() {
         oldDeleteAfterSyncValue: Boolean,
     ) {
         setupSelectFolderListener()
-        activateSync.setOnClickListener { activateSyncItem.setSwitchCheck(!activateSyncItem.isChecked) }
+        activateSync.setOnClickListener { activateSync.isChecked = !activateSync.isChecked }
         activateSyncItem.setOnCheckedChangeListener { _, isChecked ->
             saveSettingVisibility(isVisible = isChecked, showBatteryDialog = isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
@@ -256,14 +256,14 @@ class SyncSettingsActivity : BaseActivity() {
     private fun observeSelectedDrive() = with(binding) {
         selectDriveViewModel.selectedDrive.distinctUntilChanged().observe(this@SyncSettingsActivity) {
             it?.let {
-                selectDrive.setColorFolder(Color.parseColor(it.preferences.color))
-                selectDrive.setTitle(it.name)
                 selectDivider.isVisible = true
+                selectDrive.setIconColor(Color.parseColor(it.preferences.color))
+                selectDrive.title = it.name
                 selectPath.isVisible = true
             } ?: run {
-                selectDrive.setColorFolder(ContextCompat.getColor(this@SyncSettingsActivity, R.color.iconColor))
-                selectDrive.setTitle(getString(R.string.selectDriveTitle))
                 selectDivider.isGone = true
+                selectDrive.setIconColor(ContextCompat.getColor(this@SyncSettingsActivity, R.color.iconColor))
+                selectDrive.title = getString(R.string.selectDriveTitle)
                 selectPath.isGone = true
             }
             if (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId ||
@@ -283,11 +283,11 @@ class SyncSettingsActivity : BaseActivity() {
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
             if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
                 FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
-                    selectPath.setTitle(it.name)
+                    selectPath.title = it.name
                     changeSaveButtonStatus()
                 }
             } else {
-                selectPath.setTitle(getString(R.string.selectFolderTitle))
+                selectPath.title = getString(R.string.selectFolderTitle)
             }
             mediaFoldersSettingsVisibility(syncFolderId != null)
         }
@@ -311,7 +311,7 @@ class SyncSettingsActivity : BaseActivity() {
         syncSettingsViewModel.syncIntervalType.observe(this@SyncSettingsActivity) {
             if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
             changeSaveButtonStatus()
-            syncPeriodicity.setTextEnd(getString(it.title).lowercase())
+            syncPeriodicity.endText = getString(it.title).lowercase()
         }
     }
 
@@ -339,7 +339,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun activeSelectDrive() = with(binding) {
-        selectDrive.setIconEndVisibility(true)
+        selectDrive.setIconEndVisibility()
         selectDrive.setOnClickListener { SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog") }
     }
 
@@ -377,7 +377,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         val titleMediaFolders = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
         else resources.getQuantityString(R.plurals.mediaFoldersSelected, allSyncedFoldersCount, allSyncedFoldersCount)
-        mediaFolders.setTitle(titleMediaFolders)
+        mediaFolders.title = titleMediaFolders
 
         saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
                 && (selectDriveViewModel.selectedDrive.value != null)

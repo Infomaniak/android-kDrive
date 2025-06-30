@@ -123,8 +123,8 @@
                         android:id="@+id/syncPicture"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        app:endText="@string/allDisabled"
                         app:itemAction="text"
-                        app:textEnd="@string/allDisabled"
                         app:title="@string/syncSettingsTitle" />
 
                     <View
@@ -136,8 +136,8 @@
                         android:id="@+id/themeSettings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        app:endText="@string/themeSettingsSystemLabel"
                         app:itemAction="text"
-                        app:textEnd="@string/themeSettingsSystemLabel"
                         app:title="@string/themeSettingsTitle" />
 
                     <View
@@ -162,8 +162,8 @@
                         android:id="@+id/appSecurity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        app:endText="@string/allDisabled"
                         app:itemAction="text"
-                        app:textEnd="@string/allDisabled"
                         app:title="@string/appSecurityTitle" />
 
                     <View
