@@ -51,11 +51,24 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_goneMarginStart="@dimen/marginStandard" />
 
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/marginStandard"
+        android:paddingBottom="@dimen/marginStandardMedium"
+        android:text="@string/settingsOnlyWifiSyncDescription"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/iconEnd"
+        app:layout_constraintStart_toStartOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        tools:visibility="visible" />
+
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
         android:layout_marginEnd="@dimen/marginStandardMedium"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/title"
@@ -88,20 +101,5 @@
             android:text="@string/allDisabled"
             android:visibility="gone" />
     </FrameLayout>
-
-    <TextView
-        android:id="@+id/description"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/marginStandard"
-        android:paddingBottom="@dimen/marginStandardMedium"
-        android:text="@string/settingsOnlyWifiSyncDescription"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/iconEnd"
-        app:layout_constraintStart_toStartOf="@id/title"
-        app:layout_constraintTop_toBottomOf="@id/title"
-        app:layout_constraintVertical_chainStyle="packed"
-        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

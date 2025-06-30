@@ -101,7 +101,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:description="V 4.0.0 build 1337"
-                    app:itemAction="none"
                     app:title="@string/aboutAppVersionTitle" />
 
                 <View
