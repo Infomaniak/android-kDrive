@@ -256,12 +256,10 @@ class SyncSettingsActivity : BaseActivity() {
     private fun observeSelectedDrive() = with(binding) {
         selectDriveViewModel.selectedDrive.distinctUntilChanged().observe(this@SyncSettingsActivity) {
             it?.let {
-                selectDivider.isVisible = true
                 selectDrive.setIconColor(Color.parseColor(it.preferences.color))
                 selectDrive.title = it.name
                 selectPath.isVisible = true
             } ?: run {
-                selectDivider.isGone = true
                 selectDrive.setIconColor(ContextCompat.getColor(this@SyncSettingsActivity, R.color.iconColor))
                 selectDrive.title = getString(R.string.selectDriveTitle)
                 selectPath.isGone = true
