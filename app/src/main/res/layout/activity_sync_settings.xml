@@ -148,7 +148,6 @@
                                 android:layout_height="wrap_content"
                                 android:minHeight="@dimen/buttonHeight"
                                 app:icon="@drawable/ic_drive"
-                                app:itemAction="none"
                                 app:title="@string/selectDriveTitle" />
 
                             <View
