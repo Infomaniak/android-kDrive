@@ -57,7 +57,9 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:divider="@drawable/divider"
+                android:orientation="vertical"
+                android:showDividers="middle">
 
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/privacyLayout"
@@ -66,22 +68,12 @@
                     app:itemAction="chevron"
                     app:title="@string/aboutPrivacyTitle" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
-
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/sourceCodeLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:itemAction="chevron"
                     app:title="@string/aboutSourceCodeTitle" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
 
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/licenseLayout"
@@ -91,23 +83,12 @@
                     app:itemAction="chevron"
                     app:title="@string/aboutLicenseTitle" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
-
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/appVersionLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:description="V 4.0.0 build 1337"
                     app:title="@string/aboutAppVersionTitle" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/divider" />
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </androidx.core.widget.NestedScrollView>
