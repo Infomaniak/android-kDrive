@@ -25,6 +25,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.LaunchActivityArgs
@@ -191,6 +192,17 @@ object UploadNotifications {
         )
     }
 
+    fun getDestinationFolderId(resources: UploadFile): Int {
+        val matches = resources.remoteSubFolder?.split("/")
+        var folderId: Int = resources.remoteFolder
+        if (matches != null) {
+            for (match in matches) {
+                folderId = FileController.getChildrenFileWithName(folderId, match)[0]
+            }
+        }
+        return folderId
+    }
+
     fun showCancelledByUserNotification(context: Context) {
         showNotification(
             context = context,
@@ -254,7 +266,7 @@ object UploadNotifications {
                 LaunchActivityArgs(
                     destinationUserId = userId,
                     destinationDriveId = driveId,
-                    destinationRemoteFolderId = remoteFolder
+                    destinationRemoteFolderId = getDestinationFolderId(this@progressPendingIntent)
                 ).toBundle()
             )
         }
