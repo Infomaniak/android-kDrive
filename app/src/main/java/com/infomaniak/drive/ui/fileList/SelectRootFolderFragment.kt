@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
@@ -33,8 +32,9 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.databinding.FragmentSelectRootFolderBinding
+import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.home.RootFileTreeCategory.*
+import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.TypeOfFolder
@@ -45,21 +45,20 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class SelectRootFolderFragment : Fragment() {
+class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     private var _binding: FragmentSelectRootFolderBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
-    private val fileListViewModel: FileListViewModel by viewModels()
+    override val fileListViewModel: FileListViewModel by viewModels()
 
-    private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels() 
+    override val rootFolderLayout: RootFolderLayoutBinding by lazy { binding.rootFolderLayout }
 
-    private val uiSettings by lazy { UiSettings(requireContext()) }
+    private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels()
+
+    override val uiSettings by lazy { UiSettings(requireContext()) }
 
     private val recentFoldersBindings = mutableListOf<CardviewFileListBinding>()
-
-    private var commonFolderToOpen: FolderToOpen? = null
-    private var personalFolderToOpen: FolderToOpen? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSelectRootFolderBinding.inflate(inflater, container, false).also {
@@ -90,7 +89,12 @@ class SelectRootFolderFragment : Fragment() {
 
         rootFolderLayout.cardView.setMargins(top = 8.toPx())
 
-        setupItems()
+        setupItems(
+            folderLayout = binding.rootFolderLayout,
+            favoritesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToFavoritesFragment(),
+            sharedWithMeNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment(),
+            mySharesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment()
+        )
 
         observeFiles()
 
@@ -147,52 +151,7 @@ class SelectRootFolderFragment : Fragment() {
 
     }
 
-    private fun setupItems() = with(binding) {
-        rootFolderLayout.organizationFolder.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = CommonFolders
-            commonFolderToOpen?.let { safelyNavigate(fileListDirections(it)) }
-        }
-
-        rootFolderLayout.personalFolder.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = PersonalFolder
-            personalFolderToOpen?.let { safelyNavigate(fileListDirections(it)) }
-        }
-
-        rootFolderLayout.favorites.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = Favorites
-            safelyNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToFavoritesFragment())
-        }
-
-        rootFolderLayout.sharedWithMeFiles.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = SharedWithMe
-            safelyNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment())
-        }
-
-        rootFolderLayout.myShares.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = MyShares
-            safelyNavigate(SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment())
-        }
-    }
-
-    private fun observeFiles() {
-        fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
-            binding.rootFolderLayout.organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
-            binding.rootFolderLayout.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
-
-            updateFolderToOpenWhenClicked(fileTypes)
-        }
-    }
-
-    private fun updateFolderToOpenWhenClicked(fileTypes: Map<File.VisibilityType, File>) {
-        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file ->
-            commonFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
-        }
-        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
-            personalFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
-        }
-    }
-
-    private fun fileListDirections(
+    override fun fileListDirections(
         folderToOpen: FolderToOpen,
     ): NavDirections = SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
         folderId = folderToOpen.id,
