@@ -373,9 +373,8 @@ class SyncSettingsActivity : BaseActivity() {
                 || allSyncedFoldersCount > 0
         saveButton.isVisible = isEdited
 
-        val titleMediaFolders = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
+        mediaFolders.title = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
         else resources.getQuantityString(R.plurals.mediaFoldersSelected, allSyncedFoldersCount, allSyncedFoldersCount)
-        mediaFolders.title = titleMediaFolders
 
         saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
                 && (selectDriveViewModel.selectedDrive.value != null)
