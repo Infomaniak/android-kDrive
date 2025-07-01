@@ -161,6 +161,7 @@ dependencies {
     implementation(project(":Core:Matomo"))
     implementation(project(":Core:MyKSuite"))
     implementation(project(":Core:Network"))
+    implementation(project(":Core:Sentry"))
     implementation(project(":Core:RecyclerView"))
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:UserAvatar"))
