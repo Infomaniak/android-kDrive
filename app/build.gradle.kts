@@ -159,6 +159,7 @@ dependencies {
     implementation(project(":Core:Legacy:Stores"))
     implementation(project(":Core:MyKSuite"))
     implementation(project(":Core:Network"))
+    implementation(project(":Core:Sentry"))
     implementation(project(":Core:RecyclerView"))
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:UserAvatar"))
