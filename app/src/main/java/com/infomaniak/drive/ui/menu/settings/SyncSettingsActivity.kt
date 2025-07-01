@@ -158,7 +158,7 @@ class SyncSettingsActivity : BaseActivity() {
         oldDeleteAfterSyncValue: Boolean,
     ) {
         setupSelectFolderListener()
-        activateSync.setOnClickListener { activateSync.isChecked = !activateSync.isChecked }
+        activateSync.setOnClickListener { activateSyncItem.isChecked = !activateSyncItem.isChecked }
         activateSyncItem.setOnCheckedChangeListener { _, isChecked ->
             saveSettingVisibility(isVisible = isChecked, showBatteryDialog = isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
