@@ -61,7 +61,9 @@ class ItemSettingView @JvmOverloads constructor(
                 binding.icon.isGone = it == null
             }
 
-            setIconEndVisibility()
+            binding.chevron.isVisible = action == Action.Chevron
+            binding.toggle.isVisible = action == Action.Toggle
+            binding.endText.isVisible = action == Action.Text
 
         }
     }
@@ -85,10 +87,8 @@ class ItemSettingView @JvmOverloads constructor(
         binding.icon.imageTintList = ColorStateList.valueOf(color)
     }
 
-    fun setIconEndVisibility() {
-        binding.chevron.isVisible = action == Action.Chevron
-        binding.toggle.isVisible = action == Action.Toggle
-        binding.endText.isVisible = action == Action.Text
+    fun setChevronVisibility(isVisible: Boolean) {
+        binding.chevron.isVisible = isVisible
     }
 
     private enum class Action {
