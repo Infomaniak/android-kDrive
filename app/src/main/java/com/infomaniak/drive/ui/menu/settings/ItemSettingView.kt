@@ -51,34 +51,30 @@ class ItemSettingView @JvmOverloads constructor(
 
     init {
         attrs?.getAttributes(context, R.styleable.ItemSettingView) {
-            with(binding) {
-                action = Action.entries[getInteger(R.styleable.ItemSettingView_itemAction, 0)]
-                title.text = getString(R.styleable.ItemSettingView_title) ?: ""
-                endText.text = getString(R.styleable.ItemSettingView_endText) ?: ""
-                setDescription(getString(R.styleable.ItemSettingView_description) ?: "")
+            action = Action.entries[getInteger(R.styleable.ItemSettingView_itemAction, 0)]
+            title = getString(R.styleable.ItemSettingView_title) ?: ""
+            endText = getString(R.styleable.ItemSettingView_endText) ?: ""
+            setDescription(getString(R.styleable.ItemSettingView_description) ?: "")
 
-                getDrawable(R.styleable.ItemSettingView_icon).let {
-                    icon.setImageDrawable(it)
-                    icon.isGone = it == null
-                }
-
-                setIconEndVisibility()
+            getDrawable(R.styleable.ItemSettingView_icon).let {
+                binding.icon.setImageDrawable(it)
+                binding.icon.isGone = it == null
             }
+
+            setIconEndVisibility()
+
         }
     }
 
     override fun setOnClickListener(listener: OnClickListener?) = with(binding) {
-        root.setOnClickListener {
-            toggle.toggle()
-            listener?.onClick(root)
-        }
-
-        toggle.setOnClickListener(listener)
+        root.setOnClickListener { listener?.onClick(root) }
     }
 
     fun setDescription(description: String) {
-        binding.description.text = description
-        binding.description.isGone = binding.description.text.isBlank()
+        binding.description.apply {
+            text = description
+            isGone = description.isBlank()
+        }
     }
 
     fun setOnCheckedChangeListener(listener: CompoundButton.OnCheckedChangeListener) {
