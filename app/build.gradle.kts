@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.apply
 import java.util.Properties
 
 plugins {
@@ -9,6 +10,7 @@ plugins {
     id("realm-android")
     id("io.sentry.android.gradle")
     id("de.mannodermaus.android-junit5")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 val appCompileSdk: Int by rootProject.extra
@@ -149,6 +151,7 @@ sentry {
 }
 
 dependencies {
+    ktlintRuleset(project(":Core:KtlintCustomRules"))
 
     implementation(project(":Core"))
     implementation(project(":Core:FragmentNavigation"))
