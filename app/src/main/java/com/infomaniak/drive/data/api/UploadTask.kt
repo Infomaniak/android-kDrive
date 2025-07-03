@@ -350,6 +350,7 @@ class UploadTask(
                 if (expectedContentLength != bytes.size) Sentry.withScope { scope ->
                     scope.setExtra("contentLength", expectedContentLength.toString())
                     scope.setExtra("received", bytes.size.toString())
+                    scope.level = SentryLevel.WARNING
                     Sentry.captureMessage("Backend provided more or fewer bytes than the contentLength it declared!")
                 }
             }
