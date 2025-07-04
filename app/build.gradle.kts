@@ -1,4 +1,3 @@
-import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
 import java.util.Properties
 
 plugins {
@@ -153,6 +152,7 @@ dependencies {
 
     implementation(project(":Core"))
     implementation(project(":Core:CrossAppLogin"))
+    implementation(project(":Core:CrossAppLoginUI"))
     implementation(project(":Core:FragmentNavigation"))
     implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))
