@@ -25,36 +25,37 @@ import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isInvisible
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.login.crossapp.CrossAppLogin
-import com.infomaniak.core.login.crossapp.DerivedTokenGenerator
-import com.infomaniak.core.login.crossapp.DerivedTokenGeneratorImpl
+import com.infomaniak.core.crossloginui.data.CrossLoginAccount
+import com.infomaniak.core.utils.awaitOneClick
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
-import com.infomaniak.drive.awaitOneLongClick
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
-import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog.Companion.ON_ANOTHER_ACCOUNT_CLICKED_KEY
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
-import com.infomaniak.drive.utils.loginUrl
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.lib.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.lib.core.models.ApiError
@@ -62,7 +63,6 @@ import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
@@ -78,11 +78,17 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import kotlinx.serialization.ExperimentalSerializationApi
+import splitties.coroutines.repeatWhileActive
+import splitties.experimental.ExperimentalSplittiesApi
+import kotlin.collections.isNotEmpty
+import kotlin.collections.map
+import com.infomaniak.core.crossloginui.R as RCrossLogin
 
 class LoginActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
+
+    private val loginViewModel: LoginViewModel by viewModels()
 
     private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
@@ -124,9 +130,20 @@ class LoginActivity : AppCompatActivity() {
                 override fun onPageSelected(position: Int) {
                     super.onPageSelected(position)
                     val showConnectButton = position == 2
-                    nextButton.isInvisible = showConnectButton
-                    connectButton.isInvisible = !showConnectButton
-                    signInButton.isInvisible = !showConnectButton
+                    nextButton.isGone = showConnectButton
+                    connectButton.isVisible = showConnectButton
+                    if (showConnectButton) {
+                        if (loginViewModel.crossLoginAccounts.value!!.isEmpty()) {
+                            crossLoginSelection.isGone = true
+                            signInButton.isVisible = true
+                        } else {
+                            signInButton.isGone = true
+                            crossLoginSelection.isVisible = true
+                        }
+                    } else {
+                        crossLoginSelection.isGone = true
+                        signInButton.isGone = true
+                    }
                 }
             })
 
@@ -140,36 +157,7 @@ class LoginActivity : AppCompatActivity() {
             setOnClickListener {
                 signInButton.isEnabled = false
                 showProgressCatching()
-                trackAccountEvent(MatomoName.OpenLoginWebview)
-                infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
-            }
-        }
-
-        lifecycleScope.launch {
-            @OptIn(ExperimentalSerializationApi::class)
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                val derivedTokenGenerator: DerivedTokenGenerator = DerivedTokenGeneratorImpl(
-                    coroutineScope = this,
-                    tokenRetrievalUrl = "${loginUrl}token",
-                    hostAppPackageName = BuildConfig.APPLICATION_ID,
-                    clientId = BuildConfig.CLIENT_ID,
-                    userAgent = HttpUtils.getUserAgent
-                )
-                val crossAppLogin = CrossAppLogin.forContext(context = this@LoginActivity, coroutineScope = this)
-                val externalAccounts = crossAppLogin.retrieveAccountsFromOtherApps()
-                connectButton.text = "${externalAccounts.size} accounts"
-                connectButton.awaitOneLongClick()
-                println("Got ${externalAccounts.size} accounts from other apps:")
-                println("Accounts retrieved: $externalAccounts")
-                externalAccounts.firstOrNull()?.let { account ->
-                    when (val result = derivedTokenGenerator.attemptDerivingOneOfTheseTokens(account.tokens)) {
-                        is Xor.First -> authenticateUser(token = result.value, infomaniakLogin = infomaniakLogin)
-                        is Xor.Second -> {
-                            println(result.value)
-                            connectButton.text = "Ooops"
-                        }
-                    }
-                }
+                openLoginWebView()
             }
         }
 
@@ -184,10 +172,16 @@ class LoginActivity : AppCompatActivity() {
 
         handleNavigationFlags()
 
-        binding.signInButton.enableEdgeToEdge(withTop = false) {
-            binding.nextButton.setMargins(bottom = it.bottom)
-        }
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+
+        binding.footer.onApplyWindowInsetsListener { view, insets ->
+            view.setMargins(bottom = insets.bottom)
+        }
+
+        observeCrossLoginAccounts()
+        observeCrossLoginSelectedIds()
+        setCrossLoginClickListener()
+        initCrossLogin()
     }
 
     private fun startAccountCreation() {
@@ -212,7 +206,119 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun authenticateUser(token: ApiToken, infomaniakLogin: InfomaniakLogin) = Dispatchers.Default {
+    private fun observeCrossLoginAccounts() {
+        loginViewModel.crossLoginAccounts.observe(this) { accounts ->
+            SentryLog.i(TAG, "Got ${accounts.count()} accounts from other apps")
+            binding.crossLoginSelection.setAccounts(accounts)
+        }
+    }
+
+    private fun observeCrossLoginSelectedIds() {
+        loginViewModel.crossLoginSelectedIds.observe(this) { ids ->
+            if (ids.isEmpty()) return@observe
+
+            val count = ids.count()
+            SentryLog.i(TAG, "User selected $count accounts")
+            binding.crossLoginSelection.setSelectedIds(ids)
+            binding.connectButton.text = resources.getQuantityString(RCrossLogin.plurals.buttonContinueWithAccounts, count, count)
+        }
+    }
+
+    private fun setCrossLoginClickListener() {
+
+        // Open Login webView when coming back from CrossLogin bottomSheet
+        supportFragmentManager.setFragmentResultListener(
+            /* requestKey = */ ON_ANOTHER_ACCOUNT_CLICKED_KEY,
+            /* lifecycleOwner = */ this,
+        ) { _, bundle ->
+            bundle.getString(ON_ANOTHER_ACCOUNT_CLICKED_KEY)?.let { openLoginWebView() }
+        }
+
+        // Open CrossLogin bottomSheet
+        binding.crossLoginSelection.setOnClickListener {
+            CrossLoginBottomSheetDialog().show(supportFragmentManager, null)
+        }
+    }
+
+    @OptIn(ExperimentalSplittiesApi::class)
+    private fun initCrossLogin() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+            loginViewModel.initDerivedTokenGenerator(coroutineScope = this)
+
+            val accounts = loginViewModel.getCrossLoginAccounts(context = this@LoginActivity)
+
+            if (accounts.isNotEmpty()) {
+                loginViewModel.crossLoginAccounts.value = accounts
+                loginViewModel.crossLoginSelectedIds.value = accounts.map { it.id }.toSet()
+            }
+
+            repeatWhileActive {
+                binding.connectButton.awaitOneClick()
+                if (accounts.isEmpty()) {
+                    binding.signInButton.isEnabled = false
+                    openLoginWebView()
+                } else {
+                    handleCrossAppLogin()
+                }
+            }
+        }
+    }
+
+    private suspend fun handleCrossAppLogin() {
+
+        suspend fun authenticateToken(token: ApiToken, withRedirection: Boolean) {
+            authenticateUser(token, infomaniakLogin, withRedirection)
+        }
+
+        val accounts = loginViewModel.crossLoginAccounts.value
+            ?.filter { loginViewModel.crossLoginSelectedIds.value?.contains(it.id) == true }
+            ?: return
+        val tokenGenerator = loginViewModel.derivedTokenGenerator ?: return
+
+        var firstAccountToken: ApiToken? = null
+        val accountsAndTokens = mutableMapOf<CrossLoginAccount, ApiToken?>()
+
+        accounts.forEach { account ->
+            val token = when (val result = tokenGenerator.attemptDerivingOneOfTheseTokens(account.tokens)) {
+                is Xor.First -> {
+                    SentryLog.i(TAG, "Succeeded to derive token for account: ${account.id}")
+                    if (firstAccountToken == null) firstAccountToken = result.value
+                    result.value
+                }
+                is Xor.Second -> {
+                    SentryLog.e(TAG, "Failed to derive token for account ${account.id}, with reason: ${result.value}")
+                    null
+                }
+            }
+            accountsAndTokens.put(account, token)
+        }
+
+        val currentlySelectedInAnAppToken = accountsAndTokens.firstNotNullOfOrNull { (account, token) ->
+            if (account.isCurrentlySelectedInAnApp) token else null
+        }
+
+        val remainingTokens = accountsAndTokens
+            .filterNot { (_, token) -> token == currentlySelectedInAnAppToken }
+            .values
+
+        remainingTokens.forEach { token ->
+            token?.let { authenticateToken(token = it, withRedirection = false) }
+        }
+
+        (currentlySelectedInAnAppToken ?: firstAccountToken)?.let { authenticateToken(token = it, withRedirection = true) }
+    }
+
+    private fun openLoginWebView() {
+        trackAccountEvent(MatomoName.OpenLoginWebview)
+        infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
+    }
+
+    private suspend fun authenticateUser(
+        token: ApiToken,
+        infomaniakLogin: InfomaniakLogin,
+        withRedirection: Boolean = true, // TODO: Handle this
+    ) = Dispatchers.Default {
         when (val returnValue = authenticateUser(this@LoginActivity, token)) {
             is User -> {
                 val deeplink = navigationArgs?.publicShareDeeplink
