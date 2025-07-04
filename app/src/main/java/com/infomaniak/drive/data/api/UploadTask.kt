@@ -350,7 +350,8 @@ class UploadTask(
                 if (expectedContentLength != bytes.size) Sentry.withScope { scope ->
                     scope.setExtra("contentLength", expectedContentLength.toString())
                     scope.setExtra("received", bytes.size.toString())
-                    SentryLog.e(TAG, "Backend provided more or fewer bytes than the contentLength it declared!")
+                    scope.level = SentryLevel.WARNING
+                    Sentry.captureMessage("Backend provided more or fewer bytes than the contentLength it declared!")
                 }
             }
             val bodyResponse = String(bytes)
