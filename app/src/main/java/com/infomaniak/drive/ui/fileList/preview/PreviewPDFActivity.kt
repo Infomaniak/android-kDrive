@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.openWith
@@ -80,6 +81,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
             navController.navigate(R.id.previewPDFFragment)
 
             header.setup(onBackClicked = ::finish, onOpenWithClicked = ::openWith)
+            header.enableEdgeToEdge(withBottom = false)
         }
 
         initBottomSheet()
