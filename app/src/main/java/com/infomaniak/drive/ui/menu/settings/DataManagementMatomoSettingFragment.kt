@@ -46,9 +46,10 @@ class DataManagementMatomoSettingFragment : Fragment() {
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         settingsTrackingSwitchMatomo.isChecked = uiSettings.isMatomoTrackingEnabled
-        settingsTrackingSwitchMatomo.setOnClickListener {
-            uiSettings.isMatomoTrackingEnabled = !uiSettings.isMatomoTrackingEnabled
-            MatomoDrive.shouldOptOut(requireContext().applicationContext, !settingsTrackingSwitchMatomo.isChecked)
-        }
+
+        settingsTrackingSwitchMatomo.setOnCheckedChangeListener({ _, isChecked ->
+            uiSettings.isMatomoTrackingEnabled = isChecked
+            MatomoDrive.shouldOptOut(requireContext().applicationContext, !isChecked)
+        })
     }
 }

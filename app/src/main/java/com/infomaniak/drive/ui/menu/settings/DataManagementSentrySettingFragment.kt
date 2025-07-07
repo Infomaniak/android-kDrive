@@ -45,8 +45,9 @@ class DataManagementSentrySettingFragment : Fragment() {
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         settingsTrackingSwitchSentry.isChecked = uiSettings.isSentryTrackingEnabled
-        settingsTrackingSwitchSentry.setOnClickListener {
-            uiSettings.isSentryTrackingEnabled = !uiSettings.isSentryTrackingEnabled
-        }
+
+        settingsTrackingSwitchSentry.setOnCheckedChangeListener({ _, isChecked ->
+            uiSettings.isSentryTrackingEnabled = isChecked
+        })
     }
 }
