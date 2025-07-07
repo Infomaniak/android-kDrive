@@ -51,7 +51,7 @@ class ItemSettingView @JvmOverloads constructor(
 
     init {
         attrs?.getAttributes(context, R.styleable.ItemSettingView) {
-            action = Action.entries[getInteger(R.styleable.ItemSettingView_itemAction, 0)]
+            setAction(Action.entries[getInteger(R.styleable.ItemSettingView_itemAction, 0)])
             title = getString(R.styleable.ItemSettingView_title) ?: ""
             endText = getString(R.styleable.ItemSettingView_endText) ?: ""
             setDescription(getString(R.styleable.ItemSettingView_description) ?: "")
@@ -60,11 +60,6 @@ class ItemSettingView @JvmOverloads constructor(
                 binding.icon.setImageDrawable(it)
                 binding.icon.isGone = it == null
             }
-
-            binding.chevron.isVisible = action == Action.Chevron
-            binding.toggle.isVisible = action == Action.Toggle
-            binding.endText.isVisible = action == Action.Text
-
         }
     }
 
@@ -87,11 +82,16 @@ class ItemSettingView @JvmOverloads constructor(
         binding.icon.imageTintList = ColorStateList.valueOf(color)
     }
 
-    fun setChevronVisibility(isVisible: Boolean) {
-        binding.chevron.isVisible = isVisible
+    fun setAction(action: Action) {
+        this.action = action
+        with(binding) {
+            chevron.isVisible = action == Action.Chevron
+            toggle.isVisible = action == Action.Toggle
+            endText.isVisible = action == Action.Text
+        }
     }
 
-    private enum class Action {
+    enum class Action {
         None,
         Chevron,
         Toggle,
