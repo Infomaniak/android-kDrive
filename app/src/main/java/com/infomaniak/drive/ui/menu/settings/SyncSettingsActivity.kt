@@ -337,7 +337,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun activeSelectDrive() = with(binding) {
-        selectDrive.setChevronVisibility(true)
+        selectDrive.setAction(ItemSettingView.Action.Chevron)
         selectDrive.setOnClickListener { SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog") }
     }
 
