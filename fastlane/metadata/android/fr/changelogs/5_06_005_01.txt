@@ -1,0 +1,4 @@
+- Lors de la sélection d'un dossier, le nom du dossier actuel est désormais affiché
+- Ajout d'un paramètre permettant de supprimer son compte
+- Correction de l'aperçu lors de l'ouverture d'un fichier externe
+- Correction de la barre de titre lors du défilement dans les activités

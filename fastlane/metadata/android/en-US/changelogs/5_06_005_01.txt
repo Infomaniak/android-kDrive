@@ -1,0 +1,4 @@
+- When selecting a folder, the current folder name is now displayed
+- Add setting to delete account
+- Fix preview when opening an external file
+- Fix title bar when scrolling in activities
