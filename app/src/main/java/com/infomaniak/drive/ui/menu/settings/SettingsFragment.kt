@@ -45,7 +45,6 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.AccountUtils.currentUser
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
@@ -68,7 +67,7 @@ class SettingsFragment : Fragment() {
 
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val resultActivityResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) currentUser?.let(settingsViewModel::disconnectDeletedUser)
+        if (result.resultCode == Activity.RESULT_OK) AccountUtils.currentUser?.let(settingsViewModel::disconnectDeletedUser)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -151,7 +150,8 @@ class SettingsFragment : Fragment() {
     }
 
     private fun openMyKSuiteDashboard(myKSuiteData: MyKSuiteData) {
-        val data = getDashboardData(myKSuiteData = myKSuiteData)
+        val user = AccountUtils.currentUser ?: return
+        val data = getDashboardData(myKSuiteData, user)
         safeNavigate(directions = SettingsFragmentDirections.actionSettingsFragmentToMyKSuiteDashboardFragment(data))
     }
 
