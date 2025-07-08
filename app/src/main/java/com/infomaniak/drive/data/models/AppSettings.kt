@@ -67,7 +67,7 @@ open class AppSettings(
             val realm = getRealmInstance()
             return getAppSettingsAsyncQuery(realm).toFlow().flowOn(Dispatchers.Main)
                 .onCompletion { realm.close() }
-                .map { it?._currentUserId }
+                .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
         }
 
         fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
