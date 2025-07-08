@@ -192,14 +192,14 @@ dependencies {
 
     implementation("com.github.realm:realm-android-adapters:v4.0.0")
 
-    "standardImplementation"("com.google.firebase:firebase-messaging-ktx:24.1.1")
+    "standardImplementation"("com.google.firebase:firebase-messaging-ktx:24.1.2")
     "standardImplementation"("com.geniusscansdk:gssdk:5.11.0")
 
     implementation("com.googlecode.plist:dd-plist:1.28")
 
     implementation("com.github.hannesa2:paho.mqtt.android:4.2.4") // Doesn't build when bumped to 4.3 (Waiting SDK 35)
 
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0")
     testImplementation("io.github.serpro69:kotlin-faker:1.16.0")
     androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
 
@@ -215,7 +215,7 @@ dependencies {
     androidTestImplementation("androidx.test:rules:$androidxTestVersion")
     androidTestImplementation("androidx.test:runner:1.6.2")
 
-    val jupiterVersion = "5.13.1"
+    val jupiterVersion = "5.13.3"
     androidTestImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiterVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiterVersion")
@@ -227,5 +227,5 @@ dependencies {
     implementation("io.coil-kt:coil-gif:2.7.0")
 
     // Compose
-    implementation("androidx.compose.ui:ui-android:1.8.2")
+    implementation("androidx.compose.ui:ui-android:1.8.3")
 }
