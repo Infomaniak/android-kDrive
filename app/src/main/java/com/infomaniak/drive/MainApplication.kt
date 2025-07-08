@@ -68,7 +68,6 @@ import io.sentry.android.core.SentryAndroidOptions
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -198,7 +197,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     private fun tokenInterceptorListener() = object : TokenInterceptorListener {
-        @OptIn(ExperimentalCoroutinesApi::class)
         val userTokenFlow = AppSettings.getCurrentUserIdFlow().mapToApiToken(applicationScope)
 
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
