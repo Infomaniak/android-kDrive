@@ -20,20 +20,16 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
-import android.print.PageRange
-import android.print.PrintAttributes
-import android.print.PrintDocumentAdapter
-import android.print.PrintDocumentInfo
-import android.print.PrintManager
-import android.webkit.CookieManager
-import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
+import android.print.*
+import android.webkit.*
 import androidx.activity.addCallback
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.webkit.WebSettingsCompat
@@ -59,6 +55,12 @@ import java.net.URL
 class OnlyOfficeActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityOnlyOfficeBinding.inflate(layoutInflater) }
+
+    private var filePathCallback: ValueCallback<Array<out Uri?>?>? = null
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+        filePathCallback?.onReceiveValue(uris.toTypedArray())
+        filePathCallback = null
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
@@ -90,6 +92,16 @@ class OnlyOfficeActivity : AppCompatActivity() {
                 override fun onProgressChanged(view: WebView, newProgress: Int) {
                     progressBar.progress = newProgress
                     if (newProgress == 100) progressBar.isGone = true
+                }
+
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<out Uri?>?>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    this@OnlyOfficeActivity.filePathCallback = filePathCallback
+                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    return true
                 }
             }
 
