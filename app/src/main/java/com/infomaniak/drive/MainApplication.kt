@@ -104,20 +104,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         }
 
         ApiController.init(typeAdapterList = arrayListOf(File::class.java to FileDeserialization()))
-
-        /**
-         * Reasons to discard Sentry events :
-         * - Application is in Debug mode
-         * - User deactivated Sentry tracking in DataManagement settings
-         * - The exception was an [ApiController.NetworkException], and we don't want to send them to Sentry
-         */
-        this.configureSentry(
-            BuildConfig.DEBUG,
-            // TODO: Update isSentryTrackingEnabled with the sharedpreference value
-            true,
-            // TODO: Check if there are exceptions to manage
-            { _: Throwable? -> false })
-
+        configSentry()
         runBlocking { initRealm() }
 
         geniusScanIsReady = initGeniusScanSdk()
@@ -224,5 +211,19 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         override suspend fun getUserApiToken(): ApiToken? = userTokenFlow.first()
 
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
+    }
+
+    /**
+     * Reasons to discard Sentry events :
+     * - Application is in Debug mode
+     * - User deactivated Sentry tracking in DataManagement settings
+     * - The exception was an [ApiController.NetworkException], and we don't want to send them to Sentry
+     */
+    private fun configSentry() {
+        this.configureSentry(
+            isDebug = BuildConfig.DEBUG,
+            isSentryTrackingEnabled = true, // TODO: Update isSentryTrackingEnabled with the sharedpreference value when the Sentry opt-out will be enabled
+            isErrorException = { _: Throwable? -> false },
+        )
     }
 }
