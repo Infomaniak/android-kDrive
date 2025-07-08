@@ -211,7 +211,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             refreshTokenError(AccountUtils.currentUser!!)
         }
 
-        override suspend fun getApiToken(): ApiToken? = userTokenFlow.first()
+        override suspend fun getUserApiToken(): ApiToken? = userTokenFlow.first()
 
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
