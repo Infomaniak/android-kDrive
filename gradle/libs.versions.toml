@@ -1,0 +1,80 @@
+[versions]
+androidPdfview = "3.2.11"
+androidTest = "1.8.0"
+coilGif = "2.7.0"
+concurrentFuturesKtx = "1.2.0"
+coreKtx = "1.6.1"
+ddPlist = "1.28"
+dotsIndicator = "5.1.0"
+espresso = "3.6.1"
+exoplayer = "2.19.1"
+firebaseMessagingKtx = "24.1.2"
+gravitySnapHelper = "2.2.2"
+gsSdk = "5.11.0"
+junitJupiter = "5.13.3"
+kotlinFaker = "1.16.0"
+lifecycleProcess = "2.9.1"
+lottie = "6.6.7"
+materialDateTimePicker = "4.2.3"
+mockWebServer = "5.0.0"
+pahoMqttAndroid = "4.2.4" # Doesn't build when bumped to 4.3 (Waiting SDK 35)
+realmAndroidAdapters = "v4.0.0"
+runner = "1.6.2"
+splittiesMainThread = "3.0.0"
+touchImageView = "3.7.1"
+uiAndroid = "1.8.3"
+uiAutomator = "2.3.0"
+viewpager2 = "1.1.0"
+webkit = "1.14.0"
+workVersion = "2.9.1" # Keep the same version as the one in Core
+
+[libraries]
+android-pdfview = { module = "com.github.Infomaniak:android-pdfview", version.ref = "androidPdfview" }
+androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFuturesKtx" }
+androidx-core-ktx = { module = "androidx.test:core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
+androidx-rules = { module = "androidx.test:rules", version.ref = "coreKtx" }
+androidx-ui-android = { module = "androidx.compose.ui:ui-android", version.ref = "uiAndroid" }
+androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
+androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workVersion" }
+coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilGif" }
+dd-plist = { module = "com.googlecode.plist:dd-plist", version.ref = "ddPlist" }
+dots-indicator = { module = "com.tbuonomo:dotsindicator", version.ref = "dotsIndicator" }
+exoplayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "exoplayer" }
+exoplayer-core = { module = "com.google.android.exoplayer:exoplayer-core", version.ref = "exoplayer" }
+exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.ref = "exoplayer" }
+extension-okhttp = { module = "com.google.android.exoplayer:extension-okhttp", version.ref = "exoplayer" }
+firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
+gravity-snap-helper = { module = "com.github.rubensousa:gravitysnaphelper", version.ref = "gravitySnapHelper" }
+gs-sdk = { module = "com.geniusscansdk:gssdk", version.ref = "gsSdk" }
+kotlin-faker = { module = "io.github.serpro69:kotlin-faker", version.ref = "kotlinFaker" }
+lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
+material-date-time-picker = { module = "com.wdullaer:materialdatetimepicker", version.ref = "materialDateTimePicker" }
+mock-web-server = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockWebServer" }
+paho-mqtt-android = { module = "com.github.hannesa2:paho.mqtt.android", version.ref = "pahoMqttAndroid" }
+realm-android-adapters = { module = "com.github.realm:realm-android-adapters", version.ref = "realmAndroidAdapters" }
+splitties-main-thread = { module = "com.louiscad.splitties:splitties-mainthread", version.ref = "splittiesMainThread" }
+touch-image-view = { module = "com.github.MikeOrtiz:TouchImageView", version.ref = "touchImageView" }
+# Unit tests
+android-test-core = { module = "de.mannodermaus.junit5:android-test-core", version.ref = "androidTest" }
+android-test-runner = { module = "de.mannodermaus.junit5:android-test-runner", version.ref = "androidTest" }
+androidx-espresso-checker = { module = "org.checkerframework:checker", version.ref = "espresso" }
+androidx-espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "espresso" }
+androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+androidx-ui-automator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiAutomator" }
+androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "workVersion" }
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
+
+[plugins]
+android-application = { id = "com.android.application" }
+junit5 = { id = "de.mannodermaus.android-junit5" }
+kotlin-android = { id = "kotlin-android" }
+kotlin-kapt = { id = "kotlin-kapt" }
+kotlin-parcelize = { id = "kotlin-parcelize" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization" }
+navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin" }
+realm-android = { id = "realm-android" }
+sentry = { id = "io.sentry.android.gradle" }
