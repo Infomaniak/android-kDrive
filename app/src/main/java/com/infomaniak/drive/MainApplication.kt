@@ -69,11 +69,7 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.matomo.sdk.Tracker
@@ -203,13 +199,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
     private fun tokenInterceptorListener() = object : TokenInterceptorListener {
         @OptIn(ExperimentalCoroutinesApi::class)
-        val userTokenFlow = AppSettings.getCurrentUserIdFlow()
-            .mapLatest { id -> id?.let { AccountUtils.getUserById(it)?.apiToken } }
-            .catch {
-                // Let user retry without logging him out.
-                // If we send null, the user will be logged out.
-            }
-            .shareIn(applicationScope, SharingStarted.Lazily, replay = 1)
+        val userTokenFlow = AppSettings.getCurrentUserIdFlow().mapToApiToken(applicationScope)
 
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
             if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
