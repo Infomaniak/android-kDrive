@@ -36,6 +36,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
+import com.infomaniak.core.crossloginui.data.CrossLoginAccount
+import com.infomaniak.core.crossloginui.previews.accountsPreviewData
 import com.infomaniak.core.login.crossapp.DerivedTokenGenerator.Issue
 import com.infomaniak.core.utils.awaitOneClick
 import com.infomaniak.drive.BuildConfig
@@ -248,7 +250,23 @@ class LoginActivity : AppCompatActivity() {
 
             loginViewModel.initDerivedTokenGenerator(coroutineScope = this)
 
-            val accounts = loginViewModel.getCrossLoginAccounts(context = this@LoginActivity)
+            // val accounts = loginViewModel.getCrossLoginAccounts(context = this@LoginActivity)
+            // TODO: retirer le code de test
+            val accounts = loginViewModel.getCrossLoginAccounts(context = this@LoginActivity).toMutableList().apply {
+                addAll(
+                    accountsPreviewData.map {
+                        CrossLoginAccount(
+                            tokens = setOf("I'm a token"),
+                            isCurrentlySelectedInAnApp = false,
+                            id = it.id,
+                            name = it.name,
+                            initials = it.initials,
+                            email = it.email,
+                            url = it.url,
+                        )
+                    },
+                )
+            }
 
             if (accounts.isNotEmpty()) {
                 loginViewModel.crossLoginAccounts.value = accounts
