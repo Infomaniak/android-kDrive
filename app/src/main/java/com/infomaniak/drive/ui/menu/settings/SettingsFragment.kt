@@ -36,9 +36,8 @@ import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.MatomoDrive.toFloat
-import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
+import com.infomaniak.drive.MatomoDrive.trackSettingsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
@@ -214,10 +213,6 @@ class SettingsFragment : Fragment() {
             trackSettingsEvent("feedback")
             context?.openUrl(requireContext().getString(R.string.urlUserReportAndroid))
         }
-    }
-
-    private fun trackSettingsEvent(name: String, value: Boolean? = null) {
-        trackEvent("settings", name, value = value?.toFloat())
     }
 
     companion object {

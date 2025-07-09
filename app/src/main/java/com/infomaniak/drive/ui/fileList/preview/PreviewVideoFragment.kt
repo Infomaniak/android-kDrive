@@ -43,7 +43,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.FileDataSource
 import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackMediaPlayerEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
@@ -223,9 +223,5 @@ open class PreviewVideoFragment : PreviewFragment() {
         } else {
             Uri.parse(ApiRoutes.getDownloadFileUrl(file))
         }
-    }
-
-    private fun trackMediaPlayerEvent(name: String, value: Float? = null) {
-        trackEvent("mediaPlayer", name, value = value)
     }
 }

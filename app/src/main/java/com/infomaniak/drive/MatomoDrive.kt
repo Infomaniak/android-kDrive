@@ -21,8 +21,10 @@ import android.app.Activity
 import android.content.Context
 import androidx.fragment.app.Fragment
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.lib.core.MatomoCore
 import com.infomaniak.lib.core.MatomoCore.TrackerAction
+import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import org.matomo.sdk.Tracker
 
 object MatomoDrive : MatomoCore {
@@ -97,5 +99,37 @@ object MatomoDrive : MatomoCore {
 
     fun Context.trackMyKSuiteUpgradeBottomSheetEvent(name: String) {
         trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE_UPGRADE_BOTTOMSHEET, name)
+    }
+
+    fun Fragment.trackDropboxEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent("dropbox", name, action, value)
+    }
+
+    fun Fragment.trackSearchEvent(name: String) {
+        trackEvent("search", name)
+    }
+
+    fun Fragment.trackCommentEvent(name: String) {
+        trackEvent("comment", name)
+    }
+
+    fun Fragment.trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
+
+        fun BulkOperationType.toMatomoString(): String = name.lowercase().capitalizeFirstChar()
+
+        val name = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toMatomoString()
+        trackEvent(category, name, value = modifiedFileNumber.toFloat())
+    }
+
+    fun Fragment.trackMediaPlayerEvent(name: String, value: Float? = null) {
+        trackEvent("mediaPlayer", name, value = value)
+    }
+
+    fun Fragment.trackSettingsEvent(name: String, value: Boolean? = null) {
+        trackEvent("settings", name, value = value?.toFloat())
+    }
+
+    fun Context.trackPhotoSyncEvent(name: String, value: Boolean? = null) {
+        trackEvent("photoSync", name, value = value?.toFloat())
     }
 }

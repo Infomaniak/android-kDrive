@@ -35,8 +35,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.core.utils.format
 import com.infomaniak.core.utils.startOfTheDay
-import com.infomaniak.drive.MatomoDrive.toFloat
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -467,9 +466,5 @@ class SyncSettingsActivity : BaseActivity() {
                 addOnPositiveButtonClickListener { syncSettingsViewModel.customDate.value = Date(it).startOfTheDay() }
                 show(supportFragmentManager, "syncDatePicker")
             }
-    }
-
-    private fun trackPhotoSyncEvent(name: String, value: Boolean? = null) {
-        trackEvent("photoSync", name, value = value?.toFloat())
     }
 }

@@ -31,7 +31,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.drive.MatomoDrive.toFloat
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackDropboxEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
@@ -275,9 +275,5 @@ open class ManageDropboxFragment : Fragment() {
 
     protected fun enableSaveButton() {
         binding.saveButton.isEnabled = !isManageDropBox || (validationCount > 0 && !hasErrors)
-    }
-
-    private fun trackDropboxEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("dropbox", name, action, value)
     }
 }

@@ -22,7 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackCommentEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
@@ -194,9 +194,5 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
     override fun onResume() {
         super.onResume()
         addCommentButton.isVisible = true
-    }
-
-    private fun trackCommentEvent(name: String) {
-        trackEvent("comment", name)
     }
 }

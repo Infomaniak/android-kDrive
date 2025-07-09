@@ -29,7 +29,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.card.MaterialCardView
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackSearchEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
@@ -212,9 +212,5 @@ class SearchFiltersFragment : Fragment() {
     private fun MaterialCardView.setupSelection(enabled: Boolean) {
         strokeWidth = if (enabled) 2.toPx() else 0
         invalidate()
-    }
-
-    private fun trackSearchEvent(name: String) {
-        trackEvent("search", name)
     }
 }
