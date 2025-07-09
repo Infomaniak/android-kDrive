@@ -23,8 +23,14 @@ import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmMigration
 import io.realm.RealmObject
+import io.realm.kotlin.toFlow
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
 open class AppSettings(
@@ -46,6 +52,7 @@ open class AppSettings(
         private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
 
         private fun getAppSettingsQuery(realm: Realm) = realm.where(AppSettings::class.java).findFirst()
+        private fun getAppSettingsAsyncQuery(realm: Realm) = realm.where(AppSettings::class.java).findFirstAsync()
 
         fun getAppSettings(): AppSettings {
             return getRealmInstance().use { realm ->
@@ -53,6 +60,14 @@ open class AppSettings(
                     realm.copyFromRealm(it, 0)
                 }
             } ?: AppSettings()
+        }
+
+        @OptIn(DelicateCoroutinesApi::class)
+        fun getCurrentUserIdFlow(): Flow<Int?> {
+            val realm = getRealmInstance()
+            return getAppSettingsAsyncQuery(realm).toFlow().flowOn(Dispatchers.Main)
+                .onCompletion { realm.close() }
+                .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
         }
 
         fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
