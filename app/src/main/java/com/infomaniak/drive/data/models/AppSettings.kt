@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
 
 open class AppSettings(
     var _appLaunchesCount: Int = 0,
@@ -69,15 +68,17 @@ open class AppSettings(
             } ?: AppSettings()
         }
 
+        // TODO: Either use `getCurrentUserIdFlow1()` or `currentUserIdFlow2`, and delete the other one, but don't keep both.
         @OptIn(DelicateCoroutinesApi::class)
-        fun getCurrentUserIdFlow(): Flow<Int?> = runOnMainThread {
+        fun getCurrentUserIdFlow1(): Flow<Int?> = runOnMainThread {
             val realm = getRealmInstance()
             return@runOnMainThread getAppSettingsAsyncQuery(realm).toFlow().flowOn(Dispatchers.Main)
                 .onCompletion { realm.close() }
                 .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
         }
 
-        val currentUserIdFlow: Flow<Int> = flow {
+        // TODO: Either use `getCurrentUserIdFlow1()` or `currentUserIdFlow2`, and delete the other one, but don't keep both.
+        val currentUserIdFlow2: Flow<Int> = flow {
             val flow = getRealmInstance()
                 .where(AppSettings::class.java)
                 .findFirst()
