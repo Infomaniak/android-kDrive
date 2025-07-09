@@ -197,7 +197,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     private fun tokenInterceptorListener() = object : TokenInterceptorListener {
-        val userTokenFlow = AppSettings.getCurrentUserIdFlow().mapToApiToken(applicationScope)
+        val userTokenFlow = AppSettings.getCurrentUserIdFlow1().mapToApiToken(applicationScope)
 
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
             if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
