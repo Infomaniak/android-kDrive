@@ -80,8 +80,6 @@ import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import splitties.coroutines.repeatWhileActive
 import splitties.experimental.ExperimentalSplittiesApi
-import kotlin.collections.isNotEmpty
-import kotlin.collections.map
 import com.infomaniak.core.crossloginui.R as RCrossLogin
 
 class LoginActivity : AppCompatActivity() {
@@ -124,32 +122,7 @@ class LoginActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(root)
 
-        introViewpager.apply {
-            adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    super.onPageSelected(position)
-                    val showConnectButton = position == 2
-                    nextButton.isGone = showConnectButton
-                    connectButton.isVisible = showConnectButton
-                    if (showConnectButton) {
-                        if (loginViewModel.crossLoginAccounts.value!!.isEmpty()) {
-                            crossLoginSelection.isGone = true
-                            signInButton.isVisible = true
-                        } else {
-                            signInButton.isGone = true
-                            crossLoginSelection.isVisible = true
-                        }
-                    } else {
-                        crossLoginSelection.isGone = true
-                        signInButton.isGone = true
-                    }
-                }
-            })
-
-            nextButton.setOnClickListener { currentItem++ }
-        }
-
+        configureViewPager()
         dotsIndicator.attachTo(introViewpager)
 
         connectButton.apply {
@@ -182,6 +155,34 @@ class LoginActivity : AppCompatActivity() {
         observeCrossLoginSelectedIds()
         setCrossLoginClickListener()
         initCrossLogin()
+    }
+
+    private fun configureViewPager() = with(binding) {
+        introViewpager.apply {
+            adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    val showConnectButton = position == 2
+                    nextButton.isGone = showConnectButton
+                    connectButton.isVisible = showConnectButton
+                    if (showConnectButton) {
+                        if (loginViewModel.crossLoginAccounts.value!!.isEmpty()) {
+                            crossLoginSelection.isGone = true
+                            signInButton.isVisible = true
+                        } else {
+                            signInButton.isGone = true
+                            crossLoginSelection.isVisible = true
+                        }
+                    } else {
+                        crossLoginSelection.isGone = true
+                        signInButton.isGone = true
+                    }
+                }
+            })
+
+            nextButton.setOnClickListener { currentItem++ }
+        }
     }
 
     private fun startAccountCreation() {
