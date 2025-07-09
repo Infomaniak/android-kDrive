@@ -43,6 +43,7 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.FileDataSource
 import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMediaPlayerEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -84,7 +85,7 @@ open class PreviewVideoFragment : PreviewFragment() {
 
         playerView.setOnClickListener {
             if (playerView.isControllerFullyVisible) {
-                trackMediaPlayerEvent("toggleFullScreen")
+                trackMediaPlayerEvent(MatomoName.ToggleFullScreen)
                 toggleFullscreen()
             }
         }
@@ -108,7 +109,7 @@ open class PreviewVideoFragment : PreviewFragment() {
     override fun onDestroy() {
         exoPlayer?.apply {
             // Compute the percentage of the video the user watched before exiting
-            trackMediaPlayerEvent("duration", currentPosition.times(100).div(contentDuration + 1).toFloat())
+            trackMediaPlayerEvent(MatomoName.Duration, currentPosition.times(100).div(contentDuration + 1).toFloat())
             release()
         }
         super.onDestroy()
@@ -158,11 +159,11 @@ open class PreviewVideoFragment : PreviewFragment() {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 val flagKeepScreenOn = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 if (isPlaying) {
-                    trackMediaPlayerEvent("play")
+                    trackMediaPlayerEvent(MatomoName.Play)
                     toggleFullscreen()
                     activity?.window?.addFlags(flagKeepScreenOn)
                 } else {
-                    trackMediaPlayerEvent("pause")
+                    trackMediaPlayerEvent(MatomoName.Pause)
                     activity?.window?.clearFlags(flagKeepScreenOn)
                 }
             }

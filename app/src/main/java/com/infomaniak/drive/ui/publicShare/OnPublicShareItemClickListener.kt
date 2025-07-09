@@ -22,7 +22,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.drive.MatomoDrive.ACTION_DOWNLOAD_NAME
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -75,7 +75,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     }
 
     override fun downloadFileClicked() {
-        currentContext.trackPublicShareActionEvent(ACTION_DOWNLOAD_NAME)
+        currentContext.trackPublicShareActionEvent(MatomoName.Download)
         currentFile?.let { currentContext.downloadFile(drivePermissions, it, ::onDownloadSuccess) }
     }
 

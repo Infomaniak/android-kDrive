@@ -31,6 +31,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -264,7 +265,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun manageCategory(categoryId: Int, isAdding: Boolean) {
-        trackCategoriesEvent(if (isAdding) "assign" else "remove")
+        trackCategoriesEvent(if (isAdding) MatomoName.Assign else MatomoName.Remove)
         if (usageMode == SELECTED_CATEGORIES) {
             categoriesAdapter.selectCategory(categoryId, isAdding, usageMode)
             return

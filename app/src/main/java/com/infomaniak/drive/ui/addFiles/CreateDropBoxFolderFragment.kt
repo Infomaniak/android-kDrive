@@ -23,6 +23,7 @@ import android.widget.CompoundButton
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -95,7 +96,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     ) {
         if (!isValid()) return
 
-        trackNewElementEvent("createDropbox")
+        trackNewElementEvent(MatomoName.CreateDropbox)
 
         with(binding.dropboxSettings) {
             val emailWhenFinished = emailWhenFinishedSwitch.isChecked

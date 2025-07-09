@@ -24,6 +24,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -58,7 +59,7 @@ class SelectFolderFragment : FileListFragment() {
                 val selectFolderActivity = requireActivity() as? SelectFolderActivity
                 if (FileController.getFileById(folderId, userDrive)?.rights?.canCreateDirectory == true) {
                     selectFolderActivity?.hideSaveButton()
-                    trackNewElementEvent("createFolderOnTheFly")
+                    trackNewElementEvent(MatomoName.CreateFolderOnTheFly)
                     safeNavigate(
                         SelectFolderFragmentDirections.actionSelectFolderFragmentToNewFolderFragment(
                             parentFolderId = folderId,

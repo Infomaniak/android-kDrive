@@ -22,6 +22,7 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.FolderPermission.INHERIT
@@ -66,7 +67,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
     }
 
     private fun createPrivateFolder() {
-        trackNewElementEvent("createPrivateFolder")
+        trackNewElementEvent(MatomoName.CreatePrivateFolder)
         val onlyForMe = !createFolderFragmentArgs.isSharedWithMe && newFolderViewModel.currentPermission == ONLY_ME
         createFolder(onlyForMe) { file, redirectToShareDetails ->
             file?.let {

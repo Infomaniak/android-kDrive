@@ -35,8 +35,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.infomaniak.drive.MatomoDrive.ACTION_DOWNLOAD_NAME
-import com.infomaniak.drive.MatomoDrive.ACTION_SEND_FILE_COPY_NAME
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
@@ -294,7 +293,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             openAddFileBottom()
         } else {
             ownerFragment.requireContext().apply {
-                trackFileActionEvent(ACTION_SEND_FILE_COPY_NAME)
+                trackFileActionEvent(MatomoName.SendFileCopy)
                 val userDrive = UserDrive(sharedWithMe = isSharedWithMe)
                 shareFile { CloudStorageProvider.createShareFileUri(context, currentFile, userDrive) }
             }
@@ -512,7 +511,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         val currentContext: Context
         val currentFile: File?
 
-        private fun trackFileActionEvent(name: String, value: Boolean? = null) {
+        private fun trackFileActionEvent(name: MatomoName, value: Boolean? = null) {
             currentContext.trackFileActionEvent(name, value = value?.toFloat())
         }
 
@@ -522,20 +521,20 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun printClicked()
 
         @CallSuper
-        fun addFavoritesClicked() = trackFileActionEvent("favorite", currentFile?.isFavorite == false)
+        fun addFavoritesClicked() = trackFileActionEvent(MatomoName.Favorite, currentFile?.isFavorite == false)
 
         @CallSuper
-        fun cancelExternalImportClicked() = trackFileActionEvent("cancelExternalImport")
+        fun cancelExternalImportClicked() = trackFileActionEvent(MatomoName.CancelExternalImport)
 
         @CallSuper
         fun colorFolderClicked(color: String?) = currentContext.trackEvent("colorFolder", "switch")
 
         fun displayInfoClicked()
 
-        fun downloadFileClicked() = trackFileActionEvent(ACTION_DOWNLOAD_NAME)
+        fun downloadFileClicked() = trackFileActionEvent(MatomoName.Download)
 
         @CallSuper
-        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) = trackFileActionEvent("convertToDropbox", isDropBox)
+        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) = trackFileActionEvent(MatomoName.ConvertToDropbox, isDropBox)
         fun fileRightsClicked()
         fun goToFolder()
         fun manageCategoriesClicked(fileId: Int)
@@ -548,11 +547,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
 
         @CallSuper
-        fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent("shareLink")
+        fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent(MatomoName.ShareLink)
 
         @CallSuper
         fun editDocumentClicked(mainViewModel: MainViewModel) {
-            trackFileActionEvent("edit")
+            trackFileActionEvent(MatomoName.Edit)
             currentFile?.let { file ->
                 ownerFragment?.openOnlyOfficeDocument(file, mainViewModel.hasNetwork)
             }
@@ -578,11 +577,11 @@ class FileInfoActionsView @JvmOverloads constructor(
                     isOffline && isChecked -> Unit
                     !isOffline && !isChecked -> Unit
                     isChecked -> {
-                        trackFileActionEvent("offline", true)
+                        trackFileActionEvent(MatomoName.Offline, true)
                         return fileInfoActionsView.downloadAsOfflineFile()
                     }
                     else -> {
-                        trackFileActionEvent("offline", false)
+                        trackFileActionEvent(MatomoName.Offline, false)
                         val offlineLocalPath = getOfflineFile(currentContext)
                         val cacheFile = getCacheFile(currentContext)
                         offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
@@ -599,13 +598,13 @@ class FileInfoActionsView @JvmOverloads constructor(
             selectFolderResultLauncher: ActivityResultLauncher<Intent>,
             mainViewModel: MainViewModel
         ) {
-            trackFileActionEvent("move")
+            trackFileActionEvent(MatomoName.Move)
             currentContext.moveFileClicked(folderId, selectFolderResultLauncher, mainViewModel)
         }
 
         @CallSuper
         fun duplicateFileClicked(selectFolderResultLauncher: ActivityResultLauncher<Intent>, mainViewModel: MainViewModel) {
-            trackFileActionEvent("copy")
+            trackFileActionEvent(MatomoName.Copy)
             mainViewModel.ignoreSyncOffline = true
             currentContext.duplicateFilesClicked(selectFolderResultLauncher, mainViewModel)
         }
@@ -619,7 +618,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 autoDismiss = false
             ) { dialog ->
                 onLeaveShare {
-                    trackFileActionEvent("stopShare")
+                    trackFileActionEvent(MatomoName.StopShare)
                     dialog.dismiss()
                 }
             }
@@ -636,7 +635,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 selectedRange = getFileName().length
             ) { dialog, name ->
                 onRenameFile(name) {
-                    trackFileActionEvent("rename")
+                    trackFileActionEvent(MatomoName.Rename)
                     dialog.dismiss()
                 }
             }
@@ -646,7 +645,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun deleteFileClicked() = currentFile?.let {
             Utils.confirmFileDeletion(currentContext, fileName = it.name) { dialog ->
                 onDeleteFile {
-                    trackFileActionEvent("putInTrash")
+                    trackFileActionEvent(MatomoName.PutInTrash)
                     dialog.dismiss()
                 }
             }

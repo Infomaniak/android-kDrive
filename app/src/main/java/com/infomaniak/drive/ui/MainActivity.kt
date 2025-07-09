@@ -65,6 +65,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackInAppReview
@@ -312,8 +313,8 @@ class MainActivity : BaseActivity() {
     //region In-App Updates
     private fun initAppUpdateManager() {
         inAppUpdateManager.init(
-            onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) "discoverNow" else "discoverLater") },
-            onInstallStart = { trackInAppUpdate("installUpdate") },
+            onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) MatomoName.DiscoverNow else MatomoName.DiscoverLater) },
+            onInstallStart = { trackInAppUpdate(MatomoName.InstallUpdate) },
             onInstallFailure = { showSnackbar(title = R.string.errorUpdateInstall, anchor = getMainFab()) },
             onInAppUpdateUiChange = { isUpdateDownloaded ->
                 if (isUpdateDownloaded && canDisplayInAppSnackbar()) {
@@ -360,9 +361,9 @@ class MainActivity : BaseActivity() {
     //region In-App Review
     private fun initAppReviewManager() {
         inAppReviewManager.init(
-            onDialogShown = { trackInAppReview("presentAlert") },
-            onUserWantToReview = { trackInAppReview("like") },
-            onUserWantToGiveFeedback = { trackInAppReview("dislike") },
+            onDialogShown = { trackInAppReview(MatomoName.PresentAlert) },
+            onUserWantToReview = { trackInAppReview(MatomoName.Like) },
+            onUserWantToGiveFeedback = { trackInAppReview(MatomoName.Dislike) },
         )
     }
     //endregion

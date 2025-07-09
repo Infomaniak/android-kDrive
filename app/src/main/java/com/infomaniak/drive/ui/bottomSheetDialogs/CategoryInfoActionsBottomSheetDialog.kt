@@ -29,6 +29,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -82,7 +83,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
                 isDeletion = true,
                 buttonText = getString(R.string.buttonDelete),
             ) { dialog ->
-                trackCategoriesEvent("delete")
+                trackCategoriesEvent(MatomoName.Delete)
                 deleteCategory(categoryId) { dialog.dismiss() }
             }
         }

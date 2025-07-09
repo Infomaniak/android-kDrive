@@ -23,6 +23,7 @@ import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -111,7 +112,7 @@ class TrashFragment : FileSubTypeListFragment() {
                 isDeletion = true,
                 autoDismiss = false,
             ) { dialog ->
-                trackTrashEvent("emptyTrash")
+                trackTrashEvent(MatomoName.EmptyTrash)
                 closeMultiSelect()
                 trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
                     dialog.dismiss()

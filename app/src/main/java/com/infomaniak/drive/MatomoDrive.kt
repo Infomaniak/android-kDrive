@@ -32,7 +32,7 @@ object MatomoDrive : MatomoCore {
     override val Context.tracker: Tracker get() = (this as MainApplication).matomoTracker
     override val siteId = 8
 
-    enum class MatomoCategory(name: String){
+    enum class MatomoCategory(name: String) {
         Account("account"),
         Categories("categories"),
         FileAction("fileAction"),
@@ -65,7 +65,7 @@ object MatomoDrive : MatomoCore {
         Preview("preview"),
     }
 
-    enum class MatomoName(name: String){
+    enum class MatomoName(name: String) {
         OpenLoginWebview("openLoginWebview"),
         OpenCreationWebview("openCreationWebview"),
         LoggedIn("loggedIn"),
@@ -180,61 +180,79 @@ object MatomoDrive : MatomoCore {
         PreviewVideo("previewVideo"),
     }
 
-    const val ACTION_DOWNLOAD_NAME = "download"
-    const val ACTION_OPEN_WITH_NAME = "openWith"
-    const val ACTION_OPEN_BOOKMARK_NAME = "openBookmark"
-    const val ACTION_PRINT_PDF_NAME = "printPdf"
-    const val ACTION_SAVE_TO_KDRIVE_NAME = "saveToKDrive"
-    const val ACTION_SEND_FILE_COPY_NAME = "sendFileCopy"
-
-    const val PUBLIC_SHARE_ACTION_CATEGORY = "publicShareAction"
-
-    fun Fragment.trackCategoriesEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("categories", name, action, value)
+    fun Fragment.trackEvent(
+        category: MatomoCategory,
+        name: MatomoName,
+        action: TrackerAction = TrackerAction.CLICK,
+        value: Float? = null
+    ) {
+        context?.trackEvent(category, name, action, value)
     }
 
-    fun Context.trackFileActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("fileAction", name, action, value)
+    fun Context.trackEvent(
+        category: MatomoCategory,
+        name: MatomoName,
+        action: TrackerAction = TrackerAction.CLICK,
+        value: Float? = null
+    ) {
+        trackEvent(category.toString(), name.toString(), action, value)
     }
 
-    fun Context.trackPublicShareActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent(PUBLIC_SHARE_ACTION_CATEGORY, name, action, value)
+
+    fun Fragment.trackCategoriesEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.Categories, name, action, value)
     }
 
-    fun Context.trackPdfActivityActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("pdfActivityAction", name, action, value)
+    fun Context.trackFileActionEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.FileAction, name, action, value)
     }
 
-    fun Fragment.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+    fun Context.trackPublicShareActionEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.PublicShareAction, name, action, value)
+    }
+
+    fun Context.trackPdfActivityActionEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.PdfActivityAction, name, action, value)
+    }
+
+    fun Fragment.trackShareRightsEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         context?.trackShareRightsEvent(name, action, value)
     }
 
-    fun Context.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("shareAndRights", name, action, value)
+    fun Fragment.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        context?.trackEvent(MatomoCategory.ShareAndRights.toString(), name, action, value)
     }
 
-    fun Fragment.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+    fun Context.trackShareRightsEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.ShareAndRights, name, action, value)
+    }
+
+    fun Fragment.trackNewElementEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         context?.trackNewElementEvent(name, action, value)
     }
 
-    fun Context.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("newElement", name, action, value)
+    fun Fragment.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        context?.trackEvent(MatomoCategory.NewElement.toString(), name, action, value)
     }
 
-    fun Fragment.trackTrashEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("trash", name, action, value)
+    fun Context.trackNewElementEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.NewElement, name, action, value)
     }
 
-    fun Activity.trackInAppUpdate(name: String) {
-        trackEvent("inAppUpdate", name)
+    fun Fragment.trackTrashEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.Trash, name, action, value)
     }
 
-    fun Activity.trackInAppReview(name: String) {
-        trackEvent("inAppReview", name)
+    fun Activity.trackInAppUpdate(name: MatomoName) {
+        trackEvent(MatomoCategory.InAppUpdate, name)
     }
 
-    fun Activity.trackDeepLink(name: String) {
-        trackEvent("deepLink", name)
+    fun Activity.trackInAppReview(name: MatomoName) {
+        trackEvent(MatomoCategory.InAppReview, name)
+    }
+
+    fun Activity.trackDeepLink(name: MatomoName) {
+        trackEvent(MatomoCategory.DeepLink, name)
     }
 
     fun Fragment.trackMyKSuiteEvent(name: String) {
@@ -249,35 +267,40 @@ object MatomoDrive : MatomoCore {
         trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE_UPGRADE_BOTTOMSHEET, name)
     }
 
-    fun Fragment.trackDropboxEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("dropbox", name, action, value)
+    fun Fragment.trackDropboxEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.Dropbox, name, action, value)
     }
 
-    fun Fragment.trackSearchEvent(name: String) {
-        trackEvent("search", name)
+    fun Fragment.trackSearchEvent(name: MatomoName) {
+        trackEvent(MatomoCategory.Search, name)
     }
 
-    fun Fragment.trackCommentEvent(name: String) {
-        trackEvent("comment", name)
+    fun Fragment.trackCommentEvent(name: MatomoName) {
+        trackEvent(MatomoCategory.Comment, name)
     }
 
     fun Fragment.trackBulkActionEvent(category: String, action: BulkOperationType, modifiedFileNumber: Int) {
 
         fun BulkOperationType.toMatomoString(): String = name.lowercase().capitalizeFirstChar()
 
-        val name = "bulk" + (if (modifiedFileNumber == 1) "Single" else "") + action.toMatomoString()
+        val name =
+            (if (modifiedFileNumber == 1) MatomoName.BulkSingle.toString() else MatomoName.Bulk.toString()) + action.toMatomoString()
         trackEvent(category, name, value = modifiedFileNumber.toFloat())
     }
 
-    fun Fragment.trackMediaPlayerEvent(name: String, value: Float? = null) {
-        trackEvent("mediaPlayer", name, value = value)
+    fun Fragment.trackMediaPlayerEvent(name: MatomoName, value: Float? = null) {
+        trackEvent(MatomoCategory.MediaPlayer, name, value = value)
+    }
+
+    fun Fragment.trackSettingsEvent(name: MatomoName, value: Boolean? = null) {
+        trackEvent(MatomoCategory.Settings, name, value = value?.toFloat())
     }
 
     fun Fragment.trackSettingsEvent(name: String, value: Boolean? = null) {
-        trackEvent("settings", name, value = value?.toFloat())
+        trackEvent(MatomoCategory.Settings.toString(), name, value = value?.toFloat())
     }
 
-    fun Context.trackPhotoSyncEvent(name: String, value: Boolean? = null) {
-        trackEvent("photoSync", name, value = value?.toFloat())
+    fun Context.trackPhotoSyncEvent(name: MatomoName, value: Boolean? = null) {
+        trackEvent(MatomoCategory.PhotoSync, name, value = value?.toFloat())
     }
 }

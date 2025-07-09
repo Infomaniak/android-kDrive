@@ -22,6 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCommentEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
@@ -79,7 +80,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
                     positiveButton = R.string.buttonSend
                 ) { dialog, name ->
                     fileDetailsViewModel.postFileComment(currentFile, name).observe(viewLifecycleOwner) { apiResponse ->
-                        trackCommentEvent("add")
+                        trackCommentEvent(MatomoName.Add)
                         if (apiResponse.isSuccess()) {
                             apiResponse?.data?.let { comment ->
                                 commentsAdapter.addComment(comment)
@@ -125,7 +126,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
                     fieldValue = comment.body,
                     positiveButton = R.string.buttonSave
                 ) { dialog, body ->
-                    trackCommentEvent("update")
+                    trackCommentEvent(MatomoName.Update)
                     fileDetailsViewModel.putFileComment(currentFile, comment.id, body)
                         .observe(viewLifecycleOwner) { apiResponse ->
                             if (apiResponse.isSuccess()) {
@@ -143,7 +144,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
                     autoDismiss = false,
                     message = getString(R.string.modalCommentDeleteDescription)
                 ) { dialog ->
-                    trackCommentEvent("delete")
+                    trackCommentEvent(MatomoName.Delete)
                     fileDetailsViewModel.deleteFileComment(currentFile, comment.id)
                         .observe(viewLifecycleOwner) { apiResponse ->
                             dialog.dismiss()
@@ -173,7 +174,7 @@ class FileDetailsCommentsFragment : FileDetailsSubFragment(), NoItemsLayoutView.
                 }
             }
         } else {
-            trackCommentEvent("like")
+            trackCommentEvent(MatomoName.Like)
             fileDetailsViewModel.postLike(currentFile, fileComment).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
                     fileComment.liked = true

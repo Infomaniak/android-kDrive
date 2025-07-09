@@ -36,6 +36,7 @@ import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.MatomoDrive.trackSettingsEvent
 import com.infomaniak.drive.R
@@ -84,7 +85,7 @@ class SettingsFragment : Fragment() {
 
         onlyWifiSync.isChecked = AppSettings.onlyWifiSync
         onlyWifiSync.setOnCheckedChangeListener { _, isChecked ->
-            trackSettingsEvent("onlyWifiTransfer", isChecked)
+            trackSettingsEvent(MatomoName.OnlyWifiTransfer, isChecked)
             AppSettings.onlyWifiSync = isChecked
             requireActivity().launchAllUpload(drivePermissions)
         }
@@ -98,7 +99,7 @@ class SettingsFragment : Fragment() {
             if (LockActivity.hasBiometrics()) {
                 isVisible = true
                 setOnClickListener {
-                    trackSettingsEvent("lockApp")
+                    trackSettingsEvent(MatomoName.LockApp)
                     safelyNavigate(R.id.appSecurityActivity)
                 }
             } else {
@@ -210,7 +211,7 @@ class SettingsFragment : Fragment() {
                 )
             }.also(::startActivity)
         } else {
-            trackSettingsEvent("feedback")
+            trackSettingsEvent(MatomoName.Feedback)
             context?.openUrl(requireContext().getString(R.string.urlUserReportAndroid))
         }
     }

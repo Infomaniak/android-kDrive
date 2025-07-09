@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.card.MaterialCardView
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackSearchEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -127,9 +128,9 @@ class SearchFiltersFragment : Fragment() {
 
     private fun setSaveButton() = with(searchFiltersViewModel) {
         binding.saveButton.setOnClickListener {
-            date.value?.let { trackSearchEvent("filterDate") }
-            type.value?.let { trackSearchEvent("filterFileType") }
-            categories?.let { trackSearchEvent("filterCategory") }
+            date.value?.let { trackSearchEvent(MatomoName.FilterDate) }
+            type.value?.let { trackSearchEvent(MatomoName.FilterFileType) }
+            categories?.let { trackSearchEvent(MatomoName.FilterCategory) }
 
             searchViewModel.dateFilter = date.value
             searchViewModel.typeFilter = type.value

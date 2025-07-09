@@ -30,6 +30,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentCreateOrEditCategoryBinding
@@ -107,10 +108,10 @@ class CreateOrEditCategoryFragment : Fragment() {
             setOnClickListener {
                 showProgressCatching()
                 if (categoryId == CREATE_CATEGORY_ID) {
-                    trackCategoriesEvent("add")
+                    trackCategoriesEvent(MatomoName.Add)
                     createCategory()
                 } else {
-                    trackCategoriesEvent("edit")
+                    trackCategoriesEvent(MatomoName.Edit)
                     editCategory(categoryId)
                 }
             }
