@@ -317,24 +317,26 @@ class LoginActivity : AppCompatActivity() {
     private suspend fun authenticateUser(
         token: ApiToken,
         infomaniakLogin: InfomaniakLogin,
-        withRedirection: Boolean = true, // TODO: Handle this
+        withRedirection: Boolean = true,
     ) = Dispatchers.Default {
         when (val returnValue = authenticateUser(this@LoginActivity, token)) {
             is User -> {
-                val deeplink = navigationArgs?.publicShareDeeplink
-                if (deeplink.isNullOrBlank()) {
-                    trackUserId(AccountUtils.currentUserId)
-                    trackAccountEvent(MatomoName.LoggedIn)
-                    launchMainActivity()
-                } else {
-                    PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)
+                if (withRedirection) {
+                    val deeplink = navigationArgs?.publicShareDeeplink
+                    if (deeplink.isNullOrBlank()) {
+                        trackUserId(AccountUtils.currentUserId)
+                        trackAccountEvent(MatomoName.LoggedIn)
+                        launchMainActivity()
+                    } else {
+                        PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)
+                    }
                 }
 
                 return@Default
             }
             is ApiResponse<*> -> Dispatchers.Main {
                 if (returnValue.error?.description == ErrorCode.NO_DRIVE) {
-                    launchNoDriveActivity()
+                    if (withRedirection) launchNoDriveActivity()
                 } else {
                     showError(getString(returnValue.translateError()))
                 }
