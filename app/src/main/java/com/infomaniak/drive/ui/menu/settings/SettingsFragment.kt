@@ -17,16 +17,19 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.collection.arrayMapOf
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
@@ -50,6 +53,9 @@ import com.infomaniak.drive.utils.getDashboardData
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.bugtracker.BugTrackerActivity
 import com.infomaniak.lib.bugtracker.BugTrackerActivityArgs
+import com.infomaniak.lib.core.BuildConfig.AUTOLOG_URL
+import com.infomaniak.lib.core.BuildConfig.TERMINATE_ACCOUNT_URL
+import com.infomaniak.lib.core.ui.WebViewActivity
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.openAppNotificationSettings
 import com.infomaniak.lib.core.utils.safeBinding
@@ -58,6 +64,11 @@ import com.infomaniak.lib.core.utils.safeNavigate
 class SettingsFragment : Fragment() {
 
     private var binding: FragmentSettingsBinding by safeBinding()
+
+    private val settingsViewModel: SettingsViewModel by viewModels()
+    private val resultActivityResultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) AccountUtils.currentUser?.let(settingsViewModel::disconnectDeletedUser)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSettingsBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -72,8 +83,8 @@ class SettingsFragment : Fragment() {
             registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
         }
 
-        onlyWifiSyncValue.isChecked = AppSettings.onlyWifiSync
-        onlyWifiSyncValue.setOnCheckedChangeListener { _, isChecked ->
+        onlyWifiSync.isChecked = AppSettings.onlyWifiSync
+        onlyWifiSync.setOnCheckedChangeListener { _, isChecked ->
             trackSettingsEvent("onlyWifiTransfer", isChecked)
             AppSettings.onlyWifiSync = isChecked
             requireActivity().launchAllUpload(drivePermissions)
@@ -86,19 +97,18 @@ class SettingsFragment : Fragment() {
         notifications.setOnClickListener { requireContext().openAppNotificationSettings() }
         appSecurity.apply {
             if (LockActivity.hasBiometrics()) {
-                appSecuritySeparator.isVisible = true
                 isVisible = true
                 setOnClickListener {
                     trackSettingsEvent("lockApp")
                     safelyNavigate(R.id.appSecurityActivity)
                 }
             } else {
-                appSecuritySeparator.isGone = true
                 isGone = true
             }
         }
         about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
         feedback.setOnClickListener { navigateToFeedback() }
+        setDeleteAccountClickListener()
         binding.root.enableEdgeToEdge()
     }
 
@@ -125,8 +135,21 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private fun setDeleteAccountClickListener() = with(binding) {
+        deleteMyAccount.setOnClickListener {
+            WebViewActivity.startActivity(
+                context = requireContext(),
+                url = TERMINATE_ACCOUNT_FULL_URL,
+                headers = mapOf("Authorization" to "Bearer ${AccountUtils.currentUser?.apiToken?.accessToken}"),
+                urlToQuit = URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION,
+                activityResultLauncher = resultActivityResultLauncher,
+            )
+        }
+    }
+
     private fun openMyKSuiteDashboard(myKSuiteData: MyKSuiteData) {
-        val data = getDashboardData(myKSuiteData = myKSuiteData)
+        val user = AccountUtils.currentUser ?: return
+        val data = getDashboardData(myKSuiteData, user)
         safeNavigate(directions = SettingsFragmentDirections.actionSettingsFragmentToMyKSuiteDashboardFragment(data))
     }
 
@@ -152,7 +175,7 @@ class SettingsFragment : Fragment() {
                 UiSettings(requireContext()).nightMode = defaultNightMode
                 AppCompatDelegate.setDefaultNightMode(defaultNightMode)
                 setThemeSettingsValue()
-                trackSettingsEvent("theme${binding.themeSettingsValue.text}")
+                trackSettingsEvent("theme${binding.themeSettings.endText}")
             }
             .setNegativeButton(R.string.buttonCancel) { _, _ -> }
             .setCancelable(false).show()
@@ -160,8 +183,8 @@ class SettingsFragment : Fragment() {
 
     override fun onResume() = with(binding) {
         super.onResume()
-        syncPictureValue.setText(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
-        appSecurityValue.setText(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
+        syncPicture.endText = getString(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
+        appSecurity.endText = getString(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
         setThemeSettingsValue()
     }
 
@@ -171,7 +194,7 @@ class SettingsFragment : Fragment() {
             AppCompatDelegate.MODE_NIGHT_YES -> R.string.themeSettingsDarkLabel
             else -> R.string.themeSettingsSystemLabel
         }
-        binding.themeSettingsValue.setText(themeTextValue)
+        binding.themeSettings.endText = getString(themeTextValue)
     }
 
     private fun navigateToFeedback() {
@@ -195,5 +218,10 @@ class SettingsFragment : Fragment() {
 
     private fun trackSettingsEvent(name: String, value: Boolean? = null) {
         trackEvent("settings", name, value = value?.toFloat())
+    }
+
+    companion object {
+        private const val URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION = "login.infomaniak.com"
+        private const val TERMINATE_ACCOUNT_FULL_URL = "$AUTOLOG_URL/?url=$TERMINATE_ACCOUNT_URL"
     }
 }

@@ -160,6 +160,7 @@
     <string name="buttonSave">Speichern</string>
     <string name="buttonSeeFolder">Ordner anzeigen</string>
     <string name="buttonSelectAll">Alles auswählen</string>
+    <string name="buttonSelectTheFolder">Einen Ordner auswählen</string>
     <string name="buttonSend">Versenden</string>
     <string name="buttonSendCopy">Kopie versenden</string>
     <string name="buttonSettingsLockApp">Sperre aktivieren</string>
@@ -226,6 +227,7 @@
     <string name="createFolderTitle">Ordner erstellen</string>
     <string name="createFolderValidUntilDescription">Nach Verstreichen dieses Datums können die Benutzer keine Dateien mehr übertragen.</string>
     <string name="createPrivateFolderSucces">Ordner erfolgreich angelegt</string>
+    <string name="deleteMyAccount">Mein Konto löschen</string>
     <string name="deletePicturesDescription">Die Anwendung wird Sie regelmässig auffordern Fotos von Ihrem Gerät zu löschen, die bereits auf Ihrem kDrive synchronisiert sind. Sie müssen die Löschung jeweils manuell autorisieren\n</string>
     <string name="deletePicturesTitle">Fotos löschen</string>
     <plurals name="driveBlockedDescription">

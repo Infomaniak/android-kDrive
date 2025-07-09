@@ -4,8 +4,8 @@ buildscript {
     extra.apply {
         set("appCompileSdk", 35) // Ensure any extra configChanges are added into Activities' manifests.
         set("appTargetSdk", 35)
-        set("appMinSdk", 24)
-        set("legacyMinSdk", 24) // Duplicated from `Core/Legacy/build.gradle` : `legacyMinSdk = 24`
+        set("appMinSdk", 27)
+        set("legacyMinSdk", 27) // Duplicated from `Core/Legacy/build.gradle` : `legacyMinSdk = 27`
         set("javaVersion", JavaVersion.VERSION_17)
     }
 
@@ -19,12 +19,12 @@ buildscript {
 }
 
 plugins {
+    alias(libs.plugins.sentry) version "5.5.0" apply false
+    alias(core.plugins.ksp) version "2.1.21-2.0.1" apply false
     val kotlinVersion = "2.1.21"
-    id("io.sentry.android.gradle") version "5.5.0" apply false
+    alias(libs.plugins.kotlin.serialization) version kotlinVersion apply false
     alias(core.plugins.compose.compiler) version kotlinVersion apply false
-    id("org.jetbrains.kotlin.android") version kotlinVersion apply false
-    id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion apply false
-    id("com.google.devtools.ksp") version "2.1.21-2.0.1" apply false
+    alias(core.plugins.kotlin.android) version kotlinVersion apply false
 }
 
 tasks.register<Delete>("clean") {

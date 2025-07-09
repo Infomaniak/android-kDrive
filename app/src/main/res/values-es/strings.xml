@@ -160,6 +160,7 @@
     <string name="buttonSave">Guardar</string>
     <string name="buttonSeeFolder">Ver la carpeta</string>
     <string name="buttonSelectAll">Seleccionar todo</string>
+    <string name="buttonSelectTheFolder">Seleccione una carpeta</string>
     <string name="buttonSend">Enviar</string>
     <string name="buttonSendCopy">Enviar una copia</string>
     <string name="buttonSettingsLockApp">Activar el bloqueo</string>
@@ -226,6 +227,7 @@
     <string name="createFolderTitle">Crear una carpeta</string>
     <string name="createFolderValidUntilDescription">Una vez transcurrida la fecha, los usuarios ya no podrán transferir archivos.</string>
     <string name="createPrivateFolderSucces">Carpeta creada correctamente</string>
+    <string name="deleteMyAccount">Eliminar mi cuenta</string>
     <string name="deletePicturesDescription">La aplicación te pedirá regularmente que borres las fotos de tu dispositivo que ya están sincronizadas en tu kDrive. Tendrás que autorizar manualmente la supresión</string>
     <string name="deletePicturesTitle">Borrar fotos</string>
     <plurals name="driveBlockedDescription">

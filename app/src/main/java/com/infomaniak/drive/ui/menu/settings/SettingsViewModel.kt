@@ -17,24 +17,22 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
-import android.os.Bundle
-import android.view.View
-import androidx.fragment.app.viewModels
-import com.infomaniak.core.myksuite.ui.views.MyKSuiteDashboardFragment
-import com.infomaniak.drive.ui.MyKSuiteViewModel
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.getDashboardData
+import com.infomaniak.lib.core.models.user.User
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
 
-class KSuiteDashboardFragment : MyKSuiteDashboardFragment() {
+class SettingsViewModel(application: Application, private val ioDispatcher: CoroutineDispatcher) : AndroidViewModel(application) {
 
-    private val myKSuiteViewModel: MyKSuiteViewModel by viewModels()
+    private inline val context: Context get() = getApplication<Application>().applicationContext
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        myKSuiteViewModel.refreshMyKSuite()
-        myKSuiteViewModel.myKSuiteDataResult.observe(viewLifecycleOwner) { myKSuiteData ->
-            AccountUtils.currentUser?.let { resetContent(dashboardData = getDashboardData(myKSuiteData, user = it)) }
+    fun disconnectDeletedUser(currentUser: User) {
+        viewModelScope.launch(ioDispatcher) {
+            AccountUtils.removeUserAndDeleteToken(context, currentUser)
         }
     }
 }

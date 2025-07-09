@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import com.infomaniak.drive.MatomoDrive.buildTracker
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
+import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -67,12 +68,18 @@ import io.sentry.android.core.SentryAndroidOptions
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.matomo.sdk.Tracker
+import splitties.init.injectAsAppCtx
 import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
+
+    init {
+        injectAsAppCtx() // Ensures it is always initialized
+    }
 
     val matomoTracker: Tracker by lazy { buildTracker() }
     var geniusScanIsReady = false
@@ -97,7 +104,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
                     detectLeakedClosableObjects()
                     detectLeakedRegistrationObjects()
                     detectFileUriExposure()
-                    if (SDK_INT >= 26) detectContentUriWithoutPermission()
+                    detectContentUriWithoutPermission()
                     if (SDK_INT >= 29) detectCredentialProtectedWhileLocked()
                 }.build()
             )
@@ -190,15 +197,19 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     private fun tokenInterceptorListener() = object : TokenInterceptorListener {
+        val userTokenFlow = AppSettings.getCurrentUserIdFlow().mapToApiToken(applicationScope)
+
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
             AccountUtils.setUserToken(AccountUtils.currentUser!!, apiToken)
         }
 
         override suspend fun onRefreshTokenError() {
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
             refreshTokenError(AccountUtils.currentUser!!)
         }
 
-        override suspend fun getApiToken(): ApiToken? = AccountUtils.currentUser?.apiToken
+        override suspend fun getUserApiToken(): ApiToken? = userTokenFlow.first()
 
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
