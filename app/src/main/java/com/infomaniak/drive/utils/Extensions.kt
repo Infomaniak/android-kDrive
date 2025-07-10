@@ -93,7 +93,10 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
+import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.utils.FilePresenter.displayFile
+import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.views.PendingFilesView
@@ -486,6 +489,21 @@ fun Fragment.setupDriveToolbar(
             collapsingToolbarLayout.setExpandedTitleTextColor(ColorStateList.valueOf(Color.TRANSPARENT))
         } else {
             collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarExpandedTitleTextAppearance)
+        }
+    }
+}
+
+fun Fragment.observeNavigateFileListTo(mainViewModel: MainViewModel, fileListViewModel: FileListViewModel) {
+    mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
+        if (file.isFolder()) {
+            openFolder(
+                file = file,
+                shouldHideBottomNavigation = false,
+                shouldShowSmallFab = false,
+                fileListViewModel = fileListViewModel,
+            )
+        } else {
+            displayFile(file, mainViewModel, fileAdapter = null)
         }
     }
 }

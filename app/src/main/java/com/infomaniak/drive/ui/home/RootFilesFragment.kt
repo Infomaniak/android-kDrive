@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
-import com.infomaniak.drive.ui.FileListNavigatorObservable
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.CommonFolders
@@ -47,6 +46,7 @@ import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
+import com.infomaniak.drive.utils.observeNavigateFileListTo
 import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
@@ -54,7 +54,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.launch
 
-class RootFilesFragment : BaseRootFolderFragment(), FileListNavigatorObservable {
+class RootFilesFragment : BaseRootFolderFragment() {
 
     private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -94,7 +94,7 @@ class RootFilesFragment : BaseRootFolderFragment(), FileListNavigatorObservable 
         )
 
         observeFiles(haveBin = true)
-        observeNavigateFileListTo(mainViewModel, viewLifecycleOwner, this@RootFilesFragment, fileListViewModel)
+        observeNavigateFileListTo(mainViewModel, fileListViewModel)
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
             noNetworkBinding = noNetworkInclude,
