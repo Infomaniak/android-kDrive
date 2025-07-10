@@ -54,7 +54,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     private const val MQTT_USER = "ips:ips-public"
     private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
-    private const val MQTT_URI = "wss://info-mq.preprod.dev.infomaniak.ch/ws"
+    private const val MQTT_URI = "wss://info-mq.infomaniak.com/ws"
 
     private val client: MqttAndroidClient by lazy { MqttAndroidClient(appContext, MQTT_URI, clientId) }
 
