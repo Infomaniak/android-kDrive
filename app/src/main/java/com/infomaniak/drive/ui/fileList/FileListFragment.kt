@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,6 @@ import com.infomaniak.drive.data.services.UploadWorker.Companion.trackUploadWork
 import com.infomaniak.drive.databinding.FragmentFileListBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.FileListNavigatorObservable
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
@@ -83,7 +82,7 @@ import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import kotlinx.coroutines.*
 
 open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
-    NoItemsLayoutView.INoItemsLayoutView, FileListNavigatorObservable {
+    NoItemsLayoutView.INoItemsLayoutView {
 
     private var _binding: FragmentFileListBinding? = null
     val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -283,7 +282,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             binding.noFilesLayout.setMargins(bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + it.bottom)
         }
 
-        observeNavigateFileListTo(mainViewModel, viewLifecycleOwner, this@FileListFragment, fileListViewModel)
+        observeNavigateFileListTo(mainViewModel, fileListViewModel)
     }
 
     private fun setupToolbars() {
