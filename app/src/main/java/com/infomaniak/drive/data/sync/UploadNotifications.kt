@@ -197,7 +197,12 @@ object UploadNotifications {
         var folderId: Int = resources.remoteFolder
         if (matches != null) {
             for (match in matches) {
-                folderId = FileController.getChildrenFileWithName(folderId, match)[0]
+                var childrenId = FileController.getIdOfChildrenFileWithName(folderId, match)
+                if (childrenId.isNotEmpty()) {
+                    folderId = childrenId.first()
+                } else {
+                    return folderId
+                }
             }
         }
         return folderId
