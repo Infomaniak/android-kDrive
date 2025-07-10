@@ -343,7 +343,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun onCacheAddedToOffline() = Unit
 
     override fun printClicked() {
-        requireContext().trackFileActionEvent(MatomoName.PrintPdf)
+        trackFileActionEvent(MatomoName.PrintPdf)
         previewPDFHandler.printClicked(
             context = requireContext(),
             onDefaultCase = {

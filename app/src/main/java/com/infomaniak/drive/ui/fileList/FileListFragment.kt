@@ -106,9 +106,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-open class FileListFragment : MultiSelectFragment(MatomoCategory.FileListFileAction.categoryName),
-    SwipeRefreshLayout.OnRefreshListener,
-    NoItemsLayoutView.INoItemsLayoutView {
+open class FileListFragment : MultiSelectFragment(
+    matomoCategory = MatomoCategory.FileListFileAction,
+), SwipeRefreshLayout.OnRefreshListener, NoItemsLayoutView.INoItemsLayoutView {
 
     private var _binding: FragmentFileListBinding? = null
     val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -796,7 +796,7 @@ open class FileListFragment : MultiSelectFragment(MatomoCategory.FileListFileAct
             lifecycleScope.launch {
                 repeatOnLifecycle(State.RESUMED) {
                     getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
-                        trackEvent("fileList", newSortType.name)
+                        trackEvent(MatomoCategory.FileList.value, newSortType.name)
                         fileListViewModel.sortType = newSortType
                         _binding?.sortButton?.setText(fileListViewModel.sortType.translation)
 

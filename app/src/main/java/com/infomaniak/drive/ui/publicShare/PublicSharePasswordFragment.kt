@@ -58,7 +58,7 @@ class PublicSharePasswordFragment : Fragment() {
         // TODO: Remove this and call setupValidationButton instead
         //  Also change the layout (description, button's title, input visibility)
         passwordValidateButton.setOnClickListener {
-            requireActivity().trackPublicShareActionEvent(MatomoName.OpenInBrowser)
+            trackPublicShareActionEvent(MatomoName.OpenInBrowser)
             PublicShareUtils.openDeepLinkInBrowser(requireActivity(), getPublicShareUrl())
         }
 

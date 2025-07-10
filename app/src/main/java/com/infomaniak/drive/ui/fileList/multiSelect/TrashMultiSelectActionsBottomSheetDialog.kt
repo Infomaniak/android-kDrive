@@ -21,7 +21,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
-class TrashMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.TrashFileAction.categoryName) {
+class TrashMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.TrashFileAction) {
 
     override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
         binding.coloredFolder.isGone = true

@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build.VERSION.SDK_INT
 import androidx.core.app.NotificationCompat
 import com.infomaniak.drive.R
 import com.infomaniak.lib.core.utils.NotificationUtilsCore

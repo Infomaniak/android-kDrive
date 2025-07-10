@@ -99,11 +99,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
                 binding.shareLinkSwitch.isGone = true
             }
             shareLink == null && urlValue.isBlank() -> {
-                context?.trackShareRightsEvent(MatomoName.RestrictedShareLink)
+                trackShareRightsEvent(MatomoName.RestrictedShareLink)
                 setRestrictedUi()
             }
             else -> {
-                context?.trackShareRightsEvent(MatomoName.PublicShareLink)
+                trackShareRightsEvent(MatomoName.PublicShareLink)
                 setPublicUi()
             }
         }

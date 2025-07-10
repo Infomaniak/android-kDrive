@@ -179,7 +179,7 @@ class MainViewModel(
             activity = fragmentActivity,
             navController = navController,
             onOpeningPicker = {
-                fragmentActivity.trackNewElementEvent(MatomoName.UploadFile)
+                trackNewElementEvent(MatomoName.UploadFile)
                 uploadFilesHelper?.let { setParentFolder() } ?: Sentry.captureMessage("UploadFilesHelper is null. It should not!")
             },
         )

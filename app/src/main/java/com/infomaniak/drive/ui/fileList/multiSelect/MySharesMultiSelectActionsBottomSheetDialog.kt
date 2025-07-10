@@ -19,5 +19,4 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
-class MySharesMultiSelectActionsBottomSheetDialog :
-    MultiSelectActionsBottomSheetDialog(MatomoCategory.MySharesFileAction.categoryName)
+class MySharesMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.MySharesFileAction)

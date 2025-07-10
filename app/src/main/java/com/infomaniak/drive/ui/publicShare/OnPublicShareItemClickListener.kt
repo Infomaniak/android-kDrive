@@ -75,7 +75,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     }
 
     override fun downloadFileClicked() {
-        currentContext.trackPublicShareActionEvent(MatomoName.Download)
+        trackPublicShareActionEvent(MatomoName.Download)
         currentFile?.let { currentContext.downloadFile(drivePermissions, it, ::onDownloadSuccess) }
     }
 
@@ -105,7 +105,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     }
 
     private suspend fun executeDownloadAction(downloadAction: DownloadAction, cacheFile: IOFile) = runCatching {
-        currentContext.trackPublicShareActionEvent(downloadAction.matomoValue)
+        trackPublicShareActionEvent(downloadAction.matomoValue)
         val uri = FileProvider.getUriForFile(currentContext, currentContext.getString(R.string.FILE_AUTHORITY), cacheFile)
 
         when (downloadAction) {

@@ -176,7 +176,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:itemAction="chevron"
-                        app:title="@string/deleteMyAccount"/>
+                        app:title="@string/deleteMyAccount" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>

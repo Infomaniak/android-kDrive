@@ -123,6 +123,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             }
         }
 
+        MatomoDrive.addTrackingCallbackForDebugLog()
+
         runBlocking { initRealm() }
 
         geniusScanIsReady = initGeniusScanSdk()

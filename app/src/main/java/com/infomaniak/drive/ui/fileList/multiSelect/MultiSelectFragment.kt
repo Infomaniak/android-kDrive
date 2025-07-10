@@ -33,6 +33,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.trackBulkActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
@@ -59,7 +60,7 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.whenResultIsOk
 
-abstract class MultiSelectFragment(private val matomoCategory: String) : Fragment(), MultiSelectResult {
+abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) : Fragment(), MultiSelectResult {
 
     protected val mainViewModel: MainViewModel by activityViewModels()
     protected val multiSelectManager = MultiSelectManager()
@@ -75,7 +76,7 @@ abstract class MultiSelectFragment(private val matomoCategory: String) : Fragmen
             data?.extras?.let { bundle ->
                 SelectFolderActivityArgs.fromBundle(bundle).apply {
                     val bulkOperationType = customArgs?.getParcelable<BulkOperationType>(BULK_OPERATION_CUSTOM_TAG)!!
-                    val areAllFromTheSameFolder = customArgs?.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true) ?: true
+                    val areAllFromTheSameFolder = customArgs.getBoolean(ARE_ALL_FROM_THE_SAME_FOLDER_CUSTOM_TAG, true)
 
                     performBulkOperation(
                         type = bulkOperationType,

@@ -92,13 +92,13 @@ object FilePresenter {
     }
 
     fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?) {
-        trackEvent(MatomoCategory.Preview.categoryName, "preview${file.getFileType().value.capitalizeFirstChar()}")
+        trackEvent(MatomoCategory.Preview.value, "preview${file.getFileType().value.capitalizeFirstChar()}")
         val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
         Utils.displayFile(mainViewModel, findNavController(), file, fileList)
     }
 
     fun Fragment.openBookmark(file: File) {
-        requireContext().trackFileActionEvent(MatomoName.OpenBookmark)
+        trackFileActionEvent(MatomoName.OpenBookmark)
         if (file.canUseStoredFile(requireContext())) {
             openBookmarkIntent(file)
         } else {

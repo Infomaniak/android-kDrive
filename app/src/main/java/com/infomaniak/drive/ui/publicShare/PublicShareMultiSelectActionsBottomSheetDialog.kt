@@ -29,7 +29,7 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 
-class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MATOMO_CATEGORY) {
+class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.PublicShareAction) {
 
     private val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
@@ -67,9 +67,5 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
             error?.let { showSnackbar(it, anchor = (requireActivity() as PublicShareActivity).getMainButton()) }
             onActionSelected()
         }
-    }
-
-    companion object {
-        val MATOMO_CATEGORY = MatomoCategory.PublicShareAction.categoryName
     }
 }

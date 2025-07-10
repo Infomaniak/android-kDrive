@@ -55,7 +55,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class GalleryFragment : MultiSelectFragment(MatomoCategory.PicturesFileAction.categoryName), NoItemsLayoutView.INoItemsLayoutView {
+class GalleryFragment : MultiSelectFragment(
+    matomoCategory = MatomoCategory.PicturesFileAction,
+), NoItemsLayoutView.INoItemsLayoutView {
 
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView

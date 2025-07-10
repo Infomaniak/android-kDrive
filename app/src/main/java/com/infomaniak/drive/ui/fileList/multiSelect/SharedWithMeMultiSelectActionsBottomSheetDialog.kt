@@ -21,7 +21,7 @@ import androidx.core.view.isGone
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
 class SharedWithMeMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(
-    matomoCategory = MatomoCategory.SharedWithMeFileAction.categoryName,
+    matomoCategory = MatomoCategory.SharedWithMeFileAction,
 ) {
 
     override fun configureManageCategories(areIndividualActionsVisible: Boolean) {

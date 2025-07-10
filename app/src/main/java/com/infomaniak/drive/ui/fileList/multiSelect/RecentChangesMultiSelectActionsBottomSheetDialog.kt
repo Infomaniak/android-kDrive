@@ -20,5 +20,5 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
 class RecentChangesMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(
-    MatomoCategory.RecentChangesFileAction.categoryName
+    matomoCategory = MatomoCategory.RecentChangesFileAction,
 )

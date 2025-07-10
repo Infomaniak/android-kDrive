@@ -65,6 +65,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -104,7 +105,6 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
@@ -243,13 +243,13 @@ class MainActivity : BaseActivity() {
 
         val gestureDetector = GestureDetector(this@MainActivity, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                context.trackAccountEvent(MatomoName.SwitchDoubleTap.eventName)
+                trackAccountEvent(MatomoName.SwitchDoubleTap.value)
                 mainViewModel.switchToNextUser { navController.navigate(R.id.homeFragment) }
                 return true
             }
 
             override fun onLongPress(e: MotionEvent) {
-                context.trackAccountEvent("longPressDirectAccess")
+                trackAccountEvent(MatomoName.LongPressDirectAccess.value)
                 navController.navigate(R.id.switchUserActivity)
             }
         })
@@ -292,7 +292,7 @@ class MainActivity : BaseActivity() {
         val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
         fab.setOnClickListener {
             if (AccountUtils.getCurrentDrive()?.isDriveFull == true) {
-                trackMyKSuiteEvent(MatomoName.TryAddingFileWithDriveFull.eventName)
+                trackMyKSuiteEvent(MatomoName.TryAddingFileWithDriveFull.value)
                 showQuotasExceededSnackbar(navController)
             } else {
                 navController.navigate(R.id.addFileBottomSheetDialog, args)
@@ -479,7 +479,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        destination.trackDestination(context = this)
+        destination.trackDestination()
     }
 
     private fun handleBottomNavigationVisibility(
@@ -517,7 +517,7 @@ class MainActivity : BaseActivity() {
      */
     private fun handleShortcuts() {
         navigationArgs?.shortcutId?.let { shortcutId ->
-            trackEvent("shortcuts", shortcutId)
+            trackEvent(MatomoCategory.Shortcuts.value, shortcutId)
 
             when (shortcutId) {
                 Shortcuts.SEARCH.id -> {

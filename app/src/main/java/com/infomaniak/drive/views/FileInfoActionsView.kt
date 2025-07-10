@@ -35,8 +35,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
-import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
@@ -511,10 +511,6 @@ class FileInfoActionsView @JvmOverloads constructor(
         val currentContext: Context
         val currentFile: File?
 
-        private fun trackFileActionEvent(name: MatomoName, value: Boolean? = null) {
-            currentContext.trackFileActionEvent(name, value = value?.toFloat())
-        }
-
         fun shareFile()
         fun saveToKDrive()
         fun openWith()
@@ -527,14 +523,16 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun cancelExternalImportClicked() = trackFileActionEvent(MatomoName.CancelExternalImport)
 
         @CallSuper
-        fun colorFolderClicked(color: String?) = currentContext.trackEvent("colorFolder", MatomoName.Switch.eventName)
+        fun colorFolderClicked(color: String?) = trackEvent(MatomoCategory.ColorFolder, MatomoName.Switch)
 
         fun displayInfoClicked()
 
         fun downloadFileClicked() = trackFileActionEvent(MatomoName.Download)
 
         @CallSuper
-        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) = trackFileActionEvent(MatomoName.ConvertToDropbox, isDropBox)
+        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) =
+            trackFileActionEvent(MatomoName.ConvertToDropbox, isDropBox)
+
         fun fileRightsClicked()
         fun goToFolder()
         fun manageCategoriesClicked(fileId: Int)

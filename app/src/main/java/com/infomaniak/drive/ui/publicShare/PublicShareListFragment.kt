@@ -54,7 +54,6 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
@@ -278,7 +277,7 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun downloadAllFiles() {
         // RootSharedFile can either be a folder or a single file
-        requireContext().trackPublicShareActionEvent(MatomoName.DownloadAllFiles)
+        trackPublicShareActionEvent(MatomoName.DownloadAllFiles)
         publicShareViewModel.rootSharedFile.value?.let { file -> requireContext().downloadFile(drivePermissions, file) }
     }
 
@@ -305,10 +304,10 @@ class PublicShareListFragment : FileListFragment() {
     private fun setMainButton() {
         importButton.setOnClickListener {
             if (AccountUtils.currentDriveId == -1) {
-                requireContext().trackPublicShareActionEvent(MatomoName.CreateAccountAd)
+                trackPublicShareActionEvent(MatomoName.CreateAccountAd)
                 safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToObtainKDriveAdBottomSheet())
             } else {
-                requireContext().trackPublicShareActionEvent(MatomoName.BulkSaveToKDrive)
+                trackPublicShareActionEvent(MatomoName.BulkSaveToKDrive)
                 Intent(requireActivity(), SaveExternalFilesActivity::class.java).apply {
                     action = Intent.ACTION_SEND
                     putExtras(

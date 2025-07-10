@@ -25,9 +25,10 @@ import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
 import com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData
+import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
-import com.infomaniak.drive.MatomoDrive.trackMyKSuiteUpgradeBottomSheetEvent
+import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.lib.core.models.user.User
 
 fun Fragment.openMyKSuiteUpgradeBottomSheet(matomoTrackerName: String) {
@@ -35,7 +36,7 @@ fun Fragment.openMyKSuiteUpgradeBottomSheet(matomoTrackerName: String) {
 }
 
 fun Context.openMyKSuiteUpgradeBottomSheet(navController: NavController, matomoTrackerName: String) {
-    trackMyKSuiteUpgradeBottomSheetEvent(matomoTrackerName)
+    trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE_UPGRADE_BOTTOMSHEET, matomoTrackerName)
     navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
 }
 

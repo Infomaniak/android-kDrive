@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.matomo.Matomo.TrackerAction
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackDropboxEvent
@@ -42,7 +43,6 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.MatomoCore.TrackerAction
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
@@ -172,7 +172,7 @@ open class ManageDropboxFragment : Fragment() {
         disableButton.apply {
             initProgress(this@ManageDropboxFragment)
             setOnClickListener {
-                trackDropboxEvent(MatomoName.ConvertToDropbox)
+                trackDropboxEvent(MatomoName.ConvertToFolder)
                 showProgressCatching(ContextCompat.getColor(requireContext(), R.color.title))
                 dropboxViewModel.deleteDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {

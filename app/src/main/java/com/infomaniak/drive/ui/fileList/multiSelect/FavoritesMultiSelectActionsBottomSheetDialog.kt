@@ -19,5 +19,4 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
-class FavoritesMultiSelectActionsBottomSheetDialog :
-    MultiSelectActionsBottomSheetDialog(MatomoCategory.FavoritesFileAction.categoryName)
+class FavoritesMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.FavoritesFileAction)

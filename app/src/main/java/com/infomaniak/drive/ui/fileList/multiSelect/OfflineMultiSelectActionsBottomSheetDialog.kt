@@ -19,5 +19,4 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
-class OfflineMultiSelectActionsBottomSheetDialog :
-    MultiSelectActionsBottomSheetDialog(MatomoCategory.OfflineFileAction.categoryName)
+class OfflineMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.OfflineFileAction)
