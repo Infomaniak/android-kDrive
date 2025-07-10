@@ -89,7 +89,7 @@ object FileController {
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
     }
 
-    fun getChildrenFileWithName(folderId: Int, name: String): List<Int> {
+    fun getIdOfChildrenFileWithName(folderId: Int, name: String): List<Int> {
         return getRealmInstance().use { realm ->
              realm.where(File::class.java)
                  .equalTo(File::parentId.name, folderId)
