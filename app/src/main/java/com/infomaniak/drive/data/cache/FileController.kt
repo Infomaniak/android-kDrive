@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,9 +101,9 @@ object FileController {
 
     fun getIdOfChildrenFileWithName(folderId: Int, name: String): List<Int> {
         return getRealmInstance().use { realm ->
-             realm.where(File::class.java)
-                 .equalTo(File::parentId.name, folderId)
-                 .equalTo(File::name.name, name)
+            realm.where(File::class.java)
+                .equalTo(File::parentId.name, folderId)
+                .equalTo(File::name.name, name)
                 .equalTo(File::type.name, Type.DIRECTORY.value)
                 .findAll()
                 .map { it.id }
