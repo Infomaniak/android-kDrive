@@ -243,7 +243,7 @@ class MainActivity : BaseActivity() {
 
         val gestureDetector = GestureDetector(this@MainActivity, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                context.trackAccountEvent("switchDoubleTap")
+                context.trackAccountEvent(MatomoName.SwitchDoubleTap.eventName)
                 mainViewModel.switchToNextUser { navController.navigate(R.id.homeFragment) }
                 return true
             }
@@ -292,7 +292,7 @@ class MainActivity : BaseActivity() {
         val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
         fab.setOnClickListener {
             if (AccountUtils.getCurrentDrive()?.isDriveFull == true) {
-                trackMyKSuiteEvent("tryAddingFileWithDriveFull")
+                trackMyKSuiteEvent(MatomoName.TryAddingFileWithDriveFull.eventName)
                 showQuotasExceededSnackbar(navController)
             } else {
                 navController.navigate(R.id.addFileBottomSheetDialog, args)

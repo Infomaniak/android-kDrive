@@ -70,6 +70,6 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
     }
 
     companion object {
-        val MATOMO_CATEGORY = MatomoCategory.PublicShareAction.toString()
+        val MATOMO_CATEGORY = MatomoCategory.PublicShareAction.categoryName
     }
 }

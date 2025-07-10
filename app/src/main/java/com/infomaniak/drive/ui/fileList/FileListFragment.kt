@@ -43,6 +43,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -104,7 +106,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
-open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
+open class FileListFragment : MultiSelectFragment(MatomoCategory.FileListFileAction.categoryName),
+    SwipeRefreshLayout.OnRefreshListener,
     NoItemsLayoutView.INoItemsLayoutView {
 
     private var _binding: FragmentFileListBinding? = null
@@ -443,7 +446,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun setupToggleDisplayButton() {
         binding.toggleDisplayButton.setOnClickListener {
             val newListMode = !UiSettings(requireContext()).listMode
-            trackEvent("displayStyle", if (newListMode) "viewList" else "viewGrid")
+            trackEvent(MatomoCategory.DisplayStyle, if (newListMode) MatomoName.ViewList else MatomoName.ViewGrid)
             UiSettings(requireContext()).listMode = newListMode
             fileListViewModel.isListMode.value = getListMode(newListMode)
         }
@@ -914,7 +917,5 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
         const val MAX_DISPLAYED_CATEGORIES = 3
-
-        const val MATOMO_CATEGORY = "fileListFileAction"
     }
 }

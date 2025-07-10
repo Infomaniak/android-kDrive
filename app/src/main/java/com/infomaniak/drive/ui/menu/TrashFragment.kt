@@ -183,10 +183,6 @@ class TrashFragment : FileSubTypeListFragment() {
         }
     }
 
-    companion object {
-        const val MATOMO_CATEGORY = "trashFileAction"
-    }
-
     private inner class SortFiles : () -> Unit {
         override fun invoke() {
             getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->

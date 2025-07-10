@@ -31,6 +31,7 @@ import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
@@ -128,13 +129,13 @@ class LoginActivity : AppCompatActivity() {
             setOnClickListener {
                 signInButton.isEnabled = false
                 showProgressCatching()
-                trackAccountEvent("openLoginWebview")
+                trackAccountEvent(MatomoName.OpenLoginWebview.eventName)
                 infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
             }
         }
 
         signInButton.setOnClickListener {
-            trackAccountEvent("openCreationWebview")
+            trackAccountEvent(MatomoName.OpenCreationWebview.eventName)
             startAccountCreation()
         }
 
@@ -200,7 +201,7 @@ class LoginActivity : AppCompatActivity() {
                     val deeplink = navigationArgs?.publicShareDeeplink
                     if (deeplink.isNullOrBlank()) {
                         trackUserId(AccountUtils.currentUserId)
-                        trackAccountEvent("loggedIn")
+                        trackAccountEvent(MatomoName.LoggedIn.eventName)
                         launchMainActivity()
                     } else {
                         PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)

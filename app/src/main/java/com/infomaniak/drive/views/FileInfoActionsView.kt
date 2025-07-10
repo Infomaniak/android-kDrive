@@ -527,7 +527,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun cancelExternalImportClicked() = trackFileActionEvent(MatomoName.CancelExternalImport)
 
         @CallSuper
-        fun colorFolderClicked(color: String?) = currentContext.trackEvent("colorFolder", "switch")
+        fun colorFolderClicked(color: String?) = currentContext.trackEvent("colorFolder", MatomoName.Switch.eventName)
 
         fun displayInfoClicked()
 

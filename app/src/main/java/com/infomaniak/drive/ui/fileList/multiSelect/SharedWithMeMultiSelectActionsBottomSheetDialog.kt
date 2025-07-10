@@ -18,10 +18,10 @@
 package com.infomaniak.drive.ui.fileList.multiSelect
 
 import androidx.core.view.isGone
-import com.infomaniak.drive.ui.menu.SharedWithMeFragment
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
 class SharedWithMeMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(
-    matomoCategory = SharedWithMeFragment.MATOMO_CATEGORY,
+    matomoCategory = MatomoCategory.SharedWithMeFileAction.categoryName,
 ) {
 
     override fun configureManageCategories(areIndividualActionsVisible: Boolean) {

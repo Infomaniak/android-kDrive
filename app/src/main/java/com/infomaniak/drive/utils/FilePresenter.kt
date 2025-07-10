@@ -25,6 +25,7 @@ import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
 import com.dd.plist.NSString
 import com.dd.plist.PropertyListParser
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
@@ -91,7 +92,7 @@ object FilePresenter {
     }
 
     fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?) {
-        trackEvent("preview", "preview${file.getFileType().value.capitalizeFirstChar()}")
+        trackEvent(MatomoCategory.Preview.categoryName, "preview${file.getFileType().value.capitalizeFirstChar()}")
         val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
         Utils.displayFile(mainViewModel, findNavController(), file, fileList)
     }
