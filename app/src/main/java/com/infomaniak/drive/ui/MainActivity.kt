@@ -243,13 +243,13 @@ class MainActivity : BaseActivity() {
 
         val gestureDetector = GestureDetector(this@MainActivity, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                trackAccountEvent(MatomoName.SwitchDoubleTap.value)
+                trackAccountEvent(MatomoName.SwitchDoubleTap)
                 mainViewModel.switchToNextUser { navController.navigate(R.id.homeFragment) }
                 return true
             }
 
             override fun onLongPress(e: MotionEvent) {
-                trackAccountEvent(MatomoName.LongPressDirectAccess.value)
+                trackAccountEvent(MatomoName.LongPressDirectAccess)
                 navController.navigate(R.id.switchUserActivity)
             }
         })

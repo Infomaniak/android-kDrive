@@ -31,6 +31,7 @@ object MatomoDrive : Matomo {
     override val siteId = 8
 
     enum class MatomoCategory(val value: String) {
+        Account("account"),
         Categories("categories"),
         ColorFolder("colorFolder"),
         Comment("comment"),
@@ -170,6 +171,10 @@ object MatomoDrive : Matomo {
     //endregion
 
     //region Track specific events
+    fun trackAccountEvent(name: MatomoName) {
+        trackEvent(MatomoCategory.Account, name)
+    }
+
     fun trackCategoriesEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
         trackEvent(MatomoCategory.Categories, name, action, value)
     }

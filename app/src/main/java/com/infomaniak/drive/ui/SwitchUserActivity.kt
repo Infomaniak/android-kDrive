@@ -46,7 +46,7 @@ class SwitchUserActivity : AppCompatActivity() {
             val currentUserId = AccountUtils.currentUserId
             val orderedUsers = users.sortedBy { it.id != currentUserId }
             usersRecyclerView.adapter = UserAdapter(orderedUsers) { user ->
-                trackAccountEvent(MatomoName.Switch.value)
+                trackAccountEvent(MatomoName.Switch)
                 AccountUtils.currentUser = user
                 AccountUtils.currentDriveId = -1
                 AccountUtils.reloadApp?.invoke(bundleOf())
@@ -54,7 +54,7 @@ class SwitchUserActivity : AppCompatActivity() {
         }
 
         addUser.setOnClickListener {
-            trackAccountEvent(MatomoName.Add.value)
+            trackAccountEvent(MatomoName.Add)
             startActivity(Intent(this@SwitchUserActivity, LoginActivity::class.java))
         }
 

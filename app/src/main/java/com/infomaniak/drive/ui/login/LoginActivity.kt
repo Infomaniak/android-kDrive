@@ -129,13 +129,13 @@ class LoginActivity : AppCompatActivity() {
             setOnClickListener {
                 signInButton.isEnabled = false
                 showProgressCatching()
-                trackAccountEvent(MatomoName.OpenLoginWebview.value)
+                trackAccountEvent(MatomoName.OpenLoginWebview)
                 infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
             }
         }
 
         signInButton.setOnClickListener {
-            trackAccountEvent(MatomoName.OpenCreationWebview.value)
+            trackAccountEvent(MatomoName.OpenCreationWebview)
             startAccountCreation()
         }
 
@@ -201,7 +201,7 @@ class LoginActivity : AppCompatActivity() {
                     val deeplink = navigationArgs?.publicShareDeeplink
                     if (deeplink.isNullOrBlank()) {
                         trackUserId(AccountUtils.currentUserId)
-                        trackAccountEvent(MatomoName.LoggedIn.value)
+                        trackAccountEvent(MatomoName.LoggedIn)
                         launchMainActivity()
                     } else {
                         PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)
