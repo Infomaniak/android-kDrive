@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import androidx.core.os.bundleOf
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
-import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
@@ -58,7 +57,6 @@ class SwitchUserActivity : AppCompatActivity() {
             startActivity(Intent(this@SwitchUserActivity, LoginActivity::class.java))
         }
 
-        binding.scrollingContent.enableEdgeToEdge()
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 }
