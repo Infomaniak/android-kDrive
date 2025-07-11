@@ -84,7 +84,6 @@ object MatomoDrive : Matomo {
         CreateFolderOnTheFly("createFolderOnTheFly"),
         CreatePrivateFolder("createPrivateFolder"),
         Delete("delete"),
-        DeleteAccount("deleteAccount"), // TODO: Unused ?
         DeleteAfterImport("deleteAfterImport"),
         DeleteFromTrash("deleteFromTrash"),
         DeleteUser("deleteUser"),
@@ -111,8 +110,6 @@ object MatomoDrive : Matomo {
         InviteUser("inviteUser"),
         Like("like"),
         LockApp("lockApp"),
-        LogOut("logOut"), // TODO: Unused ?
-        LogOutConfirm("logOutConfirm"), // TODO: Unused ?
         LoggedIn("loggedIn"),
         LongPressDirectAccess("longPressDirectAccess"),
         Move("move"),
