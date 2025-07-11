@@ -21,6 +21,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.Px
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
@@ -53,19 +54,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.toPx
+import kotlinx.coroutines.*
 
-suspend fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false): Nothing {
-    setFileItemWithoutCategories(file = file, isGrid = isGrid)
+suspend fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false, typeFolder: TypeOfFolder = TypeOfFolder.typeFileList): Nothing {
+    setFileItemWithoutCategories(file = file, typeFolder = typeFolder, isGrid = isGrid)
     categoriesLayout.displayCategoriesForFile(file)
 }
 
-fun ItemFileBinding.setFileItemWithoutCategories(file: File, isGrid: Boolean = false) {
+fun ItemFileBinding.setFileItemWithoutCategories(file: File, typeFolder: TypeOfFolder = TypeOfFolder.typeFileList, isGrid: Boolean = false) {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
     displaySize(file)
     filePreview.displayIcon(file, isGrid, progressLayout)
+    iconLayout.setMargins(left = typeFolder.iconHorizontalMargin, right = typeFolder.iconHorizontalMargin)
     displayExternalImport(file, filePreview, fileProgression, fileDate)
 }
 
@@ -236,4 +241,9 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
             isGone = true
         }
     }
+}
+
+enum class TypeOfFolder(@Px val iconHorizontalMargin: Int){
+    typeFileList(10.toPx()),
+    typeRecentFolder(16.toPx()),;
 }
