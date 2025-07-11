@@ -94,17 +94,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         AppCompatDelegate.setDefaultNightMode(uiSettings.nightMode)
 
         if (BuildConfig.DEBUG) {
-            Stetho.initializeWithDefaults(this)
-            StrictMode.setVmPolicy(
-                VmPolicy.Builder().apply {
-                    detectActivityLeaks()
-                    detectLeakedClosableObjects()
-                    detectLeakedRegistrationObjects()
-                    detectFileUriExposure()
-                    detectContentUriWithoutPermission()
-                    if (SDK_INT >= 29) detectCredentialProtectedWhileLocked()
-                }.build()
-            )
+            configureDebugMode()
         } else {
             // For Microsoft Office app. Show File.getCloudAndFileUris()
             StrictMode.setVmPolicy(VmPolicy.Builder().build())
@@ -119,8 +109,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
                 if (BuildConfig.DEBUG) null else event
             }
         }
-
-        MatomoDrive.addTrackingCallbackForDebugLog()
 
         runBlocking { initRealm() }
 
@@ -158,6 +146,23 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         MqttClientWrapper.init(applicationContext)
 
         MyKSuiteDataUtils.initDatabase(this)
+    }
+
+    private fun configureDebugMode() {
+        Stetho.initializeWithDefaults(this)
+
+        StrictMode.setVmPolicy(
+            VmPolicy.Builder().apply {
+                detectActivityLeaks()
+                detectLeakedClosableObjects()
+                detectLeakedRegistrationObjects()
+                detectFileUriExposure()
+                detectContentUriWithoutPermission()
+                if (SDK_INT >= 29) detectCredentialProtectedWhileLocked()
+            }.build()
+        )
+
+        MatomoDrive.addTrackingCallbackForDebugLog()
     }
 
     override fun onStart(owner: LifecycleOwner) {

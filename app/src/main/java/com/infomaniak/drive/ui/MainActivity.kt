@@ -517,7 +517,7 @@ class MainActivity : BaseActivity() {
      */
     private fun handleShortcuts() {
         navigationArgs?.shortcutId?.let { shortcutId ->
-            trackEvent(MatomoCategory.Shortcuts.value, shortcutId)
+            trackEvent(MatomoCategory.Shortcuts.value, name = shortcutId)
 
             when (shortcutId) {
                 Shortcuts.SEARCH.id -> {
