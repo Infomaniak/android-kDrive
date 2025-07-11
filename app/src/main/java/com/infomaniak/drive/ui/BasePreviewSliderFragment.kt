@@ -137,7 +137,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     var shouldDisplayPageNumber = false
 
                     childFragmentManager.findFragmentByTag("f${previewSliderAdapter.getItemId(position)}")?.apply {
-                        this.trackScreen()
+                        trackScreen()
                         shouldDisplayPageNumber = this is PreviewPDFFragment && tryToUpdatePageCount()
                     }
 

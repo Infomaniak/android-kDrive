@@ -73,6 +73,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -352,7 +353,7 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
 } ?: listOf()
 
 fun Context.shareText(text: String) {
-    trackShareRightsEvent("shareButton")
+    trackShareRightsEvent(MatomoName.ShareButton)
     val intent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, text)

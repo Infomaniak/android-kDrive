@@ -27,6 +27,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -47,7 +49,7 @@ import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
 
-abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: String) : BottomSheetDialogFragment() {
+abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: MatomoCategory) : BottomSheetDialogFragment() {
 
     protected var binding: FragmentBottomSheetMultiSelectActionsBinding by safeBinding()
 
@@ -183,7 +185,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     private fun download() {
-        trackEvent(matomoCategory, "bulkDownload")
+        trackEvent(matomoCategory, MatomoName.BulkDownload)
         if (navigationArgs.areAllFromTheSameFolder) downloadArchive() else downloadFiles()
     }
 

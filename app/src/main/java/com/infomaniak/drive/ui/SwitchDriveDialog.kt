@@ -21,6 +21,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -38,7 +40,7 @@ class SwitchDriveDialog : SelectBottomSheetDialog() {
 
         val driveList = DriveInfosController.getDrives(AccountUtils.currentUserId)
         selectRecyclerView.adapter = SwitchDriveBottomSheetAdapter(driveList) { drive ->
-            trackEvent("drive", "switch")
+            trackEvent(MatomoCategory.Drive, MatomoName.Switch)
             findNavController().popBackStack()
             if (drive.maintenance) {
                 if (drive.isTechnicalMaintenance) {

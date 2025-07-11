@@ -25,6 +25,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.infomaniak.core.utils.format
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes.restrictedShareLink
@@ -98,11 +99,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
                 binding.shareLinkSwitch.isGone = true
             }
             shareLink == null && urlValue.isBlank() -> {
-                context?.trackShareRightsEvent("restrictedShareLink")
+                trackShareRightsEvent(MatomoName.RestrictedShareLink)
                 setRestrictedUi()
             }
             else -> {
-                context?.trackShareRightsEvent("publicShareLink")
+                trackShareRightsEvent(MatomoName.PublicShareLink)
                 setPublicUi()
             }
         }

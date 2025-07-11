@@ -23,6 +23,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
@@ -66,7 +67,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     private fun createCommonFolder() = with(binding) {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgressCatching()
-        trackNewElementEvent("createCommonFolder")
+        trackNewElementEvent(MatomoName.CreateCommonFolder)
 
         newFolderViewModel.createCommonFolder(
             name = folderNameValueInput.text.toString(),

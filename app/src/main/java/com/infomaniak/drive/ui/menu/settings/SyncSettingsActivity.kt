@@ -35,8 +35,8 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.core.utils.format
 import com.infomaniak.core.utils.startOfTheDay
-import com.infomaniak.drive.MatomoDrive.toFloat
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.MatomoName
+import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -385,14 +385,14 @@ class SyncSettingsActivity : BaseActivity() {
     private fun trackPhotoSyncEvents(syncSettings: SyncSettings) {
 
         val dateName = when (syncSettingsViewModel.saveOldPictures.value!!) {
-            SavePicturesDate.SINCE_NOW -> "syncNew"
-            SavePicturesDate.SINCE_FOREVER -> "syncAll"
-            SavePicturesDate.SINCE_DATE -> "syncFromDate"
+            SavePicturesDate.SINCE_NOW -> MatomoName.SyncNew
+            SavePicturesDate.SINCE_FOREVER -> MatomoName.SyncAll
+            SavePicturesDate.SINCE_DATE -> MatomoName.SyncFromDate
         }
 
-        trackPhotoSyncEvent("deleteAfterImport", syncSettings.deleteAfterSync)
-        trackPhotoSyncEvent("createDatedFolders", syncSettings.createDatedSubFolders)
-        trackPhotoSyncEvent("importVideo", syncSettings.syncVideo)
+        trackPhotoSyncEvent(MatomoName.DeleteAfterImport, syncSettings.deleteAfterSync)
+        trackPhotoSyncEvent(MatomoName.CreateDatedFolders, syncSettings.createDatedSubFolders)
+        trackPhotoSyncEvent(MatomoName.ImportVideo, syncSettings.syncVideo)
         trackPhotoSyncEvent(dateName)
     }
 
@@ -413,7 +413,7 @@ class SyncSettingsActivity : BaseActivity() {
                     Dispatchers.IO { disableAutoSync() }
                 }
 
-                trackPhotoSyncEvent(if (activateSyncItem.isChecked) "enabled" else "disabled")
+                trackPhotoSyncEvent(if (activateSyncItem.isChecked) MatomoName.Enabled else MatomoName.Disabled)
             }.onFailure { exception ->
                 showSnackbar(R.string.anErrorHasOccurred)
                 Sentry.withScope { scope ->
@@ -467,9 +467,5 @@ class SyncSettingsActivity : BaseActivity() {
                 addOnPositiveButtonClickListener { syncSettingsViewModel.customDate.value = Date(it).startOfTheDay() }
                 show(supportFragmentManager, "syncDatePicker")
             }
-    }
-
-    private fun trackPhotoSyncEvent(name: String, value: Boolean? = null) {
-        trackEvent("photoSync", name, value = value?.toFloat())
     }
 }

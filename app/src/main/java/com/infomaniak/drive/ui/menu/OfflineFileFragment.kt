@@ -56,10 +56,6 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
         )
     }
 
-    companion object {
-        const val MATOMO_CATEGORY = "offlineFileAction"
-    }
-
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             if (fileAdapter.fileList.isEmpty() || isNewSort) {

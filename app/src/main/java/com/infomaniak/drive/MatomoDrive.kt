@@ -17,85 +17,258 @@
  */
 package com.infomaniak.drive
 
-import android.app.Activity
-import android.content.Context
 import androidx.fragment.app.Fragment
+import com.infomaniak.core.matomo.Matomo
+import com.infomaniak.core.matomo.Matomo.TrackerAction
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
-import com.infomaniak.lib.core.MatomoCore
-import com.infomaniak.lib.core.MatomoCore.TrackerAction
+import com.infomaniak.drive.data.models.BulkOperationType
+import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import org.matomo.sdk.Tracker
 
-object MatomoDrive : MatomoCore {
+object MatomoDrive : Matomo {
 
-    override val Context.tracker: Tracker get() = (this as MainApplication).matomoTracker
+    override val tracker: Tracker by lazy(::buildTracker)
     override val siteId = 8
 
-    const val ACTION_DOWNLOAD_NAME = "download"
-    const val ACTION_OPEN_WITH_NAME = "openWith"
-    const val ACTION_OPEN_BOOKMARK_NAME = "openBookmark"
-    const val ACTION_PRINT_PDF_NAME = "printPdf"
-    const val ACTION_SAVE_TO_KDRIVE_NAME = "saveToKDrive"
-    const val ACTION_SEND_FILE_COPY_NAME = "sendFileCopy"
-
-    const val PUBLIC_SHARE_ACTION_CATEGORY = "publicShareAction"
-
-    fun Fragment.trackCategoriesEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("categories", name, action, value)
+    enum class MatomoCategory(val value: String) {
+        Account("account"),
+        Categories("categories"),
+        ColorFolder("colorFolder"),
+        Comment("comment"),
+        DeepLink("deepLink"),
+        DisplayStyle("displayStyle"),
+        Drive("drive"),
+        Dropbox("dropbox"),
+        FavoritesFileAction("favoritesFileAction"),
+        FileAction("fileAction"),
+        FileList("fileList"),
+        FileListFileAction("fileListFileAction"),
+        InAppReview("inAppReview"),
+        InAppUpdate("inAppUpdate"),
+        MediaPlayer("mediaPlayer"),
+        MySharesFileAction("mySharesFileAction"),
+        NewElement("newElement"),
+        OfflineFileAction("offlineFileAction"),
+        PdfActivityAction("pdfActivityAction"),
+        PhotoSync("photoSync"),
+        PicturesFileAction("picturesFileAction"),
+        Preview("preview"),
+        PublicShareAction("publicShareAction"),
+        RecentChangesFileAction("recentChangesFileAction"),
+        Search("search"),
+        Settings("settings"),
+        ShareAndRights("shareAndRights"),
+        SharedWithMeFileAction("sharedWithMeFileAction"),
+        Shortcuts("shortcuts"),
+        SyncModal("syncModal"),
+        Trash("trash"),
+        TrashFileAction("trashFileAction"),
     }
 
-    fun Context.trackFileActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("fileAction", name, action, value)
+    enum class MatomoName(val value: String) {
+        Add("add"),
+        Assign("assign"),
+        Bulk("bulk"),
+        BulkDownload("bulkDownload"),
+        BulkSaveToKDrive("bulkSaveToKDrive"),
+        BulkSingle("bulkSingle"),
+        CancelExternalImport("cancelExternalImport"),
+        ChangeLimitStorage("changeLimitStorage"),
+        Configure("configure"),
+        ConvertToDropbox("convertToDropbox"),
+        ConvertToFolder("convertToFolder"),
+        Copy("copy"),
+        CreateAccountAd("createAccountAd"),
+        CreateCommonFolder("createCommonFolder"),
+        CreateDatedFolders("createDatedFolders"),
+        CreateDropbox("createDropbox"),
+        CreateFolderOnTheFly("createFolderOnTheFly"),
+        CreatePrivateFolder("createPrivateFolder"),
+        Delete("delete"),
+        DeleteAfterImport("deleteAfterImport"),
+        DeleteFromTrash("deleteFromTrash"),
+        DeleteUser("deleteUser"),
+        Disabled("disabled"),
+        DiscoverLater("discoverLater"),
+        DiscoverNow("discoverNow"),
+        Dislike("dislike"),
+        Download("download"),
+        DownloadAllFiles("downloadAllFiles"),
+        DownloadFromLink("downloadFromLink"),
+        Duration("duration"),
+        Edit("edit"),
+        EmptyTrash("emptyTrash"),
+        Enabled("enabled"),
+        ExpirationDateLink("expirationDateLink"),
+        Favorite("favorite"),
+        Feedback("feedback"),
+        FilterCategory("filterCategory"),
+        FilterDate("filterDate"),
+        FilterFileType("filterFileType"),
+        ImportVideo("importVideo"),
+        InstallUpdate("installUpdate"),
+        Internal("internal"),
+        InviteUser("inviteUser"),
+        Like("like"),
+        LockApp("lockApp"),
+        LoggedIn("loggedIn"),
+        LongPressDirectAccess("longPressDirectAccess"),
+        Move("move"),
+        Offline("offline"),
+        OnlyWifiTransfer("onlyWifiTransfer"),
+        OpenBookmark("openBookmark"),
+        OpenCreationWebview("openCreationWebview"),
+        OpenInBrowser("openInBrowser"),
+        OpenLoginWebview("openLoginWebview"),
+        OpenWith("openWith"),
+        Pause("pause"),
+        Play("play"),
+        PresentAlert("presentAlert"),
+        PrintPdf("printPdf"),
+        ProtectWithPassword("protectWithPassword"),
+        PublicShare("publicShare"),
+        PublicShareExpired("publicShareExpired"),
+        PublicShareLink("publicShareLink"),
+        PublicShareWithPassword("publicShareWithPassword"),
+        PutInTrash("putInTrash"),
+        Remove("remove"),
+        Rename("rename"),
+        RestoreGivenFolder("restoreGivenFolder"),
+        RestoreOriginFolder("restoreOriginFolder"),
+        RestrictedShareLink("restrictedShareLink"),
+        SaveDropbox("saveDropbox"),
+        SaveToKDrive("saveToKDrive"),
+        SendFileCopy("sendFileCopy"),
+        ShareButton("shareButton"),
+        ShareLink("shareLink"),
+        StopShare("stopShare"),
+        Switch("switch"),
+        SwitchDoubleTap("switchDoubleTap"),
+        SwitchEmailOnFileImport("switchEmailOnFileImport"),
+        SwitchExpirationDate("switchExpirationDate"),
+        SwitchLimitStorageSpace("switchLimitStorageSpace"),
+        SwitchProtectWithPassword("switchProtectWithPassword"),
+        SyncAll("syncAll"),
+        SyncFromDate("syncFromDate"),
+        SyncNew("syncNew"),
+        ToggleFullScreen("toggleFullScreen"),
+        TryAddingFileWithDriveFull("tryAddingFileWithDriveFull"),
+        Update("update"),
+        UploadFile("uploadFile"),
+        ViewGrid("viewGrid"),
+        ViewList("viewList"),
     }
 
-    fun Context.trackPublicShareActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent(PUBLIC_SHARE_ACTION_CATEGORY, name, action, value)
+    //region Track global events
+    fun trackEvent(
+        category: MatomoCategory,
+        name: MatomoName,
+        action: TrackerAction = TrackerAction.CLICK,
+        value: Float? = null,
+    ) {
+        trackEvent(category.value, name.value, action, value)
+    }
+    //endregion
+
+    //region Track specific events
+    fun trackAccountEvent(name: MatomoName) {
+        trackEvent(MatomoCategory.Account, name)
     }
 
-    fun Context.trackPdfActivityActionEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("pdfActivityAction", name, action, value)
+    fun trackCategoriesEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.Categories, name, action, value)
     }
 
-    fun Fragment.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        context?.trackShareRightsEvent(name, action, value)
+    fun trackFileActionEvent(name: MatomoName, value: Boolean? = null) {
+        trackEvent(MatomoCategory.FileAction, name, value = value?.toFloat())
     }
 
-    fun Context.trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("shareAndRights", name, action, value)
+    fun trackPublicShareActionEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.PublicShareAction, name, action, value)
     }
 
-    fun Fragment.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        context?.trackNewElementEvent(name, action, value)
+    fun trackPdfActivityActionEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.PdfActivityAction, name, action, value)
     }
 
-    fun Context.trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("newElement", name, action, value)
+    fun trackShareRightsEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackShareRightsEvent(name.value, action, value)
     }
 
-    fun Fragment.trackTrashEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("trash", name, action, value)
+    fun trackShareRightsEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.ShareAndRights.value, name, action, value)
     }
 
-    fun Activity.trackInAppUpdate(name: String) {
-        trackEvent("inAppUpdate", name)
+    fun trackNewElementEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackNewElementEvent(name.value, action, value)
     }
 
-    fun Activity.trackInAppReview(name: String) {
-        trackEvent("inAppReview", name)
+    fun trackNewElementEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.NewElement.value, name, action, value)
     }
 
-    fun Activity.trackDeepLink(name: String) {
-        trackEvent("deepLink", name)
+    fun trackTrashEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.Trash, name, action, value)
     }
 
-    fun Fragment.trackMyKSuiteEvent(name: String) {
+    fun trackInAppUpdate(name: MatomoName) {
+        trackEvent(MatomoCategory.InAppUpdate, name)
+    }
+
+    fun trackInAppReview(name: MatomoName) {
+        trackEvent(MatomoCategory.InAppReview, name)
+    }
+
+    fun trackDeepLink(name: MatomoName) {
+        trackEvent(MatomoCategory.DeepLink, name)
+    }
+
+    fun trackMyKSuiteEvent(name: String) {
         trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE, name)
     }
 
-    fun Context.trackMyKSuiteEvent(name: String) {
-        trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE, name)
+    fun trackDropboxEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
+        trackEvent(MatomoCategory.Dropbox, name, action, value)
     }
 
-    fun Context.trackMyKSuiteUpgradeBottomSheetEvent(name: String) {
-        trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE_UPGRADE_BOTTOMSHEET, name)
+    fun trackSearchEvent(name: MatomoName) {
+        trackEvent(MatomoCategory.Search, name)
     }
+
+    fun trackCommentEvent(name: MatomoName) {
+        trackEvent(MatomoCategory.Comment, name)
+    }
+
+    fun trackBulkActionEvent(category: MatomoCategory, action: BulkOperationType, fileCount: Int) {
+
+        fun BulkOperationType.toMatomoString(): String = name.lowercase().capitalizeFirstChar()
+
+        val matomoName = if (fileCount == 1) MatomoName.BulkSingle else MatomoName.Bulk
+        val name = matomoName.value + action.toMatomoString()
+
+        trackEvent(category.value, name, value = fileCount.toFloat())
+    }
+
+    fun trackMediaPlayerEvent(name: MatomoName, value: Float? = null) {
+        trackEvent(MatomoCategory.MediaPlayer, name, value = value)
+    }
+
+    fun trackSettingsEvent(name: MatomoName, value: Boolean? = null) {
+        trackSettingsEvent(name.value, value = value)
+    }
+
+    fun trackSettingsEvent(name: String, value: Boolean? = null) {
+        trackEvent(MatomoCategory.Settings.value, name, value = value?.toFloat())
+    }
+
+    fun trackPhotoSyncEvent(name: MatomoName, value: Boolean? = null) {
+        trackEvent(MatomoCategory.PhotoSync, name, value = value?.toFloat())
+    }
+    //endregion
+
+    //region Track screens
+    fun Fragment.trackScreen() {
+        trackScreen(path = this::class.java.name, title = this::class.java.simpleName)
+    }
+    //endregion
 }

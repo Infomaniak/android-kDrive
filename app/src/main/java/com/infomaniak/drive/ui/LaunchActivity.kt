@@ -24,6 +24,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
@@ -220,7 +221,7 @@ class LaunchActivity : AppCompatActivity() {
                 setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
             }
 
-            trackDeepLink("internal")
+            trackDeepLink(MatomoName.Internal)
         }
     }
 
@@ -263,9 +264,9 @@ class LaunchActivity : AppCompatActivity() {
         ).toBundle()
 
         val trackerName = when {
-            isPasswordNeeded -> "publicShareWithPassword"
-            isExpired -> "publicShareExpired"
-            else -> "publicShare"
+            isPasswordNeeded -> MatomoName.PublicShareWithPassword
+            isExpired -> MatomoName.PublicShareExpired
+            else -> MatomoName.PublicShare
         }
 
         trackDeepLink(trackerName)

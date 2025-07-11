@@ -35,7 +35,6 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
-import com.infomaniak.drive.MatomoDrive.buildTracker
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
@@ -71,7 +70,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.matomo.sdk.Tracker
 import splitties.init.injectAsAppCtx
 import java.util.UUID
 
@@ -81,7 +79,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         injectAsAppCtx() // Ensures it is always initialized
     }
 
-    val matomoTracker: Tracker by lazy { buildTracker() }
     var geniusScanIsReady = false
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
@@ -97,17 +94,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         AppCompatDelegate.setDefaultNightMode(uiSettings.nightMode)
 
         if (BuildConfig.DEBUG) {
-            Stetho.initializeWithDefaults(this)
-            StrictMode.setVmPolicy(
-                VmPolicy.Builder().apply {
-                    detectActivityLeaks()
-                    detectLeakedClosableObjects()
-                    detectLeakedRegistrationObjects()
-                    detectFileUriExposure()
-                    detectContentUriWithoutPermission()
-                    if (SDK_INT >= 29) detectCredentialProtectedWhileLocked()
-                }.build()
-            )
+            configureDebugMode()
         } else {
             // For Microsoft Office app. Show File.getCloudAndFileUris()
             StrictMode.setVmPolicy(VmPolicy.Builder().build())
@@ -159,6 +146,23 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         MqttClientWrapper.init(applicationContext)
 
         MyKSuiteDataUtils.initDatabase(this)
+    }
+
+    private fun configureDebugMode() {
+        Stetho.initializeWithDefaults(this)
+
+        StrictMode.setVmPolicy(
+            VmPolicy.Builder().apply {
+                detectActivityLeaks()
+                detectLeakedClosableObjects()
+                detectLeakedRegistrationObjects()
+                detectFileUriExposure()
+                detectContentUriWithoutPermission()
+                if (SDK_INT >= 29) detectCredentialProtectedWhileLocked()
+            }.build()
+        )
+
+        MatomoDrive.addTrackingCallbackForDebugLog()
     }
 
     override fun onStart(owner: LifecycleOwner) {

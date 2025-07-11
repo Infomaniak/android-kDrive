@@ -113,10 +113,6 @@ class FavoritesFragment : FileListFragment() {
         )
     }
 
-    companion object {
-        const val MATOMO_CATEGORY = "favoritesFileAction"
-    }
-
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()

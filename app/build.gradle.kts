@@ -1,4 +1,3 @@
-import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
 import java.util.Properties
 
 plugins {
@@ -158,6 +157,7 @@ dependencies {
     implementation(project(":Core:Legacy:AppLock"))
     implementation(project(":Core:Legacy:BugTracker"))
     implementation(project(":Core:Legacy:Stores"))
+    implementation(project(":Core:Matomo"))
     implementation(project(":Core:MyKSuite"))
     implementation(project(":Core:Network"))
     implementation(project(":Core:RecyclerView"))

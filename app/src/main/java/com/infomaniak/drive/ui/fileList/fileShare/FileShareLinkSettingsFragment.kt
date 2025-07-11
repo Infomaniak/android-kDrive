@@ -33,6 +33,7 @@ import com.infomaniak.core.utils.hours
 import com.infomaniak.core.utils.minutes
 import com.infomaniak.core.utils.month
 import com.infomaniak.core.utils.year
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
@@ -293,8 +294,8 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun trackShareRightsEvents(protectWithPassword: Boolean?, expirationDate: Boolean?, downloadFromLink: Boolean?) {
-        trackShareRightsEvent("protectWithPassword", value = protectWithPassword?.toFloat())
-        trackShareRightsEvent("expirationDateLink", value = expirationDate?.toFloat())
-        trackShareRightsEvent("downloadFromLink", value = downloadFromLink?.toFloat())
+        trackShareRightsEvent(MatomoName.ProtectWithPassword, value = protectWithPassword?.toFloat())
+        trackShareRightsEvent(MatomoName.ExpirationDateLink, value = expirationDate?.toFloat())
+        trackShareRightsEvent(MatomoName.DownloadFromLink, value = downloadFromLink?.toFloat())
     }
 }

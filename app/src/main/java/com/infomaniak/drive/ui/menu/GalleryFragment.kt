@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
@@ -54,7 +55,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
-class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.INoItemsLayoutView {
+class GalleryFragment : MultiSelectFragment(
+    matomoCategory = MatomoCategory.PicturesFileAction,
+), NoItemsLayoutView.INoItemsLayoutView {
 
     private var _binding: FragmentGalleryBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -352,7 +355,6 @@ class GalleryFragment : MultiSelectFragment(MATOMO_CATEGORY), NoItemsLayoutView.
 
     companion object {
         const val TAG = "GalleryFragment"
-        const val MATOMO_CATEGORY = "picturesFileAction"
         private const val NUMBER_ITEMS_LOADER = 13
     }
 }

@@ -30,6 +30,7 @@ import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.gson.JsonObject
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -175,7 +176,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         saveButton.showProgressCatching()
         shareableItem?.let { shareable ->
             if (permission == ShareablePermission.DELETE || permission == null) {
-                trackShareRightsEvent("deleteUser")
+                trackShareRightsEvent(MatomoName.DeleteUser)
                 deleteShare(file, shareable, permission)
             } else {
                 trackShareRightsEvent(permission.name.lowercase() + "Right")

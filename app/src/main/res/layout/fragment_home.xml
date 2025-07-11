@@ -54,7 +54,7 @@
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
         </com.google.android.material.appbar.AppBarLayout>
-        
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/homeSwipeRefreshLayout"
             android:layout_width="match_parent"

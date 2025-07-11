@@ -95,10 +95,6 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         }
     }
 
-    companion object {
-        const val MATOMO_CATEGORY = "recentChangesFileAction"
-    }
-
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
 
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {

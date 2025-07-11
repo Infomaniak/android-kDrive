@@ -30,7 +30,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.drive.MatomoDrive.ACTION_PRINT_PDF_NAME
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
@@ -343,7 +343,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun onCacheAddedToOffline() = Unit
 
     override fun printClicked() {
-        requireContext().trackFileActionEvent(ACTION_PRINT_PDF_NAME)
+        trackFileActionEvent(MatomoName.PrintPdf)
         previewPDFHandler.printClicked(
             context = requireContext(),
             onDefaultCase = {

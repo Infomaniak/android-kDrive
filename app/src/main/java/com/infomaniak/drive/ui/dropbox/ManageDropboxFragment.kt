@@ -30,8 +30,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.matomo.Matomo.TrackerAction
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.toFloat
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackDropboxEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
@@ -41,7 +43,6 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.MatomoCore.TrackerAction
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
@@ -171,7 +172,7 @@ open class ManageDropboxFragment : Fragment() {
         disableButton.apply {
             initProgress(this@ManageDropboxFragment)
             setOnClickListener {
-                trackDropboxEvent("convertToFolder")
+                trackDropboxEvent(MatomoName.ConvertToFolder)
                 showProgressCatching(ContextCompat.getColor(requireContext(), R.color.title))
                 dropboxViewModel.deleteDropBox(file).observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
@@ -189,7 +190,7 @@ open class ManageDropboxFragment : Fragment() {
         saveButton.apply {
             initProgress(this@ManageDropboxFragment)
             setOnClickListener {
-                trackDropboxEvent("saveDropbox")
+                trackDropboxEvent(MatomoName.SaveDropbox)
                 currentDropBox?.newPasswordValue = settings.passwordTextInput.text?.toString()
                 currentDropBox?.newLimitFileSize = if (settings.limitStorageSwitch.isChecked) {
                     settings.limitStorageValue.text?.toString()?.toDoubleOrNull()?.let { Utils.convertGigaByteToBytes(it) }
@@ -222,7 +223,7 @@ open class ManageDropboxFragment : Fragment() {
             }
         } else {
             val newSize = it.toString().toDouble()
-            trackDropboxEvent("changeLimitStorage", TrackerAction.INPUT, newSize.toFloat())
+            trackDropboxEvent(MatomoName.ChangeLimitStorage, TrackerAction.INPUT, newSize.toFloat())
             if (Utils.convertGigaByteToBytes(newSize) != currentDropBox?.limitFileSize && validationCount == 0) validationCount++
             limitStorageValue.showOrHideEmptyError()
             hasErrors = false
@@ -231,7 +232,7 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun emailSwitched(dropBox: DropBox?, isChecked: Boolean) {
-        trackDropboxEvent("switchEmailOnFileImport", value = isChecked.toFloat())
+        trackDropboxEvent(MatomoName.SwitchEmailOnFileImport, value = isChecked.toFloat())
 
         if (dropBox?.hasNotification == isChecked) validationCount-- else validationCount++
         currentDropBox?.newHasNotification = isChecked
@@ -239,7 +240,7 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun passwordSwitched(dropBox: DropBox?, isChecked: Boolean) = with(binding.settings) {
-        trackDropboxEvent("switchProtectWithPassword", value = isChecked.toFloat())
+        trackDropboxEvent(MatomoName.SwitchProtectWithPassword, value = isChecked.toFloat())
 
         if (dropBox?.hasPassword == isChecked) validationCount-- else validationCount++
 
@@ -251,7 +252,7 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun expirationDateSwitched(dropBox: DropBox?, isChecked: Boolean) {
-        trackDropboxEvent("switchExpirationDate", value = isChecked.toFloat())
+        trackDropboxEvent(MatomoName.SwitchExpirationDate, value = isChecked.toFloat())
 
         if ((dropBox?.validUntil != null) == isChecked) validationCount-- else validationCount++
 
@@ -265,7 +266,7 @@ open class ManageDropboxFragment : Fragment() {
     }
 
     private fun limitStorageSwitched(dropBox: DropBox?, isChecked: Boolean) = with(binding.settings) {
-        trackDropboxEvent("switchLimitStorageSpace", value = isChecked.toFloat())
+        trackDropboxEvent(MatomoName.SwitchLimitStorageSpace, value = isChecked.toFloat())
 
         if ((dropBox?.limitFileSize != null) == isChecked) validationCount-- else validationCount++
         limitStorageValueLayout.isVisible = isChecked
@@ -275,9 +276,5 @@ open class ManageDropboxFragment : Fragment() {
 
     protected fun enableSaveButton() {
         binding.saveButton.isEnabled = !isManageDropBox || (validationCount > 0 && !hasErrors)
-    }
-
-    private fun trackDropboxEvent(name: String, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
-        trackEvent("dropbox", name, action, value)
     }
 }

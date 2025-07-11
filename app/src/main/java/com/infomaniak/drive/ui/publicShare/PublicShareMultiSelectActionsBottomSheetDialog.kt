@@ -22,14 +22,14 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import com.infomaniak.drive.MatomoDrive.PUBLIC_SHARE_ACTION_CATEGORY
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 
-class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MATOMO_CATEGORY) {
+class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.PublicShareAction) {
 
     private val publicShareViewModel: PublicShareViewModel by activityViewModels()
 
@@ -67,9 +67,5 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
             error?.let { showSnackbar(it, anchor = (requireActivity() as PublicShareActivity).getMainButton()) }
             onActionSelected()
         }
-    }
-
-    companion object {
-        const val MATOMO_CATEGORY = PUBLIC_SHARE_ACTION_CATEGORY
     }
 }

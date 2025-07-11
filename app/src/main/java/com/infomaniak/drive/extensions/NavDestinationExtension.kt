@@ -18,7 +18,6 @@
 package com.infomaniak.drive.extensions
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.navigation.NavDestination
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackScreen
@@ -36,6 +35,9 @@ fun NavDestination.addSentryBreadcrumb() {
 }
 
 @SuppressLint("RestrictedApi")
-fun NavDestination.trackDestination(context: Context) {
-    context.trackScreen(displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"), label.toString())
+fun NavDestination.trackDestination() {
+    trackScreen(
+        path = displayName.substringAfter("${BuildConfig.APPLICATION_ID}:id"),
+        title = label.toString(),
+    )
 }

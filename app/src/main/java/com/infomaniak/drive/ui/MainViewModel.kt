@@ -36,6 +36,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -178,7 +179,7 @@ class MainViewModel(
             activity = fragmentActivity,
             navController = navController,
             onOpeningPicker = {
-                fragmentActivity.trackNewElementEvent("uploadFile")
+                trackNewElementEvent(MatomoName.UploadFile)
                 uploadFilesHelper?.let { setParentFolder() } ?: Sentry.captureMessage("UploadFilesHelper is null. It should not!")
             },
         )

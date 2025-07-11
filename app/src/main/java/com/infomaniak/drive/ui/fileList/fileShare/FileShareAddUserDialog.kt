@@ -30,6 +30,7 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
@@ -125,7 +126,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
             initProgress(this@FileShareAddUserDialog)
             setOnClickListener {
                 showProgressCatching()
-                trackShareRightsEvent("inviteUser")
+                trackShareRightsEvent(MatomoName.InviteUser)
                 checkShare(selectedPermission) { file, body ->
                     createShareAndCloseDialog(file, body)
                 }
