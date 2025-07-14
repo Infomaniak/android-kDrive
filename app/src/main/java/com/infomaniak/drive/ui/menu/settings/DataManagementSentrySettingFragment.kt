@@ -40,7 +40,7 @@ class DataManagementSentrySettingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
-        binding.root.enableEdgeToEdge()
+        root.enableEdgeToEdge()
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 

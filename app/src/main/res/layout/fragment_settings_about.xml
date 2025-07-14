@@ -17,6 +17,7 @@
   -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -71,8 +72,8 @@
                     android:id="@+id/settingsDataManagement"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:title="@string/trackingManagementTitle"
-                    app:itemAction="chevron"/>
+                    app:itemAction="chevron"
+                    app:title="@string/trackingManagementTitle" />
 
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/sourceCodeLayout"
@@ -93,8 +94,8 @@
                     android:id="@+id/appVersionLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:description="V 4.0.0 build 1337"
-                    app:title="@string/aboutAppVersionTitle" />
+                    app:title="@string/aboutAppVersionTitle"
+                    tools:description="V 4.0.0 build 1337" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </androidx.core.widget.NestedScrollView>
