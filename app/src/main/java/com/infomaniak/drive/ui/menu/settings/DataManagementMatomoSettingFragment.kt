@@ -47,6 +47,9 @@ class DataManagementMatomoSettingFragment : Fragment() {
 
         settingsTrackingSwitchMatomo.isChecked = uiSettings.isMatomoTrackingEnabled
 
+        settingsTrackingMatomo.setOnClickListener {
+            settingsTrackingSwitchMatomo.isChecked = !settingsTrackingSwitchMatomo.isChecked
+        }
         settingsTrackingSwitchMatomo.setOnCheckedChangeListener({ _, isChecked ->
             uiSettings.isMatomoTrackingEnabled = isChecked
         })
