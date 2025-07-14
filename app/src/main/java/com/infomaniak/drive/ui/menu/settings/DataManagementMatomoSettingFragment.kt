@@ -52,6 +52,7 @@ class DataManagementMatomoSettingFragment : Fragment() {
         }
         settingsTrackingSwitchMatomo.setOnCheckedChangeListener({ _, isChecked ->
             uiSettings.isMatomoTrackingEnabled = isChecked
+            MatomoDrive.shouldOptOut(!isChecked)
         })
     }
 }

@@ -28,7 +28,9 @@ import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.databinding.FragmentDataManagementSettingBinding
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive
 import com.infomaniak.drive.MatomoDrive.trackEventDataManagement
+import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 
 class DataManagementSettingFragment : Fragment() {
@@ -56,6 +58,7 @@ class DataManagementSettingFragment : Fragment() {
             safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingToDataManagementSentry())
         }
         dataManagementSourceCodeButton.setOnClickListener {
+            trackEventDataManagement(MatomoDrive.MatomoName.ShowSourceCode, UiSettings(requireContext()).isMatomoTrackingEnabled)
             requireContext().openUrl(BuildConfig.GITHUB_REPO_URL)
         }
     }

@@ -277,5 +277,8 @@ object MatomoDrive : Matomo {
         trackScreen(path = this::class.java.name, title = this::class.java.simpleName)
     }
     //endregion
+
+    fun shouldOptOut(shouldOptOut: Boolean) {
+        tracker.isOptOut = shouldOptOut
     }
 }
