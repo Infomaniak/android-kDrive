@@ -223,7 +223,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
      * - The exception was an [ApiController.NetworkException], and we don't want to send them to Sentry
      */
     private fun configSentry() {
-        this.configureSentry(
+        configureSentry(
             isDebug = BuildConfig.DEBUG,
             isSentryTrackingEnabled = true, // TODO: Update isSentryTrackingEnabled with the sharedpreference value when the Sentry opt-out will be enabled
             isErrorException = { _: Throwable? -> false },
