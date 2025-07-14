@@ -28,7 +28,6 @@ import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.databinding.FragmentDataManagementSettingBinding
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.MatomoDrive.SHOW_SOURCE_CODE
 import com.infomaniak.drive.MatomoDrive.trackEventDataManagement
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 
@@ -43,7 +42,7 @@ class DataManagementSettingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.root.enableEdgeToEdge()
+        root.enableEdgeToEdge()
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         setupListeners()
@@ -57,7 +56,6 @@ class DataManagementSettingFragment : Fragment() {
             safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingToDataManagementSentry())
         }
         dataManagementSourceCodeButton.setOnClickListener {
-            trackEventDataManagement(SHOW_SOURCE_CODE)
             requireContext().openUrl(BuildConfig.GITHUB_REPO_URL)
         }
     }

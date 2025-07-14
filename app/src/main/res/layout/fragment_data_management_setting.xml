@@ -51,6 +51,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginVertical="@dimen/marginStandard"
             android:orientation="vertical">
 
             <ImageView
@@ -62,23 +63,19 @@
                 android:src="@drawable/illustration_data_management_paper" />
 
             <TextView
-                android:id="@+id/description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/marginStandard"
-                android:layout_marginTop="18dp"
-                android:layout_marginEnd="@dimen/marginStandard"
-                android:text="@string/trackingManagementDescription"
-                android:textSize="16sp" />
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginTop="@dimen/marginStandardMedium"
+                android:text="@string/trackingManagementDescription" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/dataManagementSourceCodeButton"
                 style="@style/TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/marginStandard"
-                android:text="@string/applicationSourceCode"
-                android:textSize="16sp" />
+                android:layout_marginStart="@dimen/marginStandardMedium"
+                android:text="@string/applicationSourceCode" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/myKSuiteLayout"
@@ -90,7 +87,9 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:divider="@drawable/divider"
+                    android:orientation="vertical"
+                    android:showDividers="middle">
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/dataManagementMatomo"
@@ -99,11 +98,6 @@
                         app:icon="@drawable/ic_matomo"
                         app:itemAction="chevron"
                         app:title="@string/trackingMatomoTitle" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/divider" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/dataManagementSentry"

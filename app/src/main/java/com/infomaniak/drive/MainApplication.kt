@@ -76,13 +76,11 @@ import splitties.init.injectAsAppCtx
 import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
-    private val uiSettings  by lazy { UiSettings(this) }
 
     init {
         injectAsAppCtx() // Ensures it is always initialized
     }
 
-    val matomoTracker: Tracker by lazy { buildTracker(shouldOptOut = !uiSettings.isMatomoTrackingEnabled) }
     var geniusScanIsReady = false
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
