@@ -63,7 +63,7 @@ object MatomoDrive : Matomo {
         SyncModal("syncModal"),
         Trash("trash"),
         TrashFileAction("trashFileAction"),
-    const val SETTINGS_DATA_MANAGEMENT = "settingsDataManagement"
+        SettingsDataManagement("settingsDataManagement")
     }
 
     enum class MatomoName(val value: String) {
@@ -142,6 +142,7 @@ object MatomoDrive : Matomo {
         SendFileCopy("sendFileCopy"),
         ShareButton("shareButton"),
         ShareLink("shareLink"),
+        ShowSourceCode("showSourceCode"),
         StopShare("stopShare"),
         Switch("switch"),
         SwitchDoubleTap("switchDoubleTap"),
@@ -265,6 +266,10 @@ object MatomoDrive : Matomo {
     fun trackPhotoSyncEvent(name: MatomoName, value: Boolean? = null) {
         trackEvent(MatomoCategory.PhotoSync, name, value = value?.toFloat())
     }
+
+    fun trackEventDataManagement(name: MatomoName, value: Boolean? = null) {
+        trackEvent(MatomoCategory.SettingsDataManagement, name, value = value?.toFloat())
+    }
     //endregion
 
     //region Track screens
@@ -272,7 +277,5 @@ object MatomoDrive : Matomo {
         trackScreen(path = this::class.java.name, title = this::class.java.simpleName)
     }
     //endregion
-    fun Fragment.trackEventDataManagement(name: String) {
-        trackEvent(SETTINGS_DATA_MANAGEMENT, name)
     }
 }
