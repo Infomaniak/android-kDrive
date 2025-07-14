@@ -41,7 +41,7 @@ class DataManagementMatomoSettingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
-        binding.root.enableEdgeToEdge()
+        root.enableEdgeToEdge()
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
@@ -49,7 +49,6 @@ class DataManagementMatomoSettingFragment : Fragment() {
 
         settingsTrackingSwitchMatomo.setOnCheckedChangeListener({ _, isChecked ->
             uiSettings.isMatomoTrackingEnabled = isChecked
-            MatomoDrive.shouldOptOut(requireContext().applicationContext, !isChecked)
         })
     }
 }
