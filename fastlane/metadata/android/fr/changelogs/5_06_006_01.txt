@@ -1,0 +1,4 @@
+- Ajout de la couleur du dossier sélectionné dans l'écran de sauvegarde des photos
+- Correction du mode bords à bords dans les paramètres de l'écran de verrouillage
+- Correction de la progression infinie des fichiers importés
+- Correction de la sélection des fichiers depuis la mise à jour d'OnlyOffice
