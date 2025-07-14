@@ -218,7 +218,7 @@ class LoginActivity : AppCompatActivity() {
                 val deeplink = navigationArgs?.publicShareDeeplink
                 if (deeplink.isNullOrBlank()) {
                     trackUserId(AccountUtils.currentUserId)
-                    trackAccountEvent("loggedIn")
+                    trackAccountEvent(MatomoName.LoggedIn)
                     launchMainActivity()
                 } else {
                     PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)
