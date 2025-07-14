@@ -78,7 +78,11 @@ import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ItemUserBinding
