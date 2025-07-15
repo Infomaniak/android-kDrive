@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import com.infomaniak.drive.utils.RealmModules
+import com.infomaniak.drive.utils.runOnMainThread
 import io.realm.DynamicRealm
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -63,9 +64,9 @@ open class AppSettings(
         }
 
         @OptIn(DelicateCoroutinesApi::class)
-        fun getCurrentUserIdFlow(): Flow<Int?> {
+        fun getCurrentUserIdFlow(): Flow<Int?> = runOnMainThread {
             val realm = getRealmInstance()
-            return getAppSettingsAsyncQuery(realm).toFlow().flowOn(Dispatchers.Main)
+            return@runOnMainThread getAppSettingsAsyncQuery(realm).toFlow().flowOn(Dispatchers.Main)
                 .onCompletion { realm.close() }
                 .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
         }
