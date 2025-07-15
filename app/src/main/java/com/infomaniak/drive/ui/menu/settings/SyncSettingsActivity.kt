@@ -59,6 +59,7 @@ import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setMargins
@@ -71,6 +72,7 @@ import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.TimeZone
+import androidx.core.graphics.toColorInt
 
 class SyncSettingsActivity : BaseActivity() {
 
@@ -256,7 +258,7 @@ class SyncSettingsActivity : BaseActivity() {
     private fun observeSelectedDrive() = with(binding) {
         selectDriveViewModel.selectedDrive.distinctUntilChanged().observe(this@SyncSettingsActivity) {
             it?.let {
-                selectDrive.setIconColor(Color.parseColor(it.preferences.color))
+                selectDrive.setIconColor(it.preferences.color.toColorInt())
                 selectDrive.title = it.name
                 selectPath.isVisible = true
             } ?: run {
@@ -281,7 +283,7 @@ class SyncSettingsActivity : BaseActivity() {
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
             if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
                 FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
-                    selectPath.setIconColor(Color.parseColor(it.color))
+                    selectPath.setIconColor(it.color?.toColorInt() ?: context.getColor(R.color.folderDefaultColor))
                     selectPath.title = it.name
                     changeSaveButtonStatus()
                 }
