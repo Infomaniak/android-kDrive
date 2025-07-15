@@ -25,4 +25,5 @@
     <color name="myKSuiteChipOnCardBackground">#F1F1F1</color>
     <color name="myKSuiteDashboardStatusBarBackground">@color/background</color>
     <color name="myKSuiteDashboardNavigationBarBackground">@color/white</color>
+    <color name="folderDefaultColor">@color/secondaryText</color>
 </resources>
