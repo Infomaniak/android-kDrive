@@ -112,7 +112,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             // register the callback as an option
             options.beforeSend = SentryOptions.BeforeSendCallback { event: SentryEvent?, _: Any? ->
                 when {
-                    //if the application is in debug mode discard the events
+                    // If the application is in debug mode discard the events
                     BuildConfig.DEBUG -> null
                     !uiSettings.isSentryTrackingEnabled -> null
                     else -> event

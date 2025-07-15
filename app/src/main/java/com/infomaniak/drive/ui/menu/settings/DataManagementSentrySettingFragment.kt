@@ -49,8 +49,8 @@ class DataManagementSentrySettingFragment : Fragment() {
         settingsTrackingSentry.setOnClickListener {
             settingsTrackingSwitchSentry.isChecked = !settingsTrackingSwitchSentry.isChecked
         }
-        settingsTrackingSwitchSentry.setOnCheckedChangeListener({ _, isChecked ->
+        settingsTrackingSwitchSentry.setOnCheckedChangeListener { _, isChecked ->
             uiSettings.isSentryTrackingEnabled = isChecked
-        })
+        }
     }
 }
