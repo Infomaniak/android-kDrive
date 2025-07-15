@@ -52,7 +52,8 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     override val fileListViewModel: FileListViewModel by viewModels()
 
-    override val rootFolderLayout: RootFolderLayoutBinding by lazy { binding.rootFolderLayout }
+    override val rootFolderLayout: RootFolderLayoutBinding
+        get() = binding.rootFolderLayout
 
     private val selectRootFolderViewModel: SelectRootFolderViewModel by viewModels()
 
