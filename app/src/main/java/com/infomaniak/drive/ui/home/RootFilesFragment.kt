@@ -60,7 +60,8 @@ class RootFilesFragment : BaseRootFolderFragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
     override val fileListViewModel: FileListViewModel by viewModels()
 
-    override val rootFolderLayout: RootFolderLayoutBinding by lazy { binding.rootFolderLayout }
+    override val rootFolderLayout: RootFolderLayoutBinding
+        get() = binding.rootFolderLayout
 
     override val uiSettings by lazy { UiSettings(requireContext()) }
 
