@@ -82,6 +82,7 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ItemUserBinding
@@ -334,7 +335,8 @@ fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel)
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
         (requireActivity() as MainActivity).clickOnBottomBarFolders()
-        mainViewModel.navigateFileListTo(this, folderId)
+        val userDrive = UserDrive(sharedWithMe = false)
+        mainViewModel.navigateFileListTo(this, folderId, userDrive)
     }
 }
 
