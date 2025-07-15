@@ -16,7 +16,7 @@ kotlinFaker = "1.16.0"
 lifecycleProcess = "2.9.1"
 lottie = "6.6.7"
 materialDateTimePicker = "4.2.3"
-mockWebServer = "5.0.0"
+mockWebServer = "5.1.0"
 pahoMqttAndroid = "4.2.4" # Doesn't build when bumped to 4.3 (Waiting SDK 35)
 realmAndroidAdapters = "v4.0.0"
 runner = "1.6.2"
@@ -59,7 +59,7 @@ touch-image-view = { module = "com.github.MikeOrtiz:TouchImageView", version.ref
 # Unit tests
 android-test-core = { module = "de.mannodermaus.junit5:android-test-core", version.ref = "androidTest" }
 android-test-runner = { module = "de.mannodermaus.junit5:android-test-runner", version.ref = "androidTest" }
-androidx-espresso-checker = { module = "org.checkerframework:checker", version.ref = "espresso" }
+androidx-espresso-checker = { module = "org.checkerframework:checker", version.ref = "espresso" } # Not unused, don't remove it
 androidx-espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "espresso" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
