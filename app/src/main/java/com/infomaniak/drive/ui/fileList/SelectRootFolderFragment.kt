@@ -84,9 +84,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
         setupRecentFoldersViews()
 
-        with((activity as SelectFolderActivity).getSaveButton()) {
-            isGone = true
-        }
+        (activity as SelectFolderActivity).hideSaveButton()
 
         rootFolderLayout.cardView.setMargins(top = 8.toPx())
 
@@ -126,13 +124,13 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     private fun setupRecentFoldersViews() {
         viewLifecycleOwner.lifecycleScope.launch {
-            selectRootFolderViewModel.getRecentFoldersViewModel(RECENT_FOLDER_NUMBER)
+            selectRootFolderViewModel.getRecentFolders(RECENT_FOLDER_NUMBER)
             selectRootFolderViewModel.recentFiles.collectLatest { files ->
                 _binding?.let {
                     it.recentFolderTitle.isGone = files.isEmpty()
                     it.recentListLayout.isGone = files.isEmpty()
 
-                    files.forEachIndexed { index, file ->
+                    files.reversed().forEachIndexed { index, file ->
                         val binding = recentFoldersBindings.getOrElse(index) { return@collectLatest }
                         launch(start = CoroutineStart.UNDISPATCHED) { binding.setupRecentFolderView(file) }
                     }
