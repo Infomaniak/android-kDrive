@@ -99,7 +99,6 @@ import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setColorNavigationBar
 import com.infomaniak.drive.utils.setColorStatusBar
-import com.infomaniak.drive.utils.showNoRight
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
@@ -272,8 +271,10 @@ class MainActivity : BaseActivity() {
 
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
-            if (it.noRights) {
-                binding.mainFab.post { showNoRight() }
+            if (it.deepLinkFileNotFound) {
+                binding.mainFab.apply {
+                    post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
+                }
             } else {
                 if (it.destinationFileId > 0) {
                     clickOnBottomBarFolders()
