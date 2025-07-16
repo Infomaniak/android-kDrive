@@ -252,7 +252,6 @@ class SaveExternalFilesActivity : BaseActivity() {
                         SelectFolderActivityArgs(
                             userId = selectDriveViewModel.selectedUserId.value!!,
                             driveId = selectDriveViewModel.selectedDrive.value?.id!!,
-                            folderId = -1,
                         ).toBundle()
                     )
                     selectFolderResultLauncher.launch(this)
