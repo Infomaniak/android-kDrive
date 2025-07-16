@@ -32,7 +32,6 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
 import android.os.StatFs
 import android.provider.MediaStore
-import android.text.format.Formatter
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.transition.TransitionSet
@@ -422,42 +421,6 @@ fun OneTimeWorkRequest.Builder.setExpeditedIfAvailable() = apply {
 fun Context.openSupport() {
     ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.FEEDBACK.id)
     openUrl(SUPPORT_URL)
-}
-
-fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): String {
-
-    fun Long.binaryToDecimal(): Long {
-
-        val binaryUnit = 1_024.0f
-        val decimalUnit = 1_000.0f
-        var units = 0 // BYTE
-        val maxUnits = 5 // KILOBYTE, MEGABYTE, GIGABYTE, TERABYTE, PETABYTE
-        var result = abs(this).toFloat()
-
-        while (result > 900 && units < maxUnits) {
-            units++
-            result /= binaryUnit
-        }
-
-        if (valueOnly) return result.toLong()
-
-        repeat(units) {
-            result *= decimalUnit
-        }
-
-        return result.toLong()
-    }
-
-    val decimalSize = when {
-        valueOnly -> size.binaryToDecimal()
-        else -> size
-    }
-
-    return if (valueOnly) {
-        "$decimalSize"
-    } else {
-        Formatter.formatShortFileSize(this, decimalSize)
-    }
 }
 
 fun Context.shareFile(getUriToShare: () -> Uri?) {

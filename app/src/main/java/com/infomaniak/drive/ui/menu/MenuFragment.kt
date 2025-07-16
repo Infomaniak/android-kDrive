@@ -32,13 +32,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.FormatterFileSize.formatShortFileSize
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.formatShortBinarySize
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.loadAvatar
@@ -79,8 +79,8 @@ class MenuFragment : Fragment() {
                     val progress = (currentDrive.usedSize.toDouble() / currentDrive.size) * 1_000.0
                     progressDriveQuota.progress = progress.toInt()
 
-                    val usedSize = requireContext().formatShortBinarySize(currentDrive.usedSize)
-                    val totalSize = requireContext().formatShortBinarySize(currentDrive.size)
+                    val usedSize = requireContext().formatShortFileSize(currentDrive.usedSize)
+                    val totalSize = requireContext().formatShortFileSize(currentDrive.size)
                     textDriveQuota.text = "$usedSize / $totalSize"
                 }
             }

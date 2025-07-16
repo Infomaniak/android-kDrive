@@ -25,11 +25,11 @@ import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
+import com.infomaniak.core.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
-import com.infomaniak.drive.utils.formatShortBinarySize
 import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 
 class NotEnoughStorageView @JvmOverloads constructor(
@@ -47,8 +47,8 @@ class NotEnoughStorageView @JvmOverloads constructor(
             if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
                 this@NotEnoughStorageView.isVisible = true
 
-                val usedStorage = context.formatShortBinarySize(usedSize, valueOnly = true)
-                val totalStorage = context.formatShortBinarySize(size)
+                val usedStorage = context.formatShortFileSize(usedSize, valueOnly = true)
+                val totalStorage = context.formatShortFileSize(size)
                 progressIndicator.progress = (storagePercentage).toInt()
                 title.text = "$usedStorage / $totalStorage"
 
