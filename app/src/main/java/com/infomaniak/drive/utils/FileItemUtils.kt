@@ -31,6 +31,7 @@ import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
 import coil.load
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.infomaniak.core.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.thumbnails.ThumbnailsUtils.getLocalThumbnail
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
@@ -96,7 +97,7 @@ private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
 
 private fun ItemFileBinding.displaySize(file: File) {
     file.size?.let {
-        fileSize.text = context.formatShortBinarySize(it)
+        fileSize.text = context.formatShortFileSize(it)
         fileSeparator.isVisible = true
     } ?: run {
         fileSize.text = ""
