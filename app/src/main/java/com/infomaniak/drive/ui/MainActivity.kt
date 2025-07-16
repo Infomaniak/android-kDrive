@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,6 +99,7 @@ import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setColorNavigationBar
 import com.infomaniak.drive.utils.setColorStatusBar
+import com.infomaniak.drive.utils.showNoRight
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import com.infomaniak.lib.applock.LockActivity
 import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
@@ -192,7 +193,6 @@ class MainActivity : BaseActivity() {
         fileObserver.startWatching()
 
         setupBottomNavigation()
-        handleNavigateToDestinationFileId()
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
@@ -200,6 +200,7 @@ class MainActivity : BaseActivity() {
         setupDrivePermissions()
         handleInAppReview()
         handleShortcuts()
+        handleNavigateToDestinationFileId()
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
@@ -271,13 +272,17 @@ class MainActivity : BaseActivity() {
 
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
-            if (it.destinationFileId > 0) {
-                clickOnBottomBarFolders()
-                mainViewModel.navigateFileListTo(
-                    navController,
-                    it.destinationFileId,
-                    it.destinationUserDrive ?: UserDrive()
-                )
+            if (it.noRights) {
+                binding.mainFab.post { showNoRight() }
+            } else {
+                if (it.destinationFileId > 0) {
+                    clickOnBottomBarFolders()
+                    mainViewModel.navigateFileListTo(
+                        navController,
+                        it.destinationFileId,
+                        it.destinationUserDrive ?: UserDrive()
+                    )
+                }
             }
         }
     }

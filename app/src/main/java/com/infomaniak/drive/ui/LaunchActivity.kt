@@ -220,6 +220,8 @@ class LaunchActivity : AppCompatActivity() {
 
             DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
                 setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
+            } ?: run {
+                mainActivityExtras = MainActivityArgs(noRights = true).toBundle()
             }
 
             trackDeepLink(MatomoName.Internal)

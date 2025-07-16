@@ -524,6 +524,10 @@ fun MainActivity.showQuotasExceededSnackbar(navController: NavController) {
     )
 }
 
+fun MainActivity.showNoRight() {
+    showSnackbar(title = "test", anchor = getMainFab())
+}
+
 fun String.isUrlFile() = endsWith(".url", ignoreCase = true)
 
 fun String.isWeblocFile() = endsWith(".webloc", ignoreCase = true)
