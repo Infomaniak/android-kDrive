@@ -21,7 +21,6 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.Px
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
@@ -61,7 +60,7 @@ import kotlinx.coroutines.withContext
 suspend fun ItemFileBinding.setFileItem(
     file: File,
     isGrid: Boolean = false,
-    typeFolder: TypeOfFolder = TypeOfFolder.typeFileList
+    typeFolder: TypeFolder = TypeFolder.fileList
 ): Nothing {
     setFileItemWithoutCategories(file = file, typeFolder = typeFolder, isGrid = isGrid)
     categoriesLayout.displayCategoriesForFile(file)
@@ -69,7 +68,7 @@ suspend fun ItemFileBinding.setFileItem(
 
 fun ItemFileBinding.setFileItemWithoutCategories(
     file: File,
-    typeFolder: TypeOfFolder = TypeOfFolder.typeFileList,
+    typeFolder: TypeFolder = TypeFolder.fileList,
     isGrid: Boolean = false
 ) {
     fileName.text = file.getDisplayName(context)
@@ -251,7 +250,7 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
     }
 }
 
-enum class TypeOfFolder(@Px val iconHorizontalMargin: Int) {
-    typeFileList(10.toPx()),
-    typeRecentFolder(16.toPx()), ;
+enum class TypeFolder(val iconHorizontalMargin: Int) {
+    fileList(10.toPx()),
+    recentFolder(16.toPx()), ;
 }

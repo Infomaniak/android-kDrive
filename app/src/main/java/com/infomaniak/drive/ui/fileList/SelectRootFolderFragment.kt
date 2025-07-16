@@ -37,10 +37,9 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.TypeOfFolder
+import com.infomaniak.drive.utils.TypeFolder
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.toPx
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -86,7 +85,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
         (activity as SelectFolderActivity).hideSaveButton()
 
-        rootFolderLayout.cardView.setMargins(top = 8.toPx())
+        rootFolderLayout.cardView.setMargins(top = resources.getDimension(R.dimen.marginStandardSmall).toInt())
 
         setupItems(
             folderLayout = binding.rootFolderLayout,
@@ -146,7 +145,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
                 SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(file.id, file.name)
             )
         }
-        itemViewFile.setFileItem(file = file, typeFolder = TypeOfFolder.typeRecentFolder)
+        itemViewFile.setFileItem(file = file, typeFolder = TypeFolder.recentFolder)
 
     }
 
