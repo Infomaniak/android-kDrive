@@ -521,6 +521,7 @@
     <string name="noFilesDescriptionNoNetwork">Die Informationen des Ordners können nicht wiederhergestellt werden. Bitte überprüfen Sie Ihre Netzwerkverbindung oder versuchen Sie es später noch einmal.</string>
     <string name="noFilesDescriptionWithCreationRights">Dieser Ordner ist leer. Klicken Sie auf den +Button, um hier Dateien hinzuzufügen.</string>
     <string name="noMediaFolderTitle">Keine Medienordner vorhanden</string>
+    <string name="noRightsToOfficeLink">Kein Konto hat Zugriff auf diese Datei</string>
     <string name="noSelectMediaFolders">Kein Ordner ausgewählt</string>
     <string name="noSyncFolderNotificationDescription">Klicken Sie hier, um die zu synchronisierenden Ordner zu konfigurieren</string>
     <string name="noSyncFolderNotificationTitle">Keine Ordner für die automatische Sicherung ausgewählt</string>
