@@ -76,6 +76,7 @@ import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import splitties.coroutines.repeatWhileActive
@@ -261,6 +262,7 @@ class LoginActivity : AppCompatActivity() {
                     openLoginWebView()
                 } else {
                     handleCrossAppLogin()
+                    delay(1_000L) // Add some delay so the button won't blink back into its original color before leaving the Activity
                 }
             }
         }
