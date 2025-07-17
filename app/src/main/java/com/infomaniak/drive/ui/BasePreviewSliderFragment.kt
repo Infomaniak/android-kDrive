@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,8 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewPDFFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderAdapter
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
+import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils
+import com.infomaniak.drive.ui.fileList.preview.playback.PreviewPlaybackFragment
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.openOnlyOfficeDocument

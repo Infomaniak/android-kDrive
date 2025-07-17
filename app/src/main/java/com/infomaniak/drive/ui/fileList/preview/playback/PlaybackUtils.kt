@@ -53,6 +53,7 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import java.util.concurrent.Executor
 
@@ -143,19 +144,11 @@ object PlaybackUtils {
     }
 
     fun getPictureInPictureParams(ratio: Rational): PictureInPictureParams? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val pipParams = PictureInPictureParams.Builder().setAspectRatio(ratio)
 
-            val pipParams = PictureInPictureParams.Builder()
-                .setAspectRatio(ratio)
+        if (Build.VERSION.SDK_INT >= 31) pipParams.setAutoEnterEnabled(true)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                pipParams.setAutoEnterEnabled(true)
-            }
-
-            pipParams.build()
-        } else {
-            null
-        }
+        return pipParams.build()
     }
 
     private fun getRunnable(callback: (MediaController) -> Unit): Runnable {
@@ -182,6 +175,7 @@ object PlaybackUtils {
         }
     }
 
+    @OptIn(ManualAuthorizationRequired::class)
     private fun Context.getDataSourceFactory(): DataSource.Factory {
         val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
             setUserAgent(Util.getUserAgent(this@getDataSourceFactory, getString(R.string.app_name)))

@@ -176,12 +176,11 @@ dependencies {
 
     implementation(libs.splitties.main.thread)
 
-    val exoplayer_version = "1.7.1"
-    implementation("androidx.media3:media3-exoplayer:$exoplayer_version")
-    implementation("androidx.media3:media3-exoplayer-dash:$exoplayer_version")
-    implementation("androidx.media3:media3-ui:$exoplayer_version")
-    implementation("androidx.media3:media3-datasource-okhttp:$exoplayer_version")
-    implementation("androidx.media3:media3-session:$exoplayer_version")
+    implementation(libs.exoplayer)
+    implementation(libs.exoplayer.dash)
+    implementation(libs.exoplayer.media3.ui)
+    implementation(libs.exoplayer.media3.datasource)
+    implementation(libs.exoplayer.media3.session)
 
     implementation(libs.android.pdfview)
     implementation(libs.dots.indicator)

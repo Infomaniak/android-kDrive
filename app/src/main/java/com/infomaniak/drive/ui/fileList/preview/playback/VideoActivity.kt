@@ -129,11 +129,9 @@ class VideoActivity : AppCompatActivity() {
     }
 
     private fun setPIPParams() {
-        if (SDK_INT >= 26) {
-            videoRatio?.let {
-                getPictureInPictureParams(it)?.let { pictureInPictureParams ->
-                    setPictureInPictureParams(pictureInPictureParams)
-                }
+        videoRatio?.let {
+            getPictureInPictureParams(it)?.let { pictureInPictureParams ->
+                setPictureInPictureParams(pictureInPictureParams)
             }
         }
     }
