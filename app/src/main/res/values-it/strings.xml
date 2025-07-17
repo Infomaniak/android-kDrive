@@ -521,6 +521,7 @@
     <string name="noFilesDescriptionNoNetwork">Impossibile recuperare le informazioni della cartella. Verificare la connessione di rete o riprovare più tardi.</string>
     <string name="noFilesDescriptionWithCreationRights">La cartella è vuota. Selezionare il pulsante + per aggiungere file.</string>
     <string name="noMediaFolderTitle">Nessuna cartella media disponibile</string>
+    <string name="noRightsToOfficeLink">Nessun account ha accesso a questo file</string>
     <string name="noSelectMediaFolders">Nessuna cartella selezionata</string>
     <string name="noSyncFolderNotificationDescription">Clicca qui per configurare le cartelle da sincronizzare</string>
     <string name="noSyncFolderNotificationTitle">Nessuna cartella selezionata per il backup automatico</string>

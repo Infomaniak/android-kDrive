@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -192,7 +192,6 @@ class MainActivity : BaseActivity() {
         fileObserver.startWatching()
 
         setupBottomNavigation()
-        handleNavigateToDestinationFileId()
 
         navController.addOnDestinationChangedListener { _, dest, args -> onDestinationChanged(dest, args) }
 
@@ -200,6 +199,7 @@ class MainActivity : BaseActivity() {
         setupDrivePermissions()
         handleInAppReview()
         handleShortcuts()
+        handleNavigateToDestinationFileId()
 
         LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
 
@@ -271,13 +271,19 @@ class MainActivity : BaseActivity() {
 
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
-            if (it.destinationFileId > 0) {
-                clickOnBottomBarFolders()
-                mainViewModel.navigateFileListTo(
-                    navController,
-                    it.destinationFileId,
-                    it.destinationUserDrive ?: UserDrive()
-                )
+            if (it.deepLinkFileNotFound) {
+                binding.mainFab.apply {
+                    post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
+                }
+            } else {
+                if (it.destinationFileId > 0) {
+                    clickOnBottomBarFolders()
+                    mainViewModel.navigateFileListTo(
+                        navController,
+                        it.destinationFileId,
+                        it.destinationUserDrive ?: UserDrive()
+                    )
+                }
             }
         }
     }

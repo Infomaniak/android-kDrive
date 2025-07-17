@@ -532,6 +532,7 @@
     <string name="noFilesDescriptionNoNetwork">Unable to retrieve information from the folder. Please check your network connection or try again later.</string>
     <string name="noFilesDescriptionWithCreationRights">This folder is empty. Click the + button to add files here.</string>
     <string name="noMediaFolderTitle">No media folders available</string>
+    <string name="noRightsToOfficeLink">No account has access to this file</string>
     <string name="noSelectMediaFolders">No folder selected</string>
     <string name="noSyncFolderNotificationDescription">Click here to configure the folders to synchronize</string>
     <string name="noSyncFolderNotificationTitle">No folder selected for automatic backup</string>

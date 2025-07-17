@@ -521,6 +521,7 @@
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
     <string name="noFilesDescriptionWithCreationRights">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noMediaFolderTitle">Aucun dossier de médias disponible</string>
+    <string name="noRightsToOfficeLink">Aucun compte n’a accès à ce fichier</string>
     <string name="noSelectMediaFolders">Aucun dossier sélectionné</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>
     <string name="noSyncFolderNotificationTitle">Aucun dossier sélectionné pour la sauvegarde automatique</string>
