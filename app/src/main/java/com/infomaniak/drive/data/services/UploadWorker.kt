@@ -576,15 +576,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             }
         }
 
-        fun Context.trackUploadWorkerProgress(): LiveData<MutableList<WorkInfo>> {
+        fun Context.trackUploadWorkerProgress(): LiveData<List<WorkInfo>> {
             return trackUploadWorker(listOf(WorkInfo.State.RUNNING))
         }
 
-        fun Context.trackUploadWorkerSucceeded(): LiveData<MutableList<WorkInfo>> {
+        fun Context.trackUploadWorkerSucceeded(): LiveData<List<WorkInfo>> {
             return trackUploadWorker(listOf(WorkInfo.State.SUCCEEDED))
         }
 
-        private fun Context.trackUploadWorker(states: List<WorkInfo.State>): LiveData<MutableList<WorkInfo>> {
+        private fun Context.trackUploadWorker(states: List<WorkInfo.State>): LiveData<List<WorkInfo>> {
             return WorkManager.getInstance(this).getWorkInfosLiveData(uploadWorkerQuery(states))
         }
     }
