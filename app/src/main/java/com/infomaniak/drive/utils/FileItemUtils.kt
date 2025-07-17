@@ -252,5 +252,5 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
 
 enum class TypeFolder(val iconHorizontalMargin: Int) {
     fileList(10.toPx()),
-    recentFolder(16.toPx()), ;
+    recentFolder(16.toPx()),
 }

@@ -63,7 +63,6 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSelectRootFolderBinding.inflate(inflater, container, false).also {
             _binding = it
-            inflateCardviewFileListBinding()
         }.root
     }
 
@@ -111,16 +110,6 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         _binding = null
     }
 
-    private fun inflateCardviewFileListBinding() {
-        repeat(RECENT_FOLDER_NUMBER) {
-            recentFoldersBindings.add(
-                CardviewFileListBinding.inflate(layoutInflater)
-                    .apply { this.root.isGone = true }
-                    .also { binding.recentListLayout.addView(it.root, 0) }
-            )
-        }
-    }
-
     private fun setupRecentFoldersViews() {
         viewLifecycleOwner.lifecycleScope.launch {
             selectRootFolderViewModel.getRecentFolders(RECENT_FOLDER_NUMBER)
@@ -129,9 +118,14 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
                     it.recentFolderTitle.isGone = files.isEmpty()
                     it.recentListLayout.isGone = files.isEmpty()
 
-                    files.reversed().forEachIndexed { index, file ->
-                        val binding = recentFoldersBindings.getOrElse(index) { return@collectLatest }
-                        launch(start = CoroutineStart.UNDISPATCHED) { binding.setupRecentFolderView(file) }
+                    files.forEachIndexed { _, file ->
+                        val recentCard = CardviewFileListBinding.inflate(layoutInflater)
+                            .apply { this.root.isGone = true }
+                            .also { binding.recentListLayout.addView(it.root, 0) }
+
+                        recentFoldersBindings.add(recentCard)
+
+                        launch(start = CoroutineStart.UNDISPATCHED) { recentCard.setupRecentFolderView(file) }
                     }
                 }
             }
@@ -157,6 +151,6 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     )
 
     companion object {
-        const val RECENT_FOLDER_NUMBER = 3
+        private const val RECENT_FOLDER_NUMBER = 3
     }
 }
