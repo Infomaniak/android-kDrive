@@ -23,7 +23,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentSettingsAboutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
@@ -46,6 +48,10 @@ class AboutSettingsFragment : Fragment() {
 
         privacyLayout.setOnClickListener {
             requireContext().openUrl(GDPR_URL)
+        }
+
+        settingsDataManagement.setOnClickListener {
+            safelyNavigate(R.id.dataManagementSettingFragment)
         }
 
         sourceCodeLayout.setOnClickListener {
