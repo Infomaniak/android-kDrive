@@ -42,6 +42,8 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
+import com.infomaniak.core.login.crossapp.internal.deviceinfo.DeviceInfoUpdateManager
+import com.infomaniak.drive.data.services.DeviceInfoUpdateWorker
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
@@ -92,6 +94,10 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
         val uiSettings = UiSettings(this)
         AppCompatDelegate.setDefaultNightMode(uiSettings.nightMode)
+
+        applicationScope.launch {
+            DeviceInfoUpdateManager.sharedInstance.scheduleWorkerOnDeviceInfoUpdate<DeviceInfoUpdateWorker>()
+        }
 
         if (BuildConfig.DEBUG) {
             configureDebugMode()
