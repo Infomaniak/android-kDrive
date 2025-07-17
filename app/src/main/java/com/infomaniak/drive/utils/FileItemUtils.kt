@@ -49,24 +49,35 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.toPx
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-suspend fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false): Nothing {
-    setFileItemWithoutCategories(file = file, isGrid = isGrid)
+suspend fun ItemFileBinding.setFileItem(
+    file: File,
+    isGrid: Boolean = false,
+    typeFolder: TypeFolder = TypeFolder.fileList
+): Nothing {
+    setFileItemWithoutCategories(file = file, typeFolder = typeFolder, isGrid = isGrid)
     categoriesLayout.displayCategoriesForFile(file)
 }
 
-fun ItemFileBinding.setFileItemWithoutCategories(file: File, isGrid: Boolean = false) {
+fun ItemFileBinding.setFileItemWithoutCategories(
+    file: File,
+    typeFolder: TypeFolder = TypeFolder.fileList,
+    isGrid: Boolean = false
+) {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
     displaySize(file)
     filePreview.displayIcon(file, isGrid, progressLayout)
+    iconLayout.setMargins(left = typeFolder.iconHorizontalMargin, right = typeFolder.iconHorizontalMargin)
     displayExternalImport(file, filePreview, fileProgression, fileDate)
 }
 
@@ -237,4 +248,9 @@ fun ProgressLayoutView.setupFileProgress(file: File, containsProgress: Boolean =
             isGone = true
         }
     }
+}
+
+enum class TypeFolder(val iconHorizontalMargin: Int) {
+    fileList(10.toPx()),
+    recentFolder(16.toPx()),
 }

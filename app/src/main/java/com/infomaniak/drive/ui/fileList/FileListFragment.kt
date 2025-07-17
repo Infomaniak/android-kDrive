@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,6 +88,7 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.getAdjustedColumnNumber
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
+import com.infomaniak.drive.utils.observeNavigateFileListTo
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.NoItemsLayoutView
 import com.infomaniak.lib.core.utils.SentryLog
@@ -307,6 +308,8 @@ open class FileListFragment : MultiSelectFragment(
             )
             binding.noFilesLayout.setMargins(bottom = resources.getDimension(R.dimen.appBarHeight).toInt() + it.bottom)
         }
+
+        observeNavigateFileListTo(mainViewModel, fileListViewModel)
     }
 
     private fun setupToolbars() {

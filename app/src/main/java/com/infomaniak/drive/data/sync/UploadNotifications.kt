@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.ui.LaunchActivityArgs
@@ -191,6 +192,22 @@ object UploadNotifications {
         )
     }
 
+    fun getDestinationFolderId(resources: UploadFile): Int {
+        val matches = resources.remoteSubFolder?.split("/")
+        var folderId: Int = resources.remoteFolder
+        if (matches != null) {
+            for (match in matches) {
+                val childrenId = FileController.getIdOfChildrenFileWithName(folderId, match)
+                if (childrenId.isNotEmpty()) {
+                    folderId = childrenId.first()
+                } else {
+                    return folderId
+                }
+            }
+        }
+        return folderId
+    }
+
     fun showCancelledByUserNotification(context: Context) {
         showNotification(
             context = context,
@@ -254,7 +271,7 @@ object UploadNotifications {
                 LaunchActivityArgs(
                     destinationUserId = userId,
                     destinationDriveId = driveId,
-                    destinationRemoteFolderId = remoteFolder
+                    destinationRemoteFolderId = getDestinationFolderId(this@progressPendingIntent)
                 ).toBundle()
             )
         }
