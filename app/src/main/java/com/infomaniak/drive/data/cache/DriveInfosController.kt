@@ -125,6 +125,18 @@ object DriveInfosController {
         }
     }
 
+    fun deleteDriveIntoDriveInfo(userId: Int) {
+        getRealmInstance().use { realm ->
+            realm.executeTransaction {
+                val drives = realm.where(Drive::class.java)
+                    .equalTo(Drive::userId.name, userId)
+                    .findAll()
+
+                drives.map { it.deleteFromRealm() }
+            }
+        }
+    }
+
     fun getUsers(userIds: ArrayList<Int>? = arrayListOf()): List<DriveUser> {
         return getRealmInstance().use { realm ->
             val userList = realm.copyFromRealm(realm.where(DriveUser::class.java).apply {

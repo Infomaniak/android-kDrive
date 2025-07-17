@@ -21,6 +21,7 @@ import android.content.Context
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
+import com.infomaniak.drive.data.cache.DriveInfosController.deleteDriveIntoDriveInfo
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
@@ -466,6 +467,7 @@ object FileController {
                 }
             }
         }
+        deleteDriveIntoDriveInfo(userId)
     }
 
     fun getFilesFromCache(folderId: Int, userDrive: UserDrive? = null, order: SortType = SortType.NAME_AZ): ArrayList<File> {
