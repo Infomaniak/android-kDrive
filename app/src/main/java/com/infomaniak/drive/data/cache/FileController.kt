@@ -173,6 +173,7 @@ object FileController {
                 .greaterThan(File::parentId.name, ROOT_ID)
                 .sort(File::lastModifiedAt.name, Sort.DESCENDING)
                 .limit(recentFolderNumber.toLong())
+                .sort(File::lastModifiedAt.name, Sort.ASCENDING)
                 .findAllAsync()
                 .toFlow()
         }
