@@ -88,7 +88,7 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     private val binding by lazy { ViewFileInfoActionsBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    private var observeDownloadOffline: LiveData<MutableList<WorkInfo>>? = null
+    private var observeDownloadOffline: LiveData<List<WorkInfo>>? = null
     private lateinit var currentFile: File
     private lateinit var mainViewModel: MainViewModel
     private lateinit var shareLinkViewModel: ShareLinkViewModel
