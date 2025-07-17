@@ -42,6 +42,7 @@ import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_
 import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.AccountUtils.getAllUsersSync
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
@@ -55,6 +56,7 @@ import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
@@ -151,7 +153,21 @@ class LaunchActivity : AppCompatActivity() {
                     level = SentryLevel.INFO
                 })
 
-                setDeepLinkFileExtra(it.destinationDriveId, it.destinationRemoteFolderId)
+                CoroutineScope(Dispatchers.IO).launch {
+                    val allUserIds = getAllUsersSync().map { it.id }
+                    if (it.destinationUserId in allUserIds) {
+                        DriveInfosController.getDrive(driveId = it.destinationDriveId, maintenance = false)?.let { drive ->
+                            setOpenSpecificFile(
+                                userId = drive.userId,
+                                driveId = drive.id,
+                                fileId = it.destinationRemoteFolderId,
+                                isSharedWithMe = drive.sharedWithMe,
+                            )
+                        }
+                    } else {
+                        mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+                    }
+                }
             }
         }
     }
@@ -212,17 +228,13 @@ class LaunchActivity : AppCompatActivity() {
             val driveId = pathDriveId.toInt()
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
-            setDeepLinkFileExtra(driveId, fileId)
+            DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
+                setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
+            } ?: run {
+                mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+            }
 
             trackDeepLink(MatomoName.Internal)
-        }
-    }
-
-    private fun setDeepLinkFileExtra(driveId: Int, fileId: Int) {
-        DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let { drive ->
-            setOpenSpecificFile(drive.userId, driveId, fileId, drive.sharedWithMe)
-        } ?: run {
-            mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
         }
     }
 
