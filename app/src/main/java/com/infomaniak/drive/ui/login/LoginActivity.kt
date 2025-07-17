@@ -155,7 +155,7 @@ class LoginActivity : AppCompatActivity() {
                     clientId = BuildConfig.CLIENT_ID,
                     userAgent = HttpUtils.getUserAgent
                 )
-                val crossAppLogin = CrossAppLogin.forContext(this@LoginActivity)
+                val crossAppLogin = CrossAppLogin.forContext(this@LoginActivity, this)
                 val externalAccounts = crossAppLogin.retrieveAccountsFromOtherApps()
                 connectButton.text = "${externalAccounts.size} accounts"
                 connectButton.awaitOneLongClick()
