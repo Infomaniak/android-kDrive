@@ -30,7 +30,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.drive.MatomoDrive.ACTION_PRINT_PDF_NAME
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
@@ -44,7 +44,12 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.navigateToParentFolder
+import com.infomaniak.drive.utils.openWith
+import com.infomaniak.drive.utils.printPdf
+import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.shareText
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
@@ -338,7 +343,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun onCacheAddedToOffline() = Unit
 
     override fun printClicked() {
-        requireContext().trackFileActionEvent(ACTION_PRINT_PDF_NAME)
+        trackFileActionEvent(MatomoName.PrintPdf)
         previewPDFHandler.printClicked(
             context = requireContext(),
             onDefaultCase = {

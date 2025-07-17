@@ -47,6 +47,7 @@ import com.infomaniak.lib.core.api.ApiController.gson
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpUtils
+import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import io.ktor.client.HttpClient
@@ -64,8 +65,15 @@ import io.ktor.utils.io.toByteArray
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import splitties.coroutines.raceOf
@@ -151,7 +159,6 @@ class UploadTask(
             message = "start ${uploadFile.uri} with $totalChunks chunks and $uploadedChunks uploadedChunks"
             level = SentryLevel.INFO
         })
-
 
         SentryLog.d("kDrive", " upload task started with total chunks: $totalChunks, valid: $uploadedChunks")
 
@@ -294,6 +301,7 @@ class UploadTask(
             // and the size seem to match, so it might be a ktor or OkHttp internal issue worth reporting.
             httpClient.preparePost(url) {
                 headers {
+                    @OptIn(ManualAuthorizationRequired::class)
                     HttpUtils.getHeaders(contentType = null).forEach { (name, value) ->
                         append(name, value)
                     }
@@ -339,15 +347,17 @@ class UploadTask(
         if (!isSuccessful) {
             val bytes = response.bodyAsChannel().toByteArray().also { bytes ->
                 val expectedContentLength = response.contentLength() ?: bytes.size
-                if (expectedContentLength != bytes.size) SentryLog.e(
-                    tag = "UploadTask",
-                    msg = "Backend provided contentLength was $expectedContentLength bytes, but received ${bytes.size}",
-                )
+                if (expectedContentLength != bytes.size) Sentry.withScope { scope ->
+                    scope.setExtra("contentLength", expectedContentLength.toString())
+                    scope.setExtra("received", bytes.size.toString())
+                    scope.level = SentryLevel.WARNING
+                    Sentry.captureMessage("Backend provided more or fewer bytes than the contentLength it declared!")
+                }
             }
             val bodyResponse = String(bytes)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
-                gson.fromJson(bodyResponse, ApiResponse::class.java)
+                gson.fromJson(bodyResponse, ApiResponse::class.java)!! // Might be empty when http 502 Bad gateway happens
             } catch (_: Exception) {
                 ApiResponse<Any>(error = ApiError(description = bodyResponse))
             }

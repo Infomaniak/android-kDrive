@@ -1,0 +1,3 @@
+- Rename "My Personal Folder" to "My folder"
+- Sync folders sorted with the new folders
+- Add private sharing link button

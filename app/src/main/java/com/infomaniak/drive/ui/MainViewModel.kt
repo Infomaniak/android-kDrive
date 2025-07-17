@@ -21,30 +21,50 @@ import android.app.Application
 import android.content.Context
 import android.provider.MediaStore
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.liveData
+import androidx.lifecycle.switchMap
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.CreateFile
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
+import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DownloadOfflineFileManager
+import com.infomaniak.drive.utils.FileId
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
+import com.infomaniak.drive.utils.NotificationPermission
+import com.infomaniak.drive.utils.SyncOfflineUtils
 import com.infomaniak.drive.utils.SyncUtils.isSyncScheduled
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.find
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
@@ -55,10 +75,15 @@ import io.realm.kotlin.toFlow
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Date
 
 class MainViewModel(
@@ -154,7 +179,7 @@ class MainViewModel(
             activity = fragmentActivity,
             navController = navController,
             onOpeningPicker = {
-                fragmentActivity.trackNewElementEvent("uploadFile")
+                trackNewElementEvent(MatomoName.UploadFile)
                 uploadFilesHelper?.let { setParentFolder() } ?: Sentry.captureMessage("UploadFilesHelper is null. It should not!")
             },
         )
@@ -179,7 +204,7 @@ class MainViewModel(
         }
     }
 
-    fun navigateFileListTo(navController: NavController, fileId: Int, isSharedWithMe: Boolean = false) {
+    fun navigateFileListTo(navController: NavController, fileId: Int, userDrive: UserDrive) {
         // Clear FileListFragment stack
         navController.popBackStack(R.id.rootFilesFragment, false)
 
@@ -187,9 +212,8 @@ class MainViewModel(
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
-            val userDrive = UserDrive(sharedWithMe = isSharedWithMe)
             val file = FileController.getFileById(fileId, userDrive)
-                ?: FileController.getFileDetails(fileId, userDrive)
+                ?: FileController.getFileDetails(fileId, userDrive = userDrive)
                 ?: return@launch
             navigateFileListTo.postValue(file)
         }

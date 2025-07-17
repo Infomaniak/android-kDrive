@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
 import android.os.StatFs
 import android.provider.MediaStore
-import android.text.format.Formatter
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.transition.TransitionSet
@@ -46,7 +45,12 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.children
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
@@ -68,6 +72,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -76,6 +81,7 @@ import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ItemUserBinding
@@ -93,9 +99,15 @@ import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.views.PendingFilesView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
+import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.isNightModeEnabled
+import com.infomaniak.lib.core.utils.lightNavigationBar
+import com.infomaniak.lib.core.utils.lightStatusBar
+import com.infomaniak.lib.core.utils.loadAvatar
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
@@ -169,13 +181,8 @@ fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsCo
 }
 
 fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
-    val nightModeEnabled = isNightModeEnabled()
-    if (nightModeEnabled || SDK_INT >= 26) {
-        navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
-        lightNavigationBar(!nightModeEnabled)
-    } else {
-        navigationBarColor = Color.BLACK
-    }
+    navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
+    lightNavigationBar(!isNightModeEnabled())
 }
 
 fun Activity.shouldExcludeFromRecents(exclude: Boolean) {
@@ -335,7 +342,8 @@ fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel)
     with(findNavController()) {
         popBackStack(R.id.homeFragment, false)
         (requireActivity() as MainActivity).clickOnBottomBarFolders()
-        mainViewModel.navigateFileListTo(this, folderId)
+        val userDrive = UserDrive(sharedWithMe = false)
+        mainViewModel.navigateFileListTo(this, folderId, userDrive)
     }
 }
 
@@ -354,7 +362,7 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
 } ?: listOf()
 
 fun Context.shareText(text: String) {
-    trackShareRightsEvent("shareButton")
+    trackShareRightsEvent(MatomoName.ShareButton)
     val intent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, text)
@@ -421,43 +429,6 @@ fun OneTimeWorkRequest.Builder.setExpeditedIfAvailable() = apply {
 fun Context.openSupport() {
     ShortcutManagerCompat.reportShortcutUsed(this, Shortcuts.FEEDBACK.id)
     openUrl(SUPPORT_URL)
-}
-
-fun Context.formatShortBinarySize(size: Long, valueOnly: Boolean = false): String {
-
-    fun Long.binaryToDecimal(): Long {
-
-        val binaryUnit = 1_024.0f
-        val decimalUnit = 1_000.0f
-        var units = 0 // BYTE
-        val maxUnits = 5 // KILOBYTE, MEGABYTE, GIGABYTE, TERABYTE, PETABYTE
-        var result = abs(this).toFloat()
-
-        while (result > 900 && units < maxUnits) {
-            units++
-            result /= binaryUnit
-        }
-
-        if (valueOnly) return result.toLong()
-
-        repeat(units) {
-            result *= decimalUnit
-        }
-
-        return result.toLong()
-    }
-
-    val decimalSize = when {
-        SDK_INT >= 26 -> size.binaryToDecimal()
-        valueOnly -> size.binaryToDecimal()
-        else -> size
-    }
-
-    return if (valueOnly) {
-        "$decimalSize"
-    } else {
-        Formatter.formatShortFileSize(this, decimalSize)
-    }
 }
 
 fun Context.shareFile(getUriToShare: () -> Uri?) {

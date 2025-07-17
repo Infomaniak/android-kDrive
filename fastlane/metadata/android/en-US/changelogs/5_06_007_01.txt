@@ -1,0 +1,3 @@
+- Fix drive activities and files not available on first login
+- Fix opening office file from a drive that is not the current one
+- Fix crash in Sync setting

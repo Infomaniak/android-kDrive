@@ -31,6 +31,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -50,8 +51,13 @@ import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.views.DebouncingTextWatcher
 import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.SnackbarUtils
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setBackNavigationResult
+import com.infomaniak.lib.core.utils.setMargins
 import java.util.Date
 
 class SelectCategoriesFragment : Fragment() {
@@ -259,7 +265,7 @@ class SelectCategoriesFragment : Fragment() {
     }
 
     private fun manageCategory(categoryId: Int, isAdding: Boolean) {
-        trackCategoriesEvent(if (isAdding) "assign" else "remove")
+        trackCategoriesEvent(if (isAdding) MatomoName.Assign else MatomoName.Remove)
         if (usageMode == SELECTED_CATEGORIES) {
             categoriesAdapter.selectCategory(categoryId, isAdding, usageMode)
             return

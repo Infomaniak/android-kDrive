@@ -1,14 +1,14 @@
 import java.util.Properties
 
 plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("kotlin-kapt")
-    id("kotlin-parcelize")
-    id("androidx.navigation.safeargs.kotlin")
-    id("realm-android")
-    id("io.sentry.android.gradle")
-    id("de.mannodermaus.android-junit5")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.junit5)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.navigation.safeargs)
+    alias(libs.plugins.realm.android)
+    alias(libs.plugins.sentry)
 }
 
 val appCompileSdk: Int by rootProject.extra
@@ -29,8 +29,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_06_000_01
-        versionName = "5.6.0"
+        versionCode = 5_06_007_01
+        versionName = "5.6.7"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -50,9 +50,9 @@ android {
         buildConfigField("String", "SHOP_URL", "\"https://shop.infomaniak.com/order/\"")
         buildConfigField("String", "SUPPORT_URL", "\"https://support.infomaniak.com/\"")
 
-        buildConfigField ("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
-        buildConfigField ("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
-        buildConfigField ("String", "GITHUB_REPO", "\"android-kdrive\"")
+        buildConfigField("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
+        buildConfigField("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
+        buildConfigField("String", "GITHUB_REPO", "\"android-kdrive\"")
 
         resValue("string", "CLOUD_STORAGE_AUTHORITY", "com.infomaniak.drive.documents")
         resValue("string", "FILE_AUTHORITY", "com.infomaniak.drive.files")
@@ -157,24 +157,24 @@ dependencies {
     implementation(project(":Core:Legacy:AppLock"))
     implementation(project(":Core:Legacy:BugTracker"))
     implementation(project(":Core:Legacy:Stores"))
+    implementation(project(":Core:Matomo"))
     implementation(project(":Core:MyKSuite"))
     implementation(project(":Core:Network"))
-    implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:RecyclerView"))
+    implementation(project(":Core:Thumbnails"))
+    implementation(project(":Core:UserAvatar"))
 
     implementation(core.ktor.client.okhttp)
 
-    val work_version = "2.9.1" // Keep the same version as the one in Core
-    implementation("androidx.work:work-runtime-ktx:$work_version")
-    androidTestImplementation("androidx.work:work-testing:$work_version")
+    implementation(libs.androidx.work.runtime.ktx)
+    androidTestImplementation(libs.androidx.work.testing)
 
-    implementation("androidx.concurrent:concurrent-futures-ktx:1.2.0")
-    implementation("androidx.lifecycle:lifecycle-process:2.9.0")
-    implementation("androidx.viewpager2:viewpager2:1.1.0")
-    implementation("androidx.webkit:webkit:1.13.0")
+    implementation(libs.androidx.concurrent.futures.ktx)
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.webkit)
 
-    val splitties_version = "3.0.0"
-    implementation("com.louiscad.splitties:splitties-mainthread:$splitties_version")
+    implementation(libs.splitties.main.thread)
 
     val exoplayer_version = "1.7.1"
     implementation("androidx.media3:media3-exoplayer:$exoplayer_version")
@@ -183,49 +183,45 @@ dependencies {
     implementation("androidx.media3:media3-datasource-okhttp:$exoplayer_version")
     implementation("androidx.media3:media3-session:$exoplayer_version")
 
-    implementation("com.airbnb.android:lottie:6.6.6")
-    implementation("com.github.Infomaniak:android-pdfview:3.2.11")
-    implementation("com.github.MikeOrtiz:TouchImageView:3.7.1")
-    implementation("com.github.rubensousa:gravitysnaphelper:2.2.2")
-    implementation("com.tbuonomo:dotsindicator:5.1.0")
-    implementation("com.wdullaer:materialdatetimepicker:4.2.3")
+    implementation(libs.android.pdfview)
+    implementation(libs.dots.indicator)
+    implementation(libs.gravity.snap.helper)
+    implementation(libs.lottie)
+    implementation(libs.material.date.time.picker)
+    implementation(libs.touch.image.view)
 
-    implementation("com.github.realm:realm-android-adapters:v4.0.0")
+    implementation(libs.realm.android.adapters)
 
-    "standardImplementation"("com.google.firebase:firebase-messaging-ktx:24.1.1")
-    "standardImplementation"("com.geniusscansdk:gssdk:5.6.1")
+    "standardImplementation"(libs.firebase.messaging.ktx)
+    "standardImplementation"(libs.gs.sdk)
 
-    implementation("com.googlecode.plist:dd-plist:1.28")
+    implementation(libs.dd.plist)
 
-    implementation("com.github.hannesa2:paho.mqtt.android:4.2.4") // Doesn't build when bumped to 4.3 (Waiting SDK 35)
+    implementation(libs.paho.mqtt.android)
 
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
-    testImplementation("io.github.serpro69:kotlin-faker:1.16.0")
-    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
+    testImplementation(libs.kotlin.faker)
+    testImplementation(libs.mock.web.server)
+    androidTestImplementation(libs.androidx.ui.automator)
 
-    val espresso_version = "3.6.1"
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:$espresso_version") {
+    androidTestImplementation(libs.androidx.espresso.contrib) {
         // WorkAround for dependencies issue (see https://github.com/android/android-test/issues/861)
-        exclude(group = "org.checkerframework", module = "checker")
+        exclude(group = libs.androidx.espresso.checker.get().group, module = libs.androidx.espresso.checker.get().name)
     }
-    androidTestImplementation("androidx.test.espresso:espresso-core:$espresso_version")
+    androidTestImplementation(libs.androidx.espresso.core)
 
-    val androidx_test_version = "1.6.1"
-    implementation("androidx.test:core-ktx:$androidx_test_version")
-    androidTestImplementation("androidx.test:rules:$androidx_test_version")
-    androidTestImplementation("androidx.test:runner:1.6.2")
+    implementation(libs.androidx.core.ktx)
+    androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.runner)
 
-    val jupiter_version = "5.12.2"
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api:$jupiter_version")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:$jupiter_version")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$jupiter_version")
+    androidTestImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
 
-    val junit_version = "1.7.0"
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core:$junit_version")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner:$junit_version")
+    androidTestImplementation(libs.android.test.core)
+    androidTestRuntimeOnly(libs.android.test.runner)
 
-    implementation("io.coil-kt:coil-gif:2.7.0")
+    implementation(libs.coil.gif)
 
     // Compose
-    implementation("androidx.compose.ui:ui-android:1.7.8") // Doesn't build when bumped to 1.8.0 (Waiting SDK 35)
+    implementation(libs.androidx.ui.android)
 }

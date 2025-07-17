@@ -1,0 +1,3 @@
+- Correction des activités et des fichiers d'un drive qui étaient invisibles à lors de la première connexion
+- Correction de l'ouverture d'un fichier Office à partir d'un drive qui n'est pas le drive courant
+- Correction d'un crash dans les paramètres de synchronisation

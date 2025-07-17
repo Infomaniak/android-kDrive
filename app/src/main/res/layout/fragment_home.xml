@@ -48,47 +48,11 @@
                     app:menu="@menu/file_list_menu"
                     app:navigationIcon="@null" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <Space
-                        android:layout_width="0dp"
-                        android:layout_height="112.8dp" />
-
-                    <include
-                        android:id="@+id/noNetworkCard"
-                        layout="@layout/view_network_unavailable_home"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/marginStandard"
-                        android:layout_marginTop="@dimen/marginStandardMedium"
-                        android:layout_marginBottom="@dimen/marginStandardSmall"
-                        android:visibility="gone"
-                        tools:visibility="visible" />
-
-                    <com.infomaniak.drive.views.PendingFilesView
-                        android:id="@+id/homeUploadFileInProgressView"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="@dimen/marginStandardMedium"
-                        android:visibility="gone"
-                        app:title="@string/uploadInProgressTitle"
-                        tools:visibility="visible" />
-
-                    <com.infomaniak.drive.views.NotEnoughStorageView
-                        android:id="@+id/notEnoughStorage"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="@dimen/marginStandardMedium"
-                        android:visibility="gone"
-                        tools:visibility="visible" />
-
-                </LinearLayout>
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="112.8dp" />
 
             </com.google.android.material.appbar.CollapsingToolbarLayout>
-
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -97,13 +61,46 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <androidx.fragment.app.FragmentContainerView
-                android:id="@+id/homeActivitiesFragment"
-                android:name="com.infomaniak.drive.ui.home.HomeActivitiesFragment"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:layout="@layout/fragment_home_activities" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
+                <include
+                    android:id="@+id/noNetworkCard"
+                    layout="@layout/view_network_unavailable_home"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/marginStandard"
+                    android:layout_marginTop="@dimen/marginStandardMedium"
+                    android:layout_marginBottom="@dimen/marginStandardSmall"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <com.infomaniak.drive.views.PendingFilesView
+                    android:id="@+id/homeUploadFileInProgressView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/marginStandardMedium"
+                    android:visibility="gone"
+                    app:title="@string/uploadInProgressTitle"
+                    tools:visibility="visible" />
+
+                <com.infomaniak.drive.views.NotEnoughStorageView
+                    android:id="@+id/notEnoughStorage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/marginStandardMedium"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/homeActivitiesFragment"
+                    android:name="com.infomaniak.drive.ui.home.HomeActivitiesFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:layout="@layout/fragment_home_activities" />
+            </LinearLayout>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

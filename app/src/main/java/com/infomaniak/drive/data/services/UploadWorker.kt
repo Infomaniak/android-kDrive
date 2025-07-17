@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,14 @@ import android.provider.OpenableColumns
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
+import androidx.work.NetworkType
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.WorkQuery
+import androidx.work.WorkerParameters
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
@@ -41,19 +48,35 @@ import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatchin
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
+import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.drive.utils.SyncUtils
+import com.infomaniak.drive.utils.getAvailableMemory
+import com.infomaniak.drive.utils.uri
+import com.infomaniak.lib.core.utils.SentryLog
+import com.infomaniak.lib.core.utils.calculateFileSize
+import com.infomaniak.lib.core.utils.getFileName
+import com.infomaniak.lib.core.utils.getFileSize
+import com.infomaniak.lib.core.utils.hasPermissions
 import io.realm.Realm
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.*
-import java.util.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.Date
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
     private lateinit var contentResolver: ContentResolver
@@ -114,7 +137,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 result = Result.failure()
             }
 
-            SentryLog.d(TAG, "Work finished, result=$result || retryError=$retryError || lastUpload=$lastUploadFileName")
+            var workFinishedMessage = "Work finished, result=$result || retryError=$retryError || lastUpload=$lastUploadFileName"
+            if (SDK_INT >= 31) workFinishedMessage += " || stopReason=$stopReason"
+            SentryLog.d(TAG, workFinishedMessage)
 
             result
         }

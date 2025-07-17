@@ -1,0 +1,3 @@
+- Renommer « Mon dossier personnel » en « Mon dossier »
+- Synchronisation des dossiers triés avec les nouveaux dossiers
+- Ajout d'un bouton de lien de partage privé

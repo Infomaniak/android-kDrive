@@ -31,6 +31,7 @@ import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
 import coil.load
 import com.google.android.material.progressindicator.CircularProgressIndicator
+import com.infomaniak.core.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.thumbnails.ThumbnailsUtils.getLocalThumbnail
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
@@ -48,7 +49,11 @@ import com.infomaniak.drive.ui.fileList.FileListFragment.Companion.MAX_DISPLAYED
 import com.infomaniak.drive.views.CategoryIconView
 import com.infomaniak.drive.views.ProgressLayoutView
 import com.infomaniak.lib.core.utils.context
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 suspend fun ItemFileBinding.setFileItem(file: File, isGrid: Boolean = false): Nothing {
     setFileItemWithoutCategories(file = file, isGrid = isGrid)
@@ -92,7 +97,7 @@ private fun ItemFileBinding.displayDate(file: File) = fileDate.apply {
 
 private fun ItemFileBinding.displaySize(file: File) {
     file.size?.let {
-        fileSize.text = context.formatShortBinarySize(it)
+        fileSize.text = context.formatShortFileSize(it)
         fileSeparator.isVisible = true
     } ?: run {
         fileSize.text = ""

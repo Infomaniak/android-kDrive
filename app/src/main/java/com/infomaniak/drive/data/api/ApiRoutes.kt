@@ -17,14 +17,21 @@
  */
 package com.infomaniak.drive.data.api
 
-import com.infomaniak.drive.BuildConfig.*
+import com.infomaniak.drive.BuildConfig.DRIVE_API_V2
+import com.infomaniak.drive.BuildConfig.DRIVE_API_V3
+import com.infomaniak.drive.BuildConfig.MANAGER_URL
+import com.infomaniak.drive.BuildConfig.OFFICE_URL
+import com.infomaniak.drive.BuildConfig.SHARE_URL_V1
+import com.infomaniak.drive.BuildConfig.SHARE_URL_V2
+import com.infomaniak.drive.BuildConfig.SHARE_URL_V3
+import com.infomaniak.drive.BuildConfig.SHOP_URL
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.lib.core.BuildConfig
 import java.net.URLEncoder
-import java.util.*
+import java.util.Date
 
 object ApiRoutes {
 
@@ -292,6 +299,8 @@ object ApiRoutes {
     /** Share link */
     //region Share link
     fun shareLink(file: File) = "${fileURLV2(file)}/link"
+
+    fun restrictedShareLink(file: File) = "${SHARE_URL_V1}drive/${file.driveId}/redirect/${file.id}"
     //endregion
 
     /** Public Share */

@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -36,14 +35,18 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.core.utils.format
 import com.infomaniak.core.utils.startOfTheDay
-import com.infomaniak.drive.MatomoDrive.toFloat
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.MatomoName
+import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.MediaFolder
+import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.SyncSettings.IntervalType
 import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
+import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.models.UploadFile
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.ActivitySyncSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseActivity
@@ -54,14 +57,22 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.showProgressCatching
+import com.infomaniak.lib.core.utils.startAppSettingsConfig
+import com.infomaniak.lib.core.utils.whenResultIsOk
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.TimeZone
+import androidx.core.graphics.toColorInt
 
 class SyncSettingsActivity : BaseActivity() {
 
@@ -90,7 +101,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         setOnBackPressed()
 
-        activateSyncSwitch.isChecked = AccountUtils.isEnableAppSync()
+        activateSyncItem.isChecked = AccountUtils.isEnableAppSync()
 
         oldSyncSettings = UploadFile.getAppSyncSettings()
 
@@ -110,9 +121,9 @@ class SyncSettingsActivity : BaseActivity() {
 
         setupListeners(oldSyncVideoValue, oldCreateDatedSubFoldersValue, oldDeleteAfterSyncValue)
 
-        syncVideoSwitch.isChecked = oldSyncVideoValue
-        createDatedSubFoldersSwitch.isChecked = oldCreateDatedSubFoldersValue
-        deletePicturesAfterSyncSwitch.isChecked = oldDeleteAfterSyncValue
+        syncVideo.isChecked = oldSyncVideoValue
+        createDatedSubFolders.isChecked = oldCreateDatedSubFoldersValue
+        deletePicturesAfterSync.isChecked = oldDeleteAfterSyncValue
 
         observeAllUsers()
         observeCustomDate()
@@ -131,7 +142,7 @@ class SyncSettingsActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        saveSettingVisibility(isVisible = binding.activateSyncSwitch.isChecked, showBatteryDialog = false)
+        saveSettingVisibility(isVisible = binding.activateSyncItem.isChecked, showBatteryDialog = false)
     }
 
     private fun initUserAndDrive() {
@@ -149,9 +160,8 @@ class SyncSettingsActivity : BaseActivity() {
         oldDeleteAfterSyncValue: Boolean,
     ) {
         setupSelectFolderListener()
-
-        activateSync.setOnClickListener { activateSyncSwitch.isChecked = !activateSyncSwitch.isChecked }
-        activateSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
+        activateSync.setOnClickListener { activateSyncItem.isChecked = !activateSyncItem.isChecked }
+        activateSyncItem.setOnCheckedChangeListener { _, isChecked ->
             saveSettingVisibility(isVisible = isChecked, showBatteryDialog = isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
             if (isChecked && !drivePermissions.checkUserChoiceStoragePermission()) {
@@ -168,17 +178,17 @@ class SyncSettingsActivity : BaseActivity() {
             SelectMediaFoldersDialog().show(supportFragmentManager, "SyncSettingsSelectMediaFoldersDialog")
         }
 
-        syncVideoSwitch.setOnCheckedChangeListener { _, isChecked ->
+        syncVideo.setOnCheckedChangeListener { _, isChecked ->
             if (oldSyncVideoValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
-        createDatedSubFoldersSwitch.setOnCheckedChangeListener { _, isChecked ->
+        createDatedSubFolders.setOnCheckedChangeListener { _, isChecked ->
             if (oldCreateDatedSubFoldersValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
 
-        deletePicturesAfterSyncSwitch.setOnCheckedChangeListener { _, isChecked ->
+        deletePicturesAfterSync.setOnCheckedChangeListener { _, isChecked ->
             if (oldDeleteAfterSyncValue == isChecked) editNumber-- else editNumber++
             changeSaveButtonStatus()
         }
@@ -248,15 +258,12 @@ class SyncSettingsActivity : BaseActivity() {
     private fun observeSelectedDrive() = with(binding) {
         selectDriveViewModel.selectedDrive.distinctUntilChanged().observe(this@SyncSettingsActivity) {
             it?.let {
-                driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(it.preferences.color))
-                driveName.text = it.name
-                selectDivider.isVisible = true
+                selectDrive.setIconColor(it.preferences.color.toColorInt())
+                selectDrive.title = it.name
                 selectPath.isVisible = true
             } ?: run {
-                driveIcon.imageTintList =
-                    ColorStateList.valueOf(ContextCompat.getColor(this@SyncSettingsActivity, R.color.iconColor))
-                driveName.setText(R.string.selectDriveTitle)
-                selectDivider.isGone = true
+                selectDrive.setIconColor(ContextCompat.getColor(this@SyncSettingsActivity, R.color.iconColor))
+                selectDrive.title = getString(R.string.selectDriveTitle)
                 selectPath.isGone = true
             }
             if (selectDriveViewModel.selectedUserId.value != oldSyncSettings?.userId ||
@@ -276,11 +283,12 @@ class SyncSettingsActivity : BaseActivity() {
             val selectedDriveId = selectDriveViewModel.selectedDrive.value?.id
             if (syncFolderId != null && selectedUserId != null && selectedDriveId != null) {
                 FileController.getFileById(syncFolderId, UserDrive(selectedUserId, selectedDriveId))?.let {
-                    pathName.text = it.name
+                    selectPath.setIconColor(it.color?.toColorInt() ?: context.getColor(R.color.folderDefaultColor))
+                    selectPath.title = it.name
                     changeSaveButtonStatus()
                 }
             } else {
-                pathName.setText(R.string.selectFolderTitle)
+                selectPath.title = getString(R.string.selectFolderTitle)
             }
             mediaFoldersSettingsVisibility(syncFolderId != null)
         }
@@ -304,7 +312,7 @@ class SyncSettingsActivity : BaseActivity() {
         syncSettingsViewModel.syncIntervalType.observe(this@SyncSettingsActivity) {
             if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
             changeSaveButtonStatus()
-            syncPeriodicityValue.text = getString(it.title).lowercase()
+            syncPeriodicity.endText = getString(it.title).lowercase()
         }
     }
 
@@ -332,7 +340,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun activeSelectDrive() = with(binding) {
-        switchDrive.isVisible = true
+        selectDrive.setAction(ItemSettingView.Action.Chevron)
         selectDrive.setOnClickListener { SelectDriveDialog().show(supportFragmentManager, "SyncSettingsSelectDriveDialog") }
     }
 
@@ -368,7 +376,7 @@ class SyncSettingsActivity : BaseActivity() {
                 || allSyncedFoldersCount > 0
         saveButton.isVisible = isEdited
 
-        mediaFoldersTitle.text = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
+        mediaFolders.title = if (allSyncedFoldersCount == 0) getString(R.string.noSelectMediaFolders)
         else resources.getQuantityString(R.plurals.mediaFoldersSelected, allSyncedFoldersCount, allSyncedFoldersCount)
 
         saveButton.isEnabled = isEdited && (selectDriveViewModel.selectedUserId.value != null)
@@ -380,14 +388,14 @@ class SyncSettingsActivity : BaseActivity() {
     private fun trackPhotoSyncEvents(syncSettings: SyncSettings) {
 
         val dateName = when (syncSettingsViewModel.saveOldPictures.value!!) {
-            SavePicturesDate.SINCE_NOW -> "syncNew"
-            SavePicturesDate.SINCE_FOREVER -> "syncAll"
-            SavePicturesDate.SINCE_DATE -> "syncFromDate"
+            SavePicturesDate.SINCE_NOW -> MatomoName.SyncNew
+            SavePicturesDate.SINCE_FOREVER -> MatomoName.SyncAll
+            SavePicturesDate.SINCE_DATE -> MatomoName.SyncFromDate
         }
 
-        trackPhotoSyncEvent("deleteAfterImport", syncSettings.deleteAfterSync)
-        trackPhotoSyncEvent("createDatedFolders", syncSettings.createDatedSubFolders)
-        trackPhotoSyncEvent("importVideo", syncSettings.syncVideo)
+        trackPhotoSyncEvent(MatomoName.DeleteAfterImport, syncSettings.deleteAfterSync)
+        trackPhotoSyncEvent(MatomoName.CreateDatedFolders, syncSettings.createDatedSubFolders)
+        trackPhotoSyncEvent(MatomoName.ImportVideo, syncSettings.syncVideo)
         trackPhotoSyncEvent(dateName)
     }
 
@@ -396,7 +404,7 @@ class SyncSettingsActivity : BaseActivity() {
 
         lifecycleScope.launch {
             val result = runCatching {
-                if (activateSyncSwitch.isChecked) {
+                if (activateSyncItem.isChecked) {
                     val syncSettings = generateSyncSettings()
                     trackPhotoSyncEvents(syncSettings)
                     syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
@@ -408,13 +416,13 @@ class SyncSettingsActivity : BaseActivity() {
                     Dispatchers.IO { disableAutoSync() }
                 }
 
-                trackPhotoSyncEvent(if (activateSyncSwitch.isChecked) "enabled" else "disabled")
+                trackPhotoSyncEvent(if (activateSyncItem.isChecked) MatomoName.Enabled else MatomoName.Disabled)
             }.onFailure { exception ->
                 showSnackbar(R.string.anErrorHasOccurred)
                 Sentry.withScope { scope ->
                     scope.setTag("syncIntervalType", syncSettingsViewModel.syncIntervalType.value?.title.toString())
-                    scope.setTag("createMonthFolder", createDatedSubFoldersSwitch.isChecked.toString())
-                    scope.setTag("deletePhoto", deletePicturesAfterSyncSwitch.isChecked.toString())
+                    scope.setTag("createMonthFolder", createDatedSubFolders.isChecked.toString())
+                    scope.setTag("deletePhoto", deletePicturesAfterSync.isChecked.toString())
                     SentryLog.e("SyncSettings", "An error has occurred when save settings", exception)
                 }
             }
@@ -435,9 +443,9 @@ class SyncSettingsActivity : BaseActivity() {
             driveId = selectDriveViewModel.selectedDrive.value!!.id,
             lastSync = date,
             syncFolder = syncSettingsViewModel.syncFolderId.value!!,
-            syncVideo = syncVideoSwitch.isChecked,
-            createDatedSubFolders = createDatedSubFoldersSwitch.isChecked,
-            deleteAfterSync = deletePicturesAfterSyncSwitch.isChecked
+            syncVideo = syncVideo.isChecked,
+            createDatedSubFolders = createDatedSubFolders.isChecked,
+            deleteAfterSync = deletePicturesAfterSync.isChecked
         )
     }
 
@@ -462,9 +470,5 @@ class SyncSettingsActivity : BaseActivity() {
                 addOnPositiveButtonClickListener { syncSettingsViewModel.customDate.value = Date(it).startOfTheDay() }
                 show(supportFragmentManager, "syncDatePicker")
             }
-    }
-
-    private fun trackPhotoSyncEvent(name: String, value: Boolean? = null) {
-        trackEvent("photoSync", name, value = value?.toFloat())
     }
 }

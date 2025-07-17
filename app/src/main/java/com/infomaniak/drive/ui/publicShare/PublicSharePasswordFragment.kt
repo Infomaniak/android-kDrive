@@ -25,6 +25,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ShareLink
@@ -34,8 +35,13 @@ import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUB
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiError
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.showProgressCatching
 
 class PublicSharePasswordFragment : Fragment() {
 
@@ -52,7 +58,7 @@ class PublicSharePasswordFragment : Fragment() {
         // TODO: Remove this and call setupValidationButton instead
         //  Also change the layout (description, button's title, input visibility)
         passwordValidateButton.setOnClickListener {
-            requireActivity().trackPublicShareActionEvent("openInBrowser")
+            trackPublicShareActionEvent(MatomoName.OpenInBrowser)
             PublicShareUtils.openDeepLinkInBrowser(requireActivity(), getPublicShareUrl())
         }
 

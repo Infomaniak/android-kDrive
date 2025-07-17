@@ -28,6 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
@@ -82,7 +83,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
             currentFile.setFileItem(currentTrashedFile)
         }
         restoreFileIn.setOnClickListener {
-            trackTrashEvent("restoreGivenFolder")
+            trackTrashEvent(MatomoName.RestoreGivenFolder)
             Intent(requireContext(), SelectFolderActivity::class.java).apply {
                 putExtras(
                     SelectFolderActivityArgs(
@@ -95,7 +96,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         restoreFileToOriginalPlace.setOnClickListener {
-            trackTrashEvent("restoreOriginFolder")
+            trackTrashEvent(MatomoName.RestoreOriginFolder)
             mainViewModel.restoreTrashFile(currentTrashedFile).observe(this@TrashedFileActionsBottomSheetDialog) { fileRequest ->
                 restoreResult(fileRequest, originalPlace = true)
             }
@@ -105,7 +106,7 @@ class TrashedFileActionsBottomSheetDialog : BottomSheetDialogFragment() {
             Utils.confirmFileDeletion(requireContext(), fileName = currentTrashedFile.name, fromTrash = true) { dialog ->
                 mainViewModel.deleteTrashFile(currentTrashedFile)
                     .observe(this@TrashedFileActionsBottomSheetDialog) { fileRequest ->
-                        trackTrashEvent("deleteFromTrash")
+                        trackTrashEvent(MatomoName.DeleteFromTrash)
                         dialog.dismiss()
                         if (fileRequest.data == true) {
                             showSnackbar(getString(R.string.snackbarDeleteConfirmation, currentTrashedFile.name))

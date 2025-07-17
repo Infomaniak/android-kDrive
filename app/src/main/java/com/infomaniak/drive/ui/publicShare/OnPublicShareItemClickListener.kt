@@ -22,16 +22,21 @@ import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.drive.MatomoDrive.ACTION_DOWNLOAD_NAME
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
 import com.infomaniak.drive.ui.fileList.preview.PreviewPDFHandler
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.openWith
+import com.infomaniak.drive.utils.printPdf
+import com.infomaniak.drive.utils.saveToKDrive
+import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import com.infomaniak.lib.core.utils.safeNavigate
@@ -70,7 +75,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     }
 
     override fun downloadFileClicked() {
-        currentContext.trackPublicShareActionEvent(ACTION_DOWNLOAD_NAME)
+        trackPublicShareActionEvent(MatomoName.Download)
         currentFile?.let { currentContext.downloadFile(drivePermissions, it, ::onDownloadSuccess) }
     }
 
@@ -100,7 +105,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     }
 
     private suspend fun executeDownloadAction(downloadAction: DownloadAction, cacheFile: IOFile) = runCatching {
-        currentContext.trackPublicShareActionEvent(downloadAction.matomoValue)
+        trackPublicShareActionEvent(downloadAction.matomoValue)
         val uri = FileProvider.getUriForFile(currentContext, currentContext.getString(R.string.FILE_AUTHORITY), cacheFile)
 
         when (downloadAction) {

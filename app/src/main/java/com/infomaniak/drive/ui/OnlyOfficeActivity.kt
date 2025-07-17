@@ -20,16 +20,24 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
+import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.ParcelFileDescriptor
-import android.print.*
+import android.print.PageRange
+import android.print.PrintAttributes
+import android.print.PrintDocumentAdapter
+import android.print.PrintDocumentInfo
+import android.print.PrintManager
 import android.webkit.CookieManager
+import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import androidx.activity.addCallback
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.webkit.WebSettingsCompat
@@ -39,7 +47,7 @@ import androidx.webkit.WebViewClientCompat
 import androidx.webkit.WebViewFeature
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityOnlyOfficeBinding
-import com.infomaniak.lib.core.InfomaniakCore
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.showToast
@@ -56,6 +64,12 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityOnlyOfficeBinding.inflate(layoutInflater) }
 
+    private var filePathCallback: ValueCallback<Array<out Uri?>?>? = null
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+        filePathCallback?.onReceiveValue(uris.toTypedArray())
+        filePathCallback = null
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
@@ -63,7 +77,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
         val url = intent.getStringExtra(ONLYOFFICE_URL_TAG)!!
         val filename = intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)!!
-        val headers = mapOf("Authorization" to "Bearer ${InfomaniakCore.bearerToken}")
+        val headers = mapOf("Authorization" to "Bearer ${AccountUtils.currentUser?.apiToken?.accessToken}")
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 
@@ -86,6 +100,16 @@ class OnlyOfficeActivity : AppCompatActivity() {
                 override fun onProgressChanged(view: WebView, newProgress: Int) {
                     progressBar.progress = newProgress
                     if (newProgress == 100) progressBar.isGone = true
+                }
+
+                override fun onShowFileChooser(
+                    webView: WebView?,
+                    filePathCallback: ValueCallback<Array<out Uri?>?>?,
+                    fileChooserParams: FileChooserParams?
+                ): Boolean {
+                    this@OnlyOfficeActivity.filePathCallback = filePathCallback
+                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    return true
                 }
             }
 

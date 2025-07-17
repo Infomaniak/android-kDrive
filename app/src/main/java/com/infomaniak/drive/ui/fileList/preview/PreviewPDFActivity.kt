@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,16 +25,21 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.drive.MatomoDrive.ACTION_PRINT_PDF_NAME
-import com.infomaniak.drive.MatomoDrive.ACTION_SAVE_TO_KDRIVE_NAME
-import com.infomaniak.drive.MatomoDrive.ACTION_SEND_FILE_COPY_NAME
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import com.infomaniak.drive.utils.openWith
+import com.infomaniak.drive.utils.saveToKDrive
+import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.setupStatusBarForPreview
+import com.infomaniak.drive.utils.shareFile
+import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.setMargins
@@ -74,6 +79,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
             navController.navigate(R.id.previewPDFFragment)
 
             header.setup(onBackClicked = ::finish, onOpenWithClicked = ::openWith)
+            header.enableEdgeToEdge(withBottom = false)
         }
 
         initBottomSheet()
@@ -130,12 +136,12 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     override fun shareFile() {
-        trackPdfActivityActionEvent(ACTION_SEND_FILE_COPY_NAME)
+        trackPdfActivityActionEvent(MatomoName.SendFileCopy)
         shareFile { previewPDFHandler.externalFileUri }
     }
 
     override fun saveToKDrive() {
-        trackPdfActivityActionEvent(ACTION_SAVE_TO_KDRIVE_NAME)
+        trackPdfActivityActionEvent(MatomoName.SaveToKDrive)
         previewPDFHandler.externalFileUri?.let(::saveToKDrive)
     }
 
@@ -144,7 +150,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     override fun printClicked() {
-        trackPdfActivityActionEvent(ACTION_PRINT_PDF_NAME)
+        trackPdfActivityActionEvent(MatomoName.PrintPdf)
         previewPDFHandler.printClicked(
             context = this,
             onError = { showSnackbar(R.string.errorFileNotFound) },

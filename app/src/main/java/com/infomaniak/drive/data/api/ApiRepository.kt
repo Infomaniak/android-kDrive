@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,26 @@ import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
+import com.infomaniak.drive.data.models.BulkOperation
+import com.infomaniak.drive.data.models.CancellableAction
+import com.infomaniak.drive.data.models.CreateFile
+import com.infomaniak.drive.data.models.DropBox
+import com.infomaniak.drive.data.models.ExtensionType
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.data.models.FileCheckResult
+import com.infomaniak.drive.data.models.FileComment
+import com.infomaniak.drive.data.models.FileCount
+import com.infomaniak.drive.data.models.Invitation
+import com.infomaniak.drive.data.models.Share
+import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.ShareableItems
+import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.models.file.FileExternalImport
@@ -38,8 +55,11 @@ import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.api.ApiController.ApiMethod.*
-import com.infomaniak.lib.core.api.ApiController.callApi
+import com.infomaniak.lib.core.api.ApiController.ApiMethod.DELETE
+import com.infomaniak.lib.core.api.ApiController.ApiMethod.GET
+import com.infomaniak.lib.core.api.ApiController.ApiMethod.POST
+import com.infomaniak.lib.core.api.ApiController.ApiMethod.PUT
+import com.infomaniak.lib.core.api.ApiController.callApiBlocking
 import com.infomaniak.lib.core.api.ApiRepositoryCore
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
@@ -50,7 +70,16 @@ import com.infomaniak.core.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
 
-    var PER_PAGE = 200
+    var PER_PAGE = 50
+
+    private inline fun <reified T> callApi(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+    ): T {
+        return callApiBlocking(url, method, body, okHttpClient)
+    }
 
     private inline fun <reified T> callApiWithCursor(
         url: String,
@@ -58,7 +87,7 @@ object ApiRepository : ApiRepositoryCore() {
         body: Any? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): T {
-        return callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
+        return callApiBlocking(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
                 result = ApiResponseStatus.ERROR,
                 error = apiError
@@ -110,7 +139,7 @@ object ApiRepository : ApiRepositoryCore() {
         order: SortType
     ): CursorApiResponse<ListingFiles> {
         val url = when (cursor) {
-            null -> ApiRoutes.getListingFiles(driveId, parentId, order)
+            null -> "${ApiRoutes.getListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
             else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
         }
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
@@ -513,10 +542,10 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.cancelExternalImport(driveId, importId), PUT)
     }
 
-    fun getMyKSuiteData(okHttpClient: OkHttpClient): ApiResponse<MyKSuiteData> {
-        return callApi(
+    suspend fun getMyKSuiteData(okHttpClient: OkHttpClient): ApiResponse<MyKSuiteData> {
+        return ApiController.callApi(
             url = MyKSuiteApiRoutes.myKSuiteData(),
-            method = ApiController.ApiMethod.GET,
+            method = GET,
             okHttpClient = okHttpClient,
             useKotlinxSerialization = true,
         )

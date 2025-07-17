@@ -24,6 +24,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
@@ -33,6 +34,7 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
@@ -220,14 +222,15 @@ class LaunchActivity : AppCompatActivity() {
                 setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
             }
 
-            trackDeepLink("internal")
+            trackDeepLink(MatomoName.Internal)
         }
     }
 
     private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int, isSharedWithMe: Boolean) {
         if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
         if (!isSharedWithMe && driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
-        mainActivityExtras = MainActivityArgs(destinationFileId = fileId, isDestinationSharedWithMe = isSharedWithMe).toBundle()
+        val userDrive = UserDrive(sharedWithMe = isSharedWithMe, driveId = driveId)
+        mainActivityExtras = MainActivityArgs(destinationFileId = fileId, destinationUserDrive = userDrive).toBundle()
     }
 
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {
@@ -263,9 +266,9 @@ class LaunchActivity : AppCompatActivity() {
         ).toBundle()
 
         val trackerName = when {
-            isPasswordNeeded -> "publicShareWithPassword"
-            isExpired -> "publicShareExpired"
-            else -> "publicShare"
+            isPasswordNeeded -> MatomoName.PublicShareWithPassword
+            isExpired -> MatomoName.PublicShareExpired
+            else -> MatomoName.PublicShare
         }
 
         trackDeepLink(trackerName)

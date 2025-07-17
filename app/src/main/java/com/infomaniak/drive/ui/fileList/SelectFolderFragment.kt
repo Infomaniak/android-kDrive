@@ -24,6 +24,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -51,14 +52,14 @@ class SelectFolderFragment : FileListFragment() {
 
         folderName = if (folderId == ROOT_ID) selectFolderViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
 
-        collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
+        collapsingToolbarLayout.title = selectFolderViewModel.getFolderName(folderId)
 
         toolbar.menu.findItem(R.id.addFolderItem).apply {
             setOnMenuItemClickListener {
                 val selectFolderActivity = requireActivity() as? SelectFolderActivity
                 if (FileController.getFileById(folderId, userDrive)?.rights?.canCreateDirectory == true) {
                     selectFolderActivity?.hideSaveButton()
-                    trackNewElementEvent("createFolderOnTheFly")
+                    trackNewElementEvent(MatomoName.CreateFolderOnTheFly)
                     safeNavigate(
                         SelectFolderFragmentDirections.actionSelectFolderFragmentToNewFolderFragment(
                             parentFolderId = folderId,

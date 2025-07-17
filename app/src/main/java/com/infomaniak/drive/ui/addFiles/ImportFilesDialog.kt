@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,13 @@ import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.getFileName
 import io.sentry.Sentry
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import splitties.init.appCtx
 import java.io.IOException
 import java.util.Date
@@ -120,7 +126,8 @@ class ImportFilesDialog : DialogFragment() {
         }
 
         if (successCount > 0) appCtx.syncImmediately()
-        dismiss()
+        currentCoroutineContext().ensureActive()
+        dismissAllowingStateLoss()
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {

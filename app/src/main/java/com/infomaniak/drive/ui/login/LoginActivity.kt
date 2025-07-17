@@ -31,6 +31,7 @@ import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
@@ -46,16 +47,21 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.lib.core.InfomaniakCore
+import com.infomaniak.lib.core.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.utils.*
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
+import com.infomaniak.lib.core.utils.clearStack
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.showProgressCatching
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.coroutines.CancellationException
@@ -123,13 +129,13 @@ class LoginActivity : AppCompatActivity() {
             setOnClickListener {
                 signInButton.isEnabled = false
                 showProgressCatching()
-                trackAccountEvent("openLoginWebview")
+                trackAccountEvent(MatomoName.OpenLoginWebview)
                 infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
             }
         }
 
         signInButton.setOnClickListener {
-            trackAccountEvent("openCreationWebview")
+            trackAccountEvent(MatomoName.OpenCreationWebview)
             startAccountCreation()
         }
 
@@ -195,7 +201,7 @@ class LoginActivity : AppCompatActivity() {
                     val deeplink = navigationArgs?.publicShareDeeplink
                     if (deeplink.isNullOrBlank()) {
                         trackUserId(AccountUtils.currentUserId)
-                        trackAccountEvent("loggedIn")
+                        trackAccountEvent(MatomoName.LoggedIn)
                         launchMainActivity()
                     } else {
                         PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)
@@ -259,8 +265,12 @@ class LoginActivity : AppCompatActivity() {
             AccountUtils.getUserById(apiToken.userId)?.let {
                 return getErrorResponse(R.string.errorUserAlreadyPresent)
             } ?: run {
-                InfomaniakCore.bearerToken = apiToken.accessToken
-                val userProfileResponse = ApiRepository.getUserProfile(HttpClient.okHttpClientNoTokenInterceptor)
+                val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor.newBuilder().addInterceptor { chain ->
+                    val newRequest = changeAccessToken(chain.request(), apiToken)
+                    chain.proceed(newRequest)
+                }.build()
+                val userProfileResponse = ApiRepository.getUserProfile(okhttpClient)
+
                 if (userProfileResponse.result == ApiResponseStatus.ERROR) {
                     return userProfileResponse
                 } else {
@@ -270,7 +280,7 @@ class LoginActivity : AppCompatActivity() {
                     }
 
                     user?.let {
-                        val allDrivesDataResponse = ApiRepository.getAllDrivesData(HttpClient.okHttpClientNoTokenInterceptor)
+                        val allDrivesDataResponse = ApiRepository.getAllDrivesData(okhttpClient)
 
                         when {
                             allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {

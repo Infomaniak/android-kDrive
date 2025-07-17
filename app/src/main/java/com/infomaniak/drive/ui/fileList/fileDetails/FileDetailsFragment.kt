@@ -45,7 +45,12 @@ import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.utils.getFolderIcon
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.isNightModeEnabled
+import com.infomaniak.lib.core.utils.lightStatusBar
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import kotlin.math.abs
 
 class FileDetailsFragment : FileDetailsSubFragment() {

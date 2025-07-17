@@ -62,7 +62,13 @@ import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryLevel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.io.IOException
@@ -541,7 +547,7 @@ class CloudStorageProvider : DocumentsProvider() {
             lastModifiedAt = Date(),
         )
 
-        val apiResponse = ApiController.callApi<ApiResponse<File>>(
+        val apiResponse = ApiController.callApiBlocking<ApiResponse<File>>(
             uploadUrl,
             ApiController.ApiMethod.POST,
             okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId, 120) }
@@ -812,9 +818,9 @@ class CloudStorageProvider : DocumentsProvider() {
             mutex.withLock {
                 try {
                     Realm.getDefaultInstance()
-                } catch (exception: Exception) {
+                } catch (_: Exception) {
                     Realm.init(this)
-                    AccountUtils.init(this)
+                    AccountUtils.init()
                 }
             }
         }

@@ -1,0 +1,4 @@
+- Add the color to the selected folder in the photo backup screen
+- Fix EdgeToEdge in LockScreen settings
+- Fix Infinite import files progression
+- Support Pick files since OnlyOffice update

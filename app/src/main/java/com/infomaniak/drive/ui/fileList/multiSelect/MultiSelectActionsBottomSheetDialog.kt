@@ -27,6 +27,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -47,7 +49,7 @@ import com.infomaniak.lib.core.utils.DownloadManagerUtils
 import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
 
-abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: String) : BottomSheetDialogFragment() {
+abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: MatomoCategory) : BottomSheetDialogFragment() {
 
     protected var binding: FragmentBottomSheetMultiSelectActionsBinding by safeBinding()
 
@@ -183,7 +185,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
     }
 
     private fun download() {
-        trackEvent(matomoCategory, "bulkDownload")
+        trackEvent(matomoCategory, MatomoName.BulkDownload)
         if (navigationArgs.areAllFromTheSameFolder) downloadArchive() else downloadFiles()
     }
 
@@ -194,7 +196,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             if (apiResponse.isSuccess()) {
                 apiResponse.data?.let { archiveUUID ->
                     val downloadURL = ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, archiveUUID.uuid)
-                    DownloadManagerUtils.scheduleDownload(requireContext(), downloadURL, ARCHIVE_FILE_NAME)
+                    val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
+                    DownloadManagerUtils.scheduleDownload(requireContext(), downloadURL, ARCHIVE_FILE_NAME, userBearerToken)
                 }
             } else {
                 showSnackbar(apiResponse.translateError())
@@ -212,7 +215,8 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: S
             val customRealm = if (navigationArgs.userDrive?.sharedWithMe == true) null else mainViewModel.realm
             FileController.getFileProxyById(fileId, navigationArgs.userDrive, customRealm)?.let { file ->
                 val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
-                DownloadManagerUtils.scheduleDownload(requireContext(), ApiRoutes.downloadFile(file), fileName)
+                val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
+                DownloadManagerUtils.scheduleDownload(requireContext(), ApiRoutes.downloadFile(file), fileName, userBearerToken)
             }
         }
         onActionSelected()

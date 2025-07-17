@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
-import com.infomaniak.drive.MatomoDrive.buildTracker
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
+import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -64,13 +64,21 @@ import io.sentry.SentryEvent
 import io.sentry.SentryOptions
 import io.sentry.android.core.SentryAndroid
 import io.sentry.android.core.SentryAndroidOptions
-import kotlinx.coroutines.*
-import org.matomo.sdk.Tracker
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import splitties.init.injectAsAppCtx
 import java.util.UUID
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
 
-    val matomoTracker: Tracker by lazy { buildTracker() }
+    init {
+        injectAsAppCtx() // Ensures it is always initialized
+    }
+
     var geniusScanIsReady = false
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
@@ -86,17 +94,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         AppCompatDelegate.setDefaultNightMode(uiSettings.nightMode)
 
         if (BuildConfig.DEBUG) {
-            Stetho.initializeWithDefaults(this)
-            StrictMode.setVmPolicy(
-                VmPolicy.Builder().apply {
-                    detectActivityLeaks()
-                    detectLeakedClosableObjects()
-                    detectLeakedRegistrationObjects()
-                    detectFileUriExposure()
-                    if (SDK_INT >= 26) detectContentUriWithoutPermission()
-                    if (SDK_INT >= 29) detectCredentialProtectedWhileLocked()
-                }.build()
-            )
+            configureDebugMode()
         } else {
             // For Microsoft Office app. Show File.getCloudAndFileUris()
             StrictMode.setVmPolicy(VmPolicy.Builder().build())
@@ -140,7 +138,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         val tokenInterceptorListener = tokenInterceptorListener()
         HttpClientConfig.customInterceptors = listOf(
             AccessTokenUsageInterceptor(
-                tokenInterceptorListener = tokenInterceptorListener,
                 previousApiCall = uiSettings.accessTokenApiCallRecord,
                 updateLastApiCall = { uiSettings.accessTokenApiCallRecord = it },
             ),
@@ -149,6 +146,23 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         MqttClientWrapper.init(applicationContext)
 
         MyKSuiteDataUtils.initDatabase(this)
+    }
+
+    private fun configureDebugMode() {
+        Stetho.initializeWithDefaults(this)
+
+        StrictMode.setVmPolicy(
+            VmPolicy.Builder().apply {
+                detectActivityLeaks()
+                detectLeakedClosableObjects()
+                detectLeakedRegistrationObjects()
+                detectFileUriExposure()
+                detectContentUriWithoutPermission()
+                if (SDK_INT >= 29) detectCredentialProtectedWhileLocked()
+            }.build()
+        )
+
+        MatomoDrive.addTrackingCallbackForDebugLog()
     }
 
     override fun onStart(owner: LifecycleOwner) {
@@ -187,15 +201,19 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     private fun tokenInterceptorListener() = object : TokenInterceptorListener {
+        val userTokenFlow by lazy { AppSettings.getCurrentUserIdFlow().mapToApiToken(applicationScope) }
+
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
             AccountUtils.setUserToken(AccountUtils.currentUser!!, apiToken)
         }
 
         override suspend fun onRefreshTokenError() {
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
             refreshTokenError(AccountUtils.currentUser!!)
         }
 
-        override suspend fun getApiToken(): ApiToken? = AccountUtils.currentUser?.apiToken
+        override suspend fun getUserApiToken(): ApiToken? = userTokenFlow.first()
 
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }

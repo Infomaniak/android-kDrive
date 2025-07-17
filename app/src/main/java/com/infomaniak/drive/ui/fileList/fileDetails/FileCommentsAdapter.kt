@@ -17,7 +17,9 @@
  */
 package com.infomaniak.drive.ui.fileList.fileDetails
 
-import android.text.format.DateUtils.*
+import android.text.format.DateUtils.DAY_IN_MILLIS
+import android.text.format.DateUtils.FORMAT_ABBREV_ALL
+import android.text.format.DateUtils.getRelativeDateTimeString
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.TooltipCompat

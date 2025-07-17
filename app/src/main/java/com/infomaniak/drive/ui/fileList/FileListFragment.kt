@@ -43,15 +43,23 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
-import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.*
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_LOCAL
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.UNRESTRICTED
+import com.infomaniak.drive.data.models.BulkOperationType
+import com.infomaniak.drive.data.models.CancellableAction
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
+import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -67,22 +75,40 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
-import com.infomaniak.drive.utils.*
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
 import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.FilePresenter.openFolder
+import com.infomaniak.drive.utils.SentryGridLayoutManager
+import com.infomaniak.drive.utils.SentryLinearLayoutManager
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.getAdjustedColumnNumber
+import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.NoItemsLayoutView
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import kotlinx.coroutines.*
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.hideProgressCatching
+import com.infomaniak.lib.core.utils.initProgress
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.setPagination
+import com.infomaniak.lib.core.utils.showProgressCatching
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
-open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefreshLayout.OnRefreshListener,
-    NoItemsLayoutView.INoItemsLayoutView {
+open class FileListFragment : MultiSelectFragment(
+    matomoCategory = MatomoCategory.FileListFileAction,
+), SwipeRefreshLayout.OnRefreshListener, NoItemsLayoutView.INoItemsLayoutView {
 
     private var _binding: FragmentFileListBinding? = null
     val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -420,7 +446,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
     private fun setupToggleDisplayButton() {
         binding.toggleDisplayButton.setOnClickListener {
             val newListMode = !UiSettings(requireContext()).listMode
-            trackEvent("displayStyle", if (newListMode) "viewList" else "viewGrid")
+            trackEvent(MatomoCategory.DisplayStyle, if (newListMode) MatomoName.ViewList else MatomoName.ViewGrid)
             UiSettings(requireContext()).listMode = newListMode
             fileListViewModel.isListMode.value = getListMode(newListMode)
         }
@@ -770,7 +796,7 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
             lifecycleScope.launch {
                 repeatOnLifecycle(State.RESUMED) {
                     getBackNavigationResult<SortType>(SORT_TYPE_OPTION_KEY) { newSortType ->
-                        trackEvent("fileList", newSortType.name)
+                        trackEvent(MatomoCategory.FileList.value, newSortType.name)
                         fileListViewModel.sortType = newSortType
                         _binding?.sortButton?.setText(fileListViewModel.sortType.translation)
 
@@ -891,7 +917,5 @@ open class FileListFragment : MultiSelectFragment(MATOMO_CATEGORY), SwipeRefresh
 
         // Beware, if this value is modified, the Categories' layouts should be modified accordingly.
         const val MAX_DISPLAYED_CATEGORIES = 3
-
-        const val MATOMO_CATEGORY = "fileListFileAction"
     }
 }

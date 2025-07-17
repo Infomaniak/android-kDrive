@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import androidx.core.view.isVisible
 import androidx.navigation.navGraphViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -36,7 +37,6 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.SnackbarUtils
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -112,15 +112,15 @@ class TrashFragment : FileSubTypeListFragment() {
                 isDeletion = true,
                 autoDismiss = false,
             ) { dialog ->
-                trackTrashEvent("emptyTrash")
+                trackTrashEvent(MatomoName.EmptyTrash)
                 closeMultiSelect()
                 trashViewModel.emptyTrash(AccountUtils.currentDriveId).observe(viewLifecycleOwner) { apiResponse ->
                     dialog.dismiss()
                     if (apiResponse.data == true) {
-                        SnackbarUtils.showSnackbar(requireView(), R.string.snackbarEmptyTrashConfirmation)
+                        showSnackbar(titleId = R.string.snackbarEmptyTrashConfirmation, showAboveFab = true)
                         onRefresh()
                     } else {
-                        showSnackbar(apiResponse.translateError())
+                        showSnackbar(apiResponse.translateError(), showAboveFab = true)
                     }
                 }
             }
@@ -181,10 +181,6 @@ class TrashFragment : FileSubTypeListFragment() {
         binding.trashAutoClearUpgradeButton.setOnClickListener {
             openMyKSuiteUpgradeBottomSheet("trashStorageLimit")
         }
-    }
-
-    companion object {
-        const val MATOMO_CATEGORY = "trashFileAction"
     }
 
     private inner class SortFiles : () -> Unit {

@@ -17,7 +17,12 @@
  */
 package com.infomaniak.drive.utils
 
-import android.Manifest.permission.*
+import android.Manifest.permission.ACCESS_MEDIA_LOCATION
+import android.Manifest.permission.POST_NOTIFICATIONS
+import android.Manifest.permission.READ_MEDIA_IMAGES
+import android.Manifest.permission.READ_MEDIA_VIDEO
+import android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Activity.RESULT_OK

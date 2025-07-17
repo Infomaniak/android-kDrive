@@ -12,8 +12,8 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         // mavenLocal() // Only used when we want to use a local version of a library (./gradlew publishToMavenLocal)
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://s3.amazonaws.com/tgl.maven' }
+        maven(url = "https://jitpack.io")
+        maven(url = "https://s3.amazonaws.com/tgl.maven")
     }
     versionCatalogs {
         create("core") { from(files("Core/gradle/core.versions.toml")) }
@@ -21,17 +21,21 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "kDrive"
-include ':app',
-        ':Core:Compose:MaterialThemeFromXml',
-        ':Core:FragmentNavigation',
-        ':Core:Ktor',
-        ':Core:Legacy',
-        ':Core:Legacy:AppLock',
-        ':Core:Legacy:BugTracker',
-        ':Core:Legacy:Stores',
-        ':Core:MyKSuite',
-        ':Core:Network',
-        ':Core:RecyclerView',
-        ':Core:Sentry',
-        ':Core:Thumbnails',
-        ':Core:UserAvatar'
+include(
+    ":app",
+    ":Core:Compose:Margin",
+    ":Core:Compose:MaterialThemeFromXml",
+    ":Core:FragmentNavigation",
+    ":Core:Ktor",
+    ":Core:Legacy",
+    ":Core:Legacy:AppLock",
+    ":Core:Legacy:BugTracker",
+    ":Core:Legacy:Stores",
+    ":Core:Matomo",
+    ":Core:MyKSuite",
+    ":Core:Network",
+    ":Core:RecyclerView",
+    ":Core:Sentry",
+    ":Core:Thumbnails",
+    ":Core:UserAvatar"
+)

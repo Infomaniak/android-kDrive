@@ -30,7 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
-import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_WITH_NAME
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
@@ -108,9 +108,9 @@ fun Context.openWith(
     onDownloadFile: (() -> Unit)? = null,
 ) {
     when {
-        currentFile?.isPublicShared() == true -> trackPublicShareActionEvent(ACTION_OPEN_WITH_NAME)
-        externalFileUri != null -> trackPdfActivityActionEvent(ACTION_OPEN_WITH_NAME)
-        else -> trackFileActionEvent(ACTION_OPEN_WITH_NAME)
+        currentFile?.isPublicShared() == true -> trackPublicShareActionEvent(MatomoName.OpenWith)
+        externalFileUri != null -> trackPdfActivityActionEvent(MatomoName.OpenWith)
+        else -> trackFileActionEvent(MatomoName.OpenWith)
     }
 
     ownerFragment?.apply {

@@ -35,6 +35,7 @@ import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.setMargins
 
 class SelectFolderActivity : BaseActivity() {
@@ -155,5 +156,10 @@ class SelectFolderActivity : BaseActivity() {
         var userDrive: UserDrive? = null
         var currentDrive: Drive? = null
         var disableSelectedFolderId: Int? = null
+
+        fun getFolderName(folderId: Int): String {
+            val selectedFolderName = if (folderId == ROOT_ID) currentDrive?.name else FileController.getFileById(folderId)?.name
+            return selectedFolderName ?: "/"
+        }
     }
 }

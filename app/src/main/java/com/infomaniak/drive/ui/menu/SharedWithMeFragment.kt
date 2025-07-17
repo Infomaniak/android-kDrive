@@ -127,10 +127,6 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         )
     }
 
-    companion object {
-        const val MATOMO_CATEGORY = "sharedWithMeFileAction"
-    }
-
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
 
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {

@@ -50,9 +50,16 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
-import com.infomaniak.drive.utils.*
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
+import com.infomaniak.drive.utils.CameraPermissions
+import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
+import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.openOnlyOfficeActivity
+import com.infomaniak.drive.utils.setFileItem
+import com.infomaniak.drive.utils.showQuotasExceededSnackbar
+import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.safeBinding

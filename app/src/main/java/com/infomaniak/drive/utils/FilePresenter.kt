@@ -25,7 +25,8 @@ import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
 import com.dd.plist.NSString
 import com.dd.plist.PropertyListParser
-import com.infomaniak.drive.MatomoDrive.ACTION_OPEN_BOOKMARK_NAME
+import com.infomaniak.drive.MatomoDrive.MatomoCategory
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
@@ -91,13 +92,13 @@ object FilePresenter {
     }
 
     fun Fragment.displayFile(file: File, mainViewModel: MainViewModel, fileAdapter: FileAdapter?) {
-        trackEvent("preview", "preview${file.getFileType().value.capitalizeFirstChar()}")
+        trackEvent(MatomoCategory.Preview.value, "preview${file.getFileType().value.capitalizeFirstChar()}")
         val fileList = fileAdapter?.getFileObjectsList(mainViewModel.realm) ?: listOf(file)
         Utils.displayFile(mainViewModel, findNavController(), file, fileList)
     }
 
     fun Fragment.openBookmark(file: File) {
-        requireContext().trackFileActionEvent(ACTION_OPEN_BOOKMARK_NAME)
+        trackFileActionEvent(MatomoName.OpenBookmark)
         if (file.canUseStoredFile(requireContext())) {
             openBookmarkIntent(file)
         } else {

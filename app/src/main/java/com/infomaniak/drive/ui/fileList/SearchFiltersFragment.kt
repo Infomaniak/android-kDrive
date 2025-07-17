@@ -29,7 +29,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.card.MaterialCardView
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.MatomoName
+import com.infomaniak.drive.MatomoDrive.trackSearchEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
@@ -40,7 +41,11 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.SearchFilterTypeBottomSheetDia
 import com.infomaniak.drive.ui.fileList.fileDetails.CategoriesUsageMode
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.utils.*
+import com.infomaniak.lib.core.utils.getBackNavigationResult
+import com.infomaniak.lib.core.utils.safeBinding
+import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.lib.core.utils.toPx
 
 class SearchFiltersFragment : Fragment() {
 
@@ -123,9 +128,9 @@ class SearchFiltersFragment : Fragment() {
 
     private fun setSaveButton() = with(searchFiltersViewModel) {
         binding.saveButton.setOnClickListener {
-            date.value?.let { trackSearchEvent("filterDate") }
-            type.value?.let { trackSearchEvent("filterFileType") }
-            categories?.let { trackSearchEvent("filterCategory") }
+            date.value?.let { trackSearchEvent(MatomoName.FilterDate) }
+            type.value?.let { trackSearchEvent(MatomoName.FilterFileType) }
+            categories?.let { trackSearchEvent(MatomoName.FilterCategory) }
 
             searchViewModel.dateFilter = date.value
             searchViewModel.typeFilter = type.value
@@ -208,9 +213,5 @@ class SearchFiltersFragment : Fragment() {
     private fun MaterialCardView.setupSelection(enabled: Boolean) {
         strokeWidth = if (enabled) 2.toPx() else 0
         invalidate()
-    }
-
-    private fun trackSearchEvent(name: String) {
-        trackEvent("search", name)
     }
 }

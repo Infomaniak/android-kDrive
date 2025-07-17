@@ -139,7 +139,7 @@ object FolderFilesProvider {
                     cursor = apiResponse.cursor,
                 )
             }
-            apiResponse.data?.isNotEmpty() == true -> {
+            apiResponse.isSuccess() -> {
                 saveFiles()
             }
         }
