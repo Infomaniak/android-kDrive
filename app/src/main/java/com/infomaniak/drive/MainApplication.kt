@@ -107,7 +107,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         }
 
         ApiController.init(typeAdapterList = arrayListOf(File::class.java to FileDeserialization()))
-        configSentry()
+        configureSentry()
         runBlocking { initRealm() }
 
         geniusScanIsReady = initGeniusScanSdk()
@@ -220,9 +220,9 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
      * Reasons to discard Sentry events :
      * - Application is in Debug mode
      * - User deactivated Sentry tracking in DataManagement settings
-     * - The exception was an [ApiController.NetworkException], and we don't want to send them to Sentry
+     * - The exception was an [ApiController.NetworkException] or an [CancellationException] or any Exception added in [isErrorException], and we don't want to send them to Sentry
      */
-    private fun configSentry() {
+    private fun configureSentry() {
         configureSentry(
             isDebug = BuildConfig.DEBUG,
             isSentryTrackingEnabled = true, // TODO: Update isSentryTrackingEnabled with the sharedpreference value when the Sentry opt-out will be enabled

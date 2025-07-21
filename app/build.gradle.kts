@@ -165,8 +165,8 @@ dependencies {
     implementation(project(":Core:kSuite:kSuitePro"))
     implementation(project(":Core:kSuite:MyKSuite"))
     implementation(project(":Core:Network"))
-    implementation(project(":Core:Sentry"))
     implementation(project(":Core:RecyclerView"))
+    implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
 
     implementation(core.ktor.client.okhttp)
