@@ -23,6 +23,8 @@ dependencyResolutionManagement {
 rootProject.name = "kDrive"
 include(
     ":app",
+    ":Core:Auth",
+    ":Core:Coil",
     ":Core:Compose:Margin",
     ":Core:Compose:MaterialThemeFromXml",
     ":Core:FragmentNavigation",
@@ -37,5 +39,5 @@ include(
     ":Core:RecyclerView",
     ":Core:Sentry",
     ":Core:Thumbnails",
-    ":Core:UserAvatar"
+    ":Core:UserAvatar",
 )
