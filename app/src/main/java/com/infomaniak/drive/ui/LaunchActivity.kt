@@ -150,14 +150,8 @@ class LaunchActivity : AppCompatActivity() {
                     message = "Upload notification has been clicked"
                     level = SentryLevel.INFO
                 })
-                DriveInfosController.getDrive(driveId = it.destinationDriveId, maintenance = false)?.let { drive ->
-                    setOpenSpecificFile(
-                        userId = drive.userId,
-                        driveId = drive.id,
-                        fileId = it.destinationRemoteFolderId,
-                        isSharedWithMe = drive.sharedWithMe,
-                    )
-                }
+
+                setDeepLinkFileExtra(it.destinationDriveId, it.destinationRemoteFolderId)
             }
         }
     }
@@ -218,11 +212,17 @@ class LaunchActivity : AppCompatActivity() {
             val driveId = pathDriveId.toInt()
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
-            DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
-                setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
-            }
+            setDeepLinkFileExtra(driveId, fileId)
 
             trackDeepLink(MatomoName.Internal)
+        }
+    }
+
+    private fun setDeepLinkFileExtra(driveId: Int, fileId: Int) {
+        DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let { drive ->
+            setOpenSpecificFile(drive.userId, driveId, fileId, drive.sharedWithMe)
+        } ?: run {
+            mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
         }
     }
 

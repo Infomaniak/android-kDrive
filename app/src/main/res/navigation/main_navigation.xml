@@ -350,6 +350,10 @@
             android:name="shortcutId"
             android:defaultValue=""
             app:argType="string" />
+        <argument
+            android:name="deepLinkFileNotFound"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </activity>
 
     <activity
