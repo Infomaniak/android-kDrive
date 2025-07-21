@@ -125,14 +125,14 @@ object DriveInfosController {
         }
     }
 
-    fun deleteDriveIntoDriveInfo(userId: Int) {
+    fun deleteDrives(userId: Int) {
         getRealmInstance().use { realm ->
             realm.executeTransaction {
                 val drives = realm.where(Drive::class.java)
                     .equalTo(Drive::userId.name, userId)
                     .findAll()
 
-                drives.map { it.deleteFromRealm() }
+                drives.forEach(Drive::deleteFromRealm)
             }
         }
     }

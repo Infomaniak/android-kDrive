@@ -29,6 +29,7 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
+import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
@@ -160,7 +161,7 @@ class LaunchActivity : AppCompatActivity() {
                         .getAll()
                         .asFlow()
                         .first()
-                        .map { it.id }
+                        .map(User::id)
 
                     if (it.destinationUserId in allUserIds) {
                         DriveInfosController.getDrive(driveId = it.destinationDriveId, maintenance = false)?.let { drive ->
