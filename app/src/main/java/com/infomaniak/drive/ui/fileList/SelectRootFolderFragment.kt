@@ -114,18 +114,16 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             selectRootFolderViewModel.getRecentFolders(RECENT_FOLDER_NUMBER)
             selectRootFolderViewModel.recentFiles.collectLatest { files ->
+
                 _binding?.let {
                     it.recentFolderTitle.isGone = files.isEmpty()
                     it.recentListLayout.isGone = files.isEmpty()
 
-                    files.forEachIndexed { _, file ->
-                        val recentCard = CardviewFileListBinding.inflate(layoutInflater)
-                            .apply { this.root.isGone = true }
-                            .also { binding.recentListLayout.addView(it.root, 0) }
-
-                        recentFoldersBindings.add(recentCard)
-
-                        launch(start = CoroutineStart.UNDISPATCHED) { recentCard.setupRecentFolderView(file) }
+                    files.forEach { file ->
+                        CardviewFileListBinding.inflate(layoutInflater).apply {
+                            it.recentListLayout.addView(root, 0)
+                            launch(start = CoroutineStart.UNDISPATCHED) { setupRecentFolderView(file) }
+                        }
                     }
                 }
             }
@@ -140,7 +138,6 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
             )
         }
         itemViewFile.setFileItem(file = file, typeFolder = TypeFolder.recentFolder)
-
     }
 
     override fun fileListDirections(
