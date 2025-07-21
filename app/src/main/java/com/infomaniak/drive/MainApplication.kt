@@ -226,7 +226,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         configureSentry(
             isDebug = BuildConfig.DEBUG,
             isSentryTrackingEnabled = UiSettings(applicationContext) .isSentryTrackingEnabled,
-            isErrorException = { _: Throwable? -> false },
+            isFilteredException = { _: Throwable? -> false },
         )
     }
 }
