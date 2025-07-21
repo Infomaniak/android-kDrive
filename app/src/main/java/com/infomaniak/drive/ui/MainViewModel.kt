@@ -74,7 +74,9 @@ import io.realm.Realm
 import io.realm.kotlin.toFlow
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
+import io.sentry.SentryEvent
 import io.sentry.SentryLevel
+import io.sentry.protocol.Message
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -481,9 +483,27 @@ class MainViewModel(
         syncOfflineFilesJob?.cancel()
     }
 
+
+    fun addBreadcrumLog(message: String) {
+        Sentry.addBreadcrumb(
+            Breadcrumb().apply {
+                this.message = message
+                level = SentryLevel.INFO
+                category = ""
+            }
+        )
+    }
+
     // Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()
     fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
         val fileDeleted = arrayListOf<UploadFile>()
+        var fileDeleteIOFile: ArrayList<Boolean> = arrayListOf<Boolean>()
+        var fileDeleteContentResolver: ArrayList<Int> = arrayListOf<Int>()
+        var incrementFileError: Int = 0
+        addBreadcrumLog("/**********************************************************************/")
+        addBreadcrumLog("filesToDelete (size): ${filesToDelete.size}")
+        addBreadcrumLog("filesToDelete (size): ${filesToDelete.map { it.fileName }}")
+        addBreadcrumLog("fileDeleted (size) before increment: ${fileDeleted.size}")
         filesToDelete.forEach { uploadFile ->
             try {
                 val uri = uploadFile.getUriObject()
@@ -494,8 +514,9 @@ class MainViewModel(
                         try {
                             columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                             val pathname = cursor.getString(columnIndex)
-                            IOFile(pathname).delete()
-                            getContext().contentResolver.delete(uri, null, null)
+
+                            fileDeleteIOFile.add(IOFile(pathname).delete())
+                            fileDeleteContentResolver.add(getContext().contentResolver.delete(uri, null, null))
                         } catch (nullPointerException: NullPointerException) {
                             Sentry.withScope { scope ->
                                 scope.setExtra("columnIndex", columnIndex.toString())
@@ -504,6 +525,10 @@ class MainViewModel(
                         } finally {
                             fileDeleted.add(uploadFile)
                         }
+                    } else {
+                        // When the app is kill before updating in realm DeleteAt, you need to update this value
+                        incrementFileError++
+                        fileDeleted.add(uploadFile)
                     }
                 } ?: fileDeleted.add(uploadFile)
             } catch (exception: SecurityException) {
@@ -512,7 +537,17 @@ class MainViewModel(
                 fileDeleted.add(uploadFile)
             }
         }
+        addBreadcrumLog("tableau fileIO: ${fileDeleteIOFile} with size (${fileDeleteIOFile.size})")
+        addBreadcrumLog("tableau contentResolver: ${fileDeleteContentResolver} with size (${fileDeleteContentResolver.size})")
+        addBreadcrumLog("fileDeleted (size) after increment: ${fileDeleted.size}")
+        addBreadcrumLog("file don't existe in device but don't write (deleteAt) in realm: ${incrementFileError}")
         UploadFile.deleteAll(fileDeleted)
+        addBreadcrumLog("/**********************************************************************/")
+        val sentryEvent = SentryEvent().apply {
+            level = SentryLevel.INFO
+            message = Message().apply { this.message = "Fin deleteSynchronizedFilesOnDevice" }
+        }
+        Sentry.captureEvent(sentryEvent)
     }
 
     fun checkBulkDownloadStatus() = viewModelScope.launch {
