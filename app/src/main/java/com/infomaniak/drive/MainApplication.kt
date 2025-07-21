@@ -225,7 +225,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     private fun configureSentry() {
         configureSentry(
             isDebug = BuildConfig.DEBUG,
-            isSentryTrackingEnabled = true, // TODO: Update isSentryTrackingEnabled with the sharedpreference value when the Sentry opt-out will be enabled
+            isSentryTrackingEnabled = UiSettings(applicationContext) .isSentryTrackingEnabled,
             isErrorException = { _: Throwable? -> false },
         )
     }
