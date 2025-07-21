@@ -36,6 +36,7 @@ include(
     ":Core:Matomo",
     ":Core:MyKSuite",
     ":Core:Network",
+    ":Core:Network:Models",
     ":Core:RecyclerView",
     ":Core:Sentry",
     ":Core:Thumbnails",
