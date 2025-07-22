@@ -25,13 +25,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.extensions.openUrl
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
-import com.infomaniak.drive.databinding.FragmentDataManagementSettingBinding
-import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive
 import com.infomaniak.drive.MatomoDrive.trackEventDataManagement
-import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.databinding.FragmentDataManagementSettingBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.lib.core.utils.safeBinding
 
 class DataManagementSettingFragment : Fragment() {
 
