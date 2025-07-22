@@ -20,6 +20,8 @@ package com.infomaniak.drive.ui
 import android.app.Application
 import android.content.Context
 import android.provider.MediaStore
+import androidx.collection.MutableIntList
+import androidx.collection.mutableIntListOf
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -483,7 +485,13 @@ class MainViewModel(
 
     // Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()
     fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
-        val fileDeleted = arrayListOf<UploadFile>()
+        val fileDeleted: MutableList<UploadFile> = mutableListOf()
+        val isIOFilesDeleted: MutableList<Boolean> = mutableListOf()
+        val fileDeleteContentResolver: MutableIntList = mutableIntListOf()
+        var incrementFileError = 0
+        val tag = "deleteSynchronizedFilesOnDevice"
+
+        SentryLog.i(tag, "filesToDelete (size): ${filesToDelete.size}")
         filesToDelete.forEach { uploadFile ->
             try {
                 val uri = uploadFile.getUriObject()
@@ -494,9 +502,10 @@ class MainViewModel(
                         try {
                             columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
                             val pathname = cursor.getString(columnIndex)
-                            IOFile(pathname).delete()
-                            getContext().contentResolver.delete(uri, null, null)
-                        } catch (nullPointerException: NullPointerException) {
+
+                            isIOFilesDeleted.add(IOFile(pathname).delete())
+                            fileDeleteContentResolver.add(getContext().contentResolver.delete(uri, null, null))
+                        } catch (_: NullPointerException) {
                             Sentry.withScope { scope ->
                                 scope.setExtra("columnIndex", columnIndex.toString())
                                 Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
@@ -504,6 +513,10 @@ class MainViewModel(
                         } finally {
                             fileDeleted.add(uploadFile)
                         }
+                    } else {
+                        // When the app is killed before updating `deleteAt` field in realm, you need to update this value
+                        incrementFileError++
+                        fileDeleted.add(uploadFile)
                     }
                 } ?: fileDeleted.add(uploadFile)
             } catch (exception: SecurityException) {
@@ -512,6 +525,12 @@ class MainViewModel(
                 fileDeleted.add(uploadFile)
             }
         }
+        SentryLog.i(tag, "table fileIO: $isIOFilesDeleted with size (${isIOFilesDeleted.size})")
+        SentryLog.i(tag, "table contentResolver: $fileDeleteContentResolver with size (${fileDeleteContentResolver.size})")
+        SentryLog.i(tag, "fileDeleted (size) after increment: ${fileDeleted.size}")
+        SentryLog.i(tag, "file don't existe in device but don't write (deleteAt) in realm: $incrementFileError")
+        Sentry.captureMessage("End deleteSynchronizedFilesOnDevice. Nb of error $incrementFileError")
+
         UploadFile.deleteAll(fileDeleted)
     }
 
