@@ -577,6 +577,7 @@
     <string name="recentActivityMeTitle">Por mí</string>
     <string name="recentActivityMyTeam">Por mi equipo</string>
     <string name="recentActivitySeeMore">Ver más archivos recientes</string>
+    <string name="recentTitle">Recientes</string>
     <string name="refreshTokenError">Ha sido desconectado</string>
     <string name="restrictedSharedLinkTitle">Enlace de uso compartido restringido</string>
     <string name="reviewAlertTitle">¿Te gusta kDrive?</string>

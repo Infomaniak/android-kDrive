@@ -135,10 +135,16 @@ class SelectFolderActivity : BaseActivity() {
     }
 
     private fun navigateToCurrentFolder() {
-        navigationIds.forEach { folderId ->
-            navController.navigate(SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId))
+        navigationIds.forEachIndexed { index, folderId ->
+            if (index == 0) {
+                navController.navigate(SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(folderId))
+            } else {
+                navController.navigate(SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId))
+            }
         }
     }
+
+    fun getSaveButton() = binding.saveButton
 
     fun showSaveButton() {
         binding.saveButton.isVisible = true

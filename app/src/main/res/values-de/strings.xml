@@ -577,6 +577,7 @@
     <string name="recentActivityMeTitle">Durch mich</string>
     <string name="recentActivityMyTeam">Durch mein Team</string>
     <string name="recentActivitySeeMore">Mehr neue Dateien anzeigen</string>
+    <string name="recentTitle">Neueste</string>
     <string name="refreshTokenError">Ihre Verbindung wurde unterbrochen</string>
     <string name="restrictedSharedLinkTitle">Eingeschränkter Freigabelink</string>
     <string name="reviewAlertTitle">Mögen Sie kDrive?</string>

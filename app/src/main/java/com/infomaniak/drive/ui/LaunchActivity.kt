@@ -22,12 +22,14 @@ import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
+import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
@@ -49,6 +51,7 @@ import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponseStatus
+import com.infomaniak.lib.core.room.UserDatabase
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.showToast
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
@@ -56,6 +59,7 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -151,7 +155,27 @@ class LaunchActivity : AppCompatActivity() {
                     level = SentryLevel.INFO
                 })
 
-                setDeepLinkFileExtra(it.destinationDriveId, it.destinationRemoteFolderId)
+                lifecycleScope.launch {
+                    val allUserIds = UserDatabase.getDatabase()
+                        .userDao()
+                        .getAll()
+                        .asFlow()
+                        .first()
+                        .map(User::id)
+
+                    if (it.destinationUserId in allUserIds) {
+                        DriveInfosController.getDrive(driveId = it.destinationDriveId, maintenance = false)?.let { drive ->
+                            setOpenSpecificFile(
+                                userId = drive.userId,
+                                driveId = drive.id,
+                                fileId = it.destinationRemoteFolderId,
+                                isSharedWithMe = drive.sharedWithMe,
+                            )
+                        }
+                    } else {
+                        mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+                    }
+                }
             }
         }
     }
@@ -212,17 +236,13 @@ class LaunchActivity : AppCompatActivity() {
             val driveId = pathDriveId.toInt()
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
-            setDeepLinkFileExtra(driveId, fileId)
+            DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
+                setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
+            } ?: run {
+                mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+            }
 
             trackDeepLink(MatomoName.Internal)
-        }
-    }
-
-    private fun setDeepLinkFileExtra(driveId: Int, fileId: Int) {
-        DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let { drive ->
-            setOpenSpecificFile(drive.userId, driveId, fileId, drive.sharedWithMe)
-        } ?: run {
-            mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
         }
     }
 
