@@ -177,9 +177,10 @@ dependencies {
     implementation(libs.splitties.main.thread)
 
     implementation(libs.exoplayer)
-    implementation(libs.exoplayer.core)
-    implementation(libs.exoplayer.ui)
-    implementation(libs.extension.okhttp)
+    implementation(libs.exoplayer.dash)
+    implementation(libs.exoplayer.media3.ui)
+    implementation(libs.exoplayer.media3.datasource)
+    implementation(libs.exoplayer.media3.session)
 
     implementation(libs.android.pdfview)
     implementation(libs.dots.indicator)

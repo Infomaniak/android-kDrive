@@ -7,7 +7,7 @@ coreKtx = "1.6.1"
 ddPlist = "1.28"
 dotsIndicator = "5.1.0"
 espresso = "3.6.1"
-exoplayer = "2.19.1"
+exoplayer = "1.7.1"
 firebaseMessagingKtx = "24.1.2"
 gravitySnapHelper = "2.2.2"
 gsSdk = "5.11.0"
@@ -28,6 +28,7 @@ viewpager2 = "1.1.0"
 webkit = "1.14.0"
 workVersion = "2.9.1" # Keep the same version as the one in Core
 
+
 [libraries]
 android-pdfview = { module = "com.github.Infomaniak:android-pdfview", version.ref = "androidPdfview" }
 androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFuturesKtx" }
@@ -41,10 +42,13 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilGif" }
 dd-plist = { module = "com.googlecode.plist:dd-plist", version.ref = "ddPlist" }
 dots-indicator = { module = "com.tbuonomo:dotsindicator", version.ref = "dotsIndicator" }
-exoplayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "exoplayer" }
-exoplayer-core = { module = "com.google.android.exoplayer:exoplayer-core", version.ref = "exoplayer" }
-exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.ref = "exoplayer" }
-extension-okhttp = { module = "com.google.android.exoplayer:extension-okhttp", version.ref = "exoplayer" }
+
+exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "exoplayer" }
+exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "exoplayer" }
+exoplayer-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "exoplayer" }
+exoplayer-media3-datasource = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "exoplayer" }
+exoplayer-media3-session = { module = "androidx.media3:media3-session", version.ref = "exoplayer" }
+
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
 gravity-snap-helper = { module = "com.github.rubensousa:gravitysnaphelper", version.ref = "gravitySnapHelper" }
 gs-sdk = { module = "com.geniusscansdk:gssdk", version.ref = "gsSdk" }
