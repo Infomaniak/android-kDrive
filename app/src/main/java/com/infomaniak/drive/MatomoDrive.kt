@@ -241,6 +241,10 @@ object MatomoDrive : Matomo {
         trackEvent(MatomoCategory.Comment, name)
     }
 
+    fun trackEventDataManagement(name: MatomoName) {
+        trackEvent(MatomoCategory.SettingsDataManagement, name)
+    }
+
     fun trackBulkActionEvent(category: MatomoCategory, action: BulkOperationType, fileCount: Int) {
 
         fun BulkOperationType.toMatomoString(): String = name.lowercase().capitalizeFirstChar()
@@ -265,10 +269,6 @@ object MatomoDrive : Matomo {
 
     fun trackPhotoSyncEvent(name: MatomoName, value: Boolean? = null) {
         trackEvent(MatomoCategory.PhotoSync, name, value = value?.toFloat())
-    }
-
-    fun trackEventDataManagement(name: MatomoName, value: Boolean? = null) {
-        trackEvent(MatomoCategory.SettingsDataManagement, name, value = value?.toFloat())
     }
     //endregion
 
