@@ -234,7 +234,7 @@ object DriveInfosController {
                     userId = AccountUtils.currentUserId,
                     driveId = driveId
                 ).findFirst().toFlow().map { drive ->
-                    if (drive?.categoryRights?.canReadOnFile == true) buildIntObjectMap {
+                    if (drive?.isValid == true && drive.categoryRights.canReadOnFile) buildIntObjectMap {
                         drive.categories.forEach { category -> this[category.id] = category }
                     } else null
                 }
