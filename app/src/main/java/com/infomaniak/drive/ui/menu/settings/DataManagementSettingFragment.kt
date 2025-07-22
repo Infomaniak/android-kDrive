@@ -58,7 +58,7 @@ class DataManagementSettingFragment : Fragment() {
             safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingFragmentToDataManagementSentryFragment())
         }
         dataManagementSourceCodeButton.setOnClickListener {
-            trackEventDataManagement(MatomoDrive.MatomoName.ShowSourceCode, UiSettings(requireContext()).isMatomoTrackingEnabled)
+            trackEventDataManagement(MatomoDrive.MatomoName.ShowSourceCode)
             requireContext().openUrl(BuildConfig.GITHUB_REPO_URL)
         }
     }
