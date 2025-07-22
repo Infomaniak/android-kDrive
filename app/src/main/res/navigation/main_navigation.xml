@@ -343,17 +343,17 @@
             app:argType="integer" />
         <argument
             android:name="destinationUserDrive"
-            app:argType="com.infomaniak.drive.data.models.UserDrive"
             android:defaultValue="@null"
-            app:nullable="true"/>
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
         <argument
             android:name="shortcutId"
             android:defaultValue=""
             app:argType="string" />
         <argument
             android:name="deepLinkFileNotFound"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
     </activity>
 
     <activity
