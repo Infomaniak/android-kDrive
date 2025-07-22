@@ -32,7 +32,7 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class)
-class LoginViewModel() : ViewModel() {
+class CrossAppLoginViewModel() : ViewModel() {
 
     val crossLoginAccounts = MutableLiveData(emptyList<ExternalAccount>())
     val crossLoginSelectedIds = MutableLiveData(emptySet<Int>())

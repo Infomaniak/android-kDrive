@@ -24,13 +24,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.databinding.FragmentBottomSheetCrossLoginBinding
-import com.infomaniak.drive.ui.login.LoginViewModel
+import com.infomaniak.drive.ui.login.CrossAppLoginViewModel
 import com.infomaniak.lib.core.utils.safeBinding
 
 class CrossLoginBottomSheetDialog : BottomSheetDialogFragment() {
 
     private var binding: FragmentBottomSheetCrossLoginBinding by safeBinding()
-    private val loginViewModel: LoginViewModel by activityViewModels()
+    private val crossAppLoginViewModel: CrossAppLoginViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentBottomSheetCrossLoginBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -44,13 +44,13 @@ class CrossLoginBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun observeCrossLoginAccounts() {
-        loginViewModel.crossLoginAccounts.observe(viewLifecycleOwner) { accounts ->
+        crossAppLoginViewModel.crossLoginAccounts.observe(viewLifecycleOwner) { accounts ->
             binding.crossLoginBottomSheet.setAccounts(accounts)
         }
     }
 
     private fun observeCrossLoginSelectedIds() {
-        loginViewModel.crossLoginSelectedIds.observe(viewLifecycleOwner) { ids ->
+        crossAppLoginViewModel.crossLoginSelectedIds.observe(viewLifecycleOwner) { ids ->
             binding.crossLoginBottomSheet.setSelectedIds(ids)
         }
     }
@@ -66,7 +66,7 @@ class CrossLoginBottomSheetDialog : BottomSheetDialogFragment() {
         }
 
         binding.crossLoginBottomSheet.setOnSaveClickedListener { selectedIds ->
-            loginViewModel.crossLoginSelectedIds.value = selectedIds
+            crossAppLoginViewModel.crossLoginSelectedIds.value = selectedIds
             dismiss()
         }
     }
