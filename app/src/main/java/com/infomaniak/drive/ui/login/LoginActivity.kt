@@ -87,7 +87,7 @@ class LoginActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
 
-    private val loginViewModel: LoginViewModel by viewModels()
+    private val crossAppLoginViewModel: CrossAppLoginViewModel by viewModels()
 
     private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
@@ -157,7 +157,7 @@ class LoginActivity : AppCompatActivity() {
                     super.onPageSelected(position)
 
                     val isLoginPage = position == 2
-                    val hasAccounts = loginViewModel.crossLoginAccounts.value?.isNotEmpty() == true
+                    val hasAccounts = crossAppLoginViewModel.crossLoginAccounts.value?.isNotEmpty() == true
 
                     nextButton.isGone = isLoginPage
                     connectButton.isVisible = isLoginPage
@@ -193,14 +193,14 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun observeCrossLoginAccounts() {
-        loginViewModel.crossLoginAccounts.observe(this) { accounts ->
+        crossAppLoginViewModel.crossLoginAccounts.observe(this) { accounts ->
             SentryLog.i(TAG, "Got ${accounts.count()} accounts from other apps")
             binding.crossLoginSelection.setAccounts(accounts)
         }
     }
 
     private fun observeCrossLoginSelectedIds() {
-        loginViewModel.crossLoginSelectedIds.observe(this) { ids ->
+        crossAppLoginViewModel.crossLoginSelectedIds.observe(this) { ids ->
             if (ids.isEmpty()) return@observe
 
             val count = ids.count()
@@ -230,11 +230,11 @@ class LoginActivity : AppCompatActivity() {
     private fun initCrossLogin() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-            val accounts = loginViewModel.getCrossLoginAccounts(context = this@LoginActivity)
+            val accounts = crossAppLoginViewModel.getCrossLoginAccounts(context = this@LoginActivity)
 
             if (accounts.isNotEmpty()) {
-                loginViewModel.crossLoginAccounts.value = accounts
-                loginViewModel.crossLoginSelectedIds.value = accounts.mapTo(mutableSetOf()) { it.id }
+                crossAppLoginViewModel.crossLoginAccounts.value = accounts
+                crossAppLoginViewModel.crossLoginSelectedIds.value = accounts.mapTo(mutableSetOf()) { it.id }
             }
 
             binding.connectButton.initProgress(this@LoginActivity)
@@ -259,10 +259,10 @@ class LoginActivity : AppCompatActivity() {
             authenticateUser(token, infomaniakLogin, withRedirection)
         }
 
-        val selectedAccounts = loginViewModel.crossLoginAccounts.value
-            ?.filter { loginViewModel.crossLoginSelectedIds.value?.contains(it.id) == true }
+        val selectedAccounts = crossAppLoginViewModel.crossLoginAccounts.value
+            ?.filter { crossAppLoginViewModel.crossLoginSelectedIds.value?.contains(it.id) == true }
             ?: return
-        val tokenGenerator = loginViewModel.derivedTokenGenerator
+        val tokenGenerator = crossAppLoginViewModel.derivedTokenGenerator
         val tokens = mutableListOf<ApiToken>()
         var currentlySelectedInAnAppToken: ApiToken? = null
 
