@@ -52,10 +52,10 @@ class DataManagementSettingFragment : Fragment() {
 
     private fun setupListeners() = with(binding) {
         dataManagementMatomo.setOnClickListener {
-            safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingToDataManagementMatomo())
+            safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingFragmentToDataManagementMatomoFragment())
         }
         dataManagementSentry.setOnClickListener {
-            safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingToDataManagementSentry())
+            safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingFragmentToDataManagementSentryFragment())
         }
         dataManagementSourceCodeButton.setOnClickListener {
             trackEventDataManagement(MatomoDrive.MatomoName.ShowSourceCode, UiSettings(requireContext()).isMatomoTrackingEnabled)
