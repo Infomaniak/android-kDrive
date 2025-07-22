@@ -78,7 +78,6 @@
                 android:text="@string/applicationSourceCode" />
 
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/myKSuiteLayout"
                 style="@style/CardViewInfomaniak"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
