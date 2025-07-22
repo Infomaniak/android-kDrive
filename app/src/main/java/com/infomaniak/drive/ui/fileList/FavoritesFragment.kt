@@ -60,6 +60,7 @@ class FavoritesFragment : FileListFragment() {
 
     private fun setupAdapter() {
         fileAdapter.apply {
+            isSelectingFolder = requireActivity() is SelectFolderActivity
             onEmptyList = { changeNoFilesLayoutVisibility(hideFileList = true, changeControlsVisibility = false) }
 
             onFileClicked = { file ->

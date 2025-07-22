@@ -78,7 +78,7 @@ class SelectFolderFragment : FileListFragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) { onBackPressed() }
 
         fileAdapter.apply {
-            selectFolder = true
+            isSelectingFolder = true
             onFileClicked = { file ->
                 if (file.isFolder() && !file.isDisabled()) {
                     fileListViewModel.cancelDownloadFiles()
