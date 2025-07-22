@@ -29,7 +29,6 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
-import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
@@ -51,6 +50,7 @@ import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponseStatus
+import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.room.UserDatabase
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.showToast
@@ -147,34 +147,36 @@ class LaunchActivity : AppCompatActivity() {
     }
 
     private fun handleNotificationDestinationIntent() {
-        navigationArgs?.let {
-            if (it.destinationUserId != 0 && it.destinationDriveId != 0) {
-                Sentry.addBreadcrumb(Breadcrumb().apply {
-                    category = UploadWorker.BREADCRUMB_TAG
-                    message = "Upload notification has been clicked"
-                    level = SentryLevel.INFO
-                })
+        val navArgs = navigationArgs ?: return
 
-                lifecycleScope.launch {
-                    val allUserIds = UserDatabase.getDatabase()
-                        .userDao()
-                        .getAll()
-                        .asFlow()
-                        .first()
-                        .map(User::id)
+        if (navArgs.destinationUserId != 0 && navArgs.destinationDriveId != 0) {
+            Sentry.addBreadcrumb(Breadcrumb().apply {
+                category = UploadWorker.BREADCRUMB_TAG
+                message = "Upload notification has been clicked"
+                level = SentryLevel.INFO
+            })
 
-                    if (it.destinationUserId in allUserIds) {
-                        DriveInfosController.getDrive(driveId = it.destinationDriveId, maintenance = false)?.let { drive ->
-                            setOpenSpecificFile(
-                                userId = drive.userId,
-                                driveId = drive.id,
-                                fileId = it.destinationRemoteFolderId,
-                                isSharedWithMe = drive.sharedWithMe,
-                            )
-                        }
-                    } else {
-                        mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+            lifecycleScope.launch {
+                val allUserIds = UserDatabase.getDatabase()
+                    .userDao()
+                    .getAll()
+                    .asFlow()
+                    .first()
+                    .map(User::id)
+
+                if (navArgs.destinationUserId in allUserIds) {
+                    Dispatchers.IO {
+                        DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
+                    }?.also { drive ->
+                        setOpenSpecificFile(
+                            userId = drive.userId,
+                            driveId = drive.id,
+                            fileId = navArgs.destinationRemoteFolderId,
+                            isSharedWithMe = drive.sharedWithMe,
+                        )
                     }
+                } else {
+                    mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
                 }
             }
         }
@@ -236,10 +238,12 @@ class LaunchActivity : AppCompatActivity() {
             val driveId = pathDriveId.toInt()
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
 
-            DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let {
-                setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
-            } ?: run {
-                mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+            lifecycleScope.launch {
+                Dispatchers.IO { DriveInfosController.getDrive(driveId = driveId, maintenance = false) }?.also {
+                    setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
+                } ?: run {
+                    mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+                }
             }
 
             trackDeepLink(MatomoName.Internal)
