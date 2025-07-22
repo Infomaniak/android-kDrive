@@ -230,8 +230,6 @@ class LoginActivity : AppCompatActivity() {
     private fun initCrossLogin() = lifecycleScope.launch {
         repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-            loginViewModel.initDerivedTokenGenerator(coroutineScope = this)
-
             val accounts = loginViewModel.getCrossLoginAccounts(context = this@LoginActivity)
 
             if (accounts.isNotEmpty()) {
@@ -264,7 +262,7 @@ class LoginActivity : AppCompatActivity() {
         val selectedAccounts = loginViewModel.crossLoginAccounts.value
             ?.filter { loginViewModel.crossLoginSelectedIds.value?.contains(it.id) == true }
             ?: return
-        val tokenGenerator = loginViewModel.derivedTokenGenerator ?: return
+        val tokenGenerator = loginViewModel.derivedTokenGenerator
         val tokens = mutableListOf<ApiToken>()
         var currentlySelectedInAnAppToken: ApiToken? = null
 

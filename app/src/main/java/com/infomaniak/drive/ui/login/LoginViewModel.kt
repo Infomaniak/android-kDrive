@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.login
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.infomaniak.core.autoCancelScope
 import com.infomaniak.core.login.crossapp.CrossAppLogin
 import com.infomaniak.core.login.crossapp.DerivedTokenGenerator
@@ -28,7 +29,6 @@ import com.infomaniak.core.login.crossapp.ExternalAccount
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.utils.loginUrl
 import com.infomaniak.lib.core.networking.HttpUtils
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -37,20 +37,15 @@ class LoginViewModel() : ViewModel() {
     val crossLoginAccounts = MutableLiveData(emptyList<ExternalAccount>())
     val crossLoginSelectedIds = MutableLiveData(emptySet<Int>())
 
-    var derivedTokenGenerator: DerivedTokenGenerator? = null
-        private set
+    val derivedTokenGenerator: DerivedTokenGenerator = DerivedTokenGeneratorImpl(
+        coroutineScope = viewModelScope,
+        tokenRetrievalUrl = "${loginUrl}token",
+        hostAppPackageName = BuildConfig.APPLICATION_ID,
+        clientId = BuildConfig.CLIENT_ID,
+        userAgent = HttpUtils.getUserAgent,
+    )
 
     suspend fun getCrossLoginAccounts(context: Context): List<ExternalAccount> = autoCancelScope {
         CrossAppLogin.forContext(context, coroutineScope = this).retrieveAccountsFromOtherApps()
-    }
-
-    fun initDerivedTokenGenerator(coroutineScope: CoroutineScope) {
-        derivedTokenGenerator = DerivedTokenGeneratorImpl(
-            coroutineScope = coroutineScope,
-            tokenRetrievalUrl = "${loginUrl}token",
-            hostAppPackageName = BuildConfig.APPLICATION_ID,
-            clientId = BuildConfig.CLIENT_ID,
-            userAgent = HttpUtils.getUserAgent,
-        )
     }
 }
