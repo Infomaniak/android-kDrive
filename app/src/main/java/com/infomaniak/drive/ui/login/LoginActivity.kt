@@ -107,7 +107,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             } else {
                 binding.connectButton.hideProgressCatching(R.string.connect)
-                binding.signInButton.isEnabled = true
+                binding.signUpButton.isEnabled = true
             }
         }
     }
@@ -126,7 +126,7 @@ class LoginActivity : AppCompatActivity() {
         configureViewPager()
         dotsIndicator.attachTo(introViewpager)
 
-        signInButton.setOnClickListener {
+        signUpButton.setOnClickListener {
             trackAccountEvent(MatomoName.OpenCreationWebview)
             startAccountCreation()
         }
@@ -161,7 +161,7 @@ class LoginActivity : AppCompatActivity() {
 
                     nextButton.isGone = isLoginPage
                     connectButton.isVisible = isLoginPage
-                    signInButton.isVisible = isLoginPage && !hasAccounts
+                    signUpButton.isVisible = isLoginPage && !hasAccounts
                     crossLoginSelection.isVisible = isLoginPage && hasAccounts
                 }
             })
@@ -188,7 +188,7 @@ class LoginActivity : AppCompatActivity() {
             }
         } else {
             connectButton.isEnabled = true
-            signInButton.isEnabled = true
+            signUpButton.isEnabled = true
         }
     }
 
@@ -242,7 +242,7 @@ class LoginActivity : AppCompatActivity() {
             repeatWhileActive {
                 binding.connectButton.awaitOneClick()
                 if (accounts.isEmpty()) {
-                    binding.signInButton.isEnabled = false
+                    binding.signUpButton.isEnabled = false
                     binding.connectButton.showProgressCatching()
                     openLoginWebView()
                 } else {
@@ -418,7 +418,7 @@ class LoginActivity : AppCompatActivity() {
     private fun showError(error: String) = with(binding) {
         showSnackbar(error)
         connectButton.hideProgressCatching(R.string.connect)
-        signInButton.isEnabled = true
+        signUpButton.isEnabled = true
         if (!connectButton.isEnabled) connectButton.isEnabled = true
     }
 
@@ -429,7 +429,7 @@ class LoginActivity : AppCompatActivity() {
     private fun launchNoDriveActivity() = with(binding) {
         Intent(this@LoginActivity, NoDriveActivity::class.java).apply { startActivity(this) }
         connectButton.hideProgressCatching(R.string.connect)
-        signInButton.isEnabled = true
+        signUpButton.isEnabled = true
     }
 
     private fun handleNavigationFlags() {
