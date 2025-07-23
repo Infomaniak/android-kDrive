@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.infomaniak.drive.ui.login
 
 import android.content.Context
@@ -30,13 +32,13 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.viewpager2.widget.ViewPager2
 import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
+import com.infomaniak.core.launchInOnLifecycle
 import com.infomaniak.core.login.crossapp.DerivedTokenGenerator.Issue
+import com.infomaniak.core.login.crossapp.ExternalAccount
+import com.infomaniak.core.observe
 import com.infomaniak.core.utils.awaitOneClick
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -50,6 +52,7 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
+import com.infomaniak.drive.extensions.selectedPagePosition
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog.Companion.ON_ANOTHER_ACCOUNT_CLICKED_KEY
@@ -76,7 +79,11 @@ import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import splitties.coroutines.repeatWhileActive
@@ -144,7 +151,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
         observeCrossLoginAccounts()
-        observeCrossLoginSelectedIds()
         setCrossLoginClickListener()
         initCrossLogin()
     }
@@ -152,19 +158,17 @@ class LoginActivity : AppCompatActivity() {
     private fun configureViewPager() = with(binding) {
         introViewpager.apply {
             adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    super.onPageSelected(position)
+            selectedPagePosition().mapLatest { position ->
+                val isLoginPage = position == 2
 
-                    val isLoginPage = position == 2
-                    val hasAccounts = crossAppLoginViewModel.crossLoginAccounts.value?.isNotEmpty() == true
-
-                    nextButton.isGone = isLoginPage
-                    connectButton.isVisible = isLoginPage
+                nextButton.isGone = isLoginPage
+                connectButton.isVisible = isLoginPage
+                crossAppLoginViewModel.crossLoginAccounts.collectLatest { accounts ->
+                    val hasAccounts = accounts.isNotEmpty()
                     signUpButton.isVisible = isLoginPage && !hasAccounts
                     crossLoginSelection.isVisible = isLoginPage && hasAccounts
                 }
-            })
+            }.launchInOnLifecycle(lifecycle)
 
             nextButton.setOnClickListener { currentItem++ }
         }
@@ -187,7 +191,6 @@ class LoginActivity : AppCompatActivity() {
                 else -> showError(translatedError)
             }
         } else {
-            connectButton.isEnabled = true
             signUpButton.isEnabled = true
         }
     }
@@ -196,17 +199,6 @@ class LoginActivity : AppCompatActivity() {
         crossAppLoginViewModel.crossLoginAccounts.observe(this) { accounts ->
             SentryLog.i(TAG, "Got ${accounts.count()} accounts from other apps")
             binding.crossLoginSelection.setAccounts(accounts)
-        }
-    }
-
-    private fun observeCrossLoginSelectedIds() {
-        crossAppLoginViewModel.crossLoginSelectedIds.observe(this) { ids ->
-            if (ids.isEmpty()) return@observe
-
-            val count = ids.count()
-            SentryLog.i(TAG, "User selected $count accounts")
-            binding.crossLoginSelection.setSelectedIds(ids)
-            binding.connectButton.text = resources.getQuantityString(RCrossLogin.plurals.buttonContinueWithAccounts, count, count)
         }
     }
 
@@ -228,40 +220,43 @@ class LoginActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalSplittiesApi::class)
     private fun initCrossLogin() = lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED) {
+        launch { crossAppLoginViewModel.activateUpdates(this@LoginActivity) }
+        launch { crossAppLoginViewModel.skippedAccountIds.collect { binding.crossLoginSelection.setSkippedIds(it) } }
 
-            val accounts = crossAppLoginViewModel.getCrossLoginAccounts(context = this@LoginActivity)
+        binding.connectButton.initProgress(lifecycle = this@LoginActivity)
 
-            if (accounts.isNotEmpty()) {
-                crossAppLoginViewModel.crossLoginAccounts.value = accounts
-                crossAppLoginViewModel.crossLoginSelectedIds.value = accounts.mapTo(mutableSetOf()) { it.id }
-            }
-
-            binding.connectButton.initProgress(this@LoginActivity)
-
-            repeatWhileActive {
-                binding.connectButton.awaitOneClick()
-                if (accounts.isEmpty()) {
-                    binding.signUpButton.isEnabled = false
-                    binding.connectButton.showProgressCatching()
-                    openLoginWebView()
-                } else {
-                    handleCrossAppLogin()
-                    delay(1_000L) // Add some delay so the button won't blink back into its original color before leaving the Activity
+        repeatWhileActive {
+            val accountsToLogin = crossAppLoginViewModel.selectedAccounts.mapLatest { accounts ->
+                val selectedCount = accounts.count()
+                SentryLog.i(TAG, "User selected $selectedCount accounts")
+                binding.connectButton.text = when {
+                    accounts.isEmpty() -> resources.getString(R.string.buttonLogin)
+                    else -> resources.getQuantityString(
+                        RCrossLogin.plurals.buttonContinueWithAccounts,
+                        selectedCount,
+                        selectedCount
+                    )
                 }
+                binding.connectButton.awaitOneClick()
+                accounts
+            }.first()
+            if (accountsToLogin.isEmpty()) {
+                binding.signUpButton.isEnabled = false
+                binding.connectButton.showProgressCatching()
+                openLoginWebView()
+            } else {
+                attemptLogin(selectedAccounts = accountsToLogin)
+                delay(1_000L) // Add some delay so the button won't blink back into its original color before leaving the Activity
             }
         }
     }
 
-    private suspend fun handleCrossAppLogin() {
+    private suspend fun attemptLogin(selectedAccounts: List<ExternalAccount>) {
 
         suspend fun authenticateToken(token: ApiToken, withRedirection: Boolean) {
             authenticateUser(token, infomaniakLogin, withRedirection)
         }
 
-        val selectedAccounts = crossAppLoginViewModel.crossLoginAccounts.value
-            ?.filter { crossAppLoginViewModel.crossLoginSelectedIds.value?.contains(it.id) == true }
-            ?: return
         val tokenGenerator = crossAppLoginViewModel.derivedTokenGenerator
         val tokens = mutableListOf<ApiToken>()
         var currentlySelectedInAnAppToken: ApiToken? = null
@@ -276,14 +271,7 @@ class LoginActivity : AppCompatActivity() {
                     result.value
                 }
                 is Xor.Second -> {
-                    SentryLog.e(TAG, "Failed to derive token for account ${account.id}, with reason: ${result.value}")
-                    val errorId = when (result.value) {
-                        is Issue.AppIntegrityCheckFailed -> TODO()
-                        is Issue.ErrorResponse -> TODO()
-                        is Issue.NetworkIssue -> R.string.connectionError
-                        is Issue.OtherIssue -> R.string.anErrorHasOccurred
-                    }
-                    Dispatchers.Main { showError(getString(errorId)) }
+                    handleTokenDerivationIssue(account, issue = result.value)
                     null
                 }
             }
@@ -306,6 +294,34 @@ class LoginActivity : AppCompatActivity() {
         }
 
         authenticateToken(currentlySelectedInAnAppToken, withRedirection = true)
+    }
+
+    private suspend fun handleTokenDerivationIssue(account: ExternalAccount, issue: Issue) {
+        val shouldReport: Boolean
+        val errorId = when (issue) {
+            is Issue.AppIntegrityCheckFailed -> {
+                shouldReport = false
+                R.string.anErrorHasOccurred
+            }
+            is Issue.ErrorResponse -> {
+                shouldReport = issue.httpStatusCode !in 500..599
+                R.string.anErrorHasOccurred
+            }
+            is Issue.NetworkIssue -> {
+                shouldReport = false
+                R.string.connectionError
+            }
+            is Issue.OtherIssue -> {
+                shouldReport = true
+                R.string.anErrorHasOccurred
+            }
+        }
+        val errorMessage = "Failed to derive token for account ${account.id}, with reason: $issue"
+        when (shouldReport) {
+            true -> SentryLog.e(TAG, errorMessage)
+            false -> SentryLog.i(TAG, errorMessage)
+        }
+        Dispatchers.Main { showError(getString(errorId)) }
     }
 
     private fun openLoginWebView() {
@@ -419,7 +435,6 @@ class LoginActivity : AppCompatActivity() {
         showSnackbar(error)
         connectButton.hideProgressCatching(R.string.connect)
         signUpButton.isEnabled = true
-        if (!connectButton.isEnabled) connectButton.isEnabled = true
     }
 
     private fun launchMainActivity() {

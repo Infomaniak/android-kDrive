@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.observe
 import com.infomaniak.drive.databinding.FragmentBottomSheetCrossLoginBinding
 import com.infomaniak.drive.ui.login.CrossAppLoginViewModel
 import com.infomaniak.lib.core.utils.safeBinding
@@ -50,8 +51,8 @@ class CrossLoginBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun observeCrossLoginSelectedIds() {
-        crossAppLoginViewModel.crossLoginSelectedIds.observe(viewLifecycleOwner) { ids ->
-            binding.crossLoginBottomSheet.setSelectedIds(ids)
+        crossAppLoginViewModel.skippedAccountIds.observe(viewLifecycleOwner) { ids ->
+            binding.crossLoginBottomSheet.setSkippedIds(ids)
         }
     }
 
@@ -65,8 +66,8 @@ class CrossLoginBottomSheetDialog : BottomSheetDialogFragment() {
             dismiss()
         }
 
-        binding.crossLoginBottomSheet.setOnSaveClickedListener { selectedIds ->
-            crossAppLoginViewModel.crossLoginSelectedIds.value = selectedIds
+        binding.crossLoginBottomSheet.setOnSaveClickedListener { skippedAccountIds ->
+            crossAppLoginViewModel.skippedAccountIds.value = skippedAccountIds
             dismiss()
         }
     }
