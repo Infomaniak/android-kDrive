@@ -258,7 +258,7 @@ object AccountUtils : CredentialManager() {
 
     private suspend fun resetApp(context: Context) {
         if (getAllUsersCount() == 0) {
-            AppSettings.removeAppSettings()
+            AppSettings.resetAppSettings()
             UiSettings(context).removeUiSettings()
             StoresSettingsRepository(context).clear()
 
