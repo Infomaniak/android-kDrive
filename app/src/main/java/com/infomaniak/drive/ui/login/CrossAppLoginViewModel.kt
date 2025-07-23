@@ -18,8 +18,11 @@
 package com.infomaniak.drive.ui.login
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.core.autoCancelScope
 import com.infomaniak.core.login.crossapp.CrossAppLogin
@@ -29,13 +32,24 @@ import com.infomaniak.core.login.crossapp.ExternalAccount
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.utils.loginUrl
 import com.infomaniak.lib.core.networking.HttpUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.plus
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class)
 class CrossAppLoginViewModel() : ViewModel() {
 
-    val crossLoginAccounts = MutableLiveData(emptyList<ExternalAccount>())
-    val crossLoginSelectedIds = MutableLiveData(emptySet<Int>())
+    val crossLoginAccounts: StateFlow<List<ExternalAccount>>
+    val selectedAccounts: StateFlow<List<ExternalAccount>>
+
+    val skippedAccountIds = MutableStateFlow(emptySet<Int>())
 
     val derivedTokenGenerator: DerivedTokenGenerator = DerivedTokenGeneratorImpl(
         coroutineScope = viewModelScope,
@@ -44,6 +58,27 @@ class CrossAppLoginViewModel() : ViewModel() {
         clientId = BuildConfig.CLIENT_ID,
         userAgent = HttpUtils.getUserAgent,
     )
+
+    private val _crossLoginAccounts = MutableStateFlow(emptyList<ExternalAccount>()).also {
+        crossLoginAccounts = it.asStateFlow()
+    }
+
+    init {
+        selectedAccounts = combine(crossLoginAccounts, skippedAccountIds) { allExternalAccounts, idsToSkip ->
+            allExternalAccounts.filter { it.id !in idsToSkip }
+        }.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = emptyList())
+    }
+
+    suspend fun activateUpdates(hostActivity: ComponentActivity): Nothing {
+        val crossAppLogin = CrossAppLogin.forContext(
+            context = hostActivity,
+            coroutineScope = hostActivity.lifecycleScope + Dispatchers.Default
+        )
+        hostActivity.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            _crossLoginAccounts.emit(crossAppLogin.retrieveAccountsFromOtherApps())
+        }
+        awaitCancellation() // Should never be reached. Unfortunately, `repeatOnLifecycle` doesn't return `Nothing`.
+    }
 
     suspend fun getCrossLoginAccounts(context: Context): List<ExternalAccount> = autoCancelScope {
         CrossAppLogin.forContext(context, coroutineScope = this).retrieveAccountsFromOtherApps()
