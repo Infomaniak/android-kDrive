@@ -163,7 +163,7 @@ class LoginActivity : AppCompatActivity() {
 
                 nextButton.isGone = isLoginPage
                 connectButton.isVisible = isLoginPage
-                crossAppLoginViewModel.crossLoginAccounts.collectLatest { accounts ->
+                crossAppLoginViewModel.availableAccounts.collectLatest { accounts ->
                     val hasAccounts = accounts.isNotEmpty()
                     signUpButton.isVisible = isLoginPage
                     crossLoginSelection.isVisible = isLoginPage && hasAccounts
@@ -196,7 +196,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun observeCrossLoginAccounts() {
-        crossAppLoginViewModel.crossLoginAccounts.observe(this) { accounts ->
+        crossAppLoginViewModel.availableAccounts.observe(this) { accounts ->
             SentryLog.i(TAG, "Got ${accounts.count()} accounts from other apps")
             binding.crossLoginSelection.setAccounts(accounts)
         }

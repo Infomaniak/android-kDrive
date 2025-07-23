@@ -45,7 +45,7 @@ class CrossLoginBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun observeCrossLoginAccounts() {
-        crossAppLoginViewModel.crossLoginAccounts.observe(viewLifecycleOwner) { accounts ->
+        crossAppLoginViewModel.availableAccounts.observe(viewLifecycleOwner) { accounts ->
             binding.crossLoginBottomSheet.setAccounts(accounts)
         }
     }
