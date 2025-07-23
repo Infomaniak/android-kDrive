@@ -22,6 +22,7 @@ import android.graphics.Color
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.avatar.getBackgroundColorResBasedOnId
 import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
 import com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData
@@ -48,5 +49,6 @@ fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteD
         avatarUri = user.avatar,
         userInitials = user.getInitials(),
         iconColor = Color.WHITE,
+        userInitialsBackgroundColor = requireContext().getBackgroundColorResBasedOnId(user.id.hashCode()),
     )
 }
