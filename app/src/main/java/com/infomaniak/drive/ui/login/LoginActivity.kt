@@ -126,15 +126,6 @@ class LoginActivity : AppCompatActivity() {
         configureViewPager()
         dotsIndicator.attachTo(introViewpager)
 
-        connectButton.apply {
-            initProgress(this@LoginActivity)
-            setOnClickListener {
-                signInButton.isEnabled = false
-                showProgressCatching()
-                openLoginWebView()
-            }
-        }
-
         signInButton.setOnClickListener {
             trackAccountEvent(MatomoName.OpenCreationWebview)
             startAccountCreation()
@@ -248,10 +239,13 @@ class LoginActivity : AppCompatActivity() {
                 loginViewModel.crossLoginSelectedIds.value = accounts.mapTo(mutableSetOf()) { it.id }
             }
 
+            binding.connectButton.initProgress(this@LoginActivity)
+
             repeatWhileActive {
                 binding.connectButton.awaitOneClick()
                 if (accounts.isEmpty()) {
                     binding.signInButton.isEnabled = false
+                    binding.connectButton.showProgressCatching()
                     openLoginWebView()
                 } else {
                     handleCrossAppLogin()
