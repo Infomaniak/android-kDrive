@@ -42,6 +42,14 @@ open class AppSettings(
     var _onlyWifiSync: Boolean = false,
 ) : RealmObject() {
 
+    fun update(appSettings: AppSettings) {
+        this._appLaunchesCount = appSettings._appLaunchesCount
+        this._appSecurityEnabled = appSettings._appSecurityEnabled
+        this._currentDriveId = appSettings._currentDriveId
+        this._currentUserId = appSettings._currentUserId
+        this._onlyWifiSync = appSettings._onlyWifiSync
+    }
+
     companion object {
         private const val DB_NAME = "AppSettings.realm"
         private val realmConfiguration: RealmConfiguration = RealmConfiguration.Builder().name(DB_NAME)
@@ -85,12 +93,9 @@ open class AppSettings(
         }
 
         fun resetAppSettings() {
-            val oldAppSettings = getAppSettings()
-            val newAppSettings = AppSettings().apply { _appLaunchesCount = oldAppSettings._appLaunchesCount }
-            getRealmInstance().use { realm ->
-                realm.executeTransaction { mutableRealm ->
-                    mutableRealm.copyToRealm(newAppSettings)
-                }
+            updateAppSettings { appSettings ->
+                val newAppSettings = AppSettings().apply { _appLaunchesCount = appSettings._appLaunchesCount }
+                appSettings.update(newAppSettings)
             }
         }
 
