@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
   -->
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -31,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
-            app:title="@string/aboutTitle">
+            app:title="@string/trackingSentryTitle">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
@@ -48,55 +47,42 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <com.google.android.material.card.MaterialCardView
-            style="@style/CardViewInfomaniak"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/marginStandard">
+            android:layout_height="match_parent"
+            android:layout_marginVertical="@dimen/marginStandard"
+            android:orientation="vertical">
 
-            <LinearLayout
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_sentry_text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard"
+                android:layout_marginVertical="@dimen/marginStandardMedium"
+                android:text="@string/trackingSentryDescription" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/settingsTrackingSentry"
+                style="@style/CardViewInfomaniak"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:divider="@drawable/divider"
-                android:orientation="vertical"
-                android:showDividers="middle">
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/marginStandard">
 
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                    android:id="@+id/privacyLayout"
+                    android:id="@+id/settingsTrackingSwitchSentry"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:itemAction="chevron"
-                    app:title="@string/aboutPrivacyTitle" />
+                    app:itemAction="toggle"
+                    app:title="@string/trackingAuthorizeTracking" />
+            </com.google.android.material.card.MaterialCardView>
 
-                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                    android:id="@+id/settingsDataManagement"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:itemAction="chevron"
-                    app:title="@string/trackingManagementTitle" />
-
-                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                    android:id="@+id/sourceCodeLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:itemAction="chevron"
-                    app:title="@string/aboutSourceCodeTitle" />
-
-                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                    android:id="@+id/licenseLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:description="@string/aboutLicenseDescription"
-                    app:itemAction="chevron"
-                    app:title="@string/aboutLicenseTitle" />
-
-                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                    android:id="@+id/appVersionLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:title="@string/aboutAppVersionTitle"
-                    tools:description="V 4.0.0 build 1337" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
