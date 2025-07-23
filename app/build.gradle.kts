@@ -53,6 +53,7 @@ android {
         buildConfigField("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
         buildConfigField("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
         buildConfigField("String", "GITHUB_REPO", "\"android-kdrive\"")
+        buildConfigField("String", "GITHUB_REPO_URL", "\"https://github.com/Infomaniak/android-kdrive\"")
 
         resValue("string", "CLOUD_STORAGE_AUTHORITY", "com.infomaniak.drive.documents")
         resValue("string", "FILE_AUTHORITY", "com.infomaniak.drive.files")
@@ -161,6 +162,7 @@ dependencies {
     implementation(project(":Core:MyKSuite"))
     implementation(project(":Core:Network"))
     implementation(project(":Core:RecyclerView"))
+    implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:UserAvatar"))
 
