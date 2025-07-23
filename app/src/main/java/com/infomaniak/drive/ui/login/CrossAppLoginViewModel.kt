@@ -46,7 +46,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 @OptIn(ExperimentalSerializationApi::class)
 class CrossAppLoginViewModel() : ViewModel() {
 
-    val crossLoginAccounts: StateFlow<List<ExternalAccount>>
+    val availableAccounts: StateFlow<List<ExternalAccount>>
     val selectedAccounts: StateFlow<List<ExternalAccount>>
 
     val skippedAccountIds = MutableStateFlow(emptySet<Int>())
@@ -59,12 +59,12 @@ class CrossAppLoginViewModel() : ViewModel() {
         userAgent = HttpUtils.getUserAgent,
     )
 
-    private val _crossLoginAccounts = MutableStateFlow(emptyList<ExternalAccount>()).also {
-        crossLoginAccounts = it.asStateFlow()
+    private val _availableAccounts = MutableStateFlow(emptyList<ExternalAccount>()).also {
+        availableAccounts = it.asStateFlow()
     }
 
     init {
-        selectedAccounts = combine(crossLoginAccounts, skippedAccountIds) { allExternalAccounts, idsToSkip ->
+        selectedAccounts = combine(availableAccounts, skippedAccountIds) { allExternalAccounts, idsToSkip ->
             allExternalAccounts.filter { it.id !in idsToSkip }
         }.stateIn(viewModelScope, started = SharingStarted.Eagerly, initialValue = emptyList())
     }
@@ -75,7 +75,7 @@ class CrossAppLoginViewModel() : ViewModel() {
             coroutineScope = hostActivity.lifecycleScope + Dispatchers.Default
         )
         hostActivity.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            _crossLoginAccounts.emit(crossAppLogin.retrieveAccountsFromOtherApps())
+            _availableAccounts.emit(crossAppLogin.retrieveAccountsFromOtherApps())
         }
         awaitCancellation() // Should never be reached. Unfortunately, `repeatOnLifecycle` doesn't return `Nothing`.
     }
