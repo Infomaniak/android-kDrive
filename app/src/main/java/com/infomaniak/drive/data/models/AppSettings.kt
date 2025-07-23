@@ -84,6 +84,16 @@ open class AppSettings(
             }
         }
 
+        fun resetAppSettings() {
+            val oldAppSettings = getAppSettings()
+            val newAppSettings = AppSettings().apply { _appLaunchesCount = oldAppSettings._appLaunchesCount }
+            getRealmInstance().use { realm ->
+                realm.executeTransaction { mutableRealm ->
+                    mutableRealm.copyToRealm(newAppSettings)
+                }
+            }
+        }
+
         fun removeAppSettings() {
             getRealmInstance().use { realm ->
                 realm.executeTransaction {
