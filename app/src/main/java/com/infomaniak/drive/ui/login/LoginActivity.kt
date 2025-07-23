@@ -165,7 +165,7 @@ class LoginActivity : AppCompatActivity() {
                 connectButton.isVisible = isLoginPage
                 crossAppLoginViewModel.crossLoginAccounts.collectLatest { accounts ->
                     val hasAccounts = accounts.isNotEmpty()
-                    signUpButton.isVisible = isLoginPage && !hasAccounts
+                    signUpButton.isVisible = isLoginPage
                     crossLoginSelection.isVisible = isLoginPage && hasAccounts
                 }
             }.launchInOnLifecycle(lifecycle)
