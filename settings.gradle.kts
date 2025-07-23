@@ -24,6 +24,7 @@ rootProject.name = "kDrive"
 include(
     ":app",
     ":Core:Auth",
+    ":Core:Avatar",
     ":Core:Coil",
     ":Core:Compose:Margin",
     ":Core:Compose:MaterialThemeFromXml",
