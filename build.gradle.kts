@@ -26,14 +26,12 @@ plugins {
     val kotlinVersion = "2.1.21"
     alias(libs.plugins.kotlin.serialization) version kotlinVersion apply false
     alias(core.plugins.compose.compiler) version kotlinVersion apply false
-    id("org.jetbrains.kotlin.android") version kotlinVersion apply false
-    id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion apply false
-    id("com.google.devtools.ksp") version "2.1.21-2.0.1" apply false
-    id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
+    alias(libs.plugins.ktlint) version "12.3.0"
 }
 
 ktlint {
     version.set("1.6.0")
+    outputToConsole.set(true)
     android.set(true)
     ignoreFailures.set(false)
     reporters {

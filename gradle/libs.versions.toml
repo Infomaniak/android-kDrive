@@ -78,3 +78,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization" }
 navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin" }
 realm-android = { id = "realm-android" }
 sentry = { id = "io.sentry.android.gradle" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint" }
