@@ -22,7 +22,12 @@ import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SelectRootFolderViewModel : ViewModel() {
