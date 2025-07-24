@@ -113,7 +113,7 @@ class LoginActivity : AppCompatActivity() {
                     else -> showError(getString(R.string.anErrorHasOccurred))
                 }
             } else {
-                binding.connectButton.hideProgressCatching(R.string.connect)
+                binding.connectButton.hideProgressCatching(connectButtonText)
                 binding.signUpButton.isEnabled = true
             }
         }
@@ -123,12 +123,16 @@ class LoginActivity : AppCompatActivity() {
         result.handleCreateAccountActivityResult()
     }
 
+    private lateinit var connectButtonText: String
+
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         lockOrientationForSmallScreens()
         super.onCreate(savedInstanceState)
 
         enableEdgeToEdge()
         setContentView(root)
+
+        connectButtonText = getString(R.string.buttonLogin)
 
         configureViewPager()
         dotsIndicator.attachTo(introViewpager)
@@ -229,7 +233,7 @@ class LoginActivity : AppCompatActivity() {
             val accountsToLogin = crossAppLoginViewModel.selectedAccounts.mapLatest { accounts ->
                 val selectedCount = accounts.count()
                 SentryLog.i(TAG, "User selected $selectedCount accounts")
-                binding.connectButton.text = when {
+                connectButtonText = when {
                     accounts.isEmpty() -> resources.getString(R.string.buttonLogin)
                     else -> resources.getQuantityString(
                         RCrossLogin.plurals.buttonContinueWithAccounts,
@@ -237,6 +241,7 @@ class LoginActivity : AppCompatActivity() {
                         selectedCount
                     )
                 }
+                binding.connectButton.text = connectButtonText
                 binding.connectButton.awaitOneClick()
                 accounts
             }.first()
@@ -418,7 +423,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showError(error: String) = with(binding) {
         showSnackbar(error)
-        connectButton.hideProgressCatching(R.string.connect)
+        connectButton.hideProgressCatching(connectButtonText)
         signUpButton.isEnabled = true
     }
 
@@ -428,7 +433,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun launchNoDriveActivity() = with(binding) {
         Intent(this@LoginActivity, NoDriveActivity::class.java).apply { startActivity(this) }
-        connectButton.hideProgressCatching(R.string.connect)
+        connectButton.hideProgressCatching(connectButtonText)
         signUpButton.isEnabled = true
     }
 
