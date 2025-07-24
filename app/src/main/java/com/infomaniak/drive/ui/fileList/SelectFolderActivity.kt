@@ -166,7 +166,11 @@ class SelectFolderActivity : BaseActivity() {
         var disableSelectedFolderId: Int? = null
 
         fun getFolderName(folderId: Int): String {
-            val selectedFolderName = if (folderId == ROOT_ID) currentDrive?.name else FileController.getFileById(folderId)?.name
+            val selectedFolderName = if (folderId == ROOT_ID) {
+                currentDrive?.name
+            } else {
+                FileController.getFileById(folderId, userDrive)?.name
+            }
             return selectedFolderName ?: "/"
         }
     }
