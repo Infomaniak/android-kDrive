@@ -41,7 +41,7 @@ ktlint {
     }
 }
 
-allprojects {
+subprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }
 
