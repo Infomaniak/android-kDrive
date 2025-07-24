@@ -18,13 +18,13 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.distinctUntilChanged
@@ -72,7 +72,6 @@ import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.TimeZone
-import androidx.core.graphics.toColorInt
 
 class SyncSettingsActivity : BaseActivity() {
 

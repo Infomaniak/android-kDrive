@@ -225,7 +225,7 @@ class LoginActivity : AppCompatActivity() {
     @OptIn(ExperimentalSplittiesApi::class)
     private fun initCrossLogin() = lifecycleScope.launch {
         launch { crossAppLoginViewModel.activateUpdates(this@LoginActivity) }
-        launch { crossAppLoginViewModel.skippedAccountIds.collect { binding.crossLoginSelection.setSkippedIds(it) } }
+        launch { crossAppLoginViewModel.skippedAccountIds.collect(binding.crossLoginSelection::setSkippedIds) }
 
         binding.connectButton.initProgress(lifecycle = this@LoginActivity)
 

@@ -42,8 +42,6 @@ import com.infomaniak.drive.ui.home.RootFileTreeCategory.PersonalFolder
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.RecentChanges
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.SharedWithMe
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.Trash
-import com.infomaniak.drive.utils.FilePresenter.displayFile
-import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.observeNavigateFileListTo

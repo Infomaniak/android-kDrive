@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.models
 import com.infomaniak.core.flowOnLazyClosable
 import com.infomaniak.drive.extensions.HandlerThreadDispatcher
 import com.infomaniak.drive.utils.RealmModules
-import com.infomaniak.drive.utils.runOnMainThread
 import io.realm.DynamicRealm
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -34,9 +33,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
 open class AppSettings(
@@ -76,22 +73,12 @@ open class AppSettings(
             } ?: AppSettings()
         }
 
-        // TODO: Either use `getCurrentUserIdFlow1()` or `currentUserIdFlow2`, and delete the other one, but don't keep both.
-        @OptIn(DelicateCoroutinesApi::class)
-        fun getCurrentUserIdFlow1(): Flow<Int?> = runOnMainThread {
-            val realm = getRealmInstance()
-            return@runOnMainThread getAppSettingsAsyncQuery(realm).toFlow().flowOn(Dispatchers.Main)
-                .onCompletion { realm.close() }
-                .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
-        }
-
-        // TODO: Either use `getCurrentUserIdFlow1()` or `currentUserIdFlow2`, and delete the other one, but don't keep both.
-        val currentUserIdFlow2: Flow<Int> = flow {
+        val currentUserIdFlow: Flow<Int?> = flow {
             val flow = getRealmInstance()
                 .where(AppSettings::class.java)
                 .findFirst()
                 .toFlow()
-                .map { it?._currentUserId ?: -1 }
+                .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
             emitAll(flow)
         }.flowOnLazyClosable {
             @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
