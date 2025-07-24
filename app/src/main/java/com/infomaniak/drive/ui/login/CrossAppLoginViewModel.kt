@@ -17,14 +17,12 @@
  */
 package com.infomaniak.drive.ui.login
 
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.autoCancelScope
 import com.infomaniak.core.login.crossapp.CrossAppLogin
 import com.infomaniak.core.login.crossapp.DerivedTokenGenerator
 import com.infomaniak.core.login.crossapp.DerivedTokenGeneratorImpl
@@ -78,9 +76,5 @@ class CrossAppLoginViewModel() : ViewModel() {
             _availableAccounts.emit(crossAppLogin.retrieveAccountsFromOtherApps())
         }
         awaitCancellation() // Should never be reached. Unfortunately, `repeatOnLifecycle` doesn't return `Nothing`.
-    }
-
-    suspend fun getCrossLoginAccounts(context: Context): List<ExternalAccount> = autoCancelScope {
-        CrossAppLogin.forContext(context, coroutineScope = this).retrieveAccountsFromOtherApps()
     }
 }
