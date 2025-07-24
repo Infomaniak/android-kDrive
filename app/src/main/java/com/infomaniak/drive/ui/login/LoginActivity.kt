@@ -258,14 +258,11 @@ class LoginActivity : AppCompatActivity() {
         }
 
         val tokenGenerator = crossAppLoginViewModel.derivedTokenGenerator
-        val tokens = mutableListOf<ApiToken>()
-        var currentlySelectedInAnAppToken: ApiToken? = null
 
         if (selectedAccounts.isEmpty()) return
 
-        selectedAccounts.forEach { account ->
-
-            val token = when (val result = tokenGenerator.attemptDerivingOneOfTheseTokens(account.tokens)) {
+        val tokens = selectedAccounts.mapNotNull { account ->
+            when (val result = tokenGenerator.attemptDerivingOneOfTheseTokens(account.tokens)) {
                 is Xor.First -> {
                     SentryLog.i(TAG, "Succeeded to derive token for account: ${account.id}")
                     result.value
@@ -275,25 +272,11 @@ class LoginActivity : AppCompatActivity() {
                     null
                 }
             }
-
-            token?.let {
-                if (account.isCurrentlySelectedInAnApp && currentlySelectedInAnAppToken == null) {
-                    currentlySelectedInAnAppToken = it
-                } else {
-                    tokens.add(it)
-                }
-            }
         }
 
-        if (currentlySelectedInAnAppToken == null) currentlySelectedInAnAppToken = tokens.firstOrNull() ?: return
-
-        val remainingTokens = tokens.filterNot { it == currentlySelectedInAnAppToken }
-
-        remainingTokens.forEach { token ->
-            authenticateToken(token, withRedirection = false)
+        tokens.forEachIndexed { index, token ->
+            authenticateToken(token, withRedirection = index == tokens.lastIndex)
         }
-
-        authenticateToken(currentlySelectedInAnAppToken, withRedirection = true)
     }
 
     private suspend fun handleTokenDerivationIssue(account: ExternalAccount, issue: Issue) {
