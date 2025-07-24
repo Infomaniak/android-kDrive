@@ -34,6 +34,7 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
+import com.infomaniak.core.login.crossapp.internal.deviceinfo.DeviceInfoUpdateManager
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
@@ -41,9 +42,8 @@ import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
-import com.infomaniak.drive.data.services.MqttClientWrapper
-import com.infomaniak.core.login.crossapp.internal.deviceinfo.DeviceInfoUpdateManager
 import com.infomaniak.drive.data.services.DeviceInfoUpdateWorker
+import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
@@ -207,7 +207,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     private fun tokenInterceptorListener() = object : TokenInterceptorListener {
-        val userTokenFlow by lazy { AppSettings.getCurrentUserIdFlow1().mapToApiToken(applicationScope) }
+        val userTokenFlow by lazy { AppSettings.currentUserIdFlow.mapToApiToken(applicationScope) }
 
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
             if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
