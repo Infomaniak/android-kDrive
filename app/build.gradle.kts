@@ -16,7 +16,7 @@ plugins {
     alias(core.plugins.compose.compiler)
     alias(core.plugins.kotlin.parcelize)
     alias(core.plugins.sentry.plugin)
-	id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.ktlint)
 }
 
 val appCompileSdk: Int by rootProject.extra
