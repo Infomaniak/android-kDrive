@@ -309,8 +309,6 @@ class LoginActivity : AppCompatActivity() {
             true -> SentryLog.e(TAG, errorMessage)
             false -> SentryLog.i(TAG, errorMessage)
         }
-        //TODO[CrossAppLogin]: Show error in a dialog or bottom sheet with retry and close/dismiss actions.
-        // Also make sure it's temporarily non-dismissable to avoid unintended dismisses.
         Dispatchers.Main { showError(getString(errorId)) }
     }
 
