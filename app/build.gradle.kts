@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
     alias(libs.plugins.sentry)
-	id("org.jlleitschuh.gradle.ktlint")
+    alias(libs.plugins.ktlint)
 }
 
 val appCompileSdk: Int by rootProject.extra

@@ -29,6 +29,7 @@ include(
     ":Core:Compose:Margin",
     ":Core:Compose:MaterialThemeFromXml",
     ":Core:FragmentNavigation",
+    ":Core:KtlintCustomRules",
     ":Core:Ktor",
     ":Core:Legacy",
     ":Core:Legacy:AppLock",
