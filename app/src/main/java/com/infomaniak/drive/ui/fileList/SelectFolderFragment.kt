@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ class SelectFolderFragment : FileListFragment() {
     override val noItemsTitle = R.string.noFilesDescription
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
-        userDrive = selectFolderViewModel.userDrive
+        userDrive = navigationArgs.userDrive
         super.onViewCreated(view, savedInstanceState)
 
         folderName = if (folderId == ROOT_ID) selectFolderViewModel.currentDrive?.name ?: "/" else navigationArgs.folderName
@@ -82,7 +82,13 @@ class SelectFolderFragment : FileListFragment() {
             onFileClicked = { file ->
                 if (file.isFolder() && !file.isDisabled()) {
                     fileListViewModel.cancelDownloadFiles()
-                    safeNavigate(SelectFolderFragmentDirections.fileListFragmentToFileListFragment(file.id, file.name))
+                    safeNavigate(
+                        SelectFolderFragmentDirections.fileListFragmentToFileListFragment(
+                            folderId = file.id,
+                            folderName = file.name,
+                            userDrive = userDrive!!
+                        )
+                    )
                 }
             }
         }
