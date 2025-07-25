@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,12 +44,16 @@ import com.infomaniak.drive.utils.Position
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
+import io.realm.Realm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -60,8 +64,7 @@ import kotlinx.coroutines.sync.withLock
 class FileListViewModel(application: Application) : AndroidViewModel(application) {
 
     private inline val context get() = getApplication<MainApplication>().applicationContext
-
-    private val realm = FileController.getRealmInstance()
+    private var realm: Realm? = null
 
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
@@ -77,13 +80,26 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     var lastItemCount: FileCount? = null
 
+    private val loadRootFiles = MutableSharedFlow<UserDrive>(replay = 1)
+
     fun sortTypeIsInitialized() = ::sortType.isInitialized
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val rootFiles = FileController.getFolderFilesFlow(realm, Utils.ROOT_ID)
+    val rootFiles: LiveData<Map<File.VisibilityType, File>> = loadRootFiles.distinctUntilChanged().flatMapLatest {
+        FileController.getRealmInstance(it).run {
+            realm = this
+            FileController.getFolderFilesFlow(this, Utils.ROOT_ID)
+        }
+    }
         .mapLatest { it.associateBy(File::getVisibilityType) }
         .cancellable()
         .asLiveData(viewModelScope.coroutineContext)
+
+    fun updateRootFiles(userDrive: UserDrive) {
+        viewModelScope.launch {
+            loadRootFiles.emit(userDrive)
+        }
+    }
 
     fun getFiles(
         folderId: Int,
@@ -316,7 +332,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     override fun onCleared() {
         super.onCleared()
-        runCatching { realm.close() }
+        runCatching { realm?.close() }
         cancelDownloadFiles()
     }
 

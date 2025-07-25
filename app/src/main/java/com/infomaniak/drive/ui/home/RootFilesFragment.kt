@@ -28,6 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
@@ -69,6 +70,8 @@ class RootFilesFragment : BaseRootFolderFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
+
+        fileListViewModel.updateRootFiles(UserDrive())
 
         setupDriveToolbar(collapsingToolbarLayout, switchDriveLayout, appBar)
 
