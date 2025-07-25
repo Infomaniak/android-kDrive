@@ -21,10 +21,15 @@ import android.content.Context
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
-import com.infomaniak.drive.data.models.*
+import com.infomaniak.drive.data.models.CancellableAction
+import com.infomaniak.drive.data.models.DropBox
+import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.IS_PRIVATE_SPACE
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.Type
+import com.infomaniak.drive.data.models.FileActivity
+import com.infomaniak.drive.data.models.MqttAction
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.services.MqttClientWrapper
@@ -34,7 +39,12 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.removeAccents
-import io.realm.*
+import io.realm.Realm
+import io.realm.RealmConfiguration
+import io.realm.RealmList
+import io.realm.RealmQuery
+import io.realm.RealmResults
+import io.realm.Sort
 import io.realm.kotlin.oneOf
 import io.realm.kotlin.toFlow
 import io.sentry.Sentry
@@ -165,18 +175,16 @@ object FileController {
             .toFlow()
     }
 
-    fun getRecentFolders(recentFolderNumber: Int): Flow<List<File>> {
-        return getRealmInstance().use { realm ->
-            realm.where(File::class.java)
-                .equalTo(File::type.name, Type.DIRECTORY.value)
-                .greaterThan(File::id.name, ROOT_ID)
-                .greaterThan(File::parentId.name, ROOT_ID)
-                .sort(File::lastModifiedAt.name, Sort.DESCENDING)
-                .limit(recentFolderNumber.toLong())
-                .sort(File::lastModifiedAt.name, Sort.ASCENDING)
-                .findAllAsync()
-                .toFlow()
-        }
+    fun getRecentFolders(realm: Realm, recentFolderNumber: Int): Flow<List<File>> {
+        return realm.where(File::class.java)
+            .equalTo(File::type.name, Type.DIRECTORY.value)
+            .greaterThan(File::id.name, ROOT_ID)
+            .greaterThan(File::parentId.name, ROOT_ID)
+            .sort(File::lastModifiedAt.name, Sort.DESCENDING)
+            .limit(recentFolderNumber.toLong())
+            .sort(File::lastModifiedAt.name, Sort.ASCENDING)
+            .findAllAsync()
+            .toFlow()
     }
 
     //region isMarkedAsOffline

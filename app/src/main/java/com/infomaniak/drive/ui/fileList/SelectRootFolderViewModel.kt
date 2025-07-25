@@ -21,19 +21,31 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class SelectRootFolderViewModel : ViewModel() {
 
     private val loadFiles = MutableSharedFlow<Int>(replay = 1)
+
+    private var userDrive: UserDrive? = null
+    private val realm
+        get() = FileController.getRealmInstance(userDrive)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val recentFiles: StateFlow<List<File>> = loadFiles.distinctUntilChanged().flatMapLatest { limit ->
-        FileController.getRecentFolders(limit)
+        FileController.getRecentFolders(realm, limit)
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    fun getRecentFolders(limit: Int) {
+    fun getRecentFolders(userDrive: UserDrive, limit: Int) {
+        this.userDrive = userDrive
         viewModelScope.launch {
             loadFiles.emit(limit)
         }
