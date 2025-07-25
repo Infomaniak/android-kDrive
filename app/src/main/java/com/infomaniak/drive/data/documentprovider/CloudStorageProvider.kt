@@ -679,7 +679,8 @@ class CloudStorageProvider : DocumentsProvider() {
     private fun MatrixCursor.addRoot(rootId: String, documentId: String, summary: String) {
         val flags = DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
                 DocumentsContract.Root.FLAG_SUPPORTS_RECENTS or
-                DocumentsContract.Root.FLAG_SUPPORTS_SEARCH
+                DocumentsContract.Root.FLAG_SUPPORTS_SEARCH or
+                DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD
 
         newRow().apply {
             add(DocumentsContract.Root.COLUMN_ROOT_ID, rootId)
@@ -733,7 +734,9 @@ class CloudStorageProvider : DocumentsProvider() {
                     DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
                     DocumentsContract.Document.FLAG_SUPPORTS_RENAME or
                     DocumentsContract.Document.FLAG_SUPPORTS_COPY or
-                    DocumentsContract.Document.FLAG_SUPPORTS_MOVE
+                    DocumentsContract.Document.FLAG_SUPPORTS_MOVE or
+                    DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
+                    DocumentsContract.Document.FLAG_SUPPORTS_REMOVE
         }
 
         val fileName = context?.let { file?.getDisplayName(it) } ?: ""
