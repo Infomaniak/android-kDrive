@@ -121,7 +121,9 @@
             android:configChanges="orientation|screenSize|layoutDirection"
             android:label="@string/selectFolderTitle" />
 
-        <activity android:name=".ui.OnlyOfficeActivity" />
+        <activity
+            android:name=".ui.OnlyOfficeActivity"
+            android:theme="@style/WebViewTheme" />
 
         <!-- This Activity is meant to be opened by everyone and don't need any permission protection-->
         <activity
