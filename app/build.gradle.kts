@@ -167,8 +167,8 @@ dependencies {
 
     implementation(core.ktor.client.okhttp)
 
-    implementation(libs.androidx.work.runtime.ktx)
-    androidTestImplementation(libs.androidx.work.testing)
+    implementation(core.androidx.work.runtime)
+    androidTestImplementation(core.androidx.work.testing)
 
     implementation(libs.androidx.concurrent.futures.ktx)
     implementation(libs.androidx.lifecycle.process)
