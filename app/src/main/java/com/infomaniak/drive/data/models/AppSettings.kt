@@ -25,12 +25,15 @@ import io.realm.RealmConfiguration
 import io.realm.RealmMigration
 import io.realm.RealmObject
 import io.realm.kotlin.toFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
 open class AppSettings(
@@ -57,6 +60,8 @@ open class AppSettings(
             .migration(AppSettingsMigration())
             .build()
 
+        private val scope = CoroutineScope(Dispatchers.Default)
+
         private fun getRealmInstance() = Realm.getInstance(realmConfiguration)
 
         private fun getAppSettingsQuery(realm: Realm) = realm.where(AppSettings::class.java).findFirst()
@@ -78,7 +83,11 @@ open class AppSettings(
                     .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
                 emitAll(flow)
             }
-        }.flowOnNewHandlerThread(name = "Realm-currentUserIdFlow")
+        }.flowOnNewHandlerThread(name = "Realm-currentUserIdFlow").shareIn(
+            scope = scope,
+            started = SharingStarted.WhileSubscribed(),
+            replay = 1,
+        )
 
         fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
             return getRealmInstance().use { realm ->
