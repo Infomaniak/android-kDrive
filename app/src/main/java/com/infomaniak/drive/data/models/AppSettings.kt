@@ -17,8 +17,7 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.infomaniak.core.flowOnLazyClosable
-import com.infomaniak.drive.extensions.HandlerThreadDispatcher
+import com.infomaniak.core.flowOnNewHandlerThread
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.DynamicRealm
 import io.realm.Realm
@@ -26,9 +25,7 @@ import io.realm.RealmConfiguration
 import io.realm.RealmMigration
 import io.realm.RealmObject
 import io.realm.kotlin.toFlow
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -74,16 +71,14 @@ open class AppSettings(
         }
 
         val currentUserIdFlow: Flow<Int?> = flow {
-            val flow = getRealmInstance()
-                .where(AppSettings::class.java)
-                .findFirst()
-                .toFlow()
-                .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
-            emitAll(flow)
-        }.flowOnLazyClosable {
-            @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
-            HandlerThreadDispatcher("Realm-currentUserIdFlow")
-        }
+            getRealmInstance().use { realm ->
+                val flow = realm.where(AppSettings::class.java)
+                    .findFirst()
+                    .toFlow()
+                    .map { it?._currentUserId?.takeIf { id -> id > 0 } } // Return null if not valid user id
+                emitAll(flow)
+            }
+        }.flowOnNewHandlerThread(name = "Realm-currentUserIdFlow")
 
         fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
             return getRealmInstance().use { realm ->
