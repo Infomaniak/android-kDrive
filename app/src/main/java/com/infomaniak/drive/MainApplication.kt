@@ -34,6 +34,7 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
+import com.infomaniak.core.sentry.SentryConfig.configureSentry
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
@@ -60,10 +61,6 @@ import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.PENDING_INT
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.stores.AppUpdateScheduler
-import io.sentry.SentryEvent
-import io.sentry.SentryOptions
-import io.sentry.android.core.SentryAndroid
-import io.sentry.android.core.SentryAndroidOptions
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -101,19 +98,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         }
 
         ApiController.init(typeAdapterList = arrayListOf(File::class.java to FileDeserialization()))
-
-        SentryAndroid.init(this) { options: SentryAndroidOptions ->
-            // register the callback as an option
-            options.beforeSend = SentryOptions.BeforeSendCallback { event: SentryEvent?, _: Any? ->
-                when {
-                    // If the application is in debug mode discard the events
-                    BuildConfig.DEBUG -> null
-                    !uiSettings.isSentryTrackingEnabled -> null
-                    else -> event
-                }
-            }
-        }
-
+        configureSentry()
         runBlocking { initRealm() }
 
         geniusScanIsReady = initGeniusScanSdk()
@@ -220,5 +205,19 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         override suspend fun getUserApiToken(): ApiToken? = userTokenFlow.first()
 
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
+    }
+
+    /**
+     * Reasons to discard Sentry events :
+     * - Application is in Debug mode
+     * - User deactivated Sentry tracking in DataManagement settings
+     * - The exception was an [ApiController.NetworkException] or an [CancellationException]
+     *   or any Exception added in [isErrorException], and we don't want to send them to Sentry
+     */
+    private fun configureSentry() {
+        this.configureSentry(
+            isDebug = BuildConfig.DEBUG,
+            isSentryTrackingEnabled = UiSettings(applicationContext) .isSentryTrackingEnabled,
+        )
     }
 }
