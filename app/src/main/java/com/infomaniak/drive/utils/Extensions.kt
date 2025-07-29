@@ -102,6 +102,7 @@ import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.views.PendingFilesView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.context
@@ -416,6 +417,11 @@ fun Context.getInfomaniakLogin() = InfomaniakLogin(
     appUID = BuildConfig.APPLICATION_ID,
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,
+    sentryCallback = { error ->
+        SentryLog.e(tag = "WebViewLogin", "An error occurred on the login/Account creation webview", scopeCallback = {
+            it.setTag("error", error)
+        })
+    }
 )
 
 //region Worker
