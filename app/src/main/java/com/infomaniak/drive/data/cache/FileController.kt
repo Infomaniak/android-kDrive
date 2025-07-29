@@ -286,6 +286,26 @@ object FileController {
         }
     }
 
+    tailrec fun deleteFileAndChildrensRec(
+        files: MutableList<File>,
+        realm: Realm? = null,
+        userDrive: UserDrive? = null,
+        context: Context
+    ) {
+        if (files.isEmpty()) return
+
+        val file: File = files.removeAt(0)
+        val childrens = getFileById(file.id)?.children?.let {
+            it.map { it }
+        } ?: emptyList<File>()
+
+        files.addAll(childrens)
+        file.deleteCaches(context)
+        updateFile(file.id, realm, userDrive = userDrive) { localFile -> localFile.deleteFromRealm() }
+
+        deleteFileAndChildrensRec(files, realm, userDrive, context)
+    }
+
     fun deleteFile(
         file: File,
         realm: Realm? = null,
@@ -295,8 +315,7 @@ object FileController {
     ): ApiResponse<CancellableAction> {
         val apiResponse = ApiRepository.deleteFile(file)
         if (apiResponse.isSuccess()) {
-            file.deleteCaches(context)
-            updateFile(file.id, realm, userDrive = userDrive) { localFile -> localFile.deleteFromRealm() }
+            deleteFileAndChildrensRec(mutableListOf(file), realm, userDrive, context)
             onSuccess?.invoke(file.id)
         }
         return apiResponse
