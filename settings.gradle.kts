@@ -23,11 +23,15 @@ dependencyResolutionManagement {
 rootProject.name = "kDrive"
 include(
     ":app",
+    ":Core:AppIntegrity",
     ":Core:Auth",
     ":Core:Avatar",
     ":Core:Coil",
+    ":Core:Compose:Basics",
     ":Core:Compose:Margin",
     ":Core:Compose:MaterialThemeFromXml",
+    ":Core:CrossAppLogin",
+    ":Core:CrossAppLoginUI",
     ":Core:FragmentNavigation",
     ":Core:Ktor",
     ":Core:Legacy",
