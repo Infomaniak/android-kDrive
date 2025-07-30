@@ -63,7 +63,7 @@ class SelectFolderActivity : BaseActivity() {
 
         // We're doing this in the mainthread because the FileListFragment rely on mainViewModel.selectFolderUserDrive.
         // Moving this call in a background thread we'll break everything
-        DriveInfosController.getDrive(driveId = driveId, maintenance = false)?.let { selectedDrive ->
+        DriveInfosController.getDrive(userId = userId, driveId = driveId, maintenance = false)?.let { selectedDrive ->
             val isSharedWithMe = selectedDrive.sharedWithMe
             val currentUserDrive = UserDrive(userId, driveId, isSharedWithMe)
             mainViewModel.selectFolderUserDrive = currentUserDrive
@@ -73,6 +73,11 @@ class SelectFolderActivity : BaseActivity() {
                 currentDrive = DriveInfosController.getDrive(userId, driveId)
                 disableSelectedFolderId = disabledFolderId
             }
+
+            navController.setGraph(
+                R.navigation.select_folder_navigation,
+                SelectRootFolderFragmentArgs(driveId = driveId, userDrive = currentUserDrive).toBundle()
+            )
 
             setSaveButton(customArgs)
 
@@ -116,7 +121,7 @@ class SelectFolderActivity : BaseActivity() {
 
     private fun initiateNavigationToCurrentFolder(folderId: Int, userDrive: UserDrive) {
         generateNavigationIds(folderId, userDrive)
-        navigateToCurrentFolder()
+        navigateToCurrentFolder(userDrive)
     }
 
     private fun generateNavigationIds(folderId: Int, userDrive: UserDrive) = with(navigationIds) {
@@ -134,16 +139,26 @@ class SelectFolderActivity : BaseActivity() {
         }
     }
 
-    private fun navigateToCurrentFolder() {
+    private fun navigateToCurrentFolder(currentUserDrive: UserDrive) {
         // Making sure the current backstack entry is selectRootFolderFragment because it'll generate a
         // crash when "Don't keep activities" is activated
         navController.popBackStack(R.id.selectRootFolderFragment, false)
 
         navigationIds.forEachIndexed { index, folderId ->
             if (index == 0) {
-                navController.navigate(SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(folderId))
+                navController.navigate(
+                    SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
+                        folderId = folderId,
+                        userDrive = currentUserDrive
+                    )
+                )
             } else {
-                navController.navigate(SelectFolderFragmentDirections.fileListFragmentToFileListFragment(folderId))
+                navController.navigate(
+                    SelectFolderFragmentDirections.fileListFragmentToFileListFragment(
+                        folderId = folderId,
+                        userDrive = currentUserDrive
+                    )
+                )
             }
         }
     }
@@ -166,7 +181,11 @@ class SelectFolderActivity : BaseActivity() {
         var disableSelectedFolderId: Int? = null
 
         fun getFolderName(folderId: Int): String {
-            val selectedFolderName = if (folderId == ROOT_ID) currentDrive?.name else FileController.getFileById(folderId)?.name
+            val selectedFolderName = if (folderId == ROOT_ID) {
+                currentDrive?.name
+            } else {
+                FileController.getFileById(folderId, userDrive)?.name
+            }
             return selectedFolderName ?: "/"
         }
     }
