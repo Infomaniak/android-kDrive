@@ -246,6 +246,7 @@ class LoginActivity : AppCompatActivity() {
                 binding.connectButton.showProgressCatching()
                 accounts
             }.first()
+
             if (accountsToLogin.isEmpty()) {
                 binding.signUpButton.isEnabled = false
                 openLoginWebView()
