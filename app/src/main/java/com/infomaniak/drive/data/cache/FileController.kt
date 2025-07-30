@@ -286,20 +286,37 @@ object FileController {
         }
     }
 
+    tailrec fun deleteFileAndChildrenRec(
+        filesToDelete: MutableList<File>,
+        realm: Realm? = null,
+        userDrive: UserDrive? = null,
+        context: Context,
+    ) {
+        if (filesToDelete.isEmpty()) return
+
+        val file = filesToDelete.removeAt(0)
+        val children = getFileById(file.id, userDrive)?.children ?: emptyList()
+
+        filesToDelete.addAll(children)
+        file.deleteCaches(context)
+        updateFile(file.id, realm, userDrive) { localFile -> localFile.deleteFromRealm() }
+
+        deleteFileAndChildrenRec(filesToDelete, realm, userDrive, context)
+    }
+
     fun deleteFile(
         file: File,
         realm: Realm? = null,
         userDrive: UserDrive? = null,
         context: Context,
         onSuccess: ((fileId: Int) -> Unit)? = null,
-    ): ApiResponse<CancellableAction> {
-        val apiResponse = ApiRepository.deleteFile(file)
+    ): ApiResponse<CancellableAction> = ApiRepository.deleteFile(file).also { apiResponse ->
         if (apiResponse.isSuccess()) {
-            file.deleteCaches(context)
-            updateFile(file.id, realm, userDrive = userDrive) { localFile -> localFile.deleteFromRealm() }
-            onSuccess?.invoke(file.id)
+            runCatching {
+                deleteFileAndChildrenRec(filesToDelete = mutableListOf(file), realm, userDrive, context)
+                onSuccess?.invoke(file.id)
+            }.onFailure(Sentry::captureException)
         }
-        return apiResponse
     }
 
     fun updateIsOfflineForFiles(
