@@ -20,9 +20,15 @@ package com.infomaniak.drive.ui.fileList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.utils.Utils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +45,8 @@ class SelectRootFolderViewModel : ViewModel() {
     private val realm
         get() = FileController.getRealmInstance(userDrive)
 
+    private var rootFilesJob: Job = Job()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val recentFiles: StateFlow<List<File>> = loadFiles.distinctUntilChanged().flatMapLatest { limit ->
         FileController.getRecentFolders(realm, limit)
@@ -49,5 +57,26 @@ class SelectRootFolderViewModel : ViewModel() {
         viewModelScope.launch {
             loadFiles.emit(limit)
         }
+    }
+
+    fun loadRootFiles(userDrive: UserDrive) {
+        rootFilesJob.cancel()
+        rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
+            FolderFilesProvider.getFiles(
+                FolderFilesProvider.FolderFilesProviderArgs(
+                    folderId = Utils.ROOT_ID,
+                    isFirstPage = true,
+                    order = SortType.NAME_AZ,
+                    sourceRestrictionType = ONLY_FROM_REMOTE,
+                    userDrive = userDrive,
+                )
+            )
+
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        rootFilesJob.cancel()
     }
 }

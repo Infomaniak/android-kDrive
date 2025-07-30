@@ -95,6 +95,8 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
         setupRecentFoldersViews()
 
+        selectRootFolderViewModel.loadRootFiles(navigationArgs.userDrive)
+
         (activity as SelectFolderActivity).hideSaveButton()
 
         rootFolderLayout.cardView.setMargins(top = resources.getDimension(R.dimen.marginStandardSmall).toInt())
