@@ -71,7 +71,6 @@ class SelectRootFolderViewModel : ViewModel() {
                     userDrive = userDrive,
                 )
             )
-
         }
     }
 
