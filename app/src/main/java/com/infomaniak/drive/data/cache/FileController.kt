@@ -737,7 +737,9 @@ object FileController {
         // Save remote folder if it doesn't exist locally
         var newLocalFolderProxy: File? = null
         if (localFolderProxy == null && remoteFolder != null) {
-            realm.executeTransaction { newLocalFolderProxy = it.copyToRealm(remoteFolder) }
+            runCatching {
+                realm.executeTransaction { newLocalFolderProxy = it.copyToRealm(remoteFolder) }
+            }
         }
         realm.executeTransaction {
             // Restore same children data
