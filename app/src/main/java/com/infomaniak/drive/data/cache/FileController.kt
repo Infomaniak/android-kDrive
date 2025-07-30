@@ -286,24 +286,22 @@ object FileController {
         }
     }
 
-    tailrec fun deleteFileAndChildrensRec(
-        files: MutableList<File>,
+    tailrec fun deleteFileAndChildrenRec(
+        filesToDelete: MutableList<File>,
         realm: Realm? = null,
         userDrive: UserDrive? = null,
-        context: Context
+        context: Context,
     ) {
-        if (files.isEmpty()) return
+        if (filesToDelete.isEmpty()) return
 
-        val file: File = files.removeAt(0)
-        val childrens = getFileById(file.id)?.children?.let {
-            it.map { it }
-        } ?: emptyList<File>()
+        val file = filesToDelete.removeAt(0)
+        val children = getFileById(file.id, userDrive)?.children ?: emptyList()
 
-        files.addAll(childrens)
+        filesToDelete.addAll(children)
         file.deleteCaches(context)
-        updateFile(file.id, realm, userDrive = userDrive) { localFile -> localFile.deleteFromRealm() }
+        updateFile(file.id, realm, userDrive) { localFile -> localFile.deleteFromRealm() }
 
-        deleteFileAndChildrensRec(files, realm, userDrive, context)
+        deleteFileAndChildrenRec(filesToDelete, realm, userDrive, context)
     }
 
     fun deleteFile(
@@ -312,13 +310,13 @@ object FileController {
         userDrive: UserDrive? = null,
         context: Context,
         onSuccess: ((fileId: Int) -> Unit)? = null,
-    ): ApiResponse<CancellableAction> {
-        val apiResponse = ApiRepository.deleteFile(file)
+    ): ApiResponse<CancellableAction> = ApiRepository.deleteFile(file).also { apiResponse ->
         if (apiResponse.isSuccess()) {
-            deleteFileAndChildrensRec(mutableListOf(file), realm, userDrive, context)
-            onSuccess?.invoke(file.id)
+            runCatching {
+                deleteFileAndChildrenRec(filesToDelete = mutableListOf(file), realm, userDrive, context)
+                onSuccess?.invoke(file.id)
+            }.onFailure(Sentry::captureException)
         }
-        return apiResponse
     }
 
     fun updateIsOfflineForFiles(
