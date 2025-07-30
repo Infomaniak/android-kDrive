@@ -241,13 +241,14 @@ class LoginActivity : AppCompatActivity() {
                         selectedCount
                     )
                 }
-                binding.connectButton.text = connectButtonText
+                binding.connectButton.hideProgressCatching(connectButtonText)
                 binding.connectButton.awaitOneClick()
+                binding.connectButton.showProgressCatching()
                 accounts
             }.first()
+
             if (accountsToLogin.isEmpty()) {
                 binding.signUpButton.isEnabled = false
-                binding.connectButton.showProgressCatching()
                 openLoginWebView()
             } else {
                 attemptLogin(selectedAccounts = accountsToLogin)
