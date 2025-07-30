@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.removeAccents
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -45,6 +46,7 @@ import io.realm.RealmList
 import io.realm.RealmQuery
 import io.realm.RealmResults
 import io.realm.Sort
+import io.realm.exceptions.RealmPrimaryKeyConstraintException
 import io.realm.kotlin.oneOf
 import io.realm.kotlin.toFlow
 import io.sentry.Sentry
@@ -739,6 +741,12 @@ object FileController {
         if (localFolderProxy == null && remoteFolder != null) {
             runCatching {
                 realm.executeTransaction { newLocalFolderProxy = it.copyToRealm(remoteFolder) }
+            }.onFailure { exception ->
+                if (exception is RealmPrimaryKeyConstraintException) {
+                    SentryLog.i("FileController", "Exception while adding a folder to Realm", exception)
+                } else {
+                    throw exception
+                }
             }
         }
         realm.executeTransaction {
