@@ -45,5 +45,4 @@ include(
     ":Core:RecyclerView",
     ":Core:Sentry",
     ":Core:Thumbnails",
-    ":Core:UserAvatar",
 )

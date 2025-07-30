@@ -165,7 +165,6 @@ dependencies {
     implementation(project(":Core:Network"))
     implementation(project(":Core:RecyclerView"))
     implementation(project(":Core:Thumbnails"))
-    implementation(project(":Core:UserAvatar"))
 
     implementation(core.ktor.client.okhttp)
 
