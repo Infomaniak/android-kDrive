@@ -26,7 +26,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
-import com.google.gson.reflect.TypeToken
 import com.infomaniak.core.io.skipExactly
 import com.infomaniak.core.ktor.toOutgoingContent
 import com.infomaniak.core.rateLimit
@@ -464,8 +463,7 @@ class UploadTask(
                     uploadFile.resetUploadTokenAndCancelSession()
                     throw UploadErrorException()
                 } else {
-                    val responseType = object : TypeToken<ApiResponse<T>>() {}.type
-                    val responseJson = gson.toJson(this, responseType)
+                    val responseJson = gson.toJson(this)
                     throw Exception("$responseJson translateError: ${context.getString(translateError())}")
                 }
             }
