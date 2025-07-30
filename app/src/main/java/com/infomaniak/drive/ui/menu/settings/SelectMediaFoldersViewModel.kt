@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.content.ContentResolver
-import android.os.Environment
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -32,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
+import splitties.init.appCtx
 
 class SelectMediaFoldersViewModel : ViewModel() {
 
@@ -67,7 +67,7 @@ class SelectMediaFoldersViewModel : ViewModel() {
         cacheMediaFolders: ArrayList<MediaFolder>,
     ): ArrayList<MediaFolder> {
 
-        fun MediaFolder.exists(): Boolean = Environment.getExternalStoragePublicDirectory(path).exists()
+        fun MediaFolder.exists(): Boolean = appCtx.getExternalFilesDir(path)?.exists() == true
 
         val localFolders = ArrayList(
             MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob),
