@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.app.Activity
 import android.app.ActivityManager
+import android.content.ClipData
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -437,7 +438,10 @@ fun Context.shareFile(getUriToShare: () -> Uri?) {
     val shareIntent = Intent().apply {
         action = Intent.ACTION_SEND
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        putExtra(Intent.EXTRA_STREAM, getUriToShare())
+
+        val uriToShare = getUriToShare()
+        putExtra(Intent.EXTRA_STREAM, uriToShare)
+        clipData = ClipData.newUri(contentResolver, "", uriToShare)
         type = "*/*"
     }
 
