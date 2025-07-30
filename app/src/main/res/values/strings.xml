@@ -458,7 +458,6 @@
     <string name="fileShareAddMessage">Add a message for guests (optional)</string>
     <string name="fileShareDetailsFileTitle">File %s sharing and rights</string>
     <string name="fileShareDetailsFolderTitle">Folder %s sharing and rights</string>
-    <string name="fileShareDetailsShareLinkTitle">Sharing links</string>
     <string name="fileShareDetailsUsersAccesTitle">Users with access</string>
     <string name="fileShareFileTitle">Share file</string>
     <string name="fileShareFolderTitle">Share folder</string>
@@ -593,7 +592,7 @@
     <string name="restrictedSharedLinkTitle">Restricted sharing link</string>
     <string name="reviewAlertTitle">Do you like kDrive?</string>
     <string name="saveExternalFileInputFileName">Document name</string>
-    <string name="saveExternalFileTitle">Save to kDrive</string>
+    <string name="saveExternalFileTitle">Save to Drive</string>
     <string name="searchFilterTitle">File types</string>
     <string name="searchFiltersSelectDate">Select a date</string>
     <string name="searchFiltersSelectType">Select a file type</string>

@@ -447,7 +447,6 @@
     <string name="fileShareAddMessage">Nachricht an Gäste hinzufügen (fakultativ)</string>
     <string name="fileShareDetailsFileTitle">Freigabe und Rechte der Datei %s</string>
     <string name="fileShareDetailsFolderTitle">Freigabe und Rechte des Ordners %s</string>
-    <string name="fileShareDetailsShareLinkTitle">Freigabelinks</string>
     <string name="fileShareDetailsUsersAccesTitle">Benutzer mit Zugang</string>
     <string name="fileShareFileTitle">Datei freigeben</string>
     <string name="fileShareFolderTitle">Ordner freigeben</string>
@@ -582,7 +581,7 @@
     <string name="restrictedSharedLinkTitle">Eingeschränkter Freigabelink</string>
     <string name="reviewAlertTitle">Mögen Sie kDrive?</string>
     <string name="saveExternalFileInputFileName">Name des Dokuments</string>
-    <string name="saveExternalFileTitle">Auf kDrive speichern</string>
+    <string name="saveExternalFileTitle">Auf Drive speichern</string>
     <string name="searchFilterTitle">Dateitypen</string>
     <string name="searchFiltersSelectDate">Datum wählen</string>
     <string name="searchFiltersSelectType">Dateityp wählen</string>
