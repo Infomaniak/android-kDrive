@@ -189,7 +189,6 @@ class SaveExternalFilesActivity : BaseActivity() {
         selectDriveViewModel.apply {
             selectedUserId.value = userId
             selectedDrive.value = drive
-            showSharedWithMe = true
         }
     }
 
