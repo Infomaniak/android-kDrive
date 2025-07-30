@@ -63,7 +63,7 @@ class MediaFoldersAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    fun addAll(addedItems: ArrayList<MediaFolder>) {
+    fun addAll(addedItems: List<MediaFolder>) {
 
         val oldList = items.toList()
 
