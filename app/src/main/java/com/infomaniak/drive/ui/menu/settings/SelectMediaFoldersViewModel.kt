@@ -38,7 +38,7 @@ class SelectMediaFoldersViewModel : ViewModel() {
     private var getMediaFilesJob: Job = Job()
     val elementsToRemove = MutableLiveData<List<Long>>()
 
-    fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<IsComplete, ArrayList<MediaFolder>>> {
+    fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<IsComplete, List<MediaFolder>>> {
         getMediaFilesJob = Job()
         return liveData {
             runInterruptible(Dispatchers.IO + getMediaFilesJob) {
@@ -64,20 +64,18 @@ class SelectMediaFoldersViewModel : ViewModel() {
         realm: Realm,
         contentResolver: ContentResolver,
         getMediaFilesJob: Job,
-        cacheMediaFolders: ArrayList<MediaFolder>,
-    ): ArrayList<MediaFolder> {
+        cacheMediaFolders: List<MediaFolder>,
+    ): List<MediaFolder> {
 
         fun MediaFolder.exists(): Boolean = appCtx.getExternalFilesDir(path)?.exists() == true
 
-        val localFolders = ArrayList(
-            MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob),
-        )
+        val localFolders = MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob)
 
         val previouslySyncedCacheFolders = cacheMediaFolders.filter {
             it.isSynced && it.exists()
         }
 
-        return ArrayList(localFolders + previouslySyncedCacheFolders)
+        return localFolders + previouslySyncedCacheFolders
     }
 
     override fun onCleared() {
@@ -85,10 +83,10 @@ class SelectMediaFoldersViewModel : ViewModel() {
         super.onCleared()
     }
 
-    private fun ArrayList<MediaFolder>.newMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
+    private fun List<MediaFolder>.newMediaFolders(cachedMediaFolders: List<MediaFolder>): List<MediaFolder> {
         return filterNot { mediaFolder ->
             cachedMediaFolders.any { cachedFolder -> cachedFolder.id == mediaFolder.id }
-        } as ArrayList<MediaFolder>
+        }
     }
 
     private fun List<MediaFolder>.removeObsoleteMediaFolders(realm: Realm, upToDateMediasIds: List<Long>) {
