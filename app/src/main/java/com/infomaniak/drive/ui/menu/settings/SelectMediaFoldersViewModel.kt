@@ -31,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
+import splitties.init.appCtx
 
 class SelectMediaFoldersViewModel : ViewModel() {
 
@@ -47,9 +48,8 @@ class SelectMediaFoldersViewModel : ViewModel() {
                         if (cacheMediaFolders.isNotEmpty()) emit(false to cacheMediaFolders)
                     }
 
-                    val localMediaFolders = ArrayList(
-                        MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob),
-                    )
+                    val localMediaFolders = getLocalMediaFolders(realm, contentResolver, getMediaFilesJob, cacheMediaFolders)
+
                     cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders.map { it.id })
 
                     viewModelScope.launch(Dispatchers.Main) {
@@ -58,6 +58,26 @@ class SelectMediaFoldersViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    private fun getLocalMediaFolders(
+        realm: Realm,
+        contentResolver: ContentResolver,
+        getMediaFilesJob: Job,
+        cacheMediaFolders: ArrayList<MediaFolder>,
+    ): ArrayList<MediaFolder> {
+
+        fun MediaFolder.exists(): Boolean = appCtx.getExternalFilesDir(path)?.exists() == true
+
+        val localFolders = ArrayList(
+            MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob),
+        )
+
+        val previouslySyncedCacheFolders = cacheMediaFolders.filter {
+            it.isSynced && it.exists()
+        }
+
+        return ArrayList(localFolders + previouslySyncedCacheFolders)
     }
 
     override fun onCleared() {
