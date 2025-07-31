@@ -650,8 +650,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         companion object {
-            fun Context.downloadFile(drivePermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
-                if (drivePermissions.checkWriteStoragePermission()) {
+            fun Context.downloadFile(downloadPermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
+                if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                     val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
                     DownloadManagerUtils.scheduleDownload(

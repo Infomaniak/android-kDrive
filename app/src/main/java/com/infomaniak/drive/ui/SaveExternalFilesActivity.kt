@@ -97,7 +97,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private val uiSettings by lazy { UiSettings(context = this) }
 
-    private lateinit var drivePermissions: DrivePermissions
+    private lateinit var backgroundUploadPermissions: DrivePermissions
     private var currentUri: Uri? = null
     private var isMultiple = false
 
@@ -164,12 +164,12 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun setupDrivePermissions() {
-        drivePermissions = DrivePermissions().apply {
+        backgroundUploadPermissions = DrivePermissions(DrivePermissions.Type.UploadInTheBackground).apply {
             registerPermissions(
                 activity = this@SaveExternalFilesActivity,
                 onPermissionResult = { authorized -> if (authorized) getFiles() },
             )
-            checkSyncPermissions()
+            hasNeededPermissions(requestIfNotGranted = true)
         }
     }
 
@@ -300,7 +300,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 }
 
                 showProgressCatching()
-                if (drivePermissions.checkSyncPermissions()) {
+                if (backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val userId = selectedUserId.value!!
                     val driveId = selectedDrive.value?.id!!
                     val folderId = saveExternalFilesViewModel.folderId.value!!
@@ -325,7 +325,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (drivePermissions.checkWriteStoragePermission(false)) getFiles()
+        getFiles()
     }
 
     private fun getFiles() {

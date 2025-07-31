@@ -91,6 +91,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var uploadedCount = 0
     private var pendingCount = 0
 
+    private val readMediaPermissions = DrivePermissions.permissionsFor(DrivePermissions.Type.ReadingMediaForSync).toTypedArray()
+
     override suspend fun doWork(): Result {
 
         SentryLog.d(TAG, "UploadWorker starts job!")
@@ -106,11 +108,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             var lastUploadFileName = ""
 
             do {
-                // Check if we have the required permissions before continuing
-                checkPermissions()?.let { return@runUploadCatching it }
 
                 // Retrieve the latest media that have not been synced
-                val appSyncSettings = retrieveLatestNotSyncedMedia()
+                val appSyncSettings = when {
+                    applicationContext.hasPermissions(readMediaPermissions) -> retrieveLatestNotSyncedMedia()
+                    else -> null
+                }
 
                 // Check if the user has cancelled the uploads and there is no more files to sync
                 checkRemainingUploadsAndUserCancellation()?.let { return@runUploadCatching it }
@@ -124,7 +127,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     checkLocalLastMedias(it)
                 }
 
-                syncNewPendingUploads = UploadFile.getAllPendingUploadsCount() > 0
+                syncNewPendingUploads = when {
+                    applicationContext.hasPermissions(readMediaPermissions) -> UploadFile.getAllPendingUploadsCount() > 0
+                    else -> UploadFile.getAllPendingPriorityFilesCount() > 0
+                }
 
                 // Update next iteration
                 retryError = if (currentUploadFile?.fileName == lastUploadFileName) retryError + 1 else 0
@@ -150,13 +156,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return progressForegroundInfo(pendingCount)
     }
 
-    private fun checkPermissions(): Result? {
-        if (!applicationContext.hasPermissions(DrivePermissions.permissions)) {
-            UploadNotifications.permissionErrorNotification(applicationContext)
-            SentryLog.d(TAG, "UploadWorker no permissions")
-            return Result.failure()
-        }
-        return null
+    private fun reportMissingPermissionsForSync() {
+        UploadNotifications.permissionErrorNotification(applicationContext)
+        SentryLog.d(TAG, "UploadWorker is missing permissions to sync media")
     }
 
     private suspend fun retrieveLatestNotSyncedMedia(): SyncSettings? {
@@ -220,7 +222,16 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private suspend fun uploadFile(uploadFile: UploadFile, isLastFile: Boolean) {
         SentryLog.d(TAG, "uploadFile> size: ${uploadFile.fileSize}")
 
-        val fileUploadedWithSuccess = uploadFile.upload(isLastFile)
+        val canReadMedia = applicationContext.hasPermissions(readMediaPermissions)
+
+        val fileUploadedWithSuccess = when {
+            canReadMedia || uploadFile.isSync().not() -> uploadFile.upload(isLastFile)
+            else -> {
+                reportMissingPermissionsForSync()
+                false
+            }
+        }
+
         if (fileUploadedWithSuccess) {
             SentryLog.i(TAG, "uploadFile: file uploaded with success")
             successNames.add(uploadFile.fileName)
