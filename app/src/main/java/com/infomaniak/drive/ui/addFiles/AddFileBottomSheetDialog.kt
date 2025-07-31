@@ -67,6 +67,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Date
@@ -79,18 +80,20 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private lateinit var openCameraWritePermissions: DrivePermissions
+    private lateinit var backgroundUploadPermissions: DrivePermissions
     private lateinit var openCameraPermissions: CameraPermissions
 
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
     private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
+        backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
         it.whenResultIsOk { onCaptureMediaResult() }
         dismiss()
     }
 
     private val scanFlowResultLauncher = registerForActivityResult(StartActivityForResult()) { activityResult ->
+        backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
         activityResult.whenResultIsOk {
             it?.let { data ->
                 val folder = when (parentFragment?.childFragmentManager?.fragments?.getOrNull(0)?.javaClass) {
@@ -120,8 +123,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             currentFolder.setFileItem(currentFolderFile)
         }
 
-        openCameraWritePermissions = DrivePermissions().apply {
-            registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
+        backgroundUploadPermissions = DrivePermissions(DrivePermissions.Type.UploadInTheBackground).apply {
+            registerPermissions(this@AddFileBottomSheetDialog)
         }
         openCameraPermissions = CameraPermissions().apply {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
@@ -149,7 +152,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun openCamera() {
-        if (openCameraWritePermissions.checkSyncPermissions() && openCameraPermissions.checkCameraPermission()) {
+        if (openCameraPermissions.checkCameraPermission()) {
             trackNewElement("takePhotoOrVideo")
             binding.openCamera.isEnabled = false
             try {

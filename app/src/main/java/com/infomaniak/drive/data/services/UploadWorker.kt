@@ -151,7 +151,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private fun checkPermissions(): Result? {
-        if (!applicationContext.hasPermissions(DrivePermissions.permissions)) {
+        val readMediaPermissions = DrivePermissions.permissionsFor(DrivePermissions.Type.ReadingMediaForSync)
+        if (!applicationContext.hasPermissions(readMediaPermissions.toTypedArray())) {
             UploadNotifications.permissionErrorNotification(applicationContext)
             SentryLog.d(TAG, "UploadWorker no permissions")
             return Result.failure()
