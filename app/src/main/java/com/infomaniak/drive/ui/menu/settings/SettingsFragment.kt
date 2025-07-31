@@ -79,7 +79,7 @@ class SettingsFragment : Fragment() {
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        val drivePermissions = DrivePermissions().apply {
+        val syncPermissions = DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).apply {
             registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
         }
 
@@ -87,7 +87,7 @@ class SettingsFragment : Fragment() {
         onlyWifiSync.setOnCheckedChangeListener { _, isChecked ->
             trackSettingsEvent(MatomoName.OnlyWifiTransfer, isChecked)
             AppSettings.onlyWifiSync = isChecked
-            requireActivity().launchAllUpload(drivePermissions)
+            requireActivity().launchAllUpload(syncPermissions)
         }
 
         setupMyKSuiteLayout()
