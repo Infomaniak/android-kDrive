@@ -1,0 +1,7 @@
+- Add cross application login
+- Add file's preview when sharing the file
+- Fix subfolders not being correctly deleted from the local storage when their parent is deleted
+- Fix the synchronized folder on the device being considered as unsynchronized when they became empty
+- Fix various rare crashs
+- Fix Account Creation formular quitting after second step
+- Support dark theme in Onlyoffice/Login/Account creation webviews

@@ -1,0 +1,7 @@
+- Ajout du login commun entre les applications infomaniak
+- Ajout d'un aperçu du fichier lors de son partage
+- Correction des sous-dossiers qui ne sont pas correctement supprimés du stockage local lorsque leur parent est supprimé
+- Correction des dossiers synchronisés sur l'appareil considérés comme non synchronisés lorsqu'ils deviennent vides
+- Correction de divers crashs rares
+- Correction du formulaire de création de compte qui s'arrête après la deuxième étape
+- Prise en charge du thème sombre dans les webviews Onlyoffice/Login/Création de compte
