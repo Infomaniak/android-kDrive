@@ -216,17 +216,10 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
 
-    /**
-     * Reasons to discard Sentry events :
-     * - Application is in Debug mode
-     * - User deactivated Sentry tracking in DataManagement settings
-     * - The exception was an [ApiController.NetworkException] or an [CancellationException]
-     *   or any Exception added in [isErrorException], and we don't want to send them to Sentry
-     */
     private fun configureSentry() {
         this.configureSentry(
             isDebug = BuildConfig.DEBUG,
-            isSentryTrackingEnabled = UiSettings(applicationContext) .isSentryTrackingEnabled,
+            isSentryTrackingEnabled = UiSettings(applicationContext).isSentryTrackingEnabled,
         )
     }
 }
