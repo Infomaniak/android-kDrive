@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalCoroutinesApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSplittiesApi::class)
 
 package com.infomaniak.drive.ui.login
 
@@ -51,6 +51,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
+import com.infomaniak.drive.extensions.awaitFragmentResult
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.selectedPagePosition
 import com.infomaniak.drive.ui.MainActivity
@@ -86,6 +87,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import splitties.coroutines.raceOf
 import splitties.coroutines.repeatWhileActive
 import splitties.experimental.ExperimentalSplittiesApi
 import com.infomaniak.core.crossloginui.R as RCrossLogin
@@ -155,7 +157,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
         observeCrossLoginAccounts()
-        setCrossLoginClickListener()
         initCrossLogin()
     }
 
@@ -206,23 +207,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun setCrossLoginClickListener() {
-
-        // Open CrossLogin bottomSheet
-        binding.crossLoginSelection.setOnClickListener {
-            CrossLoginBottomSheetDialog().show(supportFragmentManager, null)
-        }
-
-        // Open Login webView when coming back from CrossLogin bottomSheet
-        supportFragmentManager.setFragmentResultListener(
-            /* requestKey = */ ON_ANOTHER_ACCOUNT_CLICKED_KEY,
-            /* lifecycleOwner = */ this,
-        ) { _, bundle ->
-            bundle.getString(ON_ANOTHER_ACCOUNT_CLICKED_KEY)?.let { openLoginWebView() }
-        }
-    }
-
-    @OptIn(ExperimentalSplittiesApi::class)
     private fun initCrossLogin() = lifecycleScope.launch {
         launch { crossAppLoginViewModel.activateUpdates(this@LoginActivity) }
         launch { crossAppLoginViewModel.skippedAccountIds.collect(binding.crossLoginSelection::setSkippedIds) }
@@ -230,22 +214,7 @@ class LoginActivity : AppCompatActivity() {
         binding.connectButton.initProgress(lifecycle = this@LoginActivity)
 
         repeatWhileActive {
-            val accountsToLogin = crossAppLoginViewModel.selectedAccounts.mapLatest { accounts ->
-                val selectedCount = accounts.count()
-                SentryLog.i(TAG, "User selected $selectedCount accounts")
-                connectButtonText = when {
-                    accounts.isEmpty() -> resources.getString(R.string.buttonLogin)
-                    else -> resources.getQuantityString(
-                        RCrossLogin.plurals.buttonContinueWithAccounts,
-                        selectedCount,
-                        selectedCount
-                    )
-                }
-                binding.connectButton.hideProgressCatching(connectButtonText)
-                binding.connectButton.awaitOneClick()
-                binding.connectButton.showProgressCatching()
-                accounts
-            }.first()
+            val accountsToLogin = awaitConnectRequest()
 
             if (accountsToLogin.isEmpty()) {
                 binding.signUpButton.isEnabled = false
@@ -254,6 +223,55 @@ class LoginActivity : AppCompatActivity() {
                 attemptLogin(selectedAccounts = accountsToLogin)
                 delay(1_000L) // Add some delay so the button won't blink back into its original color before leaving the Activity
             }
+        }
+    }
+
+    private suspend fun awaitConnectRequest(): List<ExternalAccount> {
+        val accounts = raceOf(
+            {
+                awaitAnotherAccountClick()
+                emptyList()
+            },
+            { allowAccountSelection() },
+            {
+                crossAppLoginViewModel.selectedAccounts.mapLatest { accounts ->
+                    val selectedCount = accounts.count()
+                    SentryLog.i(TAG, "User selected $selectedCount accounts")
+                    connectButtonText = when {
+                        accounts.isEmpty() -> resources.getString(R.string.buttonLogin)
+                        else -> resources.getQuantityString(
+                            RCrossLogin.plurals.buttonContinueWithAccounts,
+                            selectedCount,
+                            selectedCount
+                        )
+                    }
+                    binding.connectButton.hideProgressCatching(connectButtonText)
+                    binding.connectButton.awaitOneClick()
+                    accounts
+                }.first()
+            }
+        )
+        binding.connectButton.showProgressCatching()
+        return accounts
+    }
+
+    private suspend fun allowAccountSelection(): Nothing = repeatWhileActive {
+        binding.crossLoginSelection.awaitOneClick()
+        val dialog = CrossLoginBottomSheetDialog()
+        dialog.show(supportFragmentManager, null)
+        // Since there is no convenient built-in way to listen for a DialogFragment dismissal,
+        // we just delay re-allowing clicks that would show the bottom sheet again,
+        // and that should be fine since the bottom sheet will prevent further clicks while shown.
+        delay(700L)
+    }
+
+    private suspend fun awaitAnotherAccountClick() {
+        repeatWhileActive {
+            val result = supportFragmentManager.awaitFragmentResult(
+                requestKey = ON_ANOTHER_ACCOUNT_CLICKED_KEY,
+                lifecycleOwner = this
+            )
+            if (result.containsKey(ON_ANOTHER_ACCOUNT_CLICKED_KEY)) return
         }
     }
 
