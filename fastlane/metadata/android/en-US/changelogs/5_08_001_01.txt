@@ -1,0 +1,1 @@
+- Prevent the login bottom sheet from showing twice

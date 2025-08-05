@@ -1,0 +1,1 @@
+- Empêche le double affichage de la feuille inférieure de connexion
