@@ -32,6 +32,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
@@ -259,10 +260,12 @@ class LoginActivity : AppCompatActivity() {
         binding.crossLoginSelection.awaitOneClick()
         val dialog = CrossLoginBottomSheetDialog()
         dialog.show(supportFragmentManager, null)
-        // Since there is no convenient built-in way to listen for a DialogFragment dismissal,
-        // we just delay re-allowing clicks that would show the bottom sheet again,
-        // and that should be fine since the bottom sheet will prevent further clicks while shown.
-        delay(700L)
+        try {
+            dialog.lifecycle.currentStateFlow.first { it == Lifecycle.State.DESTROYED }
+        } catch (e: CancellationException) {
+            dialog.dismiss() // Ensure the bottom sheet is hidden.
+            throw e
+        }
     }
 
     private suspend fun awaitAnotherAccountClick() {
