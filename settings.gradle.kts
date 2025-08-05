@@ -31,7 +31,6 @@ include(
     ":Core:Compose:Margin",
     ":Core:Compose:MaterialThemeFromXml",
     ":Core:CrossAppLogin",
-    ":Core:CrossAppLoginUI",
     ":Core:FragmentNavigation",
     ":Core:Ktor",
     ":Core:Legacy",
