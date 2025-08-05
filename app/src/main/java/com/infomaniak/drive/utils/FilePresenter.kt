@@ -79,6 +79,8 @@ object FilePresenter {
             if (file.isPublicShared()) {
                 val args = PublicShareListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
                 safeNavigate(R.id.publicShareListFragment, args.toBundle())
+            } else if (file.isTrashed()) {
+                safeNavigate(R.id.trashFragment)
             } else {
                 val args = FileListFragmentArgs(
                     folderId = file.id,

@@ -73,6 +73,7 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
@@ -276,7 +277,7 @@ class MainActivity : BaseActivity() {
                     post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
                 }
             } else {
-                if (it.destinationFileId > 0) {
+                if (it.destinationFileId > 0 || it.destinationFileId == TRASH_FILE_ID) {
                     clickOnBottomBarFolders()
                     mainViewModel.navigateFileListTo(
                         navController,
