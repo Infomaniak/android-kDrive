@@ -73,7 +73,9 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.models.AppSettings
+import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
@@ -277,15 +279,32 @@ class MainActivity : BaseActivity() {
                 }
             } else {
                 if (it.destinationFileId > 0) {
-                    clickOnBottomBarFolders()
-                    mainViewModel.navigateFileListTo(
-                        navController,
-                        it.destinationFileId,
-                        it.destinationUserDrive ?: UserDrive()
-                    )
+                    navigateToDestinationFileId(it.destinationFileId, it.destinationUserDrive, subfolderId = null)
+                } else {
+                    when (val deepLinkType = it.deepLinkType) {
+                        is DeepLinkType.SharedWithMe -> null//TODO()
+                        is DeepLinkType.Trash -> {
+                            navigateToDestinationFileId(
+                                destinationFileId = TRASH_FILE_ID,
+                                destinationUserDrive = UserDrive(driveId = deepLinkType.userDriveId),
+                                deepLinkType.folderId?.toInt()
+                            )
+                        }
+                        null -> null//TODO()
+                    }
                 }
             }
         }
+    }
+
+    private fun navigateToDestinationFileId(destinationFileId: Int, destinationUserDrive: UserDrive?, subfolderId: Int?) {
+        clickOnBottomBarFolders()
+        mainViewModel.navigateFileListTo(
+            navController,
+            destinationFileId,
+            destinationUserDrive ?: UserDrive(),
+            subfolderId
+        )
     }
 
     private fun setupFabs() = with(binding) {

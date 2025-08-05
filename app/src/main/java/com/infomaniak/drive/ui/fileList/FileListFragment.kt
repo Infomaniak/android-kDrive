@@ -58,6 +58,7 @@ import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
+import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
@@ -220,7 +221,6 @@ open class FileListFragment : MultiSelectFragment(
                 downloadFiles(false, false)
             }
         }
-
         binding.toolbar.apply {
             if (isCurrentFolderRoot() && hideBackButtonWhenRoot) navigationIcon = null
 
@@ -237,7 +237,6 @@ open class FileListFragment : MultiSelectFragment(
             }
 
             setNavigationOnClickListener { findNavController().popBackStack() }
-
             menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
         }
 
@@ -498,7 +497,7 @@ open class FileListFragment : MultiSelectFragment(
                 if (file.isUsable()) {
                     when {
                         file.isFolder() -> openFolder(
-                            file,
+                            FileListNavigationType.Folder(file),
                             navigationArgs.shouldHideBottomNavigation,
                             navigationArgs.shouldShowSmallFab,
                             fileListViewModel,
