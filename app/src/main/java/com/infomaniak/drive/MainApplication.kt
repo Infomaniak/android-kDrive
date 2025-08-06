@@ -203,26 +203,11 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), customFactories = listOf(factory))
     }
 
-    fun newImageLoaderWithOtherUserId(userId: Int?): ImageLoader {
-        var onRefreshTokenError: ((user: User) -> Unit)? = null
+    fun newImageLoader(userId: Int? = null): ImageLoader {
 
-        val tokenInterceptorListener = object : TokenInterceptorListener {
-            override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
-                val user = userId?.let { getUserById(userId) } ?: run { AccountUtils.currentUser }
-                setUserToken(user, apiToken)
-            }
-
-            override suspend fun onRefreshTokenError() {
-                val user = userId?.let { getUserById(userId) } ?: run { AccountUtils.currentUser }
-                user?.let { onRefreshTokenError?.invoke(it) }
-            }
-
-            override suspend fun getUserApiToken(): ApiToken? {
-                val user = userId?.let { getUserById(userId) } ?: run { AccountUtils.currentUser }
-                return user?.apiToken
-            }
-
-            override fun getCurrentUserId() = null
+        val tokenInterceptorListener = when (userId) {
+            null -> tokenInterceptorListener()
+            else -> tokenInterceptorListenerByUserId(userId)
         }
 
         val factory = if (SDK_INT >= 28) {
@@ -267,10 +252,31 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
 
-    private fun configureSentry() {
+    private fun tokenInterceptorListenerByUserId(userId: Int) = object : TokenInterceptorListener {
+        val onRefreshTokenError: ((user: User) -> Unit)? = null
+
+        override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
+            val user = getUserById(userId)
+            setUserToken(user, apiToken)
+        }
+
+        override suspend fun onRefreshTokenError() {
+            val user = getUserById(userId)
+            user?.let { onRefreshTokenError?.invoke(it) }
+        }
+
+        override suspend fun getUserApiToken(): ApiToken? {
+            val user = getUserById(userId)
+            return user?.apiToken
+        }
+
+        override fun getCurrentUserId() = null
+    }
+
+   private fun configureSentry() {
         this.configureSentry(
             isDebug = BuildConfig.DEBUG,
             isSentryTrackingEnabled = UiSettings(applicationContext).isSentryTrackingEnabled,
         )
-    }
+   }
 }
