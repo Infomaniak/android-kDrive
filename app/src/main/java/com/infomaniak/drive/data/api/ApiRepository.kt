@@ -19,7 +19,7 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
-import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
@@ -66,7 +66,7 @@ import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpClient.okHttpClientLongTimeout
 import okhttp3.OkHttpClient
-import com.infomaniak.core.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
+import com.infomaniak.core.ksuite.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
 

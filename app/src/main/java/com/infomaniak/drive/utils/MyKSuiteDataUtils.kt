@@ -17,8 +17,8 @@
  */
 package com.infomaniak.drive.utils
 
-import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
-import com.infomaniak.core.myksuite.ui.data.MyKSuiteDataManager
+import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteDataManager
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.SentryLog

@@ -20,7 +20,7 @@ package com.infomaniak.drive.ui.menu.settings
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import com.infomaniak.core.myksuite.ui.views.MyKSuiteDashboardFragment
+import com.infomaniak.core.ksuite.myksuite.ui.views.MyKSuiteDashboardFragment
 import com.infomaniak.drive.ui.MyKSuiteViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.getDashboardData
