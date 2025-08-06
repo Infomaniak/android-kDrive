@@ -49,6 +49,8 @@ import com.infomaniak.drive.data.services.DeviceInfoUpdateWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.AccountUtils.getUserById
+import com.infomaniak.drive.utils.AccountUtils.setUserToken
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
@@ -199,6 +201,37 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         }
 
         return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), customFactories = listOf(factory))
+    }
+
+    fun newImageLoaderWithOtherUserId(userId: Int?): ImageLoader {
+        var onRefreshTokenError: ((user: User) -> Unit)? = null
+
+        val tokenInterceptorListener = object : TokenInterceptorListener {
+            override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
+                val user = userId?.let { getUserById(userId) } ?: run { AccountUtils.currentUser }
+                setUserToken(user, apiToken)
+            }
+
+            override suspend fun onRefreshTokenError() {
+                val user = userId?.let { getUserById(userId) } ?: run { AccountUtils.currentUser }
+                user?.let { onRefreshTokenError?.invoke(it) }
+            }
+
+            override suspend fun getUserApiToken(): ApiToken? {
+                val user = userId?.let { getUserById(userId) } ?: run { AccountUtils.currentUser }
+                return user?.apiToken
+            }
+
+            override fun getCurrentUserId() = null
+        }
+
+        val factory = if (SDK_INT >= 28) {
+            ImageDecoderDecoder.Factory()
+        } else {
+            GifDecoder.Factory()
+        }
+
+        return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener, customFactories = listOf(factory))
     }
 
     private val refreshTokenError: (User) -> Unit = { user ->
