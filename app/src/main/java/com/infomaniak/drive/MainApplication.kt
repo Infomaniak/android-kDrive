@@ -34,7 +34,7 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
-import com.infomaniak.core.crosslogin.back.internal.deviceinfo.DeviceInfoUpdateManager
+import com.infomaniak.core.login.crossapp.internal.deviceinfo.DeviceInfoUpdateManager
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
