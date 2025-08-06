@@ -83,8 +83,9 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 with(requireActivity() as SelectFolderActivity) {
                     showSaveButton()
                     val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+                    val withinSameDrive = userDrive?.driveId == AccountUtils.currentDriveId
                     val enable = folderId != selectFolderViewModel.disableSelectedFolderId
-                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
+                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile) && withinSameDrive
                     enableSaveButton(enable)
                 }
             }
