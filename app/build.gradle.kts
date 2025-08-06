@@ -152,8 +152,8 @@ dependencies {
 
     implementation(project(":Core"))
     implementation(project(":Core:Avatar"))
-    implementation(project(":Core:CrossAppLogin"))
-    implementation(project(":Core:CrossAppLoginUI"))
+    implementation(project(":Core:CrossAppLogin:Back"))
+    implementation(project(":Core:CrossAppLogin:Front"))
     implementation(project(":Core:FragmentNavigation"))
     implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))

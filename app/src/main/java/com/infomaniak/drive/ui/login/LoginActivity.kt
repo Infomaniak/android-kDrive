@@ -37,8 +37,8 @@ import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
 import com.infomaniak.core.launchInOnLifecycle
-import com.infomaniak.core.login.crossapp.DerivedTokenGenerator.Issue
-import com.infomaniak.core.login.crossapp.ExternalAccount
+import com.infomaniak.core.crossapplogin.back.DerivedTokenGenerator.Issue
+import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.observe
 import com.infomaniak.core.utils.awaitOneClick
 import com.infomaniak.drive.BuildConfig
@@ -91,7 +91,7 @@ import kotlinx.coroutines.launch
 import splitties.coroutines.raceOf
 import splitties.coroutines.repeatWhileActive
 import splitties.experimental.ExperimentalSplittiesApi
-import com.infomaniak.core.crossloginui.R as RCrossLogin
+import com.infomaniak.core.crossapplogin.front.R as RCrossLogin
 
 class LoginActivity : AppCompatActivity() {
 
