@@ -23,10 +23,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.login.crossapp.CrossAppLogin
-import com.infomaniak.core.login.crossapp.DerivedTokenGenerator
-import com.infomaniak.core.login.crossapp.DerivedTokenGeneratorImpl
-import com.infomaniak.core.login.crossapp.ExternalAccount
+import com.infomaniak.core.crossapplogin.back.CrossAppLogin
+import com.infomaniak.core.crossapplogin.back.DerivedTokenGenerator
+import com.infomaniak.core.crossapplogin.back.DerivedTokenGeneratorImpl
+import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.utils.loginUrl
 import com.infomaniak.lib.core.networking.HttpUtils
