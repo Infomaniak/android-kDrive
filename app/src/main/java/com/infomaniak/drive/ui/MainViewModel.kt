@@ -44,8 +44,8 @@ import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.TRASH_FILE
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.CreateFile
