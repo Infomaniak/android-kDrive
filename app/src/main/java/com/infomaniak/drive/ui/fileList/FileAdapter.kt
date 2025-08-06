@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
+import coil.ImageLoader
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -61,7 +62,7 @@ import java.util.UUID
 open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
     var fileList: OrderedRealmCollection<File> = RealmList(),
-    override val lifecycle: Lifecycle
+    override val lifecycle: Lifecycle,
 ) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true), LifecycleOwner {
 
     private var fileAsyncListDiffer: AsyncListDiffer<File>? = null
@@ -75,6 +76,7 @@ open class FileAdapter(
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
 
+    var newImageLoader: ImageLoader? = null
     var uploadInProgress = false
     var publicShareCanDownload = true
 
@@ -323,8 +325,8 @@ open class FileAdapter(
 
         currentBindScope.launch(start = CoroutineStart.UNDISPATCHED) {
             when (binding) {
-                is CardviewFileListBinding -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(file, isGrid)
-                is CardviewFileGridBinding -> (binding as CardviewFileGridBinding).setFileItem(file, isGrid)
+                is CardviewFileListBinding -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(file, isGrid, newImageLoader)
+                is CardviewFileGridBinding -> (binding as CardviewFileGridBinding).setFileItem(file, isGrid, newImageLoader)
                 is CardviewFolderGridBinding -> (binding as CardviewFolderGridBinding).setFileItem(file, isGrid)
             }
         }
