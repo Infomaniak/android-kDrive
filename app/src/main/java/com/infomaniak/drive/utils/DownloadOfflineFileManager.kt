@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,11 @@ class DownloadOfflineFileManager(
             lastDownloadedFile = offlineFile
         }
 
-        return startOfflineDownload(context, file, offlineFile!!, onProgress)
+        return if (offlineFile == null) {
+            ListenableWorker.Result.failure()
+        } else {
+            startOfflineDownload(context, file, offlineFile, onProgress)
+        }
     }
 
     fun cleanLastDownloadedFile() {
