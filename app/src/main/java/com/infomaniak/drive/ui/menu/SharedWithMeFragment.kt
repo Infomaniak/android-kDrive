@@ -19,7 +19,9 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -27,9 +29,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.SharedWithMeViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActionsBottomSheetDialog
@@ -48,6 +52,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     override val noItemsRootIcon = R.drawable.ic_share
     override val noItemsRootTitle = R.string.sharedWithMeNoFile
+
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
@@ -70,6 +76,18 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             getString(R.string.sharedWithMeTitle)
         } else {
             navigationArgs.folderName
+        }
+
+        if (requireActivity() is SelectFolderActivity) {
+            lifecycleScope.launchWhenResumed {
+                with(requireActivity() as SelectFolderActivity) {
+                    showSaveButton()
+                    val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+                    val enable = folderId != selectFolderViewModel.disableSelectedFolderId
+                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
+                    enableSaveButton(enable)
+                }
+            }
         }
 
         fileAdapter.apply {

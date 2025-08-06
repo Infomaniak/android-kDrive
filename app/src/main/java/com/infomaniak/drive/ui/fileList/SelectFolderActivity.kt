@@ -102,7 +102,7 @@ class SelectFolderActivity : BaseActivity() {
 
     private fun setSaveButton(customArgs: Bundle?) = with(binding) {
         saveButton.setOnClickListener {
-            val currentFragment = navHostFragment.childFragmentManager.fragments.first() as SelectFolderFragment
+            val currentFragment = navHostFragment.childFragmentManager.fragments.first() as FileListFragment
             Intent().apply {
                 putExtras(
                     SelectFolderActivityArgs(
