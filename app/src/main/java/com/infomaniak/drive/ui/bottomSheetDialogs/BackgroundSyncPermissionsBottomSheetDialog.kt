@@ -17,12 +17,20 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
+import android.annotation.SuppressLint
+import android.app.Activity.RESULT_OK
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -30,14 +38,21 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentBottomSheetBackgroundSyncBinding
-import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeBinding
+import io.sentry.Sentry
+import io.sentry.SentryLevel
+import splitties.systemservices.powerManager
 
 class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     private var binding: FragmentBottomSheetBackgroundSyncBinding by safeBinding()
-    private val drivePermissions = DrivePermissions()
+
+    private val permissionResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        val hasPermission = it.resultCode == RESULT_OK || checkBatteryLifePermission(false)
+        onPermissionGranted(hasPermission)
+    }
+
     private var hasDoneNecessary = false
     private var hadBatteryLifePermission = false
 
@@ -49,8 +64,6 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        drivePermissions.registerBatteryPermission(this) { hasPermission -> onPermissionGranted(hasPermission) }
 
         setAllowBackgroundSyncSwitch(checkBatteryLifePermission(false))
 
@@ -74,8 +87,30 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun checkBatteryLifePermission(requestPermission: Boolean): Boolean {
-        return drivePermissions.checkBatteryLifePermission(requestPermission).also { hasPermission ->
-            onHasBatteryPermission(hasPermission)
+        val hasPermission = powerManager.isIgnoringBatteryOptimizations(BuildConfig.APPLICATION_ID)
+        if (hasPermission.not() && requestPermission) {
+            requireActivity().requestBatteryOptimizationPermission()
+        }
+        onHasBatteryPermission(hasPermission)
+        return hasPermission
+    }
+
+    @SuppressLint("BatteryLife")
+    private fun Context.requestBatteryOptimizationPermission() {
+        try {
+            Intent(
+                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                "package:$packageName".toUri()
+            ).apply { permissionResultLauncher.launch(this) }
+        } catch (activityNotFoundException: ActivityNotFoundException) {
+            try {
+                permissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            } catch (exception: Exception) {
+                Sentry.withScope { scope ->
+                    scope.level = SentryLevel.WARNING
+                    Sentry.captureException(exception)
+                }
+            }
         }
     }
 

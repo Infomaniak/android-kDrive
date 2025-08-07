@@ -130,7 +130,7 @@ class MainActivity : BaseActivity() {
 
     private var hasDisplayedInformationPanel: Boolean = false
 
-    private lateinit var drivePermissions: DrivePermissions
+    private lateinit var syncPermissions: DrivePermissions
 
     private var deleteLocalMediaRequestDialog: Dialog? = null
     private val pendingFilesUrisQueue = ArrayDeque<List<Uri>>()
@@ -312,7 +312,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setupDrivePermissions() {
-        drivePermissions = DrivePermissions().apply {
+        syncPermissions = DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).apply {
             registerPermissions(this@MainActivity)
         }
     }
@@ -382,7 +382,7 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
 
-        launchAllUpload(drivePermissions)
+        launchAllUpload(syncPermissions)
 
         mainViewModel.checkBulkDownloadStatus()
 

@@ -79,9 +79,9 @@ object SyncUtils {
 
     private fun Long?.isValidDate() = this != null && this > 0
 
-    fun FragmentActivity.launchAllUpload(drivePermissions: DrivePermissions) {
+    fun FragmentActivity.launchAllUpload(syncPermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
-            drivePermissions.checkSyncPermissions(requestPermission = false) &&
+            syncPermissions.hasNeededPermissions() &&
             UploadFile.getAllPendingUploads().isNotEmpty()
         ) {
             syncImmediately()
