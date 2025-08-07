@@ -500,22 +500,7 @@ open class FileListFragment : MultiSelectFragment(
                 mainApp.newImageLoader(userDrive?.userId)
             }
 
-            onFileClicked = { file ->
-                if (file.isUsable()) {
-                    when {
-                        file.isFolder() -> openFolder(
-                            FileListNavigationType.Folder(file),
-                            navigationArgs.shouldHideBottomNavigation,
-                            navigationArgs.shouldShowSmallFab,
-                            fileListViewModel,
-                        )
-                        file.isBookmark() -> openBookmark(file)
-                        else -> displayFile(file, mainViewModel, fileAdapter)
-                    }
-                } else {
-                    refreshActivities()
-                }
-            }
+            onFileClicked = getFunctionByFileType()
 
             onMenuClicked = { file ->
                 val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
@@ -551,6 +536,23 @@ open class FileListFragment : MultiSelectFragment(
                 context?.let { fileAdapter.toggleOfflineMode(it, !isInternetAvailable) }
             },
         )
+    }
+
+    private fun getFunctionByFileType(): (File) -> Unit = { file ->
+        if (file.isUsable()) {
+            when {
+                file.isFolder() -> openFolder(
+                    FileListNavigationType.Folder(file),
+                    navigationArgs.shouldHideBottomNavigation,
+                    navigationArgs.shouldShowSmallFab,
+                    fileListViewModel,
+                )
+                file.isBookmark() -> openBookmark(file)
+                else -> displayFile(file, mainViewModel, fileAdapter)
+            }
+        } else {
+            refreshActivities()
+        }
     }
 
     protected open fun homeClassName(): String? = null
