@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 
 class SelectRootFolderViewModel : ViewModel() {
 
-    private val loadFiles = MutableSharedFlow<Int>(replay = 1)
+    private val loadRecentFiles = MutableSharedFlow<Int>(replay = 1)
 
     private var userDrive: UserDrive? = null
     private val realm
@@ -48,14 +48,14 @@ class SelectRootFolderViewModel : ViewModel() {
     private var rootFilesJob: Job = Job()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val recentFiles: StateFlow<List<File>> = loadFiles.distinctUntilChanged().flatMapLatest { limit ->
+    val recentFiles: StateFlow<List<File>> = loadRecentFiles.distinctUntilChanged().flatMapLatest { limit ->
         FileController.getRecentFolders(realm, limit)
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     fun getRecentFolders(userDrive: UserDrive, limit: Int) {
         this.userDrive = userDrive
         viewModelScope.launch {
-            loadFiles.emit(limit)
+            loadRecentFiles.emit(limit)
         }
     }
 

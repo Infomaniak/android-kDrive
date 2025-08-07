@@ -38,7 +38,6 @@ import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.TypeFolder
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.setMargins
@@ -79,11 +78,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
         collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
-        val currentDrive = if (driveId == 0) {
-            AccountUtils.getCurrentDrive(forceRefresh = true)
-        } else {
-            DriveInfosController.getDrive(driveId = driveId)
-        }
+        val currentDrive = DriveInfosController.getDrive(driveId = driveId)
 
         rootFolderTitle.text = currentDrive?.name
 
