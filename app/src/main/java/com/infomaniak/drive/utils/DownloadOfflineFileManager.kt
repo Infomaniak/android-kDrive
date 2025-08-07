@@ -77,7 +77,7 @@ class DownloadOfflineFileManager(
     ): ListenableWorker.Result {
 
         currentFile = file
-        val offlineFile = file.getOfflineFile(context, userDrive.userId)
+        var offlineFile = file.getOfflineFile(context, userDrive.userId)
         val cacheFile = file.getCacheFile(context, userDrive)
 
         offlineFile?.let {
@@ -97,8 +97,9 @@ class DownloadOfflineFileManager(
 
         if (offlineFile == null) {
             getFileFromRemote(context, file.id, userDrive) { downloadedFile ->
-                downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { offlineFile ->
+                downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { updatedOfflineFile ->
                     lastDownloadedFile = offlineFile
+                    offlineFile = updatedOfflineFile
                 }
             }
         } else {
