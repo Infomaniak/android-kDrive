@@ -43,6 +43,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -484,15 +485,21 @@ open class FileListFragment : MultiSelectFragment(
             updateMultiSelect = { onUpdateMultiSelect() }
         }
 
+        val mainApp = requireContext().applicationContext as MainApplication
+
         fileAdapter = FileAdapter(
             multiSelectManager = multiSelectManager,
             fileList = FileController.emptyList(mainViewModel.realm),
-            lifecycle = viewLifecycleOwner.lifecycle
+            lifecycle = viewLifecycleOwner.lifecycle,
         ).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             setHasStableIds(true)
 
             onEmptyList = { checkIfNoFiles() }
+
+            if (userDrive != null && userDrive?.userId != AccountUtils.currentUserId) {
+                mainApp.newImageLoader(userDrive?.userId)
+            }
 
             onFileClicked = { file ->
                 if (file.isUsable()) {
