@@ -104,7 +104,9 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         setupItems(
             folderLayout = binding.rootFolderLayout,
             favoritesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToFavoritesFragment(),
-            sharedWithMeNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment(),
+            sharedWithMeNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment(
+                fromSaveExternal = navigationArgs.fromSaveExternal
+            ),
             mySharesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment()
         )
 

@@ -83,9 +83,12 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 with(requireActivity() as SelectFolderActivity) {
                     showSaveButton()
                     val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
-                    val withinSameDrive = userDrive?.driveId == AccountUtils.currentDriveId
+                    val fromSaveExternal = if (navigationArgs.fromSaveExternal) true else {
+                        userDrive?.driveId == AccountUtils.currentDriveId
+                    }
                     val enable = folderId != selectFolderViewModel.disableSelectedFolderId
-                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile) && withinSameDrive
+                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
+                            && fromSaveExternal
                     enableSaveButton(enable)
                 }
             }
@@ -136,6 +139,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 folderId = id,
                 folderName = name,
                 driveId = driveId,
+                fromSaveExternal = navigationArgs.fromSaveExternal
             )
         )
     }
