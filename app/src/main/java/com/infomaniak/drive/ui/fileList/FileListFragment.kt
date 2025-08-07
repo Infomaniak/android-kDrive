@@ -496,7 +496,9 @@ open class FileListFragment : MultiSelectFragment(
 
             onEmptyList = { checkIfNoFiles() }
 
-            newImageLoader = mainApp.newImageLoader(userDrive?.userId)
+            if (userDrive != null && userDrive?.userId != AccountUtils.currentUserId) {
+                mainApp.newImageLoader(userDrive?.userId)
+            }
 
             onFileClicked = { file ->
                 if (file.isUsable()) {

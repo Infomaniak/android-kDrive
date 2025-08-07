@@ -62,7 +62,7 @@ import kotlinx.coroutines.withContext
 suspend fun ItemFileBinding.setFileItem(
     file: File,
     isGrid: Boolean = false,
-    imageLoader: ImageLoader? = context.imageLoader,
+    imageLoader: ImageLoader = context.imageLoader,
     typeFolder: TypeFolder = TypeFolder.fileList
 ): Nothing {
     setFileItemWithoutCategories(file = file, typeFolder = typeFolder, isGrid = isGrid, imageLoader)
@@ -73,7 +73,7 @@ fun ItemFileBinding.setFileItemWithoutCategories(
     file: File,
     typeFolder: TypeFolder = TypeFolder.fileList,
     isGrid: Boolean = false,
-    imageLoader: ImageLoader? = context.imageLoader,
+    imageLoader: ImageLoader = context.imageLoader,
 ) {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
@@ -94,7 +94,7 @@ suspend fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = 
     categoriesLayout.displayCategoriesForFile(file)
 }
 
-suspend fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false, imageLoader: ImageLoader?): Nothing {
+suspend fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false, imageLoader: ImageLoader): Nothing {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
@@ -125,7 +125,7 @@ private fun ImageView.displayIcon(
     isGrid: Boolean,
     progressLayout: ProgressLayoutView,
     filePreview: ImageView? = null,
-    imageLoader: ImageLoader? = context.imageLoader,
+    imageLoader: ImageLoader = context.imageLoader,
 ) {
     scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
     when {
@@ -144,7 +144,7 @@ private fun ImageView.displayFileIcon(
     isGrid: Boolean,
     progressLayout: ProgressLayoutView,
     filePreview: ImageView? = null,
-    imageLoader: ImageLoader?,
+    imageLoader: ImageLoader,
 ) {
     val fileType = file.getFileType()
     val isGraphic = fileType == ExtensionType.IMAGE || fileType == ExtensionType.VIDEO

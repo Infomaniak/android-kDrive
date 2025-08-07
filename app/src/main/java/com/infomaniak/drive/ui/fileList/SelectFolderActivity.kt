@@ -139,7 +139,7 @@ class SelectFolderActivity : BaseActivity() {
         }
     }
 
-    private fun navigateToCurrentFolder(currentUserDrive: UserDrive) {
+    private fun navigateToCurrentFolder(userDrive: UserDrive) {
         // Making sure the current backstack entry is selectRootFolderFragment because it'll generate a
         // crash when "Don't keep activities" is activated
         navController.popBackStack(R.id.selectRootFolderFragment, false)
@@ -149,14 +149,14 @@ class SelectFolderActivity : BaseActivity() {
                 navController.navigate(
                     SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
                         folderId = folderId,
-                        userDrive = currentUserDrive
+                        userDrive = userDrive
                     )
                 )
             } else {
                 navController.navigate(
                     SelectFolderFragmentDirections.fileListFragmentToFileListFragment(
                         folderId = folderId,
-                        userDrive = currentUserDrive
+                        userDrive = userDrive
                     )
                 )
             }

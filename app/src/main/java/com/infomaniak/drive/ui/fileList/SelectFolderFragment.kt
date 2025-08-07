@@ -86,7 +86,7 @@ class SelectFolderFragment : FileListFragment() {
                         SelectFolderFragmentDirections.fileListFragmentToFileListFragment(
                             folderId = file.id,
                             folderName = file.name,
-                            userDrive = userDrive!!
+                            userDrive = navigationArgs.userDrive
                         )
                     )
                 }

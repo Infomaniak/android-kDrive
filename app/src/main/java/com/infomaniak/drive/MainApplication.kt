@@ -194,16 +194,10 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     override fun newImageLoader(): ImageLoader {
-        val factory = if (SDK_INT >= 28) {
-            ImageDecoderDecoder.Factory()
-        } else {
-            GifDecoder.Factory()
-        }
-
-        return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), customFactories = listOf(factory))
+        return newImageLoader(userId = null)
     }
 
-    fun newImageLoader(userId: Int? = null): ImageLoader {
+    fun newImageLoader(userId: Int?): ImageLoader {
 
         val tokenInterceptorListener = when (userId) {
             null -> tokenInterceptorListener()
