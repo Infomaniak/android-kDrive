@@ -101,6 +101,8 @@ class SaveExternalFilesActivity : BaseActivity() {
     private var currentUri: Uri? = null
     private var isMultiple = false
 
+    private var driveIdSharedWithMe: Int? = null
+
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
             data?.extras?.let { bundle ->
@@ -263,9 +265,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun fetchFolder() = with(selectDriveViewModel) {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
-            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null
-                || folderId == null
-            ) {
+            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null || folderId == null) {
                 null
             } else {
                 val userDrive = UserDrive(
@@ -273,7 +273,16 @@ class SaveExternalFilesActivity : BaseActivity() {
                     driveId = selectedDrive.value!!.id,
                     sharedWithMe = selectedDrive.value!!.sharedWithMe,
                 )
-                FileController.getFileById(folderId, userDrive)
+                driveIdSharedWithMe = FileController.getSharedDriveIdById(userDrive.userId, folderId)?.driveId
+
+                FileController.getFileById(folderId, userDrive) ?: FileController.getFileById(
+                    fileId = folderId,
+                    userDrive = UserDrive(
+                        userId = selectedUserId.value!!,
+                        driveId = driveIdSharedWithMe!!,
+                        sharedWithMe = true,
+                    )
+                )
             }
 
             folder?.let {
@@ -291,7 +300,11 @@ class SaveExternalFilesActivity : BaseActivity() {
             setOnClickListener {
                 if (navigationArgs.isPublicShare) {
                     Intent().apply {
-                        putExtra(DESTINATION_DRIVE_ID_KEY, selectDriveViewModel.selectedDrive.value?.id)
+                        if (driveIdSharedWithMe != null) {
+                            putExtra(DESTINATION_DRIVE_ID_KEY, driveIdSharedWithMe)
+                        } else {
+                            putExtra(DESTINATION_DRIVE_ID_KEY, selectDriveViewModel.selectedDrive.value?.id)
+                        }
                         putExtra(DESTINATION_FOLDER_ID_KEY, saveExternalFilesViewModel.folderId.value)
                         setResult(RESULT_OK, this)
                     }
@@ -302,13 +315,13 @@ class SaveExternalFilesActivity : BaseActivity() {
                 showProgressCatching()
                 if (backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val userId = selectedUserId.value!!
-                    val driveId = selectedDrive.value?.id!!
+                    val driveId = selectedDrive.value!!.id
                     val folderId = saveExternalFilesViewModel.folderId.value!!
 
                     if (canSaveFilesPref()) uiSettings.setSaveExternalFilesPref(userId, driveId, folderId)
 
                     lifecycleScope.launch(Dispatchers.IO) {
-                        if (storeFiles(userId, driveId, folderId)) {
+                        if (storeFiles(userId, driveIdSharedWithMe ?: driveId, folderId)) {
                             syncImmediately()
                             finish()
                         } else {
