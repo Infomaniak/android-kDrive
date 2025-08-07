@@ -145,7 +145,7 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
 fun ImageView.loadAny(
     data: Any?,
     @DrawableRes errorRes: Int = R.drawable.fallback_image,
-    imageLoader: ImageLoader? = context.imageLoader
+    imageLoader: ImageLoader = context.imageLoader
 ) {
     imageLoader?.let {
         load(data, it) {
