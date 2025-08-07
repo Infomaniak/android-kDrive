@@ -43,6 +43,8 @@ import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.CreateFile
@@ -210,7 +212,12 @@ class MainViewModel(
         // Clear FileListFragment stack
         navController.popBackStack(R.id.rootFilesFragment, false)
 
-        if (fileId <= Utils.ROOT_ID) return // Deeplinks could lead us to navigating to the true root
+        if (fileId <= Utils.ROOT_ID) {
+            if (fileId == TRASH_FILE_ID) {
+                navigateFileListTo.postValue(TRASH_FILE)
+            }
+            return // Deeplinks could lead us to navigating to the true root
+        }
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
