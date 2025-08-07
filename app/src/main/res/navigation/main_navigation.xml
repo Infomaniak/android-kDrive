@@ -1073,6 +1073,6 @@
         android:label="MyKSuiteDashboardFragment">
         <argument
             android:name="dashboardData"
-            app:argType="com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData" />
+            app:argType="com.infomaniak.core.ksuite.myksuite.ui.screens.MyKSuiteDashboardScreenData" />
     </fragment>
 </navigation>

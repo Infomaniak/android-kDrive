@@ -70,7 +70,7 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.MatomoName
