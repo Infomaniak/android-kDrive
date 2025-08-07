@@ -250,6 +250,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     putExtras(
                         SelectFolderActivityArgs(
                             userId = selectDriveViewModel.selectedUserId.value!!,
+                            fromSaveExternal = true,
                             driveId = selectDriveViewModel.selectedDrive.value?.id!!,
                         ).toBundle()
                     )

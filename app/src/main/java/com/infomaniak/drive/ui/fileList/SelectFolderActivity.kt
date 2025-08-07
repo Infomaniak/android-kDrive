@@ -57,6 +57,7 @@ class SelectFolderActivity : BaseActivity() {
 
         val userId = navigationArgs.userId
         val driveId = navigationArgs.driveId
+        val fromSaveExternal = navigationArgs.fromSaveExternal
         val customArgs = navigationArgs.customArgs
         val currentFolderId = navigationArgs.folderId.getIntOrNull()
         val disabledFolderId = navigationArgs.disabledFolderId.getIntOrNull()
@@ -76,7 +77,10 @@ class SelectFolderActivity : BaseActivity() {
 
             navController.setGraph(
                 R.navigation.select_folder_navigation,
-                SelectRootFolderFragmentArgs(userDrive = currentUserDrive).toBundle()
+                SelectRootFolderFragmentArgs(
+                    fromSaveExternal = fromSaveExternal,
+                    userDrive = currentUserDrive
+                ).toBundle()
             )
 
             setSaveButton(customArgs)
