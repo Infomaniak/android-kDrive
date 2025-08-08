@@ -300,11 +300,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             setOnClickListener {
                 if (navigationArgs.isPublicShare) {
                     Intent().apply {
-                        if (driveIdSharedWithMe != null) {
-                            putExtra(DESTINATION_DRIVE_ID_KEY, driveIdSharedWithMe)
-                        } else {
-                            putExtra(DESTINATION_DRIVE_ID_KEY, selectDriveViewModel.selectedDrive.value?.id)
-                        }
+                        putExtra(DESTINATION_DRIVE_ID_KEY, driveIdSharedWithMe ?: selectDriveViewModel.selectedDrive.value?.id)
                         putExtra(DESTINATION_FOLDER_ID_KEY, saveExternalFilesViewModel.folderId.value)
                         setResult(RESULT_OK, this)
                     }
@@ -315,7 +311,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 showProgressCatching()
                 if (backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val userId = selectedUserId.value!!
-                    val driveId = selectedDrive.value!!.id
+                    val driveId = selectedDrive.value?.id!!
                     val folderId = saveExternalFilesViewModel.folderId.value!!
 
                     if (canSaveFilesPref()) uiSettings.setSaveExternalFilesPref(userId, driveId, folderId)
