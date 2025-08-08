@@ -309,7 +309,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         }
     }
 
-    override fun onMoveFile(destinationFolder: File) {
+    override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) {
         mainViewModel.moveFile(currentFile, destinationFolder)
             .observe(viewLifecycleOwner) { fileRequest ->
                 if (fileRequest.isSuccess) {
