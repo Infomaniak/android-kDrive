@@ -46,7 +46,10 @@
             android:name="driveId"
             android:defaultValue="0"
             app:argType="integer" />
-
+        <argument
+            android:name="fromSaveExternal"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
@@ -87,6 +90,10 @@
             android:name="driveId"
             android:defaultValue="0"
             app:argType="integer" />
+        <argument
+            android:name="fromSaveExternal"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_sharedWithMeFragment_to_sortFilesBottomSheetDialog"
             app:destination="@id/sortFilesBottomSheetDialog" />
