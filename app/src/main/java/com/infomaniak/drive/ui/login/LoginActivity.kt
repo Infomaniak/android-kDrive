@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSplittiesApi::class)
+
 package com.infomaniak.drive.ui.login
 
 import android.content.Context
@@ -25,11 +27,20 @@ import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isInvisible
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.viewpager2.widget.ViewPager2
+import com.infomaniak.core.Xor
+import com.infomaniak.core.cancellable
+import com.infomaniak.core.launchInOnLifecycle
+import com.infomaniak.core.crossapplogin.back.DerivedTokenGenerator.Issue
+import com.infomaniak.core.crossapplogin.back.ExternalAccount
+import com.infomaniak.core.observe
+import com.infomaniak.core.utils.awaitOneClick
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
@@ -41,8 +52,12 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
-import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.extensions.awaitFragmentResult
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
+import com.infomaniak.drive.extensions.selectedPagePosition
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog
+import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog.Companion.ON_ANOTHER_ACCOUNT_CLICKED_KEY
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
@@ -66,12 +81,23 @@ import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import splitties.coroutines.raceOf
+import splitties.coroutines.repeatWhileActive
+import splitties.experimental.ExperimentalSplittiesApi
+import com.infomaniak.core.crossapplogin.front.R as RCrossLogin
 
 class LoginActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
+
+    private val crossAppLoginViewModel: CrossAppLoginViewModel by viewModels()
 
     private val infomaniakLogin: InfomaniakLogin by lazy { getInfomaniakLogin() }
 
@@ -90,8 +116,8 @@ class LoginActivity : AppCompatActivity() {
                     else -> showError(getString(R.string.anErrorHasOccurred))
                 }
             } else {
-                binding.connectButton.hideProgressCatching(R.string.connect)
-                binding.signInButton.isEnabled = true
+                binding.connectButton.hideProgressCatching(connectButtonText)
+                binding.signUpButton.isEnabled = true
             }
         }
     }
@@ -100,6 +126,8 @@ class LoginActivity : AppCompatActivity() {
         result.handleCreateAccountActivityResult()
     }
 
+    private lateinit var connectButtonText: String
+
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         lockOrientationForSmallScreens()
         super.onCreate(savedInstanceState)
@@ -107,34 +135,12 @@ class LoginActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(root)
 
-        introViewpager.apply {
-            adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
-            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-                override fun onPageSelected(position: Int) {
-                    super.onPageSelected(position)
-                    val showConnectButton = position == 2
-                    nextButton.isInvisible = showConnectButton
-                    connectButton.isInvisible = !showConnectButton
-                    signInButton.isInvisible = !showConnectButton
-                }
-            })
+        connectButtonText = getString(R.string.buttonLogin)
 
-            nextButton.setOnClickListener { currentItem++ }
-        }
-
+        configureViewPager()
         dotsIndicator.attachTo(introViewpager)
 
-        connectButton.apply {
-            initProgress(this@LoginActivity)
-            setOnClickListener {
-                signInButton.isEnabled = false
-                showProgressCatching()
-                trackAccountEvent(MatomoName.OpenLoginWebview)
-                infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
-            }
-        }
-
-        signInButton.setOnClickListener {
+        signUpButton.setOnClickListener {
             trackAccountEvent(MatomoName.OpenCreationWebview)
             startAccountCreation()
         }
@@ -145,10 +151,33 @@ class LoginActivity : AppCompatActivity() {
 
         handleNavigationFlags()
 
-        binding.signInButton.enableEdgeToEdge(withTop = false) {
-            binding.nextButton.setMargins(bottom = it.bottom)
-        }
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+
+        binding.footer.onApplyWindowInsetsListener { view, insets ->
+            view.setMargins(bottom = insets.bottom)
+        }
+
+        observeCrossLoginAccounts()
+        initCrossLogin()
+    }
+
+    private fun configureViewPager() = with(binding) {
+        introViewpager.apply {
+            adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
+            selectedPagePosition().mapLatest { position ->
+                val isLoginPage = position == 2
+
+                nextButton.isGone = isLoginPage
+                connectButton.isVisible = isLoginPage
+                crossAppLoginViewModel.availableAccounts.collectLatest { accounts ->
+                    val hasAccounts = accounts.isNotEmpty()
+                    signUpButton.isVisible = isLoginPage
+                    crossLoginSelection.isVisible = isLoginPage && hasAccounts
+                }
+            }.launchInOnLifecycle(lifecycle)
+
+            nextButton.setOnClickListener { currentItem++ }
+        }
     }
 
     private fun startAccountCreation() {
@@ -168,8 +197,188 @@ class LoginActivity : AppCompatActivity() {
                 else -> showError(translatedError)
             }
         } else {
-            connectButton.isEnabled = true
-            signInButton.isEnabled = true
+            signUpButton.isEnabled = true
+        }
+    }
+
+    private fun observeCrossLoginAccounts() {
+        crossAppLoginViewModel.availableAccounts.observe(this) { accounts ->
+            SentryLog.i(TAG, "Got ${accounts.count()} accounts from other apps")
+            binding.crossLoginSelection.setAccounts(accounts)
+        }
+    }
+
+    private fun initCrossLogin() = lifecycleScope.launch {
+        launch { crossAppLoginViewModel.activateUpdates(this@LoginActivity) }
+        launch { crossAppLoginViewModel.skippedAccountIds.collect(binding.crossLoginSelection::setSkippedIds) }
+
+        binding.connectButton.initProgress(lifecycle = this@LoginActivity)
+
+        repeatWhileActive {
+            val accountsToLogin = awaitConnectRequest()
+
+            if (accountsToLogin.isEmpty()) {
+                binding.signUpButton.isEnabled = false
+                openLoginWebView()
+            } else {
+                attemptLogin(selectedAccounts = accountsToLogin)
+                delay(1_000L) // Add some delay so the button won't blink back into its original color before leaving the Activity
+            }
+        }
+    }
+
+    private suspend fun awaitConnectRequest(): List<ExternalAccount> {
+        val accounts = raceOf(
+            {
+                awaitAnotherAccountClick()
+                emptyList()
+            },
+            { allowAccountSelection() },
+            {
+                crossAppLoginViewModel.selectedAccounts.mapLatest { accounts ->
+                    val selectedCount = accounts.count()
+                    SentryLog.i(TAG, "User selected $selectedCount accounts")
+                    connectButtonText = when {
+                        accounts.isEmpty() -> resources.getString(R.string.buttonLogin)
+                        else -> resources.getQuantityString(
+                            RCrossLogin.plurals.buttonContinueWithAccounts,
+                            selectedCount,
+                            selectedCount
+                        )
+                    }
+                    binding.connectButton.hideProgressCatching(connectButtonText)
+                    binding.connectButton.awaitOneClick()
+                    accounts
+                }.first()
+            }
+        )
+        binding.connectButton.showProgressCatching()
+        return accounts
+    }
+
+    private suspend fun allowAccountSelection(): Nothing = repeatWhileActive {
+        binding.crossLoginSelection.awaitOneClick()
+        val dialog = CrossLoginBottomSheetDialog()
+        dialog.show(supportFragmentManager, null)
+        try {
+            dialog.lifecycle.currentStateFlow.first { it == Lifecycle.State.DESTROYED }
+        } catch (e: CancellationException) {
+            dialog.dismiss() // Ensure the bottom sheet is hidden.
+            throw e
+        }
+    }
+
+    private suspend fun awaitAnotherAccountClick() {
+        repeatWhileActive {
+            val result = supportFragmentManager.awaitFragmentResult(
+                requestKey = ON_ANOTHER_ACCOUNT_CLICKED_KEY,
+                lifecycleOwner = this
+            )
+            if (result.containsKey(ON_ANOTHER_ACCOUNT_CLICKED_KEY)) return
+        }
+    }
+
+    private suspend fun attemptLogin(selectedAccounts: List<ExternalAccount>) {
+
+        suspend fun authenticateToken(token: ApiToken, withRedirection: Boolean) {
+            authenticateUser(token, infomaniakLogin, withRedirection)
+        }
+
+        val tokenGenerator = crossAppLoginViewModel.derivedTokenGenerator
+
+        if (selectedAccounts.isEmpty()) return
+
+        val tokens = selectedAccounts.mapNotNull { account ->
+            when (val result = tokenGenerator.attemptDerivingOneOfTheseTokens(account.tokens)) {
+                is Xor.First -> {
+                    SentryLog.i(TAG, "Succeeded to derive token for account: ${account.id}")
+                    result.value
+                }
+                is Xor.Second -> {
+                    handleTokenDerivationIssue(account, issue = result.value)
+                    null
+                }
+            }
+        }
+
+        tokens.forEachIndexed { index, token ->
+            authenticateToken(token, withRedirection = index == tokens.lastIndex)
+        }
+    }
+
+    private suspend fun handleTokenDerivationIssue(account: ExternalAccount, issue: Issue) {
+        val shouldReport: Boolean
+        val errorId = when (issue) {
+            is Issue.AppIntegrityCheckFailed -> {
+                shouldReport = false
+                R.string.anErrorHasOccurred
+            }
+            is Issue.ErrorResponse -> {
+                shouldReport = issue.httpStatusCode !in 500..599
+                R.string.anErrorHasOccurred
+            }
+            is Issue.NetworkIssue -> {
+                shouldReport = false
+                R.string.connectionError
+            }
+            is Issue.OtherIssue -> {
+                shouldReport = true
+                R.string.anErrorHasOccurred
+            }
+        }
+        val errorMessage = "Failed to derive token for account ${account.id}, with reason: $issue"
+        when (shouldReport) {
+            true -> SentryLog.e(TAG, errorMessage)
+            false -> SentryLog.i(TAG, errorMessage)
+        }
+        Dispatchers.Main { showError(getString(errorId)) }
+    }
+
+    private fun openLoginWebView() {
+        trackAccountEvent(MatomoName.OpenLoginWebview)
+        infomaniakLogin.startWebViewLogin(webViewLoginResultLauncher)
+    }
+
+    private suspend fun authenticateUser(
+        token: ApiToken,
+        infomaniakLogin: InfomaniakLogin,
+        withRedirection: Boolean = true,
+    ) = Dispatchers.Default {
+        val returnValue = authenticateUser(this@LoginActivity, token)
+        when (returnValue) {
+            is User -> {
+                if (withRedirection) {
+                    val deeplink = navigationArgs?.publicShareDeeplink
+                    if (deeplink.isNullOrBlank()) {
+                        trackUserId(AccountUtils.currentUserId)
+                        trackAccountEvent(MatomoName.LoggedIn)
+                        launchMainActivity()
+                    } else {
+                        PublicShareUtils.launchDeeplink(activity = this@LoginActivity, deeplink = deeplink, shouldFinish = true)
+                    }
+                }
+
+                return@Default
+            }
+            is ApiResponse<*> -> Dispatchers.Main {
+                if (returnValue.error?.description == ErrorCode.NO_DRIVE) {
+                    if (withRedirection) launchNoDriveActivity()
+                } else {
+                    showError(getString(returnValue.translateError()))
+                }
+            }
+            else -> Dispatchers.Main { showError(getString(R.string.anErrorHasOccurred)) }
+        }
+
+        runCatching {
+            infomaniakLogin.deleteToken(
+                okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+                token = token,
+            )?.let { errorStatus ->
+                SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
+            }
+        }.cancellable().onFailure { exception ->
+            SentryLog.e(TAG, "Failure on deleteToken", exception)
         }
     }
 
@@ -226,8 +435,7 @@ class LoginActivity : AppCompatActivity() {
                 )?.let { errorStatus ->
                     SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
                 }
-            }.onFailure { exception ->
-                if (exception is CancellationException) throw exception
+            }.cancellable().onFailure { exception ->
                 SentryLog.e(TAG, "Failure on deleteToken", exception)
             }
         }
@@ -235,9 +443,8 @@ class LoginActivity : AppCompatActivity() {
 
     private fun showError(error: String) = with(binding) {
         showSnackbar(error)
-        connectButton.hideProgressCatching(R.string.connect)
-        signInButton.isEnabled = true
-        if (!connectButton.isEnabled) connectButton.isEnabled = true
+        connectButton.hideProgressCatching(connectButtonText)
+        signUpButton.isEnabled = true
     }
 
     private fun launchMainActivity() {
@@ -246,8 +453,8 @@ class LoginActivity : AppCompatActivity() {
 
     private fun launchNoDriveActivity() = with(binding) {
         Intent(this@LoginActivity, NoDriveActivity::class.java).apply { startActivity(this) }
-        connectButton.hideProgressCatching(R.string.connect)
-        signInButton.isEnabled = true
+        connectButton.hideProgressCatching(connectButtonText)
+        signUpButton.isEnabled = true
     }
 
     private fun handleNavigationFlags() {
@@ -280,7 +487,7 @@ class LoginActivity : AppCompatActivity() {
                     }
 
                     user?.let {
-                        val allDrivesDataResponse = ApiRepository.getAllDrivesData(okhttpClient)
+                        val allDrivesDataResponse = Dispatchers.IO { ApiRepository.getAllDrivesData(okhttpClient) }
 
                         when {
                             allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {
@@ -294,7 +501,9 @@ class LoginActivity : AppCompatActivity() {
                             }
                             else -> {
                                 allDrivesDataResponse.data?.let { driveInfo ->
-                                    DriveInfosController.storeDriveInfos(user.id, driveInfo)
+                                    Dispatchers.IO {
+                                        DriveInfosController.storeDriveInfos(user.id, driveInfo)
+                                    }
                                     CloudStorageProvider.notifyRootsChanged(context)
 
                                     AccountUtils.addUser(user)

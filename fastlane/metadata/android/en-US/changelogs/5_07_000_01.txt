@@ -1,0 +1,5 @@
+- Add recent folders to folder selection's root screen
+- Fix Home screen not displaying activities + hidden private folder
+- Try to fix photos deletion during synchronization not working properly
+- Fix crash happening at application launch
+- Add kDrive as files provider for Material file application

@@ -165,7 +165,7 @@
                     app:layout_constraintTop_toBottomOf="@id/addPasswordDescription"
                     tools:visibility="visible" />
 
-                <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+                <com.infomaniak.core.ksuite.myksuite.ui.views.MyKSuitePlusChipView
                     android:id="@+id/offerPasswordMyKSuitePlusChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -299,7 +299,7 @@
                     app:layout_constraintTop_toBottomOf="@id/addExpirationDateDescription"
                     tools:visibility="visible" />
 
-                <com.infomaniak.core.myksuite.ui.views.MyKSuitePlusChipView
+                <com.infomaniak.core.ksuite.myksuite.ui.views.MyKSuitePlusChipView
                     android:id="@+id/offerExpirationMyKSuitePlusChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

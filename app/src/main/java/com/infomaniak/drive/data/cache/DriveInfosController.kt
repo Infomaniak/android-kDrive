@@ -125,6 +125,18 @@ object DriveInfosController {
         }
     }
 
+    fun deleteDrives(userId: Int) {
+        getRealmInstance().use { realm ->
+            realm.executeTransaction {
+                val drives = realm.where(Drive::class.java)
+                    .equalTo(Drive::userId.name, userId)
+                    .findAll()
+
+                drives.forEach(Drive::deleteFromRealm)
+            }
+        }
+    }
+
     fun getUsers(userIds: ArrayList<Int>? = arrayListOf()): List<DriveUser> {
         return getRealmInstance().use { realm ->
             val userList = realm.copyFromRealm(realm.where(DriveUser::class.java).apply {
@@ -222,7 +234,7 @@ object DriveInfosController {
                     userId = AccountUtils.currentUserId,
                     driveId = driveId
                 ).findFirst().toFlow().map { drive ->
-                    if (drive?.categoryRights?.canReadOnFile == true) buildIntObjectMap {
+                    if (drive?.isValid == true && drive.categoryRights.canReadOnFile) buildIntObjectMap {
                         drive.categories.forEach { category -> this[category.id] = category }
                     } else null
                 }

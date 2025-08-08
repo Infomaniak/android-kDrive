@@ -188,7 +188,7 @@ object AccountUtils : CredentialManager() {
     }
 
     suspend fun removeUserAndDeleteToken(context: Context, user: User) = coroutineScope {
-        SentryLog.i("logOut", "User logged out, remaining user count: ${AccountUtils.getAllUsersCount().minus(1)}")
+        SentryLog.i("logOut", "User logged out, remaining user count: ${getAllUsersCount().minus(1)}")
         SentryLog.i("logOut", "User logged out, disconnected user id: ${user.id}")
 
         launch {
@@ -258,7 +258,7 @@ object AccountUtils : CredentialManager() {
 
     private suspend fun resetApp(context: Context) {
         if (getAllUsersCount() == 0) {
-            AppSettings.removeAppSettings()
+            AppSettings.resetAppSettings()
             UiSettings(context).removeUiSettings()
             StoresSettingsRepository(context).clear()
 

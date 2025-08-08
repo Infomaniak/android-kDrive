@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.app.Activity
 import android.app.ActivityManager
+import android.content.ClipData
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -69,7 +70,7 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -93,12 +94,16 @@ import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
+import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
+import com.infomaniak.drive.utils.FilePresenter.displayFile
+import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.views.PendingFilesView
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.user.User
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.context
@@ -413,11 +418,17 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 
 fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
+const val loginUrl = "https://login.infomaniak.com/"
+
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
+    loginUrl = loginUrl,
     appUID = BuildConfig.APPLICATION_ID,
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,
+    sentryCallback = { error ->
+        SentryLog.e(tag = "WebViewLogin", error)
+    }
 )
 
 //region Worker
@@ -435,7 +446,10 @@ fun Context.shareFile(getUriToShare: () -> Uri?) {
     val shareIntent = Intent().apply {
         action = Intent.ACTION_SEND
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        putExtra(Intent.EXTRA_STREAM, getUriToShare())
+
+        val uriToShare = getUriToShare()
+        putExtra(Intent.EXTRA_STREAM, uriToShare)
+        clipData = ClipData.newUri(contentResolver, "", uriToShare)
         type = "*/*"
     }
 
@@ -494,6 +508,21 @@ fun Fragment.setupDriveToolbar(
             collapsingToolbarLayout.setExpandedTitleTextColor(ColorStateList.valueOf(Color.TRANSPARENT))
         } else {
             collapsingToolbarLayout.setExpandedTitleTextAppearance(R.style.CollapsingToolbarExpandedTitleTextAppearance)
+        }
+    }
+}
+
+fun Fragment.observeNavigateFileListTo(mainViewModel: MainViewModel, fileListViewModel: FileListViewModel) {
+    mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
+        if (file.isFolder()) {
+            openFolder(
+                file = file,
+                shouldHideBottomNavigation = false,
+                shouldShowSmallFab = false,
+                fileListViewModel = fileListViewModel,
+            )
+        } else {
+            displayFile(file, mainViewModel, fileAdapter = null)
         }
     }
 }

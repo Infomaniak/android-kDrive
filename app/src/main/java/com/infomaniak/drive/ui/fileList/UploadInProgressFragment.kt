@@ -30,7 +30,6 @@ import androidx.work.Data
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
@@ -62,7 +61,6 @@ class UploadInProgressFragment : FileListFragment() {
     override val noItemsTitle = R.string.uploadInProgressNoFile
 
     private var pendingUploadFiles = mutableListOf<UploadFile>()
-    private var pendingFiles = mutableListOf<File>()
     private var cancellationConfirmationDialog: AlertDialog? = null
     private val cancellationProgressDialog by lazy {
         Utils.createProgressDialog(requireContext(), R.string.allCancellationInProgress)
@@ -295,15 +293,13 @@ class UploadInProgressFragment : FileListFragment() {
 
         private fun showPendingFolders() = with(binding) {
             swipeRefreshLayout.isRefreshing = true
-            uploadInProgressViewModel.getPendingFolders().observe(viewLifecycleOwner) {
-                it?.let { uploadFolders ->
-                    pendingFiles = uploadFolders
-                    fileAdapter.isComplete = true
-                    fileAdapter.setFiles(uploadFolders)
-                    noFilesLayout.toggleVisibility(uploadFolders.isEmpty())
-                    showLoadingTimer.cancel()
-                    swipeRefreshLayout.isRefreshing = false
-                }
+            uploadInProgressViewModel.getPendingFolders().observe(viewLifecycleOwner) { uploadFolders ->
+                if (uploadFolders == null) return@observe
+                fileAdapter.isComplete = true
+                fileAdapter.setFiles(uploadFolders)
+                noFilesLayout.toggleVisibility(uploadFolders.isEmpty())
+                showLoadingTimer.cancel()
+                swipeRefreshLayout.isRefreshing = false
             }
         }
 
@@ -312,7 +308,6 @@ class UploadInProgressFragment : FileListFragment() {
             uploadInProgressViewModel.getPendingFiles(folderId).observe(viewLifecycleOwner) {
                 it?.let { (files, uploadFiles) ->
                     pendingUploadFiles = uploadFiles
-                    pendingFiles = files
 
                     toolbar.menu.findItem(R.id.restartItem).isVisible = true
                     toolbar.menu.findItem(R.id.closeItem).isVisible = true

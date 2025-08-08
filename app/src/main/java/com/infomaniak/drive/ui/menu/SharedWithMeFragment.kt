@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SharedWithMeViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActionsBottomSheetDialog
@@ -71,20 +72,23 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             navigationArgs.folderName
         }
 
-        fileAdapter.initAsyncListDiffer()
-        fileAdapter.onFileClicked = { file ->
-            fileListViewModel.cancelDownloadFiles()
-            when {
-                // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
-                // maintenance check on the folder type but we don't know if this is necessary
-                file.isFolder() -> {
-                    DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
-                        if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
+        fileAdapter.apply {
+            isSelectingFolder = requireActivity() is SelectFolderActivity
+            initAsyncListDiffer()
+            onFileClicked = { file ->
+                fileListViewModel.cancelDownloadFiles()
+                when {
+                    // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
+                    // maintenance check on the folder type but we don't know if this is necessary
+                    file.isFolder() -> {
+                        DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
+                            if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
+                        }
                     }
-                }
-                else -> {
-                    val fileList = fileAdapter.getFileObjectsList(sharedWithMeViewModel.sharedWithMeRealm)
-                    Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)
+                    else -> {
+                        val fileList = fileAdapter.getFileObjectsList(sharedWithMeViewModel.sharedWithMeRealm)
+                        Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)
+                    }
                 }
             }
         }

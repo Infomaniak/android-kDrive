@@ -29,8 +29,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_06_007_01
-        versionName = "5.6.7"
+        versionCode = 5_08_001_01
+        versionName = "5.8.1"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -151,6 +151,9 @@ sentry {
 dependencies {
 
     implementation(project(":Core"))
+    implementation(project(":Core:Avatar"))
+    implementation(project(":Core:CrossAppLogin:Back"))
+    implementation(project(":Core:CrossAppLogin:Front"))
     implementation(project(":Core:FragmentNavigation"))
     implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))
@@ -158,16 +161,16 @@ dependencies {
     implementation(project(":Core:Legacy:BugTracker"))
     implementation(project(":Core:Legacy:Stores"))
     implementation(project(":Core:Matomo"))
-    implementation(project(":Core:MyKSuite"))
+    implementation(project(":Core:kSuite:kSuitePro"))
+    implementation(project(":Core:kSuite:MyKSuite"))
     implementation(project(":Core:Network"))
     implementation(project(":Core:RecyclerView"))
     implementation(project(":Core:Thumbnails"))
-    implementation(project(":Core:UserAvatar"))
 
     implementation(core.ktor.client.okhttp)
 
-    implementation(libs.androidx.work.runtime.ktx)
-    androidTestImplementation(libs.androidx.work.testing)
+    implementation(core.androidx.work.runtime)
+    androidTestImplementation(core.androidx.work.testing)
 
     implementation(libs.androidx.concurrent.futures.ktx)
     implementation(libs.androidx.lifecycle.process)

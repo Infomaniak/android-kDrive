@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.removeAccents
 import io.realm.Realm
 import io.realm.RealmConfiguration
@@ -45,6 +46,7 @@ import io.realm.RealmList
 import io.realm.RealmQuery
 import io.realm.RealmResults
 import io.realm.Sort
+import io.realm.exceptions.RealmPrimaryKeyConstraintException
 import io.realm.kotlin.oneOf
 import io.realm.kotlin.toFlow
 import io.sentry.Sentry
@@ -97,6 +99,17 @@ object FileController {
             }
         }
         return realm?.let(block) ?: getRealmInstance(userDrive).use(block)
+    }
+
+    fun getIdOfChildrenFileWithName(folderId: Int, name: String): List<Int> {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::parentId.name, folderId)
+                .equalTo(File::name.name, name)
+                .equalTo(File::type.name, Type.DIRECTORY.value)
+                .findAll()
+                .map { it.id }
+        }
     }
 
     fun generateAndSavePath(fileId: Int, userDrive: UserDrive): String {
@@ -162,6 +175,20 @@ object FileController {
             .equalTo(File::parentId.name, folderId)
             .findAllAsync()
             .toFlow()
+    }
+
+    fun getRecentFolders(recentFolderNumber: Int): Flow<List<File>> {
+        return getRealmInstance().use { realm ->
+            realm.where(File::class.java)
+                .equalTo(File::type.name, Type.DIRECTORY.value)
+                .greaterThan(File::id.name, ROOT_ID)
+                .greaterThan(File::parentId.name, ROOT_ID)
+                .sort(File::lastModifiedAt.name, Sort.DESCENDING)
+                .limit(recentFolderNumber.toLong())
+                .sort(File::lastModifiedAt.name, Sort.ASCENDING)
+                .findAllAsync()
+                .toFlow()
+        }
     }
 
     //region isMarkedAsOffline
@@ -259,20 +286,37 @@ object FileController {
         }
     }
 
+    tailrec fun deleteFileAndChildrenRec(
+        filesToDelete: MutableList<File>,
+        realm: Realm? = null,
+        userDrive: UserDrive? = null,
+        context: Context,
+    ) {
+        if (filesToDelete.isEmpty()) return
+
+        val file = filesToDelete.removeAt(0)
+        val children = getFileById(file.id, userDrive)?.children ?: emptyList()
+
+        filesToDelete.addAll(children)
+        file.deleteCaches(context)
+        updateFile(file.id, realm, userDrive) { localFile -> localFile.deleteFromRealm() }
+
+        deleteFileAndChildrenRec(filesToDelete, realm, userDrive, context)
+    }
+
     fun deleteFile(
         file: File,
         realm: Realm? = null,
         userDrive: UserDrive? = null,
         context: Context,
         onSuccess: ((fileId: Int) -> Unit)? = null,
-    ): ApiResponse<CancellableAction> {
-        val apiResponse = ApiRepository.deleteFile(file)
+    ): ApiResponse<CancellableAction> = ApiRepository.deleteFile(file).also { apiResponse ->
         if (apiResponse.isSuccess()) {
-            file.deleteCaches(context)
-            updateFile(file.id, realm, userDrive = userDrive) { localFile -> localFile.deleteFromRealm() }
-            onSuccess?.invoke(file.id)
+            runCatching {
+                deleteFileAndChildrenRec(filesToDelete = mutableListOf(file), realm, userDrive, context)
+                onSuccess?.invoke(file.id)
+            }.onFailure(Sentry::captureException)
         }
-        return apiResponse
     }
 
     fun updateIsOfflineForFiles(
@@ -466,6 +510,7 @@ object FileController {
                 }
             }
         }
+        DriveInfosController.deleteDrives(userId)
     }
 
     fun getFilesFromCache(folderId: Int, userDrive: UserDrive? = null, order: SortType = SortType.NAME_AZ): ArrayList<File> {
@@ -711,7 +756,15 @@ object FileController {
         // Save remote folder if it doesn't exist locally
         var newLocalFolderProxy: File? = null
         if (localFolderProxy == null && remoteFolder != null) {
-            realm.executeTransaction { newLocalFolderProxy = it.copyToRealm(remoteFolder) }
+            runCatching {
+                realm.executeTransaction { newLocalFolderProxy = it.copyToRealm(remoteFolder) }
+            }.onFailure { exception ->
+                if (exception is RealmPrimaryKeyConstraintException) {
+                    SentryLog.i("FileController", "Exception while adding a folder to Realm", exception)
+                } else {
+                    throw exception
+                }
+            }
         }
         realm.executeTransaction {
             // Restore same children data

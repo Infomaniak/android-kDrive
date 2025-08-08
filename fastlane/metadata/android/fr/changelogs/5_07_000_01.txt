@@ -1,0 +1,5 @@
+- Ajout des dossiers récents à l'écran racine de la sélection de dossiers
+- Correction de l'écran d'accueil qui n'affiche pas les activités de fichiers + le dossier privé qui pouvait se retrouver caché
+- Essai de correction de la suppression automatique des photos synchronisées qui ne fonctionne pas dans certains cas
+- Correction d'un crash pouvant apparaître au lancement de l'application
+- Ajout de kDrive comme fournisseur de fichiers pour l'application Material file

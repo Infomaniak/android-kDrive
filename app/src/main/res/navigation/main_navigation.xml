@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2022-2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -343,13 +343,17 @@
             app:argType="integer" />
         <argument
             android:name="destinationUserDrive"
-            app:argType="com.infomaniak.drive.data.models.UserDrive"
             android:defaultValue="@null"
-            app:nullable="true"/>
+            app:argType="com.infomaniak.drive.data.models.UserDrive"
+            app:nullable="true" />
         <argument
             android:name="shortcutId"
             android:defaultValue=""
             app:argType="string" />
+        <argument
+            android:name="deepLinkFileNotFound"
+            android:defaultValue="false"
+            app:argType="boolean" />
     </activity>
 
     <activity
@@ -435,6 +439,12 @@
             android:defaultValue=""
             app:argType="string" />
     </activity>
+
+    <dialog
+        android:id="@+id/crossLoginBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog"
+        android:label="CrossLoginBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_cross_login" />
 
     <dialog
         android:id="@+id/addFileBottomSheetDialog"
@@ -1073,6 +1083,6 @@
         android:label="MyKSuiteDashboardFragment">
         <argument
             android:name="dashboardData"
-            app:argType="com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData" />
+            app:argType="com.infomaniak.core.ksuite.myksuite.ui.screens.MyKSuiteDashboardScreenData" />
     </fragment>
 </navigation>

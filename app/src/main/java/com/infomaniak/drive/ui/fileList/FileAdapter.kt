@@ -71,7 +71,7 @@ open class FileAdapter(
     var onMenuClicked: ((selectedFile: File) -> Unit)? = null
     var onStopUploadButtonClicked: ((fileName: String) -> Unit)? = null
 
-    var selectFolder = false
+    var isSelectingFolder = false
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
 
@@ -358,7 +358,7 @@ open class FileAdapter(
 
     private fun FileItemViewHolder.setupMenuButton(file: File) = menuButton.apply {
         isGone = uploadInProgress
-                || selectFolder
+                || isSelectingFolder
                 || file.isFromActivities
                 || file.isFromSearch
                 || (offlineMode && !file.isOffline)
@@ -409,7 +409,7 @@ open class FileAdapter(
             }
         }
         else -> {
-            if (selectFolder || offlineMode) {
+            if (isSelectingFolder || offlineMode) {
                 enabledFile(file.isFolder() || (offlineMode && file.isOffline))
             } else {
                 enabledFile()

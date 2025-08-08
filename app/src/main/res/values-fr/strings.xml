@@ -521,6 +521,7 @@
     <string name="noFilesDescriptionNoNetwork">Impossible de récupérer les informations du dossier. Veuillez vérifier votre connexion réseau ou réessayez ultérieurement.</string>
     <string name="noFilesDescriptionWithCreationRights">Ce dossier est vide. Appuyez sur le bouton + pour ajouter des fichiers ici.</string>
     <string name="noMediaFolderTitle">Aucun dossier de médias disponible</string>
+    <string name="noRightsToOfficeLink">Aucun compte n’a accès à ce fichier</string>
     <string name="noSelectMediaFolders">Aucun dossier sélectionné</string>
     <string name="noSyncFolderNotificationDescription">Cliquez-ici pour configurer les dossiers à synchroniser</string>
     <string name="noSyncFolderNotificationTitle">Aucun dossier sélectionné pour la sauvegarde automatique</string>
@@ -576,6 +577,7 @@
     <string name="recentActivityMeTitle">Par moi</string>
     <string name="recentActivityMyTeam">Par mon équipe</string>
     <string name="recentActivitySeeMore">Voir plus de fichiers récents</string>
+    <string name="recentTitle">Récents</string>
     <string name="refreshTokenError">Vous avez été déconnecté</string>
     <string name="restrictedSharedLinkTitle">Lien de partage restreint</string>
     <string name="reviewAlertTitle">Aimez-vous kDrive ?</string>

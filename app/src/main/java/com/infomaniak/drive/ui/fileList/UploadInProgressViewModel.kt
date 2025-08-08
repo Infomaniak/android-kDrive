@@ -24,6 +24,7 @@ import android.provider.OpenableColumns
 import android.util.ArrayMap
 import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -61,12 +62,13 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
         emit(localFolder ?: remoteFolder)
     }
 
-    fun getPendingFolders() = liveData<ArrayList<File>>(Dispatchers.IO) {
-        UploadFile.getRealmInstance().use { realm ->
+    fun getPendingFolders(): LiveData<List<File>> = liveData(Dispatchers.IO) {
+        val list = UploadFile.getRealmInstance().use { realm ->
             UploadFile.getAllPendingFolders(realm)?.let { pendingFolders ->
-                emit(generateFolderFiles(pendingFolders))
-            } ?: emit(arrayListOf())
+                generateFolderFiles(pendingFolders)
+            } ?: emptyList()
         }
+        emit(list)
     }
 
     fun getPendingFiles(folderId: Int) = liveData<Pair<ArrayList<File>, ArrayList<UploadFile>>?>(Dispatchers.IO) {

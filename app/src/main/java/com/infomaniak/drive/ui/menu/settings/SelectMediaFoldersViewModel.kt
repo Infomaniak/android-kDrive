@@ -31,13 +31,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
+import splitties.init.appCtx
 
 class SelectMediaFoldersViewModel : ViewModel() {
 
     private var getMediaFilesJob: Job = Job()
     val elementsToRemove = MutableLiveData<List<Long>>()
 
-    fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<IsComplete, ArrayList<MediaFolder>>> {
+    fun getAllMediaFolders(contentResolver: ContentResolver): LiveData<Pair<IsComplete, List<MediaFolder>>> {
         getMediaFilesJob = Job()
         return liveData {
             runInterruptible(Dispatchers.IO + getMediaFilesJob) {
@@ -47,9 +48,8 @@ class SelectMediaFoldersViewModel : ViewModel() {
                         if (cacheMediaFolders.isNotEmpty()) emit(false to cacheMediaFolders)
                     }
 
-                    val localMediaFolders = ArrayList(
-                        MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob),
-                    )
+                    val localMediaFolders = getLocalMediaFolders(realm, contentResolver, getMediaFilesJob, cacheMediaFolders)
+
                     cacheMediaFolders.removeObsoleteMediaFolders(realm, localMediaFolders.map { it.id })
 
                     viewModelScope.launch(Dispatchers.Main) {
@@ -60,15 +60,33 @@ class SelectMediaFoldersViewModel : ViewModel() {
         }
     }
 
+    private fun getLocalMediaFolders(
+        realm: Realm,
+        contentResolver: ContentResolver,
+        getMediaFilesJob: Job,
+        cacheMediaFolders: List<MediaFolder>,
+    ): List<MediaFolder> {
+
+        fun MediaFolder.exists(): Boolean = appCtx.getExternalFilesDir(path)?.exists() == true
+
+        val localFolders = MediaFoldersProvider.getAllMediaFolders(realm, contentResolver, getMediaFilesJob)
+
+        val previouslySyncedCacheFolders = cacheMediaFolders.filter {
+            it.isSynced && it.exists()
+        }
+
+        return localFolders + previouslySyncedCacheFolders
+    }
+
     override fun onCleared() {
         getMediaFilesJob.cancel()
         super.onCleared()
     }
 
-    private fun ArrayList<MediaFolder>.newMediaFolders(cachedMediaFolders: ArrayList<MediaFolder>): ArrayList<MediaFolder> {
+    private fun List<MediaFolder>.newMediaFolders(cachedMediaFolders: List<MediaFolder>): List<MediaFolder> {
         return filterNot { mediaFolder ->
             cachedMediaFolders.any { cachedFolder -> cachedFolder.id == mediaFolder.id }
-        } as ArrayList<MediaFolder>
+        }
     }
 
     private fun List<MediaFolder>.removeObsoleteMediaFolders(realm: Realm, upToDateMediasIds: List<Long>) {

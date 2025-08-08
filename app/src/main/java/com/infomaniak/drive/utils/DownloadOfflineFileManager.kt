@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ class DownloadOfflineFileManager(
     ): ListenableWorker.Result {
 
         currentFile = file
-        val offlineFile = file.getOfflineFile(context, userDrive.userId)
+        var offlineFile = file.getOfflineFile(context, userDrive.userId)
         val cacheFile = file.getCacheFile(context, userDrive)
 
         offlineFile?.let {
@@ -97,15 +97,20 @@ class DownloadOfflineFileManager(
 
         if (offlineFile == null) {
             getFileFromRemote(context, file.id, userDrive) { downloadedFile ->
-                downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { offlineFile ->
+                downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { updatedOfflineFile ->
                     lastDownloadedFile = offlineFile
+                    offlineFile = updatedOfflineFile
                 }
             }
         } else {
             lastDownloadedFile = offlineFile
         }
 
-        return startOfflineDownload(context, file, offlineFile!!, onProgress)
+        return if (offlineFile == null) {
+            ListenableWorker.Result.failure()
+        } else {
+            startOfflineDownload(context, file, offlineFile, onProgress)
+        }
     }
 
     fun cleanLastDownloadedFile() {

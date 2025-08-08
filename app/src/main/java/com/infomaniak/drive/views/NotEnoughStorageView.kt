@@ -26,7 +26,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
-import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding

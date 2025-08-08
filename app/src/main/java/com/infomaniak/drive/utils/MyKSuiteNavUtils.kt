@@ -22,12 +22,13 @@ import android.graphics.Color
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
-import com.infomaniak.core.myksuite.ui.data.MyKSuiteData
-import com.infomaniak.core.myksuite.ui.screens.KSuiteApp
-import com.infomaniak.core.myksuite.ui.screens.MyKSuiteDashboardScreenData
-import com.infomaniak.core.myksuite.ui.utils.MatomoMyKSuite
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils
-import com.infomaniak.core.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.core.avatar.getBackgroundColorResBasedOnId
+import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.core.ksuite.myksuite.ui.screens.KSuiteApp
+import com.infomaniak.core.ksuite.myksuite.ui.screens.MyKSuiteDashboardScreenData
+import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils
+import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.lib.core.models.user.User
 
@@ -48,5 +49,6 @@ fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteD
         avatarUri = user.avatar,
         userInitials = user.getInitials(),
         iconColor = Color.WHITE,
+        userInitialsBackgroundColor = requireContext().getBackgroundColorResBasedOnId(user.id.hashCode()),
     )
 }

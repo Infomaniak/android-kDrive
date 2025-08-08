@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,17 +22,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.pm.ShortcutManagerCompat
-import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
+import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.CommonFolders
@@ -43,30 +42,26 @@ import com.infomaniak.drive.ui.home.RootFileTreeCategory.PersonalFolder
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.RecentChanges
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.SharedWithMe
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.Trash
-import com.infomaniak.drive.utils.FilePresenter.displayFile
-import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
+import com.infomaniak.drive.utils.observeNavigateFileListTo
 import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
-import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class RootFilesFragment : Fragment() {
+class RootFilesFragment : BaseRootFolderFragment() {
 
     private var binding: FragmentRootFilesBinding by safeBinding()
     private val mainViewModel: MainViewModel by activityViewModels()
-    private val fileListViewModel: FileListViewModel by viewModels()
+    override val fileListViewModel: FileListViewModel by viewModels()
 
-    private val uiSettings by lazy { UiSettings(requireContext()) }
+    override val rootFolderLayout: RootFolderLayoutBinding
+        get() = binding.rootFolderLayout
 
-    private var commonFolderToOpen: FolderToOpen? = null
-    private var personalFolderToOpen: FolderToOpen? = null
-    private val hasFolderToOpenBeenSet: CompletableJob = Job()
+    override val uiSettings by lazy { UiSettings(requireContext()) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentRootFilesBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -87,10 +82,18 @@ class RootFilesFragment : Fragment() {
             }
         }
 
-        setupItems()
+        setupItems(
+            folderLayout = binding.rootFolderLayout,
+            favoritesNav = RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(),
+            sharedWithMeNav = RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(),
+            mySharesNav = RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(),
+            recentChangesNav = RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment(),
+            offlineNav = RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment(),
+            trashNav = RootFilesFragmentDirections.actionFilesFragmentToTrashFragment()
+        )
 
-        observeFiles()
-        observeNavigateFileListTo()
+        observeFiles(haveBin = true)
+        observeNavigateFileListTo(mainViewModel, fileListViewModel)
         observeAndDisplayNetworkAvailability(
             mainViewModel = mainViewModel,
             noNetworkBinding = noNetworkInclude,
@@ -102,85 +105,9 @@ class RootFilesFragment : Fragment() {
         navigateToLastVisitedFileTreeCategory()
 
         binding.root.enableEdgeToEdge(withBottom = false) { windowInsets ->
-            binding.cardView.setMargins(
+            binding.rootFolderLayout.cardView.setMargins(
                 bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom
             )
-        }
-    }
-
-    private fun setupItems() = with(binding) {
-        organizationFolder.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = CommonFolders
-            commonFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
-        }
-
-        personalFolder.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = PersonalFolder
-            personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
-        }
-
-        favorites.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = Favorites
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
-        }
-
-        recentChanges.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = RecentChanges
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
-        }
-
-        sharedWithMeFiles.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = SharedWithMe
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
-        }
-
-        myShares.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = MyShares
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
-        }
-
-        offlineFile.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = Offline
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
-        }
-
-        trashbin.setOnClickListener {
-            uiSettings.lastVisitedRootFileTreeCategory = Trash
-            safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
-        }
-    }
-
-    private fun observeFiles() {
-        fileListViewModel.rootFiles.observe(viewLifecycleOwner) { fileTypes ->
-            binding.organizationFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_TEAM_SPACE)
-            binding.personalFolder.isVisible = fileTypes.contains(File.VisibilityType.IS_PRIVATE)
-
-            updateFolderToOpenWhenClicked(fileTypes)
-        }
-    }
-
-    private fun updateFolderToOpenWhenClicked(fileTypes: Map<File.VisibilityType, File>) {
-        fileTypes[File.VisibilityType.IS_TEAM_SPACE]?.let { file ->
-            commonFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
-        }
-        fileTypes[File.VisibilityType.IS_PRIVATE]?.let { file ->
-            personalFolderToOpen = FolderToOpen(file.id, file.getDisplayName(requireContext()))
-        }
-        hasFolderToOpenBeenSet.complete()
-    }
-
-    private fun observeNavigateFileListTo() {
-        mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
-            if (file.isFolder()) {
-                openFolder(
-                    file = file,
-                    shouldHideBottomNavigation = false,
-                    shouldShowSmallFab = false,
-                    fileListViewModel = fileListViewModel,
-                )
-            } else {
-                displayFile(file, mainViewModel, fileAdapter = null)
-            }
         }
     }
 
@@ -213,7 +140,7 @@ class RootFilesFragment : Fragment() {
         }
     }
 
-    private fun fileListDirections(
+    override fun fileListDirections(
         folderToOpen: FolderToOpen,
     ): NavDirections = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
         folderId = folderToOpen.id,

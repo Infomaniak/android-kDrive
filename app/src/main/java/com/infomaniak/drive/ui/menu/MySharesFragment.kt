@@ -23,6 +23,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -68,6 +69,7 @@ class MySharesFragment : FileSubTypeListFragment() {
                 Utils.displayFile(mainViewModel, findNavController(), file, fileList)
             }
         }
+        fileAdapter.isSelectingFolder = requireActivity() is SelectFolderActivity
     }
 
     override fun onMenuButtonClicked(

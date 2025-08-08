@@ -521,6 +521,7 @@
     <string name="noFilesDescriptionNoNetwork">No se puede recuperar la información de la carpeta. Comprueba tu conexión de red o vuelve a intentarlo más tarde.</string>
     <string name="noFilesDescriptionWithCreationRights">Esta carpeta está vacía. Pulsa la tecla + para agregar archivos aquí.</string>
     <string name="noMediaFolderTitle">No hay carpetas de medios disponibles</string>
+    <string name="noRightsToOfficeLink">Ninguna cuenta tiene acceso a este archivo</string>
     <string name="noSelectMediaFolders">No hay carpeta seleccionada</string>
     <string name="noSyncFolderNotificationDescription">Pulse aquí para configurar las carpetas a sincronizar</string>
     <string name="noSyncFolderNotificationTitle">No hay carpetas seleccionadas para la copia de seguridad automática</string>
@@ -576,6 +577,7 @@
     <string name="recentActivityMeTitle">Por mí</string>
     <string name="recentActivityMyTeam">Por mi equipo</string>
     <string name="recentActivitySeeMore">Ver más archivos recientes</string>
+    <string name="recentTitle">Recientes</string>
     <string name="refreshTokenError">Ha sido desconectado</string>
     <string name="restrictedSharedLinkTitle">Enlace de uso compartido restringido</string>
     <string name="reviewAlertTitle">¿Te gusta kDrive?</string>
