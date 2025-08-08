@@ -361,8 +361,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun onMoveFile(destinationFolder: File) {
-        mainViewModel.moveFile(currentFile, destinationFolder)
+    override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) {
+        mainViewModel.moveFile(currentFile, destinationFolder, isSharedWithMe)
             .observe(viewLifecycleOwner) { fileRequest ->
                 if (fileRequest.isSuccess) {
                     mainViewModel.refreshActivities.value = true

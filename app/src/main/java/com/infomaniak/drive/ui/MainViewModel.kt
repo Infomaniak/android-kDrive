@@ -290,7 +290,12 @@ class MainViewModel(
         }
     }
 
-    fun moveFile(file: File, newParent: File, onSuccess: ((fileId: Int) -> Unit)? = null) = liveData(Dispatchers.IO) {
+    fun moveFile(
+        file: File,
+        newParent: File,
+        isSharedWithMe: Boolean = false,
+        onSuccess: ((fileId: Int) -> Unit)? = null
+    ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
             FileController.getRealmInstance().use { realm ->
@@ -306,7 +311,18 @@ class MainViewModel(
                     runCatching { localFolder.children.remove(file) }
                 }
 
-                FileController.addChild(newParent.id, file.apply { parentId = newParent.id }, realm)
+                if (isSharedWithMe) {
+                    // If the selected folder is a shared folder, it is removed from the user's realm table (userId_driveId)
+                    // and added to the share realm (userId_share)
+                    FileController.removeFile(fileId = file.id, customRealm = realm)
+                    FileController.getRealmInstance(UserDrive(sharedWithMe = true)).use { realm ->
+                        FileController.updateFile(newParent.id, realm) { localFolder ->
+                            runCatching { localFolder.children.add(file) }
+                        }
+                    }
+                } else {
+                    FileController.addChild(newParent.id, file.apply { parentId = newParent.id }, realm)
+                }
             }
 
             onSuccess?.invoke(file.id)
