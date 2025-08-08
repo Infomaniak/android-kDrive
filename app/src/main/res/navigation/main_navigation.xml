@@ -390,7 +390,10 @@
             android:name="fromSaveExternal"
             android:defaultValue="false"
             app:argType="boolean" />
-
+        <argument
+            android:name="isSharedWithMe"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <argument
             android:name="customArgs"
             android:defaultValue="@null"

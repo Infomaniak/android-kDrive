@@ -34,6 +34,7 @@ import com.infomaniak.drive.databinding.ActivitySelectFolderBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.setMargins
@@ -112,7 +113,8 @@ class SelectFolderActivity : BaseActivity() {
                     SelectFolderActivityArgs(
                         folderId = currentFragment.folderId,
                         folderName = currentFragment.folderName,
-                        customArgs = customArgs
+                        customArgs = customArgs,
+                        isSharedWithMe = navHostFragment.childFragmentManager.fragments.first() is SharedWithMeFragment
                     ).toBundle()
                 )
                 setResult(RESULT_OK, this)
