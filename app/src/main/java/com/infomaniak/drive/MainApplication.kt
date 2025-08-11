@@ -111,8 +111,12 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         SentryAndroid.init(this) { options: SentryAndroidOptions ->
             // register the callback as an option
             options.beforeSend = SentryOptions.BeforeSendCallback { event: SentryEvent?, _: Any? ->
-                //if the application is in debug mode discard the events
-                if (BuildConfig.DEBUG) null else event
+                when {
+                    // If the application is in debug mode discard the events
+                    BuildConfig.DEBUG -> null
+                    !uiSettings.isSentryTrackingEnabled -> null
+                    else -> event
+                }
             }
         }
 

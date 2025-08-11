@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,53 +23,42 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.extensions.openUrl
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.R
-import com.infomaniak.drive.databinding.FragmentSettingsAboutBinding
+import com.infomaniak.drive.MatomoDrive
+import com.infomaniak.drive.MatomoDrive.trackEventDataManagement
+import com.infomaniak.drive.databinding.FragmentDataManagementSettingBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeBinding
 
-class AboutSettingsFragment : Fragment() {
+class DataManagementSettingFragment : Fragment() {
 
-    private var binding: FragmentSettingsAboutBinding by safeBinding()
+    private var binding: FragmentDataManagementSettingBinding by safeBinding()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FragmentSettingsAboutBinding.inflate(inflater, container, false).also { binding = it }.root
+        return FragmentDataManagementSettingBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        toolbar.setNavigationOnClickListener {
-            findNavController().popBackStack()
-        }
+        root.enableEdgeToEdge()
 
-        privacyLayout.setOnClickListener {
-            requireContext().openUrl(GDPR_URL)
-        }
-
-        settingsDataManagement.setOnClickListener {
-            safelyNavigate(R.id.dataManagementSettingFragment)
-        }
-
-        sourceCodeLayout.setOnClickListener {
-            requireContext().openUrl(GITHUB_URL)
-        }
-
-        licenseLayout.setOnClickListener {
-            requireContext().openUrl(GPL_LICENSE_URL)
-        }
-
-        appVersionLayout.setDescription("v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}")
-
-        binding.root.enableEdgeToEdge()
+        toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+        setupListeners()
     }
 
-    companion object {
-        const val GDPR_URL = "https://infomaniak.com/gtl/rgpd"
-        const val GITHUB_URL = "https://github.com/Infomaniak/android-kDrive"
-        const val GPL_LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
+    private fun setupListeners() = with(binding) {
+        dataManagementMatomo.setOnClickListener {
+            safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingFragmentToDataManagementMatomoFragment())
+        }
+        dataManagementSentry.setOnClickListener {
+            safelyNavigate(DataManagementSettingFragmentDirections.actionDataManagementSettingFragmentToDataManagementSentryFragment())
+        }
+        dataManagementSourceCodeButton.setOnClickListener {
+            trackEventDataManagement(MatomoDrive.MatomoName.ShowSourceCode)
+            requireContext().openUrl(BuildConfig.GITHUB_REPO_URL)
+        }
     }
 }
