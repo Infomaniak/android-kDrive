@@ -32,6 +32,7 @@ import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Companion.getCloudAndFileUris
+import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
@@ -41,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.DownloadProgressDialogArgs
 import com.infomaniak.drive.ui.fileList.FileAdapter
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.FileListViewModel
+import com.infomaniak.drive.ui.menu.TrashFragmentArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragmentArgs
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
@@ -60,11 +62,16 @@ import java.io.InputStreamReader
 object FilePresenter {
 
     fun Fragment.openFolder(
-        file: File,
+        navigationType: FileListNavigationType,
         shouldHideBottomNavigation: Boolean,
         shouldShowSmallFab: Boolean,
         fileListViewModel: FileListViewModel,
     ) {
+        val file = when (navigationType) {
+            is FileListNavigationType.Folder -> navigationType.file
+            is FileListNavigationType.Subfolder -> navigationType.file
+        }
+
         if (file.isDisabled() && !file.isPublicShared()) {
             safeNavigate(
                 R.id.accessDeniedBottomSheetFragment,
@@ -79,6 +86,12 @@ object FilePresenter {
             if (file.isPublicShared()) {
                 val args = PublicShareListFragmentArgs(fileId = file.id, fileName = file.getDisplayName(requireContext()))
                 safeNavigate(R.id.publicShareListFragment, args.toBundle())
+            } else if (file.isTrashed()) {
+                var args: TrashFragmentArgs? = null
+                if (navigationType is FileListNavigationType.Subfolder) {
+                    args = TrashFragmentArgs(subfolderId = navigationType.subfolderId)
+                }
+                safeNavigate(R.id.trashFragment, args?.toBundle())
             } else {
                 val args = FileListFragmentArgs(
                     folderId = file.id,

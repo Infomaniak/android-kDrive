@@ -35,6 +35,7 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
@@ -240,7 +241,7 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun openFolder(folder: File) {
         openFolder(
-            file = folder,
+            navigationType = FileListNavigationType.Folder(folder),
             shouldHideBottomNavigation = true,
             shouldShowSmallFab = false,
             fileListViewModel = fileListViewModel,

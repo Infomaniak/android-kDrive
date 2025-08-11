@@ -81,6 +81,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
@@ -340,7 +341,7 @@ fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel)
         popBackStack(R.id.homeFragment, false)
         (requireActivity() as MainActivity).clickOnBottomBarFolders()
         val userDrive = UserDrive(sharedWithMe = false)
-        mainViewModel.navigateFileListTo(this, folderId, userDrive)
+        mainViewModel.navigateFileListTo(this, folderId, userDrive, null)
     }
 }
 
@@ -506,15 +507,28 @@ fun Fragment.setupDriveToolbar(
 
 fun Fragment.observeNavigateFileListTo(mainViewModel: MainViewModel, fileListViewModel: FileListViewModel) {
     mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
-        if (file.isFolder()) {
-            openFolder(
-                file = file,
-                shouldHideBottomNavigation = false,
-                shouldShowSmallFab = false,
-                fileListViewModel = fileListViewModel,
-            )
-        } else {
-            displayFile(file, mainViewModel, fileAdapter = null)
+        when (file) {
+            is FileListNavigationType.Folder -> {
+                if (file.file.isFolder()) {
+                    openFolder(
+                        navigationType = file,
+                        shouldHideBottomNavigation = false,
+                        shouldShowSmallFab = false,
+                        fileListViewModel = fileListViewModel,
+                    )
+                } else {
+                    displayFile(file.file, mainViewModel, fileAdapter = null)
+                }
+            }
+            is FileListNavigationType.Subfolder -> {
+                openFolder(
+                    navigationType = file,
+                    shouldHideBottomNavigation = false,
+                    shouldShowSmallFab = false,
+                    fileListViewModel = fileListViewModel,
+                )
+
+            }
         }
     }
 }

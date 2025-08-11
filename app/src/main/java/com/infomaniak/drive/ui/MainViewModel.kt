@@ -43,12 +43,15 @@ import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -109,7 +112,7 @@ class MainViewModel(
 
     private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
-    val navigateFileListTo = SingleLiveEvent<File>()
+    val navigateFileListTo = SingleLiveEvent<FileListNavigationType>()
 
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
@@ -206,18 +209,27 @@ class MainViewModel(
         }
     }
 
-    fun navigateFileListTo(navController: NavController, fileId: Int, userDrive: UserDrive) {
+    fun navigateFileListTo(navController: NavController, fileId: Int, userDrive: UserDrive, subfolderId: Int?) {
         // Clear FileListFragment stack
         navController.popBackStack(R.id.rootFilesFragment, false)
 
-        if (fileId <= Utils.ROOT_ID) return // Deeplinks could lead us to navigating to the true root
+        if (fileId <= Utils.ROOT_ID) {
+            if (fileId == TRASH_FILE_ID) {
+                subfolderId?.let {
+                    navigateFileListTo.postValue(FileListNavigationType.Subfolder(TRASH_FILE, it))
+                } ?: run {
+                    navigateFileListTo.postValue(FileListNavigationType.Folder(TRASH_FILE))
+                }
+            }
+            return // Deeplinks could lead us to navigating to the true root
+        }
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
             val file = FileController.getFileById(fileId, userDrive)
                 ?: FileController.getFileDetails(fileId, userDrive = userDrive)
                 ?: return@launch
-            navigateFileListTo.postValue(file)
+            navigateFileListTo.postValue(FileListNavigationType.Folder(file))
         }
     }
 
