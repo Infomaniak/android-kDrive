@@ -65,6 +65,8 @@ class UiSettings(context: Context) : SharedValues {
     var sortType by sharedValue("sortType", SortType.NAME_AZ)
     var accessTokenApiCallRecord by sharedValue<ApiCallRecord>("accessTokenApiCallRecord", null)
     var syncSettingsDate by sharedValue("syncSettingsDate", SavePicturesDate.SINCE_NOW)
+    var isMatomoTrackingEnabled by sharedValue("isMatomoTrackingEnabled", true)
+    var isSentryTrackingEnabled by sharedValue("isSentryTrackingEnabled", true)
 
     data class SaveExternalFilesData(
         val userId: Int,

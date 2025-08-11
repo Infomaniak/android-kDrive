@@ -63,6 +63,7 @@ object MatomoDrive : Matomo {
         SyncModal("syncModal"),
         Trash("trash"),
         TrashFileAction("trashFileAction"),
+        SettingsDataManagement("settingsDataManagement")
     }
 
     enum class MatomoName(val value: String) {
@@ -141,6 +142,7 @@ object MatomoDrive : Matomo {
         SendFileCopy("sendFileCopy"),
         ShareButton("shareButton"),
         ShareLink("shareLink"),
+        ShowSourceCode("showSourceCode"),
         StopShare("stopShare"),
         Switch("switch"),
         SwitchDoubleTap("switchDoubleTap"),
@@ -239,6 +241,10 @@ object MatomoDrive : Matomo {
         trackEvent(MatomoCategory.Comment, name)
     }
 
+    fun trackEventDataManagement(name: MatomoName) {
+        trackEvent(MatomoCategory.SettingsDataManagement, name)
+    }
+
     fun trackBulkActionEvent(category: MatomoCategory, action: BulkOperationType, fileCount: Int) {
 
         fun BulkOperationType.toMatomoString(): String = name.lowercase().capitalizeFirstChar()
@@ -271,4 +277,8 @@ object MatomoDrive : Matomo {
         trackScreen(path = this::class.java.name, title = this::class.java.simpleName)
     }
     //endregion
+
+    fun shouldOptOut(shouldOptOut: Boolean) {
+        tracker.isOptOut = shouldOptOut
+    }
 }
