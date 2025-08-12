@@ -447,7 +447,6 @@
     <string name="fileShareAddMessage">Aggiungi un messaggio agli invitati (facoltativo)</string>
     <string name="fileShareDetailsFileTitle">Condivisione e diritti del file %s</string>
     <string name="fileShareDetailsFolderTitle">Condivisione e diritti della cartella %s</string>
-    <string name="fileShareDetailsShareLinkTitle">Link di condivisione</string>
     <string name="fileShareDetailsUsersAccesTitle">Utenti con accesso</string>
     <string name="fileShareFileTitle">Condividi il file</string>
     <string name="fileShareFolderTitle">Condividi la cartella</string>
@@ -582,7 +581,7 @@
     <string name="restrictedSharedLinkTitle">Link di condivisione limitato</string>
     <string name="reviewAlertTitle">Ti piace kDrive?</string>
     <string name="saveExternalFileInputFileName">Nome del documento</string>
-    <string name="saveExternalFileTitle">Salva su kDrive</string>
+    <string name="saveExternalFileTitle">Salva su Drive</string>
     <string name="searchFilterTitle">Tipi di file</string>
     <string name="searchFiltersSelectDate">Seleziona una data</string>
     <string name="searchFiltersSelectType">Seleziona un tipo di file</string>
