@@ -17,8 +17,11 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -79,7 +82,9 @@ class SyncSettingsActivity : BaseActivity() {
 
     private val uiSettings by lazy { UiSettings(this) }
 
-    private val drivePermissions = DrivePermissions().also { it.registerPermissions(this) }
+    private val syncPermissions = DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).also {
+        it.registerPermissions(this)
+    }
 
     private val syncSettingsViewModel: SyncSettingsViewModel by viewModels()
     private val selectDriveViewModel: SelectDriveViewModel by viewModels()
@@ -153,6 +158,16 @@ class SyncSettingsActivity : BaseActivity() {
         }
     }
 
+    private fun wontShowUnwantedPhotoPicker(): Boolean {
+        val couldShowUnwantedPhotoPicker = when {
+            SDK_INT >= 34 -> {
+                checkSelfPermission(READ_MEDIA_VISUAL_USER_SELECTED) == PackageManager.PERMISSION_GRANTED
+            }
+            else -> false
+        }
+        return !couldShowUnwantedPhotoPicker
+    }
+
     private fun ActivitySyncSettingsBinding.setupListeners(
         oldSyncVideoValue: Boolean,
         oldCreateDatedSubFoldersValue: Boolean,
@@ -163,10 +178,12 @@ class SyncSettingsActivity : BaseActivity() {
         activateSyncItem.setOnCheckedChangeListener { _, isChecked ->
             saveSettingVisibility(isVisible = isChecked, showBatteryDialog = isChecked)
             if (AccountUtils.isEnableAppSync() == isChecked) editNumber-- else editNumber++
-            if (isChecked && !drivePermissions.checkUserChoiceStoragePermission()) {
+            if (isChecked && wontShowUnwantedPhotoPicker()) {
+                // For sync to work, we need to have full access to images, and the photo picker that
+                // opens starting from second permission request won't do it.
                 // We only request permissions if user haven't chosen the "selected image" permission to avoid spamming him
-                // with this files choosing UI
-                drivePermissions.checkWriteStoragePermission()
+                // with this unhelpful files choosing UI.
+                syncPermissions.hasNeededPermissions(requestIfNotGranted = true, canShowBatteryDialog = false)
             }
             changeSaveButtonStatus()
         }
@@ -204,7 +221,9 @@ class SyncSettingsActivity : BaseActivity() {
 
         saveButton.initProgress(this@SyncSettingsActivity)
         saveButton.setOnClickListener {
-            if (drivePermissions.checkSyncPermissions(showBatteryDialog = false)) saveSettings()
+            if (syncPermissions.hasNeededPermissions(requestIfNotGranted = true, canShowBatteryDialog = false)) {
+                saveSettings()
+            }
         }
     }
 
@@ -344,7 +363,7 @@ class SyncSettingsActivity : BaseActivity() {
     }
 
     private fun saveSettingVisibility(isVisible: Boolean, showBatteryDialog: Boolean) = with(binding) {
-        val hasPermissions = drivePermissions.checkSyncPermissions(requestPermission = false, showBatteryDialog)
+        val hasPermissions = syncPermissions.hasNeededPermissions(canShowBatteryDialog = showBatteryDialog)
         photoAccessDeniedLayout.isVisible = isVisible && !hasPermissions
         photoAccessDeniedTitle.setText(DrivePermissions.permissionNeededDescriptionRes)
         settingsLayout.isVisible = isVisible && hasPermissions

@@ -45,7 +45,7 @@ class UploadFilesHelper private constructor(
     ) : this(context = activity, navController, onOpeningPicker = onOpeningPicker) {
         filePicker = FilePicker(activity).apply { initCallback(::onSelectFilesResult) }
 
-        uploadFilesPermissions = DrivePermissions().apply {
+        uploadFilesPermissions = DrivePermissions(DrivePermissions.Type.UploadInTheBackground).apply {
             registerPermissions(activity) { authorized -> if (authorized) uploadFiles() }
         }
     }
@@ -56,7 +56,7 @@ class UploadFilesHelper private constructor(
 
     fun uploadFiles() {
         ShortcutManagerCompat.reportShortcutUsed(context, Shortcuts.UPLOAD.name)
-        if (uploadFilesPermissions.checkSyncPermissions()) {
+        if (uploadFilesPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
             onOpeningPicker?.invoke()
             filePicker.open()
         }

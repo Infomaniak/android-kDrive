@@ -45,7 +45,7 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), OnP
     override val previewPDFHandler = null
 
     private val mainButton by lazy { (requireActivity() as PublicShareActivity).getMainButton() }
-    override val drivePermissions = DrivePermissions()
+    override val downloadPermissions = DrivePermissions(DrivePermissions.Type.DownloadingWithDownloadManager)
 
     override fun initCurrentFile() {
         currentFile = publicShareViewModel.fileClicked ?: throw Exception("No current file found")
@@ -69,7 +69,7 @@ class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), OnP
 
         initBottomSheet()
 
-        drivePermissions.registerPermissions(this@PublicShareFileActionsBottomSheetDialog) { authorized ->
+        downloadPermissions.registerPermissions(this@PublicShareFileActionsBottomSheetDialog) { authorized ->
             if (authorized) downloadFileClicked()
         }
 

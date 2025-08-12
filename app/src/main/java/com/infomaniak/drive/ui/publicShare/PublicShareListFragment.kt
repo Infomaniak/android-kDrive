@@ -70,7 +70,7 @@ class PublicShareListFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
 
-    private val drivePermissions = DrivePermissions()
+    private val downloadPermissions = DrivePermissions(type = DrivePermissions.Type.DownloadingWithDownloadManager)
     private inline val importButton get() = (requireActivity() as PublicShareActivity).getMainButton()
     private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk(::onDriveAndFolderSelected)
@@ -91,7 +91,7 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        drivePermissions.registerPermissions(this@PublicShareListFragment) { authorized -> if (authorized) downloadAllFiles() }
+        downloadPermissions.registerPermissions(this@PublicShareListFragment) { authorized -> if (authorized) downloadAllFiles() }
 
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -279,7 +279,7 @@ class PublicShareListFragment : FileListFragment() {
     private fun downloadAllFiles() {
         // RootSharedFile can either be a folder or a single file
         trackPublicShareActionEvent(MatomoName.DownloadAllFiles)
-        publicShareViewModel.rootSharedFile.value?.let { file -> requireContext().downloadFile(drivePermissions, file) }
+        publicShareViewModel.rootSharedFile.value?.let { file -> requireContext().downloadFile(downloadPermissions, file) }
     }
 
     private fun onDriveAndFolderSelected(data: Intent?) {

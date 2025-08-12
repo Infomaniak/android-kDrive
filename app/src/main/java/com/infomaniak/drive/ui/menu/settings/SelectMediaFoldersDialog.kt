@@ -71,10 +71,10 @@ class SelectMediaFoldersDialog : FullScreenBottomSheetDialog(), NoItemsLayoutVie
             mediaFolderList.addItemDecoration(DividerItemDecorator(it))
         }
 
-        val drivePermissions = DrivePermissions().apply {
+        val syncPermissions = DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).apply {
             registerPermissions(this@SelectMediaFoldersDialog) { authorized -> if (authorized) loadFolders() else dismiss() }
         }
-        if (drivePermissions.checkWriteStoragePermission()) loadFolders()
+        if (syncPermissions.hasNeededPermissions(requestIfNotGranted = true)) loadFolders()
     }
 
     private fun loadFolders() = with(binding) {
