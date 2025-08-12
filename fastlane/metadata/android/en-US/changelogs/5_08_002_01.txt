@@ -1,0 +1,3 @@
+- Fine grained permission requests
+- Manage deeplink to Trash folder
+- Add data management, Matomo and Sentry screens

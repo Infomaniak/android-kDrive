@@ -1,0 +1,3 @@
+- Demandes de permissions plus précises
+- Gestion des liens profonds vers le dossier Corbeille
+- Ajout d'écrans de gestion des données, Matomo et Sentry
