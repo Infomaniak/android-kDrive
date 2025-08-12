@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.addFiles
 
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -67,6 +68,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -88,8 +90,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
         backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
-        it.whenResultIsOk { onCaptureMediaResult() }
-        dismiss()
+        if (it.resultCode == Activity.RESULT_OK) onCaptureMediaResult() else dismiss()
     }
 
     private val scanFlowResultLauncher = registerForActivityResult(StartActivityForResult()) { activityResult ->
@@ -228,30 +229,31 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun onCaptureMediaResult() {
+    private fun onCaptureMediaResult(): Job = lifecycleScope.launch(Dispatchers.IO) {
         try {
             val file = IOFile(mediaPhotoPath).takeIf { it.length() != 0L } ?: IOFile(mediaVideoPath)
             val fileModifiedAt = Date(file.lastModified())
             val applicationContext = context?.applicationContext
-            lifecycleScope.launch(Dispatchers.IO) {
-                val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
-                UploadFile(
-                    uri = cacheUri.toString(),
-                    driveId = currentFolderFile.driveId,
-                    fileCreatedAt = fileModifiedAt,
-                    fileModifiedAt = fileModifiedAt,
-                    fileName = file.name,
-                    fileSize = file.length(),
-                    remoteFolder = currentFolderFile.id,
-                    type = UploadFile.Type.UPLOAD.name,
-                    userId = currentUserId,
-                ).store()
-                applicationContext?.syncImmediately()
-                file.delete()
-            }
+            val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
+            UploadFile(
+                uri = cacheUri.toString(),
+                driveId = currentFolderFile.driveId,
+                fileCreatedAt = fileModifiedAt,
+                fileModifiedAt = fileModifiedAt,
+                fileName = file.name,
+                fileSize = file.length(),
+                remoteFolder = currentFolderFile.id,
+                type = UploadFile.Type.UPLOAD.name,
+                userId = currentUserId,
+            ).store()
+            applicationContext?.syncImmediately()
+            file.delete()
         } catch (exception: Exception) {
             exception.printStackTrace()
             showSnackbar(R.string.errorDeviceStorage, showAboveFab = true)
+        }
+        Dispatchers.Main {
+            dismiss()
         }
     }
 
