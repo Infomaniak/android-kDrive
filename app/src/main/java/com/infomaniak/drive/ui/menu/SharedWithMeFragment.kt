@@ -82,16 +82,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             lifecycleScope.launchWhenResumed {
                 with(requireActivity() as SelectFolderActivity) {
                     showSaveButton()
-                    val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
-                    val fromSaveExternal = if (navigationArgs.fromSaveExternal) {
-                        true
-                    } else {
-                        userDrive?.driveId == AccountUtils.currentDriveId
-                    }
-                    val enable = folderId != selectFolderViewModel.disableSelectedFolderId
-                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
-                            && fromSaveExternal
-                    enableSaveButton(enable)
+                    enableSaveButton(canShowButton())
                 }
             }
         }
@@ -126,6 +117,18 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         }
 
         setupBasicMultiSelectLayout()
+    }
+
+    private fun canShowButton(): Boolean {
+        val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+        val fromSaveExternal = if (navigationArgs.fromSaveExternal) {
+            true
+        } else {
+            userDrive?.driveId == AccountUtils.currentDriveId
+        }
+        return folderId != selectFolderViewModel.disableSelectedFolderId
+                && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
+                && fromSaveExternal
     }
 
     private fun openMaintenanceDialog(driveName: String) {
