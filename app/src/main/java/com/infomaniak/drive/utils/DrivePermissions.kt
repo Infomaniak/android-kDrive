@@ -55,7 +55,6 @@ class DrivePermissions(private val type: Type) {
     private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
 
-
     private val requiredPermissions = permissionsFor(type, includeOptionals = false).toTypedArray()
     private val permissionsToAsk = permissionsFor(type, includeOptionals = true).toTypedArray()
 
