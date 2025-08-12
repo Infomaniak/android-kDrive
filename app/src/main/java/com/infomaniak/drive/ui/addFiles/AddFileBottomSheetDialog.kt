@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.addFiles
 
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -89,7 +90,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
         backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
-        it.whenResultIsOk { onCaptureMediaResult() }
+        if (it.resultCode == Activity.RESULT_OK) onCaptureMediaResult() else dismiss()
     }
 
     private val scanFlowResultLauncher = registerForActivityResult(StartActivityForResult()) { activityResult ->
