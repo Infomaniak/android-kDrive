@@ -51,6 +51,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSele
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
+import com.infomaniak.drive.utils.NotificationPermission
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.downloadAsOfflineFiles
@@ -68,6 +69,8 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
     protected var multiSelectLayout: MultiSelectLayoutBinding? = null
     private var multiSelectToolbar: CollapsingToolbarLayout? = null
     private var swipeRefresh: SwipeRefreshLayout? = null
+
+    private val notificationPermission by lazy { NotificationPermission() }
 
     protected abstract val userDrive: UserDrive?
 
@@ -94,9 +97,12 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
     abstract fun initSwipeRefreshLayout(): SwipeRefreshLayout?
     abstract fun getAllSelectedFilesCount(): Int?
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        notificationPermission.registerPermission(this)
+    }
 
-        mainViewModel.notificationPermission.registerPermission(this)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         multiSelectLayout = initMultiSelectLayout()
         multiSelectToolbar = initMultiSelectToolbar()
@@ -108,6 +114,13 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         }
 
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        multiSelectLayout = null
+        multiSelectToolbar = null
+        swipeRefresh = null
     }
 
     fun openMultiSelect() {
@@ -340,7 +353,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         mediator: MediatorLiveData<MultiSelectMediatorState>,
     ) {
         if (folderId != null) {
-            mainViewModel.notificationPermission.checkNotificationPermission(requestPermission = true)
+            notificationPermission.checkNotificationPermission(requestPermission = true)
             mediator.addSource(
                 downloadAsOfflineFiles(
                     context = requireContext(),
