@@ -36,6 +36,7 @@ import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
+import com.infomaniak.core.cancellable
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -195,7 +196,7 @@ class MainViewModel(
     fun loadRootFiles() {
         rootFilesJob.cancel()
         rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
-            if (hasNetwork) {
+            if (hasNetwork) runCatching {
                 FolderFilesProvider.getFiles(
                     FolderFilesProvider.FolderFilesProviderArgs(
                         folderId = Utils.ROOT_ID,
@@ -205,7 +206,9 @@ class MainViewModel(
                         userDrive = UserDrive(),
                     )
                 )
-            }
+            }.cancellable().onFailure { t ->
+                SentryLog.e(TAG, "recursiveDownload failed", t)
+            }.getOrNull()
         }
     }
 
@@ -641,6 +644,8 @@ class MainViewModel(
     )
 
     companion object {
+        const val TAG = "MainViewModel"
+
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
     }
