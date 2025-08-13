@@ -155,9 +155,12 @@ class MainViewModel(
 
     private fun getContext() = getApplication<MainApplication>()
 
-    fun updateParentDetails(parentId: Int) {
+    fun getFileWithDetailsById(parentId: Int, userDrive: UserDrive? = null, callback: (File?) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            FileController.getFileDetails(parentId)
+            val updatedFileDetails = FileController.getFileDetails(parentId, userDrive ?: UserDrive())
+            withContext(Dispatchers.Main) {
+                callback(updatedFileDetails)
+            }
         }
     }
 

@@ -590,11 +590,10 @@ open class FileListFragment : MultiSelectFragment(
         activitiesRefreshTimer.cancel()
         isLoadingActivities = true
         mainViewModel.currentFolder.value?.let { localCurrentFolder ->
-            mainViewModel.updateParentDetails(localCurrentFolder.id)
-            FileController.getFileById(localCurrentFolder.id, userDrive)?.let { updatedFolder ->
-                downloadFolderActivities(updatedFolder)
+            mainViewModel.getFileWithDetailsById(localCurrentFolder.id, userDrive) { updatedFolder ->
+                updatedFolder?.let { downloadFolderActivities(updatedFolder) }
                 activitiesRefreshTimer.start()
-            } ?: run { activitiesRefreshTimer.start() }
+            }
         } ?: run { activitiesRefreshTimer.start() }
     }
 
