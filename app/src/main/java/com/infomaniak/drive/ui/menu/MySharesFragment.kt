@@ -19,15 +19,11 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
-import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -44,8 +40,6 @@ class MySharesFragment : FileSubTypeListFragment() {
     override val noItemsRootIcon = R.drawable.ic_share
     override val noItemsRootTitle = R.string.mySharesNoFile
 
-    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
-
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -53,17 +47,7 @@ class MySharesFragment : FileSubTypeListFragment() {
         super.onViewCreated(view, savedInstanceState)
         setToolbarTitle(R.string.mySharesTitle)
         setupAdapter()
-        if (requireActivity() is SelectFolderActivity) {
-            lifecycleScope.launchWhenResumed {
-                with(requireActivity() as SelectFolderActivity) {
-                    showSaveButton()
-                    val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
-                    val enable = folderId != selectFolderViewModel.disableSelectedFolderId
-                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
-                    enableSaveButton(enable)
-                }
-            }
-        }
+        setupSaveButton()
     }
 
     private fun initParams() {
