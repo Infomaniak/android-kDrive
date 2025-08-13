@@ -91,7 +91,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
-import kotlin.onFailure
 
 class MainViewModel(
     appContext: Application,
