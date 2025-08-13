@@ -590,8 +590,8 @@ open class FileListFragment : MultiSelectFragment(
         activitiesRefreshTimer.cancel()
         isLoadingActivities = true
         mainViewModel.currentFolder.value?.let { localCurrentFolder ->
-            mainViewModel.getFileWithDetailsById(localCurrentFolder.id, userDrive) { updatedFolder ->
-                updatedFolder?.let { downloadFolderActivities(updatedFolder) }
+            viewLifecycleOwner.lifecycleScope.launch {
+                mainViewModel.getFileWithDetailsById(localCurrentFolder.id, userDrive)?.let { downloadFolderActivities(it) }
                 activitiesRefreshTimer.start()
             }
         } ?: run { activitiesRefreshTimer.start() }

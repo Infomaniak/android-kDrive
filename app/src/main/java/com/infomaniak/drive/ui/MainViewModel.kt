@@ -155,13 +155,12 @@ class MainViewModel(
 
     private fun getContext() = getApplication<MainApplication>()
 
-    fun getFileWithDetailsById(parentId: Int, userDrive: UserDrive? = null, callback: (File?) -> Unit) {
+    suspend fun getFileWithDetailsById(parentId: Int, userDrive: UserDrive? = null): File? {
+        var file: File? = null
         viewModelScope.launch(Dispatchers.IO) {
-            val updatedFileDetails = FileController.getFileDetails(parentId, userDrive ?: UserDrive())
-            withContext(Dispatchers.Main) {
-                callback(updatedFileDetails)
-            }
-        }
+            file = FileController.getFileDetails(parentId, userDrive ?: UserDrive())
+        }.join()
+        return file
     }
 
     fun setCurrentFolder(folder: File?) {
