@@ -54,26 +54,26 @@ object FolderFilesProvider {
 
     fun getFiles(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
         val realm = folderFilesProviderArgs.realm ?: FileController.getRealmInstance(folderFilesProviderArgs.userDrive)
+        try {
+            val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
+            val sourceRestrictionType = folderFilesProviderArgs.sourceRestrictionType
+            val needToLoadFromRemote = needToLoadFromRemote(sourceRestrictionType, folderProxy)
 
-        val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
-        val sourceRestrictionType = folderFilesProviderArgs.sourceRestrictionType
-        val needToLoadFromRemote = needToLoadFromRemote(sourceRestrictionType, folderProxy)
-
-        val files = when {
-            needToLoadFromRemote && sourceRestrictionType != SourceRestrictionType.ONLY_FROM_LOCAL -> {
-                loadFromRemote(realm, folderProxy, folderFilesProviderArgs)
+            val files = when {
+                needToLoadFromRemote && sourceRestrictionType != SourceRestrictionType.ONLY_FROM_LOCAL -> {
+                    loadFromRemote(realm, folderProxy, folderFilesProviderArgs)
+                }
+                folderFilesProviderArgs.isFirstPage -> {
+                    loadFromLocal(realm, folderProxy, folderFilesProviderArgs.withChildren, folderFilesProviderArgs.order)
+                }
+                else -> {
+                    null
+                }
             }
-            folderFilesProviderArgs.isFirstPage -> {
-                loadFromLocal(realm, folderProxy, folderFilesProviderArgs.withChildren, folderFilesProviderArgs.order)
-            }
-            else -> {
-                null
-            }
+            return files
+        } finally {
+            if (folderFilesProviderArgs.realm == null) realm.close()
         }
-
-        if (folderFilesProviderArgs.realm == null) realm.close()
-
-        return files
     }
 
     fun loadSharedWithMeFiles(
