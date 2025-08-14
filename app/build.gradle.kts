@@ -182,6 +182,7 @@ dependencies {
     implementation(project(":Core:Legacy:BugTracker"))
     implementation(project(":Core:Legacy:Stores"))
     implementation(project(":Core:Matomo"))
+    implementation(project(":Core:kSuite"))
     implementation(project(":Core:kSuite:kSuitePro"))
     implementation(project(":Core:kSuite:MyKSuite"))
     implementation(project(":Core:Network"))
