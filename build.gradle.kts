@@ -31,7 +31,7 @@ plugins {
 }
 
 ktlint {
-    version.set("1.6.0")
+    version.set("1.7.1")
     android.set(true)
     ignoreFailures.set(false)
     reporters {
