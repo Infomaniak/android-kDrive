@@ -1,4 +1,3 @@
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
@@ -27,7 +26,6 @@ plugins {
     alias(core.plugins.dagger.hilt) apply false
     alias(core.plugins.ksp) apply false
     alias(core.plugins.navigation.safeargs) apply false
-    alias(libs.plugins.ktlint) version "12.3.0"
     alias(libs.plugins.ktlint) version "13.0.0"
 }
 
