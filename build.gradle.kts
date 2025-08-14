@@ -1,4 +1,3 @@
-import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
@@ -21,22 +20,14 @@ buildscript {
 }
 
 plugins {
-    alias(libs.plugins.sentry) version "5.5.0" apply false
-    alias(core.plugins.ksp) version "2.1.21-2.0.1" apply false
     val kotlinVersion = "2.1.21"
-    alias(libs.plugins.kotlin.serialization) version kotlinVersion apply false
     alias(core.plugins.compose.compiler) version kotlinVersion apply false
     alias(core.plugins.kotlin.android) version kotlinVersion apply false
-    alias(libs.plugins.ktlint) version "13.0.0"
-}
+    alias(core.plugins.ksp) version "2.1.21-2.0.1" apply false
+    alias(core.plugins.ktlint) version "13.0.0"
 
-ktlint {
-    version.set("1.7.1")
-    android.set(true)
-    ignoreFailures.set(false)
-    reporters {
-        reporter(ReporterType.PLAIN)
-    }
+    alias(libs.plugins.kotlin.serialization) version kotlinVersion apply false
+    alias(libs.plugins.sentry) version "5.5.0" apply false
 }
 
 subprojects {
