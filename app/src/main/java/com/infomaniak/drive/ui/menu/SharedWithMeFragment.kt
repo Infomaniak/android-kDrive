@@ -60,12 +60,15 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val isRoot = folderId == ROOT_ID
         mainViewModel.setCurrentFolder(null)
-        userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = true).also {
-            mainViewModel.loadCurrentFolder(
-                folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderId,
-                userDrive = it,
-            )
-        }
+        userDrive =
+            UserDrive(userId = navigationArgs.userDrive!!.userId, driveId = navigationArgs.driveId, sharedWithMe = true).also {
+                mainViewModel.loadCurrentFolder(
+                    folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderId,
+                    userDrive = it,
+                )
+            }
+
+        sharedWithMeViewModel.sharedWithMeRealm = FileController.getRealmInstance(userDrive)
 
         downloadFiles = DownloadFiles()
 
@@ -96,7 +99,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                     // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
                     // maintenance check on the folder type but we don't know if this is necessary
                     file.isFolder() -> {
-                        DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
+                        DriveInfosController.getDrive(navigationArgs.userDrive!!.userId, file.driveId)?.let { currentDrive ->
                             if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
                         }
                     }
@@ -144,7 +147,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 folderId = id,
                 folderName = name,
                 driveId = driveId,
-                fromSaveExternal = navigationArgs.fromSaveExternal
+                fromSaveExternal = navigationArgs.fromSaveExternal,
+                userDrive = userDrive,
             )
         )
     }

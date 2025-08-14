@@ -100,7 +100,8 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
             folderLayout = binding.rootFolderLayout,
             favoritesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToFavoritesFragment(userDrive),
             sharedWithMeNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment(
-                fromSaveExternal = navigationArgs.fromSaveExternal
+                fromSaveExternal = navigationArgs.fromSaveExternal,
+                userDrive = userDrive,
             ),
             mySharesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment(userDrive)
         )

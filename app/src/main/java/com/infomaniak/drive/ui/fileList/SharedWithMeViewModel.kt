@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 
 class SharedWithMeViewModel : ViewModel() {
 
-    val sharedWithMeRealm = FileController.getRealmInstance(UserDrive(sharedWithMe = true))
+    var sharedWithMeRealm = FileController.getRealmInstance(UserDrive(sharedWithMe = true))
 
     private var sharedWithMeJob: Job? = null
 
