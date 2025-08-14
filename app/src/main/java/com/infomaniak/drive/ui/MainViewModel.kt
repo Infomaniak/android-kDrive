@@ -65,7 +65,6 @@ import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
-import com.infomaniak.drive.utils.NotificationPermission
 import com.infomaniak.drive.utils.SyncOfflineUtils
 import com.infomaniak.drive.utils.SyncUtils.isSyncScheduled
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -135,8 +134,6 @@ class MainViewModel(
     var ignoreSyncOffline = false
 
     var uploadFilesHelper: UploadFilesHelper? = null
-
-    val notificationPermission by lazy { NotificationPermission() }
 
     private var rootFilesJob: Job = Job()
     private var getFileDetailsJob = Job()
