@@ -27,7 +27,7 @@ plugins {
     alias(core.plugins.dagger.hilt) apply false
     alias(core.plugins.ksp) apply false
     alias(core.plugins.navigation.safeargs) apply false
-    id("org.jlleitschuh.gradle.ktlint") version "12.3.0"
+    alias(libs.plugins.ktlint) version "12.3.0"
 }
 
 ktlint {
