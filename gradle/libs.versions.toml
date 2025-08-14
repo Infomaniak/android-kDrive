@@ -72,6 +72,7 @@ kotlin-android = { id = "kotlin-android" }
 kotlin-kapt = { id = "kotlin-kapt" }
 kotlin-parcelize = { id = "kotlin-parcelize" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint" }
 navigation-safeargs = { id = "androidx.navigation.safeargs.kotlin" }
 realm-android = { id = "realm-android" }
 sentry = { id = "io.sentry.android.gradle" }
