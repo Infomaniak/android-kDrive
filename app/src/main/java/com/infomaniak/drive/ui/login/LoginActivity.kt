@@ -35,6 +35,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.cancellable
+import com.infomaniak.core.crossapplogin.back.CrossAppLoginCommon.LoginResult
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.launchInOnLifecycle
 import com.infomaniak.core.observe
@@ -56,7 +57,6 @@ import com.infomaniak.drive.extensions.selectedPagePosition
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog.Companion.ON_ANOTHER_ACCOUNT_CLICKED_KEY
-import com.infomaniak.drive.ui.login.CrossAppLoginViewModel.LoginResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
