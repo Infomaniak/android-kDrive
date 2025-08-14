@@ -109,10 +109,11 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiWithCursor(url, GET)
     }
 
-    fun getSharedWithMeFiles(order: SortType, cursor: String?): CursorApiResponse<List<File>> {
+    fun getSharedWithMeFiles(okHttpClient: OkHttpClient, order: SortType, cursor: String?): CursorApiResponse<List<File>> {
         return callApiWithCursor(
             url = "${ApiRoutes.getSharedWithMeFiles(order)}&${loadCursor(cursor)}",
-            method = GET
+            method = GET,
+            okHttpClient = okHttpClient,
         )
     }
 

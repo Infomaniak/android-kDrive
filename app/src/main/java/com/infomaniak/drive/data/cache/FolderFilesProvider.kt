@@ -107,7 +107,11 @@ object FolderFilesProvider {
     ) {
         val folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderFilesProviderArgs.folderId
         val apiResponse = if (isRoot) {
-            ApiRepository.getSharedWithMeFiles(order = folderFilesProviderArgs.order, cursor = cursor)
+            ApiRepository.getSharedWithMeFiles(
+                okHttpClient = okHttpClient,
+                order = folderFilesProviderArgs.order,
+                cursor = cursor
+            )
         } else {
             ApiRepository.getFolderFiles(
                 okHttpClient = okHttpClient,
@@ -254,6 +258,7 @@ object FolderFilesProvider {
         val apiResponse = when {
             folderFilesProviderArgs.folderId == ROOT_ID && userDrive.sharedWithMe -> {
                 ApiRepository.getSharedWithMeFiles(
+                    okHttpClient = okHttpClient,
                     order = folderFilesProviderArgs.order,
                     cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
                 )
