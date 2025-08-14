@@ -27,7 +27,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) version kotlinVersion apply false
     alias(core.plugins.compose.compiler) version kotlinVersion apply false
     alias(core.plugins.kotlin.android) version kotlinVersion apply false
-    alias(libs.plugins.ktlint) version "12.3.0"
+    alias(libs.plugins.ktlint) version "13.0.0"
 }
 
 ktlint {
