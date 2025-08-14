@@ -21,7 +21,7 @@ jobs:
         java-version: 11
 
     - name: Install ktlint
-      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.6.0/ktlint && chmod a+x ktlint
+      run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.7.1/ktlint && chmod a+x ktlint
 
     - name: Run ktlint
       run: ./ktlint --baseline ktlint_baseline.xml
