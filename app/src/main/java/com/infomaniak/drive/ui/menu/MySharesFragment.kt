@@ -20,9 +20,11 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
@@ -40,6 +42,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     override val noItemsRootIcon = R.drawable.ic_share
     override val noItemsRootTitle = R.string.mySharesNoFile
 
+    private val navigationArgs by navArgs<MySharesFragmentArgs>()
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -62,6 +65,7 @@ class MySharesFragment : FileSubTypeListFragment() {
             fileListViewModel.cancelDownloadFiles()
             if (file.isFolder()) safeNavigate(
                 MySharesFragmentDirections.actionMySharesFragmentSelf(
+                    userDrive = navigationArgs.userDrive,
                     file.id,
                     file.name
                 )
@@ -88,14 +92,14 @@ class MySharesFragment : FileSubTypeListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            fileListViewModel.getMySharedFiles(fileListViewModel.sortType).observe(viewLifecycleOwner) {
+            fileListViewModel.getMySharedFiles(fileListViewModel.sortType, navigationArgs.userDrive ?: UserDrive()).observe(viewLifecycleOwner) {
                 // forceClean because myShares is not paginated
                 populateFileList(
                     files = it?.first ?: ArrayList(),
                     folderId = FileController.MY_SHARES_FILE_ID,
                     forceClean = true,
                     isComplete = true,
-                    realm = mainViewModel.realm,
+                    realm = FileController.getRealmInstance(navigationArgs.userDrive),
                     isNewSort = isNewSort
                 )
             }
