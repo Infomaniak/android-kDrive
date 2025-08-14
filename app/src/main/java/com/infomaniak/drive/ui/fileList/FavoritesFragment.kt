@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -32,6 +33,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.safeNavigate
+import kotlin.getValue
 
 class FavoritesFragment : FileListFragment() {
 
@@ -40,6 +42,8 @@ class FavoritesFragment : FileListFragment() {
 
     override val noItemsRootIcon = R.drawable.ic_star_filled
     override val noItemsRootTitle = R.string.favoritesNoFile
+
+    private val navigationArgs by navArgs<FavoritesFragmentArgs>()
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
@@ -77,7 +81,7 @@ class FavoritesFragment : FileListFragment() {
 
     private fun File.openFavoriteFolder() {
         fileListViewModel.cancelDownloadFiles()
-        safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(id, name))
+        safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(navigationArgs.userDrive,id, name,))
     }
 
     private fun setupMultiSelectLayout() {
@@ -126,7 +130,7 @@ class FavoritesFragment : FileListFragment() {
                             isFavorite = true,
                             order = fileListViewModel.sortType,
                             parentId = FileController.FAVORITES_FILE_ID,
-                            realm = mainViewModel.realm,
+                            realm = FileController.getRealmInstance(navigationArgs.userDrive),
                             withVisibilitySort = false
                         )
                         fileAdapter.updateFileList(realmFiles)

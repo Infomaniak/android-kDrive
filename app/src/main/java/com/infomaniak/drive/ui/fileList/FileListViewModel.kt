@@ -228,11 +228,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getMySharedFiles(sortType: SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
+    fun getMySharedFiles(sortType: SortType, userDrive: UserDrive): LiveData<Pair<ArrayList<File>, Boolean>?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            FileController.getMySharedFiles(UserDrive(), sortType, transaction = { files, isComplete ->
+            FileController.getMySharedFiles(userDrive, sortType, transaction = { files, isComplete ->
                 runBlocking { emit(files to isComplete) }
             })
         }
