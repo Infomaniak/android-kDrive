@@ -33,7 +33,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.safeNavigate
-import kotlin.getValue
 
 class FavoritesFragment : FileListFragment() {
 
@@ -81,7 +80,7 @@ class FavoritesFragment : FileListFragment() {
 
     private fun File.openFavoriteFolder() {
         fileListViewModel.cancelDownloadFiles()
-        safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(navigationArgs.userDrive,id, name,))
+        safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(navigationArgs.userDrive, id, name))
     }
 
     private fun setupMultiSelectLayout() {
@@ -123,7 +122,11 @@ class FavoritesFragment : FileListFragment() {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
-            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType, isNewSort).observe(viewLifecycleOwner) {
+            fileListViewModel.getFavoriteFiles(
+                order = fileListViewModel.sortType,
+                isNewSort = isNewSort,
+                userDrive = navigationArgs.userDrive!!
+            ).observe(viewLifecycleOwner) {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.isFirstPage || isNewSort) {
                         val realmFiles = FileController.getRealmLiveFiles(
