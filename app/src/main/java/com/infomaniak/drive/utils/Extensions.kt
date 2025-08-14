@@ -417,7 +417,7 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 
 fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
-const val loginUrl = "https://login.infomaniak.com/"
+private const val loginUrl = "https://login.infomaniak.com/"
 
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
