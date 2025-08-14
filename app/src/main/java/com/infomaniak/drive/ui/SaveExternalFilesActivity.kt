@@ -279,7 +279,6 @@ class SaveExternalFilesActivity : BaseActivity() {
                     fileId = folderId,
                     userDrive = UserDrive(
                         userId = selectedUserId.value!!,
-                        driveId = driveIdSharedWithMe!!,
                         sharedWithMe = true,
                     )
                 )
