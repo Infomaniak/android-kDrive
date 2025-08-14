@@ -47,9 +47,17 @@ class DriveMigration : RealmMigration {
                 addRealmObjectField("_quotas", driveQuotasSchema)
             }
         }
+
+        // Migrated to version 2
+        if (oldVersion < 2L) {
+
+            schema["Drive"]?.apply {
+                renameField("accountAdmin", "isAdmin")
+            }
+        }
     }
 
     companion object {
-        const val DB_VERSION = 1L // Must be bumped when the schema changes
+        const val DB_VERSION = 2L // Must be bumped when the schema changes
     }
 }

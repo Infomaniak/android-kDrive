@@ -52,7 +52,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
                 progressIndicator.progress = (storagePercentage).toInt()
                 title.text = "$usedStorage / $totalStorage"
 
-                if (isSingleUserDrive) {
+                if (isAdmin) {
                     description.setText(R.string.notEnoughStorageDescription1)
                     upgradeOffer.isVisible = true
                     upgradeOffer.setOnClickListener {

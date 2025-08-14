@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteDataManager
 import com.infomaniak.drive.data.api.ApiRepository
@@ -38,8 +39,8 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
         MyKSuiteDataUtils.requestKSuiteData()
 
         // Don't try to fetch the my kSuite Data if the user doesn't have a my kSuite offer
-        val currentDrive = AccountUtils.getCurrentDrive()
-        if (currentDrive?.isMyKSuitePack != true && currentDrive?.isMyKSuitePlusPack != true) return@runCatching null
+        val kSuite = AccountUtils.getCurrentDrive()?.kSuite
+        if (kSuite != KSuite.PersoFree && kSuite != KSuite.PersoPlus) return@runCatching null
 
         val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClient)
         if (apiResponse.data != null) {
