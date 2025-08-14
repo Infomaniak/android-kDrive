@@ -43,7 +43,6 @@ import com.infomaniak.drive.ui.home.RootFileTreeCategory.PersonalFolder
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.RecentChanges
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.SharedWithMe
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.Trash
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.observeNavigateFileListTo
@@ -88,7 +87,7 @@ class RootFilesFragment : BaseRootFolderFragment() {
 
         setupItems(
             folderLayout = binding.rootFolderLayout,
-            sharedWithMeNav = RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(),
+            sharedWithMeNav = RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(UserDrive()),
             favoritesNav = RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(UserDrive()),
             mySharesNav = RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(UserDrive()),
             recentChangesNav = RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment(),
@@ -136,7 +135,7 @@ class RootFilesFragment : BaseRootFolderFragment() {
                 }
                 Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(UserDrive()))
                 RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
-                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
+                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(UserDrive()))
                 MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(UserDrive()))
                 Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
                 Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
