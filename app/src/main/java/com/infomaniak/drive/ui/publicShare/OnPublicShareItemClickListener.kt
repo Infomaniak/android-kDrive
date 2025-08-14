@@ -136,7 +136,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     override fun onDeleteFile(onApiResponse: () -> Unit) = Unit
     override fun onLeaveShare(onApiResponse: () -> Unit) = Unit
     override fun onDuplicateFile(destinationFolder: File) = Unit
-    override fun onMoveFile(destinationFolder: File) = Unit
+    override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) = Unit
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
     override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) = Unit
 }

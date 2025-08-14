@@ -286,6 +286,10 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
+        <argument
+            android:name="userDrive"
+            app:nullable="true"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_favoritesFragment_self"
             app:destination="@id/favoritesFragment" />
@@ -386,6 +390,14 @@
             android:name="disabledFolderId"
             android:defaultValue="-1"
             app:argType="integer" />
+        <argument
+            android:name="fromSaveExternal"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="isSharedWithMe"
+            android:defaultValue="false"
+            app:argType="boolean" />
         <argument
             android:name="customArgs"
             android:defaultValue="@null"
@@ -853,6 +865,14 @@
             android:name="driveId"
             android:defaultValue="0"
             app:argType="integer" />
+        <argument
+            android:name="fromSaveExternal"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="userDrive"
+            app:nullable="true"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_sharedWithMeFragment_to_sortFilesBottomSheetDialog"
             app:destination="@id/sortFilesBottomSheetDialog" />
@@ -874,6 +894,10 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
+        <argument
+            android:name="userDrive"
+            app:nullable="true"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_mySharesFragment_self"
             app:destination="@id/mySharesFragment" />
