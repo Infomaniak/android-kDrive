@@ -34,11 +34,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.launchInOnLifecycle
-import com.infomaniak.core.crossapplogin.back.DerivedTokenGenerator.Issue
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
+import com.infomaniak.core.launchInOnLifecycle
 import com.infomaniak.core.observe
 import com.infomaniak.core.utils.awaitOneClick
 import com.infomaniak.drive.BuildConfig
@@ -221,7 +219,16 @@ class LoginActivity : AppCompatActivity() {
                 binding.signUpButton.isEnabled = false
                 openLoginWebView()
             } else {
-                attemptLogin(selectedAccounts = accountsToLogin)
+                val loginResult = crossAppLoginViewModel.attemptLogin(selectedAccounts = accountsToLogin)
+
+                with(loginResult) {
+                    tokens.forEachIndexed { index, token ->
+                        authenticateUser(token, infomaniakLogin, withRedirection = index == tokens.lastIndex)
+                    }
+
+                    errorMessageIds.forEach { errorId -> showError(getString(errorId)) }
+                }
+
                 delay(1_000L) // Add some delay so the button won't blink back into its original color before leaving the Activity
             }
         }
@@ -276,62 +283,6 @@ class LoginActivity : AppCompatActivity() {
             )
             if (result.containsKey(ON_ANOTHER_ACCOUNT_CLICKED_KEY)) return
         }
-    }
-
-    private suspend fun attemptLogin(selectedAccounts: List<ExternalAccount>) {
-
-        suspend fun authenticateToken(token: ApiToken, withRedirection: Boolean) {
-            authenticateUser(token, infomaniakLogin, withRedirection)
-        }
-
-        val tokenGenerator = crossAppLoginViewModel.derivedTokenGenerator
-
-        if (selectedAccounts.isEmpty()) return
-
-        val tokens = selectedAccounts.mapNotNull { account ->
-            when (val result = tokenGenerator.attemptDerivingOneOfTheseTokens(account.tokens)) {
-                is Xor.First -> {
-                    SentryLog.i(TAG, "Succeeded to derive token for account: ${account.id}")
-                    result.value
-                }
-                is Xor.Second -> {
-                    handleTokenDerivationIssue(account, issue = result.value)
-                    null
-                }
-            }
-        }
-
-        tokens.forEachIndexed { index, token ->
-            authenticateToken(token, withRedirection = index == tokens.lastIndex)
-        }
-    }
-
-    private suspend fun handleTokenDerivationIssue(account: ExternalAccount, issue: Issue) {
-        val shouldReport: Boolean
-        val errorId = when (issue) {
-            is Issue.AppIntegrityCheckFailed -> {
-                shouldReport = false
-                R.string.anErrorHasOccurred
-            }
-            is Issue.ErrorResponse -> {
-                shouldReport = issue.httpStatusCode !in 500..599
-                R.string.anErrorHasOccurred
-            }
-            is Issue.NetworkIssue -> {
-                shouldReport = false
-                R.string.connectionError
-            }
-            is Issue.OtherIssue -> {
-                shouldReport = true
-                R.string.anErrorHasOccurred
-            }
-        }
-        val errorMessage = "Failed to derive token for account ${account.id}, with reason: $issue"
-        when (shouldReport) {
-            true -> SentryLog.e(TAG, errorMessage)
-            false -> SentryLog.i(TAG, errorMessage)
-        }
-        Dispatchers.Main { showError(getString(errorId)) }
     }
 
     private fun openLoginWebView() {
