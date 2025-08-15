@@ -18,7 +18,9 @@
 package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.drive.data.models.DriveUser
+import com.infomaniak.drive.data.models.drive.DrivePack.DrivePackType
 import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
 import io.realm.RealmList
 import io.realm.RealmObject
@@ -33,7 +35,7 @@ open class Drive(
      * User data
      */
     @SerializedName("account_admin")
-    var accountAdmin: Boolean = false,
+    var isAdmin: Boolean = false, // Used to know if the user is the kSuite admin, or not.
     @SerializedName("rights")
     private var _rights: DriveRights? = DriveRights(),
     var name: String = "",
@@ -105,14 +107,18 @@ open class Drive(
     val role: DriveUser.Role?
         get() = enumValueOfOrNull<DriveUser.Role>(_role)
 
-    // Old offer pack, now replaced by My kSuite
-    inline val isFreePack get() = pack?.type == DrivePack.DrivePackType.FREE
-    // Old offer pack, now replaced by My kSuite Plus
-    inline val isSoloPack get() = pack?.type == DrivePack.DrivePackType.SOLO
-    inline val isMyKSuitePack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE
-    inline val isMyKSuitePlusPack get() = pack?.type == DrivePack.DrivePackType.MY_KSUITE_PLUS
-    inline val isFreeTier get() = isFreePack || isMyKSuitePack
-    inline val isSingleUserDrive get() = isFreeTier || isMyKSuitePlusPack || isSoloPack
+    inline val isFreeTier get() = pack?.type == DrivePackType.FREE || kSuite == KSuite.PersoFree || kSuite == KSuite.ProFree
+
+    inline val kSuite: KSuite?
+        get() = when (pack?.type) {
+            DrivePackType.KSUITE_ENTREPRISE -> KSuite.ProEnterprise
+            DrivePackType.KSUITE_PRO -> KSuite.ProBusiness
+            DrivePackType.KSUITE_STANDARD -> KSuite.ProStandard
+            DrivePackType.KSUITE_ESSENTIAL -> KSuite.ProFree
+            DrivePackType.MY_KSUITE_PLUS -> KSuite.PersoPlus
+            DrivePackType.MY_KSUITE -> KSuite.PersoFree
+            else -> null // Old offers packs, will hopefully be removed someday so this `when` can return a non-nullable `KSuite`
+        }
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
