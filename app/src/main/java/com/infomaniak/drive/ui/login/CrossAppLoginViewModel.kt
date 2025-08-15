@@ -17,28 +17,9 @@
  */
 package com.infomaniak.drive.ui.login
 
-import androidx.activity.ComponentActivity
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.crossapplogin.back.CrossAppLoginCommon
-import com.infomaniak.core.crossapplogin.back.CrossAppLoginCommon.LoginResult
-import com.infomaniak.core.crossapplogin.back.ExternalAccount
+import com.infomaniak.core.crossapplogin.back.CrossAppLoginViewModel
 import com.infomaniak.drive.BuildConfig
 import kotlinx.serialization.ExperimentalSerializationApi
 
 @OptIn(ExperimentalSerializationApi::class)
-class CrossAppLoginViewModel() : ViewModel() {
-    private val crossAppLoginCommon = CrossAppLoginCommon(viewModelScope, BuildConfig.APPLICATION_ID, BuildConfig.CLIENT_ID)
-
-    val availableAccounts by crossAppLoginCommon::availableAccounts
-    val skippedAccountIds by crossAppLoginCommon::skippedAccountIds
-    val selectedAccounts by crossAppLoginCommon::selectedAccounts
-
-    suspend fun activateUpdates(hostActivity: ComponentActivity): Nothing {
-        crossAppLoginCommon.activateUpdates(hostActivity)
-    }
-
-    suspend fun attemptLogin(selectedAccounts: List<ExternalAccount>): LoginResult {
-        return crossAppLoginCommon.attemptLogin(selectedAccounts)
-    }
-}
+class CrossAppLoginViewModel() : CrossAppLoginViewModel(BuildConfig.APPLICATION_ID, BuildConfig.CLIENT_ID)

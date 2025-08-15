@@ -35,7 +35,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.crossapplogin.back.CrossAppLoginCommon.LoginResult
+import com.infomaniak.core.crossapplogin.back.CrossAppLoginViewModel.LoginResult
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.launchInOnLifecycle
 import com.infomaniak.core.observe
