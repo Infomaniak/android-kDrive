@@ -34,7 +34,9 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
+import com.infomaniak.core.auth.AuthConfiguration
 import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpdateManager
+import com.infomaniak.core.network.NetworkConfiguration
 import com.infomaniak.core.sentry.SentryConfig.configureSentry
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.data.api.ErrorCode
@@ -117,16 +119,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             }
         }
 
-        InfomaniakCore.apply {
-            init(
-                appId = BuildConfig.APPLICATION_ID,
-                appVersionCode = BuildConfig.VERSION_CODE,
-                appVersionName = BuildConfig.VERSION_NAME,
-                clientId = BuildConfig.CLIENT_ID,
-            )
-            apiErrorCodes = ErrorCode.apiErrorCodes
-            accessType = null
-        }
+        configureInfomaniakCore()
 
         AccountUtils.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
@@ -141,6 +134,34 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         MqttClientWrapper.init(applicationContext)
 
         MyKSuiteDataUtils.initDatabase(this)
+    }
+
+    private fun configureInfomaniakCore() {
+        // Legacy configuration
+        InfomaniakCore.apply {
+            init(
+                appId = BuildConfig.APPLICATION_ID,
+                appVersionCode = BuildConfig.VERSION_CODE,
+                appVersionName = BuildConfig.VERSION_NAME,
+                clientId = BuildConfig.CLIENT_ID,
+            )
+            apiErrorCodes = ErrorCode.apiErrorCodes
+            accessType = null
+        }
+
+        // New modules configuration
+        NetworkConfiguration.init(
+            appId = BuildConfig.APPLICATION_ID,
+            appVersionCode = BuildConfig.VERSION_CODE,
+            appVersionName = BuildConfig.VERSION_NAME,
+        )
+
+        AuthConfiguration.init(
+            appId = BuildConfig.APPLICATION_ID,
+            appVersionCode = BuildConfig.VERSION_CODE,
+            appVersionName = BuildConfig.VERSION_NAME,
+            clientId = BuildConfig.CLIENT_ID,
+        )
     }
 
     private fun configureDebugMode() {
