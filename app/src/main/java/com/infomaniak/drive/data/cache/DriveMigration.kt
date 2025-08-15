@@ -23,13 +23,12 @@ import io.realm.RealmMigration
 class DriveMigration : RealmMigration {
 
     override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
-        var oldVersionTemp = oldVersion
 
         // DynamicRealm exposes an editable schema
         val schema = realm.schema
 
         // Migrated to version 1
-        if (oldVersionTemp == 0L) {
+        if (oldVersion < 1L) {
 
             val driveQuotaSchema = schema.create("DriveQuota").apply {
                 addField("current", Int::class.java)
@@ -47,13 +46,10 @@ class DriveMigration : RealmMigration {
                 if (hasField("_packFunctionality")) removeField("_packFunctionality")
                 addRealmObjectField("_quotas", driveQuotasSchema)
             }
-
-            oldVersionTemp++
         }
     }
 
     companion object {
         const val DB_VERSION = 1L // Must be bumped when the schema changes
     }
-
 }

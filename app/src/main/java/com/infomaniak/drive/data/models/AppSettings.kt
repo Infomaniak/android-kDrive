@@ -119,7 +119,7 @@ open class AppSettings(
         var appLaunches: Int = getAppSettings()._appLaunchesCount
             set(value) {
                 field = value
-                scope.launch (Dispatchers.IO) {
+                scope.launch(Dispatchers.IO) {
                     updateAppSettings { appSettings -> appSettings._appLaunchesCount = value }
                 }
             }
