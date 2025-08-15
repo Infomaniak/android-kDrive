@@ -29,6 +29,8 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
+import coil.ImageLoader
+import coil.imageLoader
 import coil.load
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
@@ -60,23 +62,25 @@ import kotlinx.coroutines.withContext
 suspend fun ItemFileBinding.setFileItem(
     file: File,
     isGrid: Boolean = false,
+    imageLoader: ImageLoader = context.imageLoader,
     typeFolder: TypeFolder = TypeFolder.fileList
 ): Nothing {
-    setFileItemWithoutCategories(file = file, typeFolder = typeFolder, isGrid = isGrid)
+    setFileItemWithoutCategories(file = file, typeFolder = typeFolder, isGrid = isGrid, imageLoader)
     categoriesLayout.displayCategoriesForFile(file)
 }
 
 fun ItemFileBinding.setFileItemWithoutCategories(
     file: File,
     typeFolder: TypeFolder = TypeFolder.fileList,
-    isGrid: Boolean = false
+    isGrid: Boolean = false,
+    imageLoader: ImageLoader = context.imageLoader,
 ) {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
     displayDate(file)
     displaySize(file)
-    filePreview.displayIcon(file, isGrid, progressLayout)
+    filePreview.displayIcon(file, isGrid, progressLayout, imageLoader = imageLoader)
     iconLayout.setMargins(left = typeFolder.iconHorizontalMargin, right = typeFolder.iconHorizontalMargin)
     displayExternalImport(file, filePreview, fileProgression, fileDate)
 }
@@ -90,11 +94,11 @@ suspend fun CardviewFolderGridBinding.setFileItem(file: File, isGrid: Boolean = 
     categoriesLayout.displayCategoriesForFile(file)
 }
 
-suspend fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false): Nothing {
+suspend fun CardviewFileGridBinding.setFileItem(file: File, isGrid: Boolean = false, imageLoader: ImageLoader): Nothing {
     fileName.text = file.getDisplayName(context)
     fileFavorite.isVisible = file.isFavorite
     progressLayout.isGone = true
-    filePreview.displayIcon(file, isGrid, progressLayout, filePreview2)
+    filePreview.displayIcon(file, isGrid, progressLayout, filePreview2, imageLoader)
     categoriesLayout.displayCategoriesForFile(file)
 }
 
@@ -121,11 +125,12 @@ private fun ImageView.displayIcon(
     isGrid: Boolean,
     progressLayout: ProgressLayoutView,
     filePreview: ImageView? = null,
+    imageLoader: ImageLoader = context.imageLoader,
 ) {
     scaleType = if (isGrid) ImageView.ScaleType.FIT_CENTER else ImageView.ScaleType.CENTER
     when {
         file.isFolder() -> displayFolderIcon(file)
-        else -> displayFileIcon(file, isGrid, progressLayout, filePreview)
+        else -> displayFileIcon(file, isGrid, progressLayout, filePreview, imageLoader)
     }
 }
 
@@ -139,6 +144,7 @@ private fun ImageView.displayFileIcon(
     isGrid: Boolean,
     progressLayout: ProgressLayoutView,
     filePreview: ImageView? = null,
+    imageLoader: ImageLoader,
 ) {
     val fileType = file.getFileType()
     val isGraphic = fileType == ExtensionType.IMAGE || fileType == ExtensionType.VIDEO
@@ -146,7 +152,7 @@ private fun ImageView.displayFileIcon(
     when {
         file.hasThumbnail && (isGrid || isGraphic) -> {
             scaleType = ImageView.ScaleType.CENTER_CROP
-            loadAny(ApiRoutes.getThumbnailUrl(file), fileType.icon)
+            loadAny(ApiRoutes.getThumbnailUrl(file), fileType.icon, imageLoader)
         }
         file.isFromUploads && isGraphic -> {
             scaleType = ImageView.ScaleType.CENTER_CROP
