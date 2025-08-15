@@ -18,9 +18,9 @@
 package com.infomaniak.drive
 
 import androidx.fragment.app.Fragment
+import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.core.matomo.Matomo
 import com.infomaniak.core.matomo.Matomo.TrackerAction
-import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import org.matomo.sdk.Tracker

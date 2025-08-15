@@ -356,9 +356,9 @@
             app:argType="boolean" />
         <argument
             android:name="deepLinkType"
+            android:defaultValue="@null"
             app:argType="com.infomaniak.drive.data.models.DeepLinkType"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
     </activity>
 
     <activity
@@ -503,8 +503,8 @@
             app:destination="@id/trashedFileActionsBottomSheetDialog" />
         <argument
             android:name="subfolderId"
-            app:argType="integer"
-            android:defaultValue="-1" />
+            android:defaultValue="-1"
+            app:argType="integer" />
     </fragment>
 
     <dialog
