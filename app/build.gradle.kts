@@ -152,6 +152,7 @@ sentry {
 dependencies {
 
     implementation(project(":Core"))
+    implementation(project(":Core:Auth"))
     implementation(project(":Core:Avatar"))
     implementation(project(":Core:CrossAppLogin:Back"))
     implementation(project(":Core:CrossAppLogin:Front"))
