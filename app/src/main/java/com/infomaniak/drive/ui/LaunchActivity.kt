@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -119,7 +120,7 @@ class LaunchActivity : AppCompatActivity() {
         }.also(::startActivity)
     }
 
-    private suspend fun getDestinationClass(): Class<out AppCompatActivity> = withContext(Dispatchers.IO) {
+    private suspend fun getDestinationClass(): Class<out Activity> = withContext(Dispatchers.IO) {
         when {
             publicShareActivityExtras != null -> PublicShareActivity::class.java
             AccountUtils.requestCurrentUser() == null -> LoginActivity::class.java

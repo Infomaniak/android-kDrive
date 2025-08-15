@@ -21,24 +21,24 @@ package com.infomaniak.drive.ui.login
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
-import androidx.activity.addCallback
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.crossapplogin.back.ExternalAccount
-import com.infomaniak.core.launchInOnLifecycle
+import com.infomaniak.core.compose.materialthemefromxml.MaterialThemeFromXml
 import com.infomaniak.core.observe
-import com.infomaniak.core.utils.awaitOneClick
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
@@ -50,12 +50,8 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.databinding.ActivityLoginBinding
-import com.infomaniak.drive.extensions.awaitFragmentResult
-import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
-import com.infomaniak.drive.extensions.selectedPagePosition
 import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog.Companion.ON_ANOTHER_ACCOUNT_CLICKED_KEY
+import com.infomaniak.drive.ui.login.components.OnboardingScreen
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.getInfomaniakLogin
@@ -72,26 +68,16 @@ import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.lib.core.utils.clearStack
 import com.infomaniak.lib.core.utils.hideProgressCatching
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.showProgressCatching
 import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.login.InfomaniakLogin
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import splitties.coroutines.raceOf
-import splitties.coroutines.repeatWhileActive
 import splitties.experimental.ExperimentalSplittiesApi
-import com.infomaniak.core.crossapplogin.front.R as RCrossLogin
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : ComponentActivity() {
 
     private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
 
@@ -130,53 +116,79 @@ class LoginActivity : AppCompatActivity() {
         lockOrientationForSmallScreens()
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
-        setContentView(root)
-
-        connectButtonText = getString(R.string.buttonLogin)
-
-        configureViewPager()
-        dotsIndicator.attachTo(introViewpager)
-
-        signUpButton.setOnClickListener {
-            trackAccountEvent(MatomoName.OpenCreationWebview)
-            startAccountCreation()
-        }
-
-        onBackPressedDispatcher.addCallback {
-            if (introViewpager.currentItem == 0) finish() else introViewpager.currentItem -= 1
-        }
-
-        handleNavigationFlags()
-
+        enableEdgeToEdge(navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT))
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
 
-        binding.footer.onApplyWindowInsetsListener { view, insets ->
-            view.setMargins(bottom = insets.bottom)
+        setContent {
+            val accounts by crossAppLoginViewModel.selectedAccounts.collectAsStateWithLifecycle()
+            val skippedIds by crossAppLoginViewModel.skippedAccountIds.collectAsStateWithLifecycle()
+            MaterialThemeFromXml {
+                Surface {
+                    OnboardingScreen(
+                        accounts = { accounts },
+                        skippedIds = { skippedIds },
+                        onLogin = {
+                            openLoginWebView()
+                        },
+                        onContinueWithSelectedAccounts = { /*TODO()*/ },
+                        onCreateAccount = {
+                            trackAccountEvent(MatomoName.OpenCreationWebview)
+                            startAccountCreation()
+                        },
+                        onAnotherAccountClicked = { /*TODO()*/ },
+                        onSaveSkippedAccounts = { /*TODO()*/ }
+                    )
+                }
+            }
         }
+
+//        setContentView(root)
+//
+//        connectButtonText = getString(R.string.buttonLogin)
+//
+//        configureViewPager()
+//        dotsIndicator.attachTo(introViewpager)
+//
+//        signUpButton.setOnClickListener {
+//            trackAccountEvent(MatomoName.OpenCreationWebview)
+//            startAccountCreation()
+//        }
+//
+        // TODO
+//        onBackPressedDispatcher.addCallback {
+//            if (introViewpager.currentItem == 0) finish() else introViewpager.currentItem -= 1
+//        }
+//
+        handleNavigationFlags()
+//
+//        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+//
+//        binding.footer.onApplyWindowInsetsListener { view, insets ->
+//            view.setMargins(bottom = insets.bottom)
+//        }
 
         observeCrossLoginAccounts()
         initCrossLogin()
     }
 
-    private fun configureViewPager() = with(binding) {
-        introViewpager.apply {
-            adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
-            selectedPagePosition().mapLatest { position ->
-                val isLoginPage = position == 2
-
-                nextButton.isGone = isLoginPage
-                connectButton.isVisible = isLoginPage
-                crossAppLoginViewModel.availableAccounts.collectLatest { accounts ->
-                    val hasAccounts = accounts.isNotEmpty()
-                    signUpButton.isVisible = isLoginPage
-                    crossLoginSelection.isVisible = isLoginPage && hasAccounts
-                }
-            }.launchInOnLifecycle(lifecycle)
-
-            nextButton.setOnClickListener { currentItem++ }
-        }
-    }
+//    private fun configureViewPager() = with(binding) {
+//        introViewpager.apply {
+//            adapter = IntroPagerAdapter(supportFragmentManager, lifecycle)
+//            selectedPagePosition().mapLatest { position ->
+//                val isLoginPage = position == 2
+//
+//                nextButton.isGone = isLoginPage
+//                connectButton.isVisible = isLoginPage
+//                crossAppLoginViewModel.availableAccounts.collectLatest { accounts ->
+//                    val hasAccounts = accounts.isNotEmpty()
+//                    signUpButton.isVisible = isLoginPage
+//                    crossLoginSelection.isVisible = isLoginPage && hasAccounts
+//                }
+//            }.launchInOnLifecycle(lifecycle)
+//
+//            nextButton.setOnClickListener { currentItem++ }
+//        }
+//    }
 
     private fun startAccountCreation() {
         infomaniakLogin.startCreateAccountWebView(
@@ -202,88 +214,89 @@ class LoginActivity : AppCompatActivity() {
     private fun observeCrossLoginAccounts() {
         crossAppLoginViewModel.availableAccounts.observe(this) { accounts ->
             SentryLog.i(TAG, "Got ${accounts.count()} accounts from other apps")
-            binding.crossLoginSelection.setAccounts(accounts)
+//            binding.crossLoginSelection.setAccounts(accounts)
         }
     }
 
     private fun initCrossLogin() = lifecycleScope.launch {
         launch { crossAppLoginViewModel.activateUpdates(this@LoginActivity) }
-        launch { crossAppLoginViewModel.skippedAccountIds.collect(binding.crossLoginSelection::setSkippedIds) }
+//        launch { crossAppLoginViewModel.skippedAccountIds.collect(binding.crossLoginSelection::setSkippedIds) }
 
-        binding.connectButton.initProgress(lifecycle = this@LoginActivity)
-
-        repeatWhileActive {
-            val accountsToLogin = awaitConnectRequest()
-
-            if (accountsToLogin.isEmpty()) {
-                binding.signUpButton.isEnabled = false
-                openLoginWebView()
-            } else {
-                val loginResult = crossAppLoginViewModel.attemptLogin(selectedAccounts = accountsToLogin)
-
-                with(loginResult) {
-                    tokens.forEachIndexed { index, token ->
-                        authenticateUser(token, infomaniakLogin, withRedirection = index == tokens.lastIndex)
-                    }
-
-                    errorMessageIds.forEach { errorId -> showError(getString(errorId)) }
-                }
-
-                delay(1_000L) // Add some delay so the button won't blink back into its original color before leaving the Activity
-            }
-        }
+//        binding.connectButton.initProgress(lifecycle = this@LoginActivity)
+//
+//        repeatWhileActive {
+//            val accountsToLogin = awaitConnectRequest()
+//
+//            if (accountsToLogin.isEmpty()) {
+//                binding.signUpButton.isEnabled = false
+//                openLoginWebView()
+//            } else {
+//                val loginResult = crossAppLoginViewModel.attemptLogin(selectedAccounts = accountsToLogin)
+//
+//                with(loginResult) {
+//                    tokens.forEachIndexed { index, token ->
+//                        authenticateUser(token, infomaniakLogin, withRedirection = index == tokens.lastIndex)
+//                    }
+//
+//                    errorMessageIds.forEach { errorId -> showError(getString(errorId)) }
+//                }
+//
+//                delay(1_000L) // Add some delay so the button won't blink back into its original color before leaving the Activity
+//            }
+//        }
     }
 
-    private suspend fun awaitConnectRequest(): List<ExternalAccount> {
-        val accounts = raceOf(
-            {
-                awaitAnotherAccountClick()
-                emptyList()
-            },
-            { allowAccountSelection() },
-            {
-                crossAppLoginViewModel.selectedAccounts.mapLatest { accounts ->
-                    val selectedCount = accounts.count()
-                    SentryLog.i(TAG, "User selected $selectedCount accounts")
-                    connectButtonText = when {
-                        accounts.isEmpty() -> resources.getString(R.string.buttonLogin)
-                        else -> resources.getQuantityString(
-                            RCrossLogin.plurals.buttonContinueWithAccounts,
-                            selectedCount,
-                            selectedCount
-                        )
-                    }
-                    binding.connectButton.hideProgressCatching(connectButtonText)
-                    binding.connectButton.awaitOneClick()
-                    accounts
-                }.first()
-            }
-        )
-        binding.connectButton.showProgressCatching()
-        return accounts
-    }
+//    private suspend fun awaitConnectRequest(): List<ExternalAccount> {
+//        val accounts = raceOf(
+//            {
+//                awaitAnotherAccountClick()
+//                emptyList()
+//            },
+//            { allowAccountSelection() },
+//            {
+//                crossAppLoginViewModel.selectedAccounts.mapLatest { accounts ->
+//                    val selectedCount = accounts.count()
+    // TODO
+//                    SentryLog.i(TAG, "User selected $selectedCount accounts")
+//                    connectButtonText = when {
+//                        accounts.isEmpty() -> resources.getString(R.string.buttonLogin)
+//                        else -> resources.getQuantityString(
+//                            RCrossLogin.plurals.buttonContinueWithAccounts,
+//                            selectedCount,
+//                            selectedCount
+//                        )
+//                    }
+//                    binding.connectButton.hideProgressCatching(connectButtonText)
+//                    binding.connectButton.awaitOneClick()
+//                    accounts
+//                }.first()
+//            }
+//        )
+//        binding.connectButton.showProgressCatching()
+//        return accounts
+//    }
 
-    private suspend fun allowAccountSelection(): Nothing = repeatWhileActive {
-        binding.crossLoginSelection.awaitOneClick()
-        val dialog = CrossLoginBottomSheetDialog()
-        dialog.show(supportFragmentManager, null)
-        try {
-            dialog.lifecycle.currentStateFlow.first { it == Lifecycle.State.DESTROYED }
-        } catch (e: CancellationException) {
-            dialog.dismiss() // Ensure the bottom sheet is hidden.
-            throw e
-        }
-    }
+//    private suspend fun allowAccountSelection(): Nothing = repeatWhileActive {
+//        binding.crossLoginSelection.awaitOneClick()
+//        val dialog = CrossLoginBottomSheetDialog()
+//        dialog.show(supportFragmentManager, null)
+//        try {
+//            dialog.lifecycle.currentStateFlow.first { it == Lifecycle.State.DESTROYED }
+//        } catch (e: CancellationException) {
+//            dialog.dismiss() // Ensure the bottom sheet is hidden.
+//            throw e
+//        }
+//    }
 
-    private suspend fun awaitAnotherAccountClick() {
-        repeatWhileActive {
-            val result = supportFragmentManager.awaitFragmentResult(
-                requestKey = ON_ANOTHER_ACCOUNT_CLICKED_KEY,
-                lifecycleOwner = this
-            )
-            if (result.containsKey(ON_ANOTHER_ACCOUNT_CLICKED_KEY)) return
-        }
-    }
+//    private suspend fun awaitAnotherAccountClick() {
+//        repeatWhileActive {
+//            val result = supportFragmentManager.awaitFragmentResult(
+//                requestKey = ON_ANOTHER_ACCOUNT_CLICKED_KEY,
+//                lifecycleOwner = this
+//            )
+//            if (result.containsKey(ON_ANOTHER_ACCOUNT_CLICKED_KEY)) return
+//        }
+//    }
 
     private fun openLoginWebView() {
         trackAccountEvent(MatomoName.OpenLoginWebview)
