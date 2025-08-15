@@ -30,7 +30,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
-import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.TrashMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
