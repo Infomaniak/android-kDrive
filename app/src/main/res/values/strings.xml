@@ -178,7 +178,6 @@
     <string name="buttonShare">Share</string>
     <string name="buttonShareDropboxLink">Share link</string>
     <string name="buttonSharePublicLink">Share public link</string>
-    <string name="buttonSignIn">Create an account</string>
     <string name="buttonStopUpload">Stop uploading this file</string>
     <string name="buttonSwitchDrive">Change drive</string>
     <string name="buttonTakePhotoOrVideo">Take a photo or video</string>

@@ -180,7 +180,11 @@ dependencies {
     implementation(project(":Core:Thumbnails"))
 
     implementation(platform(core.compose.bom))
+    implementation(core.activity.compose)
     implementation(core.compose.foundation)
+    implementation(core.compose.material3)
+    implementation(core.lottie)
+    implementation(core.compose.ui.tooling.preview)
 
     implementation(core.ktor.client.okhttp)
 

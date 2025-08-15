@@ -167,7 +167,6 @@
     <string name="buttonShare">Freigeben</string>
     <string name="buttonShareDropboxLink">Link teilen</string>
     <string name="buttonSharePublicLink">Öffentlichen Link freigeben</string>
-    <string name="buttonSignIn">Konto anlegen</string>
     <string name="buttonStopUpload">Import dieser Datei abbrechen</string>
     <string name="buttonSwitchDrive">Drive wechseln</string>
     <string name="buttonTakePhotoOrVideo">Foto oder Video aufnehmen</string>
