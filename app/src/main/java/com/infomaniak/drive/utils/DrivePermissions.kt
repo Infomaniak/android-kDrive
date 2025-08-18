@@ -37,7 +37,9 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog
-import com.infomaniak.drive.utils.DrivePermissions.Type.*
+import com.infomaniak.drive.utils.DrivePermissions.Type.DownloadingWithDownloadManager
+import com.infomaniak.drive.utils.DrivePermissions.Type.ReadingMediaForSync
+import com.infomaniak.drive.utils.DrivePermissions.Type.UploadInTheBackground
 import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
 import com.infomaniak.lib.core.utils.startAppSettingsConfig

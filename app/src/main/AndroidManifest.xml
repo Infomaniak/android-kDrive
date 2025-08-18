@@ -191,8 +191,8 @@
                 <data android:pathPattern="/app/share/.*/..*" />
 
                 <data android:host="ksuite.infomaniak.com" />
-                <data android:pathPattern="/.*/kdrive/app/drive/.*/trash"/>
-                <data android:pathPattern="/.*/kdrive/app/drive/.*/trash/..*"/>
+                <data android:pathPattern="/.*/kdrive/app/drive/.*/trash" />
+                <data android:pathPattern="/.*/kdrive/app/drive/.*/trash/..*" />
             </intent-filter>
 
             <meta-data
