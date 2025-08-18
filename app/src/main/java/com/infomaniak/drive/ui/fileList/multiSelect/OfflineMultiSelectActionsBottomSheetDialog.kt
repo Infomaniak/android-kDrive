@@ -17,6 +17,28 @@
  */
 package com.infomaniak.drive.ui.fileList.multiSelect
 
+import androidx.core.view.isGone
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
-class OfflineMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.OfflineFileAction)
+class OfflineMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.OfflineFileAction){
+
+    override fun configureManageCategories(areIndividualActionsVisible: Boolean) {
+        binding.manageCategories.isGone = true
+    }
+
+    override fun configureAddFavorites(areIndividualActionsVisible: Boolean) {
+        binding.addFavorites.isGone = true
+    }
+
+    override fun configureColoredFolder(areIndividualActionsVisible: Boolean) {
+        binding.coloredFolder.isGone = true
+    }
+
+    override fun configureMoveFile() {
+        binding.moveFile.isGone = true
+    }
+
+    override fun configureDuplicateFile() {
+        binding.duplicateFile.isGone = true
+    }
+}
