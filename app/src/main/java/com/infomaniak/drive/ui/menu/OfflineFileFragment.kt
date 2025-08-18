@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
@@ -37,6 +38,8 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
         initParams()
         super.onViewCreated(view, savedInstanceState)
         setToolbarTitle(R.string.offlineFileTitle)
+
+        multiSelectLayout?.selectAllButton?.isVisible = true
         binding.swipeRefreshLayout.isEnabled = false
     }
 
@@ -61,6 +64,7 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
             if (fileAdapter.fileList.isEmpty() || isNewSort) {
                 FileController.getOfflineFiles(order = fileListViewModel.sortType, customRealm = mainViewModel.realm).apply {
                     fileAdapter.updateFileList(this)
+                    sizeOfOffline = this.size
                 }
             }
 

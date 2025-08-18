@@ -143,6 +143,8 @@ open class FileListFragment : MultiSelectFragment(
     protected open var allowCancellation = true
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
+    var sizeOfOffline: Int? = null
+
     private val noItemsFoldersTitle: Int by lazy {
         if (mainViewModel.currentFolder.value?.rights?.canCreateFile == true
             && findNavController().currentDestination?.id != R.id.trashFragment
@@ -424,19 +426,28 @@ open class FileListFragment : MultiSelectFragment(
                         fileAdapter.configureAllSelected(true)
                         enableMultiSelectButtons(false)
 
-                        fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
-                            .observe(viewLifecycleOwner) { fileCount ->
-                                with(fileAdapter.getFiles()) {
-                                    multiSelectManager.selectedItems = this
-                                    multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
+                        if (sizeOfOffline != null) {
+                            setupAllSelect(sizeOfOffline)
+                        } else {
+                            fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
+                                .observe(viewLifecycleOwner) { fileCount ->
+                                    setupAllSelect(fileCount.count)
                                 }
-                                enableMultiSelectButtons(true)
-                                onUpdateMultiSelect(fileCount.count)
-                            }
+                        }
+
                     }
                 }
             }
         }
+    }
+
+    private fun setupAllSelect(listSize: Int?) {
+        with(fileAdapter.getFiles()) {
+            multiSelectManager.selectedItems = this
+            multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
+        }
+        enableMultiSelectButtons(true)
+        onUpdateMultiSelect(listSize)
     }
 
     private fun setupDisplay() {
