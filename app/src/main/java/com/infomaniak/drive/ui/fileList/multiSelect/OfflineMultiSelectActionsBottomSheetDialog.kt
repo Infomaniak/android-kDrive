@@ -20,7 +20,7 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 import androidx.core.view.isGone
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 
-class OfflineMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.OfflineFileAction){
+class OfflineMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomSheetDialog(MatomoCategory.OfflineFileAction) {
 
     override fun configureManageCategories(areIndividualActionsVisible: Boolean) {
         binding.manageCategories.isGone = true

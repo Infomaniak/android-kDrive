@@ -77,6 +77,7 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
+import com.infomaniak.drive.ui.menu.OfflineFileFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
@@ -405,8 +406,13 @@ open class FileListFragment : MultiSelectFragment(
         multiSelectLayout?.apply {
 
             toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
-            moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
-            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
+            if (this@FileListFragment is OfflineFileFragment) {
+                moveButtonMultiSelect.isVisible = false
+                deleteButtonMultiSelect.isVisible = false
+            } else {
+                moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
+                deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
+            }
             menuButtonMultiSelect.setOnClickListener {
                 onMenuButtonClicked(
                     multiSelectBottomSheet = FileListMultiSelectActionsBottomSheetDialog(),
