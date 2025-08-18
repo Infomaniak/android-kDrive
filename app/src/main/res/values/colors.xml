@@ -26,4 +26,8 @@
     <color name="myKSuiteDashboardStatusBarBackground">@color/background</color>
     <color name="myKSuiteDashboardNavigationBarBackground">@color/white</color>
     <color name="folderDefaultColor">@color/secondaryText</color>
+
+    <!--Bottom sheet-->
+    <color name="bottomSheetBackgroundColor">@color/appBar</color>
+    <color name="onBottomSheetBackgroundColor">@color/title</color>
 </resources>

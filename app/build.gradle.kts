@@ -1,6 +1,7 @@
 import java.util.Properties
 
 plugins {
+    alias(core.plugins.compose.compiler)
     alias(libs.plugins.android.application)
     alias(libs.plugins.junit5)
     alias(libs.plugins.kotlin.android)
@@ -109,6 +110,7 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        compose = true
     }
 
     lint {
@@ -159,6 +161,8 @@ dependencies {
     implementation(project(":Core"))
     implementation(project(":Core:Auth"))
     implementation(project(":Core:Avatar"))
+    implementation(project(":Core:Compose:Margin"))
+    implementation(project(":Core:Compose:MaterialThemeFromXml"))
     implementation(project(":Core:CrossAppLogin:Back"))
     implementation(project(":Core:CrossAppLogin:Front"))
     implementation(project(":Core:FragmentNavigation"))
@@ -174,6 +178,11 @@ dependencies {
     implementation(project(":Core:RecyclerView"))
     implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
+
+    implementation(platform(core.compose.bom))
+    implementation(core.compose.foundation)
+    implementation(core.compose.material3)
+    implementation(core.compose.ui.tooling.preview)
 
     implementation(core.ktor.client.okhttp)
 
