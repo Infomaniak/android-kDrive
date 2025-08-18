@@ -36,5 +36,5 @@
     <dimen name="bottomSheetCornerSize">20dp</dimen>
     <dimen name="bottomSheetDragHandleHeight">@dimen/marginStandardVerySmall</dimen>
     <dimen name="bottomSheetDragHandleWidth">42dp</dimen>
-    <dimen name="bottomSheetDragHandleVerticalMargin">@dimen/marginStandardMedium</dimen>
+    <dimen name="bottomSheetDragHandleVerticalMargin">22dp</dimen> <!--Same value as material's default values-->
 </resources>
