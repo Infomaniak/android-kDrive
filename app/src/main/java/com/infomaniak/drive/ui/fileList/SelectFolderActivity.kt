@@ -76,7 +76,7 @@ class SelectFolderActivity : BaseActivity() {
 
             navController.setGraph(
                 R.navigation.select_folder_navigation,
-                SelectRootFolderFragmentArgs(driveId = driveId, userDrive = currentUserDrive).toBundle()
+                SelectRootFolderFragmentArgs(userDrive = currentUserDrive).toBundle()
             )
 
             setSaveButton(customArgs)
@@ -132,7 +132,7 @@ class SelectFolderActivity : BaseActivity() {
 
     private fun MutableList<Int>.addNavigationIdsRecursively(folderId: Int, userDrive: UserDrive) {
         FileController.getParentFileProxy(folderId, userDrive, getCustomRealm(userDrive))?.id?.let { parentId ->
-            if (parentId != Utils.ROOT_ID) {
+            if (parentId != ROOT_ID) {
                 add(parentId)
                 addNavigationIdsRecursively(parentId, userDrive)
             }

@@ -43,11 +43,6 @@
             android:id="@+id/actionSelectRootFolderFragmentToFavoritesFragment"
             app:destination="@id/favoritesFragment" />
         <argument
-            android:name="driveId"
-            android:defaultValue="0"
-            app:argType="integer" />
-
-        <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
     </fragment>

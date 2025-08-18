@@ -52,9 +52,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     override val fileListViewModel: FileListViewModel by viewModels()
 
-    private val navigationArgs by navArgs<SelectRootFolderFragmentArgs>()
-
-    private val driveId by lazy { navigationArgs.driveId }
+    private val navigationArgs: SelectRootFolderFragmentArgs by navArgs()
 
     override val rootFolderLayout: RootFolderLayoutBinding
         get() = binding.rootFolderLayout
@@ -78,7 +76,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
         collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
-        val currentDrive = DriveInfosController.getDrive(driveId = driveId)
+        val currentDrive = DriveInfosController.getDrive(driveId = navigationArgs.userDrive.driveId)
 
         rootFolderTitle.text = currentDrive?.name
 
@@ -146,8 +144,8 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
             safelyNavigate(
                 SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
                     folderId = file.id,
+                    folderName = file.name,
                     userDrive = navigationArgs.userDrive,
-                    folderName = file.name
                 )
             )
         }

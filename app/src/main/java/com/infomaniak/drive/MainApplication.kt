@@ -222,10 +222,11 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             AccountUtils.removeUserAndDeleteToken(this@MainApplication, user)
         }
     }
-   private fun configureSentry() {
+
+    private fun configureSentry() {
         this.configureSentry(
             isDebug = BuildConfig.DEBUG,
             isSentryTrackingEnabled = UiSettings(applicationContext).isSentryTrackingEnabled,
         )
-   }
+    }
 }

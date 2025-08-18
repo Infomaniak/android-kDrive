@@ -80,24 +80,25 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     var lastItemCount: FileCount? = null
 
-    private val loadRootFiles = MutableSharedFlow<UserDrive>(replay = 1)
+    private val rootFilesUserDrive = MutableSharedFlow<UserDrive>(replay = 1)
 
     fun sortTypeIsInitialized() = ::sortType.isInitialized
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val rootFiles: LiveData<Map<File.VisibilityType, File>> = loadRootFiles.distinctUntilChanged().flatMapLatest {
-        FileController.getRealmInstance(it).run {
-            realm = this
-            FileController.getFolderFilesFlow(this, Utils.ROOT_ID)
+    val rootFiles: LiveData<Map<File.VisibilityType, File>> =
+        rootFilesUserDrive.distinctUntilChanged().flatMapLatest { userDrive ->
+            FileController.getRealmInstance(userDrive).run {
+                realm = this
+                FileController.getFolderFilesFlow(this, Utils.ROOT_ID)
+            }
         }
-    }
-        .mapLatest { it.associateBy(File::getVisibilityType) }
-        .cancellable()
-        .asLiveData(viewModelScope.coroutineContext)
+            .mapLatest { it.associateBy(File::getVisibilityType) }
+            .cancellable()
+            .asLiveData(viewModelScope.coroutineContext)
 
     fun updateRootFiles(userDrive: UserDrive) {
         viewModelScope.launch {
-            loadRootFiles.emit(userDrive)
+            rootFilesUserDrive.emit(userDrive)
         }
     }
 

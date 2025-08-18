@@ -76,14 +76,12 @@ open class FileAdapter(
     var isSelectingFolder = false
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
-
-    var newImageLoader: ImageLoader? = null
-
     var uploadInProgress = false
     var publicShareCanDownload = true
 
     var isComplete = false
     var isHomeOffline = false
+    var newImageLoader: ImageLoader? = null
 
     private var offlineMode = false
     private var pendingWifiConnection = false
@@ -332,12 +330,12 @@ open class FileAdapter(
                 is CardviewFileListBinding -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(
                     file = file,
                     isGrid = isGrid,
-                    imageLoader = getNewImageLoader(binding.context)
+                    imageLoader = getNewImageLoader(binding.context),
                 )
                 is CardviewFileGridBinding -> (binding as CardviewFileGridBinding).setFileItem(
                     file = file,
                     isGrid = isGrid,
-                    imageLoader = getNewImageLoader(binding.context)
+                    imageLoader = getNewImageLoader(binding.context),
                 )
                 is CardviewFolderGridBinding -> (binding as CardviewFolderGridBinding).setFileItem(file = file, isGrid = isGrid)
             }

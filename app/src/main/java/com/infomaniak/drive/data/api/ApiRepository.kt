@@ -150,7 +150,7 @@ object ApiRepository : ApiRepositoryCore() {
         file: File,
         cursor: String?,
         forFileList: Boolean,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
+        okHttpClient: OkHttpClient = okHttpClientLongTimeout,
     ): CursorApiResponse<ArrayList<FileActivity>> {
         val url = ApiRoutes.getFileActivities(file, forFileList, loadCursor(cursor))
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
@@ -166,7 +166,7 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         fileIds: List<Int>,
         fromDate: Long,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientLongTimeout,
+        okHttpClient: OkHttpClient = okHttpClientLongTimeout,
     ): ApiResponse<ArrayList<FileActivity>> {
         val formattedFileIds = fileIds.joinToString(",") { it.toString() }
         return callApi(ApiRoutes.getFileActivities(driveId, formattedFileIds, fromDate), GET, okHttpClient = okHttpClient)

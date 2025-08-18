@@ -28,14 +28,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 
 object TokenInterceptorListenerProvider {
-    private suspend fun onRefreshTokenSuccessCommon(apiToken: ApiToken, user: User?) = setUserToken(user!!, apiToken)
-    private suspend fun onRefreshTokenErrorCommon(refreshTokenError: (User) -> Unit, user: User?) = refreshTokenError(user!!)
+
+    private suspend fun onRefreshTokenSuccessCommon(apiToken: ApiToken, user: User?) = setUserToken(user, apiToken)
+    private fun onRefreshTokenErrorCommon(refreshTokenError: (User) -> Unit, user: User?) = refreshTokenError(user!!)
 
     fun tokenInterceptorListener(
         refreshTokenError: (User) -> Unit,
-        globalCoroutineScope: CoroutineScope,
+        coroutineScope: CoroutineScope,
     ): TokenInterceptorListener = object : TokenInterceptorListener {
-        val userTokenFlow by lazy { AppSettings.currentUserIdFlow.mapToApiToken(globalCoroutineScope) }
+        val userTokenFlow by lazy { AppSettings.currentUserIdFlow.mapToApiToken(coroutineScope) }
+
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
             if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
             onRefreshTokenSuccessCommon(apiToken, AccountUtils.currentUser)
@@ -72,6 +74,4 @@ object TokenInterceptorListenerProvider {
 
         override fun getCurrentUserId(): Int = userId
     }
-
-
 }
