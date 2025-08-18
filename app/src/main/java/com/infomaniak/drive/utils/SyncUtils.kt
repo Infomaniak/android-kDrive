@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.MediaObserverWorker
 import com.infomaniak.lib.core.utils.SentryLog
+import kotlinx.coroutines.flow.first
 import java.util.Date
 
 object SyncUtils {
@@ -105,6 +106,12 @@ object SyncUtils {
         ).get()?.isNotEmpty() == true
     }
 
+    suspend fun isSyncActive(context: Context, isRunning: Boolean = true): Boolean {
+        return WorkManager.getInstance(context).getWorkInfosFlow(
+            UploadWorker.uploadWorkerQuery(listOf(if (isRunning) WorkInfo.State.RUNNING else WorkInfo.State.ENQUEUED))
+        ).first().isNotEmpty()
+    }
+
     fun Context.isSyncScheduled(): Boolean {
         return WorkManager.getInstance(this).getWorkInfos(
             UploadWorker.uploadWorkerQuery(listOf(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED, WorkInfo.State.BLOCKED))
@@ -119,9 +126,9 @@ object SyncUtils {
         ).get()?.isNotEmpty() == true
     }
 
-    private fun Context.startPeriodicSync(syncInterval: Long) {
-        if (!isSyncActive()) {
-            PeriodicUploadWorker.scheduleWork(this, syncInterval)
+    private suspend fun startPeriodicSync(context: Context, syncInterval: Long) {
+        if (!isSyncActive(context)) {
+            PeriodicUploadWorker.scheduleWork(context, syncInterval)
         }
     }
 
@@ -130,7 +137,7 @@ object SyncUtils {
         WorkManager.getInstance(this).cancelUniqueWork(PeriodicUploadWorker.TAG)
     }
 
-    fun Context.activateSyncIfNeeded() {
+    suspend fun Context.activateSyncIfNeeded() {
         UploadFile.getAppSyncSettings()?.let { syncSettings ->
             if (!isAutoSyncActive()) {
                 // Cancel old period periodic worker
@@ -152,10 +159,10 @@ object SyncUtils {
         MediaObserverWorker.cancelWork(applicationContext)
     }
 
-    fun Context.activateAutoSync(syncSettings: SyncSettings) {
+    suspend fun Context.activateAutoSync(syncSettings: SyncSettings) {
         cancelContentObserver()
         if (syncSettings.syncImmediately) startContentObserverService()
-        startPeriodicSync(syncSettings.syncInterval)
+        startPeriodicSync(context = this, syncSettings.syncInterval)
     }
 
     fun Context.disableAutoSync() {

@@ -69,9 +69,9 @@ import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.showProgressCatching
 import com.infomaniak.lib.core.utils.startAppSettingsConfig
 import com.infomaniak.lib.core.utils.whenResultIsOk
-import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.TimeZone
@@ -422,13 +422,17 @@ class SyncSettingsActivity : BaseActivity() {
 
         lifecycleScope.launch {
             val result = runCatching {
+                SentryLog.i(TAG, "start saveSettings on coroutineScope")
                 if (activateSyncItem.isChecked) {
                     val syncSettings = generateSyncSettings()
                     trackPhotoSyncEvents(syncSettings)
                     syncSettings.setIntervalType(syncSettingsViewModel.syncIntervalType.value!!)
                     Dispatchers.IO {
+                        SentryLog.i(TAG, "start update appSettings")
                         UploadFile.setAppSyncSettings(syncSettings)
-                        activateAutoSync(syncSettings)
+                        SentryLog.i(TAG, "appSettings updated")
+                        applicationContext.activateAutoSync(syncSettings)
+                        SentryLog.i(TAG, "auto sync enabled")
                     }
                 } else {
                     Dispatchers.IO { disableAutoSync() }
@@ -437,15 +441,17 @@ class SyncSettingsActivity : BaseActivity() {
                 trackPhotoSyncEvent(if (activateSyncItem.isChecked) MatomoName.Enabled else MatomoName.Disabled)
             }.onFailure { exception ->
                 showSnackbar(R.string.anErrorHasOccurred)
-                Sentry.withScope { scope ->
+                SentryLog.e("SyncSettings", "An error has occurred when save settings", exception) { scope ->
                     scope.setTag("syncIntervalType", syncSettingsViewModel.syncIntervalType.value?.title.toString())
                     scope.setTag("createMonthFolder", createDatedSubFolders.isChecked.toString())
                     scope.setTag("deletePhoto", deletePicturesAfterSync.isChecked.toString())
-                    SentryLog.e("SyncSettings", "An error has occurred when save settings", exception)
+                    scope.setTag("coroutineScope.isActive", isActive.toString())
+                    scope.setTag("lifecycle.currentState", lifecycle.currentState.name)
                 }
             }
 
             saveButton.hideProgressCatching(R.string.buttonSave)
+
             if (result.isSuccess) finish()
         }
     }
@@ -488,5 +494,9 @@ class SyncSettingsActivity : BaseActivity() {
                 addOnPositiveButtonClickListener { syncSettingsViewModel.customDate.value = Date(it).startOfTheDay() }
                 show(supportFragmentManager, "syncDatePicker")
             }
+    }
+
+    companion object {
+        val TAG = SyncSettingsActivity::class.java.simpleName
     }
 }
