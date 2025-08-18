@@ -35,13 +35,16 @@ class RebootReceiver : BroadcastReceiver() {
     private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
     override fun onReceive(context: Context, intent: Intent?): Unit = with(context) {
+        val pendingResult = goAsync()
         coroutineScope.launch(Dispatchers.IO) {
-            launch { syncMediaFolders() }
+            val syncMediaJob = launch { syncMediaFolders() }
 
             activateSyncIfNeeded()
 
             startContentObserverService()
             if (intent?.action == Intent.ACTION_BOOT_COMPLETED && AccountUtils.isEnableAppSync()) syncImmediately()
+            syncMediaJob.join()
+            pendingResult.finish()
         }
     }
 
