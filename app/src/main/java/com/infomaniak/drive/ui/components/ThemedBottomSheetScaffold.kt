@@ -40,7 +40,7 @@ import com.infomaniak.core.compose.margin.Margin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DriveBottomSheetScaffold(
+fun ThemedBottomSheetScaffold(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     sheetState: SheetState = rememberModalBottomSheetState(),
@@ -88,7 +88,7 @@ private fun Preview() {
     MaterialTheme {
         ProvideBottomSheetTheme {
             Surface {
-                DriveBottomSheetScaffold(
+                ThemedBottomSheetScaffold(
                     onDismissRequest = {},
                     title = "This bottom sheet's title"
                 ) {
