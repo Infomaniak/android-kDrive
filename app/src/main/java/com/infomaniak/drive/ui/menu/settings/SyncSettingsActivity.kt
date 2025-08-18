@@ -63,6 +63,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.context
+import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.showProgressCatching
@@ -449,12 +450,9 @@ class SyncSettingsActivity : BaseActivity() {
                 }
             }
 
-//            saveButton.hideProgressCatching(R.string.buttonSave)
-            saveButton.text = getString(R.string.buttonSave)
+            saveButton.hideProgressCatching(R.string.buttonSave)
 
-            if (result.isSuccess) finish() else {
-                saveButton.text = getString(R.string.buttonSave)
-            }
+            if (result.isSuccess) finish()
         }
     }
 
