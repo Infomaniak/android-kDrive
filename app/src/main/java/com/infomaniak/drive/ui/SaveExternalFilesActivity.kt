@@ -273,7 +273,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     driveId = selectedDrive.value!!.id,
                     sharedWithMe = selectedDrive.value!!.sharedWithMe,
                 )
-                driveIdSharedWithMe = FileController.getSharedDriveIdById(userDrive.userId, folderId)?.driveId
+                driveIdSharedWithMe = FileController.getSharedDrive(userDrive.userId, folderId)?.driveId
 
                 FileController.getFileById(folderId, userDrive) ?: FileController.getFileById(
                     fileId = folderId,
@@ -299,7 +299,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             setOnClickListener {
                 if (navigationArgs.isPublicShare) {
                     Intent().apply {
-                        putExtra(DESTINATION_DRIVE_ID_KEY, driveIdSharedWithMe ?: selectDriveViewModel.selectedDrive.value?.id)
+                        putExtra(DESTINATION_DRIVE_ID_KEY, selectDriveViewModel.selectedDrive.value?.id)
                         putExtra(DESTINATION_FOLDER_ID_KEY, saveExternalFilesViewModel.folderId.value)
                         setResult(RESULT_OK, this)
                     }

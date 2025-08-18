@@ -81,9 +81,8 @@ object FileController {
         return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
     }
 
-    fun getSharedDriveIdById(userId: Int, fileId: Int): File? {
-        val sharedDrive = UserDrive(userId = userId, sharedWithMe = true)
-        getRealmInstance(sharedDrive).use { realm ->
+    fun getSharedDrive(userId: Int, fileId: Int): File? {
+        getRealmInstance(UserDrive(userId = userId, sharedWithMe = true)).use { realm ->
             return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {
                 realm.copyFromRealm(it, 1)
             }

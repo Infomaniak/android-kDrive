@@ -27,6 +27,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.multiSelect.FavoritesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -125,7 +126,7 @@ class FavoritesFragment : FileListFragment() {
             fileListViewModel.getFavoriteFiles(
                 order = fileListViewModel.sortType,
                 isNewSort = isNewSort,
-                userDrive = navigationArgs.userDrive!!
+                userDrive = navigationArgs.userDrive ?: UserDrive()
             ).observe(viewLifecycleOwner) {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.isFirstPage || isNewSort) {

@@ -329,7 +329,7 @@ class MainViewModel(
                     FileController.removeFile(fileId = file.id, customRealm = realm)
                     FileController.getRealmInstance(UserDrive(sharedWithMe = true)).use { realm ->
                         FileController.updateFile(newParent.id, realm) { localFolder ->
-                            runCatching { localFolder.children.add(file) }
+                            runCatching { localFolder.children.add(file) }.onFailure(Sentry::captureException)
                         }
                     }
                 } else {

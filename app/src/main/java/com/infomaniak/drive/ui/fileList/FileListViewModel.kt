@@ -163,13 +163,13 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getFavoriteFiles(order: SortType, isNewSort: Boolean, userDrive: UserDrive = UserDrive()): LiveData<FolderFilesResult?> {
+    fun getFavoriteFiles(order: SortType, isNewSort: Boolean, userDrive: UserDrive): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
             tailrec suspend fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
                 getFilesJob.ensureActive()
-                val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
+                val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
                 val apiResponse = ApiRepository.getFavoriteFiles(userDrive.driveId, order, cursor, okHttpClient)
                 if (apiResponse.isSuccess()) {
                     when {
