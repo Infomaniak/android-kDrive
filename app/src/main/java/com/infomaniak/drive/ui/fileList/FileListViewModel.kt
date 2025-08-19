@@ -219,13 +219,8 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         userDrive: UserDrive
     ) {
         FileController.getRealmInstance(userDrive).use {
-            FileController.saveFavoritesFiles(
-                files = files,
-                replaceOldData = isFirstPage,
-                realm = it
-            )
+            FileController.saveFavoritesFiles(files = files, replaceOldData = isFirstPage, realm = it)
         }
-
     }
 
     fun getPendingFilesCount(folderId: Int) = liveData(Dispatchers.IO) {

@@ -61,7 +61,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         val isRoot = folderId == ROOT_ID
         mainViewModel.setCurrentFolder(null)
         userDrive = UserDrive(
-            userId = navigationArgs.userDrive!!.userId,
+            userId = navigationArgs.userDrive.userId,
             driveId = navigationArgs.driveId,
             sharedWithMe = true
         ).also {
@@ -102,7 +102,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                     // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
                     // maintenance check on the folder type but we don't know if this is necessary
                     file.isFolder() -> {
-                        DriveInfosController.getDrive(navigationArgs.userDrive!!.userId, file.driveId)?.let { currentDrive ->
+                        DriveInfosController.getDrive(navigationArgs.userDrive.userId, file.driveId)?.let { currentDrive ->
                             if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
                         }
                     }
@@ -147,7 +147,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 folderName = name,
                 driveId = driveId,
                 fromSaveExternal = navigationArgs.fromSaveExternal,
-                userDrive = userDrive,
+                userDrive = userDrive ?: UserDrive(),
             )
         )
     }

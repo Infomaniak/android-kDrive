@@ -35,7 +35,6 @@ import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
-import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.setMargins
 
@@ -58,7 +57,6 @@ class SelectFolderActivity : BaseActivity() {
 
         val userId = navigationArgs.userId
         val driveId = navigationArgs.driveId
-        val fromSaveExternal = navigationArgs.fromSaveExternal
         val customArgs = navigationArgs.customArgs
         val currentFolderId = navigationArgs.folderId.getIntOrNull()
         val disabledFolderId = navigationArgs.disabledFolderId.getIntOrNull()
@@ -79,7 +77,7 @@ class SelectFolderActivity : BaseActivity() {
             navController.setGraph(
                 R.navigation.select_folder_navigation,
                 SelectRootFolderFragmentArgs(
-                    fromSaveExternal = fromSaveExternal,
+                    fromSaveExternal = navigationArgs.fromSaveExternal,
                     userDrive = currentUserDrive
                 ).toBundle()
             )

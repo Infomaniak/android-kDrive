@@ -24,7 +24,6 @@ import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MySharesMultiSelectActionsBottomSheetDialog
@@ -92,7 +91,7 @@ class MySharesFragment : FileSubTypeListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            fileListViewModel.getMySharedFiles(fileListViewModel.sortType, navigationArgs.userDrive ?: UserDrive())
+            fileListViewModel.getMySharedFiles(fileListViewModel.sortType, navigationArgs.userDrive)
                 .observe(viewLifecycleOwner) {
                     // forceClean because myShares is not paginated
                     populateFileList(

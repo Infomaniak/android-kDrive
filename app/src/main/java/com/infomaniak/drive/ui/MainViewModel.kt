@@ -310,12 +310,12 @@ class MainViewModel(
     ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
-            FileController.getRealmInstance().use { realm ->
+            FileController.getRealmInstance().use { currentDriveRealm ->
                 file.getStoredFile(getContext())?.let { ioFile ->
                     if (ioFile.exists()) moveIfOfflineFileOrDelete(file, ioFile, newParent)
                 }
 
-                FileController.updateFile(file.parentId, realm) { localFolder ->
+                FileController.updateFile(file.parentId, currentDriveRealm) { localFolder ->
                     // Ignore expired transactions when it's suspended
                     // In case the phone is slow or in standby, the transaction can create an IllegalStateException
                     // because realm will not be available anymore, the transaction is resumed afterwards
@@ -326,14 +326,14 @@ class MainViewModel(
                 if (isSharedWithMe) {
                     // If the selected folder is a shared folder, it is removed from the user's realm table (userId_driveId)
                     // and added to the share realm (userId_share)
-                    FileController.removeFile(fileId = file.id, customRealm = realm)
-                    FileController.getRealmInstance(UserDrive(sharedWithMe = true)).use { realm ->
-                        FileController.updateFile(newParent.id, realm) { localFolder ->
+                    FileController.removeFile(fileId = file.id, customRealm = currentDriveRealm)
+                    FileController.getRealmInstance(UserDrive(sharedWithMe = true)).use { sharedRealm ->
+                        FileController.updateFile(newParent.id, sharedRealm) { localFolder ->
                             runCatching { localFolder.children.add(file) }.onFailure(Sentry::captureException)
                         }
                     }
                 } else {
-                    FileController.addChild(newParent.id, file.apply { parentId = newParent.id }, realm)
+                    FileController.addChild(newParent.id, file.apply { parentId = newParent.id }, currentDriveRealm)
                 }
             }
 

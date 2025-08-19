@@ -288,7 +288,6 @@
             app:argType="string" />
         <argument
             android:name="userDrive"
-            app:nullable="true"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_favoritesFragment_self"
@@ -871,7 +870,6 @@
             app:argType="boolean" />
         <argument
             android:name="userDrive"
-            app:nullable="true"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_sharedWithMeFragment_to_sortFilesBottomSheetDialog"
@@ -896,7 +894,6 @@
             app:argType="string" />
         <argument
             android:name="userDrive"
-            app:nullable="true"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_mySharesFragment_self"
