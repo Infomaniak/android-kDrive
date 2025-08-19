@@ -181,8 +181,6 @@ dependencies {
 
     implementation(platform(core.compose.bom))
     implementation(core.compose.foundation)
-    implementation(core.compose.material3)
-    implementation(core.compose.ui.tooling.preview)
 
     implementation(core.ktor.client.okhttp)
 
