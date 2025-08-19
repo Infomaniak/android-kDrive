@@ -179,18 +179,16 @@ object FileController {
             .toFlow()
     }
 
-    fun getRecentFolders(recentFolderNumber: Int): Flow<List<File>> {
-        return getRealmInstance().use { realm ->
-            realm.where(File::class.java)
-                .equalTo(File::type.name, Type.DIRECTORY.value)
-                .greaterThan(File::id.name, ROOT_ID)
-                .greaterThan(File::parentId.name, ROOT_ID)
-                .sort(File::lastModifiedAt.name, Sort.DESCENDING)
-                .limit(recentFolderNumber.toLong())
-                .sort(File::lastModifiedAt.name, Sort.ASCENDING)
-                .findAllAsync()
-                .toFlow()
-        }
+    fun getRecentFolders(realm: Realm, recentFolderNumber: Int): Flow<List<File>> {
+        return realm.where(File::class.java)
+            .equalTo(File::type.name, Type.DIRECTORY.value)
+            .greaterThan(File::id.name, ROOT_ID)
+            .greaterThan(File::parentId.name, ROOT_ID)
+            .sort(File::lastModifiedAt.name, Sort.DESCENDING)
+            .limit(recentFolderNumber.toLong())
+            .sort(File::lastModifiedAt.name, Sort.ASCENDING)
+            .findAllAsync()
+            .toFlow()
     }
 
     //region isMarkedAsOffline

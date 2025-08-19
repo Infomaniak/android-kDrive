@@ -62,6 +62,8 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
+import coil.ImageLoader
+import coil.imageLoader
 import coil.load
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -140,8 +142,18 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     }
 }
 
-fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image) {
-    load(data) {
+fun ImageView.loadAny(
+    data: Any?,
+    @DrawableRes errorRes: Int = R.drawable.fallback_image,
+    imageLoader: ImageLoader = context.imageLoader
+) {
+    imageLoader?.let {
+        load(data, it) {
+            error(errorRes)
+            fallback(errorRes)
+            placeholder(R.drawable.placeholder)
+        }
+    } ?: load(data) {
         error(errorRes)
         fallback(errorRes)
         placeholder(R.drawable.placeholder)

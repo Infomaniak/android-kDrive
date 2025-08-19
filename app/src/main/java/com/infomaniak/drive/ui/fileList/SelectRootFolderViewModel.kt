@@ -20,8 +20,15 @@ package com.infomaniak.drive.ui.fileList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FolderFilesProvider
+import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
+import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.utils.Utils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,15 +39,43 @@ import kotlinx.coroutines.launch
 
 class SelectRootFolderViewModel : ViewModel() {
 
-    private val loadFiles = MutableSharedFlow<Int>(replay = 1)
+    private val recentFilesToLoadLimit = MutableSharedFlow<Int>(replay = 1)
+
+    private var userDrive: UserDrive? = null
+    private val realm by lazy { FileController.getRealmInstance(userDrive) }
+
+    private var rootFilesJob: Job = Job()
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    val recentFiles: StateFlow<List<File>> = loadFiles.distinctUntilChanged().flatMapLatest { limit ->
-        FileController.getRecentFolders(limit)
+    val recentFiles: StateFlow<List<File>> = recentFilesToLoadLimit.distinctUntilChanged().flatMapLatest { limit ->
+        FileController.getRecentFolders(realm, limit)
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    fun getRecentFolders(limit: Int) {
+    fun getRecentFolders(userDrive: UserDrive, limit: Int) {
+        this.userDrive = userDrive
         viewModelScope.launch {
-            loadFiles.emit(limit)
+            recentFilesToLoadLimit.emit(limit)
         }
+    }
+
+    fun loadRootFiles(userDrive: UserDrive) {
+        rootFilesJob.cancel()
+        rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
+            FolderFilesProvider.getFiles(
+                FolderFilesProvider.FolderFilesProviderArgs(
+                    folderId = Utils.ROOT_ID,
+                    isFirstPage = true,
+                    order = SortType.NAME_AZ,
+                    sourceRestrictionType = ONLY_FROM_REMOTE,
+                    userDrive = userDrive,
+                )
+            )
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        rootFilesJob.cancel()
+        realm.close()
     }
 }

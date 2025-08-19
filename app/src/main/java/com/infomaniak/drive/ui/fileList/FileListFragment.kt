@@ -43,6 +43,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -483,32 +484,23 @@ open class FileListFragment : MultiSelectFragment(
             updateMultiSelect = { onUpdateMultiSelect() }
         }
 
+        val mainApp = requireContext().applicationContext as MainApplication
+
         fileAdapter = FileAdapter(
             multiSelectManager = multiSelectManager,
             fileList = FileController.emptyList(mainViewModel.realm),
-            lifecycle = viewLifecycleOwner.lifecycle
+            lifecycle = viewLifecycleOwner.lifecycle,
         ).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             setHasStableIds(true)
 
             onEmptyList = { checkIfNoFiles() }
 
-            onFileClicked = { file ->
-                if (file.isUsable()) {
-                    when {
-                        file.isFolder() -> openFolder(
-                            FileListNavigationType.Folder(file),
-                            navigationArgs.shouldHideBottomNavigation,
-                            navigationArgs.shouldShowSmallFab,
-                            fileListViewModel,
-                        )
-                        file.isBookmark() -> openBookmark(file)
-                        else -> displayFile(file, mainViewModel, fileAdapter)
-                    }
-                } else {
-                    refreshActivities()
-                }
+            if (userDrive != null && userDrive?.userId != AccountUtils.currentUserId) {
+                newImageLoader = mainApp.newImageLoader(userDrive?.userId)
             }
+
+            onFileClicked = getFunctionByFileType()
 
             onMenuClicked = { file ->
                 val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
@@ -544,6 +536,23 @@ open class FileListFragment : MultiSelectFragment(
                 context?.let { fileAdapter.toggleOfflineMode(it, !isInternetAvailable) }
             },
         )
+    }
+
+    private fun getFunctionByFileType(): (File) -> Unit = { file ->
+        if (file.isUsable()) {
+            when {
+                file.isFolder() -> openFolder(
+                    FileListNavigationType.Folder(file),
+                    navigationArgs.shouldHideBottomNavigation,
+                    navigationArgs.shouldShowSmallFab,
+                    fileListViewModel,
+                )
+                file.isBookmark() -> openBookmark(file)
+                else -> displayFile(file, mainViewModel, fileAdapter)
+            }
+        } else {
+            refreshActivities()
+        }
     }
 
     protected open fun homeClassName(): String? = null

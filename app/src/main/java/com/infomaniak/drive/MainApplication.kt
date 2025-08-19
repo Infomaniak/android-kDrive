@@ -42,7 +42,6 @@ import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
-import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.services.DeviceInfoUpdateWorker
@@ -55,7 +54,6 @@ import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.lib.core.InfomaniakCore
 import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.AccessTokenUsageInterceptor
 import com.infomaniak.lib.core.networking.HttpClient
@@ -63,12 +61,10 @@ import com.infomaniak.lib.core.networking.HttpClientConfig
 import com.infomaniak.lib.core.utils.CoilUtils
 import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.lib.core.utils.clearStack
-import com.infomaniak.lib.login.ApiToken
 import com.infomaniak.lib.stores.AppUpdateScheduler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import splitties.init.injectAsAppCtx
@@ -123,7 +119,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
         AccountUtils.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
-        val tokenInterceptorListener = tokenInterceptorListener()
+        val tokenInterceptorListener =
+            TokenInterceptorListenerProvider.tokenInterceptorListener(refreshTokenError, applicationScope)
         HttpClientConfig.customInterceptors = listOf(
             AccessTokenUsageInterceptor(
                 previousApiCall = uiSettings.accessTokenApiCallRecord,
@@ -192,13 +189,23 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     override fun newImageLoader(): ImageLoader {
+        return newImageLoader(userId = null)
+    }
+
+    fun newImageLoader(userId: Int?): ImageLoader {
+
+        val tokenInterceptorListener = when (userId) {
+            null -> TokenInterceptorListenerProvider.tokenInterceptorListener(refreshTokenError, applicationScope)
+            else -> TokenInterceptorListenerProvider.tokenInterceptorListenerByUserId(refreshTokenError, userId)
+        }
+
         val factory = if (SDK_INT >= 28) {
             ImageDecoderDecoder.Factory()
         } else {
             GifDecoder.Factory()
         }
 
-        return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener(), customFactories = listOf(factory))
+        return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener, customFactories = listOf(factory))
     }
 
     private val refreshTokenError: (User) -> Unit = { user ->
@@ -214,24 +221,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         applicationScope.launch {
             AccountUtils.removeUserAndDeleteToken(this@MainApplication, user)
         }
-    }
-
-    private fun tokenInterceptorListener() = object : TokenInterceptorListener {
-        val userTokenFlow by lazy { AppSettings.currentUserIdFlow.mapToApiToken(applicationScope) }
-
-        override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
-            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
-            AccountUtils.setUserToken(AccountUtils.currentUser!!, apiToken)
-        }
-
-        override suspend fun onRefreshTokenError() {
-            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
-            refreshTokenError(AccountUtils.currentUser!!)
-        }
-
-        override suspend fun getUserApiToken(): ApiToken? = userTokenFlow.first()
-
-        override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
 
     private fun configureSentry() {

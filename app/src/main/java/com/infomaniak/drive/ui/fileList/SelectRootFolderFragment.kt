@@ -26,8 +26,10 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
+import androidx.navigation.fragment.navArgs
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.CardviewFileListBinding
@@ -36,7 +38,6 @@ import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.BaseRootFolderFragment
 import com.infomaniak.drive.ui.home.RootFilesFragment.FolderToOpen
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.TypeFolder
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.lib.core.utils.setMargins
@@ -50,6 +51,8 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
 
     override val fileListViewModel: FileListViewModel by viewModels()
+
+    private val navigationArgs: SelectRootFolderFragmentArgs by navArgs()
 
     override val rootFolderLayout: RootFolderLayoutBinding
         get() = binding.rootFolderLayout
@@ -69,9 +72,12 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
+        fileListViewModel.updateRootFiles(navigationArgs.userDrive)
+
         collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
-        val currentDrive = AccountUtils.getCurrentDrive(forceRefresh = true)
+        val currentDrive = DriveInfosController.getDrive(driveId = navigationArgs.userDrive.driveId)
+
         rootFolderTitle.text = currentDrive?.name
 
         rootFolderLayout.apply {
@@ -81,6 +87,8 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         }
 
         setupRecentFoldersViews()
+
+        selectRootFolderViewModel.loadRootFiles(navigationArgs.userDrive)
 
         (activity as SelectFolderActivity).hideSaveButton()
 
@@ -112,7 +120,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
     private fun setupRecentFoldersViews() {
         viewLifecycleOwner.lifecycleScope.launch {
-            selectRootFolderViewModel.getRecentFolders(RECENT_FOLDER_NUMBER)
+            selectRootFolderViewModel.getRecentFolders(userDrive = navigationArgs.userDrive, RECENT_FOLDER_NUMBER)
             selectRootFolderViewModel.recentFiles.collectLatest { files ->
 
                 _binding?.let {
@@ -134,7 +142,11 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
         root.isVisible = true
         root.setOnClickListener {
             safelyNavigate(
-                SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(file.id, file.name)
+                SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
+                    folderId = file.id,
+                    folderName = file.name,
+                    userDrive = navigationArgs.userDrive,
+                )
             )
         }
         itemViewFile.setFileItem(file = file, typeFolder = TypeFolder.recentFolder)
@@ -145,6 +157,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     ): NavDirections = SelectRootFolderFragmentDirections.selectRootFolderFragmentToSelectFolderFragment(
         folderId = folderToOpen.id,
         folderName = folderToOpen.name,
+        userDrive = navigationArgs.userDrive,
     )
 
     companion object {

@@ -19,6 +19,8 @@ package com.infomaniak.drive.data.cache
 
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
+import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FileController.saveRemoteFiles
@@ -31,7 +33,6 @@ import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.realm.RealmQuery
 import io.sentry.Sentry
@@ -239,7 +240,7 @@ object FolderFilesProvider {
 
         ensureActive()
 
-        handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy)
+        handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy, okHttpClient)
     }
 
     private fun loadCloudStorageFromRemote(
@@ -278,13 +279,17 @@ object FolderFilesProvider {
         apiResponse: CursorApiResponse<List<File>>,
         folderFilesProviderArgs: FolderFilesProviderArgs,
         folderProxy: File?,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): FolderFilesProviderResult? {
         val userDrive = folderFilesProviderArgs.userDrive
         val apiResponseData = apiResponse.data
         val folderWithChildren = folderFilesProviderArgs.withChildren
 
         val localFolder = folderProxy?.freeze()
-            ?: ApiRepository.getFileDetails(File(id = folderFilesProviderArgs.folderId, driveId = userDrive.driveId)).data
+            ?: ApiRepository.getFileDetails(
+                File(id = folderFilesProviderArgs.folderId, driveId = userDrive.driveId),
+                okHttpClient
+            ).data
             ?: return null
 
         return when {
