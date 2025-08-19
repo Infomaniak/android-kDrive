@@ -147,13 +147,7 @@ fun ImageView.loadAny(
     @DrawableRes errorRes: Int = R.drawable.fallback_image,
     imageLoader: ImageLoader = context.imageLoader
 ) {
-    imageLoader?.let {
-        load(data, it) {
-            error(errorRes)
-            fallback(errorRes)
-            placeholder(R.drawable.placeholder)
-        }
-    } ?: load(data) {
+    load(data, imageLoader) {
         error(errorRes)
         fallback(errorRes)
         placeholder(R.drawable.placeholder)
