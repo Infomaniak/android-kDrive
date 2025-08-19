@@ -42,7 +42,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     override val noItemsRootIcon = R.drawable.ic_share
     override val noItemsRootTitle = R.string.mySharesNoFile
 
-    private val navigationArgs by navArgs<MySharesFragmentArgs>()
+    private val navigationArgs: MySharesFragmentArgs by navArgs()
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,8 +66,8 @@ class MySharesFragment : FileSubTypeListFragment() {
             if (file.isFolder()) safeNavigate(
                 MySharesFragmentDirections.actionMySharesFragmentSelf(
                     userDrive = navigationArgs.userDrive,
-                    file.id,
-                    file.name
+                    folderId = file.id,
+                    folderName = file.name
                 )
             ) else {
                 val fileList = fileAdapter.getFileObjectsList(mainViewModel.realm)
@@ -92,17 +92,18 @@ class MySharesFragment : FileSubTypeListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            fileListViewModel.getMySharedFiles(fileListViewModel.sortType, navigationArgs.userDrive ?: UserDrive()).observe(viewLifecycleOwner) {
-                // forceClean because myShares is not paginated
-                populateFileList(
-                    files = it?.first ?: ArrayList(),
-                    folderId = FileController.MY_SHARES_FILE_ID,
-                    forceClean = true,
-                    isComplete = true,
-                    realm = FileController.getRealmInstance(navigationArgs.userDrive),
-                    isNewSort = isNewSort
-                )
-            }
+            fileListViewModel.getMySharedFiles(fileListViewModel.sortType, navigationArgs.userDrive ?: UserDrive())
+                .observe(viewLifecycleOwner) {
+                    // forceClean because myShares is not paginated
+                    populateFileList(
+                        files = it?.first ?: ArrayList(),
+                        folderId = FileController.MY_SHARES_FILE_ID,
+                        forceClean = true,
+                        isComplete = true,
+                        realm = mainViewModel.realm,
+                        isNewSort = isNewSort
+                    )
+                }
         }
     }
 }

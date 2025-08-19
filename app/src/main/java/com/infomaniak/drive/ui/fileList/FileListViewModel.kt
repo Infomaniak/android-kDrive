@@ -176,11 +176,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                         apiResponse.data.isNullOrEmpty() -> emit(null)
                         apiResponse.hasMoreAndCursorExists -> {
                             apiResponse.data?.let {
-                                FileController.saveFavoritesFiles(
-                                    files = it,
-                                    replaceOldData = isFirstPage,
-                                    realm = FileController.getRealmInstance(userDrive)
-                                )
+                                saveFavoriteFiles(it, isFirstPage, userDrive)
                             }
                             emit(
                                 FolderFilesResult(
@@ -193,11 +189,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                             recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                         }
                         else -> {
-                            FileController.saveFavoritesFiles(
-                                apiResponse.data!!,
-                                isFirstPage,
-                                realm = FileController.getRealmInstance(userDrive)
-                            )
+                            saveFavoriteFiles(apiResponse.data!!, isFirstPage, userDrive)
                             emit(
                                 FolderFilesResult(
                                     files = apiResponse.data!!,
@@ -219,6 +211,21 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
             }
             recursive(isFirstPage = true, isNewSort = isNewSort)
         }
+    }
+
+    private fun saveFavoriteFiles(
+        files: ArrayList<File>,
+        isFirstPage: Boolean,
+        userDrive: UserDrive
+    ) {
+        FileController.getRealmInstance(userDrive).use {
+            FileController.saveFavoritesFiles(
+                files = files,
+                replaceOldData = isFirstPage,
+                realm = it
+            )
+        }
+
     }
 
     fun getPendingFilesCount(folderId: Int) = liveData(Dispatchers.IO) {

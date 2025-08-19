@@ -43,7 +43,7 @@ class FavoritesFragment : FileListFragment() {
     override val noItemsRootIcon = R.drawable.ic_star_filled
     override val noItemsRootTitle = R.string.favoritesNoFile
 
-    private val navigationArgs by navArgs<FavoritesFragmentArgs>()
+    private val navigationArgs: FavoritesFragmentArgs by navArgs()
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
@@ -134,7 +134,7 @@ class FavoritesFragment : FileListFragment() {
                             isFavorite = true,
                             order = fileListViewModel.sortType,
                             parentId = FileController.FAVORITES_FILE_ID,
-                            realm = FileController.getRealmInstance(navigationArgs.userDrive),
+                            realm = mainViewModel.realm,
                             withVisibilitySort = false
                         )
                         fileAdapter.updateFileList(realmFiles)

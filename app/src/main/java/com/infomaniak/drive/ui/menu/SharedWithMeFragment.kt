@@ -60,13 +60,16 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val isRoot = folderId == ROOT_ID
         mainViewModel.setCurrentFolder(null)
-        userDrive =
-            UserDrive(userId = navigationArgs.userDrive!!.userId, driveId = navigationArgs.driveId, sharedWithMe = true).also {
-                mainViewModel.loadCurrentFolder(
-                    folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderId,
-                    userDrive = it,
-                )
-            }
+        userDrive = UserDrive(
+            userId = navigationArgs.userDrive!!.userId,
+            driveId = navigationArgs.driveId,
+            sharedWithMe = true
+        ).also {
+            mainViewModel.loadCurrentFolder(
+                folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderId,
+                userDrive = it,
+            )
+        }
 
         sharedWithMeViewModel.sharedWithMeRealm = FileController.getRealmInstance(userDrive)
 
@@ -124,14 +127,10 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
 
     private fun canShowButton(): Boolean {
         val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
-        val fromSaveExternal = if (navigationArgs.fromSaveExternal) {
-            true
-        } else {
-            userDrive?.driveId == AccountUtils.currentDriveId
-        }
+        val isFromExternalOrCurrentDrive = navigationArgs.fromSaveExternal || userDrive?.driveId == AccountUtils.currentDriveId
         return folderId != selectFolderViewModel.disableSelectedFolderId
                 && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
-                && fromSaveExternal
+                && isFromExternalOrCurrentDrive
     }
 
     private fun openMaintenanceDialog(driveName: String) {
