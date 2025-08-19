@@ -30,4 +30,5 @@
     <!--Bottom sheet-->
     <color name="bottomSheetBackgroundColor">@color/appBar</color>
     <color name="onBottomSheetBackgroundColor">@color/title</color>
+    <color name="dragHandleColor">#cedae1</color>
 </resources>

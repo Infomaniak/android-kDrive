@@ -54,6 +54,10 @@
         <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
         <item name="snackbarTextViewStyle">@style/Widget.App.SnackbarTextView</item>
         <item name="toolbarStyle">@style/AppTheme.ToolbarTheme</item>
+
+        <!--Material 3 theme-->
+        <item name="colorOnSurface">@color/title</item>
+        <item name="colorSurfaceContainerLow">@color/bottomSheetBackgroundColor</item>
     </style>
 
     <style name="AppTheme" parent="AppThemeBase" />
@@ -227,6 +231,7 @@
 
     <!--Text-->
 
+    <!--Keep these text styles in sync with their compose version in Type.kt-->
     <style name="H1">
         <item name="android:fontFamily">@font/suisseintl_bold</item>
         <item name="android:textColor">@color/title</item>
