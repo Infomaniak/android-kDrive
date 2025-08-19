@@ -30,6 +30,7 @@ import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.PrintManager
+import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -48,6 +49,7 @@ import androidx.webkit.WebViewFeature
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityOnlyOfficeBinding
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.showToast
@@ -110,6 +112,22 @@ class OnlyOfficeActivity : AppCompatActivity() {
                     this@OnlyOfficeActivity.filePathCallback = filePathCallback
                     pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                     return true
+                }
+
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    if (consoleMessage != null) {
+                        val lineNumber = consoleMessage.lineNumber()
+                        val messageLevel = consoleMessage.messageLevel()
+                        val sourceId = consoleMessage.sourceId()
+                        val message = "${consoleMessage.message()} \n\tat $sourceId line $lineNumber"
+                        when (messageLevel) {
+                            ConsoleMessage.MessageLevel.ERROR -> SentryLog.e(TAG, message)
+                            ConsoleMessage.MessageLevel.WARNING -> SentryLog.w(TAG, message)
+                            else -> return false
+                        }
+                        return true
+                    }
+                    return super.onConsoleMessage(consoleMessage)
                 }
             }
 
@@ -209,6 +227,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     companion object {
+        val TAG = OnlyOfficeActivity::class.java.simpleName
         const val ONLYOFFICE_URL_TAG = "office_url_tag"
         const val ONLYOFFICE_FILENAME_TAG = "office_filename_tag"
     }
