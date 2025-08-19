@@ -29,8 +29,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_08_003_01
-        versionName = "5.8.3"
+        versionCode = 5_08_004_01
+        versionName = "5.8.4"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -109,6 +109,11 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+    }
+
+    lint {
+        // Temporary fix waiting for the gradual update of some libs (androidx lifecycle, mqtt)
+        disable += "NullSafeMutableLiveData"
     }
 
     testOptions.unitTests.all {
