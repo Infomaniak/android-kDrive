@@ -60,6 +60,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
 import com.infomaniak.drive.data.models.FileListNavigationType
+import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
@@ -74,6 +75,7 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
@@ -122,6 +124,7 @@ open class FileListFragment : MultiSelectFragment(
 
     private val navigationArgs: FileListFragmentArgs by navArgs()
     private val dropboxViewModel: DropboxViewModel by activityViewModels()
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
 
     internal var folderId = ROOT_ID
     internal var folderName: String = "/"
@@ -359,6 +362,20 @@ open class FileListFragment : MultiSelectFragment(
         }
 
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { closeMultiSelect() }
+    }
+
+    fun setupSaveButton() {
+        if (requireActivity() is SelectFolderActivity) {
+            lifecycleScope.launchWhenResumed {
+                with(requireActivity() as SelectFolderActivity) {
+                    showSaveButton()
+                    val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+                    val enable = folderId != selectFolderViewModel.disableSelectedFolderId
+                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
+                    enableSaveButton(enable)
+                }
+            }
+        }
     }
 
     override fun onStart() {

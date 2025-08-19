@@ -19,7 +19,9 @@ package com.infomaniak.drive.ui.menu
 
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -27,9 +29,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.SharedWithMeViewModel
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.SharedWithMeMultiSelectActionsBottomSheetDialog
@@ -49,17 +53,25 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override val noItemsRootIcon = R.drawable.ic_share
     override val noItemsRootTitle = R.string.sharedWithMeNoFile
 
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val isRoot = folderId == ROOT_ID
         mainViewModel.setCurrentFolder(null)
-        userDrive = UserDrive(driveId = navigationArgs.driveId, sharedWithMe = true).also {
+        userDrive = UserDrive(
+            userId = navigationArgs.userDrive.userId,
+            driveId = navigationArgs.driveId,
+            sharedWithMe = true
+        ).also {
             mainViewModel.loadCurrentFolder(
                 folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderId,
                 userDrive = it,
             )
         }
+
+        sharedWithMeViewModel.sharedWithMeRealm = FileController.getRealmInstance(userDrive)
 
         downloadFiles = DownloadFiles()
 
@@ -72,6 +84,15 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             navigationArgs.folderName
         }
 
+        if (requireActivity() is SelectFolderActivity) {
+            lifecycleScope.launchWhenResumed {
+                with(requireActivity() as SelectFolderActivity) {
+                    showSaveButton()
+                    enableSaveButton(canShowButton())
+                }
+            }
+        }
+
         fileAdapter.apply {
             isSelectingFolder = requireActivity() is SelectFolderActivity
             initAsyncListDiffer()
@@ -81,7 +102,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                     // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
                     // maintenance check on the folder type but we don't know if this is necessary
                     file.isFolder() -> {
-                        DriveInfosController.getDrive(AccountUtils.currentUserId, file.driveId)?.let { currentDrive ->
+                        DriveInfosController.getDrive(navigationArgs.userDrive.userId, file.driveId)?.let { currentDrive ->
                             if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
                         }
                     }
@@ -104,6 +125,14 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         setupBasicMultiSelectLayout()
     }
 
+    private fun canShowButton(): Boolean {
+        val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+        val isFromExternalOrCurrentDrive = navigationArgs.fromSaveExternal || userDrive?.driveId == AccountUtils.currentDriveId
+        return folderId != selectFolderViewModel.disableSelectedFolderId
+                && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
+                && isFromExternalOrCurrentDrive
+    }
+
     private fun openMaintenanceDialog(driveName: String) {
         safeNavigate(
             R.id.driveMaintenanceBottomSheetFragment,
@@ -117,6 +146,8 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
                 folderId = id,
                 folderName = name,
                 driveId = driveId,
+                fromSaveExternal = navigationArgs.fromSaveExternal,
+                userDrive = userDrive ?: UserDrive(),
             )
         )
     }

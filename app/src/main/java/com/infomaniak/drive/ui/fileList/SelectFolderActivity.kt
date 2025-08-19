@@ -34,7 +34,7 @@ import com.infomaniak.drive.databinding.ActivitySelectFolderBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.utils.setMargins
 
@@ -76,7 +76,10 @@ class SelectFolderActivity : BaseActivity() {
 
             navController.setGraph(
                 R.navigation.select_folder_navigation,
-                SelectRootFolderFragmentArgs(userDrive = currentUserDrive).toBundle()
+                SelectRootFolderFragmentArgs(
+                    fromSaveExternal = navigationArgs.fromSaveExternal,
+                    userDrive = currentUserDrive
+                ).toBundle()
             )
 
             setSaveButton(customArgs)
@@ -102,13 +105,14 @@ class SelectFolderActivity : BaseActivity() {
 
     private fun setSaveButton(customArgs: Bundle?) = with(binding) {
         saveButton.setOnClickListener {
-            val currentFragment = navHostFragment.childFragmentManager.fragments.first() as SelectFolderFragment
+            val currentFragment = navHostFragment.childFragmentManager.fragments.first() as FileListFragment
             Intent().apply {
                 putExtras(
                     SelectFolderActivityArgs(
                         folderId = currentFragment.folderId,
                         folderName = currentFragment.folderName,
-                        customArgs = customArgs
+                        customArgs = customArgs,
+                        isSharedWithMe = navHostFragment.childFragmentManager.fragments.first() is SharedWithMeFragment
                     ).toBundle()
                 )
                 setResult(RESULT_OK, this)

@@ -27,6 +27,7 @@ import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.Utils
+import io.realm.Realm
 import io.realm.kotlin.toFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,13 +35,13 @@ import kotlinx.coroutines.launch
 
 class SharedWithMeViewModel : ViewModel() {
 
-    val sharedWithMeRealm = FileController.getRealmInstance(UserDrive(sharedWithMe = true))
+    var sharedWithMeRealm: Realm? = null
 
     private var sharedWithMeJob: Job? = null
 
     private val loadSharedWithMeFiles = MutableLiveData<Pair<Int, File.SortType>>()
     val sharedWithMeFiles = loadSharedWithMeFiles.switchMap { (folderId, order) ->
-        FileController.getRealmLiveFiles(folderId, sharedWithMeRealm, order).toFlow().asLiveData()
+        sharedWithMeRealm?.let { FileController.getRealmLiveFiles(folderId, it, order).toFlow().asLiveData() }
     }
 
     fun loadSharedWithMeFiles(
@@ -86,7 +87,7 @@ class SharedWithMeViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        runCatching { sharedWithMeRealm.close() }
+        runCatching { sharedWithMeRealm?.close() }
         sharedWithMeJob?.cancel()
     }
 }

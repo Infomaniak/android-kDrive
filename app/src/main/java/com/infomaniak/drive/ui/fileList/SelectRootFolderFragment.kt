@@ -72,7 +72,9 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        fileListViewModel.updateRootFiles(navigationArgs.userDrive)
+        val userDrive = navigationArgs.userDrive
+
+        fileListViewModel.updateRootFiles(userDrive)
 
         collapsingToolbarLayout.title = getString(R.string.selectFolderTitle)
 
@@ -88,7 +90,7 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
         setupRecentFoldersViews()
 
-        selectRootFolderViewModel.loadRootFiles(navigationArgs.userDrive)
+        selectRootFolderViewModel.loadRootFiles(userDrive)
 
         (activity as SelectFolderActivity).hideSaveButton()
 
@@ -96,9 +98,12 @@ class SelectRootFolderFragment : BaseRootFolderFragment() {
 
         setupItems(
             folderLayout = binding.rootFolderLayout,
-            favoritesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToFavoritesFragment(),
-            sharedWithMeNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment(),
-            mySharesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment()
+            favoritesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToFavoritesFragment(userDrive),
+            sharedWithMeNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToSharedWithMeFragment(
+                fromSaveExternal = navigationArgs.fromSaveExternal,
+                userDrive = userDrive,
+            ),
+            mySharesNav = SelectRootFolderFragmentDirections.actionSelectRootFolderFragmentToMySharesFragment(userDrive)
         )
 
         observeFiles()

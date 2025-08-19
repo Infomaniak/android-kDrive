@@ -81,6 +81,14 @@ object FileController {
         return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
     }
 
+    fun getSharedDrive(userId: Int, fileId: Int): File? {
+        getRealmInstance(UserDrive(userId = userId, sharedWithMe = true)).use { realm ->
+            return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {
+                realm.copyFromRealm(it, 1)
+            }
+        }
+    }
+
     // https://github.com/realm/realm-java/issues/1862
     fun emptyList(realm: Realm): RealmResults<File> = realm.where(File::class.java).alwaysFalse().findAll()
 

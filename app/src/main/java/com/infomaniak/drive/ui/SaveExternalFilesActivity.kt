@@ -101,6 +101,8 @@ class SaveExternalFilesActivity : BaseActivity() {
     private var currentUri: Uri? = null
     private var isMultiple = false
 
+    private var driveIdSharedWithMe: Int? = null
+
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
             data?.extras?.let { bundle ->
@@ -250,6 +252,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     putExtras(
                         SelectFolderActivityArgs(
                             userId = selectDriveViewModel.selectedUserId.value!!,
+                            fromSaveExternal = true,
                             driveId = selectDriveViewModel.selectedDrive.value?.id!!,
                         ).toBundle()
                     )
@@ -262,9 +265,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun fetchFolder() = with(selectDriveViewModel) {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
-            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null
-                || folderId == null
-            ) {
+            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null || folderId == null) {
                 null
             } else {
                 val userDrive = UserDrive(
@@ -272,7 +273,15 @@ class SaveExternalFilesActivity : BaseActivity() {
                     driveId = selectedDrive.value!!.id,
                     sharedWithMe = selectedDrive.value!!.sharedWithMe,
                 )
-                FileController.getFileById(folderId, userDrive)
+                driveIdSharedWithMe = FileController.getSharedDrive(userDrive.userId, folderId)?.driveId
+
+                FileController.getFileById(folderId, userDrive) ?: FileController.getFileById(
+                    fileId = folderId,
+                    userDrive = UserDrive(
+                        userId = selectedUserId.value!!,
+                        sharedWithMe = true,
+                    )
+                )
             }
 
             folder?.let {
@@ -307,7 +316,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     if (canSaveFilesPref()) uiSettings.setSaveExternalFilesPref(userId, driveId, folderId)
 
                     lifecycleScope.launch(Dispatchers.IO) {
-                        if (storeFiles(userId, driveId, folderId)) {
+                        if (storeFiles(userId, driveIdSharedWithMe ?: driveId, folderId)) {
                             syncImmediately()
                             finish()
                         } else {

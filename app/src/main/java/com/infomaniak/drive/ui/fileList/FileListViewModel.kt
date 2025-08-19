@@ -163,18 +163,21 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getFavoriteFiles(order: SortType, isNewSort: Boolean): LiveData<FolderFilesResult?> {
+    fun getFavoriteFiles(order: SortType, isNewSort: Boolean, userDrive: UserDrive): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
             tailrec suspend fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
                 getFilesJob.ensureActive()
-                val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, cursor)
+                val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
+                val apiResponse = ApiRepository.getFavoriteFiles(userDrive.driveId, order, cursor, okHttpClient)
                 if (apiResponse.isSuccess()) {
                     when {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
                         apiResponse.hasMoreAndCursorExists -> {
-                            apiResponse.data?.let { FileController.saveFavoritesFiles(it, isFirstPage) }
+                            apiResponse.data?.let {
+                                saveFavoriteFiles(it, isFirstPage, userDrive)
+                            }
                             emit(
                                 FolderFilesResult(
                                     files = apiResponse.data!!,
@@ -186,7 +189,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                             recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                         }
                         else -> {
-                            FileController.saveFavoritesFiles(apiResponse.data!!, isFirstPage)
+                            saveFavoriteFiles(apiResponse.data!!, isFirstPage, userDrive)
                             emit(
                                 FolderFilesResult(
                                     files = apiResponse.data!!,
@@ -199,7 +202,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                     }
                 } else emit(
                     FolderFilesResult(
-                        files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
+                        files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID, userDrive = userDrive),
                         isComplete = true,
                         isFirstPage = true,
                         isNewSort = isNewSort,
@@ -207,6 +210,16 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 )
             }
             recursive(isFirstPage = true, isNewSort = isNewSort)
+        }
+    }
+
+    private fun saveFavoriteFiles(
+        files: ArrayList<File>,
+        isFirstPage: Boolean,
+        userDrive: UserDrive
+    ) {
+        FileController.getRealmInstance(userDrive).use {
+            FileController.saveFavoritesFiles(files = files, replaceOldData = isFirstPage, realm = it)
         }
     }
 
@@ -228,11 +241,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getMySharedFiles(sortType: SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
+    fun getMySharedFiles(sortType: SortType, userDrive: UserDrive): LiveData<Pair<ArrayList<File>, Boolean>?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            FileController.getMySharedFiles(UserDrive(), sortType, transaction = { files, isComplete ->
+            FileController.getMySharedFiles(userDrive, sortType, transaction = { files, isComplete ->
                 runBlocking { emit(files to isComplete) }
             })
         }

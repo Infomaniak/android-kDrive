@@ -540,7 +540,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onDeleteFile(onApiResponse: () -> Unit)
         fun onLeaveShare(onApiResponse: () -> Unit)
         fun onDuplicateFile(destinationFolder: File)
-        fun onMoveFile(destinationFolder: File)
+        fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean = false)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
 
@@ -561,7 +561,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     val file = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
                     when (customArgs?.getString(SINGLE_OPERATION_CUSTOM_TAG)) {
                         SingleOperation.COPY.name -> onDuplicateFile(file)
-                        SingleOperation.MOVE.name -> onMoveFile(file)
+                        SingleOperation.MOVE.name -> onMoveFile(file, isSharedWithMe)
                         else -> Unit
                     }
                 }
