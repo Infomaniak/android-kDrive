@@ -60,7 +60,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/moveButtonMultiSelect"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/moveButtonMultiSelect"
+        app:layout_constraintTop_toTopOf="@id/menuButtonMultiSelect"
         tools:text="500 sélectionné(s)" />
 
     <com.google.android.material.button.MaterialButton

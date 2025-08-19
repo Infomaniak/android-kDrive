@@ -77,6 +77,7 @@ import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadActio
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
+import com.infomaniak.drive.ui.menu.OfflineFileFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
@@ -142,6 +143,8 @@ open class FileListFragment : MultiSelectFragment(
     protected open var showPendingFiles = true
     protected open var allowCancellation = true
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
+
+    var sizeOfOffline: Int = 0
 
     private val noItemsFoldersTitle: Int by lazy {
         if (mainViewModel.currentFolder.value?.rights?.canCreateFile == true
@@ -398,13 +401,21 @@ open class FileListFragment : MultiSelectFragment(
     }
 
     private fun setupMultiSelect() {
+        val isOfflineFileFragment = this@FileListFragment is OfflineFileFragment
         multiSelectManager.isMultiSelectAuthorized = true
 
         multiSelectLayout?.apply {
 
             toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
-            moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
-            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
+
+            moveButtonMultiSelect.isGone = isOfflineFileFragment
+            deleteButtonMultiSelect.isGone = isOfflineFileFragment
+
+            if (!isOfflineFileFragment) {
+                moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
+                deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
+            }
+
             menuButtonMultiSelect.setOnClickListener {
                 onMenuButtonClicked(
                     multiSelectBottomSheet = FileListMultiSelectActionsBottomSheetDialog(),
@@ -424,19 +435,27 @@ open class FileListFragment : MultiSelectFragment(
                         fileAdapter.configureAllSelected(true)
                         enableMultiSelectButtons(false)
 
-                        fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
-                            .observe(viewLifecycleOwner) { fileCount ->
-                                with(fileAdapter.getFiles()) {
-                                    multiSelectManager.selectedItems = this
-                                    multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
+                        if (isOfflineFileFragment) {
+                            setupAllSelect(sizeOfOffline)
+                        } else {
+                            fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
+                                .observe(viewLifecycleOwner) { fileCount ->
+                                    setupAllSelect(fileCount.count)
                                 }
-                                enableMultiSelectButtons(true)
-                                onUpdateMultiSelect(fileCount.count)
-                            }
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun setupAllSelect(listSize: Int?) {
+        val allFiles = fileAdapter.getFiles()
+        multiSelectManager.selectedItems = allFiles
+        multiSelectManager.selectedItemsIds = allFiles.map { it.id }.toHashSet()
+
+        enableMultiSelectButtons(isEnabled = true)
+        onUpdateMultiSelect(selectedNumber = listSize)
     }
 
     private fun setupDisplay() {
