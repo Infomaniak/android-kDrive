@@ -56,8 +56,8 @@
         <item name="toolbarStyle">@style/AppTheme.ToolbarTheme</item>
 
         <!--Material 3 theme-->
-        <item name="colorOnSurface">@color/title</item>
-        <item name="colorSurfaceContainerLow">@color/bottomSheetBackgroundColor</item>
+        <item name="colorOnSurface">@color/title</item> <!--Bottom sheet content color-->
+        <item name="colorSurfaceContainerLow">@color/bottomSheetBackgroundColor</item> <!--Bottom sheet container color-->
     </style>
 
     <style name="AppTheme" parent="AppThemeBase" />
