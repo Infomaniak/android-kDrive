@@ -64,7 +64,7 @@ open class OfflineFileFragment : FileSubTypeListFragment() {
             if (fileAdapter.fileList.isEmpty() || isNewSort) {
                 FileController.getOfflineFiles(order = fileListViewModel.sortType, customRealm = mainViewModel.realm).apply {
                     fileAdapter.updateFileList(this)
-                    sizeOfOffline = this.size
+                    sizeOfOffline = size
                 }
             }
 

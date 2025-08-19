@@ -144,7 +144,7 @@ open class FileListFragment : MultiSelectFragment(
     protected open var allowCancellation = true
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
-    var sizeOfOffline: Int? = null
+    var sizeOfOffline: Int = 0
 
     private val noItemsFoldersTitle: Int by lazy {
         if (mainViewModel.currentFolder.value?.rights?.canCreateFile == true
@@ -401,18 +401,21 @@ open class FileListFragment : MultiSelectFragment(
     }
 
     private fun setupMultiSelect() {
+        val isOfflineFileFragment = this@FileListFragment is OfflineFileFragment
         multiSelectManager.isMultiSelectAuthorized = true
 
         multiSelectLayout?.apply {
 
             toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
-            if (this@FileListFragment is OfflineFileFragment) {
-                moveButtonMultiSelect.isVisible = false
-                deleteButtonMultiSelect.isVisible = false
-            } else {
+
+            moveButtonMultiSelect.isGone = isOfflineFileFragment
+            deleteButtonMultiSelect.isGone = isOfflineFileFragment
+
+            if (!isOfflineFileFragment) {
                 moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
                 deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
             }
+
             menuButtonMultiSelect.setOnClickListener {
                 onMenuButtonClicked(
                     multiSelectBottomSheet = FileListMultiSelectActionsBottomSheetDialog(),
@@ -432,7 +435,7 @@ open class FileListFragment : MultiSelectFragment(
                         fileAdapter.configureAllSelected(true)
                         enableMultiSelectButtons(false)
 
-                        if (sizeOfOffline != null) {
+                        if (isOfflineFileFragment) {
                             setupAllSelect(sizeOfOffline)
                         } else {
                             fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
@@ -440,7 +443,6 @@ open class FileListFragment : MultiSelectFragment(
                                     setupAllSelect(fileCount.count)
                                 }
                         }
-
                     }
                 }
             }
@@ -448,12 +450,12 @@ open class FileListFragment : MultiSelectFragment(
     }
 
     private fun setupAllSelect(listSize: Int?) {
-        with(fileAdapter.getFiles()) {
-            multiSelectManager.selectedItems = this
-            multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
-        }
-        enableMultiSelectButtons(true)
-        onUpdateMultiSelect(listSize)
+        val allFiles = fileAdapter.getFiles()
+        multiSelectManager.selectedItems = allFiles
+        multiSelectManager.selectedItemsIds = allFiles.map { it.id }.toHashSet()
+
+        enableMultiSelectButtons(isEnabled = true)
+        onUpdateMultiSelect(selectedNumber = listSize)
     }
 
     private fun setupDisplay() {
