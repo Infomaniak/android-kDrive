@@ -125,6 +125,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import com.infomaniak.core.auth.BuildConfig as AuthBuildConfig
 
 typealias FileId = Int
 typealias IOFile = java.io.File
@@ -417,17 +418,13 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 
 fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
-private const val loginUrl = "https://login.infomaniak.com/"
-
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
-    loginUrl = loginUrl,
+    loginUrl = AuthBuildConfig.LOGIN_ENDPOINT_URL,
     appUID = BuildConfig.APPLICATION_ID,
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,
-    sentryCallback = { error ->
-        SentryLog.e(tag = "WebViewLogin", error)
-    }
+    sentryCallback = { error -> SentryLog.e(tag = "WebViewLogin", error) }
 )
 
 //region Worker
