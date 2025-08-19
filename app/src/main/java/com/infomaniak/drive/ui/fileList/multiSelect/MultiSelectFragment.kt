@@ -48,6 +48,7 @@ import com.infomaniak.drive.ui.MainViewModel.MultiSelectMediatorState
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectManager.MultiSelectResult
+import com.infomaniak.drive.ui.menu.OfflineFileFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils
 import com.infomaniak.drive.utils.BulkOperationsUtils.launchBulkOperationWorker
@@ -197,7 +198,7 @@ abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) :
         return MultiSelectActionsBottomSheetDialogArgs(
             userDrive = userDrive,
             parentId = if (userDrive?.sharedWithMe == true) OTHER_ROOT_ID else mainViewModel.currentFolder.value?.id!!,
-            fileIds = if (isAllSelected) intArrayOf() else fileIds,
+            fileIds = if (isAllSelected && this !is OfflineFileFragment) intArrayOf() else fileIds,
             exceptFileIds = if (isAllSelected) exceptFileIds else intArrayOf(),
             onlyFolders = onlyFolders,
             onlyFavorite = onlyFavorite,
