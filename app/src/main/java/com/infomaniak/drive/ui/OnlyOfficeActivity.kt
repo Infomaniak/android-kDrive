@@ -123,7 +123,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
                         when (messageLevel) {
                             ConsoleMessage.MessageLevel.ERROR -> SentryLog.e(TAG, message)
                             ConsoleMessage.MessageLevel.WARNING -> SentryLog.w(TAG, message)
-                            else -> return false
+                            else -> return super.onConsoleMessage(consoleMessage)
                         }
                         return true
                     }
