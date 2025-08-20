@@ -430,8 +430,7 @@
     <activity
         android:id="@+id/loginActivity"
         android:name="com.infomaniak.drive.ui.login.LoginActivity"
-        android:label="LoginActivity"
-        tools:layout="@layout/activity_login">
+        android:label="LoginActivity">
         <argument
             android:name="isHelpShortcutPressed"
             android:defaultValue="false"

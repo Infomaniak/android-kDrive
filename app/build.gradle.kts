@@ -204,7 +204,6 @@ dependencies {
     implementation(libs.extension.okhttp)
 
     implementation(libs.android.pdfview)
-    implementation(libs.dots.indicator)
     implementation(libs.gravity.snap.helper)
     implementation(libs.lottie)
     implementation(libs.material.date.time.picker)
