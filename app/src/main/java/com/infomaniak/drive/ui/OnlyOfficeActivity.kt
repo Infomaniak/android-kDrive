@@ -196,11 +196,9 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     private inner class OnlyOfficeWebChromeClient : WebChromeClient() {
-        override fun onProgressChanged(view: WebView, newProgress: Int) {
-            with(binding) {
-                progressBar.progress = newProgress
-                if (newProgress == 100) progressBar.isGone = true
-            }
+        override fun onProgressChanged(view: WebView, newProgress: Int) = with(binding) {
+            progressBar.progress = newProgress
+            if (newProgress == 100) progressBar.isGone = true
         }
 
         override fun onShowFileChooser(
