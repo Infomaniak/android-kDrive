@@ -159,7 +159,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         leaveShare.isVisible = rights.canLeave == true
         cancelExternalImport.isVisible = file.isImporting()
         moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
-        renameFile.isVisible = rights.canRename == true && !isSharedWithMe && !file.isImporting()
+        renameFile.isVisible = rights.canRename == true && !file.isImporting()
         goToFolder.isVisible = isGoToFolderVisible()
     }
 
@@ -232,7 +232,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         // Displays the item to change folder color for all folder if the user is in free tier to display My kSuite Ad.
         // But only displays it for the folder that can really be colored if it's a paid drive.
         val isDriveFree = AccountUtils.getCurrentDrive()?.isFreeTier == true
-        isVisible = isDriveFree || currentFile.isAllowedToBeColored() && !isSharedWithMe
+        isVisible = (isDriveFree || currentFile.isAllowedToBeColored()) && !isSharedWithMe
         shouldShowMyKSuiteChip = isDriveFree
     }
 
