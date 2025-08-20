@@ -16,8 +16,8 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <View xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="42dp"
-    android:layout_height="@dimen/marginStandardVerySmall"
+    android:layout_width="@dimen/bottomSheetDragHandleWidth"
+    android:layout_height="@dimen/bottomSheetDragHandleHeight"
     android:layout_gravity="center"
-    android:layout_marginVertical="@dimen/marginStandardMedium"
+    android:layout_marginVertical="@dimen/bottomSheetDragHandleVerticalMargin"
     android:background="@drawable/background_bottom_sheet_anchor" />
