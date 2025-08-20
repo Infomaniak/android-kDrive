@@ -227,7 +227,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     companion object {
-        val TAG = OnlyOfficeActivity::class.java.simpleName
+        private val TAG = OnlyOfficeActivity::class.java.simpleName
         const val ONLYOFFICE_URL_TAG = "office_url_tag"
         const val ONLYOFFICE_FILENAME_TAG = "office_filename_tag"
     }
