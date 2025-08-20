@@ -98,38 +98,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
                 }
             }
 
-            webChromeClient = object : WebChromeClient() {
-                override fun onProgressChanged(view: WebView, newProgress: Int) {
-                    progressBar.progress = newProgress
-                    if (newProgress == 100) progressBar.isGone = true
-                }
-
-                override fun onShowFileChooser(
-                    webView: WebView?,
-                    filePathCallback: ValueCallback<Array<out Uri?>?>?,
-                    fileChooserParams: FileChooserParams?
-                ): Boolean {
-                    this@OnlyOfficeActivity.filePathCallback = filePathCallback
-                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    return true
-                }
-
-                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                    if (consoleMessage != null) {
-                        val lineNumber = consoleMessage.lineNumber()
-                        val messageLevel = consoleMessage.messageLevel()
-                        val sourceId = consoleMessage.sourceId()
-                        val message = "${consoleMessage.message()} \n\tat $sourceId line $lineNumber"
-                        when (messageLevel) {
-                            ConsoleMessage.MessageLevel.ERROR -> SentryLog.e(TAG, message)
-                            ConsoleMessage.MessageLevel.WARNING -> SentryLog.w(TAG, message)
-                            else -> return super.onConsoleMessage(consoleMessage)
-                        }
-                        return true
-                    }
-                    return super.onConsoleMessage(consoleMessage)
-                }
-            }
+            webChromeClient = OnlyOfficeWebChromeClient()
 
             setDownloadListener { url, _, _, _, _ ->
                 if (url.endsWith(".pdf")) sendToPrintPDF(url, filename) else openUrl(url)
@@ -224,6 +193,41 @@ class OnlyOfficeActivity : AppCompatActivity() {
     private fun popBackIfNeeded(url: String) {
         val popBackNeeded = !url.contains(Regex("^https.*/app/(office/\\d+|share/\\d+/[a-z0-9\\-]+/preview/text)/\\d+"))
         if (popBackNeeded) finish()
+    }
+
+    private inner class OnlyOfficeWebChromeClient : WebChromeClient() {
+        override fun onProgressChanged(view: WebView, newProgress: Int) {
+            with(binding) {
+                progressBar.progress = newProgress
+                if (newProgress == 100) progressBar.isGone = true
+            }
+        }
+
+        override fun onShowFileChooser(
+            webView: WebView?,
+            filePathCallback: ValueCallback<Array<out Uri?>?>?,
+            fileChooserParams: FileChooserParams?
+        ): Boolean {
+            this@OnlyOfficeActivity.filePathCallback = filePathCallback
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            return true
+        }
+
+        override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+            if (consoleMessage != null) {
+                val lineNumber = consoleMessage.lineNumber()
+                val messageLevel = consoleMessage.messageLevel()
+                val sourceId = consoleMessage.sourceId()
+                val message = "${consoleMessage.message()} \n\tat $sourceId line $lineNumber"
+                when (messageLevel) {
+                    ConsoleMessage.MessageLevel.ERROR -> SentryLog.e(TAG, message)
+                    ConsoleMessage.MessageLevel.WARNING -> SentryLog.w(TAG, message)
+                    else -> return super.onConsoleMessage(consoleMessage)
+                }
+                return true
+            }
+            return super.onConsoleMessage(consoleMessage)
+        }
     }
 
     companion object {
