@@ -146,9 +146,9 @@ class FileInfoActionsView @JvmOverloads constructor(
             disabledSendCopy.isGone = sendCopyEnabled
         }
 
-        addFavorites.isVisible = rights.canUseFavorite == true
+        addFavorites.isVisible = rights.canUseFavorite == true && !isSharedWithMe
         availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
-        deleteFile.isVisible = rights.canDelete == true && !file.isImporting()
+        deleteFile.isVisible = rights.canDelete == true && !file.isImporting() && !isSharedWithMe
         downloadFile.isVisible = rights.canRead == true
         duplicateFile.isGone = rights.canRead == false
                 || isSharedWithMe
@@ -167,7 +167,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         currentFile = file
         refreshBottomSheetUi(currentFile)
         manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
-                && !file.isDisabled()
+                && !file.isDisabled() && !isSharedWithMe
 
         if (currentFile.isFromActivities) {
             quickActionsLayout.isGone = true
@@ -232,7 +232,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         // Displays the item to change folder color for all folder if the user is in free tier to display My kSuite Ad.
         // But only displays it for the folder that can really be colored if it's a paid drive.
         val isDriveFree = AccountUtils.getCurrentDrive()?.isFreeTier == true
-        isVisible = isDriveFree || currentFile.isAllowedToBeColored()
+        isVisible = isDriveFree || currentFile.isAllowedToBeColored() && !isSharedWithMe
         shouldShowMyKSuiteChip = isDriveFree
     }
 
