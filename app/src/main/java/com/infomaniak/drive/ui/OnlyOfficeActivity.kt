@@ -30,6 +30,7 @@ import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.PrintManager
+import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -48,6 +49,7 @@ import androidx.webkit.WebViewFeature
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityOnlyOfficeBinding
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.showToast
@@ -96,22 +98,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
                 }
             }
 
-            webChromeClient = object : WebChromeClient() {
-                override fun onProgressChanged(view: WebView, newProgress: Int) {
-                    progressBar.progress = newProgress
-                    if (newProgress == 100) progressBar.isGone = true
-                }
-
-                override fun onShowFileChooser(
-                    webView: WebView?,
-                    filePathCallback: ValueCallback<Array<out Uri?>?>?,
-                    fileChooserParams: FileChooserParams?
-                ): Boolean {
-                    this@OnlyOfficeActivity.filePathCallback = filePathCallback
-                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    return true
-                }
-            }
+            webChromeClient = OnlyOfficeWebChromeClient()
 
             setDownloadListener { url, _, _, _, _ ->
                 if (url.endsWith(".pdf")) sendToPrintPDF(url, filename) else openUrl(url)
@@ -208,7 +195,41 @@ class OnlyOfficeActivity : AppCompatActivity() {
         if (popBackNeeded) finish()
     }
 
+    private inner class OnlyOfficeWebChromeClient : WebChromeClient() {
+        override fun onProgressChanged(view: WebView, newProgress: Int) = with(binding) {
+            progressBar.progress = newProgress
+            if (newProgress == 100) progressBar.isGone = true
+        }
+
+        override fun onShowFileChooser(
+            webView: WebView?,
+            filePathCallback: ValueCallback<Array<out Uri?>?>?,
+            fileChooserParams: FileChooserParams?
+        ): Boolean {
+            this@OnlyOfficeActivity.filePathCallback = filePathCallback
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            return true
+        }
+
+        override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+            if (consoleMessage != null) {
+                val lineNumber = consoleMessage.lineNumber()
+                val messageLevel = consoleMessage.messageLevel()
+                val sourceId = consoleMessage.sourceId()
+                val message = "${consoleMessage.message()} \n\tat $sourceId line $lineNumber"
+                when (messageLevel) {
+                    ConsoleMessage.MessageLevel.ERROR -> SentryLog.e(TAG, message)
+                    ConsoleMessage.MessageLevel.WARNING -> SentryLog.w(TAG, message)
+                    else -> return super.onConsoleMessage(consoleMessage)
+                }
+                return true
+            }
+            return super.onConsoleMessage(consoleMessage)
+        }
+    }
+
     companion object {
+        private val TAG = OnlyOfficeActivity::class.java.simpleName
         const val ONLYOFFICE_URL_TAG = "office_url_tag"
         const val ONLYOFFICE_FILENAME_TAG = "office_filename_tag"
     }
