@@ -76,7 +76,7 @@ class ImportFilesDialog : DialogFragment() {
             .setView(dialogBinding.root)
             .create().also { dialog ->
                 dialog.setOnShowListener {
-                    lifecycleScope.launch { importFiles() }
+                    dialog.lifecycleScope.launch { importFiles() }
                 }
             }
     }
