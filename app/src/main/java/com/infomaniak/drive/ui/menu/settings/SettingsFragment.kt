@@ -125,7 +125,7 @@ class SettingsFragment : Fragment() {
             myKSuiteSettingsEmail.text = myKSuiteData.mail.email
 
             AccountUtils.getCurrentDrive()?.let { drive ->
-                myKSuiteSettingsTitle.setText(if (drive.isFreeTier) R.string.myKSuiteName else R.string.myKSuitePlusName)
+                myKSuiteSettingsTitle.setText(if (drive.isKSuitePersoFree) R.string.myKSuiteName else R.string.myKSuitePlusName)
             }
 
             dashboardSettings.setOnClickListener {
