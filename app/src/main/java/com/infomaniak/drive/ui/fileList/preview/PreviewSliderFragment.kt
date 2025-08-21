@@ -168,7 +168,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         super<FileInfoActionsView.OnItemClickListener>.sharePublicLink(onActionFinished)
         binding.bottomSheetFileInfos.createPublicShareLink(
             onSuccess = { shareLinkUrl ->
-                context?.shareText(shareLinkUrl)
+                context?.shareText(text = shareLinkUrl)
                 toggleBottomSheet(shouldShow = true)
                 onActionFinished()
             },
