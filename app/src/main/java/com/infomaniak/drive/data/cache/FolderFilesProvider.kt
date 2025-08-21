@@ -82,9 +82,10 @@ object FolderFilesProvider {
         onRecursionStart: (() -> Unit)? = null,
     ) {
         with(folderFilesProviderArgs) {
-            val block: suspend (Realm) -> Unit = { realm ->
-                val rootFolder = File(id = FileController.SHARED_WITH_ME_FILE_ID, name = "/")
-                val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
+            val rootFolder = File(id = FileController.SHARED_WITH_ME_FILE_ID, name = "/")
+            val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
+
+            FileController.getRealmInstance(userDrive).use { realm ->
                 loadSharedWithMeFilesRec(
                     realm = realm,
                     okHttpClient = okHttpClient,
@@ -94,8 +95,6 @@ object FolderFilesProvider {
                     onRecursionStart = onRecursionStart,
                 )
             }
-
-            realm?.let { block(it) } ?: FileController.getRealmInstance(userDrive).use { block(it) }
         }
     }
 
