@@ -1,5 +1,5 @@
 /*
- * Infomaniak Mail - Android
+ * Infomaniak Drive - Android
  * Copyright (C) 2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
