@@ -18,6 +18,7 @@
 package com.infomaniak.drive
 
 import androidx.fragment.app.Fragment
+import com.infomaniak.core.ksuite.ksuitepro.utils.MatomoKSuitePro
 import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.core.matomo.Matomo
 import com.infomaniak.core.matomo.Matomo.TrackerAction
@@ -227,6 +228,10 @@ object MatomoDrive : Matomo {
 
     fun trackMyKSuiteEvent(name: String) {
         trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE, name)
+    }
+
+    fun trackKSuiteProBottomSheetEvent(name: String) {
+        trackEvent(MatomoKSuitePro.CATEGORY_KSUITE_PRO_BOTTOMSHEET, name)
     }
 
     fun trackDropboxEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {
