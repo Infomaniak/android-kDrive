@@ -194,7 +194,7 @@ open class ShareLink(
                 JsonParser.parseString(toJson(this@ShareLinkSettings)).asJsonObject.apply {
                     if (password == null) remove(ShareLinkSettings::password.name)
                     if (right == null) remove(ShareLinkSettings::right.name)
-                    if (AccountUtils.getCurrentDrive()?.isFreeTier == true) remove("valid_until")
+                    if (AccountUtils.getCurrentDrive()?.isUpgradableTier == true) remove("valid_until") // TODO: C'est quoi ?
                 }
             }
         }

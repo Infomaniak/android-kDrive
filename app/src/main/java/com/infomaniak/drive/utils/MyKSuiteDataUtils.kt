@@ -38,18 +38,18 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
     override suspend fun fetchData(): MyKSuiteData? = runCatching {
         MyKSuiteDataUtils.requestKSuiteData()
 
-        // Don't try to fetch the my kSuite Data if the user doesn't have a my kSuite offer
+        // Don't try to fetch the my kSuite data if the user doesn't have a my kSuite offer
         val kSuite = AccountUtils.getCurrentDrive()?.kSuite
         if (kSuite != KSuite.PersoFree && kSuite != KSuite.PersoPlus) return@runCatching null
 
         val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClient)
-        if (apiResponse.data != null) {
-            MyKSuiteDataUtils.upsertKSuiteData(apiResponse.data!!)
-        } else {
+        if (apiResponse.data == null) {
             @OptIn(ExperimentalSerializationApi::class)
             apiResponse.error?.exception?.let {
                 if (it is MissingFieldException) SentryLog.e(TAG, "Error decoding the api result MyKSuiteObject", it)
             }
+        } else {
+            MyKSuiteDataUtils.upsertKSuiteData(apiResponse.data!!)
         }
 
         return@runCatching apiResponse.data
