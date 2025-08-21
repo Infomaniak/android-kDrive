@@ -289,8 +289,13 @@ class PublicShareListFragment : FileListFragment() {
         if (data == null || destinationDriveId == PUBLIC_SHARE_DEFAULT_ID || destinationFolderId == PUBLIC_SHARE_DEFAULT_ID) {
             showSnackbar(RCore.string.anErrorHasOccurred, anchor = importButton)
         } else {
+            val rootSharedFileId = publicShareViewModel.rootSharedFile.value?.id
             val fileIds = multiSelectManager.selectedItemsIds.toList().ifEmpty {
-                if (folderId == publicShareViewModel.rootSharedFile.value?.id) emptyList() else listOf(folderId)
+                if (folderId == rootSharedFileId || publicShareViewModel.fileId == rootSharedFileId) {
+                    emptyList()
+                } else {
+                    listOf(folderId)
+                }
             }
             closeMultiSelect()
             publicShareViewModel.importFilesToDrive(
