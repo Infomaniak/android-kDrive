@@ -562,12 +562,19 @@ fun Fragment.setupRootPendingFilesIndicator(countLiveData: LiveData<Int>, pendin
     countLiveData.observe(viewLifecycleOwner, pendingFilesView::updateUploadFileInProgress)
 }
 
-fun MainActivity.showQuotasExceededSnackbar(navController: NavController) {
+fun MainActivity.showQuotasExceededSnackbar(navController: NavController, drive: Drive?) {
     showSnackbar(
         title = R.string.errorQuotaExceeded,
         anchor = getMainFab(),
         actionButtonTitle = R.string.buttonUpgrade,
-        onActionClicked = { openMyKSuiteUpgradeBottomSheet(navController, MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME) },
+        onActionClicked = {
+            val matomoName = MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
+            if (drive?.isKSuiteProUpgradable == true) {
+                openKSuiteProBottomSheet(navController, drive.kSuite!!, drive.isAdmin, matomoName)
+            } else {
+                openMyKSuiteUpgradeBottomSheet(navController, matomoName)
+            }
+        },
     )
 }
 
