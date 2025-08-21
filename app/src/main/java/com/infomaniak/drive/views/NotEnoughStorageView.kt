@@ -24,12 +24,14 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.navigation.findNavController
+import androidx.fragment.app.Fragment
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
+import com.infomaniak.drive.utils.openKSuiteProBottomSheet
 import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 
 class NotEnoughStorageView @JvmOverloads constructor(
@@ -41,37 +43,36 @@ class NotEnoughStorageView @JvmOverloads constructor(
     private val binding by lazy { ViewNotEnoughStorageBinding.inflate(LayoutInflater.from(context), this, true) }
 
     @SuppressLint("SetTextI18n")
-    fun setup(currentDrive: Drive) = with(binding) {
-        currentDrive.apply {
-            val storagePercentage = if (size > 0L) (usedSize.toDouble() / size).toFloat() * 100.0f else 0.0f
-            if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
-                this@NotEnoughStorageView.isVisible = true
+    fun setup(drive: Drive, fragment: Fragment) = with(binding) {
+        val storagePercentage = if (drive.size > 0L) (drive.usedSize.toDouble() / drive.size).toFloat() * 100.0f else 0.0f
+        if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
+            this@NotEnoughStorageView.isVisible = true
 
-                val usedStorage = context.formatShortFileSize(usedSize, valueOnly = true)
-                val totalStorage = context.formatShortFileSize(size)
-                progressIndicator.progress = (storagePercentage).toInt()
-                title.text = "$usedStorage / $totalStorage"
+            val usedStorage = context.formatShortFileSize(drive.usedSize, valueOnly = true)
+            val totalStorage = context.formatShortFileSize(drive.size)
+            progressIndicator.progress = (storagePercentage).toInt()
+            title.text = "$usedStorage / $totalStorage"
 
-                if (isAdmin) {
-                    description.setText(R.string.notEnoughStorageDescription1)
-                    upgradeOffer.isVisible = true
-                    upgradeOffer.setOnClickListener {
-                        context.openMyKSuiteUpgradeBottomSheet(
-                            navController = findNavController(),
-                            matomoTrackerName = MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME,
-                        )
+            description.setText(if (drive.isAdmin) R.string.notEnoughStorageDescription1 else R.string.notEnoughStorageDescription2)
+
+            if (drive.isKSuiteFreeTier) {
+                upgradeOffer.isVisible = true
+                upgradeOffer.setOnClickListener {
+                    val matomoName = MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
+                    if (drive.kSuite == KSuite.ProFree) {
+                        fragment.openKSuiteProBottomSheet(drive.kSuite!!, drive.isAdmin, matomoName)
+                    } else {
+                        fragment.openMyKSuiteUpgradeBottomSheet(matomoName)
                     }
-                } else {
-                    description.setText(R.string.notEnoughStorageDescription2)
-                    upgradeOffer.isGone = true
-                }
-
-                close.setOnClickListener {
-                    this@NotEnoughStorageView.isGone = true
                 }
             } else {
+                upgradeOffer.isGone = true
+            }
+            close.setOnClickListener {
                 this@NotEnoughStorageView.isGone = true
             }
+        } else {
+            this@NotEnoughStorageView.isGone = true
         }
     }
 

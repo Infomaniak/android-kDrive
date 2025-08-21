@@ -61,9 +61,9 @@ fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteD
 fun Fragment.openKSuiteProBottomSheet(
     kSuite: KSuite,
     isAdmin: Boolean,
-    matomoTrackerName: String,
+    matomoTrackerName: String? = null,
 ) {
-    trackKSuiteProBottomSheetEvent(matomoTrackerName)
+    matomoTrackerName?.let(::trackKSuiteProBottomSheetEvent)
     safelyNavigate(
         resId = R.id.kSuiteProBottomSheetDialog,
         args = KSuiteProBottomSheetDialogArgs(kSuite, isAdmin).toBundle(),

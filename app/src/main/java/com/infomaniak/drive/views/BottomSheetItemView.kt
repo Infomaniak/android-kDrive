@@ -64,6 +64,12 @@ class BottomSheetItemView @JvmOverloads constructor(
             binding.myKSuitePlusChip.isVisible = value
         }
 
+    var shouldShowKSuiteProChip: Boolean
+        get() = binding.kSuiteProChip.isVisible
+        set(value) {
+            binding.kSuiteProChip.isVisible = value
+        }
+
     override fun setEnabled(enabled: Boolean) {
         binding.disabledOverlay.isGone = enabled
     }

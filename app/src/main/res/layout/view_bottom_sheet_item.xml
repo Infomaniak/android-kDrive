@@ -54,6 +54,13 @@
             app:backgroundColor="@color/myKSuiteChipOnCardBackground"
             tools:visibility="visible" />
 
+        <com.infomaniak.core.ksuite.ksuitepro.views.EvolveChipView
+            android:id="@+id/kSuiteProChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
     </LinearLayout>
 
     <View

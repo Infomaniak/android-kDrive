@@ -198,6 +198,16 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="@id/dropBoxTitle" />
 
+                    <com.infomaniak.core.ksuite.ksuitepro.views.EvolveChipView
+                        android:id="@+id/kSuiteProChip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/marginStandardMedium"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="@+id/dropBoxTitle"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/dropBoxTitle" />
+
                     <TextView
                         android:id="@+id/dropBoxDescription"
                         android:layout_width="0dp"
