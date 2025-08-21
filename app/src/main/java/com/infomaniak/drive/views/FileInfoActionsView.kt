@@ -35,6 +35,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -51,6 +52,7 @@ import com.infomaniak.drive.data.models.File.VisibilityType.IS_TEAM_SPACE
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.databinding.ViewFileInfoActionsBinding
 import com.infomaniak.drive.ui.MainViewModel
@@ -184,14 +186,16 @@ class FileInfoActionsView @JvmOverloads constructor(
             computeFileRights(file, rights)
         }
 
-        setupDropboxItem()
+        val drive = AccountUtils.getCurrentDrive() ?: return@with
+
+        setupDropboxItem(drive)
 
         if (currentFile.isFolder()) {
             sendCopyIcon.setImageResource(R.drawable.ic_add)
             sendCopyText.setText(R.string.buttonAdd)
             availableOffline.isGone = true
             openWith.isGone = true
-            setupColoredFolderVisibility()
+            setupColoredFolderVisibility(drive)
         }
     }
 
@@ -214,27 +218,28 @@ class FileInfoActionsView @JvmOverloads constructor(
         ownerFragment.safeNavigate(R.id.addFileBottomSheetDialog)
     }
 
-    private fun setupDropboxItem() = with(binding.dropBox) {
+    private fun setupDropboxItem(drive: Drive) = with(binding.dropBox) {
         if (currentFile.isDropBox() || currentFile.rights?.canBecomeDropbox == true) {
             text = context.getString(
                 if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
             )
             setOnClickListener {
-                onItemClickListener.dropBoxClicked(isDropBox = currentFile.isDropBox(), canCreateDropbox = canCreateDropbox)
+                onItemClickListener.dropBoxClicked(currentFile.isDropBox(), canCreateDropbox, drive.kSuite, drive.isAdmin)
             }
             isVisible = true
-            shouldShowMyKSuiteChip = !canCreateDropbox && !currentFile.isDropBox()
+            shouldShowMyKSuiteChip = drive.isKSuitePersoFree && !canCreateDropbox && !currentFile.isDropBox()
+            shouldShowKSuiteProChip = drive.isKSuiteProUpgradable && !canCreateDropbox && !currentFile.isDropBox()
         } else {
             isGone = true
         }
     }
 
-    private fun setupColoredFolderVisibility() = with(binding.coloredFolder) {
+    private fun setupColoredFolderVisibility(drive: Drive) = with(binding.coloredFolder) {
         // Displays the item to change folder color for all folder if the user is in free tier to display My kSuite Ad.
         // But only displays it for the folder that can really be colored if it's a paid drive.
-        val isDriveFree = AccountUtils.getCurrentDrive()?.isFreeTier == true
-        isVisible = (isDriveFree || currentFile.isAllowedToBeColored()) && !isSharedWithMe
-        shouldShowMyKSuiteChip = isDriveFree
+        isVisible = (drive.isKSuiteFreeTier || currentFile.isAllowedToBeColored()) && !isSharedWithMe
+        shouldShowMyKSuiteChip = drive.isKSuitePersoFree
+        shouldShowKSuiteProChip = drive.isKSuiteProUpgradable
     }
 
     private fun initOnClickListeners() = with(binding) {
@@ -531,8 +536,9 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun downloadFileClicked() = trackFileActionEvent(MatomoName.Download)
 
         @CallSuper
-        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) =
+        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean, kSuite: KSuite?, isAdmin: Boolean) {
             trackFileActionEvent(MatomoName.ConvertToDropbox, isDropBox)
+        }
 
         fun fileRightsClicked()
         fun goToFolder()

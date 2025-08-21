@@ -140,16 +140,28 @@
                 tools:text="60 Go / 1 To" />
         </LinearLayout>
 
+        <com.infomaniak.core.ksuite.ksuitepro.views.GetCardView
+            android:id="@+id/kSuiteProCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/marginStandard"
+            android:layout_marginTop="@dimen/marginStandard"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/driveStorageProgress"
+            tools:visibility="visible" />
+
         <com.infomaniak.drive.views.PendingFilesView
             android:id="@+id/menuUploadFileInProgressView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/marginStandardMedium"
-            android:layout_marginTop="@dimen/marginStandardMedium"
+            android:layout_marginTop="@dimen/marginStandard"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/driveStorageProgress"
+            app:layout_constraintTop_toBottomOf="@id/kSuiteProCard"
             app:title="@string/uploadInProgressTitle"
             tools:visibility="visible" />
 
@@ -158,10 +170,7 @@
             style="@style/CardViewInfomaniak"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandard"
-            android:layout_marginTop="@dimen/marginStandard"
-            android:layout_marginEnd="@dimen/marginStandard"
-            android:layout_marginBottom="@dimen/marginStandard"
+            android:layout_margin="@dimen/marginStandard"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -207,7 +216,7 @@
                         android:id="@+id/changeUserChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/marginStandard"
+                        android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_chevron_right"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -254,7 +263,7 @@
                         android:id="@+id/settingsChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/marginStandard"
+                        android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_chevron_right"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -301,7 +310,7 @@
                         android:id="@+id/supportChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/marginStandard"
+                        android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_chevron_right"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -348,7 +357,7 @@
                         android:id="@+id/logoutChevron"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/marginStandard"
+                        android:layout_marginEnd="10dp"
                         android:src="@drawable/ic_chevron_right"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"

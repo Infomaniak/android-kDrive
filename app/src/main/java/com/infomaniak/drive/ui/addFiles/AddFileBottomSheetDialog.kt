@@ -51,6 +51,7 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.AccountUtils.currentUserId
 import com.infomaniak.drive.utils.CameraPermissions
 import com.infomaniak.drive.utils.DrivePermissions
@@ -217,7 +218,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                         val error = apiResponse.translateError()
                         val quotaErrorCode = ErrorCode.apiErrorCodes.firstOrNull { it.code == ErrorCode.QUOTA_EXCEEDED_ERROR }
                         if (error == quotaErrorCode?.translateRes) {
-                            (requireActivity() as? MainActivity)?.showQuotasExceededSnackbar(findNavController())
+                            (requireActivity() as? MainActivity)?.showQuotasExceededSnackbar(
+                                navController = findNavController(),
+                                drive = AccountUtils.getCurrentDrive(),
+                            )
                         } else {
                             showSnackbar(error, showAboveFab = true)
                         }

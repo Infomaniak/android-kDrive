@@ -33,12 +33,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.openKSuiteProBottomSheet
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.loadAvatar
@@ -83,6 +85,14 @@ class MenuFragment : Fragment() {
                     val totalSize = requireContext().formatShortFileSize(currentDrive.size)
                     textDriveQuota.text = "$usedSize / $totalSize"
                 }
+
+                val kSuite = currentDrive.kSuite
+                if (kSuite == KSuite.ProFree) {
+                    kSuiteProCard.isVisible = true
+                    kSuiteProCard.setOnClick { openKSuiteProBottomSheet(kSuite, currentDrive.isAdmin) }
+                } else {
+                    kSuiteProCard.isGone = true
+                }
             }
 
             userImage.loadAvatar(currentUser)
@@ -93,16 +103,16 @@ class MenuFragment : Fragment() {
                 driveSwitchContainer.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
             }
 
+            changeUser.setOnClickListener {
+                val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)
+                safeNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
+            }
+
             settings.setOnClickListener {
                 safeNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
             }
 
             support.setOnClickListener { requireContext().openSupport() }
-
-            changeUser.setOnClickListener {
-                val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)
-                safeNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
-            }
 
             logout.setOnClickListener {
                 MaterialAlertDialogBuilder(requireContext(), R.style.DeleteDialogStyle)
