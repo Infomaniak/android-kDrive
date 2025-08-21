@@ -1,5 +1,5 @@
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
 
     extra.apply {
@@ -28,6 +28,16 @@ plugins {
 
     alias(libs.plugins.kotlin.serialization) version kotlinVersion apply false
     alias(libs.plugins.sentry) version "5.5.0" apply false
+}
+
+ktlint {
+    version.set("1.7.1")
+    android.set(true)
+    ignoreFailures.set(false)
+    reporters {
+        reporter(ReporterType.PLAIN)
+    }
+    baseline.set(file("${projectDir}/config/ktlint/baseline.xml"))
 }
 
 subprojects {
