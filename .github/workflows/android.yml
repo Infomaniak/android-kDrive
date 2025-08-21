@@ -24,7 +24,7 @@ jobs:
       run: curl -sSLO https://github.com/pinterest/ktlint/releases/download/1.7.1/ktlint && chmod a+x ktlint
 
     - name: Run ktlint
-      run: ./ktlint --baseline ktlint_baseline.xml
+      run: ./ktlint 'src/**/*.kt' --baseline=config/ktlint/baseline.xml
 
   instrumentation-tests:
     if: github.event.pull_request.draft == false
