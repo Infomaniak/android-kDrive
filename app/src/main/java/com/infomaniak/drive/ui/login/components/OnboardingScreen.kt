@@ -44,7 +44,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.infomaniak.core.compose.basics.Typography
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
@@ -126,7 +125,7 @@ private fun Page.toOnboardingPage(pagerState: PagerState, index: Int): Onboardin
     background = { DefaultBackground(ImageVector.vectorResource(backgroundRes), modifier = Modifier.padding(bottom = 300.dp)) },
     illustration = {
         DefaultLottieIllustration(
-            lottieCompositionSpec = LottieCompositionSpec.RawRes(illustrationRes),
+            lottieRawRes = illustrationRes,
             isCurrentPageVisible = { pagerState.currentPage == index },
             // Height of the biggest of the three illustrations. Because all animations don't have the same height, we need to
             // force them to have the same height so the content of every page is correctly aligned
