@@ -107,7 +107,10 @@ open class Drive(
     val role: DriveUser.Role?
         get() = enumValueOfOrNull<DriveUser.Role>(_role)
 
-    inline val isFreeTier get() = pack?.type == DrivePackType.FREE || kSuite == KSuite.PersoFree || kSuite == KSuite.ProFree
+    //region KSuite
+    inline val isKSuitePersoFree get() = pack?.type == DrivePackType.FREE || kSuite == KSuite.PersoFree
+    inline val isKSuiteProUpgradable get() = kSuite?.isProUpgradable() == true
+    inline val isUpgradableTier get() = isKSuitePersoFree || isKSuiteProUpgradable
 
     inline val kSuite: KSuite?
         get() = when (pack?.type) {
@@ -119,11 +122,12 @@ open class Drive(
             DrivePackType.MY_KSUITE -> KSuite.PersoFree
             else -> null // Old offers packs, will hopefully be removed someday so this `when` can return a non-nullable `KSuite`
         }
+    //endregion
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
-    inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (!isFreeTier || quotas.canCreateDropbox)
-    inline val canCreateShareLink get() = !isFreeTier || quotas.canCreateShareLink
+    inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (!isUpgradableTier || quotas.canCreateDropbox) // TODO: voir avec Fabian, ça a peut-être changé depuis Février, mais apparemment il faut retirer le `!isFreeTier`
+    inline val canCreateShareLink get() = !isUpgradableTier || quotas.canCreateShareLink // TODO: voir avec Fabian, ça a peut-être changé depuis Février, mais apparemment il faut retirer le `!isFreeTier`
 
     inline val isDriveFull get() = usedSize >= size
 
