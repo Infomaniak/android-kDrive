@@ -105,6 +105,7 @@ class LoginActivity : ComponentActivity() {
                 }
             } else {
                 isLoginButtonLoading = false
+                isSignUpButtonLoading = false
             }
         }
     }

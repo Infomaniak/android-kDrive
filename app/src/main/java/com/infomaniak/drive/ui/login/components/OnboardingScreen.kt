@@ -75,10 +75,10 @@ fun OnboardingScreen(
 ) {
     val pagerState = rememberPagerState(pageCount = { Page.entries.size })
     val isLastPage by remember { derivedStateOf { pagerState.currentPage >= pagerState.pageCount - 1 } }
-    val coroutineScope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
 
     BackHandler(pagerState.currentPage > 0) {
-        coroutineScope.launch {
+        scope.launch {
             pagerState.animateScrollToPage(pagerState.currentPage - 1)
         }
     }
@@ -104,7 +104,7 @@ fun OnboardingScreen(
                 titleColor = colorResource(R.color.title),
                 descriptionColor = colorResource(R.color.primaryText),
                 isLastPage = { isLastPage },
-                onGoToNextPageRequest = { coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
+                onGoToNextPageRequest = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
                 onLogin = onLogin,
                 onContinueWithSelectedAccounts = onContinueWithSelectedAccounts,
                 onCreateAccount = onCreateAccount,

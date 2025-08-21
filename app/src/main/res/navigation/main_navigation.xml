@@ -446,12 +446,6 @@
     </activity>
 
     <dialog
-        android:id="@+id/crossLoginBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog"
-        android:label="CrossLoginBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_cross_login" />
-
-    <dialog
         android:id="@+id/addFileBottomSheetDialog"
         android:name="com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialog"
         android:label="AddFileBottomSheetDialog"
