@@ -366,11 +366,12 @@ fun Drive?.getDriveUsers(): List<DriveUser> = this?.users?.let { categories ->
     return@let DriveInfosController.getUsers(ArrayList(categories.drive + categories.account))
 } ?: listOf()
 
-fun Context.shareText(text: String) {
+fun Context.shareText(title: String? = null, text: String) {
     trackShareRightsEvent(MatomoName.ShareButton)
     val intent = Intent().apply {
         action = Intent.ACTION_SEND
         putExtra(Intent.EXTRA_TEXT, text)
+        title?.let { putExtra(Intent.EXTRA_TITLE, title) }
         type = "text/plain"
     }
     ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
