@@ -167,7 +167,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         currentFile = file
         refreshBottomSheetUi(currentFile)
         manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
-                && !file.isDisabled() && !isSharedWithMe
+                && !file.isDisabled()
+                && !isSharedWithMe
 
         if (currentFile.isFromActivities) {
             quickActionsLayout.isGone = true
