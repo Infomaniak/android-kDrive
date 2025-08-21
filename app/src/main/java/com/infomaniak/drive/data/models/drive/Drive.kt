@@ -109,8 +109,9 @@ open class Drive(
 
     //region KSuite
     inline val isKSuitePersoFree get() = pack?.type == DrivePackType.FREE || kSuite == KSuite.PersoFree
+    inline val isKSuiteProFree get() = kSuite == KSuite.ProFree
+    inline val isKSuiteFreeTier get() = isKSuitePersoFree || isKSuiteProFree
     inline val isKSuiteProUpgradable get() = kSuite?.isProUpgradable() == true
-    inline val isUpgradableTier get() = isKSuitePersoFree || isKSuiteProUpgradable
 
     inline val kSuite: KSuite?
         get() = when (pack?.type) {
@@ -126,8 +127,8 @@ open class Drive(
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
-    inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (!isUpgradableTier || quotas.canCreateDropbox) // TODO: voir avec Fabian, ça a peut-être changé depuis Février, mais apparemment il faut retirer le `!isFreeTier`
-    inline val canCreateShareLink get() = !isUpgradableTier || quotas.canCreateShareLink // TODO: voir avec Fabian, ça a peut-être changé depuis Février, mais apparemment il faut retirer le `!isFreeTier`
+    inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (!isKSuiteFreeTier || quotas.canCreateDropbox)
+    inline val canCreateShareLink get() = !isKSuiteFreeTier || quotas.canCreateShareLink
 
     inline val isDriveFull get() = usedSize >= size
 
