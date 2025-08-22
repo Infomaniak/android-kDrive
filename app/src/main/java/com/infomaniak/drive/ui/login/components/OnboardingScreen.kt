@@ -68,15 +68,9 @@ fun OnboardingScreen(
 ) {
     val pagerState = rememberPagerState(pageCount = { Page.entries.size })
 
-    val onboardingPages = buildList {
-        Page.entries.forEachIndexed { index, page ->
-            add(page.toOnboardingPage(pagerState, index))
-        }
-    }
-
     OnboardingScaffold(
         pagerState = pagerState,
-        onboardingPages = onboardingPages,
+        onboardingPages = Page.entries.mapIndexed { index, page -> page.toOnboardingPage(pagerState, index) },
         bottomContent = { paddingValues ->
             OnboardingComponents.CrossLoginBottomContent(
                 modifier = Modifier
@@ -107,7 +101,9 @@ fun OnboardingScreen(
 
 @Composable
 private fun Page.toOnboardingPage(pagerState: PagerState, index: Int): OnboardingPage = OnboardingPage(
-    background = { DefaultBackground(ImageVector.vectorResource(backgroundRes), modifier = Modifier.padding(bottom = 300.dp)) },
+    background = {
+        DefaultBackground(ImageVector.vectorResource(backgroundRes), modifier = Modifier.padding(bottom = 300.dp))
+    },
     illustration = {
         DefaultLottieIllustration(
             lottieRawRes = illustrationRes,
