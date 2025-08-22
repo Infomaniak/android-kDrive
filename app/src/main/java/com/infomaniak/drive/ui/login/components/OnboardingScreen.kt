@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.ui.login.components
 
-import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.annotation.RawRes
 import androidx.annotation.StringRes
@@ -75,12 +74,6 @@ fun OnboardingScreen(
     val pagerState = rememberPagerState(pageCount = { Page.entries.size })
     val isLastPage by remember { derivedStateOf { pagerState.currentPage >= pagerState.pageCount - 1 } }
     val scope = rememberCoroutineScope()
-
-    BackHandler(pagerState.currentPage > 0) {
-        scope.launch {
-            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-        }
-    }
 
     val onboardingPages = buildList {
         Page.entries.forEachIndexed { index, page ->
