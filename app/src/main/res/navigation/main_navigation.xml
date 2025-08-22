@@ -430,8 +430,7 @@
     <activity
         android:id="@+id/loginActivity"
         android:name="com.infomaniak.drive.ui.login.LoginActivity"
-        android:label="LoginActivity"
-        tools:layout="@layout/activity_login">
+        android:label="LoginActivity">
         <argument
             android:name="isHelpShortcutPressed"
             android:defaultValue="false"
@@ -445,12 +444,6 @@
             android:defaultValue=""
             app:argType="string" />
     </activity>
-
-    <dialog
-        android:id="@+id/crossLoginBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.CrossLoginBottomSheetDialog"
-        android:label="CrossLoginBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_cross_login" />
 
     <dialog
         android:id="@+id/addFileBottomSheetDialog"

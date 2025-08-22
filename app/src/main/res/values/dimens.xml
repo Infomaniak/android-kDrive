@@ -28,6 +28,11 @@
 
     <integer name="defaultMaxLengthFileName">254</integer>
 
+    <!-- Button style -->
+    <dimen name="primaryButtonRadius">@dimen/radius</dimen>
+    <dimen name="primaryButtonHeight">70dp</dimen>
+    <dimen name="primaryButtonVerticalInset">@dimen/mtrl_btn_inset</dimen>
+
     <!--fastScroller-->
     <dimen name="defaultHandleSize">18dp</dimen>
     <dimen name="defaultPopupPadding">16dp</dimen>
