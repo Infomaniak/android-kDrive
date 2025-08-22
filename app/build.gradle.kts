@@ -1,6 +1,7 @@
 import java.util.Properties
 
 plugins {
+    alias(core.plugins.compose.compiler)
     alias(libs.plugins.android.application)
     alias(libs.plugins.junit5)
     alias(libs.plugins.kotlin.android)
@@ -29,8 +30,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_08_001_01
-        versionName = "5.8.1"
+        versionCode = 5_08_004_01
+        versionName = "5.8.4"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -109,6 +110,12 @@ android {
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        compose = true
+    }
+
+    lint {
+        // Temporary fix waiting for the gradual update of some libs (androidx lifecycle, mqtt)
+        disable += "NullSafeMutableLiveData"
     }
 
     testOptions.unitTests.all {
@@ -152,7 +159,10 @@ sentry {
 dependencies {
 
     implementation(project(":Core"))
+    implementation(project(":Core:Auth"))
     implementation(project(":Core:Avatar"))
+    implementation(project(":Core:Compose:Basics"))
+    implementation(project(":Core:Compose:MaterialThemeFromXml"))
     implementation(project(":Core:CrossAppLogin:Back"))
     implementation(project(":Core:CrossAppLogin:Front"))
     implementation(project(":Core:FragmentNavigation"))
@@ -166,7 +176,11 @@ dependencies {
     implementation(project(":Core:kSuite:MyKSuite"))
     implementation(project(":Core:Network"))
     implementation(project(":Core:RecyclerView"))
+    implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
+
+    implementation(platform(core.compose.bom))
+    implementation(core.compose.foundation)
 
     implementation(core.ktor.client.okhttp)
 

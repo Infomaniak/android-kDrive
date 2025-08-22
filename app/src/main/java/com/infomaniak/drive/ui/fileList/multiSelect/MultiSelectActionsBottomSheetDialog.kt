@@ -152,14 +152,14 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
     }
 
     protected open fun configureDownload() {
-        val drivePermissions = DrivePermissions().apply {
+        val downloadPermissions = DrivePermissions(DrivePermissions.Type.DownloadingWithDownloadManager).apply {
             registerPermissions(this@MultiSelectActionsBottomSheetDialog) { authorized ->
                 if (authorized) download()
             }
         }
 
         binding.downloadFile.apply {
-            setOnClickListener { if (drivePermissions.checkWriteStoragePermission()) download() }
+            setOnClickListener { if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) download() }
             isVisible = navigationArgs.fileIds.isNotEmpty() || navigationArgs.isAllSelected
         }
     }

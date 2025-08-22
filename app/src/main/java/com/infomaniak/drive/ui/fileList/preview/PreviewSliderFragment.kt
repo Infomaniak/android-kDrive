@@ -218,7 +218,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
 
     override fun downloadFileClicked() {
         super<BasePreviewSliderFragment>.downloadFileClicked()
-        currentContext.downloadFile(drivePermissions, currentFile) { toggleBottomSheet(shouldShow = true) }
+        currentContext.downloadFile(downloadPermissions, currentFile) { toggleBottomSheet(shouldShow = true) }
     }
 
     override fun onLeaveShare(onApiResponse: () -> Unit) {
@@ -309,7 +309,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         }
     }
 
-    override fun onMoveFile(destinationFolder: File) {
+    override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) {
         mainViewModel.moveFile(currentFile, destinationFolder)
             .observe(viewLifecycleOwner) { fileRequest ->
                 if (fileRequest.isSuccess) {

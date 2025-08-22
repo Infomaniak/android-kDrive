@@ -91,6 +91,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var uploadedCount = 0
     private var pendingCount = 0
 
+    private val readMediaPermissions = DrivePermissions.permissionsFor(DrivePermissions.Type.ReadingMediaForSync).toTypedArray()
+
     override suspend fun doWork(): Result {
 
         SentryLog.d(TAG, "UploadWorker starts job!")
@@ -106,17 +108,18 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             var lastUploadFileName = ""
 
             do {
-                // Check if we have the required permissions before continuing
-                checkPermissions()?.let { return@runUploadCatching it }
 
                 // Retrieve the latest media that have not been synced
-                val appSyncSettings = retrieveLatestNotSyncedMedia()
+                val appSyncSettings = when {
+                    applicationContext.hasPermissions(readMediaPermissions) -> retrieveLatestNotSyncedMedia()
+                    else -> null
+                }
 
                 // Check if the user has cancelled the uploads and there is no more files to sync
                 checkRemainingUploadsAndUserCancellation()?.let { return@runUploadCatching it }
 
                 // Start uploads
-                result = startSyncFiles()
+                result = uploadPendingFiles()
 
                 // Check if re-sync is needed
                 appSyncSettings?.let {
@@ -124,7 +127,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                     checkLocalLastMedias(it)
                 }
 
-                syncNewPendingUploads = UploadFile.getAllPendingUploadsCount() > 0
+                syncNewPendingUploads = when {
+                    applicationContext.hasPermissions(readMediaPermissions) -> UploadFile.getAllPendingUploadsCount() > 0
+                    else -> UploadFile.getAllPendingPriorityFilesCount() > 0
+                }
 
                 // Update next iteration
                 retryError = if (currentUploadFile?.fileName == lastUploadFileName) retryError + 1 else 0
@@ -150,13 +156,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return progressForegroundInfo(pendingCount)
     }
 
-    private fun checkPermissions(): Result? {
-        if (!applicationContext.hasPermissions(DrivePermissions.permissions)) {
-            UploadNotifications.permissionErrorNotification(applicationContext)
-            SentryLog.d(TAG, "UploadWorker no permissions")
-            return Result.failure()
-        }
-        return null
+    private fun reportMissingPermissionsForSync() {
+        UploadNotifications.permissionErrorNotification(applicationContext)
+        SentryLog.d(TAG, "UploadWorker is missing permissions to sync media")
     }
 
     private suspend fun retrieveLatestNotSyncedMedia(): SyncSettings? {
@@ -176,7 +178,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return null
     }
 
-    private suspend fun startSyncFiles(): Result = withContext(Dispatchers.IO) {
+    private suspend fun uploadPendingFiles(): Result = withContext(Dispatchers.IO) {
         var uploadFiles: List<UploadFile>
 
         getRealmInstance().use { realm ->
@@ -188,11 +190,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             checkUploadCountReliability(realm)
         }
 
-        SentryLog.d(TAG, "startSyncFiles> upload for ${uploadFiles.count()}")
+        SentryLog.d(TAG, "uploadPendingFiles> upload for ${uploadFiles.count()}")
 
-        for ((index, uploadFile) in uploadFiles.withIndex()) {
+        for ((index, fileToUpload) in uploadFiles.withIndex()) {
             val isLastFile = index == uploadFiles.lastIndex
-            startUpload(uploadFile, isLastFile)
+            uploadFile(fileToUpload, isLastFile)
 
             pendingCount--
 
@@ -200,12 +202,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             if (isLastFile && failedNamesMap.count() == UploadFile.getAllPendingUploadsCount()) break
             // If there is a new file during the sync and it has priority (ex: Manual uploads),
             // then we start again in order to process the priority files first.
-            if (uploadFile.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext startSyncFiles()
+            if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext uploadPendingFiles()
         }
 
         uploadedCount = successCount
 
-        SentryLog.d(TAG, "startSyncFiles: finish with $uploadedCount uploaded")
+        SentryLog.d(TAG, "uploadPendingFiles: finish with $uploadedCount uploaded")
 
         currentUploadFile?.showUploadedFilesNotification(
             context = applicationContext,
@@ -217,17 +219,26 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         if (uploadedCount > 0) Result.success() else Result.failure()
     }
 
-    private suspend fun startUpload(uploadFile: UploadFile, isLastFile: Boolean) {
-        SentryLog.d(TAG, "startSyncFiles> size: ${uploadFile.fileSize}")
+    private suspend fun uploadFile(uploadFile: UploadFile, isLastFile: Boolean) {
+        SentryLog.d(TAG, "uploadFile> size: ${uploadFile.fileSize}")
 
-        val fileUploadedWithSuccess = uploadFile.initUpload(isLastFile)
+        val canReadMedia = applicationContext.hasPermissions(readMediaPermissions)
+
+        val fileUploadedWithSuccess = when {
+            canReadMedia || uploadFile.isSync().not() -> uploadFile.upload(isLastFile)
+            else -> {
+                reportMissingPermissionsForSync()
+                false
+            }
+        }
+
         if (fileUploadedWithSuccess) {
-            SentryLog.i(TAG, "startSyncFiles: file uploaded with success")
+            SentryLog.i(TAG, "uploadFile: file uploaded with success")
             successNames.add(uploadFile.fileName)
             if (failedNamesMap[uploadFile.uri] != null) failedNamesMap.remove(uploadFile.uri)
             successCount++
         } else {
-            SentryLog.i(TAG, "startSyncFiles: file upload failed")
+            SentryLog.i(TAG, "uploadFile: file upload failed")
             if (failedNamesMap[uploadFile.uri] == null) {
                 failedNamesMap[uploadFile.uri] = uploadFile.fileName
                 failedCount++
@@ -249,18 +260,18 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun UploadFile.initUpload(isLastFile: Boolean) = withContext(Dispatchers.IO) {
+    private suspend fun UploadFile.upload(isLastFile: Boolean) = withContext(Dispatchers.IO) {
         val uri = getUriObject()
 
-        currentUploadFile = this@initUpload
+        currentUploadFile = this@upload
         applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         updateUploadCountNotification()
 
         try {
             if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
-                initUploadSchemeFile(uri)
+                uploadSchemeFile(uri)
             } else {
-                initUploadSchemeContent(uri)
+                uploadSchemeContent(uri)
             }
         } catch (exception: CancellationException) {
             throw exception
@@ -274,17 +285,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             if (isLastFile) throw exception
             false
         } catch (exception: Exception) {
-            SentryLog.w(TAG, "initUpload: failed", exception)
+            SentryLog.w(TAG, "upload: failed", exception)
             handleException(exception)
             false
         }
     }
 
-    private suspend fun UploadFile.initUploadSchemeFile(uri: Uri): Boolean {
+    private suspend fun UploadFile.uploadSchemeFile(uri: Uri): Boolean {
         SentryLog.d(TAG, "initUploadSchemeFile: start")
         val cacheFile = uri.toFile().apply {
             if (!exists()) {
-                SentryLog.i(TAG, "initUploadSchemeFile: file doesn't exist")
+                SentryLog.i(TAG, "uploadSchemeFile: file doesn't exist")
                 deleteIfExists()
                 return false
             }
@@ -295,19 +306,19 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private suspend fun UploadFile.initUploadSchemeContent(uri: Uri): Boolean {
-        SentryLog.d(TAG, "initUploadSchemeContent: start")
+    private suspend fun UploadFile.uploadSchemeContent(uri: Uri): Boolean {
+        SentryLog.d(TAG, "uploadSchemeContent: start")
         return contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val columns = cursor.columnNames.joinToString { it }
 
             if (cursor.moveToFirst()) {
                 if (!columns.contains(OpenableColumns.SIZE)) {
-                    SentryLog.e(TAG, "initUploadSchemeContent: size column doesn't exist ($columns)")
+                    SentryLog.e(TAG, "uploadSchemeContent: size column doesn't exist ($columns)")
                 }
                 startUploadFile(uri.getFileSize(cursor))
             } else {
                 val sentryMessage = "$fileName moveToFirst failed - count(${cursor.count}), columns($columns)"
-                SentryLog.w(TAG, "initUploadSchemeContent: $sentryMessage")
+                SentryLog.w(TAG, "uploadSchemeContent: $sentryMessage")
                 deleteIfExists(keepFile = isSync())
                 false
             }

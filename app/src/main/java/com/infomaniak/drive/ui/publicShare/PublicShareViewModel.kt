@@ -72,6 +72,9 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     val driveId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
 
+    val fileId: Int
+        inline get() = savedStateHandle[PublicShareActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
+
     val publicShareUuid: String
         inline get() = savedStateHandle[PublicShareActivityArgs::publicShareUuid.name] ?: ""
 
@@ -83,9 +86,6 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
     private val canDownload: Boolean
         inline get() = savedStateHandle[PublicShareActivityArgs::canDownload.name] ?: false
-
-    private val fileId: Int
-        inline get() = savedStateHandle[PublicShareActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
 
     private var getPublicShareFilesJob: Job = Job()
     private var currentCursor: String? = null

@@ -447,7 +447,6 @@
     <string name="fileShareAddMessage">Añadir un mensaje para los invitados (opcional)</string>
     <string name="fileShareDetailsFileTitle">Uso compartido y derechos del archivo %s</string>
     <string name="fileShareDetailsFolderTitle">Uso compartido y derechos de la carpeta %s</string>
-    <string name="fileShareDetailsShareLinkTitle">Enlaces de uso compartido</string>
     <string name="fileShareDetailsUsersAccesTitle">Usuarios con acceso</string>
     <string name="fileShareFileTitle">Compartir el archivo</string>
     <string name="fileShareFolderTitle">Compartir la carpeta</string>
@@ -582,7 +581,7 @@
     <string name="restrictedSharedLinkTitle">Enlace de uso compartido restringido</string>
     <string name="reviewAlertTitle">¿Te gusta kDrive?</string>
     <string name="saveExternalFileInputFileName">Nombre del documento</string>
-    <string name="saveExternalFileTitle">Guardar en el kDrive</string>
+    <string name="saveExternalFileTitle">Guardar en el Drive</string>
     <string name="searchFilterTitle">Tipos de archivos</string>
     <string name="searchFiltersSelectDate">Seleccionar una fecha</string>
     <string name="searchFiltersSelectType">Seleccionar un tipo de archivo</string>

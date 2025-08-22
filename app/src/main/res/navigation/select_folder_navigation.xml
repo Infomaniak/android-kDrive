@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2022-2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -42,6 +42,13 @@
         <action
             android:id="@+id/actionSelectRootFolderFragmentToFavoritesFragment"
             app:destination="@id/favoritesFragment" />
+        <argument
+            android:name="fromSaveExternal"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="userDrive"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
     </fragment>
 
     <fragment
@@ -57,6 +64,9 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
+        <argument
+            android:name="userDrive"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_mySharesFragment_self"
             app:destination="@id/mySharesFragment" />
@@ -79,6 +89,13 @@
             android:name="driveId"
             android:defaultValue="0"
             app:argType="integer" />
+        <argument
+            android:name="fromSaveExternal"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="userDrive"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_sharedWithMeFragment_to_sortFilesBottomSheetDialog"
             app:destination="@id/sortFilesBottomSheetDialog" />
@@ -100,6 +117,9 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
+        <argument
+            android:name="userDrive"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
             android:id="@+id/action_favoritesFragment_self"
             app:destination="@id/favoritesFragment" />
@@ -117,6 +137,11 @@
             android:name="folderName"
             android:defaultValue="/"
             app:argType="string" />
+
+        <argument
+            android:name="userDrive"
+            app:argType="com.infomaniak.drive.data.models.UserDrive" />
+
         <action
             android:id="@+id/fileListFragmentToFileListFragment"
             app:destination="@id/selectFolderFragment"

@@ -15,11 +15,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.login
+package com.infomaniak.drive.data.models
 
-import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel
-import com.infomaniak.drive.BuildConfig
-import kotlinx.serialization.ExperimentalSerializationApi
+sealed interface FileListNavigationType {
 
-@OptIn(ExperimentalSerializationApi::class)
-class CrossAppLoginViewModel() : BaseCrossAppLoginViewModel(BuildConfig.APPLICATION_ID, BuildConfig.CLIENT_ID)
+    data class Folder(val file: File) : FileListNavigationType
+    data class Subfolder(val file: File, val subfolderId: Int) : FileListNavigationType
+}

@@ -19,6 +19,8 @@ package com.infomaniak.drive.data.cache
 
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
+import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FileController.saveRemoteFiles
@@ -31,7 +33,6 @@ import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.realm.RealmQuery
 import io.sentry.Sentry
@@ -54,45 +55,47 @@ object FolderFilesProvider {
 
     fun getFiles(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
         val realm = folderFilesProviderArgs.realm ?: FileController.getRealmInstance(folderFilesProviderArgs.userDrive)
+        try {
+            val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
+            val sourceRestrictionType = folderFilesProviderArgs.sourceRestrictionType
+            val needToLoadFromRemote = needToLoadFromRemote(sourceRestrictionType, folderProxy)
 
-        val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
-        val sourceRestrictionType = folderFilesProviderArgs.sourceRestrictionType
-        val needToLoadFromRemote = needToLoadFromRemote(sourceRestrictionType, folderProxy)
-
-        val files = when {
-            needToLoadFromRemote && sourceRestrictionType != SourceRestrictionType.ONLY_FROM_LOCAL -> {
-                loadFromRemote(realm, folderProxy, folderFilesProviderArgs)
+            val files = when {
+                needToLoadFromRemote && sourceRestrictionType != SourceRestrictionType.ONLY_FROM_LOCAL -> {
+                    loadFromRemote(realm, folderProxy, folderFilesProviderArgs)
+                }
+                folderFilesProviderArgs.isFirstPage -> {
+                    loadFromLocal(realm, folderProxy, folderFilesProviderArgs.withChildren, folderFilesProviderArgs.order)
+                }
+                else -> {
+                    null
+                }
             }
-            folderFilesProviderArgs.isFirstPage -> {
-                loadFromLocal(realm, folderProxy, folderFilesProviderArgs.withChildren, folderFilesProviderArgs.order)
-            }
-            else -> {
-                null
-            }
+            return files
+        } finally {
+            if (folderFilesProviderArgs.realm == null) realm.close()
         }
-
-        if (folderFilesProviderArgs.realm == null) realm.close()
-
-        return files
     }
 
-    fun loadSharedWithMeFiles(
+    suspend fun loadSharedWithMeFiles(
         folderFilesProviderArgs: FolderFilesProviderArgs,
         onRecursionStart: (() -> Unit)? = null,
-    ) = with(folderFilesProviderArgs) {
-        val block: (Realm) -> Unit = { realm ->
+    ) {
+        with(folderFilesProviderArgs) {
             val rootFolder = File(id = FileController.SHARED_WITH_ME_FILE_ID, name = "/")
-            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
-            loadSharedWithMeFilesRec(
-                realm = realm,
-                okHttpClient = okHttpClient,
-                folderFilesProviderArgs = this,
-                isRoot = folderId == ROOT_ID,
-                rootFolder = rootFolder,
-                onRecursionStart = onRecursionStart,
-            )
+            val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
+
+            FileController.getRealmInstance(userDrive).use { realm ->
+                loadSharedWithMeFilesRec(
+                    realm = realm,
+                    okHttpClient = okHttpClient,
+                    folderFilesProviderArgs = this,
+                    isRoot = folderId == ROOT_ID,
+                    rootFolder = rootFolder,
+                    onRecursionStart = onRecursionStart,
+                )
+            }
         }
-        realm?.let(block) ?: FileController.getRealmInstance(userDrive).use(block)
     }
 
     private tailrec fun loadSharedWithMeFilesRec(
@@ -106,7 +109,11 @@ object FolderFilesProvider {
     ) {
         val folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderFilesProviderArgs.folderId
         val apiResponse = if (isRoot) {
-            ApiRepository.getSharedWithMeFiles(order = folderFilesProviderArgs.order, cursor = cursor)
+            ApiRepository.getSharedWithMeFiles(
+                okHttpClient = okHttpClient,
+                order = folderFilesProviderArgs.order,
+                cursor = cursor
+            )
         } else {
             ApiRepository.getFolderFiles(
                 okHttpClient = okHttpClient,
@@ -239,7 +246,7 @@ object FolderFilesProvider {
 
         ensureActive()
 
-        handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy)
+        handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy, okHttpClient)
     }
 
     private fun loadCloudStorageFromRemote(
@@ -253,6 +260,7 @@ object FolderFilesProvider {
         val apiResponse = when {
             folderFilesProviderArgs.folderId == ROOT_ID && userDrive.sharedWithMe -> {
                 ApiRepository.getSharedWithMeFiles(
+                    okHttpClient = okHttpClient,
                     order = folderFilesProviderArgs.order,
                     cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
                 )
@@ -278,13 +286,17 @@ object FolderFilesProvider {
         apiResponse: CursorApiResponse<List<File>>,
         folderFilesProviderArgs: FolderFilesProviderArgs,
         folderProxy: File?,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): FolderFilesProviderResult? {
         val userDrive = folderFilesProviderArgs.userDrive
         val apiResponseData = apiResponse.data
         val folderWithChildren = folderFilesProviderArgs.withChildren
 
         val localFolder = folderProxy?.freeze()
-            ?: ApiRepository.getFileDetails(File(id = folderFilesProviderArgs.folderId, driveId = userDrive.driveId)).data
+            ?: ApiRepository.getFileDetails(
+                File(id = folderFilesProviderArgs.folderId, driveId = userDrive.driveId),
+                okHttpClient
+            ).data
             ?: return null
 
         return when {

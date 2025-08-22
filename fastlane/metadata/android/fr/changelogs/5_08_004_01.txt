@@ -1,0 +1,4 @@
+- Ajout du bouton « Sélectionner tout » dans la page hors ligne
+- Correction du nom de dossier lors du partage d'un fichier sur kDrive et de la sélection d'un autre lecteur
+- Tentative de résolution du problème de progression infinie dans SyncSettings
+- Tentative de correction d'éventuelles fuites mémoire

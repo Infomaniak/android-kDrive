@@ -97,9 +97,11 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private val uiSettings by lazy { UiSettings(context = this) }
 
-    private lateinit var drivePermissions: DrivePermissions
+    private lateinit var backgroundUploadPermissions: DrivePermissions
     private var currentUri: Uri? = null
     private var isMultiple = false
+
+    private var driveIdSharedWithMe: Int? = null
 
     private val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk { data ->
@@ -164,12 +166,12 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun setupDrivePermissions() {
-        drivePermissions = DrivePermissions().apply {
+        backgroundUploadPermissions = DrivePermissions(DrivePermissions.Type.UploadInTheBackground).apply {
             registerPermissions(
                 activity = this@SaveExternalFilesActivity,
                 onPermissionResult = { authorized -> if (authorized) getFiles() },
             )
-            checkSyncPermissions()
+            hasNeededPermissions(requestIfNotGranted = true)
         }
     }
 
@@ -189,7 +191,6 @@ class SaveExternalFilesActivity : BaseActivity() {
         selectDriveViewModel.apply {
             selectedUserId.value = userId
             selectedDrive.value = drive
-            showSharedWithMe = true
         }
     }
 
@@ -251,6 +252,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     putExtras(
                         SelectFolderActivityArgs(
                             userId = selectDriveViewModel.selectedUserId.value!!,
+                            fromSaveExternal = true,
                             driveId = selectDriveViewModel.selectedDrive.value?.id!!,
                         ).toBundle()
                     )
@@ -263,9 +265,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun fetchFolder() = with(selectDriveViewModel) {
         saveExternalFilesViewModel.folderId.observe(this@SaveExternalFilesActivity) { folderId ->
 
-            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null
-                || folderId == null
-            ) {
+            val folder = if (selectedUserId.value == null || selectedDrive.value?.id == null || folderId == null) {
                 null
             } else {
                 val userDrive = UserDrive(
@@ -273,7 +273,15 @@ class SaveExternalFilesActivity : BaseActivity() {
                     driveId = selectedDrive.value!!.id,
                     sharedWithMe = selectedDrive.value!!.sharedWithMe,
                 )
-                FileController.getFileById(folderId, userDrive)
+                driveIdSharedWithMe = FileController.getSharedDrive(userDrive.userId, folderId)?.driveId
+
+                FileController.getFileById(folderId, userDrive) ?: FileController.getFileById(
+                    fileId = folderId,
+                    userDrive = UserDrive(
+                        userId = selectedUserId.value!!,
+                        sharedWithMe = true,
+                    )
+                )
             }
 
             folder?.let {
@@ -300,7 +308,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                 }
 
                 showProgressCatching()
-                if (drivePermissions.checkSyncPermissions()) {
+                if (backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val userId = selectedUserId.value!!
                     val driveId = selectedDrive.value?.id!!
                     val folderId = saveExternalFilesViewModel.folderId.value!!
@@ -308,7 +316,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     if (canSaveFilesPref()) uiSettings.setSaveExternalFilesPref(userId, driveId, folderId)
 
                     lifecycleScope.launch(Dispatchers.IO) {
-                        if (storeFiles(userId, driveId, folderId)) {
+                        if (storeFiles(userId, driveIdSharedWithMe ?: driveId, folderId)) {
                             syncImmediately()
                             finish()
                         } else {
@@ -325,7 +333,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (drivePermissions.checkWriteStoragePermission(false)) getFiles()
+        getFiles()
     }
 
     private fun getFiles() {

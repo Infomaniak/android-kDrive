@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 
 interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListener {
 
-    val drivePermissions: DrivePermissions
+    val downloadPermissions: DrivePermissions
     val publicShareViewModel: PublicShareViewModel
     val previewPDFHandler: PreviewPDFHandler?
 
@@ -76,7 +76,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
 
     override fun downloadFileClicked() {
         trackPublicShareActionEvent(MatomoName.Download)
-        currentFile?.let { currentContext.downloadFile(drivePermissions, it, ::onDownloadSuccess) }
+        currentFile?.let { currentContext.downloadFile(downloadPermissions, it, ::onDownloadSuccess) }
     }
 
     override fun printClicked() {
@@ -136,7 +136,7 @@ interface OnPublicShareItemClickListener : FileInfoActionsView.OnItemClickListen
     override fun onDeleteFile(onApiResponse: () -> Unit) = Unit
     override fun onLeaveShare(onApiResponse: () -> Unit) = Unit
     override fun onDuplicateFile(destinationFolder: File) = Unit
-    override fun onMoveFile(destinationFolder: File) = Unit
+    override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) = Unit
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
     override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) = Unit
 }

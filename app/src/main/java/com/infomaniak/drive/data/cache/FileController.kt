@@ -66,17 +66,27 @@ object FileController {
     const val RECENT_CHANGES_FILE_ID = -4
     private const val GALLERY_FILE_ID = -3
     const val SHARED_WITH_ME_FILE_ID = -5
+    const val TRASH_FILE_ID = -6
 
     private val FAVORITES_FILE = File(id = FAVORITES_FILE_ID, name = "Favorites").apply { initUid() }
     private val MY_SHARES_FILE = File(id = MY_SHARES_FILE_ID, name = "My Shares").apply { initUid() }
     private val GALLERY_FILE = File(id = GALLERY_FILE_ID, name = "Gallery").apply { initUid() }
     private val RECENT_CHANGES_FILE = File(id = RECENT_CHANGES_FILE_ID, name = "Recent changes").apply { initUid() }
     private val SHARED_WITH_ME_FILE = File(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me").apply { initUid() }
+    val TRASH_FILE = File(id = TRASH_FILE_ID, name = "Trash", status = "trash", type = "dir").apply { initUid() }
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
     fun getFileById(realm: Realm, fileId: Int): File? {
         return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()
+    }
+
+    fun getSharedDrive(userId: Int, fileId: Int): File? {
+        getRealmInstance(UserDrive(userId = userId, sharedWithMe = true)).use { realm ->
+            return realm.where(File::class.java).equalTo(File::id.name, fileId).findFirst()?.let {
+                realm.copyFromRealm(it, 1)
+            }
+        }
     }
 
     // https://github.com/realm/realm-java/issues/1862
@@ -177,18 +187,16 @@ object FileController {
             .toFlow()
     }
 
-    fun getRecentFolders(recentFolderNumber: Int): Flow<List<File>> {
-        return getRealmInstance().use { realm ->
-            realm.where(File::class.java)
-                .equalTo(File::type.name, Type.DIRECTORY.value)
-                .greaterThan(File::id.name, ROOT_ID)
-                .greaterThan(File::parentId.name, ROOT_ID)
-                .sort(File::lastModifiedAt.name, Sort.DESCENDING)
-                .limit(recentFolderNumber.toLong())
-                .sort(File::lastModifiedAt.name, Sort.ASCENDING)
-                .findAllAsync()
-                .toFlow()
-        }
+    fun getRecentFolders(realm: Realm, recentFolderNumber: Int): Flow<List<File>> {
+        return realm.where(File::class.java)
+            .equalTo(File::type.name, Type.DIRECTORY.value)
+            .greaterThan(File::id.name, ROOT_ID)
+            .greaterThan(File::parentId.name, ROOT_ID)
+            .sort(File::lastModifiedAt.name, Sort.DESCENDING)
+            .limit(recentFolderNumber.toLong())
+            .sort(File::lastModifiedAt.name, Sort.ASCENDING)
+            .findAllAsync()
+            .toFlow()
     }
 
     //region isMarkedAsOffline

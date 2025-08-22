@@ -36,6 +36,7 @@ import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
+import com.infomaniak.core.cancellable
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -43,12 +44,15 @@ import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
@@ -61,7 +65,6 @@ import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
-import com.infomaniak.drive.utils.NotificationPermission
 import com.infomaniak.drive.utils.SyncOfflineUtils
 import com.infomaniak.drive.utils.SyncUtils.isSyncScheduled
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
@@ -109,7 +112,7 @@ class MainViewModel(
 
     private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
-    val navigateFileListTo = SingleLiveEvent<File>()
+    val navigateFileListTo = SingleLiveEvent<FileListNavigationType>()
 
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
@@ -131,8 +134,6 @@ class MainViewModel(
     var ignoreSyncOffline = false
 
     var uploadFilesHelper: UploadFilesHelper? = null
-
-    val notificationPermission by lazy { NotificationPermission() }
 
     private var rootFilesJob: Job = Job()
     private var getFileDetailsJob = Job()
@@ -192,7 +193,7 @@ class MainViewModel(
     fun loadRootFiles() {
         rootFilesJob.cancel()
         rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
-            if (hasNetwork) {
+            if (hasNetwork) runCatching {
                 FolderFilesProvider.getFiles(
                     FolderFilesProvider.FolderFilesProviderArgs(
                         folderId = Utils.ROOT_ID,
@@ -202,22 +203,33 @@ class MainViewModel(
                         userDrive = UserDrive(),
                     )
                 )
-            }
+            }.cancellable().onFailure { t ->
+                SentryLog.e(TAG, "recursiveDownload failed", t)
+            }.getOrNull()
         }
     }
 
-    fun navigateFileListTo(navController: NavController, fileId: Int, userDrive: UserDrive) {
+    fun navigateFileListTo(navController: NavController, fileId: Int, userDrive: UserDrive, subfolderId: Int?) {
         // Clear FileListFragment stack
         navController.popBackStack(R.id.rootFilesFragment, false)
 
-        if (fileId <= Utils.ROOT_ID) return // Deeplinks could lead us to navigating to the true root
+        if (fileId <= Utils.ROOT_ID) {
+            if (fileId == TRASH_FILE_ID) {
+                subfolderId?.let {
+                    navigateFileListTo.postValue(FileListNavigationType.Subfolder(TRASH_FILE, it))
+                } ?: run {
+                    navigateFileListTo.postValue(FileListNavigationType.Folder(TRASH_FILE))
+                }
+            }
+            return // Deeplinks could lead us to navigating to the true root
+        }
 
         // Emit destination folder id
         viewModelScope.launch(Dispatchers.IO) {
             val file = FileController.getFileById(fileId, userDrive)
                 ?: FileController.getFileDetails(fileId, userDrive = userDrive)
                 ?: return@launch
-            navigateFileListTo.postValue(file)
+            navigateFileListTo.postValue(FileListNavigationType.Folder(file))
         }
     }
 
@@ -290,15 +302,20 @@ class MainViewModel(
         }
     }
 
-    fun moveFile(file: File, newParent: File, onSuccess: ((fileId: Int) -> Unit)? = null) = liveData(Dispatchers.IO) {
+    fun moveFile(
+        file: File,
+        newParent: File,
+        isSharedWithMe: Boolean = false,
+        onSuccess: ((fileId: Int) -> Unit)? = null
+    ) = liveData(Dispatchers.IO) {
         val apiResponse = ApiRepository.moveFile(file, newParent)
         if (apiResponse.isSuccess()) {
-            FileController.getRealmInstance().use { realm ->
+            FileController.getRealmInstance().use { currentDriveRealm ->
                 file.getStoredFile(getContext())?.let { ioFile ->
                     if (ioFile.exists()) moveIfOfflineFileOrDelete(file, ioFile, newParent)
                 }
 
-                FileController.updateFile(file.parentId, realm) { localFolder ->
+                FileController.updateFile(file.parentId, currentDriveRealm) { localFolder ->
                     // Ignore expired transactions when it's suspended
                     // In case the phone is slow or in standby, the transaction can create an IllegalStateException
                     // because realm will not be available anymore, the transaction is resumed afterwards
@@ -306,7 +323,18 @@ class MainViewModel(
                     runCatching { localFolder.children.remove(file) }
                 }
 
-                FileController.addChild(newParent.id, file.apply { parentId = newParent.id }, realm)
+                if (isSharedWithMe) {
+                    // If the selected folder is a shared folder, it is removed from the user's realm table (userId_driveId)
+                    // and added to the share realm (userId_share)
+                    FileController.removeFile(fileId = file.id, customRealm = currentDriveRealm)
+                    FileController.getRealmInstance(UserDrive(sharedWithMe = true)).use { sharedRealm ->
+                        FileController.updateFile(newParent.id, sharedRealm) { localFolder ->
+                            runCatching { localFolder.children.add(file) }.onFailure(Sentry::captureException)
+                        }
+                    }
+                } else {
+                    FileController.addChild(newParent.id, file.apply { parentId = newParent.id }, currentDriveRealm)
+                }
             }
 
             onSuccess?.invoke(file.id)
@@ -629,6 +657,8 @@ class MainViewModel(
     )
 
     companion object {
+        const val TAG = "MainViewModel"
+
         private const val SAVED_STATE_FOLDER_ID_KEY = "folderId"
         private const val SAVED_STATE_MUST_OPEN_UPLOAD_SHORTCUT_KEY = "mustOpenUploadShortcut"
     }

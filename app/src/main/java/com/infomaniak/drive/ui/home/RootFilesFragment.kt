@@ -28,6 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
@@ -70,6 +71,8 @@ class RootFilesFragment : BaseRootFolderFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
+        fileListViewModel.updateRootFiles(UserDrive())
+
         setupDriveToolbar(collapsingToolbarLayout, switchDriveLayout, appBar)
 
         toolbar.setOnMenuItemClickListener { menuItem ->
@@ -84,9 +87,9 @@ class RootFilesFragment : BaseRootFolderFragment() {
 
         setupItems(
             folderLayout = binding.rootFolderLayout,
-            favoritesNav = RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(),
-            sharedWithMeNav = RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(),
-            mySharesNav = RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(),
+            sharedWithMeNav = RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(UserDrive()),
+            favoritesNav = RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(UserDrive()),
+            mySharesNav = RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(UserDrive()),
             recentChangesNav = RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment(),
             offlineNav = RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment(),
             trashNav = RootFilesFragmentDirections.actionFilesFragmentToTrashFragment()
@@ -130,10 +133,10 @@ class RootFilesFragment : BaseRootFolderFragment() {
                     hasFolderToOpenBeenSet.join()
                     personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
                 }
-                Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment())
+                Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(UserDrive()))
                 RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
-                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment())
-                MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment())
+                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(UserDrive()))
+                MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(UserDrive()))
                 Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
                 Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
             }

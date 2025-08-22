@@ -19,52 +19,59 @@ package com.infomaniak.drive.utils
 
 import android.Manifest.permission.ACCESS_MEDIA_LOCATION
 import android.Manifest.permission.POST_NOTIFICATIONS
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.READ_MEDIA_IMAGES
 import android.Manifest.permission.READ_MEDIA_VIDEO
 import android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Activity.RESULT_OK
-import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.DialogInterface
-import android.content.Intent
-import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.CUR_DEVELOPMENT
-import android.os.PowerManager
-import android.provider.Settings
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog
+import com.infomaniak.drive.utils.DrivePermissions.Type.DownloadingWithDownloadManager
+import com.infomaniak.drive.utils.DrivePermissions.Type.ReadingMediaForSync
+import com.infomaniak.drive.utils.DrivePermissions.Type.UploadInTheBackground
 import com.infomaniak.lib.core.utils.hasPermissions
 import com.infomaniak.lib.core.utils.requestPermissionsIsPossible
 import com.infomaniak.lib.core.utils.startAppSettingsConfig
-import io.sentry.Sentry
-import io.sentry.SentryLevel
+import splitties.init.appCtx
+import splitties.systemservices.powerManager
 
-class DrivePermissions {
+class DrivePermissions(private val type: Type) {
 
-    private lateinit var batteryPermissionResultLauncher: ActivityResultLauncher<Intent>
+    enum class Type {
+        DownloadingWithDownloadManager,
+        ReadingMediaForSync,
+        UploadInTheBackground,
+    }
+
     private lateinit var registerForActivityResult: ActivityResultLauncher<Array<String>>
     private lateinit var activity: FragmentActivity
+
+    private val requiredPermissions = permissionsFor(type, includeOptionals = false).toTypedArray()
+    private val permissionsToAsk = permissionsFor(type, includeOptionals = true).toTypedArray()
+
+    private val requiredPermissionsAlreadyGranted: Boolean = appCtx.hasPermissions(requiredPermissions)
 
     private val backgroundSyncPermissionsBottomSheetDialog by lazy { BackgroundSyncPermissionsBottomSheetDialog() }
 
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
-            val authorized = authorizedPermissions.values.all { it }
-            onPermissionResult?.invoke(authorized)
-            activity.resultPermissions(authorized, permissions)
+            if (requiredPermissionsAlreadyGranted.not()) {
+                val authorized = authorizedPermissions.filterKeys { it in requiredPermissions }.values.all { it }
+                onPermissionResult?.invoke(authorized)
+                activity.resultPermissions(authorized, requiredPermissions)
+            }
         }
     }
 
@@ -72,98 +79,37 @@ class DrivePermissions {
         activity = fragment.requireActivity()
         registerForActivityResult =
             fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
-                val authorized = authorizedPermissions.values.all { it }
-                onPermissionResult?.invoke(authorized)
-                activity.resultPermissions(authorized, permissions)
+                if (requiredPermissionsAlreadyGranted.not()) {
+                    val authorized = authorizedPermissions.filterKeys { it in requiredPermissions }.values.all { it }
+                    onPermissionResult?.invoke(authorized)
+                    activity.resultPermissions(authorized, requiredPermissions)
+                }
             }
     }
 
-    fun registerBatteryPermission(fragment: Fragment, onPermissionResult: ((authorized: Boolean) -> Unit)) {
-        activity = fragment.requireActivity()
-        batteryPermissionResultLauncher = fragment.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            val hasPermission = it.resultCode == RESULT_OK || checkBatteryLifePermission(false)
-            onPermissionResult(hasPermission)
+    fun hasNeededPermissions(requestIfNotGranted: Boolean = false, canShowBatteryDialog: Boolean = true): Boolean {
+        if (canShowBatteryDialog) when (type) {
+            DownloadingWithDownloadManager -> Unit
+            ReadingMediaForSync, UploadInTheBackground -> tryShowBatteryDialogIfNeeded()
+        }
+        return when {
+            activity.hasPermissions(permissionsToAsk) -> true
+            else -> {
+                if (requestIfNotGranted) {
+                    // All permissions (optionals included) are NOT granted (so we are requesting them)…
+                    registerForActivityResult.launch(permissionsToAsk)
+                }
+                activity.hasPermissions(requiredPermissions) // …but the needed ones might be granted.
+            }
         }
     }
 
-    /**
-     * Check if the sync has all permissions to work
-     *
-     * @param requestPermission Whether or not the app should just check if it has the permissions,
-     * or requests it if it's not the case
-     * @param showBatteryDialog We want to be able to show the battery dialog even if we don't request the mandatory permissions
-     *
-     * @return [Boolean] true if the sync has all permissions or false
-     */
-    fun checkSyncPermissions(requestPermission: Boolean = true, showBatteryDialog: Boolean = true): Boolean {
-
-        fun displayBatteryDialog() {
+    private fun tryShowBatteryDialogIfNeeded() {
+        val mustDisplayIt = UiSettings(activity).mustDisplayBatteryDialog
+        if (mustDisplayIt || powerManager.isIgnoringBatteryOptimizations(BuildConfig.APPLICATION_ID).not()) {
             with(backgroundSyncPermissionsBottomSheetDialog) {
                 if (dialog?.isShowing != true && !isResumed) {
                     show(this@DrivePermissions.activity.supportFragmentManager, "syncPermissionsDialog")
-                }
-            }
-        }
-
-        if (showBatteryDialog && (UiSettings(activity).mustDisplayBatteryDialog || !checkBatteryLifePermission(false))) {
-            displayBatteryDialog()
-        }
-
-        return checkWriteStoragePermission(requestPermission)
-    }
-
-    fun checkUserChoiceStoragePermission(): Boolean {
-        return if (SDK_INT >= 34) {
-            activity.hasPermissions(arrayOf(READ_MEDIA_VISUAL_USER_SELECTED))
-        } else {
-            false
-        }
-    }
-
-    /**
-     * Checks if the user has already confirmed write permission
-     */
-    @SuppressLint("NewApi")
-    fun checkWriteStoragePermission(requestPermission: Boolean = true): Boolean {
-        return when {
-            activity.hasPermissions(permissions) -> true
-            else -> {
-                if (requestPermission) registerForActivityResult.launch(permissions)
-                false
-            }
-        }
-    }
-
-    /**
-     * Checks if the user has already confirmed battery optimization's disabling permission
-     */
-    fun checkBatteryLifePermission(requestPermission: Boolean): Boolean {
-        return with(activity) {
-            val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager?
-            when {
-                powerManager?.isIgnoringBatteryOptimizations(packageName) != false -> true
-                else -> {
-                    if (requestPermission) requestBatteryOptimizationPermission()
-                    false
-                }
-            }
-        }
-    }
-
-    @SuppressLint("BatteryLife")
-    private fun Context.requestBatteryOptimizationPermission() {
-        try {
-            Intent(
-                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                Uri.parse("package:$packageName")
-            ).apply { batteryPermissionResultLauncher.launch(this) }
-        } catch (activityNotFoundException: ActivityNotFoundException) {
-            try {
-                batteryPermissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-            } catch (exception: Exception) {
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.WARNING
-                    Sentry.captureException(exception)
                 }
             }
         }
@@ -177,20 +123,25 @@ class DrivePermissions {
             else -> R.string.allPermissionNeeded
         }
 
-        val permissions = buildSet {
-            if (SDK_INT < 33) {
-                // Even if the docs says that it's unless after api 30, it is in fact needed for the related READ_EXTERNAL_STORAGE
-                // permission, which is use up to 32
-                add(WRITE_EXTERNAL_STORAGE)
+        fun permissionsFor(type: Type, includeOptionals: Boolean = false): List<String> = buildList {
+            // Note that order is important, because it'll be the ask order.
+            when (type) {
+                DownloadingWithDownloadManager -> if (SDK_INT < 29) add(WRITE_EXTERNAL_STORAGE)
+                ReadingMediaForSync -> {
+                    // See https://developer.android.com/training/data-storage/shared/media
+                    if (SDK_INT >= 34) add(READ_MEDIA_VISUAL_USER_SELECTED)
+                    if (SDK_INT >= 33) {
+                        add(READ_MEDIA_IMAGES)
+                        add(READ_MEDIA_VIDEO)
+                    } else {
+                        add(READ_EXTERNAL_STORAGE)
+                    }
+                    if (SDK_INT >= 29) add(ACCESS_MEDIA_LOCATION)
+                    if (SDK_INT >= 33 && includeOptionals) add(POST_NOTIFICATIONS)
+                }
+                UploadInTheBackground -> if (SDK_INT >= 33 && includeOptionals) add(POST_NOTIFICATIONS)
             }
-            if (SDK_INT in 29..<CUR_DEVELOPMENT) add(ACCESS_MEDIA_LOCATION)
-            if (SDK_INT in 33..<CUR_DEVELOPMENT) {
-                add(POST_NOTIFICATIONS)
-                add(READ_MEDIA_IMAGES)
-                add(READ_MEDIA_VIDEO)
-            }
-            if (SDK_INT in 34..<CUR_DEVELOPMENT) add(READ_MEDIA_VISUAL_USER_SELECTED)
-        }.toTypedArray()
+        }
 
         fun Activity.resultPermissions(authorized: Boolean, permissions: Array<String>) {
             if (!authorized && !requestPermissionsIsPossible(permissions)) {

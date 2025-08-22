@@ -30,6 +30,8 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
+import coil.ImageLoader
+import coil.imageLoader
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
@@ -61,7 +63,7 @@ import java.util.UUID
 open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
     var fileList: OrderedRealmCollection<File> = RealmList(),
-    override val lifecycle: Lifecycle
+    override val lifecycle: Lifecycle,
 ) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true), LifecycleOwner {
 
     private var fileAsyncListDiffer: AsyncListDiffer<File>? = null
@@ -74,17 +76,19 @@ open class FileAdapter(
     var isSelectingFolder = false
     var showShareFileButton = true
     var viewHolderType: DisplayType = DisplayType.LIST
-
     var uploadInProgress = false
     var publicShareCanDownload = true
 
     var isComplete = false
     var isHomeOffline = false
+    var newImageLoader: ImageLoader? = null
 
     private var offlineMode = false
     private var pendingWifiConnection = false
     private var showLoading = false
     private var fileAdapterObserver: AdapterDataObserver? = null
+
+    private fun getNewImageLoader(context: Context) = newImageLoader ?: context.imageLoader
 
     private fun createFileAdapterObserver(recyclerView: RecyclerView) = object : AdapterDataObserver() {
 
@@ -323,9 +327,17 @@ open class FileAdapter(
 
         currentBindScope.launch(start = CoroutineStart.UNDISPATCHED) {
             when (binding) {
-                is CardviewFileListBinding -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(file, isGrid)
-                is CardviewFileGridBinding -> (binding as CardviewFileGridBinding).setFileItem(file, isGrid)
-                is CardviewFolderGridBinding -> (binding as CardviewFolderGridBinding).setFileItem(file, isGrid)
+                is CardviewFileListBinding -> (binding as CardviewFileListBinding).itemViewFile.setFileItem(
+                    file = file,
+                    isGrid = isGrid,
+                    imageLoader = getNewImageLoader(binding.context),
+                )
+                is CardviewFileGridBinding -> (binding as CardviewFileGridBinding).setFileItem(
+                    file = file,
+                    isGrid = isGrid,
+                    imageLoader = getNewImageLoader(binding.context),
+                )
+                is CardviewFolderGridBinding -> (binding as CardviewFolderGridBinding).setFileItem(file = file, isGrid = isGrid)
             }
         }
 

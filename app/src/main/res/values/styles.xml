@@ -54,6 +54,10 @@
         <item name="snackbarStyle">@style/Widget.App.Snackbar</item>
         <item name="snackbarTextViewStyle">@style/Widget.App.SnackbarTextView</item>
         <item name="toolbarStyle">@style/AppTheme.ToolbarTheme</item>
+
+        <!--Material 3 theme-->
+        <item name="colorOnSurface">@color/title</item> <!--Bottom sheet content color-->
+        <item name="colorSurfaceContainerLow">@color/bottomSheetBackgroundColor</item> <!--Bottom sheet container color-->
     </style>
 
     <style name="AppTheme" parent="AppThemeBase" />
@@ -150,13 +154,13 @@
     <style name="BottomSheetDialogTheme" parent="BottomSheetDialogTheme.Base" />
 
     <style name="BottomSheetDialogTheme.ModalStyle" parent="Widget.Material3.BottomSheet">
-        <item name="backgroundTint">@color/appBar</item>
+        <item name="backgroundTint">@color/bottomSheetBackgroundColor</item>
         <item name="shapeAppearanceOverlay">@style/BottomSheetDialogTheme.ShapeAppearanceOverlay</item>
     </style>
 
     <style name="BottomSheetDialogTheme.ShapeAppearanceOverlay">
-        <item name="cornerSizeTopLeft">20dp</item>
-        <item name="cornerSizeTopRight">20dp</item>
+        <item name="cornerSizeTopLeft">@dimen/bottomSheetCornerSize</item>
+        <item name="cornerSizeTopRight">@dimen/bottomSheetCornerSize</item>
     </style>
 
     <style name="BottomSheetStyle" parent="BottomSheetDialogTheme.ModalStyle">
@@ -227,6 +231,7 @@
 
     <!--Text-->
 
+    <!--Keep these text styles in sync with their compose version in Type.kt-->
     <style name="H1">
         <item name="android:fontFamily">@font/suisseintl_bold</item>
         <item name="android:textColor">@color/title</item>

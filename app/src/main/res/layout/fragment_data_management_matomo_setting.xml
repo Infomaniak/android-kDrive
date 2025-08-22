@@ -67,7 +67,6 @@
                 android:layout_marginVertical="@dimen/marginStandardMedium"
                 android:text="@string/trackingMatomoDescription" />
 
-
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/settingsTrackingMatomo"
                 style="@style/CardViewInfomaniak"

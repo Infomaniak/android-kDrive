@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
+import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
@@ -228,15 +229,28 @@ class LaunchActivity : AppCompatActivity() {
     private fun processInternalLink(path: String) {
         Regex("/app/[a-z]+/(\\d+)/([a-z-]*)/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
             val (pathDriveId, roleFolderId, pathFolderId, pathFileId) = match.destructured
-            // In case of SharedWithMe deeplinks, we open the link in the web as we cannot support them in-app for now
-            if (roleFolderId == SHARED_WITH_ME_FOLDER_ROLE) {
-                PublicShareUtils.openDeepLinkInBrowser(activity = this, path)
-                shouldStartApp = false
-                return
-            }
 
             val driveId = pathDriveId.toInt()
             val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
+
+            when (roleFolderId) {
+                SHARED_WITH_ME_FOLDER_ROLE -> {
+                    // In case of SharedWithMe deeplinks, we open the link in the web as we cannot support them in-app for now
+                    PublicShareUtils.openDeepLinkInBrowser(activity = this, path)
+                    shouldStartApp = false
+                    return
+                }
+                TRASH -> {
+                    mainActivityExtras = MainActivityArgs(
+                        deepLinkType = DeepLinkType.Trash(
+                            organizationId = null,
+                            userDriveId = driveId,
+                            folderId = pathFolderId
+                        )
+                    ).toBundle()
+                    return
+                }
+            }
 
             lifecycleScope.launch {
                 Dispatchers.IO { DriveInfosController.getDrive(driveId = driveId, maintenance = false) }?.also {
@@ -301,5 +315,6 @@ class LaunchActivity : AppCompatActivity() {
     companion object {
         private const val SHORTCUTS_TAG = "shortcuts_tag"
         private const val SHARED_WITH_ME_FOLDER_ROLE = "shared-with-me"
+        private const val TRASH = "trash"
     }
 }

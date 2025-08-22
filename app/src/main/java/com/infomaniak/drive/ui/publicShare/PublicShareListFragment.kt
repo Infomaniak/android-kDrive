@@ -35,6 +35,7 @@ import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
@@ -69,7 +70,7 @@ class PublicShareListFragment : FileListFragment() {
     override var enabledMultiSelectMode: Boolean = true
     override var hideBackButtonWhenRoot: Boolean = false
 
-    private val drivePermissions = DrivePermissions()
+    private val downloadPermissions = DrivePermissions(type = DrivePermissions.Type.DownloadingWithDownloadManager)
     private inline val importButton get() = (requireActivity() as PublicShareActivity).getMainButton()
     private val selectDriveAndFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
         it.whenResultIsOk(::onDriveAndFolderSelected)
@@ -90,7 +91,7 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        drivePermissions.registerPermissions(this@PublicShareListFragment) { authorized -> if (authorized) downloadAllFiles() }
+        downloadPermissions.registerPermissions(this@PublicShareListFragment) { authorized -> if (authorized) downloadAllFiles() }
 
         return super.onCreateView(inflater, container, savedInstanceState)
     }
@@ -240,7 +241,7 @@ class PublicShareListFragment : FileListFragment() {
 
     private fun openFolder(folder: File) {
         openFolder(
-            file = folder,
+            navigationType = FileListNavigationType.Folder(folder),
             shouldHideBottomNavigation = true,
             shouldShowSmallFab = false,
             fileListViewModel = fileListViewModel,
@@ -278,7 +279,7 @@ class PublicShareListFragment : FileListFragment() {
     private fun downloadAllFiles() {
         // RootSharedFile can either be a folder or a single file
         trackPublicShareActionEvent(MatomoName.DownloadAllFiles)
-        publicShareViewModel.rootSharedFile.value?.let { file -> requireContext().downloadFile(drivePermissions, file) }
+        publicShareViewModel.rootSharedFile.value?.let { file -> requireContext().downloadFile(downloadPermissions, file) }
     }
 
     private fun onDriveAndFolderSelected(data: Intent?) {
@@ -288,8 +289,13 @@ class PublicShareListFragment : FileListFragment() {
         if (data == null || destinationDriveId == PUBLIC_SHARE_DEFAULT_ID || destinationFolderId == PUBLIC_SHARE_DEFAULT_ID) {
             showSnackbar(RCore.string.anErrorHasOccurred, anchor = importButton)
         } else {
+            val rootSharedFileId = publicShareViewModel.rootSharedFile.value?.id
             val fileIds = multiSelectManager.selectedItemsIds.toList().ifEmpty {
-                if (folderId == publicShareViewModel.rootSharedFile.value?.id) emptyList() else listOf(folderId)
+                if (folderId == rootSharedFileId || publicShareViewModel.fileId == rootSharedFileId) {
+                    emptyList()
+                } else {
+                    listOf(folderId)
+                }
             }
             closeMultiSelect()
             publicShareViewModel.importFilesToDrive(

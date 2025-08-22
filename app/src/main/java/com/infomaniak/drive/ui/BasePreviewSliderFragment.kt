@@ -93,7 +93,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     // This is not protected, otherwise it won't build because PublicSharePreviewSliderFragment needs it public for the interface
     // it implements
-    val drivePermissions: DrivePermissions = DrivePermissions()
+    val downloadPermissions: DrivePermissions = DrivePermissions(type = DrivePermissions.Type.DownloadingWithDownloadManager)
     open val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {}
 
     val previewPDFHandler by lazy {
@@ -113,7 +113,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
         setBackActionHandlers()
 
-        drivePermissions.registerPermissions(this@BasePreviewSliderFragment) { authorized ->
+        downloadPermissions.registerPermissions(this@BasePreviewSliderFragment) { authorized ->
             if (authorized) downloadFileClicked()
         }
 

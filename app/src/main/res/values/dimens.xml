@@ -31,4 +31,10 @@
     <!--fastScroller-->
     <dimen name="defaultHandleSize">18dp</dimen>
     <dimen name="defaultPopupPadding">16dp</dimen>
+
+    <!--Bottom sheet-->
+    <dimen name="bottomSheetCornerSize">20dp</dimen>
+    <dimen name="bottomSheetDragHandleHeight">@dimen/marginStandardVerySmall</dimen>
+    <dimen name="bottomSheetDragHandleWidth">42dp</dimen>
+    <dimen name="bottomSheetDragHandleVerticalMargin">22dp</dimen> <!--Same value as material's default values-->
 </resources>

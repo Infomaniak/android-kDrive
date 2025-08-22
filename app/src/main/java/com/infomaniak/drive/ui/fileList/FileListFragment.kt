@@ -43,6 +43,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -58,6 +59,8 @@ import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.File.SortTypeUsage
+import com.infomaniak.drive.data.models.FileListNavigationType
+import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
@@ -72,9 +75,11 @@ import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.SelectCategoriesFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.FileListMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectFragment
+import com.infomaniak.drive.ui.menu.OfflineFileFragment
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openBookmark
@@ -119,6 +124,7 @@ open class FileListFragment : MultiSelectFragment(
 
     private val navigationArgs: FileListFragmentArgs by navArgs()
     private val dropboxViewModel: DropboxViewModel by activityViewModels()
+    private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
 
     internal var folderId = ROOT_ID
     internal var folderName: String = "/"
@@ -140,6 +146,8 @@ open class FileListFragment : MultiSelectFragment(
     protected open var showPendingFiles = true
     protected open var allowCancellation = true
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
+
+    var sizeOfOffline: Int = 0
 
     private val noItemsFoldersTitle: Int by lazy {
         if (mainViewModel.currentFolder.value?.rights?.canCreateFile == true
@@ -220,7 +228,6 @@ open class FileListFragment : MultiSelectFragment(
                 downloadFiles(false, false)
             }
         }
-
         binding.toolbar.apply {
             if (isCurrentFolderRoot() && hideBackButtonWhenRoot) navigationIcon = null
 
@@ -237,7 +244,6 @@ open class FileListFragment : MultiSelectFragment(
             }
 
             setNavigationOnClickListener { findNavController().popBackStack() }
-
             menu?.findItem(R.id.searchItem)?.isVisible = findNavController().currentDestination?.id == R.id.fileListFragment
         }
 
@@ -358,6 +364,20 @@ open class FileListFragment : MultiSelectFragment(
         getBackNavigationResult<List<Int>>(SelectCategoriesFragment.SELECT_CATEGORIES_NAV_KEY) { closeMultiSelect() }
     }
 
+    fun setupSaveButton() {
+        if (requireActivity() is SelectFolderActivity) {
+            lifecycleScope.launchWhenResumed {
+                with(requireActivity() as SelectFolderActivity) {
+                    showSaveButton()
+                    val currentFolderRights = FileController.getFileById(folderId, userDrive)?.rights ?: Rights()
+                    val enable = folderId != selectFolderViewModel.disableSelectedFolderId
+                            && (currentFolderRights.canMoveInto || currentFolderRights.canCreateFile)
+                    enableSaveButton(enable)
+                }
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         fileAdapter.resetRealmListener()
@@ -398,13 +418,21 @@ open class FileListFragment : MultiSelectFragment(
     }
 
     private fun setupMultiSelect() {
+        val isOfflineFileFragment = this@FileListFragment is OfflineFileFragment
         multiSelectManager.isMultiSelectAuthorized = true
 
         multiSelectLayout?.apply {
 
             toolbarMultiSelect.setNavigationOnClickListener { closeMultiSelect() }
-            moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
-            deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
+
+            moveButtonMultiSelect.isGone = isOfflineFileFragment
+            deleteButtonMultiSelect.isGone = isOfflineFileFragment
+
+            if (!isOfflineFileFragment) {
+                moveButtonMultiSelect.setOnClickListener { moveFiles(folderId) }
+                deleteButtonMultiSelect.setOnClickListener { deleteFiles(getAllSelectedFilesCount()) }
+            }
+
             menuButtonMultiSelect.setOnClickListener {
                 onMenuButtonClicked(
                     multiSelectBottomSheet = FileListMultiSelectActionsBottomSheetDialog(),
@@ -424,19 +452,27 @@ open class FileListFragment : MultiSelectFragment(
                         fileAdapter.configureAllSelected(true)
                         enableMultiSelectButtons(false)
 
-                        fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
-                            .observe(viewLifecycleOwner) { fileCount ->
-                                with(fileAdapter.getFiles()) {
-                                    multiSelectManager.selectedItems = this
-                                    multiSelectManager.selectedItemsIds = this.map { it.id }.toHashSet()
+                        if (isOfflineFileFragment) {
+                            setupAllSelect(sizeOfOffline)
+                        } else {
+                            fileListViewModel.getFileCount(multiSelectManager.currentFolder!!)
+                                .observe(viewLifecycleOwner) { fileCount ->
+                                    setupAllSelect(fileCount.count)
                                 }
-                                enableMultiSelectButtons(true)
-                                onUpdateMultiSelect(fileCount.count)
-                            }
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun setupAllSelect(listSize: Int?) {
+        val allFiles = fileAdapter.getFiles()
+        multiSelectManager.selectedItems = allFiles
+        multiSelectManager.selectedItemsIds = allFiles.map { it.id }.toHashSet()
+
+        enableMultiSelectButtons(isEnabled = true)
+        onUpdateMultiSelect(selectedNumber = listSize)
     }
 
     private fun setupDisplay() {
@@ -484,32 +520,23 @@ open class FileListFragment : MultiSelectFragment(
             updateMultiSelect = { onUpdateMultiSelect() }
         }
 
+        val mainApp = requireContext().applicationContext as MainApplication
+
         fileAdapter = FileAdapter(
             multiSelectManager = multiSelectManager,
             fileList = FileController.emptyList(mainViewModel.realm),
-            lifecycle = viewLifecycleOwner.lifecycle
+            lifecycle = viewLifecycleOwner.lifecycle,
         ).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             setHasStableIds(true)
 
             onEmptyList = { checkIfNoFiles() }
 
-            onFileClicked = { file ->
-                if (file.isUsable()) {
-                    when {
-                        file.isFolder() -> openFolder(
-                            file,
-                            navigationArgs.shouldHideBottomNavigation,
-                            navigationArgs.shouldShowSmallFab,
-                            fileListViewModel,
-                        )
-                        file.isBookmark() -> openBookmark(file)
-                        else -> displayFile(file, mainViewModel, fileAdapter)
-                    }
-                } else {
-                    refreshActivities()
-                }
+            if (userDrive != null && userDrive?.userId != AccountUtils.currentUserId) {
+                newImageLoader = mainApp.newImageLoader(userDrive?.userId)
             }
+
+            onFileClicked = getFunctionByFileType()
 
             onMenuClicked = { file ->
                 val fileObject = file.realm?.copyFromRealm(file, 1) ?: file
@@ -545,6 +572,23 @@ open class FileListFragment : MultiSelectFragment(
                 context?.let { fileAdapter.toggleOfflineMode(it, !isInternetAvailable) }
             },
         )
+    }
+
+    private fun getFunctionByFileType(): (File) -> Unit = { file ->
+        if (file.isUsable()) {
+            when {
+                file.isFolder() -> openFolder(
+                    FileListNavigationType.Folder(file),
+                    navigationArgs.shouldHideBottomNavigation,
+                    navigationArgs.shouldShowSmallFab,
+                    fileListViewModel,
+                )
+                file.isBookmark() -> openBookmark(file)
+                else -> displayFile(file, mainViewModel, fileAdapter)
+            }
+        } else {
+            refreshActivities()
+        }
     }
 
     protected open fun homeClassName(): String? = null

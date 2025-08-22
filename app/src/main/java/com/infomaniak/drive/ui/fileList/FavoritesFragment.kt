@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
@@ -41,6 +42,8 @@ class FavoritesFragment : FileListFragment() {
     override val noItemsRootIcon = R.drawable.ic_star_filled
     override val noItemsRootTitle = R.string.favoritesNoFile
 
+    private val navigationArgs: FavoritesFragmentArgs by navArgs()
+
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -49,6 +52,7 @@ class FavoritesFragment : FileListFragment() {
         setToolbarTitle(R.string.favoritesTitle)
         setupAdapter()
         setupMultiSelectLayout()
+        setupSaveButton()
     }
 
     private fun initParams() {
@@ -76,7 +80,7 @@ class FavoritesFragment : FileListFragment() {
 
     private fun File.openFavoriteFolder() {
         fileListViewModel.cancelDownloadFiles()
-        safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(id, name))
+        safeNavigate(FavoritesFragmentDirections.actionFavoritesFragmentSelf(navigationArgs.userDrive, id, name))
     }
 
     private fun setupMultiSelectLayout() {
@@ -118,7 +122,11 @@ class FavoritesFragment : FileListFragment() {
         override fun invoke(ignoreCache: Boolean, isNewSort: Boolean) {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
-            fileListViewModel.getFavoriteFiles(fileListViewModel.sortType, isNewSort).observe(viewLifecycleOwner) {
+            fileListViewModel.getFavoriteFiles(
+                order = fileListViewModel.sortType,
+                isNewSort = isNewSort,
+                userDrive = navigationArgs.userDrive
+            ).observe(viewLifecycleOwner) {
                 it?.let { result ->
                     if (fileAdapter.itemCount == 0 || result.isFirstPage || isNewSort) {
                         val realmFiles = FileController.getRealmLiveFiles(

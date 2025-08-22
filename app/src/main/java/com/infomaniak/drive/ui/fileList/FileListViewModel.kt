@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import com.infomaniak.core.cancellable
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
@@ -41,13 +42,18 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.drive.utils.Position
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
+import io.realm.Realm
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -58,8 +64,7 @@ import kotlinx.coroutines.sync.withLock
 class FileListViewModel(application: Application) : AndroidViewModel(application) {
 
     private inline val context get() = getApplication<MainApplication>().applicationContext
-
-    private val realm = FileController.getRealmInstance()
+    private var realm: Realm? = null
 
     private var getFilesJob: Job = Job()
     private var getFolderActivitiesJob: Job = Job()
@@ -75,13 +80,27 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     var lastItemCount: FileCount? = null
 
+    private val rootFilesUserDrive = MutableSharedFlow<UserDrive>(replay = 1)
+
     fun sortTypeIsInitialized() = ::sortType.isInitialized
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val rootFiles = FileController.getFolderFilesFlow(realm, Utils.ROOT_ID)
-        .mapLatest { it.associateBy(File::getVisibilityType) }
-        .cancellable()
-        .asLiveData(viewModelScope.coroutineContext)
+    val rootFiles: LiveData<Map<File.VisibilityType, File>> =
+        rootFilesUserDrive.distinctUntilChanged().flatMapLatest { userDrive ->
+            FileController.getRealmInstance(userDrive).run {
+                realm = this
+                FileController.getFolderFilesFlow(this, Utils.ROOT_ID)
+            }
+        }
+            .mapLatest { it.associateBy(File::getVisibilityType) }
+            .cancellable()
+            .asLiveData(viewModelScope.coroutineContext)
+
+    fun updateRootFiles(userDrive: UserDrive) {
+        viewModelScope.launch {
+            rootFilesUserDrive.emit(userDrive)
+        }
+    }
 
     fun getFiles(
         folderId: Int,
@@ -136,22 +155,29 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                     }
                 }
             }
-            recursiveDownload(folderId, isFirstPage = true)
+            runCatching {
+                recursiveDownload(folderId, isFirstPage = true)
+            }.cancellable().onFailure { t ->
+                SentryLog.e(TAG, "recursiveDownload failed", t)
+            }.getOrNull()
         }
     }
 
-    fun getFavoriteFiles(order: SortType, isNewSort: Boolean): LiveData<FolderFilesResult?> {
+    fun getFavoriteFiles(order: SortType, isNewSort: Boolean, userDrive: UserDrive): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
             tailrec suspend fun recursive(isFirstPage: Boolean, isNewSort: Boolean, cursor: String? = null) {
                 getFilesJob.ensureActive()
-                val apiResponse = ApiRepository.getFavoriteFiles(AccountUtils.currentDriveId, order, cursor)
+                val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
+                val apiResponse = ApiRepository.getFavoriteFiles(userDrive.driveId, order, cursor, okHttpClient)
                 if (apiResponse.isSuccess()) {
                     when {
                         apiResponse.data.isNullOrEmpty() -> emit(null)
                         apiResponse.hasMoreAndCursorExists -> {
-                            apiResponse.data?.let { FileController.saveFavoritesFiles(it, isFirstPage) }
+                            apiResponse.data?.let {
+                                saveFavoriteFiles(it, isFirstPage, userDrive)
+                            }
                             emit(
                                 FolderFilesResult(
                                     files = apiResponse.data!!,
@@ -163,7 +189,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                             recursive(isFirstPage = false, isNewSort = false, cursor = apiResponse.cursor)
                         }
                         else -> {
-                            FileController.saveFavoritesFiles(apiResponse.data!!, isFirstPage)
+                            saveFavoriteFiles(apiResponse.data!!, isFirstPage, userDrive)
                             emit(
                                 FolderFilesResult(
                                     files = apiResponse.data!!,
@@ -176,7 +202,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                     }
                 } else emit(
                     FolderFilesResult(
-                        files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID),
+                        files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID, userDrive = userDrive),
                         isComplete = true,
                         isFirstPage = true,
                         isNewSort = isNewSort,
@@ -184,6 +210,16 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 )
             }
             recursive(isFirstPage = true, isNewSort = isNewSort)
+        }
+    }
+
+    private fun saveFavoriteFiles(
+        files: ArrayList<File>,
+        isFirstPage: Boolean,
+        userDrive: UserDrive
+    ) {
+        FileController.getRealmInstance(userDrive).use {
+            FileController.saveFavoritesFiles(files = files, replaceOldData = isFirstPage, realm = it)
         }
     }
 
@@ -205,11 +241,11 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getMySharedFiles(sortType: SortType): LiveData<Pair<ArrayList<File>, Boolean>?> {
+    fun getMySharedFiles(sortType: SortType, userDrive: UserDrive): LiveData<Pair<ArrayList<File>, Boolean>?> {
         getFilesJob.cancel()
         getFilesJob = Job()
         return liveData(Dispatchers.IO + getFilesJob) {
-            FileController.getMySharedFiles(UserDrive(), sortType, transaction = { files, isComplete ->
+            FileController.getMySharedFiles(userDrive, sortType, transaction = { files, isComplete ->
                 runBlocking { emit(files to isComplete) }
             })
         }
@@ -310,7 +346,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
 
     override fun onCleared() {
         super.onCleared()
-        runCatching { realm.close() }
+        runCatching { realm?.close() }
         cancelDownloadFiles()
     }
 
@@ -320,6 +356,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     }
 
     private companion object {
+        const val TAG = "FileListViewModel"
         val mutex = Mutex()
     }
 }

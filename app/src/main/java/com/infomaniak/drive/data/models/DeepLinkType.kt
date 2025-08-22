@@ -15,11 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.ui.login
+package com.infomaniak.drive.data.models
 
-import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel
-import com.infomaniak.drive.BuildConfig
-import kotlinx.serialization.ExperimentalSerializationApi
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-@OptIn(ExperimentalSerializationApi::class)
-class CrossAppLoginViewModel() : BaseCrossAppLoginViewModel(BuildConfig.APPLICATION_ID, BuildConfig.CLIENT_ID)
+sealed interface DeepLinkType : Parcelable {
+    val organizationId: Int?
+
+    @Parcelize
+    data class Trash(override val organizationId: Int?, val userDriveId: Int, val folderId: String?) : DeepLinkType
+    @Parcelize
+    data class SharedWithMe(override val organizationId: Int?, val path: String?) : DeepLinkType
+}

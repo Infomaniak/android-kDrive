@@ -146,9 +146,9 @@ class FileInfoActionsView @JvmOverloads constructor(
             disabledSendCopy.isGone = sendCopyEnabled
         }
 
-        addFavorites.isVisible = rights.canUseFavorite == true
+        addFavorites.isVisible = rights.canUseFavorite == true && !isSharedWithMe
         availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
-        deleteFile.isVisible = rights.canDelete == true && !file.isImporting()
+        deleteFile.isVisible = rights.canDelete == true && !file.isImporting() && !isSharedWithMe
         downloadFile.isVisible = rights.canRead == true
         duplicateFile.isGone = rights.canRead == false
                 || isSharedWithMe
@@ -159,7 +159,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         leaveShare.isVisible = rights.canLeave == true
         cancelExternalImport.isVisible = file.isImporting()
         moveFile.isVisible = rights.canMove == true && !isSharedWithMe && !file.isImporting()
-        renameFile.isVisible = rights.canRename == true && !isSharedWithMe && !file.isImporting()
+        renameFile.isVisible = rights.canRename == true && !file.isImporting()
         goToFolder.isVisible = isGoToFolderVisible()
     }
 
@@ -168,6 +168,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         refreshBottomSheetUi(currentFile)
         manageCategories.isVisible = DriveInfosController.getCategoryRights(file.driveId).canPutOnFile
                 && !file.isDisabled()
+                && !isSharedWithMe
 
         if (currentFile.isFromActivities) {
             quickActionsLayout.isGone = true
@@ -232,7 +233,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         // Displays the item to change folder color for all folder if the user is in free tier to display My kSuite Ad.
         // But only displays it for the folder that can really be colored if it's a paid drive.
         val isDriveFree = AccountUtils.getCurrentDrive()?.isFreeTier == true
-        isVisible = isDriveFree || currentFile.isAllowedToBeColored()
+        isVisible = (isDriveFree || currentFile.isAllowedToBeColored()) && !isSharedWithMe
         shouldShowMyKSuiteChip = isDriveFree
     }
 
@@ -540,7 +541,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onDeleteFile(onApiResponse: () -> Unit)
         fun onLeaveShare(onApiResponse: () -> Unit)
         fun onDuplicateFile(destinationFolder: File)
-        fun onMoveFile(destinationFolder: File)
+        fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean = false)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
         fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
 
@@ -561,7 +562,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                     val file = File(id = folderId, name = folderName, driveId = AccountUtils.currentDriveId)
                     when (customArgs?.getString(SINGLE_OPERATION_CUSTOM_TAG)) {
                         SingleOperation.COPY.name -> onDuplicateFile(file)
-                        SingleOperation.MOVE.name -> onMoveFile(file)
+                        SingleOperation.MOVE.name -> onMoveFile(file, isSharedWithMe)
                         else -> Unit
                     }
                 }
@@ -650,8 +651,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         companion object {
-            fun Context.downloadFile(drivePermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
-                if (drivePermissions.checkWriteStoragePermission()) {
+            fun Context.downloadFile(downloadPermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
+                if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                     val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
                     DownloadManagerUtils.scheduleDownload(

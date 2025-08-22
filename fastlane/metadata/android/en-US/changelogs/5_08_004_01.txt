@@ -1,0 +1,4 @@
+- Add `Select All` button in offline page
+- Fix Folder name when sharing a file to kDrive and selecting other drive
+- Attempt to fix the infinite progression issue in SyncSettings
+- Attempt fixing possible memory leaks

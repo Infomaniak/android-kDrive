@@ -62,6 +62,8 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
+import coil.ImageLoader
+import coil.imageLoader
 import coil.load
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -81,6 +83,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileCategory
+import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
@@ -122,6 +125,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import com.infomaniak.core.auth.BuildConfig as AuthBuildConfig
 
 typealias FileId = Int
 typealias IOFile = java.io.File
@@ -139,8 +143,12 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     }
 }
 
-fun ImageView.loadAny(data: Any?, @DrawableRes errorRes: Int = R.drawable.fallback_image) {
-    load(data) {
+fun ImageView.loadAny(
+    data: Any?,
+    @DrawableRes errorRes: Int = R.drawable.fallback_image,
+    imageLoader: ImageLoader = context.imageLoader
+) {
+    load(data, imageLoader) {
         error(errorRes)
         fallback(errorRes)
         placeholder(R.drawable.placeholder)
@@ -348,7 +356,7 @@ fun Fragment.navigateToParentFolder(folderId: Int, mainViewModel: MainViewModel)
         popBackStack(R.id.homeFragment, false)
         (requireActivity() as MainActivity).clickOnBottomBarFolders()
         val userDrive = UserDrive(sharedWithMe = false)
-        mainViewModel.navigateFileListTo(this, folderId, userDrive)
+        mainViewModel.navigateFileListTo(this, folderId, userDrive, null)
     }
 }
 
@@ -418,17 +426,13 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 
 fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
-const val loginUrl = "https://login.infomaniak.com/"
-
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
-    loginUrl = loginUrl,
+    loginUrl = AuthBuildConfig.LOGIN_ENDPOINT_URL,
     appUID = BuildConfig.APPLICATION_ID,
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,
-    sentryCallback = { error ->
-        SentryLog.e(tag = "WebViewLogin", error)
-    }
+    sentryCallback = { error -> SentryLog.e(tag = "WebViewLogin", error) }
 )
 
 //region Worker
@@ -514,15 +518,28 @@ fun Fragment.setupDriveToolbar(
 
 fun Fragment.observeNavigateFileListTo(mainViewModel: MainViewModel, fileListViewModel: FileListViewModel) {
     mainViewModel.navigateFileListTo.observe(viewLifecycleOwner) { file ->
-        if (file.isFolder()) {
-            openFolder(
-                file = file,
-                shouldHideBottomNavigation = false,
-                shouldShowSmallFab = false,
-                fileListViewModel = fileListViewModel,
-            )
-        } else {
-            displayFile(file, mainViewModel, fileAdapter = null)
+        when (file) {
+            is FileListNavigationType.Folder -> {
+                if (file.file.isFolder()) {
+                    openFolder(
+                        navigationType = file,
+                        shouldHideBottomNavigation = false,
+                        shouldShowSmallFab = false,
+                        fileListViewModel = fileListViewModel,
+                    )
+                } else {
+                    displayFile(file.file, mainViewModel, fileAdapter = null)
+                }
+            }
+            is FileListNavigationType.Subfolder -> {
+                openFolder(
+                    navigationType = file,
+                    shouldHideBottomNavigation = false,
+                    shouldShowSmallFab = false,
+                    fileListViewModel = fileListViewModel,
+                )
+
+            }
         }
     }
 }

@@ -74,7 +74,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     private var binding: FragmentBottomSheetFileInfoActionsBinding by safeBinding()
 
-    private lateinit var drivePermissions: DrivePermissions
+    private lateinit var downloadPermissions: DrivePermissions
     private val mainViewModel: MainViewModel by activityViewModels()
     private val shareLinkViewModel: ShareLinkViewModel by viewModels()
     private val navigationArgs: FileInfoActionsBottomSheetDialogArgs by navArgs()
@@ -99,7 +99,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             return
         }
 
-        drivePermissions = DrivePermissions().apply {
+        downloadPermissions = DrivePermissions(DrivePermissions.Type.DownloadingWithDownloadManager).apply {
             registerPermissions(this@FileInfoActionsBottomSheetDialog) { authorized -> if (authorized) downloadFileClicked() }
         }
 
@@ -225,7 +225,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
 
     override fun downloadFileClicked() {
         super.downloadFileClicked()
-        currentContext.downloadFile(drivePermissions, currentFile) { findNavController().popBackStack() }
+        currentContext.downloadFile(downloadPermissions, currentFile) { findNavController().popBackStack() }
     }
 
     override fun manageCategoriesClicked(fileId: Int) {
@@ -361,8 +361,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
     }
 
-    override fun onMoveFile(destinationFolder: File) {
-        mainViewModel.moveFile(currentFile, destinationFolder)
+    override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) {
+        mainViewModel.moveFile(currentFile, destinationFolder, isSharedWithMe)
             .observe(viewLifecycleOwner) { fileRequest ->
                 if (fileRequest.isSuccess) {
                     mainViewModel.refreshActivities.value = true

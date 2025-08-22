@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui.menu
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
@@ -43,6 +44,7 @@ import com.infomaniak.lib.core.utils.safeNavigate
 class TrashFragment : FileSubTypeListFragment() {
 
     val trashViewModel: TrashViewModel by navGraphViewModels(R.id.trashFragment)
+    private val navigationArgs: TrashFragmentArgs by navArgs()
 
     override var enabledMultiSelectMode: Boolean = true
     override val sortTypeUsage = SortTypeUsage.TRASH
@@ -51,6 +53,15 @@ class TrashFragment : FileSubTypeListFragment() {
     override val noItemsRootTitle = R.string.trashNoFile
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        navigationArgs.subfolderId.takeIf { it != -1 }?.let {
+            // TODO Load the subfolder
+            //safeNavigate(TrashFragmentDirections.actionTrashFragmentSelf(it, "FOLDERNAME"))
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initParams()

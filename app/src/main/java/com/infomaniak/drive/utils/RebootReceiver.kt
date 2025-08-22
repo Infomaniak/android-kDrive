@@ -32,21 +32,30 @@ import kotlinx.coroutines.launch
 
 class RebootReceiver : BroadcastReceiver() {
 
-    override fun onReceive(context: Context, intent: Intent?) = with(context) {
-        CoroutineScope(Dispatchers.IO).launch {
-            MediaFolder.getRealmInstance().use { realm ->
-                if (context.hasPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
-                    MediaFolder.getAllCount(realm) == 0L
-                ) {
-                    // Sync local media folders with Realm
-                    MediaFoldersProvider.getAllMediaFolders(realm, contentResolver)
-                }
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+    override fun onReceive(context: Context, intent: Intent?): Unit = with(context) {
+        val pendingResult = goAsync()
+        coroutineScope.launch(Dispatchers.IO) {
+            val syncMediaJob = launch { syncMediaFolders() }
+
+            activateSyncIfNeeded()
+
+            startContentObserverService()
+            if (intent?.action == Intent.ACTION_BOOT_COMPLETED && AccountUtils.isEnableAppSync()) syncImmediately()
+            syncMediaJob.join()
+            pendingResult.finish()
+        }
+    }
+
+    private fun Context.syncMediaFolders() {
+        MediaFolder.getRealmInstance().use { realm ->
+            if (hasPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)) &&
+                MediaFolder.getAllCount(realm) == 0L
+            ) {
+                // Sync local media folders with Realm
+                MediaFoldersProvider.getAllMediaFolders(realm, contentResolver)
             }
         }
-
-        activateSyncIfNeeded()
-
-        startContentObserverService()
-        if (intent?.action == Intent.ACTION_BOOT_COMPLETED && AccountUtils.isEnableAppSync()) syncImmediately()
     }
 }

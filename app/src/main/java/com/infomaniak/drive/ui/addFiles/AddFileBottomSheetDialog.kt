@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.addFiles
 
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -67,6 +68,8 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Date
@@ -79,18 +82,19 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private lateinit var openCameraWritePermissions: DrivePermissions
+    private lateinit var backgroundUploadPermissions: DrivePermissions
     private lateinit var openCameraPermissions: CameraPermissions
 
     private var mediaPhotoPath = ""
     private var mediaVideoPath = ""
 
     private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
-        it.whenResultIsOk { onCaptureMediaResult() }
-        dismiss()
+        backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
+        if (it.resultCode == Activity.RESULT_OK) onCaptureMediaResult() else dismiss()
     }
 
     private val scanFlowResultLauncher = registerForActivityResult(StartActivityForResult()) { activityResult ->
+        backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
         activityResult.whenResultIsOk {
             it?.let { data ->
                 val folder = when (parentFragment?.childFragmentManager?.fragments?.getOrNull(0)?.javaClass) {
@@ -120,8 +124,8 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             currentFolder.setFileItem(currentFolderFile)
         }
 
-        openCameraWritePermissions = DrivePermissions().apply {
-            registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
+        backgroundUploadPermissions = DrivePermissions(DrivePermissions.Type.UploadInTheBackground).apply {
+            registerPermissions(this@AddFileBottomSheetDialog)
         }
         openCameraPermissions = CameraPermissions().apply {
             registerPermissions(this@AddFileBottomSheetDialog) { authorized -> if (authorized) openCamera() }
@@ -149,7 +153,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun openCamera() {
-        if (openCameraWritePermissions.checkSyncPermissions() && openCameraPermissions.checkCameraPermission()) {
+        if (openCameraPermissions.checkCameraPermission()) {
             trackNewElement("takePhotoOrVideo")
             binding.openCamera.isEnabled = false
             try {
@@ -225,30 +229,31 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun onCaptureMediaResult() {
+    private fun onCaptureMediaResult(): Job = lifecycleScope.launch(Dispatchers.IO) {
         try {
             val file = IOFile(mediaPhotoPath).takeIf { it.length() != 0L } ?: IOFile(mediaVideoPath)
             val fileModifiedAt = Date(file.lastModified())
             val applicationContext = context?.applicationContext
-            lifecycleScope.launch(Dispatchers.IO) {
-                val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
-                UploadFile(
-                    uri = cacheUri.toString(),
-                    driveId = currentFolderFile.driveId,
-                    fileCreatedAt = fileModifiedAt,
-                    fileModifiedAt = fileModifiedAt,
-                    fileName = file.name,
-                    fileSize = file.length(),
-                    remoteFolder = currentFolderFile.id,
-                    type = UploadFile.Type.UPLOAD.name,
-                    userId = currentUserId,
-                ).store()
-                applicationContext?.syncImmediately()
-                file.delete()
-            }
+            val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
+            UploadFile(
+                uri = cacheUri.toString(),
+                driveId = currentFolderFile.driveId,
+                fileCreatedAt = fileModifiedAt,
+                fileModifiedAt = fileModifiedAt,
+                fileName = file.name,
+                fileSize = file.length(),
+                remoteFolder = currentFolderFile.id,
+                type = UploadFile.Type.UPLOAD.name,
+                userId = currentUserId,
+            ).store()
+            applicationContext?.syncImmediately()
+            file.delete()
         } catch (exception: Exception) {
             exception.printStackTrace()
             showSnackbar(R.string.errorDeviceStorage, showAboveFab = true)
+        }
+        Dispatchers.Main {
+            dismiss()
         }
     }
 

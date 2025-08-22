@@ -76,6 +76,7 @@ class HomeActivitiesFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        paginationListener = null
     }
 
     private fun initAdapter() {
