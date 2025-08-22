@@ -66,11 +66,11 @@ class ShareLinkContainerView @JvmOverloads constructor(
             binding.shareLinkButton.setOnClickListener {
                 // if `shareLink` isn't null it means that it's public share. Otherwise we create a private link.
                 val title = if (this.shareLink?._right == "public") {
-                    context.getString(R.string.publicSharedLinkTitle)
+                    R.string.publicSharedLinkTitle
                 } else {
-                    context.getString(R.string.restrictedSharedLinkTitle)
+                    R.string.restrictedSharedLinkTitle
                 }
-                context.shareText(title = title, text = this.shareLink?.url ?: restrictedShareLink(file))
+                context.shareText(title = context.getString(title), text = this.shareLink?.url ?: restrictedShareLink(file))
             }
         }
     }
