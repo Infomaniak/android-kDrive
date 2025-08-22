@@ -30,10 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
@@ -56,7 +52,6 @@ import com.infomaniak.core.onboarding.components.OnboardingComponents.DefaultLot
 import com.infomaniak.core.onboarding.components.OnboardingComponents.DefaultTitleAndDescription
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.theme.DriveTheme
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,8 +67,6 @@ fun OnboardingScreen(
     onSaveSkippedAccounts: (Set<Long>) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { Page.entries.size })
-    val isLastPage by remember { derivedStateOf { pagerState.currentPage >= pagerState.pageCount - 1 } }
-    val scope = rememberCoroutineScope()
 
     val onboardingPages = buildList {
         Page.entries.forEachIndexed { index, page ->
@@ -89,14 +82,13 @@ fun OnboardingScreen(
                 modifier = Modifier
                     .padding(paddingValues)
                     .consumeWindowInsets(paddingValues),
+                pagerState = pagerState,
                 accounts = accounts,
                 skippedIds = skippedIds,
                 isLoginButtonLoading = isLoginButtonLoading,
                 isSignUpButtonLoading = isSignUpButtonLoading,
                 titleColor = colorResource(R.color.title),
                 descriptionColor = colorResource(R.color.primaryText),
-                isLastPage = { isLastPage },
-                onGoToNextPageRequest = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
                 onLogin = onLogin,
                 onContinueWithSelectedAccounts = onContinueWithSelectedAccounts,
                 onCreateAccount = onCreateAccount,
