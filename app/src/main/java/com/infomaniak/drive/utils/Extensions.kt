@@ -72,7 +72,7 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -568,7 +568,7 @@ fun MainActivity.showQuotasExceededSnackbar(navController: NavController, drive:
         anchor = getMainFab(),
         actionButtonTitle = R.string.buttonUpgrade,
         onActionClicked = {
-            val matomoName = MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
+            val matomoName = MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
             if (drive?.isKSuiteProUpgradable == true) {
                 openKSuiteProBottomSheet(navController, drive.kSuite!!, drive.isAdmin, matomoName)
             } else {

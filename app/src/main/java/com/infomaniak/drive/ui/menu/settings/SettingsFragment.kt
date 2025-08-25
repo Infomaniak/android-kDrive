@@ -34,7 +34,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
-import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
@@ -129,7 +129,7 @@ class SettingsFragment : Fragment() {
             }
 
             dashboardSettings.setOnClickListener {
-                trackMyKSuiteEvent(MatomoMyKSuite.OPEN_DASHBOARD_NAME)
+                trackMyKSuiteEvent(MatomoKSuite.OPEN_DASHBOARD_NAME)
                 openMyKSuiteDashboard(myKSuiteData)
             }
         }
