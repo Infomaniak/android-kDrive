@@ -27,7 +27,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.ksuite.data.KSuite
-import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
@@ -58,7 +58,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
             if (drive.isKSuiteFreeTier) {
                 upgradeOffer.isVisible = true
                 upgradeOffer.setOnClickListener {
-                    val matomoName = MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
+                    val matomoName = MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
                     if (drive.kSuite == KSuite.ProFree) {
                         fragment.openKSuiteProBottomSheet(drive.kSuite!!, drive.isAdmin, matomoName)
                     } else {
