@@ -177,6 +177,16 @@
                     app:layout_constraintTop_toTopOf="@id/upgradeOfferPassword"
                     tools:visibility="visible" />
 
+                <com.infomaniak.core.ksuite.ksuitepro.views.EvolveChipView
+                    android:id="@+id/offerPasswordKSuiteProChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardSmall"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/upgradeOfferPassword"
+                    app:layout_constraintStart_toEndOf="@id/upgradeOfferPassword"
+                    app:layout_constraintTop_toTopOf="@id/upgradeOfferPassword" />
+
                 <com.infomaniak.lib.core.views.EndIconTextInputLayout
                     android:id="@+id/passwordTextLayout"
                     style="@style/TextInputLayout.OutlinedBox"
@@ -306,6 +316,16 @@
                     android:layout_marginStart="@dimen/marginStandardSmall"
                     android:visibility="gone"
                     app:backgroundColor="@color/myKSuiteChipOnCardBackground"
+                    app:layout_constraintBottom_toBottomOf="@id/upgradeOfferExpirationDate"
+                    app:layout_constraintStart_toEndOf="@id/upgradeOfferExpirationDate"
+                    app:layout_constraintTop_toTopOf="@id/upgradeOfferExpirationDate" />
+
+                <com.infomaniak.core.ksuite.ksuitepro.views.EvolveChipView
+                    android:id="@+id/offerExpirationKSuiteProChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/marginStandardSmall"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="@id/upgradeOfferExpirationDate"
                     app:layout_constraintStart_toEndOf="@id/upgradeOfferExpirationDate"
                     app:layout_constraintTop_toTopOf="@id/upgradeOfferExpirationDate"

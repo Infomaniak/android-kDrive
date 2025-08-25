@@ -172,6 +172,7 @@ dependencies {
     implementation(project(":Core:Auth"))
     implementation(project(":Core:Avatar"))
     implementation(project(":Core:Compose:Basics"))
+    implementation(project(":Core:Compose:Margin"))
     implementation(project(":Core:Compose:MaterialThemeFromXml"))
     implementation(project(":Core:CrossAppLogin:Back"))
     implementation(project(":Core:CrossAppLogin:Front"))
@@ -182,6 +183,7 @@ dependencies {
     implementation(project(":Core:Legacy:BugTracker"))
     implementation(project(":Core:Legacy:Stores"))
     implementation(project(":Core:Matomo"))
+    implementation(project(":Core:kSuite"))
     implementation(project(":Core:kSuite:kSuitePro"))
     implementation(project(":Core:kSuite:MyKSuite"))
     implementation(project(":Core:Network"))
@@ -189,6 +191,7 @@ dependencies {
     implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
 
+    // Compose
     implementation(platform(core.compose.bom))
     implementation(core.activity.compose)
     implementation(core.compose.foundation)

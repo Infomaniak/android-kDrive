@@ -40,6 +40,7 @@ include(
     ":Core:Legacy:BugTracker",
     ":Core:Legacy:Stores",
     ":Core:Matomo",
+    ":Core:kSuite",
     ":Core:kSuite:kSuitePro",
     ":Core:kSuite:MyKSuite",
     ":Core:Network",
