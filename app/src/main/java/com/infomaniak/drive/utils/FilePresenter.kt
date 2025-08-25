@@ -25,6 +25,8 @@ import androidx.navigation.fragment.findNavController
 import com.dd.plist.NSDictionary
 import com.dd.plist.NSString
 import com.dd.plist.PropertyListParser
+import com.infomaniak.core.cancellable
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -55,11 +57,12 @@ import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-// TODO Making migration of others actions as openFolder, or preview
 /**
  * Responsible for file opening actions from [com.infomaniak.drive.ui.fileList.FileListFragment]
  */
 object FilePresenter {
+
+    const val TAG = "FilePresenter"
 
     fun Fragment.openFolder(
         navigationType: FileListNavigationType,
@@ -131,10 +134,11 @@ object FilePresenter {
         runCatching {
             val storedFileUri = file.getCloudAndFileUris(requireContext()).second
             requireActivity().openBookmarkIntent(file.name, storedFileUri)
-        }.onFailure {
-            requireActivity().showSnackbar(
+        }.cancellable().onFailure { exception ->
+            SentryLog.e(TAG, "Error opening an url link", exception)
+            activity?.showSnackbar(
                 title = getString(R.string.errorGetBookmarkURL),
-                anchor = (requireActivity() as MainActivity).getMainFab(),
+                anchor = (activity as MainActivity).getMainFab(),
             )
         }
     }
