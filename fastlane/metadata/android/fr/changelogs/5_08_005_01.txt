@@ -1,0 +1,4 @@
+- Correction d'un problème empêchant la création de certains fichiers hors ligne
+- Correction d'un plantage lors de l'ouverture d'un fichier URL
+- Correction de l'importation du fichier d'un partage public unique
+- Autres corrections diverses

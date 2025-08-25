@@ -1,0 +1,4 @@
+- Fix a case where some offline file couldn't be created
+- Fix a crash when opening a url file
+- Fix the import of a single file in a public share
+- Other various fixes
