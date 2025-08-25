@@ -41,6 +41,8 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeBinding
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import splitties.init.appCtx
 import splitties.systemservices.powerManager
 
@@ -49,7 +51,7 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     private var binding: FragmentBottomSheetBackgroundSyncBinding by safeBinding()
 
     private val permissionResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val hasPermission = it.resultCode == RESULT_OK || checkBatteryLifePermission(false)
+        val hasPermission = it.resultCode == RESULT_OK || checkBatteryLifePermission(requestPermission = false)
         onPermissionGranted(hasPermission)
     }
 
@@ -131,7 +133,7 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
             isChecked = hasBatteryPermission
             isClickable = !hasBatteryPermission
         }
-        if (hasBatteryPermission && !hadBatteryLifePermission) checkBatteryLifePermission(true)
+        if (hasBatteryPermission && !hadBatteryLifePermission) checkBatteryLifePermission(requestPermission = true)
     }
 
     companion object {
