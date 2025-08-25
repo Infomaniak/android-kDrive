@@ -31,6 +31,8 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -67,7 +69,12 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setAllowBackgroundSyncSwitch(checkBatteryLifePermission(false))
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.currentStateFlow.first { it == Lifecycle.State.RESUMED }
+            // Ensure this Fragment is in the resumed state (and that the Fragment is attached) before
+            // launch is called on the permissionResultLauncher, to avoid undocumented IllegalStateException.
+            setAllowBackgroundSyncSwitch(checkBatteryLifePermission(requestPermission = false))
+        }
 
         with(binding) {
             allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> setAllowBackgroundSyncSwitch(isChecked) }
