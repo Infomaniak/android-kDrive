@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
@@ -42,6 +41,7 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeBinding
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import splitties.init.appCtx
 import splitties.systemservices.powerManager
 
 class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
@@ -89,14 +89,15 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     private fun checkBatteryLifePermission(requestPermission: Boolean): Boolean {
         val hasPermission = powerManager.isIgnoringBatteryOptimizations(BuildConfig.APPLICATION_ID)
         if (hasPermission.not() && requestPermission) {
-            requireActivity().requestBatteryOptimizationPermission()
+            requestBatteryOptimizationPermission()
         }
         onHasBatteryPermission(hasPermission)
         return hasPermission
     }
 
     @SuppressLint("BatteryLife")
-    private fun Context.requestBatteryOptimizationPermission() {
+    private fun requestBatteryOptimizationPermission() {
+        val packageName = appCtx.packageName
         try {
             Intent(
                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
