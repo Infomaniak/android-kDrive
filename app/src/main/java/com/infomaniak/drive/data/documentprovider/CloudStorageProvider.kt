@@ -632,7 +632,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 return ParcelFileDescriptor.open(cacheFile, accessMode)
             }
         } catch (exception: Exception) {
-            exception.printStackTrace()
+            SentryLog.e(TAG, "An error has occurred on getDataFile", exception)
         }
 
         return null
