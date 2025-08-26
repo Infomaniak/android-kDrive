@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ open class ShareLink(
         @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
-            R.string.shareLinkRestrictedRightTitle,
+            R.string.shareLinkPrivateRightTitle,
             R.string.shareLinkRestrictedRightFileDescriptionShort
         ),
 
@@ -104,7 +104,7 @@ open class ShareLink(
         @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
-            R.string.shareLinkRestrictedRightTitle,
+            R.string.shareLinkPrivateRightTitle,
             R.string.shareLinkRestrictedRightFolderDescriptionShort
         ),
     }
@@ -126,7 +126,7 @@ open class ShareLink(
         @SerializedName("inherit")
         RESTRICTED(
             R.drawable.ic_lock,
-            R.string.shareLinkRestrictedRightTitle,
+            R.string.shareLinkPrivateRightTitle,
             R.string.shareLinkRestrictedRightDocumentDescriptionShort
         ),
     }

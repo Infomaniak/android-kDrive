@@ -565,6 +565,7 @@
     <string name="previewNoPreview">Es scheint, als ob diese Datei keine Vorschau hat.</string>
     <string name="previewPdfPages">%1$d von %2$d</string>
     <string name="previewVideoSourceError">Videodatei wird vom Videoplayer nicht unterstützt</string>
+    <string name="privateSharedLinkTitle">Privater Freigabelink</string>
     <string name="publicShareImportationInProgress">Laufender Download im ausgewählten Ordner</string>
     <string name="publicShareOutdatedLinkDescription">Der Link wurde deaktiviert oder ist abgelaufen.\nUm auf die Dateien zuzugreifen, senden Sie eine Nachricht an den Nutzer, der den Link für Sie freigegeben hat, damit er ihn wieder aktiviert.</string>
     <string name="publicShareOutdatedLinkTitle">Die Dateien sind nicht mehr verfügbar</string>
@@ -577,7 +578,6 @@
     <string name="recentActivitySeeMore">Mehr neue Dateien anzeigen</string>
     <string name="recentTitle">Neueste</string>
     <string name="refreshTokenError">Ihre Verbindung wurde unterbrochen</string>
-    <string name="restrictedSharedLinkTitle">Eingeschränkter Freigabelink</string>
     <string name="reviewAlertTitle">Mögen Sie kDrive?</string>
     <string name="saveExternalFileInputFileName">Name des Dokuments</string>
     <string name="saveExternalFileTitle">Auf Drive speichern</string>
@@ -605,6 +605,7 @@
     <string name="shareLinkOfficePermissionWriteTitle">Bearbeiten</string>
     <string name="shareLinkPasswordRightDescription">Jeder, der den Link hat, muss ein Passwort eingeben, um auf die %s zuzugreifen.</string>
     <string name="shareLinkPasswordRightTitle">Mit Passwort</string>
+    <string name="shareLinkPrivateRightTitle">Privat</string>
     <string name="shareLinkPublicRightDescription">Jeder, der über den Link verfügt, kann dieses %2$s%3$s%4$s %1$s.</string>
     <string name="shareLinkPublicRightDescriptionDate">, bis zum %s</string>
     <string name="shareLinkPublicRightDescriptionPassword">, das durch ein Kennwort geschützt ist</string>
@@ -616,7 +617,6 @@
     <string name="shareLinkRestrictedRightDocumentDescriptionShort">Nur hinzugefügte Benutzer können auf die Dokument zugreifen.</string>
     <string name="shareLinkRestrictedRightFileDescriptionShort">Nur hinzugefügte Benutzer können auf die Datei zugreifen.</string>
     <string name="shareLinkRestrictedRightFolderDescriptionShort">Nur hinzugefügte Benutzer können auf den Ordner.</string>
-    <string name="shareLinkRestrictedRightTitle">Auswählen</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">Der Freigabelink kann nicht mehr verwendet werden, wenn das Datum verstrichen ist.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Benutzer können die Dateien über diesen Link herunter- bzw. heraufladen.</string>
     <string name="shareLinkSettingsAllowDownloadTitle">Download über den Freigabelink</string>
