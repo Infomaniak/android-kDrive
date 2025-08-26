@@ -565,6 +565,7 @@
     <string name="previewNoPreview">Parece que este archivo no tiene vista previa.</string>
     <string name="previewPdfPages">%1$d de %2$d</string>
     <string name="previewVideoSourceError">El archivo de vídeo no es compatible con el lector de vídeo</string>
+    <string name="privateSharedLinkTitle">Enlace privado para compartir</string>
     <string name="publicShareImportationInProgress">Descarga en curso en la carpeta seleccionada</string>
     <string name="publicShareOutdatedLinkDescription">El enlace ha sido desactivado o ha caducado.\nPara acceder a los archivos, envía un mensaje al usuario que compartió el enlace contigo para que pueda reactivarlo.</string>
     <string name="publicShareOutdatedLinkTitle">Los archivos ya no están disponibles</string>
@@ -577,7 +578,6 @@
     <string name="recentActivitySeeMore">Ver más archivos recientes</string>
     <string name="recentTitle">Recientes</string>
     <string name="refreshTokenError">Ha sido desconectado</string>
-    <string name="restrictedSharedLinkTitle">Enlace de uso compartido restringido</string>
     <string name="reviewAlertTitle">¿Te gusta kDrive?</string>
     <string name="saveExternalFileInputFileName">Nombre del documento</string>
     <string name="saveExternalFileTitle">Guardar en el Drive</string>
@@ -605,6 +605,7 @@
     <string name="shareLinkOfficePermissionWriteTitle">Modificar</string>
     <string name="shareLinkPasswordRightDescription">Cualquiera que tenga el enlace tendrá que introducir una contraseña para acceder al %s.</string>
     <string name="shareLinkPasswordRightTitle">Con contraseña</string>
+    <string name="shareLinkPrivateRightTitle">Privado</string>
     <string name="shareLinkPublicRightDescription">Todos aquellos que tengan el enlace pueden %1$s este %2$s%3$s%4$s.</string>
     <string name="shareLinkPublicRightDescriptionDate">\u0020hasta el %s</string>
     <string name="shareLinkPublicRightDescriptionPassword">\u0020protegido por contraseña</string>
@@ -616,7 +617,6 @@
     <string name="shareLinkRestrictedRightDocumentDescriptionShort">Sólo pueden acceder al documento los usuarios añadidos.</string>
     <string name="shareLinkRestrictedRightFileDescriptionShort">Sólo pueden acceder al archivo los usuarios añadidos.</string>
     <string name="shareLinkRestrictedRightFolderDescriptionShort">Sólo los usuarios añadidos pueden acceder a la carpeta.</string>
-    <string name="shareLinkRestrictedRightTitle">Restringido</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">El enlace de uso compartido no podrá utilizarse una vez transcurrida la fecha.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Los usuarios podrán descargar los archivos desde este enlace.</string>
     <string name="shareLinkSettingsAllowDownloadTitle">Descargar desde el enlace de uso compartido</string>

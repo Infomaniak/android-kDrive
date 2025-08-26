@@ -576,6 +576,7 @@
     <string name="previewNoPreview">This file appears to have no preview.</string>
     <string name="previewPdfPages">%1$d out of %2$d</string>
     <string name="previewVideoSourceError">Video file not supported by the video player</string>
+    <string name="privateSharedLinkTitle">Private sharing link</string>
     <string name="publicShareImportationInProgress">Download in progress in selected folder</string>
     <string name="publicShareOutdatedLinkDescription">The link has been deactivated or has expired.\nTo access its files, send a message to the user who shared the link with you so that they can reactivate it.</string>
     <string name="publicShareOutdatedLinkTitle">The files are no longer available</string>
@@ -588,7 +589,6 @@
     <string name="recentActivitySeeMore">View more recent files</string>
     <string name="recentTitle">Recent</string>
     <string name="refreshTokenError">You have been disconnected</string>
-    <string name="restrictedSharedLinkTitle">Restricted sharing link</string>
     <string name="reviewAlertTitle">Do you like kDrive?</string>
     <string name="saveExternalFileInputFileName">Document name</string>
     <string name="saveExternalFileTitle">Save to Drive</string>
@@ -616,6 +616,7 @@
     <string name="shareLinkOfficePermissionWriteTitle">Modify</string>
     <string name="shareLinkPasswordRightDescription">Anyone who has the link will have to enter a password to access the %s.</string>
     <string name="shareLinkPasswordRightTitle">With password</string>
+    <string name="shareLinkPrivateRightTitle">Private</string>
     <string name="shareLinkPublicRightDescription">Everyone who has the link can %1$s this %3$s%2$s%4$s.</string>
     <string name="shareLinkPublicRightDescriptionDate">\u0020until %s</string>
     <string name="shareLinkPublicRightDescriptionPassword">password-protected\u0020</string>
@@ -627,7 +628,6 @@
     <string name="shareLinkRestrictedRightDocumentDescriptionShort">Only the users added can access the document.</string>
     <string name="shareLinkRestrictedRightFileDescriptionShort">Only the users added can access the file.</string>
     <string name="shareLinkRestrictedRightFolderDescriptionShort">Only added users can access the folder.</string>
-    <string name="shareLinkRestrictedRightTitle">Restricted</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">The share link will only work until the expiry date.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Users will be able to download files using this link.</string>
     <string name="shareLinkSettingsAllowDownloadTitle">Download from the share link</string>
