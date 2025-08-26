@@ -2,15 +2,16 @@
 androidJunit5 = "1.13.1.0"
 androidPdfview = "3.2.13"
 androidTest = "1.8.0"
+checkerFramework = "3.49.5"
 coilGif = "2.7.0"
 concurrentFuturesKtx = "1.3.0"
 coreKtx = "1.7.0"
 ddPlist = "1.28"
-espresso = "3.49.5"
+espresso = "3.7.0"
 exoplayer = "2.19.1"
 firebaseMessagingKtx = "24.1.2"
 googleServices = "4.4.3"
-gradle = "8.12.0"
+gradle = "8.12.1"
 gravitySnapHelper = "2.2.2"
 gsSdk = "5.12.0"
 junitJupiter = "5.13.4"
@@ -65,7 +66,7 @@ touch-image-view = { module = "com.github.MikeOrtiz:TouchImageView", version.ref
 # Unit tests
 android-test-core = { module = "de.mannodermaus.junit5:android-test-core", version.ref = "androidTest" }
 android-test-runner = { module = "de.mannodermaus.junit5:android-test-runner", version.ref = "androidTest" }
-androidx-espresso-checker = { module = "org.checkerframework:checker", version.ref = "espresso" } # Not unused, don't remove it
+androidx-espresso-checker = { module = "org.checkerframework:checker", version.ref = "checkerFramework" } # Not unused, don't remove it
 androidx-espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "espresso" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
 androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
