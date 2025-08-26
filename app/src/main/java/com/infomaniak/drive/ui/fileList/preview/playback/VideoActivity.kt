@@ -38,6 +38,7 @@ import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLE
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPlayer
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getPictureInPictureParams
+import com.infomaniak.drive.utils.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.utils.setupStatusBarForPreview
 import com.infomaniak.drive.utils.shouldExcludeFromRecents
 import com.infomaniak.drive.utils.toggleSystemBar
@@ -98,7 +99,7 @@ class VideoActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        shouldExcludeFromRecents(true)
+        shouldExcludeFromRecents(isDontKeepActivitiesEnabled().not())
 
         with(binding.playerView) {
             player = exoPlayer

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaI
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.setMediaSession
 import com.infomaniak.drive.ui.fileList.preview.playback.PlayerListener.Companion.trackMediaPlayerEvent
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.utils.shouldExcludeFromRecents
 
 @UnstableApi
@@ -150,7 +151,9 @@ open class PreviewPlaybackFragment : PreviewFragment() {
 
             // We'll open a new activity for videos to handle PIP perfectly
             findViewById<View>(R.id.exo_play_pause).setOnClickListener {
-                requireActivity().shouldExcludeFromRecents(true)
+                with(requireActivity()) {
+                    shouldExcludeFromRecents(isDontKeepActivitiesEnabled().not())
+                }
                 startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
                     putExtras(VideoActivityArgs(fileId = file.id).toBundle())
                 })

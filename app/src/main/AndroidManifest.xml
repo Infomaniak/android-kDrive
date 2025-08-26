@@ -107,8 +107,6 @@
         <activity
             android:name=".ui.fileList.preview.playback.VideoActivity"
             android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
-            android:excludeFromRecents="true"
-            android:noHistory="true"
             android:supportsPictureInPicture="true" />
 
         <service

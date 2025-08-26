@@ -33,6 +33,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
 import android.os.StatFs
 import android.provider.MediaStore
+import android.provider.Settings
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.transition.TransitionSet
@@ -140,6 +141,14 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     return ActivityManager.MemoryInfo().also { memoryInfo ->
         activityManager.getMemoryInfo(memoryInfo)
+    }
+}
+
+fun Context.isDontKeepActivitiesEnabled(): Boolean {
+    return runCatching {
+        Settings.Global.getInt(contentResolver, Settings.Global.ALWAYS_FINISH_ACTIVITIES, 0) != 0
+    }.getOrElse {
+        false
     }
 }
 
