@@ -28,6 +28,7 @@ object ErrorCode {
     const val DESTINATION_ALREADY_EXISTS = "destination_already_exists"
     const val EXTERNAL_IMPORT_IN_PROGRESS_ERROR = "external_import_in_progress_in_directory_error"
     const val LIMIT_EXCEEDED_ERROR = "limit_exceeded_error"
+    const val LOCK_ERROR = "lock_error"
     const val NO_DRIVE = "no_drive"
     const val SHARE_LINK_ALREADY_EXISTS = "file_share_link_already_exists"
     const val PASSWORD_NOT_VALID = "password_not_valid"
@@ -40,6 +41,7 @@ object ErrorCode {
         ApiErrorCode(CONFLICT_ERROR, R.string.errorConflict),
         ApiErrorCode(DESTINATION_ALREADY_EXISTS, R.string.errorFileAlreadyExists),
         ApiErrorCode(EXTERNAL_IMPORT_IN_PROGRESS_ERROR, R.string.errorExternalImportInProgress),
+        ApiErrorCode(LOCK_ERROR, R.string.errorFileLocked),
         ApiErrorCode(LIMIT_EXCEEDED_ERROR, R.string.errorLimitExceeded),
         ApiErrorCode(NO_DRIVE, R.string.noDriveTitle),
         ApiErrorCode(SHARE_LINK_ALREADY_EXISTS, R.string.errorShareLink),
