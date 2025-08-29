@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.utils.day
 import com.infomaniak.core.utils.endOfTheDay
 import com.infomaniak.core.utils.hours
@@ -44,6 +45,7 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.openKSuiteProBottomSheet
 import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
@@ -144,12 +146,22 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
     }
 
-    private fun setupUpgradeOfferListener() {
+    private fun setupUpgradeOfferListener(kSuite: KSuite, isAdmin: Boolean) {
         binding.addPasswordLayout.setOnClickListener {
-            openMyKSuiteUpgradeBottomSheet("shareLinkPassword")
+            val matomoName = "shareLinkPassword"
+            if (kSuite == KSuite.PersoFree) {
+                openMyKSuiteUpgradeBottomSheet(matomoName)
+            } else {
+                openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
+            }
         }
         binding.addExpirationDateLayout.setOnClickListener {
-            openMyKSuiteUpgradeBottomSheet("shareLinkExpiryDate")
+            val matomoName = "shareLinkExpiryDate"
+            if (kSuite == KSuite.PersoFree) {
+                openMyKSuiteUpgradeBottomSheet(matomoName)
+            } else {
+                openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
+            }
         }
     }
 
@@ -217,18 +229,23 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun setupFreeAccountUi() = with(binding) {
-        if (AccountUtils.getCurrentDrive()?.isFreeTier == true) {
-            setupUpgradeOfferListener()
+
+        val drive = AccountUtils.getCurrentDrive() ?: return@with
+
+        if (drive.isKSuiteFreeTier) {
+            setupUpgradeOfferListener(drive.kSuite!!, drive.isAdmin)
 
             addPasswordSwitch.isEnabled = false
             addPasswordSwitch.isClickable = false
             upgradeOfferPassword.isVisible = true
-            offerPasswordMyKSuitePlusChip.isVisible = true
+            offerPasswordMyKSuitePlusChip.isVisible = drive.isKSuitePersoFree
+            offerPasswordKSuiteProChip.isVisible = drive.isKSuiteProUpgradable
 
             addExpirationDateSwitch.isEnabled = false
             addExpirationDateSwitch.isClickable = false
             upgradeOfferExpirationDate.isVisible = true
-            offerExpirationMyKSuitePlusChip.isVisible = true
+            offerExpirationMyKSuitePlusChip.isVisible = drive.isKSuitePersoFree
+            offerExpirationKSuiteProChip.isVisible = drive.isKSuiteProUpgradable
         }
     }
 

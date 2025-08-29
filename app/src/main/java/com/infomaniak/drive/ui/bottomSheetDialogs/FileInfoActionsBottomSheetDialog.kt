@@ -31,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
@@ -54,6 +55,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.navigateToParentFolder
+import com.infomaniak.drive.utils.openKSuiteProBottomSheet
 import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.shareText
@@ -185,8 +187,8 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         FileController.getParentFile(currentFile.id)?.let { folder -> navigateToParentFolder(folder.id, mainViewModel) }
     }
 
-    override fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean) {
-        super.dropBoxClicked(isDropBox, canCreateDropbox)
+    override fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean, kSuite: KSuite?, isAdmin: Boolean) {
+        super.dropBoxClicked(isDropBox, canCreateDropbox, kSuite, isAdmin)
         if (isDropBox) {
             safeNavigate(
                 FileInfoActionsBottomSheetDialogDirections.actionFileInfoActionsBottomSheetDialogToManageDropboxFragment(
@@ -203,7 +205,12 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                     )
                 )
             } else {
-                openMyKSuiteUpgradeBottomSheet("convertToDropbox")
+                val matomoName = "convertToDropbox"
+                if (kSuite?.isProUpgradable() == true) {
+                    openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
+                } else {
+                    openMyKSuiteUpgradeBottomSheet(matomoName)
+                }
             }
         }
     }
@@ -421,13 +428,14 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         }
 
         fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
-            if (AccountUtils.getCurrentDrive()?.isFreeTier == true) {
-                openMyKSuiteUpgradeBottomSheet("colorFolder")
-            } else {
-                safeNavigate(
-                    R.id.colorFolderBottomSheetDialog,
-                    ColorFolderBottomSheetDialogArgs(color = color).toBundle(),
-                )
+            val drive = AccountUtils.getCurrentDrive() ?: return
+            val matomoName = "colorFolder"
+            when {
+                drive.isKSuitePersoFree -> openMyKSuiteUpgradeBottomSheet(matomoName)
+                drive.isKSuiteProUpgradable -> openKSuiteProBottomSheet(drive.kSuite!!, drive.isAdmin, matomoName)
+                else -> {
+                    safeNavigate(R.id.colorFolderBottomSheetDialog, ColorFolderBottomSheetDialogArgs(color = color).toBundle())
+                }
             }
         }
     }

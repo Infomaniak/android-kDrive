@@ -321,9 +321,10 @@ class MainActivity : BaseActivity() {
     private fun setupFab(fab: FloatingActionButton, shouldShowSmallFab: Boolean = false) {
         val args = AddFileBottomSheetDialogArgs(shouldShowSmallFab).toBundle()
         fab.setOnClickListener {
-            if (AccountUtils.getCurrentDrive()?.isDriveFull == true) {
+            val drive = AccountUtils.getCurrentDrive() ?: return@setOnClickListener
+            if (drive.isDriveFull) {
                 trackMyKSuiteEvent(MatomoName.TryAddingFileWithDriveFull.value)
-                showQuotasExceededSnackbar(navController)
+                showQuotasExceededSnackbar(navController, drive)
             } else {
                 navController.navigate(R.id.addFileBottomSheetDialog, args)
             }
@@ -491,9 +492,9 @@ class MainActivity : BaseActivity() {
         }
 
         when (destination.id) {
-            R.id.myKSuiteDashboardFragment -> {
-                setColorStatusBar(SystemBarsColorScheme.MyKSuite)
-                setColorNavigationBar(SystemBarsColorScheme.MyKSuite)
+            R.id.myKSuiteDashboardFragment, R.id.kSuiteProBottomSheetDialog -> {
+                setColorStatusBar(SystemBarsColorScheme.KSuite)
+                setColorNavigationBar(SystemBarsColorScheme.KSuite)
             }
             R.id.fileDetailsFragment -> {
                 setColorNavigationBar(SystemBarsColorScheme.AppBar)
@@ -680,7 +681,7 @@ class MainActivity : BaseActivity() {
     enum class SystemBarsColorScheme(@ColorRes val statusBarColor: Int, @ColorRes val navigationBarColor: Int = statusBarColor) {
         AppBar(R.color.appBar),
         Default(R.color.background),
-        MyKSuite(
+        KSuite(
             statusBarColor = R.color.myKSuiteDashboardStatusBarBackground,
             navigationBarColor = R.color.myKSuiteDashboardNavigationBarBackground,
         ),
