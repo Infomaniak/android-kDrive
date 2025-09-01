@@ -39,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
 import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
@@ -211,9 +212,8 @@ class LoginActivity : ComponentActivity() {
         infomaniakLogin: InfomaniakLogin,
         withRedirection: Boolean = true,
     ) = Dispatchers.Default {
-        val returnValue = authenticateUser(this@LoginActivity, token)
-        when (returnValue) {
-            is User -> {
+        when (val result: Xor<User, ApiResponse<*>> = authenticateUser(this@LoginActivity, token)) {
+            is Xor.First -> {
                 if (withRedirection) {
                     val deeplink = navigationArgs?.publicShareDeeplink
                     if (deeplink.isNullOrBlank()) {
@@ -227,14 +227,13 @@ class LoginActivity : ComponentActivity() {
 
                 return@Default
             }
-            is ApiResponse<*> -> Dispatchers.Main {
-                if (returnValue.error?.description == ErrorCode.NO_DRIVE) {
+            is Xor.Second -> Dispatchers.Main {
+                if (result.value.error?.description == ErrorCode.NO_DRIVE) {
                     if (withRedirection) launchNoDriveActivity()
                 } else {
-                    showError(getString(returnValue.translateError()))
+                    showError(getString(result.value.translateError()))
                 }
             }
-            else -> Dispatchers.Main { showError(getString(R.string.anErrorHasOccurred)) }
         }
 
         runCatching {
@@ -272,8 +271,8 @@ class LoginActivity : ComponentActivity() {
 
     private fun onGetTokenSuccess(apiToken: ApiToken) {
         lifecycleScope.launch(Dispatchers.IO) {
-            when (val returnValue = authenticateUser(this@LoginActivity, apiToken)) {
-                is User -> {
+            when (val result: Xor<User, ApiResponse<*>> = authenticateUser(this@LoginActivity, apiToken)) {
+                is Xor.First -> {
                     val deeplink = navigationArgs?.publicShareDeeplink
                     if (deeplink.isNullOrBlank()) {
                         trackUserId(AccountUtils.currentUserId)
@@ -285,14 +284,13 @@ class LoginActivity : ComponentActivity() {
 
                     return@launch
                 }
-                is ApiResponse<*> -> Dispatchers.Main {
-                    if (returnValue.error?.description == ErrorCode.NO_DRIVE) {
+                is Xor.Second -> Dispatchers.Main {
+                    if (result.value.error?.description == ErrorCode.NO_DRIVE) {
                         launchNoDriveActivity()
                     } else {
-                        showError(getString(returnValue.translateError()))
+                        showError(getString(result.value.translateError()))
                     }
                 }
-                else -> Dispatchers.Main { showError(getString(R.string.anErrorHasOccurred)) }
             }
 
             runCatching {
@@ -334,55 +332,45 @@ class LoginActivity : ComponentActivity() {
     companion object {
         private val TAG = LoginActivity::class.java.simpleName
 
-        suspend fun authenticateUser(context: Context, apiToken: ApiToken): Any {
+        suspend fun authenticateUser(context: Context, apiToken: ApiToken): Xor<User, ApiResponse<*>> {
 
-            AccountUtils.getUserById(apiToken.userId)?.let {
-                return getErrorResponse(R.string.errorUserAlreadyPresent)
-            } ?: run {
-                val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor.newBuilder().addInterceptor { chain ->
+            val dbUser = AccountUtils.getUserById(apiToken.userId)
+            if (dbUser != null) return Xor.Second(getErrorResponse(R.string.errorUserAlreadyPresent))
+
+            val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor
+                .newBuilder()
+                .addInterceptor { chain ->
                     val newRequest = changeAccessToken(chain.request(), apiToken)
                     chain.proceed(newRequest)
-                }.build()
-                val userProfileResponse = ApiRepository.getUserProfile(okhttpClient)
+                }
+                .build()
+            val userProfileResponse = ApiRepository.getUserProfile(okhttpClient)
 
-                if (userProfileResponse.result == ApiResponseStatus.ERROR) {
-                    return userProfileResponse
-                } else {
-                    val user: User? = userProfileResponse.data?.apply {
-                        this.apiToken = apiToken
-                        this.organizations = ArrayList()
-                    }
+            if (userProfileResponse.result == ApiResponseStatus.ERROR) return Xor.Second(userProfileResponse)
 
-                    user?.let {
-                        val allDrivesDataResponse = Dispatchers.IO { ApiRepository.getAllDrivesData(okhttpClient) }
+            val user = userProfileResponse.data?.apply {
+                this.apiToken = apiToken
+                this.organizations = ArrayList()
+            } ?: return Xor.Second(getErrorResponse(R.string.anErrorHasOccurred))
 
-                        when {
-                            allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {
-                                return allDrivesDataResponse
-                            }
-                            allDrivesDataResponse.data?.drives?.any { it.isDriveUser() } == false -> {
-                                return ApiResponse<DriveInfo>(
-                                    result = ApiResponseStatus.ERROR,
-                                    error = ApiError(code = ErrorCode.NO_DRIVE)
-                                )
-                            }
-                            else -> {
-                                allDrivesDataResponse.data?.let { driveInfo ->
-                                    Dispatchers.IO {
-                                        DriveInfosController.storeDriveInfos(user.id, driveInfo)
-                                    }
-                                    CloudStorageProvider.notifyRootsChanged(context)
+            val allDrivesDataResponse = Dispatchers.IO { ApiRepository.getAllDrivesData(okhttpClient) }
 
-                                    AccountUtils.addUser(user)
-                                    return user
-                                } ?: run {
-                                    return getErrorResponse(R.string.serverError)
-                                }
-                            }
-                        }
-                    } ?: run {
-                        return getErrorResponse(R.string.anErrorHasOccurred)
-                    }
+            return when {
+                allDrivesDataResponse.result == ApiResponseStatus.ERROR -> Xor.Second(allDrivesDataResponse)
+                allDrivesDataResponse.data?.drives?.any { it.isDriveUser() } == false -> Xor.Second(
+                    ApiResponse<DriveInfo>(
+                        result = ApiResponseStatus.ERROR,
+                        error = ApiError(code = ErrorCode.NO_DRIVE),
+                    ),
+                )
+                else -> {
+                    val driveInfo = allDrivesDataResponse.data ?: return Xor.Second(getErrorResponse(R.string.serverError))
+
+                    Dispatchers.IO { DriveInfosController.storeDriveInfos(user.id, driveInfo) }
+                    CloudStorageProvider.notifyRootsChanged(context)
+
+                    AccountUtils.addUser(user)
+                    Xor.First(user)
                 }
             }
         }
