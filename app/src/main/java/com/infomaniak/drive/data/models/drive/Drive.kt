@@ -108,19 +108,19 @@ open class Drive(
         get() = enumValueOfOrNull<DriveUser.Role>(_role)
 
     //region KSuite
-    inline val isKSuitePersoFree get() = pack?.type == DrivePackType.FREE || kSuite == KSuite.PersoFree
-    inline val isKSuiteProFree get() = kSuite == KSuite.ProFree
-    inline val isKSuiteFreeTier get() = isKSuitePersoFree || isKSuiteProFree
+    inline val isKSuitePersoFree get() = pack?.type == DrivePackType.FREE || kSuite == KSuite.Perso.Free
+    inline val isKSuiteProFree get() = kSuite == KSuite.Pro.Free
+    inline val isKSuiteFreeTier get() = kSuite?.isFreeTier() == true
     inline val isKSuiteProUpgradable get() = kSuite?.isProUpgradable() == true
 
     inline val kSuite: KSuite?
         get() = when (pack?.type) {
-            DrivePackType.KSUITE_ENTREPRISE -> KSuite.ProEnterprise
-            DrivePackType.KSUITE_PRO -> KSuite.ProBusiness
-            DrivePackType.KSUITE_STANDARD -> KSuite.ProStandard
-            DrivePackType.KSUITE_ESSENTIAL -> KSuite.ProFree
-            DrivePackType.MY_KSUITE_PLUS -> KSuite.PersoPlus
-            DrivePackType.MY_KSUITE -> KSuite.PersoFree
+            DrivePackType.KSUITE_ENTREPRISE -> KSuite.Pro.Enterprise
+            DrivePackType.KSUITE_PRO -> KSuite.Pro.Business
+            DrivePackType.KSUITE_STANDARD -> KSuite.Pro.Standard
+            DrivePackType.KSUITE_ESSENTIAL -> KSuite.Pro.Free
+            DrivePackType.MY_KSUITE_PLUS -> KSuite.Perso.Plus
+            DrivePackType.MY_KSUITE -> KSuite.Perso.Free
             else -> null // Old offers packs, will hopefully be removed someday so this `when` can return a non-nullable `KSuite`
         }
     //endregion
