@@ -149,7 +149,7 @@ class FileShareLinkSettingsFragment : Fragment() {
     private fun setupUpgradeOfferListener(kSuite: KSuite, isAdmin: Boolean) {
         binding.addPasswordLayout.setOnClickListener {
             val matomoName = "shareLinkPassword"
-            if (kSuite == KSuite.PersoFree) {
+            if (kSuite == KSuite.Perso.Free) {
                 openMyKSuiteUpgradeBottomSheet(matomoName)
             } else {
                 openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
@@ -157,7 +157,7 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
         binding.addExpirationDateLayout.setOnClickListener {
             val matomoName = "shareLinkExpiryDate"
-            if (kSuite == KSuite.PersoFree) {
+            if (kSuite == KSuite.Perso.Free) {
                 openMyKSuiteUpgradeBottomSheet(matomoName)
             } else {
                 openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)

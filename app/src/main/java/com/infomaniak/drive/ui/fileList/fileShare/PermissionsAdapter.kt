@@ -151,7 +151,7 @@ class PermissionsAdapter(
                     permission == ShareLinkDocumentPermission.PUBLIC -> {
                 enableViewHolder(true)
                 AccountUtils.getCurrentDrive()?.let { drive ->
-                    if (drive.kSuite == KSuite.ProFree) {
+                    if (drive.kSuite == KSuite.Pro.Free) {
                         upgradeOffer.isVisible = true
                         kSuiteProChip.isVisible = true
                     }

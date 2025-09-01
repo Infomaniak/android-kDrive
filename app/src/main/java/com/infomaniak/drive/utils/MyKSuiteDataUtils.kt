@@ -40,7 +40,7 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
 
         // Don't try to fetch the my kSuite data if the user doesn't have a my kSuite offer
         val kSuite = AccountUtils.getCurrentDrive()?.kSuite
-        if (kSuite != KSuite.PersoFree && kSuite != KSuite.PersoPlus) return@runCatching null
+        if (kSuite != KSuite.Perso.Free && kSuite != KSuite.Perso.Plus) return@runCatching null
 
         val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClient)
         if (apiResponse.data == null) {
