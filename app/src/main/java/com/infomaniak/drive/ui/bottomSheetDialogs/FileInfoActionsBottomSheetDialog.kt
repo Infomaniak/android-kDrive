@@ -212,7 +212,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         super.sharePublicLink(onActionFinished)
         binding.fileInfoActionsView.createPublicShareLink(
             onSuccess = {
-                context?.shareText(it)
+                context?.shareText(text = it)
                 findNavController().popBackStack()
                 onActionFinished()
             },

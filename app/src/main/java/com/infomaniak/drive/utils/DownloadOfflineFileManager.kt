@@ -27,6 +27,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.reflect.TypeToken
+import com.infomaniak.core.cancellable
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -109,7 +110,11 @@ class DownloadOfflineFileManager(
         return if (offlineFile == null) {
             ListenableWorker.Result.failure()
         } else {
-            startOfflineDownload(context, file, offlineFile, onProgress)
+            runCatching {
+                startOfflineDownload(context, file, offlineFile, onProgress)
+            }.cancellable().onFailure { exception ->
+                SentryLog.e(TAG, "An error has occurred", exception)
+            }.getOrDefault(ListenableWorker.Result.failure())
         }
     }
 
@@ -313,6 +318,8 @@ class DownloadOfflineFileManager(
         ) {
             SentryLog.d(tag, "Save remote data to ${outputFile?.path}")
             response.body?.byteStream()?.buffered()?.use { input ->
+                if (outputFile?.parentFile?.exists() == false) outputFile.parentFile?.mkdirs()
+                if (outputFile?.exists() == false) outputFile.createNewFile()
                 val stream = outputStream ?: outputFile?.outputStream()
                 stream?.use { output ->
                     input.copyTo(output)

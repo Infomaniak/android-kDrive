@@ -45,7 +45,7 @@ class UrlDisplayView @JvmOverloads constructor(
     }
 
     private fun shareUrl(context: Context) {
-        context.shareText(binding.urlValue.text.toString())
+        context.shareText(text = binding.urlValue.text.toString())
     }
 
     fun setUrl(url: String) {

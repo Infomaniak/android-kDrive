@@ -30,8 +30,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_08_004_01
-        versionName = "5.8.4"
+        versionCode = 5_08_005_01
+        versionName = "5.8.5"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -180,7 +180,10 @@ dependencies {
     implementation(project(":Core:Thumbnails"))
 
     implementation(platform(core.compose.bom))
+    implementation(core.activity.compose)
     implementation(core.compose.foundation)
+    implementation(core.compose.material3)
+    implementation(core.compose.ui.tooling.preview)
 
     implementation(core.ktor.client.okhttp)
 
@@ -201,7 +204,6 @@ dependencies {
     implementation(libs.exoplayer.media3.session)
 
     implementation(libs.android.pdfview)
-    implementation(libs.dots.indicator)
     implementation(libs.gravity.snap.helper)
     implementation(libs.lottie)
     implementation(libs.material.date.time.picker)

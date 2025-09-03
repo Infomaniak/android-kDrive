@@ -37,6 +37,7 @@
                 android:id="@+id/collapsingToolbarLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:expandedTitleMarginEnd="@dimen/marginStandardSmall"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
                 <com.google.android.material.appbar.MaterialToolbar
@@ -48,6 +49,7 @@
                     app:menu="@menu/file_list_menu"
                     app:navigationIcon="@null" />
 
+                <!-- Needed to perfectly align the toolbar button with the collapsing title -->
                 <Space
                     android:layout_width="0dp"
                     android:layout_height="112.8dp" />

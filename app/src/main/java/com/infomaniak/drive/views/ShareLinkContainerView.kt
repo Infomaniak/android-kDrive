@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,12 @@ class ShareLinkContainerView @JvmOverloads constructor(
             }
             binding.shareLinkButton.setOnClickListener {
                 // if `shareLink` isn't null it means that it's public share. Otherwise we create a private link.
-                context.shareText(text = this.shareLink?.url ?: restrictedShareLink(file))
+                val title = if (this.shareLink?._right == "public") {
+                    R.string.publicSharedLinkTitle
+                } else {
+                    R.string.privateSharedLinkTitle
+                }
+                context.shareText(title = context.getString(title), text = this.shareLink?.url ?: restrictedShareLink(file))
             }
         }
     }
@@ -123,7 +128,7 @@ class ShareLinkContainerView @JvmOverloads constructor(
     private fun setRestrictedUi() {
         setUi(
             iconId = R.drawable.ic_lock,
-            title = context.getString(R.string.restrictedSharedLinkTitle),
+            title = context.getString(R.string.privateSharedLinkTitle),
             shareButtonVisibility = true,
             shareSettings = false,
             status = context.getString(R.string.shareLinkRestrictedRightDescription, currentFile.getTypeName(context)),

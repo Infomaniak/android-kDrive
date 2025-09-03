@@ -167,7 +167,6 @@
     <string name="buttonShare">Condividi</string>
     <string name="buttonShareDropboxLink">Condividi il link</string>
     <string name="buttonSharePublicLink">Condividere il link pubblico</string>
-    <string name="buttonSignIn">Crea un account</string>
     <string name="buttonStopUpload">Arresta l’importazione del file</string>
     <string name="buttonSwitchDrive">Cambia drive</string>
     <string name="buttonTakePhotoOrVideo">Scatta una foto o gira un video</string>
@@ -566,6 +565,7 @@
     <string name="previewNoPreview">Sembra che il file non abbia anteprima.</string>
     <string name="previewPdfPages">%1$d di %2$d</string>
     <string name="previewVideoSourceError">File video non supportato dal lettore</string>
+    <string name="privateSharedLinkTitle">Link di condivisione privato</string>
     <string name="publicShareImportationInProgress">Download in corso nella cartella selezionata</string>
     <string name="publicShareOutdatedLinkDescription">Il link è stato disattivato o è scaduto.\nPer accedere ai file, invia un messaggio all’utente che ha condiviso il link in modo che possa riattivarlo.</string>
     <string name="publicShareOutdatedLinkTitle">I file non sono più disponibili</string>
@@ -578,7 +578,6 @@
     <string name="recentActivitySeeMore">Mostra più file recenti</string>
     <string name="recentTitle">Recente</string>
     <string name="refreshTokenError">Siete stati disconnessi</string>
-    <string name="restrictedSharedLinkTitle">Link di condivisione limitato</string>
     <string name="reviewAlertTitle">Ti piace kDrive?</string>
     <string name="saveExternalFileInputFileName">Nome del documento</string>
     <string name="saveExternalFileTitle">Salva su Drive</string>
@@ -606,6 +605,7 @@
     <string name="shareLinkOfficePermissionWriteTitle">Modificare</string>
     <string name="shareLinkPasswordRightDescription">Chiunque abbia il link dovrà inserire una password per accedere al %s.</string>
     <string name="shareLinkPasswordRightTitle">Con la password</string>
+    <string name="shareLinkPrivateRightTitle">Privato</string>
     <string name="shareLinkPublicRightDescription">Tutti coloro che dispongono del link possono %1$s questo %2$s%3$s%4$s.</string>
     <string name="shareLinkPublicRightDescriptionDate">\u0020fino al %s</string>
     <string name="shareLinkPublicRightDescriptionPassword">\u0020protetto da password</string>
@@ -617,7 +617,6 @@
     <string name="shareLinkRestrictedRightDocumentDescriptionShort">Al documento possono accedere soltanto gli utenti aggiunti.</string>
     <string name="shareLinkRestrictedRightFileDescriptionShort">Al file possono accedere soltanto gli utenti aggiunti.</string>
     <string name="shareLinkRestrictedRightFolderDescriptionShort">Solo gli utenti aggiunti possono accedere alla cartella.</string>
-    <string name="shareLinkRestrictedRightTitle">Limitato</string>
     <string name="shareLinkSettingsAddExpirationDateDescription">Il link di condivisione non potrà più essere utilizzato successivamente alla data.</string>
     <string name="shareLinkSettingsAllowDownloadDescription">Gli utenti potranno scaricare i file da questo link.</string>
     <string name="shareLinkSettingsAllowDownloadTitle">Download dal link di condivisione</string>

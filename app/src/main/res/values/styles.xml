@@ -63,6 +63,9 @@
     <style name="AppTheme" parent="AppThemeBase" />
 
     <style name="AppTheme.LoginBase" parent="AppThemeBase">
+        <!-- Used for the onboarding horizontal pager indicator and cross app login selected accounts button -->
+        <item name="colorOutlineVariant">@color/border</item>
+        <item name="colorSurface">@color/appBar</item>
         <item name="android:windowBackground">@color/appBar</item>
     </style>
 
@@ -295,14 +298,16 @@
 
     <style name="ButtonInfomaniak" parent="Widget.MaterialComponents.Button">
         <item name="android:fontFamily">@font/suisseintl_medium</item>
-        <item name="android:layout_height">70dp</item>
+        <item name="android:layout_height">@dimen/primaryButtonHeight</item>
+        <item name="android:insetTop">@dimen/primaryButtonVerticalInset</item>
+        <item name="android:insetBottom">@dimen/primaryButtonVerticalInset</item>
         <item name="android:letterSpacing">0</item>
         <item name="android:maxWidth">500dp</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:textAllCaps">false</item>
         <item name="backgroundTint">@color/background_btn_color_selector</item>
         <item name="android:textSize">@dimen/h3</item>
-        <item name="cornerRadius">@dimen/radius</item>
+        <item name="cornerRadius">@dimen/primaryButtonRadius</item>
         <item name="iconTint">@color/white</item>
         <item name="layout_constraintWidth_max">500dp</item>
     </style>

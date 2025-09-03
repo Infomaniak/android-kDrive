@@ -17,11 +17,14 @@
  */
 package com.infomaniak.drive.data.models
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
+import kotlinx.android.parcel.Parcelize
 import java.util.Date
 
+@Parcelize
 @RealmClass(embedded = true)
 open class FileCategory(
     @SerializedName("category_id")
@@ -34,4 +37,4 @@ open class FileCategory(
     var userId: Int? = null,
     @SerializedName("added_at")
     var addedAt: Date = Date(), // Date when the category was added to file
-) : RealmObject()
+) : RealmObject(), Parcelable

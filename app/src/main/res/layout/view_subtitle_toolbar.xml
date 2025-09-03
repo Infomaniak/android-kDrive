@@ -31,6 +31,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@android:color/white"
+        android:layout_marginEnd="@dimen/marginStandardSmall"
         tools:text="(long title) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras venenatis, erat imperdiet venenatis sollicitudin, nulla dolor porta urna, congue aliquet dolor mauris ut sapien.jpg" />
 
     <TextView

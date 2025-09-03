@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
@@ -32,6 +31,8 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -42,6 +43,9 @@ import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import com.infomaniak.lib.core.utils.safeBinding
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import splitties.init.appCtx
 import splitties.systemservices.powerManager
 
 class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
@@ -49,7 +53,7 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     private var binding: FragmentBottomSheetBackgroundSyncBinding by safeBinding()
 
     private val permissionResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        val hasPermission = it.resultCode == RESULT_OK || checkBatteryLifePermission(false)
+        val hasPermission = it.resultCode == RESULT_OK || checkBatteryLifePermission(requestPermission = false)
         onPermissionGranted(hasPermission)
     }
 
@@ -65,7 +69,12 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setAllowBackgroundSyncSwitch(checkBatteryLifePermission(false))
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.currentStateFlow.first { it == Lifecycle.State.RESUMED }
+            // Ensure this Fragment is in the resumed state (and that the Fragment is attached) before
+            // launch is called on the permissionResultLauncher, to avoid undocumented IllegalStateException.
+            setAllowBackgroundSyncSwitch(checkBatteryLifePermission(requestPermission = false))
+        }
 
         with(binding) {
             allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> setAllowBackgroundSyncSwitch(isChecked) }
@@ -89,14 +98,15 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     private fun checkBatteryLifePermission(requestPermission: Boolean): Boolean {
         val hasPermission = powerManager.isIgnoringBatteryOptimizations(BuildConfig.APPLICATION_ID)
         if (hasPermission.not() && requestPermission) {
-            requireActivity().requestBatteryOptimizationPermission()
+            requestBatteryOptimizationPermission()
         }
         onHasBatteryPermission(hasPermission)
         return hasPermission
     }
 
     @SuppressLint("BatteryLife")
-    private fun Context.requestBatteryOptimizationPermission() {
+    private fun requestBatteryOptimizationPermission() {
+        val packageName = appCtx.packageName
         try {
             Intent(
                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
@@ -130,7 +140,7 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
             isChecked = hasBatteryPermission
             isClickable = !hasBatteryPermission
         }
-        if (hasBatteryPermission && !hadBatteryLifePermission) checkBatteryLifePermission(true)
+        if (hasBatteryPermission && !hadBatteryLifePermission) checkBatteryLifePermission(requestPermission = true)
     }
 
     companion object {

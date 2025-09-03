@@ -35,6 +35,7 @@ import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImpo
 import com.infomaniak.drive.data.models.file.FileVersion
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.drive.utils.RealmListParceler.FileCategoryRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.FileRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.StringRealmListParceler
@@ -95,7 +96,7 @@ open class File(
     var shareLink: ShareLink? = null,
     @SerializedName("capabilities")
     var rights: Rights? = null,
-    var categories: @RawValue RealmList<FileCategory> = RealmList(),
+    var categories: @WriteWith<FileCategoryRealmListParceler> RealmList<FileCategory> = RealmList(),
     var cursor: String? = null,
 
     /**
