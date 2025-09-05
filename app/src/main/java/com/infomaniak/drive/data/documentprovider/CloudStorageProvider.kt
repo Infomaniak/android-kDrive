@@ -292,7 +292,7 @@ class CloudStorageProvider : DocumentsProvider() {
             if (isWrite) {
                 writeDataFile(context, updatedFile, userDrive, accessMode)
             } else {
-                getDataFile(context, updatedFile, userDrive, accessMode)
+                getDataFile(context, updatedFile, userDrive, signal)
             }
         }
     }
@@ -618,41 +618,66 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun getDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
+    private fun getDataFile(
+        context: Context,
+        file: File,
+        userDrive: UserDrive,
+        signal: CancellationSignal?,
+    ): ParcelFileDescriptor? {
         val cacheFile = file.getCacheFile(context, userDrive)
         val offlineFile = file.getOfflineFile(context, userDrive.userId)
 
-        try {
-            // Get offline file if it's intact
-            if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
-                return ParcelFileDescriptor.open(offlineFile, accessMode)
-            }
+        val (readPipe, writePipe) = ParcelFileDescriptor.createReliablePipe()
 
-            // Get cache file if it's exists and if the file is updated
-            if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
-                return ParcelFileDescriptor.open(cacheFile, accessMode)
-            }
+        val job = cloudScope.launch {
+            ParcelFileDescriptor.AutoCloseOutputStream(writePipe).use { writeStream ->
+                runCatching {
+                    // Get offline file if it's intact
+                    if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
+                        offlineFile.inputStream().use { it.copyToCancellable(writeStream) }
+                        return@runCatching
+                    }
 
-            // Download data file
-            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
-            val response = DownloadOfflineFileManager.downloadFileResponse(
-                fileUrl = ApiRoutes.downloadFile(file),
-                okHttpClient = okHttpClient,
-                downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
-                    SentryLog.i(TAG, "open currentProgress: $progress")
-                })
-            )
+                    // Get cache file if it's exists and if the file is updated
+                    if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
+                        cacheFile.inputStream().use { it.copyToCancellable(writeStream) }
+                        return@runCatching
+                    }
 
-            if (response.isSuccessful) {
-                DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
-                cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
-                return ParcelFileDescriptor.open(cacheFile, accessMode)
+                    // Download data file
+                    val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
+                    val response = DownloadOfflineFileManager.downloadFileResponseAsync(
+                        fileUrl = ApiRoutes.downloadFile(file),
+                        okHttpClient = okHttpClient,
+                        downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
+                            SentryLog.i(TAG, "open currentProgress: $progress")
+                        })
+                    )
+
+                    if (response.isSuccessful) {
+                        if (DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)) {
+                            cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
+                            cacheFile.inputStream().use { it.copyToCancellable(writeStream) }
+                        } else {
+                            writePipe.closeWithError("Error occurred when download remote data")
+                        }
+                    } else {
+                        writePipe.closeWithError("No data available")
+                    }
+
+                }.cancellable().onFailure { exception ->
+                    val event = SentryEvent(exception).apply {
+                        message = Message().apply { message = "An error has occurred on getDataFile" }
+                    }
+                    Sentry.captureEvent(event)
+                    writePipe.closeWithError(exception.message)
+                }
             }
-        } catch (exception: Exception) {
-            SentryLog.e(TAG, "An error has occurred on getDataFile", exception)
         }
 
-        return null
+        signal?.setOnCancelListener { job.cancel() }
+
+        return readPipe
     }
 
     private fun scheduleRefresh(sourceParentDocumentId: String? = currentParentDocumentId) {
