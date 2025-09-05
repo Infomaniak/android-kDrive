@@ -109,7 +109,7 @@ class DownloadOfflineFileManager(
             lastDownloadedFile = offlineFile
         }
 
-        return if (offlineFile == null) {
+        return if (offlineFile == null || currentFile?.rights?.canRead == false) {
             ListenableWorker.Result.failure()
         } else {
             runCatching {
