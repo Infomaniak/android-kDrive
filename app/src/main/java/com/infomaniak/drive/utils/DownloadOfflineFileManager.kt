@@ -99,6 +99,7 @@ class DownloadOfflineFileManager(
 
         if (offlineFile == null) {
             getFileFromRemote(context, file.id, userDrive) { downloadedFile ->
+                currentFile = downloadedFile
                 downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { updatedOfflineFile ->
                     lastDownloadedFile = offlineFile
                     offlineFile = updatedOfflineFile
