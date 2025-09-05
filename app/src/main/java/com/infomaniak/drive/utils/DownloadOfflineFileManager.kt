@@ -309,6 +309,19 @@ class DownloadOfflineFileManager(
             }.build().newCall(request).execute()
         }
 
+        suspend fun downloadFileResponseAsync(
+            fileUrl: String,
+            okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+            downloadInterceptor: Interceptor? = null
+        ): Response {
+            @OptIn(ManualAuthorizationRequired::class)
+            val request = Request.Builder().url(fileUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
+
+            return okHttpClient.newBuilder().apply {
+                downloadInterceptor?.let { interceptor -> addInterceptor(interceptor) }
+            }.build().newCall(request).await()
+        }
+
         fun saveRemoteData(
             tag: String,
             response: Response,
