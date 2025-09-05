@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,14 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityPublicShareBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
-import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.setColorNavigationBar
@@ -47,8 +48,9 @@ class PublicShareActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
-        binding.root.enableEdgeToEdge(withTop = false, withBottom = false) {
-            binding.mainPublicShareButton.setMargins(bottom = it.bottom)
+        binding.mainPublicShareButton.onApplyWindowInsetsListener { view, insets ->
+            val margin = resources.getDimension(R.dimen.marginStandard).toInt()
+            view.setMargins(left = margin + insets.left, right = margin + insets.right, bottom = margin + insets.bottom)
         }
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
@@ -63,8 +65,12 @@ class PublicShareActivity : AppCompatActivity() {
         destination.trackDestination()
 
         if (destination.id == R.id.publicShareListFragment || destination.id == R.id.publicShareBottomSheetFileActions) {
+            binding.bottomNavigationBackgroundView.isGone = false
+
             setColorStatusBar()
             setColorNavigationBar()
+        } else {
+            binding.bottomNavigationBackgroundView.isGone = true
         }
 
         val isMainButtonVisible = destination.id == R.id.publicShareListFragment && publicShareViewModel.canDownloadFiles
