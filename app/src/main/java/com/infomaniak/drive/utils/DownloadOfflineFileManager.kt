@@ -188,20 +188,22 @@ class DownloadOfflineFileManager(
         if (!response.isSuccessful) return@withContext ListenableWorker.Result.failure()
         makeSureFileExists(offlineFile) ?: return@withContext ListenableWorker.Result.failure()
 
-        val remoteDataHasBeenSaved = saveRemoteData(downloadWorker.workerTag(), response, offlineFile)
+        runCatching {
+            val remoteDataHasBeenSaved = saveRemoteData(downloadWorker.workerTag(), response, offlineFile)
 
-        if (remoteDataHasBeenSaved && offlineFile.exists()) {
-            onProgress(100, file.id)
-            FileController.updateOfflineStatus(file.id, true)
-            offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
-            if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
-        }
-
-        if (response.isSuccessful) {
-            fileDownloaded(context, file.id)
-            ListenableWorker.Result.success()
-        } else {
-            ListenableWorker.Result.failure()
+            if (remoteDataHasBeenSaved && offlineFile.exists()) {
+                onProgress(100, file.id)
+                FileController.updateOfflineStatus(file.id, true)
+                offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
+                if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
+                fileDownloaded(context, file.id)
+                ListenableWorker.Result.success()
+            } else {
+                ListenableWorker.Result.failure()
+            }
+        }.cancellable().getOrElse {
+            offlineFile.delete()
+            throw it
         }
     }
 
