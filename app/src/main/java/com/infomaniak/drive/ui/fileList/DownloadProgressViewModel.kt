@@ -73,9 +73,9 @@ class DownloadProgressViewModel : ViewModel() {
         }
     }
 
-    private fun saveData(file: File, outputFile: IOFile, response: Response) {
+    private suspend fun saveData(file: File, outputFile: IOFile, response: Response) {
         if (outputFile.exists()) outputFile.delete()
-        DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
+        if (DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile)) {
             downloadProgressLiveData.postValue(PROGRESS_COMPLETE)
         }
         outputFile.setLastModified(file.getLastModifiedInMilliSecond())
