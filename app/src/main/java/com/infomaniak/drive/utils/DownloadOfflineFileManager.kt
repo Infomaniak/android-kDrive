@@ -160,7 +160,7 @@ class DownloadOfflineFileManager(
 
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
 
-        val response = downloadFileResponse(
+        val response = downloadFileResponseAsync(
             fileUrl = ApiRoutes.downloadFile(file),
             okHttpClient = okHttpClient,
             downloadInterceptor = downloadProgressInterceptor(
