@@ -48,6 +48,9 @@ object SyncOfflineUtils {
     /** Maximum number of files that can be sent to the api */
     private const val API_LIMIT_FILES_ACTION_BODY = 500
     private const val API_V3_ROOT_FOLDER_NAME = "Private"
+    private const val API_V3_COMMON_DOCUMENTS_NAME = "Common documents"
+
+    private val apiV3RootFolders = setOf(API_V3_ROOT_FOLDER_NAME, API_V3_COMMON_DOCUMENTS_NAME)
 
     private val renameActions = setOf(FILE_RENAME, FILE_RENAME_ALIAS, FILE_MOVE_OUT)
 
@@ -86,7 +89,7 @@ object SyncOfflineUtils {
         val userDrive = UserDrive()
         val offlineFolder = IOFile(File.getOfflineFolder(context), "${userDrive.userId}/${userDrive.driveId}")
         offlineFolder.listFiles()?.forEach { file ->
-            if (file.name != API_V3_ROOT_FOLDER_NAME) file.deleteRecursively()
+            if (file.name !in apiV3RootFolders) file.deleteRecursively()
         }
     }
 
