@@ -36,6 +36,7 @@ import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import com.infomaniak.core.cancellable
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -55,13 +56,16 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.copyToCancellable
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.NotificationUtilsCore
 import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.sentry.Sentry
+import io.sentry.SentryEvent
 import io.sentry.SentryLevel
+import io.sentry.protocol.Message
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -354,7 +358,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
             FileController.getFileProxyById(fileId, customRealm = realm)?.let { file ->
 
-                generateThumbnail(fileId, file, userId)?.let { parcel ->
+                generateThumbnail(fileId, file, userId, signal)?.let { parcel ->
                     AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
                 }
 
@@ -362,34 +366,47 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun generateThumbnail(fileId: Int, file: File, userId: String): ParcelFileDescriptor? {
-
+    private fun generateThumbnail(fileId: Int, file: File, userId: String, signal: CancellationSignal?): ParcelFileDescriptor? {
         val outputFolder = IOFile(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
         val name = "${fileId}_${file.name}"
         val outputFile = IOFile(outputFolder, name)
-        var parcel: ParcelFileDescriptor? = null
+        val thumbnailUrl = ApiRoutes.getThumbnailUrl(file)
 
-        try {
-            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
-            val response = DownloadOfflineFileManager.downloadFileResponse(ApiRoutes.getThumbnailUrl(file), okHttpClient)
+        val (readPipe, writePipe) = ParcelFileDescriptor.createReliablePipe()
 
-            if (response.isSuccessful) {
-                DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
-                    parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+        val job = cloudScope.launch(Dispatchers.IO) {
+            ParcelFileDescriptor.AutoCloseOutputStream(writePipe).use { writeStream ->
+                runCatching {
+                    val okHttpClient = AccountUtils.getHttpClient(userId.toInt())
+                    val response = DownloadOfflineFileManager.downloadFileResponseAsync(thumbnailUrl, okHttpClient)
+
+                    if (response.isSuccessful) {
+                        if (DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile)) {
+                            outputFile.inputStream().use { inputStream ->
+                                inputStream.copyToCancellable(writeStream)
+                            }
+                        }
+                    } else if (outputFile.exists()) {
+                        outputFile.inputStream().use { inputStream ->
+                            inputStream.copyToCancellable(writeStream)
+                        }
+                    } else {
+                        writePipe.closeWithError("No thumbnail available")
+                    }
+
+                }.cancellable().onFailure { exception ->
+                    val event = SentryEvent(exception).apply {
+                        message = Message().apply { message = "An error has occurred on generateThumbnail" }
+                    }
+                    Sentry.captureEvent(event)
+                    writePipe.closeWithError(exception.message)
                 }
-            } else if (outputFile.exists()) {
-                parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
-            }
-
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-
-            if (outputFile.exists()) {
-                parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
             }
         }
 
-        return parcel
+        signal?.setOnCancelListener { job.cancel() }
+
+        return readPipe
     }
 
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
