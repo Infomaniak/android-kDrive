@@ -65,7 +65,7 @@ class PublicShareActivity : AppCompatActivity() {
         destination.trackDestination()
 
         if (destination.id == R.id.publicShareListFragment || destination.id == R.id.publicShareBottomSheetFileActions) {
-            binding.bottomNavigationBackgroundView.isGone = false
+            binding.bottomNavigationBackgroundView.isVisible = true
 
             setColorStatusBar()
             setColorNavigationBar()
