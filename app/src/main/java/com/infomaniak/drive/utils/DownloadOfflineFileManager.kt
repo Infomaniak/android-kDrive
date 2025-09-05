@@ -185,6 +185,7 @@ class DownloadOfflineFileManager(
             )
         )
 
+        if (!response.isSuccessful) return@withContext ListenableWorker.Result.failure()
         makeSureFileExists(offlineFile) ?: return@withContext ListenableWorker.Result.failure()
 
         val remoteDataHasBeenSaved = saveRemoteData(downloadWorker.workerTag(), response, offlineFile)
