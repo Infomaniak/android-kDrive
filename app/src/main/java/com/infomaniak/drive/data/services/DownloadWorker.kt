@@ -28,13 +28,11 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import java.io.File as IOFile
 
 class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDownloadWorker(context, workerParams) {
 
     private val fileId: Int by lazy { inputData.getInt(FILE_ID, 0) }
     private val file: File? by lazy { FileController.getFileById(fileId) }
-    private val offlineFile: IOFile? by lazy { file?.getOfflineFile(applicationContext, userDrive.userId) }
     private val fileName: String by lazy { inputData.getString(FILE_NAME) ?: "" }
     private val userDrive: UserDrive by lazy {
         UserDrive(
@@ -59,11 +57,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     override suspend fun downloadAction(): Result = downloadFile()
 
-    override fun onFinish() {
-        offlineFile?.let { if (it.exists() && file?.isIntactFile(it) == false) it.delete() }
-        notifyDownloadCancelled()
-        file?.id?.let(notificationManagerCompat::cancel)
-    }
+    override fun onFinish(): Unit = Unit
 
     override fun isForOneFile() = true
 
@@ -86,6 +80,9 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
             if (result == Result.success()) {
                 applicationContext.cancelNotification(fileId)
+            } else {
+                notifyDownloadCancelled()
+                file?.id?.let(notificationManagerCompat::cancel)
             }
         }
 
