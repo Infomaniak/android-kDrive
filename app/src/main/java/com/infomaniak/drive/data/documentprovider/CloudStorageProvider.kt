@@ -380,11 +380,9 @@ class CloudStorageProvider : DocumentsProvider() {
                     val okHttpClient = AccountUtils.getHttpClient(userId.toInt())
                     val response = DownloadOfflineFileManager.downloadFileResponseAsync(thumbnailUrl, okHttpClient)
 
-                    if (response.isSuccessful) {
-                        if (DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile)) {
-                            outputFile.inputStream().use { inputStream ->
-                                inputStream.copyToCancellable(writeStream)
-                            }
+                    if (response.isSuccessful && DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile)) {
+                        outputFile.inputStream().use { inputStream ->
+                            inputStream.copyToCancellable(writeStream)
                         }
                     } else if (outputFile.exists()) {
                         outputFile.inputStream().use { inputStream ->
