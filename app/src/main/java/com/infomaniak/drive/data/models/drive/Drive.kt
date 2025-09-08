@@ -127,8 +127,8 @@ open class Drive(
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
-    inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (!isKSuiteFreeTier || quotas.canCreateDropbox)
-    inline val canCreateShareLink get() = !isKSuiteFreeTier || quotas.canCreateShareLink
+    inline val canCreateDropbox get() = !isKSuiteFreeTier && quotas.canCreateDropbox && pack?.capabilities?.useDropbox == true
+    inline val canCreateShareLink get() = !isKSuiteFreeTier && quotas.canCreateShareLink
 
     inline val isDriveFull get() = usedSize >= size
 
