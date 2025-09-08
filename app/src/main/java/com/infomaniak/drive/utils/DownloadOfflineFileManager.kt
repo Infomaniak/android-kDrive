@@ -99,6 +99,7 @@ class DownloadOfflineFileManager(
 
         if (offlineFile == null) {
             getFileFromRemote(context, file.id, userDrive) { downloadedFile ->
+                currentFile = downloadedFile
                 downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { updatedOfflineFile ->
                     lastDownloadedFile = offlineFile
                     offlineFile = updatedOfflineFile
@@ -108,7 +109,7 @@ class DownloadOfflineFileManager(
             lastDownloadedFile = offlineFile
         }
 
-        return if (offlineFile == null) {
+        return if (offlineFile == null || currentFile?.rights?.canRead == false) {
             ListenableWorker.Result.failure()
         } else {
             runCatching {
@@ -159,7 +160,7 @@ class DownloadOfflineFileManager(
 
         val okHttpClient = AccountUtils.getHttpClient(userDrive.userId, null)
 
-        val response = downloadFileResponse(
+        val response = downloadFileResponseAsync(
             fileUrl = ApiRoutes.downloadFile(file),
             okHttpClient = okHttpClient,
             downloadInterceptor = downloadProgressInterceptor(
@@ -184,22 +185,25 @@ class DownloadOfflineFileManager(
             )
         )
 
+        if (!response.isSuccessful) return@withContext ListenableWorker.Result.failure()
         makeSureFileExists(offlineFile) ?: return@withContext ListenableWorker.Result.failure()
 
-        val remoteDataHasBeenSaved = saveRemoteData(downloadWorker.workerTag(), response, offlineFile)
+        runCatching {
+            val remoteDataHasBeenSaved = saveRemoteData(downloadWorker.workerTag(), response, offlineFile)
 
-        if (remoteDataHasBeenSaved && offlineFile.exists()) {
-            onProgress(100, file.id)
-            FileController.updateOfflineStatus(file.id, true)
-            offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
-            if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
-        }
-
-        if (response.isSuccessful) {
-            fileDownloaded(context, file.id)
-            ListenableWorker.Result.success()
-        } else {
-            ListenableWorker.Result.failure()
+            if (remoteDataHasBeenSaved && offlineFile.exists()) {
+                onProgress(100, file.id)
+                FileController.updateOfflineStatus(file.id, true)
+                offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
+                if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
+                fileDownloaded(context, file.id)
+                ListenableWorker.Result.success()
+            } else {
+                ListenableWorker.Result.failure()
+            }
+        }.cancellable().getOrElse {
+            offlineFile.delete()
+            throw it
         }
     }
 
