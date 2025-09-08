@@ -381,13 +381,9 @@ class CloudStorageProvider : DocumentsProvider() {
                     val response = DownloadOfflineFileManager.downloadFileResponseAsync(thumbnailUrl, okHttpClient)
 
                     if (response.isSuccessful && DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile)) {
-                        outputFile.inputStream().use { inputStream ->
-                            inputStream.copyToCancellable(writeStream)
-                        }
+                        writeStream.loadFromFile(outputFile)
                     } else if (outputFile.exists()) {
-                        outputFile.inputStream().use { inputStream ->
-                            inputStream.copyToCancellable(writeStream)
-                        }
+                        writeStream.loadFromFile(outputFile)
                     } else {
                         writePipe.closeWithError("No thumbnail available")
                     }
@@ -685,6 +681,12 @@ class CloudStorageProvider : DocumentsProvider() {
             cacheFile.inputStream().use { it.copyToCancellable(this) }
         } else {
             writePipe.closeWithError("Error occurred when download remote data")
+        }
+    }
+
+    private suspend fun ParcelFileDescriptor.AutoCloseOutputStream.loadFromFile(outputFile: IOFile) {
+        outputFile.inputStream().use { inputStream ->
+            inputStream.copyToCancellable(this)
         }
     }
 
