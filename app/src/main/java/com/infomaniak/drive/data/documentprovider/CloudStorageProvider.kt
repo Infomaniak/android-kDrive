@@ -655,12 +655,8 @@ class CloudStorageProvider : DocumentsProvider() {
                     )
 
                     if (response.isSuccessful) {
-                        if (DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)) {
-                            cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
-                            cacheFile.inputStream().use { it.copyToCancellable(writeStream) }
-                        } else {
-                            writePipe.closeWithError("Error occurred when download remote data")
-                        }
+                        val remoteDataHasBeenSaved = DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
+                        writeStream.loadCachedData(remoteDataHasBeenSaved, cacheFile, file, writePipe)
                     } else {
                         writePipe.closeWithError("No data available")
                     }
@@ -678,6 +674,20 @@ class CloudStorageProvider : DocumentsProvider() {
         signal?.setOnCancelListener { job.cancel() }
 
         return readPipe
+    }
+
+    private suspend fun ParcelFileDescriptor.AutoCloseOutputStream.loadCachedData(
+        remoteDataHasBeenSaved: Boolean,
+        cacheFile: IOFile,
+        file: File,
+        writePipe: ParcelFileDescriptor,
+    ) {
+        if (remoteDataHasBeenSaved) {
+            cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
+            cacheFile.inputStream().use { it.copyToCancellable(this) }
+        } else {
+            writePipe.closeWithError("Error occurred when download remote data")
+        }
     }
 
     private fun scheduleRefresh(sourceParentDocumentId: String? = currentParentDocumentId) {
