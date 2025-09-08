@@ -49,6 +49,7 @@ import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
+import com.infomaniak.lib.core.utils.await
 import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
@@ -185,7 +186,9 @@ class DownloadOfflineFileManager(
 
         makeSureFileExists(offlineFile) ?: return@withContext ListenableWorker.Result.failure()
 
-        saveRemoteData(downloadWorker.workerTag(), response, offlineFile) {
+        val remoteDataHasBeenSaved = saveRemoteData(downloadWorker.workerTag(), response, offlineFile)
+
+        if (remoteDataHasBeenSaved && offlineFile.exists()) {
             onProgress(100, file.id)
             FileController.updateOfflineStatus(file.id, true)
             offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
@@ -309,23 +312,34 @@ class DownloadOfflineFileManager(
             }.build().newCall(request).execute()
         }
 
-        fun saveRemoteData(
+        suspend fun downloadFileResponseAsync(
+            fileUrl: String,
+            okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+            downloadInterceptor: Interceptor? = null
+        ): Response {
+            @OptIn(ManualAuthorizationRequired::class)
+            val request = Request.Builder().url(fileUrl).headers(HttpUtils.getHeaders(contentType = null)).get().build()
+
+            return okHttpClient.newBuilder().apply {
+                downloadInterceptor?.let { interceptor -> addInterceptor(interceptor) }
+            }.build().newCall(request).await()
+        }
+
+        suspend fun saveRemoteData(
             tag: String,
             response: Response,
             outputFile: java.io.File? = null,
             outputStream: ParcelFileDescriptor.AutoCloseOutputStream? = null,
-            onFinish: (() -> Unit)? = null,
-        ) {
+        ): Boolean {
             SentryLog.d(tag, "Save remote data to ${outputFile?.path}")
-            response.body?.byteStream()?.buffered()?.use { input ->
+            return response.body?.byteStream()?.buffered()?.use { input ->
                 if (outputFile?.parentFile?.exists() == false) outputFile.parentFile?.mkdirs()
                 if (outputFile?.exists() == false) outputFile.createNewFile()
                 val stream = outputStream ?: outputFile?.outputStream()
                 stream?.use { output ->
-                    input.copyTo(output)
-                    onFinish?.invoke()
+                    input.copyToCancellable(output)
                 }
-            }
+            } != null
         }
 
         fun downloadProgressInterceptor(
