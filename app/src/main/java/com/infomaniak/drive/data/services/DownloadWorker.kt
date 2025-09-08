@@ -78,12 +78,8 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
                 )
             }
 
-            if (result == Result.success()) {
-                applicationContext.cancelNotification(fileId)
-            } else {
-                notifyDownloadCancelled()
-                file?.id?.let(notificationManagerCompat::cancel)
-            }
+            if (result == Result.failure()) notifyDownloadCancelled()
+            applicationContext.cancelNotification(fileId)
         }
 
         return result
