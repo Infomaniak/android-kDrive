@@ -295,15 +295,15 @@
         android:name="com.infomaniak.drive.ui.fileList.fileShare.FileShareLinkSettingsFragment"
         android:label="FileShareLinkSettings"
         tools:layout="@layout/fragment_file_share_link_settings">
+        <action
+            android:id="@+id/action_fileShareLinkSettingsFragment_to_selectPermissionBottomSheetDialog"
+            app:destination="@id/selectPermissionBottomSheetDialog" />
         <argument
             android:name="fileId"
             app:argType="integer" />
         <argument
             android:name="driveId"
             app:argType="integer" />
-        <action
-            android:id="@+id/action_fileShareLinkSettingsFragment_to_selectPermissionBottomSheetDialog"
-            app:destination="@id/selectPermissionBottomSheetDialog" />
         <argument
             android:name="shareLink"
             app:argType="com.infomaniak.drive.data.models.ShareLink" />

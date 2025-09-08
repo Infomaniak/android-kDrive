@@ -53,7 +53,7 @@
             app:layout_constraintStart_toEndOf="@id/shareLinkIcon"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_goneMarginStart="0dp"
-            tools:text="@string/restrictedSharedLinkTitle" />
+            tools:text="@string/privateSharedLinkTitle" />
 
         <com.infomaniak.core.ksuite.myksuite.ui.views.MyKSuitePlusChipView
             android:id="@+id/shareLinkMyKSuiteChip"

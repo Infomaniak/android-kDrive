@@ -36,15 +36,15 @@ open class DrivePack(
     val type: DrivePackType? get() = enumValueOfOrNull<DrivePackType>(name.uppercase())
 
     enum class DrivePackType {
-        FREE, // Old offer pack, now replaced by [KSuite.PersoFree]
-        SOLO, // Old offer pack, now replaced by [KSuite.PersoPlus]
+        FREE, // Old offer pack, now replaced by [KSuite.Perso.Free]
+        SOLO, // Old offer pack, now replaced by [KSuite.Perso.Plus]
         TEAM, // Old offer pack, will hopefully be replaced someday
         PRO, // Old offer pack, will hopefully be replaced someday
-        MY_KSUITE, // [KSuite.PersoFree]
-        MY_KSUITE_PLUS, // [KSuite.PersoPlus]
-        KSUITE_ESSENTIAL, // [KSuite.ProFree]
-        KSUITE_STANDARD, // [KSuite.ProStandard]
-        KSUITE_PRO, // [KSuite.ProBusiness]
-        KSUITE_ENTREPRISE, // [KSuite.ProEnterprise]
+        MY_KSUITE, // [KSuite.Perso.Free]
+        MY_KSUITE_PLUS, // [KSuite.Perso.Plus]
+        KSUITE_ESSENTIAL, // [KSuite.Pro.Free]
+        KSUITE_STANDARD, // [KSuite.Pro.Standard]
+        KSUITE_PRO, // [KSuite.Pro.Business]
+        KSUITE_ENTREPRISE, // [KSuite.Pro.Enterprise]
     }
 }
