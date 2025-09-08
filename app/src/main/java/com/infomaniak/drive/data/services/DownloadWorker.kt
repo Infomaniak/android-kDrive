@@ -50,9 +50,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
     }
 
     override fun downloadNotification(): DownloadNotification? {
-        return file?.id?.let { notificationId ->
-            DownloadNotification(id = notificationId, notification = downloadProgressNotification)
-        }
+        return DownloadNotification(id = fileId, notification = downloadProgressNotification)
     }
 
     override suspend fun downloadAction(): Result = downloadFile()
