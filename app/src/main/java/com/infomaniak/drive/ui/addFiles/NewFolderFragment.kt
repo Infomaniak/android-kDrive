@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.addFiles
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -86,11 +87,20 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initDropBoxFolder(drive: Drive?) {
+    private fun initDropBoxFolder(drive: Drive?) = with(binding) {
         val canCreateDropbox = drive?.canCreateDropbox == true
-        binding.myKSuitePlusChip.isVisible = !canCreateDropbox && drive?.isKSuitePersoFree == true
-        binding.kSuiteProChip.isVisible = !canCreateDropbox && drive?.isKSuiteProFree == true
-        binding.dropBox.apply {
+
+        val current = drive?.quotas?.dropbox?.current
+        val max = drive?.quotas?.dropbox?.max
+        if (current != null && max != null) {
+            // if (max > 1000) max = 1000 // TODO: Currently, the API returns 500000. That's kinda ugly in the UI. What do we want to do ?
+            @SuppressLint("SetTextI18n")
+            dropBoxTitle.text = getString(R.string.dropBoxTitle) + " (${current} / ${max})"
+        }
+
+        myKSuitePlusChip.isVisible = !canCreateDropbox && drive?.isKSuitePersoFree == true
+        kSuiteProChip.isVisible = !canCreateDropbox && drive?.isKSuiteProFree == true
+        dropBox.apply {
             isVisible = drive?.sharedWithMe != true
             setOnClickListener {
                 val matomoName = "dropboxQuotaExceeded"
