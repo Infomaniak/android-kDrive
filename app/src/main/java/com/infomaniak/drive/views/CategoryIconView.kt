@@ -19,10 +19,10 @@ package com.infomaniak.drive.views
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.drive.data.models.drive.Category
@@ -39,7 +39,7 @@ class CategoryIconView @JvmOverloads constructor(
 
     fun setCategoryIconOrHide(category: Category?) {
         category?.let {
-            binding.categoryImageView.setBackgroundColor(Color.parseColor(it.color))
+            binding.categoryImageView.setBackgroundColor(it.color.toColorInt())
             isVisible = true
         } ?: run {
             isGone = true
@@ -57,7 +57,7 @@ class CategoryIconView @JvmOverloads constructor(
                     isGone = true
                 }
             }
-            categoryImageView.setBackgroundColor(Color.parseColor(it.color))
+            categoryImageView.setBackgroundColor(it.color.toColorInt())
             isVisible = true
         } ?: run {
             isGone = true

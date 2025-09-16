@@ -17,13 +17,13 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.drawable.DrawableCompat.setTint
 import androidx.core.graphics.drawable.DrawableCompat.wrap
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -69,7 +69,7 @@ class MenuFragment : Fragment() {
                 driveName.text = currentDrive.name
 
                 driveName.setCompoundDrawables(wrap(driveName.compoundDrawablesRelative.first()).apply {
-                    val color = Color.parseColor(currentDrive.preferences.color)
+                    val color = currentDrive.preferences.color.toColorInt()
                     setTint(this, color)
                 }, null, null, null)
 

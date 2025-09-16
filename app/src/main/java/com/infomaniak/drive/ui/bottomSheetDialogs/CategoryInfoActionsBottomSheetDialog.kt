@@ -17,11 +17,11 @@
  */
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
@@ -60,7 +60,7 @@ class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(navigationArgs) {
         super.onViewCreated(view, savedInstanceState)
-        binding.categoryIcon.setBackgroundColor(Color.parseColor(categoryColor))
+        binding.categoryIcon.setBackgroundColor(categoryColor.toColorInt())
         binding.categoryTitle.text = categoryName
         handleRights()
         binding.editCategory.setOnClickListener {
