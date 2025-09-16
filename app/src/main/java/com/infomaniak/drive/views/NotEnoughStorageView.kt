@@ -44,9 +44,10 @@ class NotEnoughStorageView @JvmOverloads constructor(
 
     @SuppressLint("SetTextI18n")
     fun setup(drive: Drive, fragment: Fragment) = with(binding) {
+
         val storagePercentage = if (drive.size > 0L) (drive.usedSize.toDouble() / drive.size).toFloat() * 100.0f else 0.0f
-        if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
-            this@NotEnoughStorageView.isVisible = true
+
+        this@NotEnoughStorageView.isVisible = if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
 
             val usedStorage = context.formatShortFileSize(drive.usedSize, valueOnly = true)
             val totalStorage = context.formatShortFileSize(drive.size)
@@ -55,8 +56,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
 
             description.setText(if (drive.isAdmin) R.string.notEnoughStorageDescription1 else R.string.notEnoughStorageDescription2)
 
-            if (drive.isKSuiteFreeTier) {
-                upgradeOffer.isVisible = true
+            upgradeOffer.isVisible = if (drive.isKSuiteFreeTier) {
                 upgradeOffer.setOnClickListener {
                     val matomoName = MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
                     if (drive.kSuite == KSuite.Pro.Free) {
@@ -65,14 +65,16 @@ class NotEnoughStorageView @JvmOverloads constructor(
                         fragment.openMyKSuiteUpgradeBottomSheet(matomoName)
                     }
                 }
+                true
             } else {
-                upgradeOffer.isGone = true
+                false
             }
-            close.setOnClickListener {
-                this@NotEnoughStorageView.isGone = true
-            }
+
+            close.setOnClickListener { this@NotEnoughStorageView.isGone = true }
+
+            true
         } else {
-            this@NotEnoughStorageView.isGone = true
+            false
         }
     }
 
