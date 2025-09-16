@@ -259,6 +259,7 @@
     <string name="errorConflict">An dieser Stelle existiert bereits ein Element mit demselben Namen</string>
     <string name="errorDelete">Fehler beim Löschen</string>
     <string name="errorDeviceStorage">Unzureichender Gerätespeicher</string>
+    <string name="errorDropboxLimitExceeded">Sie haben das Dropbox-Limit erreicht.</string>
     <string name="errorDuplicate">Fehler beim Duplizieren</string>
     <string name="errorExternalImportInProgress">Der Ordner kann nicht bearbeitet werden, da ein externer Import im Gange ist</string>
     <string name="errorFileAlreadyExists">Datei oder Ordner existiert bereits</string>
