@@ -207,9 +207,9 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             } else {
                 val matomoName = "convertToDropbox"
                 when {
-                    kSuite?.isProUpgradable() == true -> openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
                     kSuite == KSuite.Pro.Free -> openMyKSuiteUpgradeBottomSheet(matomoName)
-                    else -> showSnackbar(getString(R.string.errorDropboxLimitExceeded), showAboveFab = true)
+                    kSuite?.isProUpgradable() == true -> openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
+                    kSuite == KSuite.Pro.Enterprise -> showSnackbar(getString(R.string.errorDropboxLimitExceeded), true)
                 }
             }
         }

@@ -38,9 +38,9 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
     override suspend fun fetchData(): MyKSuiteData? = runCatching {
         MyKSuiteDataUtils.requestKSuiteData()
 
-        // Don't try to fetch the my kSuite data if the user doesn't have a my kSuite offer
+        // Don't try to fetch the MyKSuite data if the user doesn't have a MyKSuite offer
         val kSuite = AccountUtils.getCurrentDrive()?.kSuite
-        if (kSuite != KSuite.Perso.Free && kSuite != KSuite.Perso.Plus) return@runCatching null
+        if (kSuite !is KSuite.Perso) return@runCatching null
 
         val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClient)
         if (apiResponse.data == null) {

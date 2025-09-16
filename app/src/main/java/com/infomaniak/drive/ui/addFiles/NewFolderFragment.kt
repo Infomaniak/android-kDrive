@@ -86,11 +86,11 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initDropBoxFolder(drive: Drive?) {
+    private fun initDropBoxFolder(drive: Drive?) = with(binding) {
         val canCreateDropbox = drive?.canCreateDropbox == true
-        binding.myKSuitePlusChip.isVisible = !canCreateDropbox && drive?.isKSuitePersoFree == true
-        binding.kSuiteProChip.isVisible = !canCreateDropbox && drive?.isKSuiteProFree == true
-        binding.dropBox.apply {
+        myKSuitePlusChip.isVisible = !canCreateDropbox && drive?.isKSuitePersoFree == true
+        kSuiteProChip.isVisible = !canCreateDropbox && drive?.isKSuiteProFree == true
+        dropBox.apply {
             isVisible = drive?.sharedWithMe != true
             setOnClickListener {
                 val matomoName = "dropboxQuotaExceeded"
