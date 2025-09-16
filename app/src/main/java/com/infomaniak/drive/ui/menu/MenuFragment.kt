@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.menu
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -58,77 +59,79 @@ class MenuFragment : Fragment() {
         return FragmentMenuBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        AccountUtils.currentUser?.let { currentUser ->
-            userName.text = currentUser.displayName
-            userEmail.text = currentUser.email
+        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, menuUploadFileInProgressView)
 
-            AccountUtils.getCurrentDrive()?.let { currentDrive ->
-                driveName.text = currentDrive.name
+        val user = AccountUtils.currentUser ?: return@with
 
-                driveName.setCompoundDrawables(wrap(driveName.compoundDrawablesRelative.first()).apply {
-                    val color = currentDrive.preferences.color.toColorInt()
-                    setTint(this, color)
-                }, null, null, null)
+        userName.text = user.displayName
+        userEmail.text = user.email
+        userImage.loadAvatar(user)
 
-                if (currentDrive.size == 0L) {
-                    driveStorageProgress.isInvisible = true
-                } else {
-                    driveStorageProgress.isVisible = true
-                    progressDriveQuota.max = 1_000
-                    val progress = (currentDrive.usedSize.toDouble() / currentDrive.size) * 1_000.0
-                    progressDriveQuota.progress = progress.toInt()
-
-                    val usedSize = requireContext().formatShortFileSize(currentDrive.usedSize)
-                    val totalSize = requireContext().formatShortFileSize(currentDrive.size)
-                    textDriveQuota.text = "$usedSize / $totalSize"
-                }
-
-                val kSuite = currentDrive.kSuite
-                kSuiteProCard.isVisible = if (kSuite == KSuite.Pro.Free) {
-                    kSuiteProCard.setOnClick { openKSuiteProBottomSheet(kSuite, currentDrive.isAdmin, "openFromUserMenuCard") }
-                    true
-                } else {
-                    false
-                }
-            }
-
-            userImage.loadAvatar(currentUser)
-
-            if (DriveInfosController.hasSingleDrive(currentUser.id)) {
-                driveIcon.isGone = true
-            } else {
-                driveSwitchContainer.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
-            }
-
-            changeUser.setOnClickListener {
-                val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)
-                safeNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
-            }
-
-            settings.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
-            }
-
-            support.setOnClickListener { requireContext().openSupport() }
-
-            logout.setOnClickListener {
-                MaterialAlertDialogBuilder(requireContext(), R.style.DeleteDialogStyle)
-                    .setTitle(getString(R.string.alertRemoveUserTitle))
-                    .setMessage(getString(R.string.alertRemoveUserDescription, currentUser.displayName))
-                    .setPositiveButton(R.string.buttonConfirm) { _, _ ->
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            if (UploadFile.getAppSyncSettings()?.userId == currentUser.id) UploadFile.deleteAllSyncFile()
-                            AccountUtils.removeUserAndDeleteToken(requireContext(), currentUser)
-                        }
-                    }
-                    .setNegativeButton(R.string.buttonCancel) { _, _ -> }
-                    .setCancelable(false).show()
-            }
+        if (DriveInfosController.hasSingleDrive(user.id)) {
+            driveIcon.isGone = true
+        } else {
+            driveSwitchContainer.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
         }
 
-        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, menuUploadFileInProgressView)
+        changeUser.setOnClickListener {
+            val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)
+            safeNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
+        }
+
+        settings.setOnClickListener {
+            safeNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
+        }
+
+        support.setOnClickListener { requireContext().openSupport() }
+
+        logout.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext(), R.style.DeleteDialogStyle)
+                .setTitle(getString(R.string.alertRemoveUserTitle))
+                .setMessage(getString(R.string.alertRemoveUserDescription, user.displayName))
+                .setPositiveButton(R.string.buttonConfirm) { _, _ ->
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        if (UploadFile.getAppSyncSettings()?.userId == user.id) UploadFile.deleteAllSyncFile()
+                        AccountUtils.removeUserAndDeleteToken(requireContext(), user)
+                    }
+                }
+                .setNegativeButton(R.string.buttonCancel) { _, _ -> }
+                .setCancelable(false).show()
+        }
+
+        val drive = AccountUtils.getCurrentDrive() ?: return@with
+
+        driveName.text = drive.name
+        driveName.setCompoundDrawables(
+            wrap(driveName.compoundDrawablesRelative.first()).apply {
+                setTint(this, drive.preferences.color.toColorInt())
+            },
+            null, null, null,
+        )
+
+        driveStorageProgress.isInvisible = if (drive.size == 0L) {
+            true
+        } else {
+            val progress = (drive.usedSize.toDouble() / drive.size.toDouble()) * 1_000.toDouble()
+            progressDriveQuota.progress = progress.toInt()
+            progressDriveQuota.max = 1_000
+
+            val usedSize = requireContext().formatShortFileSize(drive.usedSize)
+            val totalSize = requireContext().formatShortFileSize(drive.size)
+            textDriveQuota.text = "$usedSize / $totalSize"
+
+            false
+        }
+
+        val kSuite = drive.kSuite
+        kSuiteProCard.isVisible = if (kSuite == KSuite.Pro.Free) {
+            kSuiteProCard.setOnClick { openKSuiteProBottomSheet(kSuite, drive.isAdmin, "openFromUserMenuCard") }
+            true
+        } else {
+            false
+        }
     }
 }
