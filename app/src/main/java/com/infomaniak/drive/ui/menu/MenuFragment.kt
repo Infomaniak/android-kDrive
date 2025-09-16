@@ -34,6 +34,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.coil.loadAvatar
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.drive.R
@@ -45,7 +46,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.openKSuiteProBottomSheet
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
-import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeBinding
 
 class MenuFragment : Fragment() {
@@ -69,7 +69,7 @@ class MenuFragment : Fragment() {
 
         userName.text = user.displayName
         userEmail.text = user.email
-        userImage.loadAvatar(user)
+        userImage.loadAvatar(id = user.id, avatarUrl = user.avatar, initials = user.getInitials())
 
         if (DriveInfosController.hasSingleDrive(user.id)) {
             driveIcon.isGone = true
