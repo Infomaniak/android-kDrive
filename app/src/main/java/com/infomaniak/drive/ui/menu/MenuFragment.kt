@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,30 +30,30 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MenuViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.openKSuiteProBottomSheet
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MenuFragment : Fragment() {
 
     private var binding: FragmentMenuBinding by safeBinding()
+
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val menuViewModel: MenuViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentMenuBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -74,16 +74,16 @@ class MenuFragment : Fragment() {
         if (DriveInfosController.hasSingleDrive(user.id)) {
             driveIcon.isGone = true
         } else {
-            driveSwitchContainer.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
+            driveSwitchContainer.setOnClickListener { safelyNavigate(R.id.switchDriveDialog) }
         }
 
         changeUser.setOnClickListener {
             val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)
-            safeNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
+            safelyNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
         }
 
         settings.setOnClickListener {
-            safeNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
+            safelyNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
         }
 
         support.setOnClickListener { requireContext().openSupport() }
@@ -92,12 +92,7 @@ class MenuFragment : Fragment() {
             MaterialAlertDialogBuilder(requireContext(), R.style.DeleteDialogStyle)
                 .setTitle(getString(R.string.alertRemoveUserTitle))
                 .setMessage(getString(R.string.alertRemoveUserDescription, user.displayName))
-                .setPositiveButton(R.string.buttonConfirm) { _, _ ->
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        if (UploadFile.getAppSyncSettings()?.userId == user.id) UploadFile.deleteAllSyncFile()
-                        AccountUtils.removeUserAndDeleteToken(requireContext(), user)
-                    }
-                }
+                .setPositiveButton(R.string.buttonConfirm) { _, _ -> menuViewModel.logout(user) }
                 .setNegativeButton(R.string.buttonCancel) { _, _ -> }
                 .setCancelable(false).show()
         }
