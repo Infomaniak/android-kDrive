@@ -102,7 +102,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val downloadRequired = forceDownload || mustRefreshUi
             homeActivitiesFragment.getFragment<HomeActivitiesFragment>().getLastActivities(currentDrive.id, downloadRequired)
 
-            notEnoughStorage.setup(currentDrive, this@HomeFragment)
+            notEnoughStorage.setup(currentDrive, fragment = this@HomeFragment)
             mustRefreshUi = false
         }
     }
