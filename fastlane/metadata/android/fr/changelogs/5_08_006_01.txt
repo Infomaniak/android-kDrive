@@ -1,0 +1,1 @@
+- Correction du mode bord à bord pour les fichiers partagés publics

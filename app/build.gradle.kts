@@ -30,8 +30,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_08_005_01
-        versionName = "5.8.5"
+        versionCode = 5_08_007_01
+        versionName = "5.8.7"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -190,12 +190,12 @@ dependencies {
     implementation(core.androidx.work.runtime)
     androidTestImplementation(core.androidx.work.testing)
 
-    implementation(libs.androidx.concurrent.futures.ktx)
+    implementation(core.androidx.concurrent.futures.ktx)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.viewpager2)
     implementation(libs.androidx.webkit)
 
-    implementation(libs.splitties.main.thread)
+    implementation(core.splitties.mainthread)
 
     implementation(libs.exoplayer)
     implementation(libs.exoplayer.dash)
@@ -205,7 +205,7 @@ dependencies {
 
     implementation(libs.android.pdfview)
     implementation(libs.gravity.snap.helper)
-    implementation(libs.lottie)
+    implementation(core.lottie)
     implementation(libs.material.date.time.picker)
     implementation(libs.touch.image.view)
 
@@ -228,9 +228,9 @@ dependencies {
     }
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation(libs.androidx.core.ktx)
-    androidTestImplementation(libs.androidx.rules)
-    androidTestImplementation(libs.androidx.runner)
+    implementation(core.androidx.core.ktx)
+    androidTestImplementation(core.androidx.rules)
+    androidTestImplementation(core.androidx.runner)
 
     androidTestImplementation(libs.junit.jupiter.api)
     testImplementation(libs.junit.jupiter.api)
@@ -239,7 +239,7 @@ dependencies {
     androidTestImplementation(libs.android.test.core)
     androidTestRuntimeOnly(libs.android.test.runner)
 
-    implementation(libs.coil.gif)
+    implementation(core.coil.two.gif)
 
     // Compose
     implementation(libs.androidx.ui.android)

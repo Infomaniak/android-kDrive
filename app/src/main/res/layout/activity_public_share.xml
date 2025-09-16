@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2024 Infomaniak Network SA
+  ~ Copyright (C) 2024-2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
         app:navGraph="@navigation/public_share_navigation" />
 
     <View
+        android:id="@+id/bottomNavigationBackgroundView"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:background="@drawable/background_bottom_view"
@@ -44,11 +45,13 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/mainPublicShareButton"
         style="@style/ButtonInfomaniak"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_marginHorizontal="@dimen/marginStandard"
         android:layout_marginBottom="@dimen/marginStandard"
         android:elevation="@dimen/marginStandardMedium"
         android:text="@string/buttonAddToKDrive"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

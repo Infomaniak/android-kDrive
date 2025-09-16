@@ -1,0 +1,2 @@
+- Amélioration de la stabilité de la synchronisation hors ligne
+- Amélioration de la génération des miniatures et de l'obtention des données à partir du stockage cloud

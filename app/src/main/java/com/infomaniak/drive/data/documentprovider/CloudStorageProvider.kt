@@ -36,6 +36,7 @@ import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
+import com.infomaniak.core.cancellable
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -55,13 +56,16 @@ import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
+import com.infomaniak.drive.utils.copyToCancellable
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.utils.NotificationUtilsCore
 import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.sentry.Sentry
+import io.sentry.SentryEvent
 import io.sentry.SentryLevel
+import io.sentry.protocol.Message
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -288,7 +292,7 @@ class CloudStorageProvider : DocumentsProvider() {
             if (isWrite) {
                 writeDataFile(context, updatedFile, userDrive, accessMode)
             } else {
-                getDataFile(context, updatedFile, userDrive, accessMode)
+                getDataFile(context, updatedFile, userDrive, signal)
             }
         }
     }
@@ -354,7 +358,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
             FileController.getFileProxyById(fileId, customRealm = realm)?.let { file ->
 
-                generateThumbnail(fileId, file, userId)?.let { parcel ->
+                generateThumbnail(fileId, file, userId, signal)?.let { parcel ->
                     AssetFileDescriptor(parcel, 0, AssetFileDescriptor.UNKNOWN_LENGTH)
                 }
 
@@ -362,34 +366,41 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun generateThumbnail(fileId: Int, file: File, userId: String): ParcelFileDescriptor? {
-
+    private fun generateThumbnail(fileId: Int, file: File, userId: String, signal: CancellationSignal?): ParcelFileDescriptor? {
         val outputFolder = IOFile(context?.cacheDir, "thumbnails").apply { if (!exists()) mkdirs() }
         val name = "${fileId}_${file.name}"
         val outputFile = IOFile(outputFolder, name)
-        var parcel: ParcelFileDescriptor? = null
+        val thumbnailUrl = ApiRoutes.getThumbnailUrl(file)
 
-        try {
-            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userId.toInt()) }
-            val response = DownloadOfflineFileManager.downloadFileResponse(ApiRoutes.getThumbnailUrl(file), okHttpClient)
+        val (readPipe, writePipe) = ParcelFileDescriptor.createReliablePipe()
 
-            if (response.isSuccessful) {
-                DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile) {
-                    parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
+        val job = cloudScope.launch(Dispatchers.IO) {
+            ParcelFileDescriptor.AutoCloseOutputStream(writePipe).use { writeStream ->
+                runCatching {
+                    val okHttpClient = AccountUtils.getHttpClient(userId.toInt())
+                    val response = DownloadOfflineFileManager.downloadFileResponseAsync(thumbnailUrl, okHttpClient)
+
+                    if (response.isSuccessful && DownloadOfflineFileManager.saveRemoteData(TAG, response, outputFile)) {
+                        writeStream.loadFromFile(outputFile)
+                    } else if (outputFile.exists()) {
+                        writeStream.loadFromFile(outputFile)
+                    } else {
+                        writePipe.closeWithError("No thumbnail available")
+                    }
+
+                }.cancellable().onFailure { exception ->
+                    val event = SentryEvent(exception).apply {
+                        message = Message().apply { message = "An error has occurred on generateThumbnail" }
+                    }
+                    Sentry.captureEvent(event)
+                    writePipe.closeWithError(exception.message)
                 }
-            } else if (outputFile.exists()) {
-                parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
-            }
-
-        } catch (exception: Exception) {
-            exception.printStackTrace()
-
-            if (outputFile.exists()) {
-                parcel = ParcelFileDescriptor.open(outputFile, ParcelFileDescriptor.MODE_READ_ONLY)
             }
         }
 
-        return parcel
+        signal?.setOnCancelListener { job.cancel() }
+
+        return readPipe
     }
 
     override fun createDocument(parentDocumentId: String, mimeType: String, displayName: String): String {
@@ -601,41 +612,82 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun getDataFile(context: Context, file: File, userDrive: UserDrive, accessMode: Int): ParcelFileDescriptor? {
+    private fun getDataFile(
+        context: Context,
+        file: File,
+        userDrive: UserDrive,
+        signal: CancellationSignal?,
+    ): ParcelFileDescriptor? {
         val cacheFile = file.getCacheFile(context, userDrive)
         val offlineFile = file.getOfflineFile(context, userDrive.userId)
 
-        try {
-            // Get offline file if it's intact
-            if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
-                return ParcelFileDescriptor.open(offlineFile, accessMode)
-            }
+        val (readPipe, writePipe) = ParcelFileDescriptor.createReliablePipe()
 
-            // Get cache file if it's exists and if the file is updated
-            if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
-                return ParcelFileDescriptor.open(cacheFile, accessMode)
-            }
+        val job = cloudScope.launch {
+            ParcelFileDescriptor.AutoCloseOutputStream(writePipe).use { writeStream ->
+                runCatching {
+                    // Get offline file if it's intact
+                    if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
+                        offlineFile.inputStream().use { it.copyToCancellable(writeStream) }
+                        return@runCatching
+                    }
 
-            // Download data file
-            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
-            val response = DownloadOfflineFileManager.downloadFileResponse(
-                fileUrl = ApiRoutes.downloadFile(file),
-                okHttpClient = okHttpClient,
-                downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
-                    SentryLog.i(TAG, "open currentProgress: $progress")
-                })
-            )
+                    // Get cache file if it's exists and if the file is updated
+                    if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
+                        cacheFile.inputStream().use { it.copyToCancellable(writeStream) }
+                        return@runCatching
+                    }
 
-            if (response.isSuccessful) {
-                DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
-                cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
-                return ParcelFileDescriptor.open(cacheFile, accessMode)
+                    // Download data file
+                    val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
+                    val response = DownloadOfflineFileManager.downloadFileResponseAsync(
+                        fileUrl = ApiRoutes.downloadFile(file),
+                        okHttpClient = okHttpClient,
+                        downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
+                            SentryLog.i(TAG, "open currentProgress: $progress")
+                        })
+                    )
+
+                    if (response.isSuccessful) {
+                        val remoteDataHasBeenSaved = DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
+                        writeStream.loadCachedData(remoteDataHasBeenSaved, cacheFile, file, writePipe)
+                    } else {
+                        writePipe.closeWithError("No data available")
+                    }
+
+                }.cancellable().onFailure { exception ->
+                    val event = SentryEvent(exception).apply {
+                        message = Message().apply { message = "An error has occurred on getDataFile" }
+                    }
+                    Sentry.captureEvent(event)
+                    writePipe.closeWithError(exception.message)
+                }
             }
-        } catch (exception: Exception) {
-            SentryLog.e(TAG, "An error has occurred on getDataFile", exception)
         }
 
-        return null
+        signal?.setOnCancelListener { job.cancel() }
+
+        return readPipe
+    }
+
+    private suspend fun ParcelFileDescriptor.AutoCloseOutputStream.loadCachedData(
+        remoteDataHasBeenSaved: Boolean,
+        cacheFile: IOFile,
+        file: File,
+        writePipe: ParcelFileDescriptor,
+    ) {
+        if (remoteDataHasBeenSaved) {
+            cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
+            cacheFile.inputStream().use { it.copyToCancellable(this) }
+        } else {
+            writePipe.closeWithError("Error occurred when download remote data")
+        }
+    }
+
+    private suspend fun ParcelFileDescriptor.AutoCloseOutputStream.loadFromFile(outputFile: IOFile) {
+        outputFile.inputStream().use { inputStream ->
+            inputStream.copyToCancellable(this)
+        }
     }
 
     private fun scheduleRefresh(sourceParentDocumentId: String? = currentParentDocumentId) {

@@ -105,7 +105,6 @@ import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.setPagination
 import com.infomaniak.lib.core.utils.showProgressCatching
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
@@ -667,9 +666,6 @@ open class FileListFragment : MultiSelectFragment(
                 fileAdapter.updateFileProgressByFileId(fileId, progress) { _, file ->
                     val tag = workInfo.tags.firstOrNull { it == file.getWorkerTag() }
                     if (tag != null) {
-                        CoroutineScope(Dispatchers.IO).launch {
-                            FileController.updateOfflineStatus(fileId, true)
-                        }
                         file.currentProgress = Utils.INDETERMINATE_PROGRESS
                     }
                 }

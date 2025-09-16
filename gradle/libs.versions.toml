@@ -3,9 +3,6 @@ androidJunit5 = "1.13.1.0"
 androidPdfview = "3.2.13"
 androidTest = "1.8.0"
 checkerFramework = "3.49.5"
-coilGif = "2.7.0"
-concurrentFuturesKtx = "1.3.0"
-coreKtx = "1.7.0"
 ddPlist = "1.28"
 espresso = "3.7.0"
 exoplayer = "1.8.0"
@@ -13,19 +10,16 @@ firebaseMessagingKtx = "24.1.2"
 googleServices = "4.4.3"
 gradle = "8.12.1"
 gravitySnapHelper = "2.2.2"
-gsSdk = "5.12.0"
+gsSdk = "5.13.0"
 junitJupiter = "5.13.4"
 kotlinFaker = "1.16.0"
 lifecycleProcess = "2.9.2"
-lottie = "6.6.7"
 materialDateTimePicker = "4.2.3"
 mockWebServer = "5.1.0"
 navigationSafeArgsGradlePlugin = "2.9.3"
 pahoMqttAndroid = "4.4.1"
 realmAndroidAdapters = "v4.0.0"
 realmGradlePlugin = "10.19.0"
-runner = "1.7.0"
-splittiesMainThread = "3.0.0"
 touchImageView = "3.7.1"
 uiAndroid = "1.9.0"
 uiAutomator = "2.3.0"
@@ -36,15 +30,11 @@ webkit = "1.14.0"
 [libraries]
 android-junit5 = { module = "de.mannodermaus.gradle.plugins:android-junit5", version.ref = "androidJunit5" }
 android-pdfview = { module = "com.github.Infomaniak:android-pdfview", version.ref = "androidPdfview" }
-androidx-concurrent-futures-ktx = { module = "androidx.concurrent:concurrent-futures-ktx", version.ref = "concurrentFuturesKtx" }
-androidx-core-ktx = { module = "androidx.test:core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
 androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigationSafeArgsGradlePlugin" }
-androidx-rules = { module = "androidx.test:rules", version.ref = "coreKtx" }
 androidx-ui-android = { module = "androidx.compose.ui:ui-android", version.ref = "uiAndroid" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
-coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilGif" }
 dd-plist = { module = "com.googlecode.plist:dd-plist", version.ref = "ddPlist" }
 exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "exoplayer" }
 exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "exoplayer" }
@@ -57,13 +47,11 @@ gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gravity-snap-helper = { module = "com.github.rubensousa:gravitysnaphelper", version.ref = "gravitySnapHelper" }
 gs-sdk = { module = "com.geniusscansdk:gssdk", version.ref = "gsSdk" }
 kotlin-faker = { module = "io.github.serpro69:kotlin-faker", version.ref = "kotlinFaker" }
-lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 material-date-time-picker = { module = "com.wdullaer:materialdatetimepicker", version.ref = "materialDateTimePicker" }
 mock-web-server = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockWebServer" }
 paho-mqtt-android = { module = "com.github.hannesa2:paho.mqtt.android", version.ref = "pahoMqttAndroid" }
 realm-android-adapters = { module = "com.github.realm:realm-android-adapters", version.ref = "realmAndroidAdapters" }
 realm-gradle-plugin = { module = "io.realm:realm-gradle-plugin", version.ref = "realmGradlePlugin" }
-splitties-main-thread = { module = "com.louiscad.splitties:splitties-mainthread", version.ref = "splittiesMainThread" }
 touch-image-view = { module = "com.github.MikeOrtiz:TouchImageView", version.ref = "touchImageView" }
 # Unit tests
 android-test-core = { module = "de.mannodermaus.junit5:android-test-core", version.ref = "androidTest" }
@@ -71,7 +59,6 @@ android-test-runner = { module = "de.mannodermaus.junit5:android-test-runner", v
 androidx-espresso-checker = { module = "org.checkerframework:checker", version.ref = "checkerFramework" } # Not unused, don't remove it
 androidx-espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "espresso" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
-androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
 androidx-ui-automator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiAutomator" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
