@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -29,6 +28,7 @@ import android.text.Spanned
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -233,7 +233,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun canSaveFilesPref() = canUseExternalFilesPref() || navigationArgs.folderId == -1
 
     private fun displaySelectedDrive(drive: Drive) = with(binding) {
-        driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
+        driveIcon.imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
         driveName.text = drive.name
     }
 

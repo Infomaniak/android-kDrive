@@ -17,9 +17,9 @@
  */
 package com.infomaniak.drive.ui.fileList.fileDetails
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -59,7 +59,7 @@ class CategoriesAdapter(private val onCategoryChanged: (id: Int, isSelected: Boo
             setClickOnCategory(category)
         }
 
-        categoryIcon.setBackgroundColor(Color.parseColor(category.color))
+        categoryIcon.setBackgroundColor(category.color.toColorInt())
         categoryTitle.text = category.name
     }
 

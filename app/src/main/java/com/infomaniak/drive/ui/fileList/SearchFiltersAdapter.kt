@@ -18,9 +18,9 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.chip.Chip
@@ -63,7 +63,7 @@ class SearchFiltersAdapter(
     private fun Chip.setIcon(filter: SearchFilter) {
         if (filter.icon == null) {
             setChipIconResource(R.drawable.round_empty)
-            chipIconTint = ColorStateList.valueOf(Color.parseColor(filter.tint))
+            filter.tint?.toColorInt()?.let { chipIconTint = ColorStateList.valueOf(it) }
         } else {
             setChipIconResource(filter.icon)
         }

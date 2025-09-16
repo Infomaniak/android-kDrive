@@ -18,9 +18,9 @@
 package com.infomaniak.drive.ui
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -46,7 +46,7 @@ class SwitchDriveBottomSheetAdapter(
 
         itemSelectIcon.apply {
             setImageResource(R.drawable.ic_drive)
-            imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
+            imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
             isVisible = true
         }
 
