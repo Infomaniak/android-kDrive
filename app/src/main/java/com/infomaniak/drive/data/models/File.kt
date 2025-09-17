@@ -56,7 +56,6 @@ import io.realm.annotations.PrimaryKey
 import io.sentry.Sentry
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.RawValue
 import kotlinx.parcelize.WriteWith
 import java.util.Date
 
