@@ -37,33 +37,39 @@ class NotEnoughStorageView @JvmOverloads constructor(
 
     private val binding by lazy { ViewNotEnoughStorageBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    @SuppressLint("SetTextI18n")
     fun setup(drive: Drive, showKSuiteAd: () -> Unit) = with(binding) {
 
         val storagePercentage = if (drive.size > 0L) (drive.usedSize.toDouble() / drive.size).toFloat() * 100.0f else 0.0f
 
-        this@NotEnoughStorageView.isVisible = if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
+        this@NotEnoughStorageView.isVisible = storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE
 
-            val usedStorage = context.formatShortFileSize(drive.usedSize, valueOnly = true)
-            val totalStorage = context.formatShortFileSize(drive.size)
-            progressIndicator.progress = (storagePercentage).toInt()
-            title.text = "$usedStorage / $totalStorage"
-
-            description.setText(if (drive.isAdmin) R.string.notEnoughStorageDescription1 else R.string.notEnoughStorageDescription2)
-
-            upgradeOffer.isVisible = if (drive.isKSuiteFreeTier) {
-                upgradeOffer.setOnClickListener { showKSuiteAd() }
-                true
-            } else {
-                false
-            }
-
-            close.setOnClickListener { this@NotEnoughStorageView.isGone = true }
-
-            true
-        } else {
-            false
+        if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
+            setupStorageValues(drive, storagePercentage)
+            setupDescription(drive)
+            setupUpgradeButton(drive, showKSuiteAd)
+            setupCloseButton()
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun setupStorageValues(drive: Drive, storagePercentage: Float) = with(binding) {
+        val usedStorage = context.formatShortFileSize(drive.usedSize, valueOnly = true)
+        val totalStorage = context.formatShortFileSize(drive.size)
+        progressIndicator.progress = (storagePercentage).toInt()
+        title.text = "$usedStorage / $totalStorage"
+    }
+
+    private fun setupDescription(drive: Drive) = with(binding) {
+        description.setText(if (drive.isAdmin) R.string.notEnoughStorageDescription1 else R.string.notEnoughStorageDescription2)
+    }
+
+    private fun setupUpgradeButton(drive: Drive, showKSuiteAd: () -> Unit) = with(binding) {
+        upgradeOffer.isVisible = drive.isKSuiteFreeTier
+        if (!drive.isKSuiteMaxTier) upgradeOffer.setOnClickListener { showKSuiteAd() }
+    }
+
+    private fun setupCloseButton() = with(binding) {
+        close.setOnClickListener { this@NotEnoughStorageView.isGone = true }
     }
 
     companion object {
