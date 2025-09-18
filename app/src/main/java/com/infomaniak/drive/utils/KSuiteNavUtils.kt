@@ -36,6 +36,14 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.bottomSheetDialogs.KSuiteProBottomSheetDialogArgs
 import com.infomaniak.lib.core.models.user.User
 
+fun Fragment.openKSuiteUpgradeBottomSheet(matomoName: String, kSuite: KSuite, isAdmin: Boolean) {
+    if (kSuite is KSuite.Perso.Free) {
+        openMyKSuiteUpgradeBottomSheet(matomoName)
+    } else {
+        openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
+    }
+}
+
 fun Fragment.openMyKSuiteUpgradeBottomSheet(matomoTrackerName: String) {
     openMyKSuiteUpgradeBottomSheet(findNavController(), matomoTrackerName)
 }
@@ -57,11 +65,7 @@ fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteD
     )
 }
 
-fun Fragment.openKSuiteProBottomSheet(
-    kSuite: KSuite,
-    isAdmin: Boolean,
-    matomoTrackerName: String,
-) {
+fun Fragment.openKSuiteProBottomSheet(kSuite: KSuite, isAdmin: Boolean, matomoTrackerName: String) {
     trackKSuiteProBottomSheetEvent(matomoTrackerName)
     safelyNavigate(
         resId = R.id.kSuiteProBottomSheetDialog,

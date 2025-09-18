@@ -24,6 +24,7 @@ import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -31,6 +32,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes.restrictedShareLink
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewShareLinkContainerBinding
 import com.infomaniak.drive.utils.shareText
 
@@ -81,17 +83,22 @@ class ShareLinkContainerView @JvmOverloads constructor(
         selectUi()
     }
 
-    fun setupMyKSuitePlusChip(canCreateShareLink: Boolean, showMyKSuitePlusAd: () -> Unit) = with(binding) {
+    fun setupKSuiteChip(canCreateShareLink: Boolean, drive: Drive, showKSuiteAd: () -> Unit) = with(binding) {
         if (this@ShareLinkContainerView.shareLink != null || currentFile.isDropBox()) return@with
 
-        shareLinkMyKSuiteChip.isGone = canCreateShareLink
+        shareLinkMyKSuiteChip.isVisible = !canCreateShareLink && drive.kSuite is KSuite.Perso.Free
+        shareLinkKSuiteProChip.isVisible = !canCreateShareLink && drive.kSuite?.isProUpgradable() == true
         titleContainer.isEnabled = canCreateShareLink
         titleContainer.isClickable = canCreateShareLink
         shareLinkSettings.isEnabled = canCreateShareLink
         shareLinkButton.isEnabled = canCreateShareLink
 
         root.apply {
-            if (!canCreateShareLink) setOnClickListener { showMyKSuitePlusAd() } else setOnClickListener(null)
+            if (!canCreateShareLink && !drive.isKSuiteMaxTier) {
+                setOnClickListener { showKSuiteAd() }
+            } else {
+                setOnClickListener(null)
+            }
             isClickable = !canCreateShareLink
             isEnabled = !canCreateShareLink
         }

@@ -64,6 +64,16 @@
             app:backgroundColor="@color/myKSuiteChipOnCardBackground"
             app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
             app:layout_constraintStart_toEndOf="@id/shareLinkTitle"
+            app:layout_constraintTop_toTopOf="@id/shareLinkTitle" />
+
+        <com.infomaniak.core.ksuite.ksuitepro.views.EvolveChipView
+            android:id="@+id/shareLinkKSuiteProChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/marginStandardSmall"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/shareLinkTitle"
+            app:layout_constraintStart_toEndOf="@id/shareLinkTitle"
             app:layout_constraintTop_toTopOf="@id/shareLinkTitle"
             tools:visibility="visible" />
 
