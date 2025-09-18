@@ -236,7 +236,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         // But only displays it for the folder that can really be colored if it's a paid drive.
         isVisible = (drive.isKSuiteFreeTier || currentFile.isAllowedToBeColored()) && !isSharedWithMe
         shouldShowMyKSuiteChip = drive.isKSuitePersoFree
-        shouldShowKSuiteProChip = drive.isKSuiteProUpgradable
+        shouldShowKSuiteProChip = drive.isKSuiteProFree
     }
 
     private fun initOnClickListeners() = with(binding) {

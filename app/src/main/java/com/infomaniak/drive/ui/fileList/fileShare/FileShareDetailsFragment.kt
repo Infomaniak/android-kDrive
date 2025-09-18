@@ -319,10 +319,9 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             val hasShareLink = fileShareViewModel.currentFile.value?.shareLink != null
             val canCreateShareLink = drive.canCreateShareLink || hasShareLink
             val drive = AccountUtils.getCurrentDrive() ?: return@observe
-            val matomoName = "shareLinkQuotaExceeded"
 
             binding.shareLinkContainer.setupKSuiteChip(canCreateShareLink, drive) {
-                openKSuiteUpgradeBottomSheet(matomoName, drive)
+                openKSuiteUpgradeBottomSheet("shareLinkQuotaExceeded", drive)
             }
         }
     }

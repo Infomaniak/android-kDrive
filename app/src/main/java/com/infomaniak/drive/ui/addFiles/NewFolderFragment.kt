@@ -92,11 +92,10 @@ class NewFolderFragment : Fragment() {
         dropBox.apply {
             isVisible = drive?.sharedWithMe != true
             setOnClickListener {
-                val matomoName = "dropboxQuotaExceeded"
                 if (canCreateDropbox) {
                     safeNavigate(R.id.createDropBoxFolderFragment)
                 } else {
-                    openKSuiteUpgradeBottomSheet(matomoName, drive)
+                    openKSuiteUpgradeBottomSheet("dropboxQuotaExceeded", drive)
                 }
             }
         }
