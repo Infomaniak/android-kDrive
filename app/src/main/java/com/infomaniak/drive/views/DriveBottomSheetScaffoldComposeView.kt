@@ -99,7 +99,7 @@ abstract class DriveBottomSheetScaffoldComposeView @JvmOverloads constructor(
                 containerColor?.let { color ->
                     val theme = LocalBottomSheetTheme.current.copy(containerColor = color)
                     ProvideBottomSheetTheme(theme) { Scaffold(sheetState) }
-                } ?: run { Scaffold(sheetState) }
+                } ?: Scaffold(sheetState)
             }
         }
     }
