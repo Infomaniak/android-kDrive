@@ -27,7 +27,6 @@ import coil.load
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
-import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share.UserFileAccess
@@ -150,12 +149,6 @@ class PermissionsAdapter(
                     permission == ShareLinkFolderPermission.PUBLIC ||
                     permission == ShareLinkDocumentPermission.PUBLIC -> {
                 enableViewHolder(true)
-                AccountUtils.getCurrentDrive()?.let { drive ->
-                    if (drive.kSuite == KSuite.Pro.Free) {
-                        upgradeOffer.isVisible = true
-                        kSuiteProChip.isVisible = true
-                    }
-                }
             }
             else -> enableViewHolder(true)
         }
@@ -164,7 +157,6 @@ class PermissionsAdapter(
     private fun CardviewPermissionBinding.enableViewHolder(enabled: Boolean) {
         root.isEnabled = enabled
         disabled.isGone = enabled
-        upgradeOffer.isGone = true
         userExternalWarning.isGone = true
     }
 

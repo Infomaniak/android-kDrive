@@ -108,10 +108,16 @@ open class Drive(
         get() = enumValueOfOrNull<DriveUser.Role>(_role)
 
     //region KSuite
-    inline val isKSuitePersoFree get() = pack?.type == DrivePackType.FREE || kSuite == KSuite.Perso.Free
-    inline val isKSuiteProFree get() = kSuite == KSuite.Pro.Free
-    inline val isKSuiteFreeTier get() = kSuite?.isFreeTier() == true
+    inline val isKSuitePersoFree get() = pack?.type == DrivePackType.FREE || kSuite is KSuite.Perso.Free
+    inline val isKSuiteProFree get() = kSuite is KSuite.Pro.Free
+    inline val isKSuiteFreeTier get() = isKSuitePersoFree || isKSuiteProFree
     inline val isKSuiteProUpgradable get() = kSuite?.isProUpgradable() == true
+    inline val isKSuiteMaxTier
+        get() = when (kSuite) {
+            is KSuite.Perso -> kSuite is KSuite.Perso.Plus
+            is KSuite.Pro -> kSuite?.isProUpgradable() == false
+            else -> true
+        }
 
     inline val kSuite: KSuite?
         get() = when (pack?.type) {
@@ -119,16 +125,16 @@ open class Drive(
             DrivePackType.KSUITE_PRO -> KSuite.Pro.Business
             DrivePackType.KSUITE_STANDARD -> KSuite.Pro.Standard
             DrivePackType.KSUITE_ESSENTIAL -> KSuite.Pro.Free
-            DrivePackType.MY_KSUITE_PLUS -> KSuite.Perso.Plus
-            DrivePackType.MY_KSUITE -> KSuite.Perso.Free
+            DrivePackType.MY_KSUITE_PLUS, DrivePackType.SOLO -> KSuite.Perso.Plus
+            DrivePackType.MY_KSUITE, DrivePackType.FREE -> KSuite.Perso.Free
             else -> null // Old offers packs, will hopefully be removed someday so this `when` can return a non-nullable `KSuite`
         }
     //endregion
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
 
-    inline val canCreateDropbox get() = !isKSuiteFreeTier && quotas.canCreateDropbox && pack?.capabilities?.useDropbox == true
-    inline val canCreateShareLink get() = !isKSuiteFreeTier && quotas.canCreateShareLink
+    inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (isKSuiteMaxTier || quotas.canCreateDropbox)
+    inline val canCreateShareLink get() = isKSuiteMaxTier || quotas.canCreateShareLink
 
     inline val isDriveFull get() = usedSize >= size
 

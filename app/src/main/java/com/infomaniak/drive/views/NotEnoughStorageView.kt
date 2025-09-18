@@ -59,7 +59,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
             upgradeOffer.isVisible = if (drive.isKSuiteFreeTier) {
                 upgradeOffer.setOnClickListener {
                     val matomoName = MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
-                    if (drive.kSuite == KSuite.Pro.Free) {
+                    if (drive.kSuite is KSuite.Pro.Free) {
                         fragment.openKSuiteProBottomSheet(drive.kSuite!!, drive.isAdmin, matomoName)
                     } else {
                         fragment.openMyKSuiteUpgradeBottomSheet(matomoName)

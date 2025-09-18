@@ -85,7 +85,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             android:layout_marginTop="@dimen/marginStandardVerySmall"
-            app:layout_constraintBottom_toTopOf="@id/upgradeOffer"
+            android:layout_marginBottom="@dimen/marginStandardMedium"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/mainIcon"
             app:layout_constraintTop_toBottomOf="@id/permissionTitle"
@@ -120,32 +121,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/permissionDescription" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/upgradeOffer"
-            style="@style/ChipLink"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/marginStandardSmall"
-            android:text="@string/buttonUpgradeOffer"
-            android:visibility="gone"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@id/permissionTitle"
-            app:layout_constraintTop_toBottomOf="@id/permissionDescription"
-            tools:visibility="visible" />
-
-        <com.infomaniak.core.ksuite.ksuitepro.views.EvolveChipView
-            android:id="@+id/kSuiteProChip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/marginStandardMedium"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/upgradeOffer"
-            app:layout_constraintStart_toEndOf="@id/upgradeOffer"
-            app:layout_constraintTop_toTopOf="@id/upgradeOffer"
-            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

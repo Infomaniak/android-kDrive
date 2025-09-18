@@ -122,7 +122,7 @@ class MenuFragment : Fragment() {
         }
 
         val kSuite = drive.kSuite
-        kSuiteProCard.isVisible = if (kSuite == KSuite.Pro.Free) {
+        kSuiteProCard.isVisible = if (kSuite is KSuite.Pro.Free) {
             kSuiteProCard.setOnClick { openKSuiteProBottomSheet(kSuite, drive.isAdmin, "openFromUserMenuCard") }
             true
         } else {

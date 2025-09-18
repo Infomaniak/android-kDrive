@@ -45,8 +45,7 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.openKSuiteProBottomSheet
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
@@ -147,22 +146,8 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun setupUpgradeOfferListener(kSuite: KSuite, isAdmin: Boolean) {
-        binding.addPasswordLayout.setOnClickListener {
-            val matomoName = "shareLinkPassword"
-            if (kSuite == KSuite.Perso.Free) {
-                openMyKSuiteUpgradeBottomSheet(matomoName)
-            } else {
-                openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
-            }
-        }
-        binding.addExpirationDateLayout.setOnClickListener {
-            val matomoName = "shareLinkExpiryDate"
-            if (kSuite == KSuite.Perso.Free) {
-                openMyKSuiteUpgradeBottomSheet(matomoName)
-            } else {
-                openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
-            }
-        }
+        binding.addPasswordLayout.setOnClickListener { openKSuiteUpgradeBottomSheet("shareLinkPassword", kSuite, isAdmin) }
+        binding.addExpirationDateLayout.setOnClickListener { openKSuiteUpgradeBottomSheet("shareLinkExpiryDate", kSuite, isAdmin) }
     }
 
     private fun setupSaveButton() = with(binding) {

@@ -53,7 +53,7 @@ import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Compani
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getDriveUsers
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.setupAvailableShareableItems
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.hideKeyboard
@@ -318,9 +318,11 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
         fileShareViewModel.currentDriveResult.observe(viewLifecycleOwner) { drive ->
             val hasShareLink = fileShareViewModel.currentFile.value?.shareLink != null
             val canCreateShareLink = drive.canCreateShareLink || hasShareLink
+            val drive = AccountUtils.getCurrentDrive() ?: return@observe
+            val matomoName = "shareLinkQuotaExceeded"
 
-            binding.shareLinkContainer.setupMyKSuitePlusChip(canCreateShareLink) {
-                openMyKSuiteUpgradeBottomSheet("shareLinkQuotaExceeded")
+            binding.shareLinkContainer.setupKSuiteChip(canCreateShareLink, drive) {
+                openKSuiteUpgradeBottomSheet(matomoName, drive.kSuite!!, drive.isAdmin)
             }
         }
     }
