@@ -17,28 +17,62 @@
  */
 package com.infomaniak.drive.utils
 
-import android.content.Context
+import android.app.Activity
 import android.graphics.Color
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.avatar.getBackgroundColorResBasedOnId
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.myksuite.ui.screens.KSuiteApp
 import com.infomaniak.core.ksuite.myksuite.ui.screens.MyKSuiteDashboardScreenData
-import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
-import com.infomaniak.drive.MatomoDrive.trackEvent
+import com.infomaniak.drive.MatomoDrive.trackKSuiteProBottomSheetEvent
+import com.infomaniak.drive.MatomoDrive.trackMyKSuiteUpgradeBottomSheetEvent
+import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.ui.bottomSheetDialogs.KSuiteProBottomSheetDialogArgs
 import com.infomaniak.lib.core.models.user.User
 
-fun Fragment.openMyKSuiteUpgradeBottomSheet(matomoTrackerName: String) {
-    requireActivity().openMyKSuiteUpgradeBottomSheet(findNavController(), matomoTrackerName)
+fun Fragment.openKSuiteUpgradeBottomSheet(matomoName: String, drive: Drive?) {
+    val kSuite = drive?.kSuite ?: return
+    val navController = findNavController()
+    when {
+        kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(navController, matomoName)
+        kSuite.isProUpgradable() -> requireActivity().openKSuiteProBottomSheet(navController, kSuite, drive.isAdmin, matomoName)
+        else -> Unit
+    }
 }
 
-fun Context.openMyKSuiteUpgradeBottomSheet(navController: NavController, matomoTrackerName: String) {
-    trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE_UPGRADE_BOTTOMSHEET, matomoTrackerName)
+fun Activity.openKSuiteUpgradeBottomSheet(navController: NavController, matomoName: String, drive: Drive?) {
+    val kSuite = drive?.kSuite ?: return
+    when {
+        kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(navController, matomoName)
+        kSuite.isProUpgradable() -> openKSuiteProBottomSheet(navController, kSuite, drive.isAdmin, matomoName)
+        else -> Unit
+    }
+}
+
+private fun openMyKSuiteUpgradeBottomSheet(navController: NavController, matomoName: String) {
+    trackMyKSuiteUpgradeBottomSheetEvent(matomoName)
     navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+}
+
+private fun Activity.openKSuiteProBottomSheet(
+    navController: NavController,
+    kSuite: KSuite,
+    isAdmin: Boolean,
+    matomoName: String,
+) {
+    trackKSuiteProBottomSheetEvent(matomoName)
+    safelyNavigate(
+        navController = navController,
+        resId = R.id.kSuiteProBottomSheetDialog,
+        args = KSuiteProBottomSheetDialogArgs(kSuite, isAdmin).toBundle(),
+    )
 }
 
 fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteDashboardScreenData {

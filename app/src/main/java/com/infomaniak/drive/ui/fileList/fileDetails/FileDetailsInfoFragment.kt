@@ -19,12 +19,12 @@ package com.infomaniak.drive.ui.fileList.fileDetails
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.toColorInt
 import androidx.core.view.forEachIndexed
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -157,7 +157,7 @@ class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
     @SuppressLint("SetTextI18n")
     private fun setPath(path: String) = with(binding) {
         val drive = DriveInfosController.getDrive(AccountUtils.currentUserId, driveId = file.driveId)!!
-        driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
+        driveIcon.imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
         pathValue.text = "${drive.name}$path"
         pathView.isVisible = true
     }

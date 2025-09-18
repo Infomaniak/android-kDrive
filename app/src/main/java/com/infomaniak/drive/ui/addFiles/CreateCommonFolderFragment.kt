@@ -18,9 +18,9 @@
 package com.infomaniak.drive.ui.addFiles
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -52,7 +52,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
 
         AccountUtils.getCurrentDrive()?.let { drive ->
             pathDriveText.text = drive.name
-            pathDriveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
+            pathDriveIcon.imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
         }
 
         adapter.apply {

@@ -1125,4 +1125,18 @@
             android:name="dashboardData"
             app:argType="com.infomaniak.core.ksuite.myksuite.ui.screens.MyKSuiteDashboardScreenData" />
     </fragment>
+
+    <dialog
+        android:id="@+id/kSuiteProBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.KSuiteProBottomSheetDialog"
+        android:label="KSuiteProBottomSheetDialog"
+        tools:layout="@layout/bottom_sheet_k_suite_pro">
+        <argument
+            android:name="kSuite"
+            app:argType="com.infomaniak.core.ksuite.data.KSuite" />
+        <argument
+            android:name="isAdmin"
+            app:argType="boolean" />
+    </dialog>
+
 </navigation>

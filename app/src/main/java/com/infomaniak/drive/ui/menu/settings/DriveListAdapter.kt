@@ -18,9 +18,9 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -49,7 +49,7 @@ class DriveListAdapter(
             holder.binding.apply {
                 switchDrive.isGone = (drive.id == AccountUtils.currentDriveId) && hideCurrentDriveChevron
                 driveName.text = drive.name
-                driveIcon.imageTintList = ColorStateList.valueOf(Color.parseColor(drive.preferences.color))
+                driveIcon.imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
                 root.setOnClickListener { onItemClicked(drive) }
             }
         }

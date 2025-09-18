@@ -29,12 +29,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.setDriveHeader
 import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
@@ -98,11 +100,13 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun updateUi(forceDownload: Boolean = false) = with(binding) {
-        AccountUtils.getCurrentDrive()?.let { currentDrive ->
+        AccountUtils.getCurrentDrive()?.let { drive ->
             val downloadRequired = forceDownload || mustRefreshUi
-            homeActivitiesFragment.getFragment<HomeActivitiesFragment>().getLastActivities(currentDrive.id, downloadRequired)
+            homeActivitiesFragment.getFragment<HomeActivitiesFragment>().getLastActivities(drive.id, downloadRequired)
 
-            notEnoughStorage.setup(currentDrive)
+            notEnoughStorage.setup(drive) {
+                openKSuiteUpgradeBottomSheet(MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME, drive)
+            }
             mustRefreshUi = false
         }
     }

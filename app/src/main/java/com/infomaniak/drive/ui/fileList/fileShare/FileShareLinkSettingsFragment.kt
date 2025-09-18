@@ -39,12 +39,13 @@ import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentFileShareLinkSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.ShareLinkContainerView.Companion.getTypeName
@@ -144,12 +145,12 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
     }
 
-    private fun setupUpgradeOfferListener() {
+    private fun setupUpgradeOfferListener(drive: Drive) {
         binding.addPasswordLayout.setOnClickListener {
-            openMyKSuiteUpgradeBottomSheet("shareLinkPassword")
+            openKSuiteUpgradeBottomSheet(MatomoName.ShareLinkPassword.value, drive)
         }
         binding.addExpirationDateLayout.setOnClickListener {
-            openMyKSuiteUpgradeBottomSheet("shareLinkExpiryDate")
+            openKSuiteUpgradeBottomSheet(MatomoName.ShareLinkExpiryDate.value, drive)
         }
     }
 
@@ -217,18 +218,23 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun setupFreeAccountUi() = with(binding) {
-        if (AccountUtils.getCurrentDrive()?.isFreeTier == true) {
-            setupUpgradeOfferListener()
+
+        val drive = AccountUtils.getCurrentDrive() ?: return@with
+
+        if (drive.isKSuiteFreeTier) {
+            setupUpgradeOfferListener(drive)
 
             addPasswordSwitch.isEnabled = false
             addPasswordSwitch.isClickable = false
             upgradeOfferPassword.isVisible = true
-            offerPasswordMyKSuitePlusChip.isVisible = true
+            offerPasswordMyKSuitePlusChip.isVisible = drive.isKSuitePersoFree
+            offerPasswordKSuiteProChip.isVisible = drive.isKSuiteProUpgradable
 
             addExpirationDateSwitch.isEnabled = false
             addExpirationDateSwitch.isClickable = false
             upgradeOfferExpirationDate.isVisible = true
-            offerExpirationMyKSuitePlusChip.isVisible = true
+            offerExpirationMyKSuitePlusChip.isVisible = drive.isKSuitePersoFree
+            offerExpirationKSuiteProChip.isVisible = drive.isKSuiteProUpgradable
         }
     }
 

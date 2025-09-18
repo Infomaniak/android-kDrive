@@ -259,6 +259,7 @@
     <string name="errorConflict">Un élément du même nom existe déjà à cet emplacement</string>
     <string name="errorDelete">Erreur lors de la suppression</string>
     <string name="errorDeviceStorage">Stockage de l’appareil insuffisant</string>
+    <string name="errorDropboxLimitExceeded">Vous avez atteint la limite de boite de dépôt.</string>
     <string name="errorDuplicate">Erreur lors de la duplication</string>
     <string name="errorExternalImportInProgress">Impossible d’effectuer l’action sur le dossier, une importation externe est en cours</string>
     <string name="errorFileAlreadyExists">Le fichier ou le dossier existe déjà</string>
@@ -702,7 +703,7 @@
     <string name="trashTitle">Corbeille</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
         <item quantity="one">Un élément supprimé définitivement</item>
-        <item quantity="other">%s éléments supprimés définitivement</item>
+        <item quantity="other">%d éléments supprimés définitivement</item>
     </plurals>
     <plurals name="trashedFileRestoreFileInSuccess">
         <item quantity="one">%1$s restauré dans %2$s</item>

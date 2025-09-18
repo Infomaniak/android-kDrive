@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
+import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteDataManager
 import com.infomaniak.drive.data.api.ApiRepository
@@ -37,18 +38,18 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
     override suspend fun fetchData(): MyKSuiteData? = runCatching {
         MyKSuiteDataUtils.requestKSuiteData()
 
-        // Don't try to fetch the my kSuite Data if the user doesn't have a my kSuite offer
-        val currentDrive = AccountUtils.getCurrentDrive()
-        if (currentDrive?.isMyKSuitePack != true && currentDrive?.isMyKSuitePlusPack != true) return@runCatching null
+        // Don't try to fetch the MyKSuite data if the user doesn't have a MyKSuite offer
+        val kSuite = AccountUtils.getCurrentDrive()?.kSuite
+        if (kSuite !is KSuite.Perso) return@runCatching null
 
         val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClient)
-        if (apiResponse.data != null) {
-            MyKSuiteDataUtils.upsertKSuiteData(apiResponse.data!!)
-        } else {
+        if (apiResponse.data == null) {
             @OptIn(ExperimentalSerializationApi::class)
             apiResponse.error?.exception?.let {
                 if (it is MissingFieldException) SentryLog.e(TAG, "Error decoding the api result MyKSuiteObject", it)
             }
+        } else {
+            MyKSuiteDataUtils.upsertKSuiteData(apiResponse.data!!)
         }
 
         return@runCatching apiResponse.data

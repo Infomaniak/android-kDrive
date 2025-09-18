@@ -72,7 +72,7 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -562,12 +562,12 @@ fun Fragment.setupRootPendingFilesIndicator(countLiveData: LiveData<Int>, pendin
     countLiveData.observe(viewLifecycleOwner, pendingFilesView::updateUploadFileInProgress)
 }
 
-fun MainActivity.showQuotasExceededSnackbar(navController: NavController) {
+fun MainActivity.showQuotasExceededSnackbar(navController: NavController, drive: Drive?) {
     showSnackbar(
         title = R.string.errorQuotaExceeded,
         anchor = getMainFab(),
         actionButtonTitle = R.string.buttonUpgrade,
-        onActionClicked = { openMyKSuiteUpgradeBottomSheet(navController, MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME) },
+        onActionClicked = { openKSuiteUpgradeBottomSheet(navController, MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME, drive) },
     )
 }
 

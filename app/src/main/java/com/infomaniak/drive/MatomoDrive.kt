@@ -18,7 +18,7 @@
 package com.infomaniak.drive
 
 import androidx.fragment.app.Fragment
-import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
+import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.core.matomo.Matomo
 import com.infomaniak.core.matomo.Matomo.TrackerAction
 import com.infomaniak.drive.data.models.BulkOperationType
@@ -75,6 +75,7 @@ object MatomoDrive : Matomo {
         BulkSingle("bulkSingle"),
         CancelExternalImport("cancelExternalImport"),
         ChangeLimitStorage("changeLimitStorage"),
+        ColorFolder("colorFolder"),
         Configure("configure"),
         ConvertToDropbox("convertToDropbox"),
         ConvertToFolder("convertToFolder"),
@@ -96,6 +97,7 @@ object MatomoDrive : Matomo {
         Download("download"),
         DownloadAllFiles("downloadAllFiles"),
         DownloadFromLink("downloadFromLink"),
+        DropboxQuotaExceeded("dropboxQuotaExceeded"),
         Duration("duration"),
         Edit("edit"),
         EmptyTrash("emptyTrash"),
@@ -119,6 +121,7 @@ object MatomoDrive : Matomo {
         OnlyWifiTransfer("onlyWifiTransfer"),
         OpenBookmark("openBookmark"),
         OpenCreationWebview("openCreationWebview"),
+        OpenFromUserMenuCard("openFromUserMenuCard"),
         OpenInBrowser("openInBrowser"),
         OpenLoginWebview("openLoginWebview"),
         OpenWith("openWith"),
@@ -142,6 +145,9 @@ object MatomoDrive : Matomo {
         SendFileCopy("sendFileCopy"),
         ShareButton("shareButton"),
         ShareLink("shareLink"),
+        ShareLinkExpiryDate("shareLinkExpiryDate"),
+        ShareLinkPassword("shareLinkPassword"),
+        ShareLinkQuotaExceeded("shareLinkQuotaExceeded"),
         ShowSourceCode("showSourceCode"),
         StopShare("stopShare"),
         Switch("switch"),
@@ -154,6 +160,7 @@ object MatomoDrive : Matomo {
         SyncFromDate("syncFromDate"),
         SyncNew("syncNew"),
         ToggleFullScreen("toggleFullScreen"),
+        TrashStorageLimit("trashStorageLimit"),
         TryAddingFileWithDriveFull("tryAddingFileWithDriveFull"),
         Update("update"),
         UploadFile("uploadFile"),
@@ -226,7 +233,15 @@ object MatomoDrive : Matomo {
     }
 
     fun trackMyKSuiteEvent(name: String) {
-        trackEvent(MatomoMyKSuite.CATEGORY_MY_KSUITE, name)
+        trackEvent(MatomoKSuite.CATEGORY_MY_KSUITE, name)
+    }
+
+    fun trackMyKSuiteUpgradeBottomSheetEvent(name: String) {
+        trackEvent(MatomoKSuite.CATEGORY_MY_KSUITE_UPGRADE_BOTTOM_SHEET, name)
+    }
+
+    fun trackKSuiteProBottomSheetEvent(name: String) {
+        trackEvent(MatomoKSuite.CATEGORY_KSUITE_PRO_BOTTOM_SHEET, name)
     }
 
     fun trackDropboxEvent(name: MatomoName, action: TrackerAction = TrackerAction.CLICK, value: Float? = null) {

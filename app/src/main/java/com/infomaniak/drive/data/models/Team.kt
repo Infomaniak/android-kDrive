@@ -17,8 +17,8 @@
  */
 package com.infomaniak.drive.data.models
 
-import android.graphics.Color
 import android.os.Parcelable
+import androidx.core.graphics.toColorInt
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.utils.RealmListParceler.IntRealmListParceler
 import com.infomaniak.drive.utils.RealmListParceler.TeamDetailsRealmListParceler
@@ -49,29 +49,31 @@ open class Team(
     }
 
     fun getParsedColor(): Int {
-        return Color.parseColor(
-            if (isAllUsers()) "#4051b5" else
-                when (this.color) {
-                    0 -> "#F44336"
-                    1 -> "#E91E63"
-                    2 -> "#9C26B0"
-                    3 -> "#673AB7"
-                    4 -> "#4051B5"
-                    5 -> "#4BAF50"
-                    6 -> "#009688"
-                    7 -> "#00BCD4"
-                    8 -> "#02A9F4"
-                    9 -> "#2196F3"
-                    10 -> "#8BC34A"
-                    11 -> "#CDDC3A"
-                    12 -> "#FFC10A"
-                    13 -> "#FF9802"
-                    14 -> "#607D8B"
-                    15 -> "#9E9E9E"
-                    16 -> "#795548"
-                    else -> "#E91E63"
-                }
-        )
+        val parsedColor = if (isAllUsers()) {
+            "#4051b5"
+        } else {
+            when (this.color) {
+                0 -> "#F44336"
+                1 -> "#E91E63"
+                2 -> "#9C26B0"
+                3 -> "#673AB7"
+                4 -> "#4051B5"
+                5 -> "#4BAF50"
+                6 -> "#009688"
+                7 -> "#00BCD4"
+                8 -> "#02A9F4"
+                9 -> "#2196F3"
+                10 -> "#8BC34A"
+                11 -> "#CDDC3A"
+                12 -> "#FFC10A"
+                13 -> "#FF9802"
+                14 -> "#607D8B"
+                15 -> "#9E9E9E"
+                16 -> "#795548"
+                else -> "#E91E63"
+            }
+        }
+        return parsedColor.toColorInt()
     }
 
     override fun compareTo(other: Team): Int {
