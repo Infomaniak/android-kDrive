@@ -246,7 +246,7 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
                     BulkOperationType.MANAGE_CATEGORIES -> {
                         openManageCategoriesBottomSheetDialog(navigationArgs.fileIds, currentClassName = this::class.java.name)
                     }
-                    BulkOperationType.COLOR_FOLDER -> openColorFolderBottomSheetDialog(null)
+                    BulkOperationType.COLOR_FOLDER -> openColorFolderBottomSheetDialog(color = null)
                     BulkOperationType.COPY -> duplicateFiles()
                     BulkOperationType.MOVE -> {
                         moveFiles(if (navigationArgs.areAllFromTheSameFolder) mainViewModel.currentFolder.value?.id else null)

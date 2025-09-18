@@ -35,7 +35,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -223,9 +222,7 @@ class FileInfoActionsView @JvmOverloads constructor(
             text = context.getString(
                 if (currentFile.isDropBox()) R.string.buttonManageDropBox else R.string.buttonConvertToDropBox
             )
-            setOnClickListener {
-                onItemClickListener.dropBoxClicked(currentFile.isDropBox(), canCreateDropbox, drive.kSuite, drive.isAdmin)
-            }
+            setOnClickListener { onItemClickListener.dropBoxClicked(currentFile.isDropBox(), canCreateDropbox, drive) }
             isVisible = true
             shouldShowMyKSuiteChip = drive.isKSuitePersoFree && !canCreateDropbox && !currentFile.isDropBox()
             shouldShowKSuiteProChip = drive.isKSuiteProUpgradable && !canCreateDropbox && !currentFile.isDropBox()
@@ -536,7 +533,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun downloadFileClicked() = trackFileActionEvent(MatomoName.Download)
 
         @CallSuper
-        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean, kSuite: KSuite?, isAdmin: Boolean) {
+        fun dropBoxClicked(isDropBox: Boolean, canCreateDropbox: Boolean, drive: Drive) {
             trackFileActionEvent(MatomoName.ConvertToDropbox, isDropBox)
         }
 

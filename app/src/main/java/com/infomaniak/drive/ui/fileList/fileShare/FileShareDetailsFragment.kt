@@ -322,7 +322,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             val matomoName = "shareLinkQuotaExceeded"
 
             binding.shareLinkContainer.setupKSuiteChip(canCreateShareLink, drive) {
-                openKSuiteUpgradeBottomSheet(matomoName, drive.kSuite!!, drive.isAdmin)
+                openKSuiteUpgradeBottomSheet(matomoName, drive)
             }
         }
     }

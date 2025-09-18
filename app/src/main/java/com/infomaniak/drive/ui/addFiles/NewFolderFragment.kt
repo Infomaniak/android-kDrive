@@ -31,8 +31,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentNewFolderBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.utils.openKSuiteProBottomSheet
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -94,10 +93,10 @@ class NewFolderFragment : Fragment() {
             isVisible = drive?.sharedWithMe != true
             setOnClickListener {
                 val matomoName = "dropboxQuotaExceeded"
-                when {
-                    canCreateDropbox -> safeNavigate(R.id.createDropBoxFolderFragment)
-                    drive?.isKSuiteProFree == true -> openKSuiteProBottomSheet(drive.kSuite!!, drive.isAdmin, matomoName)
-                    else -> openMyKSuiteUpgradeBottomSheet(matomoName)
+                if (canCreateDropbox) {
+                    safeNavigate(R.id.createDropBoxFolderFragment)
+                } else {
+                    openKSuiteUpgradeBottomSheet(matomoName, drive)
                 }
             }
         }

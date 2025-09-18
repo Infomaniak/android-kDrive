@@ -105,7 +105,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             homeActivitiesFragment.getFragment<HomeActivitiesFragment>().getLastActivities(drive.id, downloadRequired)
 
             notEnoughStorage.setup(drive) {
-                openKSuiteUpgradeBottomSheet(MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME, drive.kSuite!!, drive.isAdmin)
+                openKSuiteUpgradeBottomSheet(MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME, drive)
             }
             mustRefreshUi = false
         }

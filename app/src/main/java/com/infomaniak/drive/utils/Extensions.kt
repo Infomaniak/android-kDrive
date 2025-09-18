@@ -567,14 +567,7 @@ fun MainActivity.showQuotasExceededSnackbar(navController: NavController, drive:
         title = R.string.errorQuotaExceeded,
         anchor = getMainFab(),
         actionButtonTitle = R.string.buttonUpgrade,
-        onActionClicked = {
-            val matomoName = MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
-            if (drive?.isKSuiteProUpgradable == true) {
-                openKSuiteProBottomSheet(navController, drive.kSuite!!, drive.isAdmin, matomoName)
-            } else {
-                openMyKSuiteUpgradeBottomSheet(navController, matomoName)
-            }
-        },
+        onActionClicked = { openKSuiteUpgradeBottomSheet(navController, MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME, drive) },
     )
 }
 

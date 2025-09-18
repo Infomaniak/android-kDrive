@@ -33,24 +33,46 @@ import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuite
 import com.infomaniak.drive.MatomoDrive.trackKSuiteProBottomSheetEvent
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteUpgradeBottomSheetEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.KSuiteProBottomSheetDialogArgs
 import com.infomaniak.lib.core.models.user.User
 
-fun Fragment.openKSuiteUpgradeBottomSheet(matomoName: String, kSuite: KSuite, isAdmin: Boolean) {
-    if (kSuite is KSuite.Perso.Free) {
-        openMyKSuiteUpgradeBottomSheet(matomoName)
-    } else {
-        openKSuiteProBottomSheet(kSuite, isAdmin, matomoName)
+fun Fragment.openKSuiteUpgradeBottomSheet(matomoName: String, drive: Drive?) {
+    val kSuite = drive?.kSuite ?: return
+    val navController = findNavController()
+    when {
+        kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(navController, matomoName)
+        kSuite.isProUpgradable() -> requireActivity().openKSuiteProBottomSheet(navController, kSuite, drive.isAdmin, matomoName)
+        else -> Unit
     }
 }
 
-fun Fragment.openMyKSuiteUpgradeBottomSheet(matomoTrackerName: String) {
-    openMyKSuiteUpgradeBottomSheet(findNavController(), matomoTrackerName)
+fun Activity.openKSuiteUpgradeBottomSheet(navController: NavController, matomoName: String, drive: Drive?) {
+    val kSuite = drive?.kSuite ?: return
+    when {
+        kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(navController, matomoName)
+        kSuite.isProUpgradable() -> openKSuiteProBottomSheet(navController, kSuite, drive.isAdmin, matomoName)
+        else -> Unit
+    }
 }
 
-fun openMyKSuiteUpgradeBottomSheet(navController: NavController, matomoTrackerName: String) {
-    trackMyKSuiteUpgradeBottomSheetEvent(matomoTrackerName)
+private fun openMyKSuiteUpgradeBottomSheet(navController: NavController, matomoName: String) {
+    trackMyKSuiteUpgradeBottomSheetEvent(matomoName)
     navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+}
+
+private fun Activity.openKSuiteProBottomSheet(
+    navController: NavController,
+    kSuite: KSuite,
+    isAdmin: Boolean,
+    matomoName: String,
+) {
+    trackKSuiteProBottomSheetEvent(matomoName)
+    safelyNavigate(
+        navController = navController,
+        resId = R.id.kSuiteProBottomSheetDialog,
+        args = KSuiteProBottomSheetDialogArgs(kSuite, isAdmin).toBundle(),
+    )
 }
 
 fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteDashboardScreenData {
@@ -62,27 +84,5 @@ fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteD
         userInitials = user.getInitials(),
         iconColor = Color.WHITE,
         userInitialsBackgroundColor = requireContext().getBackgroundColorResBasedOnId(user.id.hashCode()),
-    )
-}
-
-fun Fragment.openKSuiteProBottomSheet(kSuite: KSuite, isAdmin: Boolean, matomoTrackerName: String) {
-    trackKSuiteProBottomSheetEvent(matomoTrackerName)
-    safelyNavigate(
-        resId = R.id.kSuiteProBottomSheetDialog,
-        args = KSuiteProBottomSheetDialogArgs(kSuite, isAdmin).toBundle(),
-    )
-}
-
-fun Activity.openKSuiteProBottomSheet(
-    navController: NavController,
-    kSuite: KSuite,
-    isAdmin: Boolean,
-    matomoTrackerName: String,
-) {
-    trackKSuiteProBottomSheetEvent(matomoTrackerName)
-    safelyNavigate(
-        navController = navController,
-        resId = R.id.kSuiteProBottomSheetDialog,
-        args = KSuiteProBottomSheetDialogArgs(kSuite, isAdmin).toBundle(),
     )
 }

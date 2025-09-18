@@ -27,7 +27,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.utils.day
 import com.infomaniak.core.utils.endOfTheDay
 import com.infomaniak.core.utils.hours
@@ -40,6 +39,7 @@ import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.ShareLink
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentFileShareLinkSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
@@ -145,9 +145,9 @@ class FileShareLinkSettingsFragment : Fragment() {
         }
     }
 
-    private fun setupUpgradeOfferListener(kSuite: KSuite, isAdmin: Boolean) {
-        binding.addPasswordLayout.setOnClickListener { openKSuiteUpgradeBottomSheet("shareLinkPassword", kSuite, isAdmin) }
-        binding.addExpirationDateLayout.setOnClickListener { openKSuiteUpgradeBottomSheet("shareLinkExpiryDate", kSuite, isAdmin) }
+    private fun setupUpgradeOfferListener(drive: Drive) {
+        binding.addPasswordLayout.setOnClickListener { openKSuiteUpgradeBottomSheet("shareLinkPassword", drive) }
+        binding.addExpirationDateLayout.setOnClickListener { openKSuiteUpgradeBottomSheet("shareLinkExpiryDate", drive) }
     }
 
     private fun setupSaveButton() = with(binding) {
@@ -218,7 +218,7 @@ class FileShareLinkSettingsFragment : Fragment() {
         val drive = AccountUtils.getCurrentDrive() ?: return@with
 
         if (drive.isKSuiteFreeTier) {
-            setupUpgradeOfferListener(drive.kSuite!!, drive.isAdmin)
+            setupUpgradeOfferListener(drive)
 
             addPasswordSwitch.isEnabled = false
             addPasswordSwitch.isClickable = false

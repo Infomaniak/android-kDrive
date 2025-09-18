@@ -196,7 +196,7 @@ class TrashFragment : FileSubTypeListFragment() {
 
         trashAutoClearUpgradeButton.setOnClickListener {
             val matomoName = "trashStorageLimit"
-            openKSuiteUpgradeBottomSheet(matomoName, drive.kSuite!!, drive.isAdmin)
+            openKSuiteUpgradeBottomSheet(matomoName, drive)
         }
     }
 

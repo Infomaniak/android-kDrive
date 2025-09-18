@@ -40,10 +40,11 @@ class NotEnoughStorageView @JvmOverloads constructor(
     fun setup(drive: Drive, showKSuiteAd: () -> Unit) = with(binding) {
 
         val storagePercentage = if (drive.size > 0L) (drive.usedSize.toDouble() / drive.size).toFloat() * 100.0f else 0.0f
+        val isStorageAlertReached = storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE
 
-        this@NotEnoughStorageView.isVisible = storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE
+        this@NotEnoughStorageView.isVisible = isStorageAlertReached
 
-        if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
+        if (isStorageAlertReached) {
             setupStorageValues(drive, storagePercentage)
             setupDescription(drive)
             setupUpgradeButton(drive, showKSuiteAd)

@@ -43,7 +43,7 @@ import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MenuViewModel
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.openKSuiteProBottomSheet
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import com.infomaniak.lib.core.utils.safeBinding
@@ -107,9 +107,9 @@ class MenuFragment : Fragment() {
             null, null, null,
         )
 
-        driveStorageProgress.isInvisible = if (drive.size == 0L) {
-            true
-        } else {
+        val isDriveEmpty = drive.size == 0L
+        driveStorageProgress.isInvisible = isDriveEmpty
+        if (!isDriveEmpty) {
             val progress = (drive.usedSize.toDouble() / drive.size.toDouble()) * 1_000.toDouble()
             progressDriveQuota.progress = progress.toInt()
             progressDriveQuota.max = 1_000
@@ -117,16 +117,10 @@ class MenuFragment : Fragment() {
             val usedSize = requireContext().formatShortFileSize(drive.usedSize)
             val totalSize = requireContext().formatShortFileSize(drive.size)
             textDriveQuota.text = "$usedSize / $totalSize"
-
-            false
         }
 
-        val kSuite = drive.kSuite
-        kSuiteProCard.isVisible = if (kSuite is KSuite.Pro.Free) {
-            kSuiteProCard.setOnClick { openKSuiteProBottomSheet(kSuite, drive.isAdmin, "openFromUserMenuCard") }
-            true
-        } else {
-            false
-        }
+        val isKSuiteProFree = drive.kSuite is KSuite.Pro.Free
+        kSuiteProCard.isVisible = isKSuiteProFree
+        if (isKSuiteProFree) kSuiteProCard.setOnClick { openKSuiteUpgradeBottomSheet("openFromUserMenuCard", drive) }
     }
 }
