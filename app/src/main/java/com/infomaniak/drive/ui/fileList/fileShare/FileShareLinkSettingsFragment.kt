@@ -146,8 +146,12 @@ class FileShareLinkSettingsFragment : Fragment() {
     }
 
     private fun setupUpgradeOfferListener(drive: Drive) {
-        binding.addPasswordLayout.setOnClickListener { openKSuiteUpgradeBottomSheet("shareLinkPassword", drive) }
-        binding.addExpirationDateLayout.setOnClickListener { openKSuiteUpgradeBottomSheet("shareLinkExpiryDate", drive) }
+        binding.addPasswordLayout.setOnClickListener {
+            openKSuiteUpgradeBottomSheet(MatomoName.ShareLinkPassword.value, drive)
+        }
+        binding.addExpirationDateLayout.setOnClickListener {
+            openKSuiteUpgradeBottomSheet(MatomoName.ShareLinkExpiryDate.value, drive)
+        }
     }
 
     private fun setupSaveButton() = with(binding) {

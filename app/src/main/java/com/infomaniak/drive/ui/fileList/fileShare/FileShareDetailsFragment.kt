@@ -30,6 +30,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
@@ -321,7 +322,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             val drive = AccountUtils.getCurrentDrive() ?: return@observe
 
             binding.shareLinkContainer.setupKSuiteChip(canCreateShareLink, drive) {
-                openKSuiteUpgradeBottomSheet("shareLinkQuotaExceeded", drive)
+                openKSuiteUpgradeBottomSheet(MatomoName.ShareLinkQuotaExceeded.value, drive)
             }
         }
     }

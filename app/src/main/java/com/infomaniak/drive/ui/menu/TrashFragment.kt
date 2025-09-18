@@ -194,7 +194,7 @@ class TrashFragment : FileSubTypeListFragment() {
         myKSuitePlusChip.isVisible = drive.isKSuitePersoFree
         kSuiteProChip.isVisible = drive.isKSuiteProFree
 
-        trashAutoClearUpgradeButton.setOnClickListener { openKSuiteUpgradeBottomSheet("trashStorageLimit", drive) }
+        trashAutoClearUpgradeButton.setOnClickListener { openKSuiteUpgradeBottomSheet(MatomoName.TrashStorageLimit.value, drive) }
     }
 
     private inner class SortFiles : () -> Unit {

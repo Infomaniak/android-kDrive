@@ -37,6 +37,7 @@ import com.infomaniak.core.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.coil.loadAvatar
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.data.KSuite
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.databinding.FragmentMenuBinding
@@ -121,6 +122,8 @@ class MenuFragment : Fragment() {
 
         val isKSuiteProFree = drive.kSuite is KSuite.Pro.Free
         kSuiteProCard.isVisible = isKSuiteProFree
-        if (isKSuiteProFree) kSuiteProCard.setOnClick { openKSuiteUpgradeBottomSheet("openFromUserMenuCard", drive) }
+        if (isKSuiteProFree) {
+            kSuiteProCard.setOnClick { openKSuiteUpgradeBottomSheet(MatomoName.OpenFromUserMenuCard.value, drive) }
+        }
     }
 }

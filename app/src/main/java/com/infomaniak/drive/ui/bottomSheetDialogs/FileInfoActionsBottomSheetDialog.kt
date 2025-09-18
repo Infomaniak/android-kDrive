@@ -31,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
 import com.infomaniak.drive.data.cache.FileController
@@ -207,7 +208,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
                 if (drive.isKSuiteMaxTier) {
                     showSnackbar(getString(R.string.errorDropboxLimitExceeded), true)
                 } else {
-                    openKSuiteUpgradeBottomSheet("convertToDropbox", drive)
+                    openKSuiteUpgradeBottomSheet(MatomoName.ConvertToDropbox.value, drive)
                 }
             }
         }
@@ -428,7 +429,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
         fun Fragment.openColorFolderBottomSheetDialog(color: String?) {
             val drive = AccountUtils.getCurrentDrive() ?: return
             if (drive.isKSuiteFreeTier) {
-                openKSuiteUpgradeBottomSheet("colorFolder", drive)
+                openKSuiteUpgradeBottomSheet(MatomoName.ColorFolder.value, drive)
             } else {
                 safeNavigate(R.id.colorFolderBottomSheetDialog, ColorFolderBottomSheetDialogArgs(color = color).toBundle())
             }

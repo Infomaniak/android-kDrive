@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentNewFolderBinding
@@ -95,7 +96,7 @@ class NewFolderFragment : Fragment() {
                 if (canCreateDropbox) {
                     safeNavigate(R.id.createDropBoxFolderFragment)
                 } else {
-                    openKSuiteUpgradeBottomSheet("dropboxQuotaExceeded", drive)
+                    openKSuiteUpgradeBottomSheet(MatomoName.DropboxQuotaExceeded.value, drive)
                 }
             }
         }
