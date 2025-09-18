@@ -24,15 +24,10 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
-import com.infomaniak.core.ksuite.data.KSuite
-import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
-import com.infomaniak.drive.utils.openKSuiteProBottomSheet
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 
 class NotEnoughStorageView @JvmOverloads constructor(
     context: Context,
@@ -43,7 +38,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
     private val binding by lazy { ViewNotEnoughStorageBinding.inflate(LayoutInflater.from(context), this, true) }
 
     @SuppressLint("SetTextI18n")
-    fun setup(drive: Drive, fragment: Fragment) = with(binding) {
+    fun setup(drive: Drive, showKSuiteAd: () -> Unit) = with(binding) {
 
         val storagePercentage = if (drive.size > 0L) (drive.usedSize.toDouble() / drive.size).toFloat() * 100.0f else 0.0f
 
@@ -57,14 +52,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
             description.setText(if (drive.isAdmin) R.string.notEnoughStorageDescription1 else R.string.notEnoughStorageDescription2)
 
             upgradeOffer.isVisible = if (drive.isKSuiteFreeTier) {
-                upgradeOffer.setOnClickListener {
-                    val matomoName = MatomoKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME
-                    if (drive.kSuite is KSuite.Pro.Free) {
-                        fragment.openKSuiteProBottomSheet(drive.kSuite!!, drive.isAdmin, matomoName)
-                    } else {
-                        fragment.openMyKSuiteUpgradeBottomSheet(matomoName)
-                    }
-                }
+                upgradeOffer.setOnClickListener { showKSuiteAd() }
                 true
             } else {
                 false
