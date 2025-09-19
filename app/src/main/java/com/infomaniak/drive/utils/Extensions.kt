@@ -33,6 +33,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
 import android.os.StatFs
 import android.provider.MediaStore
+import android.provider.Settings
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.transition.TransitionSet
@@ -143,6 +144,14 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     }
 }
 
+fun Context.isDontKeepActivitiesEnabled(): Boolean {
+    return runCatching {
+        Settings.Global.getInt(contentResolver, Settings.Global.ALWAYS_FINISH_ACTIVITIES, 0) != 0
+    }.getOrElse {
+        false
+    }
+}
+
 fun ImageView.loadAny(
     data: Any?,
     @DrawableRes errorRes: Int = R.drawable.fallback_image,
@@ -196,6 +205,14 @@ fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsCo
 fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
     navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
     lightNavigationBar(!isNightModeEnabled())
+}
+
+fun Activity.shouldExcludeFromRecents(exclude: Boolean) {
+    val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val tasks = am.appTasks
+    if (tasks != null && tasks.isNotEmpty()) {
+        tasks[0].setExcludeFromRecents(exclude)
+    }
 }
 
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()

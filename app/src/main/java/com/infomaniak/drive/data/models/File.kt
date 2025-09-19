@@ -188,6 +188,7 @@ open class File(
     fun isPublicShared() = publicShareUuid.isNotBlank()
 
     fun isPDF() = getFileType() == ExtensionType.PDF
+    fun isVideo() = getFileType() == ExtensionType.VIDEO
 
     fun getFileType(): ExtensionType {
         return if (isFromUploads) getFileTypeFromExtension() else when (extensionType) {
