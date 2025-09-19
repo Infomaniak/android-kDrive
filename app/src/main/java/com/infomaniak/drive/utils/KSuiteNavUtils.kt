@@ -39,10 +39,9 @@ import com.infomaniak.lib.core.models.user.User
 
 fun Fragment.openKSuiteUpgradeBottomSheet(matomoName: String, drive: Drive?) {
     val kSuite = drive?.kSuite ?: return
-    val navController = findNavController()
     when {
-        kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(navController, matomoName)
-        kSuite.isProUpgradable() -> requireActivity().openKSuiteProBottomSheet(navController, kSuite, drive.isAdmin, matomoName)
+        kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(findNavController(), matomoName)
+        kSuite.isProUpgradable() -> openKSuiteProBottomSheet(kSuite, drive.isAdmin, matomoName)
         else -> Unit
     }
 }
@@ -59,6 +58,18 @@ fun Activity.openKSuiteUpgradeBottomSheet(navController: NavController, matomoNa
 private fun openMyKSuiteUpgradeBottomSheet(navController: NavController, matomoName: String) {
     trackMyKSuiteUpgradeBottomSheetEvent(matomoName)
     navController.openMyKSuiteUpgradeBottomSheet(KSuiteApp.Drive)
+}
+
+private fun Fragment.openKSuiteProBottomSheet(
+    kSuite: KSuite,
+    isAdmin: Boolean,
+    matomoName: String,
+) {
+    trackKSuiteProBottomSheetEvent(matomoName)
+    safelyNavigate(
+        resId = R.id.kSuiteProBottomSheetDialog,
+        args = KSuiteProBottomSheetDialogArgs(kSuite, isAdmin).toBundle(),
+    )
 }
 
 private fun Activity.openKSuiteProBottomSheet(
