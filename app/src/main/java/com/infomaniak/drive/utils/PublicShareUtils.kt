@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ package com.infomaniak.drive.utils
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import androidx.core.net.toUri
 import com.infomaniak.drive.ui.LaunchActivity
 import com.infomaniak.lib.core.R
@@ -40,13 +39,12 @@ object PublicShareUtils {
 
     fun openDeepLinkInBrowser(activity: Activity, url: String) = runCatching {
         Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER).apply {
-            setData(Uri.parse(url))
+            setData(url.toUri())
             flags = Intent.FLAG_ACTIVITY_NO_HISTORY
         }.also(activity::startActivity)
         activity.finishAndRemoveTask()
     }.onFailure { exception ->
-        exception.printStackTrace()
-        SentryLog.d("OpenDeepLinkInBrowser", exception.message.toString(), exception)
+        SentryLog.e("OpenDeepLinkInBrowser", exception.message.toString(), exception)
         val errorMessage = if (exception is ActivityNotFoundException) {
             R.string.browserNotFound
         } else {
@@ -54,5 +52,4 @@ object PublicShareUtils {
         }
         activity.showToast(errorMessage)
     }
-
 }
