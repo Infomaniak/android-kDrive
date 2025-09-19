@@ -349,10 +349,11 @@ object ApiRepository : ApiRepositoryCore() {
 
     //region Public Share
     fun getPublicShareInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
+        val okhttpClient = AccountUtils.currentUser?.let { HttpClient.okHttpClient } ?: HttpClient.okHttpClientNoTokenInterceptor
         return callApi(
             url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
             method = GET,
-            okHttpClient = getPublicShareOkHttpClient(),
+            okHttpClient = okhttpClient,
         )
     }
 
@@ -369,7 +370,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(
             url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId),
             method = GET,
-            okHttpClient = getPublicShareOkHttpClient(),
+            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
         )
     }
 
@@ -381,14 +382,14 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String?,
     ): CursorApiResponse<List<File>> {
         val url = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
-        return callApiWithCursor(url, GET, okHttpClient = getPublicShareOkHttpClient())
+        return callApiWithCursor(url, GET, okHttpClient = HttpClient.okHttpClientNoTokenInterceptor)
     }
 
     fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount> {
         return callApi(
             url = ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId),
             method = GET,
-            okHttpClient = getPublicShareOkHttpClient(),
+            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
         )
     }
 
@@ -397,7 +398,7 @@ object ApiRepository : ApiRepositoryCore() {
             url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid),
             method = POST,
             body = archiveBody,
-            okHttpClient = getPublicShareOkHttpClient(),
+            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
         )
     }
 
@@ -424,12 +425,7 @@ object ApiRepository : ApiRepositoryCore() {
             url = ApiRoutes.importPublicShareFiles(destinationDriveId),
             method = POST,
             body = body,
-            okHttpClient = getPublicShareOkHttpClient(),
         )
-    }
-
-    private fun getPublicShareOkHttpClient(): OkHttpClient {
-        return AccountUtils.currentUser?.let { HttpClient.okHttpClient } ?: HttpClient.okHttpClientNoTokenInterceptor
     }
     //endregion
 
