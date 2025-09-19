@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.utils
 
-import android.app.Activity
 import android.graphics.Color
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
@@ -37,6 +36,18 @@ import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.KSuiteProBottomSheetDialogArgs
 import com.infomaniak.lib.core.models.user.User
 
+fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteDashboardScreenData {
+    return MyKSuiteUiUtils.getDashboardData(
+        context = requireContext(),
+        myKSuiteData = myKSuiteData,
+        userId = user.id,
+        avatarUri = user.avatar,
+        userInitials = user.getInitials(),
+        iconColor = Color.WHITE,
+        userInitialsBackgroundColor = requireContext().getBackgroundColorResBasedOnId(user.id.hashCode()),
+    )
+}
+
 fun Fragment.openKSuiteUpgradeBottomSheet(matomoName: String, drive: Drive?) {
     val kSuite = drive?.kSuite ?: return
     when {
@@ -46,7 +57,12 @@ fun Fragment.openKSuiteUpgradeBottomSheet(matomoName: String, drive: Drive?) {
     }
 }
 
-fun Activity.openKSuiteUpgradeBottomSheet(navController: NavController, matomoName: String, drive: Drive?) {
+/**
+ * Navigate WITHOUT double nav protection to the kSuite upgrade bottomsheets
+ * Only use when the protection is not needed (e.g. when navigating from a snackbar action)
+ * In fragment, prefer to use [Fragment.openKSuiteUpgradeBottomSheet] instead
+ */
+fun openKSuiteUpgradeBottomSheet(navController: NavController, matomoName: String, drive: Drive?) {
     val kSuite = drive?.kSuite ?: return
     when {
         kSuite is KSuite.Perso.Free -> openMyKSuiteUpgradeBottomSheet(navController, matomoName)
@@ -72,28 +88,18 @@ private fun Fragment.openKSuiteProBottomSheet(
     )
 }
 
-private fun Activity.openKSuiteProBottomSheet(
+/**
+ * Navigate WITHOUT double nav protection to the kSuite Pro upgrade bottomsheet
+ */
+private fun openKSuiteProBottomSheet(
     navController: NavController,
     kSuite: KSuite,
     isAdmin: Boolean,
     matomoName: String,
 ) {
     trackKSuiteProBottomSheetEvent(matomoName)
-    safelyNavigate(
-        navController = navController,
+    navController.navigate(
         resId = R.id.kSuiteProBottomSheetDialog,
         args = KSuiteProBottomSheetDialogArgs(kSuite, isAdmin).toBundle(),
-    )
-}
-
-fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteDashboardScreenData {
-    return MyKSuiteUiUtils.getDashboardData(
-        context = requireContext(),
-        myKSuiteData = myKSuiteData,
-        userId = user.id,
-        avatarUri = user.avatar,
-        userInitials = user.getInitials(),
-        iconColor = Color.WHITE,
-        userInitialsBackgroundColor = requireContext().getBackgroundColorResBasedOnId(user.id.hashCode()),
     )
 }
