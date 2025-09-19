@@ -347,11 +347,12 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.shareLink(file), DELETE)
     }
 
+    //region Public Share
     fun getPublicShareInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
         return callApi(
             url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
             method = GET,
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+            okHttpClient = getPublicShareOkHttpClient(),
         )
     }
 
@@ -365,7 +366,11 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
-        return callApi(ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId), GET)
+        return callApi(
+            url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId),
+            method = GET,
+            okHttpClient = getPublicShareOkHttpClient(),
+        )
     }
 
     fun getPublicShareChildrenFiles(
@@ -376,15 +381,24 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String?,
     ): CursorApiResponse<List<File>> {
         val url = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
-        return callApiWithCursor(url, GET)
+        return callApiWithCursor(url, GET, okHttpClient = getPublicShareOkHttpClient())
     }
 
     fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount> {
-        return callApi(ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId), GET)
+        return callApi(
+            url = ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId),
+            method = GET,
+            okHttpClient = getPublicShareOkHttpClient(),
+        )
     }
 
     fun buildPublicShareArchive(driveId: Int, linkUuid: String, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
-        return callApi(ApiRoutes.buildPublicShareArchive(driveId, linkUuid), POST, archiveBody)
+        return callApi(
+            url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid),
+            method = POST,
+            body = archiveBody,
+            okHttpClient = getPublicShareOkHttpClient(),
+        )
     }
 
     fun importPublicShareFiles(
@@ -406,8 +420,18 @@ object ApiRepository : ApiRepositoryCore() {
         if (fileIds.isNotEmpty()) body["file_ids"] = fileIds.toTypedArray()
         if (exceptedFileIds.isNotEmpty()) body["except_file_ids"] = exceptedFileIds.toTypedArray()
 
-        return callApi(ApiRoutes.importPublicShareFiles(destinationDriveId), POST, body)
+        return callApi(
+            url = ApiRoutes.importPublicShareFiles(destinationDriveId),
+            method = POST,
+            body = body,
+            okHttpClient = getPublicShareOkHttpClient(),
+        )
     }
+
+    private fun getPublicShareOkHttpClient(): OkHttpClient {
+        return AccountUtils.currentUser?.let { HttpClient.okHttpClient } ?: HttpClient.okHttpClientNoTokenInterceptor
+    }
+    //endregion
 
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
         return callApi(ApiRoutes.checkFileShare(file), POST, body)
