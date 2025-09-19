@@ -30,8 +30,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_08_007_01
-        versionName = "5.8.7"
+        versionCode = 5_09_000_01
+        versionName = "5.9.0"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -161,7 +161,9 @@ dependencies {
     implementation(project(":Core"))
     implementation(project(":Core:Auth"))
     implementation(project(":Core:Avatar"))
+    implementation(project(":Core:Coil"))
     implementation(project(":Core:Compose:Basics"))
+    implementation(project(":Core:Compose:Margin"))
     implementation(project(":Core:Compose:MaterialThemeFromXml"))
     implementation(project(":Core:CrossAppLogin:Back"))
     implementation(project(":Core:CrossAppLogin:Front"))
@@ -172,13 +174,15 @@ dependencies {
     implementation(project(":Core:Legacy:BugTracker"))
     implementation(project(":Core:Legacy:Stores"))
     implementation(project(":Core:Matomo"))
-    implementation(project(":Core:kSuite:kSuitePro"))
-    implementation(project(":Core:kSuite:MyKSuite"))
+    implementation(project(":Core:KSuite"))
+    implementation(project(":Core:KSuite:KSuitePro"))
+    implementation(project(":Core:KSuite:MyKSuite"))
     implementation(project(":Core:Network"))
     implementation(project(":Core:RecyclerView"))
     implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
 
+    // Compose
     implementation(platform(core.compose.bom))
     implementation(core.activity.compose)
     implementation(core.compose.foundation)

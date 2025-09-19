@@ -35,7 +35,7 @@ import com.infomaniak.drive.ui.fileList.multiSelect.TrashMultiSelectActionsBotto
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.getBackNavigationResult
@@ -187,11 +187,14 @@ class TrashFragment : FileSubTypeListFragment() {
         }
     }
 
-    private fun setupAutoClearUpgradeLayout() {
-        binding.trashAutoClearLayout.isVisible = AccountUtils.getCurrentDrive()?.isFreeTier == true
-        binding.trashAutoClearUpgradeButton.setOnClickListener {
-            openMyKSuiteUpgradeBottomSheet("trashStorageLimit")
-        }
+    private fun setupAutoClearUpgradeLayout() = with(binding) {
+        val drive = AccountUtils.getCurrentDrive() ?: return
+
+        trashAutoClearLayout.isVisible = drive.isKSuiteFreeTier
+        myKSuitePlusChip.isVisible = drive.isKSuitePersoFree
+        kSuiteProChip.isVisible = drive.isKSuiteProFree
+
+        trashAutoClearUpgradeButton.setOnClickListener { openKSuiteUpgradeBottomSheet(MatomoName.TrashStorageLimit.value, drive) }
     }
 
     private inner class SortFiles : () -> Unit {

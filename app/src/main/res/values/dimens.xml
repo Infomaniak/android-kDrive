@@ -25,6 +25,7 @@
     <dimen name="categoryIconOverlap">-8dp</dimen>
     <dimen name="coloredChipSize">56dp</dimen>
     <dimen name="horizontalMarginRoot">@dimen/marginStandard</dimen>
+    <dimen name="menuChevronEndMargin">10dp</dimen>
 
     <integer name="defaultMaxLengthFileName">254</integer>
 

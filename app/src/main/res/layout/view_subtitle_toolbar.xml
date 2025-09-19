@@ -27,11 +27,11 @@
         style="@style/H1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/marginStandardSmall"
         android:layout_marginBottom="@dimen/marginStandardVerySmall"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@android:color/white"
-        android:layout_marginEnd="@dimen/marginStandardSmall"
         tools:text="(long title) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras venenatis, erat imperdiet venenatis sollicitudin, nulla dolor porta urna, congue aliquet dolor mauris ut sapien.jpg" />
 
     <TextView

@@ -259,6 +259,7 @@
     <string name="errorConflict">Un elemento con lo stesso nome esiste già in questa posizione</string>
     <string name="errorDelete">Errore durante l’eliminazione</string>
     <string name="errorDeviceStorage">Memoria del dispositivo insufficiente</string>
+    <string name="errorDropboxLimitExceeded">Hai raggiunto il limite massimo di caselle di consegna.</string>
     <string name="errorDuplicate">Errore durante la duplicazione</string>
     <string name="errorExternalImportInProgress">Non è possibile eseguire un’azione sulla cartella perché è in corso un’importazione esterna</string>
     <string name="errorFileAlreadyExists">Il file o la cartella esiste già</string>

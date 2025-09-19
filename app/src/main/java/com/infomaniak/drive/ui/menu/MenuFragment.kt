@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,108 +17,113 @@
  */
 package com.infomaniak.drive.ui.menu
 
-import android.graphics.Color
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.graphics.drawable.DrawableCompat.setTint
 import androidx.core.graphics.drawable.DrawableCompat.wrap
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.coil.loadAvatar
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
+import com.infomaniak.core.ksuite.data.KSuite
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.MenuViewModel
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
-import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class MenuFragment : Fragment() {
 
     private var binding: FragmentMenuBinding by safeBinding()
+
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val menuViewModel: MenuViewModel by viewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentMenuBinding.inflate(inflater, container, false).also { binding = it }.root
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        AccountUtils.currentUser?.let { currentUser ->
-            userName.text = currentUser.displayName
-            userEmail.text = currentUser.email
+        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, menuUploadFileInProgressView)
 
-            AccountUtils.getCurrentDrive()?.let { currentDrive ->
-                driveName.text = currentDrive.name
+        val user = AccountUtils.currentUser ?: return@with
 
-                driveName.setCompoundDrawables(wrap(driveName.compoundDrawablesRelative.first()).apply {
-                    val color = Color.parseColor(currentDrive.preferences.color)
-                    setTint(this, color)
-                }, null, null, null)
+        userName.text = user.displayName
+        userEmail.text = user.email
+        userImage.loadAvatar(id = user.id, avatarUrl = user.avatar, initials = user.getInitials())
 
-                if (currentDrive.size == 0L) {
-                    driveStorageProgress.isInvisible = true
-                } else {
-                    driveStorageProgress.isVisible = true
-                    progressDriveQuota.max = 1_000
-                    val progress = (currentDrive.usedSize.toDouble() / currentDrive.size) * 1_000.0
-                    progressDriveQuota.progress = progress.toInt()
-
-                    val usedSize = requireContext().formatShortFileSize(currentDrive.usedSize)
-                    val totalSize = requireContext().formatShortFileSize(currentDrive.size)
-                    textDriveQuota.text = "$usedSize / $totalSize"
-                }
-            }
-
-            userImage.loadAvatar(currentUser)
-
-            if (DriveInfosController.hasSingleDrive(currentUser.id)) {
-                driveIcon.isGone = true
-            } else {
-                driveSwitchContainer.setOnClickListener { safeNavigate(R.id.switchDriveDialog) }
-            }
-
-            settings.setOnClickListener {
-                safeNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
-            }
-
-            support.setOnClickListener { requireContext().openSupport() }
-
-            changeUser.setOnClickListener {
-                val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)
-                safeNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
-            }
-
-            logout.setOnClickListener {
-                MaterialAlertDialogBuilder(requireContext(), R.style.DeleteDialogStyle)
-                    .setTitle(getString(R.string.alertRemoveUserTitle))
-                    .setMessage(getString(R.string.alertRemoveUserDescription, currentUser.displayName))
-                    .setPositiveButton(R.string.buttonConfirm) { _, _ ->
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            if (UploadFile.getAppSyncSettings()?.userId == currentUser.id) UploadFile.deleteAllSyncFile()
-                            AccountUtils.removeUserAndDeleteToken(requireContext(), currentUser)
-                        }
-                    }
-                    .setNegativeButton(R.string.buttonCancel) { _, _ -> }
-                    .setCancelable(false).show()
-            }
+        if (DriveInfosController.hasSingleDrive(user.id)) {
+            driveIcon.isGone = true
+        } else {
+            driveSwitchContainer.setOnClickListener { safelyNavigate(R.id.switchDriveDialog) }
         }
 
-        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, menuUploadFileInProgressView)
+        changeUser.setOnClickListener {
+            val switchUserExtra = FragmentNavigatorExtras(changeUser to changeUser.transitionName)
+            safelyNavigate(R.id.switchUserActivity, null, null, switchUserExtra)
+        }
+
+        settings.setOnClickListener {
+            safelyNavigate(MenuFragmentDirections.actionMenuFragmentToSettingsFragment())
+        }
+
+        support.setOnClickListener { requireContext().openSupport() }
+
+        logout.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext(), R.style.DeleteDialogStyle)
+                .setTitle(getString(R.string.alertRemoveUserTitle))
+                .setMessage(getString(R.string.alertRemoveUserDescription, user.displayName))
+                .setPositiveButton(R.string.buttonConfirm) { _, _ -> menuViewModel.logout(user) }
+                .setNegativeButton(R.string.buttonCancel) { _, _ -> }
+                .setCancelable(false).show()
+        }
+
+        val drive = AccountUtils.getCurrentDrive() ?: return@with
+
+        driveName.text = drive.name
+        driveName.setCompoundDrawables(
+            wrap(driveName.compoundDrawablesRelative.first()).apply {
+                setTint(this, drive.preferences.color.toColorInt())
+            },
+            null, null, null,
+        )
+
+        val isDriveEmpty = drive.size == 0L
+        driveStorageProgress.isInvisible = isDriveEmpty
+        if (!isDriveEmpty) {
+            val progress = (drive.usedSize.toDouble() / drive.size.toDouble()) * 1_000.toDouble()
+            progressDriveQuota.progress = progress.toInt()
+            progressDriveQuota.max = 1_000
+
+            val usedSize = requireContext().formatShortFileSize(drive.usedSize)
+            val totalSize = requireContext().formatShortFileSize(drive.size)
+            textDriveQuota.text = "$usedSize / $totalSize"
+        }
+
+        val isKSuiteProFree = drive.kSuite is KSuite.Pro.Free
+        kSuiteProCard.isVisible = isKSuiteProFree
+        if (isKSuiteProFree) {
+            kSuiteProCard.setOnClick { openKSuiteUpgradeBottomSheet(MatomoName.OpenFromUserMenuCard.value, drive) }
+        }
     }
 }

@@ -27,11 +27,12 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentNewFolderBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
 
@@ -85,16 +86,17 @@ class NewFolderFragment : Fragment() {
         }
     }
 
-    private fun initDropBoxFolder(drive: Drive?) {
+    private fun initDropBoxFolder(drive: Drive?) = with(binding) {
         val canCreateDropbox = drive?.canCreateDropbox == true
-        binding.myKSuitePlusChip.isVisible = !canCreateDropbox
-        binding.dropBox.apply {
+        myKSuitePlusChip.isVisible = !canCreateDropbox && drive?.isKSuitePersoFree == true
+        kSuiteProChip.isVisible = !canCreateDropbox && drive?.isKSuiteProFree == true
+        dropBox.apply {
             isVisible = drive?.sharedWithMe != true
             setOnClickListener {
                 if (canCreateDropbox) {
                     safeNavigate(R.id.createDropBoxFolderFragment)
                 } else {
-                    openMyKSuiteUpgradeBottomSheet("dropboxQuotaExceeded")
+                    openKSuiteUpgradeBottomSheet(MatomoName.DropboxQuotaExceeded.value, drive)
                 }
             }
         }

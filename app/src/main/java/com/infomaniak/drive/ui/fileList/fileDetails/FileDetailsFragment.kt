@@ -26,6 +26,7 @@ import android.view.ViewGroup
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.Insets
+import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
@@ -161,7 +162,7 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         binding.noPreviewLayout.icon.apply {
             if (file.isFolder()) {
                 val (icon, tint) = file.getFolderIcon()
-                if (tint != null) imageTintList = ColorStateList.valueOf(Color.parseColor(tint))
+                if (tint != null) imageTintList = ColorStateList.valueOf(tint.toColorInt())
                 setImageResource(icon)
             } else {
                 setImageResource(file.getFileType().icon)

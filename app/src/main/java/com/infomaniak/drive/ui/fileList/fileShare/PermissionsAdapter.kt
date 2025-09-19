@@ -149,7 +149,6 @@ class PermissionsAdapter(
     private fun CardviewPermissionBinding.enableViewHolder(enabled: Boolean) {
         root.isEnabled = enabled
         disabled.isGone = enabled
-        upgradeOffer.isGone = true
         userExternalWarning.isGone = true
     }
 

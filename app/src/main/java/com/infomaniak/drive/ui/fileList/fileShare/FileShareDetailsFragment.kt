@@ -30,6 +30,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
@@ -53,7 +54,7 @@ import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Compani
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getDriveUsers
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.setupAvailableShareableItems
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.hideKeyboard
@@ -318,9 +319,10 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
         fileShareViewModel.currentDriveResult.observe(viewLifecycleOwner) { drive ->
             val hasShareLink = fileShareViewModel.currentFile.value?.shareLink != null
             val canCreateShareLink = drive.canCreateShareLink || hasShareLink
+            val drive = AccountUtils.getCurrentDrive() ?: return@observe
 
-            binding.shareLinkContainer.setupMyKSuitePlusChip(canCreateShareLink) {
-                openMyKSuiteUpgradeBottomSheet("shareLinkQuotaExceeded")
+            binding.shareLinkContainer.setupKSuiteChip(canCreateShareLink, drive) {
+                openKSuiteUpgradeBottomSheet(MatomoName.ShareLinkQuotaExceeded.value, drive)
             }
         }
     }

@@ -24,13 +24,10 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.navigation.findNavController
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
-import com.infomaniak.core.ksuite.myksuite.ui.utils.MatomoMyKSuite
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding
-import com.infomaniak.drive.utils.openMyKSuiteUpgradeBottomSheet
 
 class NotEnoughStorageView @JvmOverloads constructor(
     context: Context,
@@ -40,39 +37,40 @@ class NotEnoughStorageView @JvmOverloads constructor(
 
     private val binding by lazy { ViewNotEnoughStorageBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    @SuppressLint("SetTextI18n")
-    fun setup(currentDrive: Drive) = with(binding) {
-        currentDrive.apply {
-            val storagePercentage = if (size > 0L) (usedSize.toDouble() / size).toFloat() * 100.0f else 0.0f
-            if (storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE) {
-                this@NotEnoughStorageView.isVisible = true
+    fun setup(drive: Drive, showKSuiteAd: () -> Unit) = with(binding) {
 
-                val usedStorage = context.formatShortFileSize(usedSize, valueOnly = true)
-                val totalStorage = context.formatShortFileSize(size)
-                progressIndicator.progress = (storagePercentage).toInt()
-                title.text = "$usedStorage / $totalStorage"
+        val storagePercentage = if (drive.size > 0L) (drive.usedSize.toDouble() / drive.size).toFloat() * 100.0f else 0.0f
+        val isStorageAlertReached = storagePercentage > STORAGE_ALERT_MIN_PERCENTAGE
 
-                if (isSingleUserDrive) {
-                    description.setText(R.string.notEnoughStorageDescription1)
-                    upgradeOffer.isVisible = true
-                    upgradeOffer.setOnClickListener {
-                        context.openMyKSuiteUpgradeBottomSheet(
-                            navController = findNavController(),
-                            matomoTrackerName = MatomoMyKSuite.NOT_ENOUGH_STORAGE_UPGRADE_NAME,
-                        )
-                    }
-                } else {
-                    description.setText(R.string.notEnoughStorageDescription2)
-                    upgradeOffer.isGone = true
-                }
+        this@NotEnoughStorageView.isVisible = isStorageAlertReached
 
-                close.setOnClickListener {
-                    this@NotEnoughStorageView.isGone = true
-                }
-            } else {
-                this@NotEnoughStorageView.isGone = true
-            }
+        if (isStorageAlertReached) {
+            setupStorageValues(drive, storagePercentage)
+            setupDescription(drive)
+            setupUpgradeButton(drive, showKSuiteAd)
+            setupCloseButton()
         }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun setupStorageValues(drive: Drive, storagePercentage: Float) = with(binding) {
+        val usedStorage = context.formatShortFileSize(drive.usedSize, valueOnly = true)
+        val totalStorage = context.formatShortFileSize(drive.size)
+        progressIndicator.progress = (storagePercentage).toInt()
+        title.text = "$usedStorage / $totalStorage"
+    }
+
+    private fun setupDescription(drive: Drive) = with(binding) {
+        description.setText(if (drive.isAdmin) R.string.notEnoughStorageDescription1 else R.string.notEnoughStorageDescription2)
+    }
+
+    private fun setupUpgradeButton(drive: Drive, showKSuiteAd: () -> Unit) = with(binding) {
+        upgradeOffer.isVisible = drive.isKSuiteFreeTier
+        if (!drive.isKSuiteMaxTier) upgradeOffer.setOnClickListener { showKSuiteAd() }
+    }
+
+    private fun setupCloseButton() = with(binding) {
+        close.setOnClickListener { this@NotEnoughStorageView.isGone = true }
     }
 
     companion object {
