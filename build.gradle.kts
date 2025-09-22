@@ -19,7 +19,6 @@ buildscript {
 }
 
 plugins {
-    alias(libs.plugins.sentry) version "5.5.0" apply false
     alias(core.plugins.ksp) version "2.1.21-2.0.1" apply false
     val kotlinVersion = "2.1.21"
     alias(libs.plugins.kotlin.serialization) version kotlinVersion apply false
