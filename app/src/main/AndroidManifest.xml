@@ -206,8 +206,17 @@
                 <data android:pathPattern="/app/share/.*/..*" />
 
                 <data android:host="ksuite.infomaniak.com" />
+
+                <data android:pathPattern="/.*/kdrive/app/drive" />
+                <data android:pathPattern="/.*/kdrive/app/drive/" />
+                <data android:pathPattern="/.*/kdrive/app/drive/.*/files" />
+                <data android:pathPattern="/.*/kdrive/app/drive/.*/files/.*" />
+                <data android:pathPattern="/.*/kdrive/app/drive/.*/files/.*/preview/./..*" />
+                <data android:pathPattern="/.*/kdrive/app/drive/.*/redirect/..*" />
                 <data android:pathPattern="/.*/kdrive/app/drive/.*/trash" />
                 <data android:pathPattern="/.*/kdrive/app/drive/.*/trash/..*" />
+                <data android:pathPattern="/.*/kdrive/app/office/.*/..*" />
+                <data android:pathPattern="/.*/kdrive/app/share/.*/..*" />
             </intent-filter>
 
             <meta-data
