@@ -1,0 +1,2 @@
+- Add missing deep links for kSuite
+- Fix public share opening an empty folder in rare cases.

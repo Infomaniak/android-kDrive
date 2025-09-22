@@ -30,8 +30,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_09_000_01
-        versionName = "5.9.0"
+        versionCode = 5_09_001_01
+        versionName = "5.9.1"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
