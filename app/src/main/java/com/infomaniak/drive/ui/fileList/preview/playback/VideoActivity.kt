@@ -98,7 +98,7 @@ class VideoActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        shouldExcludeFromRecents(isDontKeepActivitiesEnabled().not())
+        shouldExcludeFromRecents(!isDontKeepActivitiesEnabled())
 
         with(binding.playerView) {
             player = exoPlayer

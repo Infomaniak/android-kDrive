@@ -152,7 +152,7 @@ open class PreviewPlaybackFragment : PreviewFragment() {
             // We'll open a new activity for videos to handle PIP perfectly
             findViewById<View>(R.id.exo_play_pause).setOnClickListener {
                 with(requireActivity()) {
-                    shouldExcludeFromRecents(isDontKeepActivitiesEnabled().not())
+                    shouldExcludeFromRecents(!isDontKeepActivitiesEnabled())
                 }
                 startActivity(Intent(requireActivity(), VideoActivity::class.java).apply {
                     putExtras(VideoActivityArgs(fileId = file.id).toBundle())
