@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.PublicShareUtils
@@ -41,6 +42,7 @@ import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
 import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.core.utils.safeNavigate
+import com.infomaniak.lib.core.utils.setMargins
 import com.infomaniak.lib.core.utils.showProgressCatching
 
 class PublicSharePasswordFragment : Fragment() {
@@ -65,6 +67,10 @@ class PublicSharePasswordFragment : Fragment() {
         publicSharePasswordEditText.addTextChangedListener { publicSharePasswordLayout.error = null }
         observeSubmitPasswordResult()
         observeInitResult()
+
+        binding.root.enableEdgeToEdge(withPadding = true, withBottom = false) {
+            binding.passwordValidateButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandardMedium).toInt() + it.bottom)
+        }
     }
 
     //region Hack TODO: Remove this when the back will support bearer token
