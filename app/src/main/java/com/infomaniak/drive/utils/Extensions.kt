@@ -33,6 +33,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
 import android.os.StatFs
 import android.provider.MediaStore
+import android.provider.Settings
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.transition.TransitionSet
@@ -196,6 +197,13 @@ fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsCo
 fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
     navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
     lightNavigationBar(!isNightModeEnabled())
+}
+
+fun Activity.shouldExcludeFromRecents(exclude: Boolean) {
+    val tasks = (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).appTasks
+    if (tasks != null && tasks.isNotEmpty()) {
+        tasks[0].setExcludeFromRecents(exclude)
+    }
 }
 
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()
