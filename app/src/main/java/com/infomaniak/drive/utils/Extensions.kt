@@ -144,14 +144,6 @@ fun Context.getAvailableMemory(): ActivityManager.MemoryInfo {
     }
 }
 
-fun Context.isDontKeepActivitiesEnabled(): Boolean {
-    return runCatching {
-        Settings.Global.getInt(contentResolver, Settings.Global.ALWAYS_FINISH_ACTIVITIES, 0) != 0
-    }.getOrElse {
-        false
-    }
-}
-
 fun ImageView.loadAny(
     data: Any?,
     @DrawableRes errorRes: Int = R.drawable.fallback_image,

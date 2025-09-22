@@ -31,13 +31,13 @@ import androidx.core.view.isVisible
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.infomaniak.core.extensions.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityVideoBinding
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLER_SHOW_TIMEOUT_MS
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getExoPlayer
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaItem
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getPictureInPictureParams
-import com.infomaniak.drive.utils.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.utils.setupStatusBarForPreview
 import com.infomaniak.drive.utils.shouldExcludeFromRecents
 import com.infomaniak.drive.utils.toggleSystemBar

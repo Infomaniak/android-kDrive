@@ -29,6 +29,7 @@ import androidx.core.view.isVisible
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.infomaniak.core.extensions.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentPreviewPlaybackBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
@@ -42,7 +43,6 @@ import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.getMediaI
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.setMediaSession
 import com.infomaniak.drive.ui.fileList.preview.playback.PlayerListener.Companion.trackMediaPlayerEvent
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.isDontKeepActivitiesEnabled
 import com.infomaniak.drive.utils.shouldExcludeFromRecents
 
 @UnstableApi
