@@ -208,8 +208,7 @@ fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBa
 }
 
 fun Activity.shouldExcludeFromRecents(exclude: Boolean) {
-    val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    val tasks = am.appTasks
+    val tasks = (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).appTasks
     if (tasks != null && tasks.isNotEmpty()) {
         tasks[0].setExcludeFromRecents(exclude)
     }

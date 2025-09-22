@@ -26,7 +26,6 @@ uiAutomator = "2.3.0"
 viewpager2 = "1.1.0"
 webkit = "1.14.0"
 
-
 [libraries]
 android-junit5 = { module = "de.mannodermaus.gradle.plugins:android-junit5", version.ref = "androidJunit5" }
 android-pdfview = { module = "com.github.Infomaniak:android-pdfview", version.ref = "androidPdfview" }
