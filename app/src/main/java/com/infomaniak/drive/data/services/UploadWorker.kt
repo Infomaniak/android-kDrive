@@ -250,12 +250,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount(realm)
         if (allPendingUploadsCount != pendingCount) {
             val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriorityCount(realm)
-            Sentry.withScope { scope ->
+            Sentry.captureMessage("An upload count inconsistency has been detected", SentryLevel.ERROR) { scope ->
                 scope.setExtra("uploadFiles pending count", "$pendingCount")
                 scope.setExtra("realmAllPendingUploadsCount", "$allPendingUploadsCount")
                 scope.setExtra("allPendingUploadsWithoutPriorityCount", "$allPendingUploadsWithoutPriorityCount")
-                Sentry.captureMessage("An upload count inconsistency has been detected", SentryLevel.ERROR)
             }
+
             if (pendingCount == 0) throw CancellationException("Stop several restart")
         }
     }
