@@ -263,16 +263,16 @@ object FileController {
                         if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
                     }
                 }
-                try {
+                runCatching {
                     if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
                     if (!keepFiles.contains(fileId)) realm.executeTransaction { if (file.isValid) file.deleteFromRealm() }
-                } catch (exception: Exception) {
-                    Sentry.withScope { scope ->
+                }.onFailure { exception ->
+                    Sentry.captureException(exception) { scope ->
                         scope.setExtra("with custom realm", "${customRealm != null}")
                         scope.setExtra("recursive", "$recursive")
-                        Sentry.captureException(exception)
                     }
                 }
+                Unit
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
@@ -357,10 +357,7 @@ object FileController {
             realm?.let(block) ?: getRealmInstance(userDrive).use(block)
         } catch (exception: Exception) {
             exception.printStackTrace()
-            Sentry.withScope { scope ->
-                scope.setExtra("custom realm", "${realm != null}")
-                Sentry.captureException(exception)
-            }
+            Sentry.captureException(exception) { scope -> scope.setExtra("custom realm", "${realm != null}") }
         }
     }
 

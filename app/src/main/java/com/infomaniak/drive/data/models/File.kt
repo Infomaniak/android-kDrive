@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,6 @@ import io.realm.RealmResults
 import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
-import io.sentry.Sentry
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -374,10 +373,9 @@ open class File(
             runCatching {
                 // Because RealmList.sort will crash in case objects are not managed.
                 categories.sortedBy { it.addedAt }.map { it.categoryId }
-            }.onFailure {
-                Sentry.withScope { scope ->
+            }.onFailure { exception ->
+                SentryLog.e("getSortedCategoriesIds", "Failed to do sortBy on unmanaged RealmList??", exception) { scope ->
                     scope.setExtra("categories", categories.joinToString { "id: ${it.categoryId} addedAt: ${it.addedAt}" })
-                    SentryLog.e("getSortedCategoriesIds", "Failed to do sortBy on unmanaged RealmList??", it)
                 }
             }.getOrDefault(emptyList())
         }

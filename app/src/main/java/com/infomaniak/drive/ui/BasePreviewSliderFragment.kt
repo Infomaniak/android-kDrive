@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -163,11 +163,10 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             val position = previewSliderAdapter.getPosition(currentFile)
             runCatching {
                 viewPager.setCurrentItem(position, false)
-            }.onFailure {
-                Sentry.withScope { scope ->
+            }.onFailure { exception ->
+                Sentry.captureException(exception) { scope ->
                     scope.setExtra("currentFile", "id: ${currentFile.id}")
                     scope.setExtra("files.values", files.values.joinToString { "id: ${it.id}" })
-                    Sentry.captureException(it)
                 }
                 currentFile = files.values.first()
                 viewPager.setCurrentItem(0, false)

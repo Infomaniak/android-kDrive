@@ -250,12 +250,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount(realm)
         if (allPendingUploadsCount != pendingCount) {
             val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriorityCount(realm)
-            Sentry.withScope { scope ->
+            Sentry.captureMessage("An upload count inconsistency has been detected", SentryLevel.ERROR) { scope ->
                 scope.setExtra("uploadFiles pending count", "$pendingCount")
                 scope.setExtra("realmAllPendingUploadsCount", "$allPendingUploadsCount")
                 scope.setExtra("allPendingUploadsWithoutPriorityCount", "$allPendingUploadsWithoutPriorityCount")
-                Sentry.captureMessage("An upload count inconsistency has been detected", SentryLevel.ERROR)
             }
+
             if (pendingCount == 0) throw CancellationException("Stop several restart")
         }
     }
@@ -276,11 +276,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         } catch (exception: CancellationException) {
             throw exception
         } catch (exception: AllowedFileSizeExceededException) {
-            Sentry.withScope { scope ->
+            SentryLog.e(TAG, "total chunks exceeded", exception) { scope ->
                 scope.setExtra("half heap", "${Runtime.getRuntime().maxMemory() / 2}")
                 scope.setExtra("available ram memory", "${applicationContext.getAvailableMemory().availMem}")
                 scope.setExtra("available service memory", "${applicationContext.getAvailableMemory().threshold}")
-                SentryLog.e(TAG, "total chunks exceeded", exception)
             }
             if (isLastFile) throw exception
             false

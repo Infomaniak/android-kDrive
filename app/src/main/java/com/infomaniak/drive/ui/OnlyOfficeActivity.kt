@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui
 
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -173,15 +172,12 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
         }
 
-        (this.getSystemService(Context.PRINT_SERVICE) as PrintManager).apply {
+        (this.getSystemService(PRINT_SERVICE) as PrintManager).apply {
             try {
                 print("PRINT_ONLYOFFICE_PDF_SERVICE", printDocumentAdapter, null)
             } catch (activityNotFoundException: ActivityNotFoundException) {
                 showToast(R.string.errorNoSupportingAppFound)
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.WARNING
-                    Sentry.captureException(activityNotFoundException)
-                }
+                Sentry.captureException(activityNotFoundException) { scope -> scope.level = SentryLevel.WARNING }
             }
         }
 

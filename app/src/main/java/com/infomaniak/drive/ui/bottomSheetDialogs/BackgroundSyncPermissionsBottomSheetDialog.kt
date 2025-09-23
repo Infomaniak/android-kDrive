@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,14 +112,11 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                 "package:$packageName".toUri()
             ).apply { permissionResultLauncher.launch(this) }
-        } catch (activityNotFoundException: ActivityNotFoundException) {
-            try {
+        } catch (_: ActivityNotFoundException) {
+            runCatching {
                 permissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-            } catch (exception: Exception) {
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.WARNING
-                    Sentry.captureException(exception)
-                }
+            }.onFailure { exception ->
+                Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
             }
         }
     }

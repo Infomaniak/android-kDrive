@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -534,9 +534,8 @@ class MainViewModel(
                             isIOFilesDeleted.add(IOFile(pathname).delete())
                             fileDeleteContentResolver.add(getContext().contentResolver.delete(uri, null, null))
                         } catch (_: NullPointerException) {
-                            Sentry.withScope { scope ->
+                            Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()")) { scope ->
                                 scope.setExtra("columnIndex", columnIndex.toString())
-                                Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
                             }
                         } finally {
                             fileDeleted.add(uploadFile)

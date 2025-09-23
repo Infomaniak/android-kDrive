@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -121,17 +121,11 @@ class UploadTask(
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
             SentryLog.w(TAG, "file not found", exception)
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
-            }
+            Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
         } catch (exception: UploadNotTerminated) {
             SentryLog.w(TAG, "upload not terminated", exception)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
-            }
+            Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
         } catch (exception: Exception) {
             exception.printStackTrace()
             throw exception
@@ -346,11 +340,14 @@ class UploadTask(
         if (!isSuccessful) {
             val bytes = response.bodyAsChannel().toByteArray().also { bytes ->
                 val expectedContentLength = response.contentLength() ?: bytes.size
-                if (expectedContentLength != bytes.size) Sentry.withScope { scope ->
-                    scope.setExtra("contentLength", expectedContentLength.toString())
-                    scope.setExtra("received", bytes.size.toString())
-                    scope.level = SentryLevel.WARNING
-                    Sentry.captureMessage("Backend provided more or fewer bytes than the contentLength it declared!")
+                if (expectedContentLength != bytes.size) {
+                    Sentry.captureMessage(
+                        "Backend provided more or fewer bytes than the contentLength it declared!",
+                        SentryLevel.WARNING,
+                    ) { scope ->
+                        scope.setExtra("contentLength", expectedContentLength.toString())
+                        scope.setExtra("received", bytes.size.toString())
+                    }
                 }
             }
             val bodyResponse = String(bytes)
