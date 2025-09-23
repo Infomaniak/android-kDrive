@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -156,9 +156,8 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun isExtrasNull(): Boolean {
         if (intent?.extras == null) {
-            Sentry.withScope { scope ->
+            Sentry.captureException(IllegalStateException("Activity $this has null extras in $intent")) { scope ->
                 scope.level = SentryLevel.WARNING
-                Sentry.captureException(IllegalStateException("Activity $this has null extras in $intent"))
             }
             return true
         }
@@ -346,10 +345,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             } catch (exception: Exception) {
                 exception.printStackTrace()
                 showSnackbar(R.string.anErrorHasOccurred)
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.WARNING
-                    Sentry.captureException(exception)
-                }
+                Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
                 finish()
             }
         }
@@ -454,11 +450,10 @@ class SaveExternalFilesActivity : BaseActivity() {
         } catch (exception: Exception) {
             exception.printStackTrace()
             showSnackbar(R.string.anErrorHasOccurred)
-            Sentry.withScope { scope ->
+            Sentry.captureException(exception) { scope ->
                 scope.setExtra("lifecycleState", lifecycle.currentState.name)
                 scope.setExtra("sharedFolderExists", sharedFolder.exists().toString())
                 scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
             }
             false
         }

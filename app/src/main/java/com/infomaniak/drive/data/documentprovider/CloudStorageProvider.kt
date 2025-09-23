@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -604,10 +604,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 }
             } else {
                 exception.printStackTrace()
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.INFO
-                    Sentry.captureException(exception)
-                }
+                Sentry.captureException(exception) { scope -> scope.level = SentryLevel.INFO }
             }
         }
     }

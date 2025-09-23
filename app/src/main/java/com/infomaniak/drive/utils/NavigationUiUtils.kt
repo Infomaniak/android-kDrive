@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ object NavigationUiUtils {
                 item.isChecked = true
                 onNavDestinationSelected(item, navController)
             }.getOrElse { exception ->
-                Sentry.withScope { scope ->
+                Sentry.captureException(exception) { scope ->
                     scope.setTag("ItemId", item.itemId.toString())
                     scope.setTag("CurrentDestinationId", navController.currentDestination?.id.toString())
                     scope.setExtra("ItemId", item.itemId.toString())
@@ -77,7 +77,6 @@ object NavigationUiUtils {
                     scope.setExtra("CurrentDestinationId", navController.currentDestination?.id.toString())
                     scope.setExtra("ParentId", navController.currentDestination?.parent?.id.toString())
                     scope.setExtra("Graph", navController.graph[item.itemId].route.toString())
-                    Sentry.captureException(exception)
                 }
                 false
             }
