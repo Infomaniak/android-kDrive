@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 
-open class PreviewVideoFragment : PreviewFragment() {
+open class PreviewVideoFragment(private val isPublicShared: Boolean = false) : PreviewFragment() {
 
     private var _binding: FragmentPreviewVideoBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -134,7 +134,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         val trackSelector = getTrackSelector(context)
 
         exoPlayer = ExoPlayer.Builder(context, getRenderersFactory(context.applicationContext))
-            .setMediaSourceFactory(getMediaSourceFactory(context, offlineIsComplete))
+            .setMediaSourceFactory(getMediaSourceFactory(context, offlineIsComplete, isPublicShared))
             .setTrackSelector(trackSelector)
             .build()
 
@@ -197,8 +197,8 @@ open class PreviewVideoFragment : PreviewFragment() {
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
     }
 
-    private fun getMediaSourceFactory(context: Context, offlineIsComplete: Boolean): MediaSourceFactory {
-        val dataSourceFactory = if (offlineIsComplete) getOfflineDataSourceFactory() else getDataSourceFactory(context)
+    private fun getMediaSourceFactory(context: Context, offlineIsComplete: Boolean, isPublicShared: Boolean): MediaSourceFactory {
+        val dataSourceFactory = if (offlineIsComplete) getOfflineDataSourceFactory() else getDataSourceFactory(context, isPublicShared)
         return DefaultMediaSourceFactory(dataSourceFactory)
     }
 
@@ -206,10 +206,11 @@ open class PreviewVideoFragment : PreviewFragment() {
         return DataSource.Factory { FileDataSource() }
     }
 
-    private fun getDataSourceFactory(context: Context): DataSource.Factory {
+    private fun getDataSourceFactory(context: Context, isPublicShared: Boolean): DataSource.Factory {
         val appContext = context.applicationContext
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
-        val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
+        val okHttpClient = if (isPublicShared) HttpClient.okHttpClientNoTokenInterceptor else HttpClient.okHttpClient
+        val okHttpDataSource = OkHttpDataSource.Factory(okHttpClient).apply {
             setUserAgent(userAgent)
 
             @OptIn(ManualAuthorizationRequired::class)

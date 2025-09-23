@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,11 +31,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileListNavigationType
+import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
@@ -179,6 +181,8 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     private fun populateFileList(files: List<File>, isNewSort: Boolean) {
+        val mainApp = requireContext().applicationContext as MainApplication
+        fileAdapter.newImageLoader = mainApp.newImageLoader(ImageLoaderType.PublicShared)
         fileAdapter.setFiles(files, isFileListResetNeeded = isNewSort)
         fileAdapter.isComplete = true
         showLoadingTimer.cancel()

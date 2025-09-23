@@ -64,6 +64,7 @@ import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -532,7 +533,7 @@ open class FileListFragment : MultiSelectFragment(
             onEmptyList = { checkIfNoFiles() }
 
             if (userDrive != null && userDrive?.userId != AccountUtils.currentUserId) {
-                newImageLoader = mainApp.newImageLoader(userDrive?.userId)
+                newImageLoader = mainApp.newImageLoader(ImageLoaderType.SpecificUser(userDrive!!.userId))
             }
 
             onFileClicked = getFunctionByFileType()
