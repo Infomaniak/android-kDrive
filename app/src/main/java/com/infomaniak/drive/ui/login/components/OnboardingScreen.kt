@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.infomaniak.core.compose.basics.Typography
+import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.Companion.filterSelectedAccounts
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
 import com.infomaniak.core.crossapplogin.front.data.CrossLoginDefaults
@@ -82,7 +83,7 @@ fun OnboardingScreen(
                 titleColor = colorResource(R.color.title),
                 descriptionColor = colorResource(R.color.primaryText),
                 onLogin = { onLoginRequest(emptyList()) },
-                onContinueWithSelectedAccounts = { onLoginRequest(accounts()) },
+                onContinueWithSelectedAccounts = { onLoginRequest(accounts().filterSelectedAccounts(skippedIds())) },
                 onCreateAccount = onCreateAccount,
                 onUseAnotherAccountClicked = { onLoginRequest(emptyList()) },
                 onSaveSkippedAccounts = onSaveSkippedAccounts,

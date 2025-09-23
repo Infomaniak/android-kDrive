@@ -134,7 +134,7 @@ class LoginActivity : ComponentActivity() {
                         skippedIds = { skippedIds },
                         isLoginButtonLoading = { loginRequest.isAwaitingCall.not() || isLoginButtonLoading },
                         isSignUpButtonLoading = { isSignUpButtonLoading },
-                        onLoginRequest = { loginRequest(it) },
+                        onLoginRequest = { accounts -> loginRequest(accounts) },
                         onCreateAccount = { openAccountCreationWebView() },
                         onSaveSkippedAccounts = { crossAppLoginViewModel.skippedAccountIds.value = it },
                     )
@@ -150,13 +150,8 @@ class LoginActivity : ComponentActivity() {
 
     private suspend fun handleLogin(loginRequest: CallableState<List<ExternalAccount>>): Nothing = repeatWhileActive {
         val accountsToLogin = loginRequest.awaitOneCall()
-        if (accountsToLogin.isEmpty()) {
-            openLoginWebView()
-        } else {
-            val skippedIds = crossAppLoginViewModel.skippedAccountIds.value
-            val selectedAccounts = accountsToLogin.filter { it.id !in skippedIds }
-            connectAccounts(selectedAccounts = selectedAccounts)
-        }
+        if (accountsToLogin.isEmpty()) openLoginWebView()
+        else connectAccounts(selectedAccounts = accountsToLogin)
     }
 
     private suspend fun connectAccounts(selectedAccounts: List<ExternalAccount>) {
