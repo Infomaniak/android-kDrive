@@ -20,6 +20,7 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -39,7 +40,6 @@ import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.room.UserDatabase
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.stores.StoresSettingsRepository
 import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException

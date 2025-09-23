@@ -25,6 +25,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
@@ -54,7 +55,6 @@ import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.models.ApiResponseStatus
 import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.core.room.UserDatabase
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.showToast
 import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
