@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.cache
 
 import android.content.Context
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
@@ -38,7 +39,6 @@ import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.removeAccents
 import io.realm.Realm
 import io.realm.RealmConfiguration

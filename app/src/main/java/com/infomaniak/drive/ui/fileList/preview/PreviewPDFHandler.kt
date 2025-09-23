@@ -21,9 +21,9 @@ import android.content.Context
 import android.net.Uri
 import android.print.PrintAttributes
 import android.print.PrintManager
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.getFileNameAndSize
 
 class PreviewPDFHandler(

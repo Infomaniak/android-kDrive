@@ -35,6 +35,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.core.utils.format
 import com.infomaniak.core.utils.startOfTheDay
@@ -60,7 +61,6 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.context
 import com.infomaniak.lib.core.utils.hideProgressCatching

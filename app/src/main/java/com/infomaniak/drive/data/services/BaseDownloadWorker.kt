@@ -27,11 +27,11 @@ import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.RemoteFileException
 import com.infomaniak.drive.utils.getAvailableStorageInBytes
-import com.infomaniak.lib.core.utils.SentryLog
 import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
 

@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
@@ -36,7 +37,6 @@ import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUB
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.models.ApiError
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.hideProgressCatching
 import com.infomaniak.lib.core.utils.initProgress
@@ -69,7 +69,9 @@ class PublicSharePasswordFragment : Fragment() {
         observeInitResult()
 
         binding.root.enableEdgeToEdge(withPadding = true, withBottom = false) {
-            binding.passwordValidateButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandardMedium).toInt() + it.bottom)
+            binding.passwordValidateButton.setMargins(
+                bottom = resources.getDimension(R.dimen.marginStandardMedium).toInt() + it.bottom
+            )
         }
     }
 

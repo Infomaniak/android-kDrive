@@ -31,6 +31,7 @@ import com.geniusscansdk.scanflow.ScanConfiguration
 import com.geniusscansdk.scanflow.ScanConfiguration.OcrConfiguration
 import com.geniusscansdk.scanflow.ScanConfiguration.OcrOutputFormat
 import com.geniusscansdk.scanflow.ScanResult
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.data.models.File
@@ -40,7 +41,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IGeniusScanUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.lib.core.utils.Utils
 import io.sentry.Sentry

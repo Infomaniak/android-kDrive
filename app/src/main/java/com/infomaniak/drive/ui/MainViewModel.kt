@@ -38,6 +38,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.infomaniak.core.cancellable
 import com.infomaniak.core.network.NetworkAvailability
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
@@ -73,7 +74,6 @@ import com.infomaniak.drive.utils.find
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
 import io.realm.kotlin.toFlow
