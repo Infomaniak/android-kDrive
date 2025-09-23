@@ -35,13 +35,12 @@ import androidx.annotation.StringRes
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel
+import com.infomaniak.core.compose.basics.CallableState
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.observe
 import com.infomaniak.drive.BuildConfig
@@ -79,6 +78,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import splitties.coroutines.repeatWhileActive
 import splitties.experimental.ExperimentalSplittiesApi
 
 class LoginActivity : ComponentActivity() {
@@ -91,6 +91,7 @@ class LoginActivity : ComponentActivity() {
         intent?.extras?.let(LoginActivityArgs::fromBundle)
     }
 
+    private val loginRequest = CallableState<List<ExternalAccount>>()
     private var isLoginButtonLoading by mutableStateOf(false)
     private var isSignUpButtonLoading by mutableStateOf(false)
 
@@ -123,8 +124,6 @@ class LoginActivity : ComponentActivity() {
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
 
         setContent {
-            val scope = rememberCoroutineScope()
-
             val accounts by crossAppLoginViewModel.availableAccounts.collectAsStateWithLifecycle()
             val skippedIds by crossAppLoginViewModel.skippedAccountIds.collectAsStateWithLifecycle()
 
@@ -133,12 +132,10 @@ class LoginActivity : ComponentActivity() {
                     OnboardingScreen(
                         accounts = { accounts },
                         skippedIds = { skippedIds },
-                        isLoginButtonLoading = { isLoginButtonLoading },
+                        isLoginButtonLoading = { loginRequest.isAwaitingCall.not() || isLoginButtonLoading },
                         isSignUpButtonLoading = { isSignUpButtonLoading },
-                        onLogin = { openLoginWebView() },
-                        onContinueWithSelectedAccounts = { scope.launch { connectSelectedAccounts(accounts, skippedIds) } },
+                        onLoginRequest = { accounts -> loginRequest(accounts) },
                         onCreateAccount = { openAccountCreationWebView() },
-                        onUseAnotherAccountClicked = { openLoginWebView() },
                         onSaveSkippedAccounts = { crossAppLoginViewModel.skippedAccountIds.value = it },
                     )
                 }
@@ -151,8 +148,13 @@ class LoginActivity : ComponentActivity() {
         initCrossLogin()
     }
 
-    private suspend fun connectSelectedAccounts(accounts: List<ExternalAccount>, skippedIds: Set<Long>) {
-        val selectedAccounts = BaseCrossAppLoginViewModel.computeSelectedAccounts(accounts, skippedIds)
+    private suspend fun handleLogin(loginRequest: CallableState<List<ExternalAccount>>): Nothing = repeatWhileActive {
+        val accountsToLogin = loginRequest.awaitOneCall()
+        if (accountsToLogin.isEmpty()) openLoginWebView()
+        else connectAccounts(selectedAccounts = accountsToLogin)
+    }
+
+    private suspend fun connectAccounts(selectedAccounts: List<ExternalAccount>) {
         val loginResult = crossAppLoginViewModel.attemptLogin(selectedAccounts)
 
         with(loginResult) {
@@ -184,6 +186,7 @@ class LoginActivity : ComponentActivity() {
 
     private fun initCrossLogin() = lifecycleScope.launch {
         launch { crossAppLoginViewModel.activateUpdates(this@LoginActivity) }
+        launch { handleLogin(loginRequest) }
     }
 
     private fun openLoginWebView() {
