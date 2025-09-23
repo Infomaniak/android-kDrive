@@ -50,7 +50,6 @@ import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.await
-import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -215,9 +214,8 @@ class DownloadOfflineFileManager(
             // This line is here to help some devices that don't succeed in automatically creating the file…
             offlineFile.createNewFile()
         }.onFailure {
-            Sentry.withScope { scope ->
+            SentryLog.e(TAG, "Failed to create a new file", it) { scope ->
                 scope.setExtra("does parent exist", parentExists.toString())
-                SentryLog.e(TAG, "Failed to create a new file", it)
             }
 
             return null

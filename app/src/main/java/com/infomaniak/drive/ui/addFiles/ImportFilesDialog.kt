@@ -43,7 +43,6 @@ import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.lib.core.utils.SentryLog
 import com.infomaniak.lib.core.utils.getFileName
-import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -135,10 +134,7 @@ class ImportFilesDialog : DialogFragment() {
         fun captureWithSentry(cursorState: String) {
             // We have cases where importation has failed,
             // but we've added enough information to know the cause.
-            Sentry.withScope { scope ->
-                scope.setExtra("uri", uri.toString())
-                SentryLog.e(TAG, "Uri found but cursor is $cursorState")
-            }
+            SentryLog.e(TAG, "Uri found but cursor is $cursorState") { scope -> scope.setExtra("uri", uri.toString()) }
         }
 
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -189,9 +185,8 @@ class ImportFilesDialog : DialogFragment() {
     private suspend fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
 
         fun captureCannotProcessCopyData() {
-            Sentry.withScope { scope ->
+            SentryLog.e(TAG, "Uri is valid but data cannot be copied from the import file") { scope ->
                 scope.setExtra("uri", uri.toString())
-                SentryLog.e(TAG, "Uri is valid but data cannot be copied from the import file")
             }
         }
 
