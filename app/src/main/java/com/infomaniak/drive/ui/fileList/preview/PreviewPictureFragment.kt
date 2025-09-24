@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +28,14 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import coil.Coil
+import coil.ImageLoader
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.ImageRequest.Listener
 import coil.request.SuccessResult
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
@@ -84,13 +87,22 @@ class PreviewPictureFragment : PreviewFragment() {
     }
 
     private fun loadImage() {
-        val imageLoader = Coil.imageLoader(requireContext())
         val thumbnailPreviewRequest = buildThumbnailPreviewRequest()
         val previewRequest = buildPreviewRequest()
+        val imageLoader = getImageLoader()
 
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             imageLoader.execute(thumbnailPreviewRequest)
             imageLoader.execute(previewRequest)
+        }
+    }
+
+    private fun getImageLoader(): ImageLoader {
+        return if (navigationArgs?.isPublicShared == true) {
+            val mainApp = requireContext().applicationContext as MainApplication
+            mainApp.newImageLoader(ImageLoaderType.PublicShared)
+        } else {
+            Coil.imageLoader(requireContext())
         }
     }
 

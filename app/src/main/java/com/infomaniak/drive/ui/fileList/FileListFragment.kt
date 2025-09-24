@@ -64,6 +64,7 @@ import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -519,8 +520,6 @@ open class FileListFragment : MultiSelectFragment(
             updateMultiSelect = { onUpdateMultiSelect() }
         }
 
-        val mainApp = requireContext().applicationContext as MainApplication
-
         fileAdapter = FileAdapter(
             multiSelectManager = multiSelectManager,
             fileList = FileController.emptyList(mainViewModel.realm),
@@ -531,9 +530,7 @@ open class FileListFragment : MultiSelectFragment(
 
             onEmptyList = { checkIfNoFiles() }
 
-            if (userDrive != null && userDrive?.userId != AccountUtils.currentUserId) {
-                newImageLoader = mainApp.newImageLoader(userDrive?.userId)
-            }
+            configNewImageLoader(userDrive)
 
             onFileClicked = getFunctionByFileType()
 
@@ -571,6 +568,13 @@ open class FileListFragment : MultiSelectFragment(
                 context?.let { fileAdapter.toggleOfflineMode(it, !isInternetAvailable) }
             },
         )
+    }
+
+    private fun FileAdapter.configNewImageLoader(userDrive: UserDrive?) {
+        if (userDrive != null && userDrive.userId != AccountUtils.currentUserId) {
+            val mainApp = requireContext().applicationContext as MainApplication
+            newImageLoader = mainApp.newImageLoader(ImageLoaderType.SpecificUser(userDrive.userId))
+        }
     }
 
     private fun getFunctionByFileType(): (File) -> Unit = { file ->

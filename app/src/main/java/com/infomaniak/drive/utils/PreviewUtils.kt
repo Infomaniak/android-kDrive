@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
 import com.infomaniak.drive.utils.PreviewPDFUtils.PasswordProtectedException
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
+import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
@@ -187,12 +188,18 @@ fun downloadFile(
     file: File,
     shouldBePdf: Boolean,
     onProgress: (progress: Int) -> Unit,
+    isPublicShared: Boolean,
 ) {
     if (externalOutputFile.exists()) externalOutputFile.delete()
     val downloadUrl = ApiRoutes.getDownloadFileUrl(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
+    val okHttpClient = if (isPublicShared) HttpClient.okHttpClientNoTokenInterceptor else HttpClient.okHttpClient
 
-    DownloadOfflineFileManager.downloadFileResponse(downloadUrl, downloadInterceptor = downloadProgressInterceptor).use {
+    DownloadOfflineFileManager.downloadFileResponse(
+        fileUrl = downloadUrl,
+        downloadInterceptor = downloadProgressInterceptor,
+        okHttpClient = okHttpClient,
+    ).use {
         if (!it.isSuccessful) {
             val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
             if (errorCode == "password_protected_error") {

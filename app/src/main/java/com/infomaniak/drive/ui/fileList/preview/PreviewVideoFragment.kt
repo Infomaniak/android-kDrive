@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -209,7 +209,12 @@ open class PreviewVideoFragment : PreviewFragment() {
     private fun getDataSourceFactory(context: Context): DataSource.Factory {
         val appContext = context.applicationContext
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
-        val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
+        val okHttpClient = if (navigationArgs?.isPublicShared == true) {
+            HttpClient.okHttpClientNoTokenInterceptor
+        } else {
+            HttpClient.okHttpClient
+        }
+        val okHttpDataSource = OkHttpDataSource.Factory(okHttpClient).apply {
             setUserAgent(userAgent)
 
             @OptIn(ManualAuthorizationRequired::class)
@@ -222,7 +227,7 @@ open class PreviewVideoFragment : PreviewFragment() {
         return if (offlineFile != null && offlineIsComplete) {
             offlineFile.toUri()
         } else {
-            Uri.parse(ApiRoutes.getDownloadFileUrl(file))
+            ApiRoutes.getDownloadFileUrl(file).toUri()
         }
     }
 }

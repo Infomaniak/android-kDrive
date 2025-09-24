@@ -72,7 +72,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     protected lateinit var previewSliderAdapter: PreviewSliderAdapter
     protected lateinit var userDrive: UserDrive
-    protected abstract val isPublicShare: Boolean
+    protected abstract val isPublicShared: Boolean
     private var isOverlayShown = true
 
     override val currentContext by lazy { requireContext() }
@@ -122,6 +122,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             manager = childFragmentManager,
             lifecycle = lifecycle,
             userDrive = previewSliderViewModel.userDrive,
+            isPublicShared = isPublicShared,
         )
 
         viewPager.apply {
@@ -144,11 +145,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     with(header) {
                         toggleEditVisibility(isVisible = file.isOnlyOfficePreview())
                         setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
-                        toggleOpenWithVisibility(isVisible = !isPublicShare && !file.isOnlyOfficePreview())
+                        toggleOpenWithVisibility(isVisible = !isPublicShared && !file.isOnlyOfficePreview())
                     }
                     setPrintButtonVisibility(isGone = !file.isPDF())
 
-                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
+                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShared
                     bottomSheetUpdates.tryEmit(file)
                 }
             })

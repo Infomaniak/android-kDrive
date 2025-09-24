@@ -44,6 +44,7 @@ import com.infomaniak.drive.data.api.FileDeserialization
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
+import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.data.services.DeviceInfoUpdateWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.LaunchActivity
@@ -189,14 +190,19 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     }
 
     override fun newImageLoader(): ImageLoader {
-        return newImageLoader(userId = null)
+        return newImageLoader(ImageLoaderType.CurrentUser)
     }
 
-    fun newImageLoader(userId: Int?): ImageLoader {
+    fun newImageLoader(imageLoaderType: ImageLoaderType): ImageLoader {
 
-        val tokenInterceptorListener = when (userId) {
-            null -> TokenInterceptorListenerProvider.tokenInterceptorListener(refreshTokenError, applicationScope)
-            else -> TokenInterceptorListenerProvider.tokenInterceptorListenerByUserId(refreshTokenError, userId)
+        val tokenInterceptorListener = when (imageLoaderType) {
+            is ImageLoaderType.CurrentUser -> {
+                TokenInterceptorListenerProvider.tokenInterceptorListener(refreshTokenError, applicationScope)
+            }
+            is ImageLoaderType.SpecificUser -> {
+                TokenInterceptorListenerProvider.tokenInterceptorListenerByUserId(refreshTokenError, imageLoaderType.userId)
+            }
+            is ImageLoaderType.PublicShared -> null
         }
 
         val factory = if (SDK_INT >= 28) {

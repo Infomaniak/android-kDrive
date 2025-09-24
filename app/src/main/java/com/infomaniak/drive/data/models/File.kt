@@ -479,8 +479,9 @@ open class File(
         onProgress: (progress: Int) -> Unit,
         navigateToDownloadDialog: (suspend () -> Unit)? = null,
     ): IOFile {
+        val isPublicShared = isPublicShared()
         val cacheFile = when {
-            isPublicShared() -> getPublicShareCache(context)
+            isPublicShared -> getPublicShareCache(context)
             isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
             isOffline -> getOfflineFile(context, userDrive.userId)!!
             else -> getCacheFile(context, userDrive)
@@ -489,7 +490,7 @@ open class File(
         val fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         if (fileNeedDownload) {
             navigateToDownloadDialog?.invoke()
-            downloadFile(cacheFile, file = this, shouldBePdf, onProgress)
+            downloadFile(cacheFile, file = this, shouldBePdf, onProgress, isPublicShared)
             cacheFile.setLastModified(getLastModifiedInMilliSecond())
         }
 
