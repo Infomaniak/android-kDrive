@@ -39,12 +39,12 @@ class PreviewSliderAdapter(
 
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
-        val args = PreviewFragmentArgs(fileId = file.id, userDrive = userDrive).toBundle()
+        val args = PreviewFragmentArgs(fileId = file.id, userDrive = userDrive, isPublicShared = isPublicShared).toBundle()
 
         return when (file.getFileType()) {
-            ExtensionType.IMAGE -> PreviewPictureFragment(isPublicShared)
-            ExtensionType.VIDEO -> PreviewVideoFragment(isPublicShared)
-            ExtensionType.AUDIO -> PreviewMusicFragment(isPublicShared)
+            ExtensionType.IMAGE -> PreviewPictureFragment()
+            ExtensionType.VIDEO -> PreviewVideoFragment()
+            ExtensionType.AUDIO -> PreviewMusicFragment()
             ExtensionType.PDF -> PreviewPDFFragment()
             else -> if (file.isOnlyOfficePreview()) PreviewPDFFragment() else PreviewOtherFragment()
         }.apply { arguments = args }

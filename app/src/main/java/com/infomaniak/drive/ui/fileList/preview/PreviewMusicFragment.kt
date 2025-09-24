@@ -17,4 +17,4 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-class PreviewMusicFragment(isPublicShared: Boolean = false) : PreviewVideoFragment(isPublicShared)
+class PreviewMusicFragment : PreviewVideoFragment()

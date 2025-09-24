@@ -45,7 +45,7 @@ import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class PreviewPictureFragment(private val isPublicShared: Boolean = false) : PreviewFragment() {
+class PreviewPictureFragment : PreviewFragment() {
 
     private var binding: FragmentPreviewPictureBinding by safeBinding()
     private val loadTimer by lazy {
@@ -98,7 +98,7 @@ class PreviewPictureFragment(private val isPublicShared: Boolean = false) : Prev
     }
 
     private fun getImageLoader(): ImageLoader {
-        return if (isPublicShared) {
+        return if (navigationArgs?.isPublicShared == true) {
             val mainApp = requireContext().applicationContext as MainApplication
             mainApp.newImageLoader(ImageLoaderType.PublicShared)
         } else {

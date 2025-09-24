@@ -55,7 +55,7 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.networking.HttpUtils
 import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 
-open class PreviewVideoFragment(private val isPublicShared: Boolean = false) : PreviewFragment() {
+open class PreviewVideoFragment : PreviewFragment() {
 
     private var _binding: FragmentPreviewVideoBinding? = null
     private val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -209,7 +209,11 @@ open class PreviewVideoFragment(private val isPublicShared: Boolean = false) : P
     private fun getDataSourceFactory(context: Context): DataSource.Factory {
         val appContext = context.applicationContext
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
-        val okHttpClient = if (isPublicShared) HttpClient.okHttpClientNoTokenInterceptor else HttpClient.okHttpClient
+        val okHttpClient = if (navigationArgs?.isPublicShared == true) {
+            HttpClient.okHttpClientNoTokenInterceptor
+        } else {
+            HttpClient.okHttpClient
+        }
         val okHttpDataSource = OkHttpDataSource.Factory(okHttpClient).apply {
             setUserAgent(userAgent)
 
@@ -223,7 +227,7 @@ open class PreviewVideoFragment(private val isPublicShared: Boolean = false) : P
         return if (offlineFile != null && offlineIsComplete) {
             offlineFile.toUri()
         } else {
-            Uri.parse(ApiRoutes.getDownloadFileUrl(file))
+            ApiRoutes.getDownloadFileUrl(file).toUri()
         }
     }
 }
