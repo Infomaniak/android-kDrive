@@ -29,7 +29,7 @@ import com.infomaniak.core.cancellable
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.drive.data.api.PublicShareApiRepository
+import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
