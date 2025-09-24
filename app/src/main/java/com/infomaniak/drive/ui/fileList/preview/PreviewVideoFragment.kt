@@ -134,7 +134,7 @@ open class PreviewVideoFragment(private val isPublicShared: Boolean = false) : P
         val trackSelector = getTrackSelector(context)
 
         exoPlayer = ExoPlayer.Builder(context, getRenderersFactory(context.applicationContext))
-            .setMediaSourceFactory(getMediaSourceFactory(context, offlineIsComplete, isPublicShared))
+            .setMediaSourceFactory(getMediaSourceFactory(context, offlineIsComplete))
             .setTrackSelector(trackSelector)
             .build()
 
@@ -197,8 +197,8 @@ open class PreviewVideoFragment(private val isPublicShared: Boolean = false) : P
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
     }
 
-    private fun getMediaSourceFactory(context: Context, offlineIsComplete: Boolean, isPublicShared: Boolean): MediaSourceFactory {
-        val dataSourceFactory = if (offlineIsComplete) getOfflineDataSourceFactory() else getDataSourceFactory(context, isPublicShared)
+    private fun getMediaSourceFactory(context: Context, offlineIsComplete: Boolean): MediaSourceFactory {
+        val dataSourceFactory = if (offlineIsComplete) getOfflineDataSourceFactory() else getDataSourceFactory(context)
         return DefaultMediaSourceFactory(dataSourceFactory)
     }
 
@@ -206,7 +206,7 @@ open class PreviewVideoFragment(private val isPublicShared: Boolean = false) : P
         return DataSource.Factory { FileDataSource() }
     }
 
-    private fun getDataSourceFactory(context: Context, isPublicShared: Boolean): DataSource.Factory {
+    private fun getDataSourceFactory(context: Context): DataSource.Factory {
         val appContext = context.applicationContext
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
         val okHttpClient = if (isPublicShared) HttpClient.okHttpClientNoTokenInterceptor else HttpClient.okHttpClient
