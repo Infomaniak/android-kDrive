@@ -20,6 +20,10 @@
 
     <application tools:ignore="MissingApplicationIcon">
 
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+
         <service
             android:name=".DriveMessagingService"
             android:exported="false">
