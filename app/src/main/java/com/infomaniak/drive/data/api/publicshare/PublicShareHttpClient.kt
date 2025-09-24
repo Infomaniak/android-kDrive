@@ -17,29 +17,14 @@
  */
 package com.infomaniak.drive.data.api.publicshare
 
-import com.infomaniak.core.network.networking.HttpClient.addCache
-import com.infomaniak.core.network.networking.HttpClient.addCommonInterceptors
+import com.infomaniak.core.auth.networking.BaseHttpClient
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.auth.TokenInterceptorListener
 import okhttp3.OkHttpClient
 
-object PublicShareHttpClient {
+object PublicShareHttpClient : BaseHttpClient() {
 
-    private var tokenInterceptorListener: TokenInterceptorListener? = null
+    override fun OkHttpClient.Builder.addTokenInterceptor() {
 
-    fun init(tokenInterceptorListener: TokenInterceptorListener) {
-        this.tokenInterceptorListener = tokenInterceptorListener
-    }
-
-    val publicShareHttpClient: OkHttpClient by lazy {
-        OkHttpClient.Builder().apply {
-            addCache()
-            addTokenInterceptorIfConnected()
-            addCommonInterceptors()
-        }.build()
-    }
-
-    private fun OkHttpClient.Builder.addTokenInterceptorIfConnected() {
         AccountUtils.currentUser?.let {
             tokenInterceptorListener?.let { listener -> addInterceptor(PublicShareTokenInterceptor(listener)) }
         }

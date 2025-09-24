@@ -20,7 +20,6 @@ package com.infomaniak.drive.data.api.publicshare
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.CursorApiResponse
-import com.infomaniak.drive.data.api.publicshare.PublicShareHttpClient.publicShareHttpClient
 import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.File
@@ -112,7 +111,7 @@ object PublicShareApiRepository {
     }
 
     private suspend inline fun <reified T> callApi(url: String, method: ApiController.ApiMethod, body: Any? = null): T {
-        return ApiController.callApi(url, method, body, publicShareHttpClient)
+        return ApiController.callApi(url, method, body, PublicShareHttpClient.okHttpClientWithTokenInterceptor)
     }
 
     private suspend inline fun <reified T> callApiWithCursor(
@@ -124,7 +123,7 @@ object PublicShareApiRepository {
             url = url,
             method = method,
             body = body,
-            okHttpClient = publicShareHttpClient,
+            okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
             buildErrorResult = { apiError, translatedErrorRes ->
                 CursorApiResponse<Any>(
                     result = ApiResponseStatus.ERROR,
