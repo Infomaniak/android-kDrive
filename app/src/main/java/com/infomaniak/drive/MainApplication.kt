@@ -196,8 +196,12 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     fun newImageLoader(imageLoaderType: ImageLoaderType): ImageLoader {
 
         val tokenInterceptorListener = when (imageLoaderType) {
-            is ImageLoaderType.CurrentUser -> TokenInterceptorListenerProvider.tokenInterceptorListener(refreshTokenError, applicationScope)
-            is ImageLoaderType.SpecificUser -> TokenInterceptorListenerProvider.tokenInterceptorListenerByUserId(refreshTokenError, imageLoaderType.userId)
+            is ImageLoaderType.CurrentUser -> {
+                TokenInterceptorListenerProvider.tokenInterceptorListener(refreshTokenError, applicationScope)
+            }
+            is ImageLoaderType.SpecificUser -> {
+                TokenInterceptorListenerProvider.tokenInterceptorListenerByUserId(refreshTokenError, imageLoaderType.userId)
+            }
             is ImageLoaderType.PublicShared -> null
         }
 

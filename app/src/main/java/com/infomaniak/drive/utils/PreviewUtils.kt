@@ -24,7 +24,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.print.PrintAttributes
 import android.print.PrintManager
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
