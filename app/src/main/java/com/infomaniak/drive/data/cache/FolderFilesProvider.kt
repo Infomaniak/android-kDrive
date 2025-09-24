@@ -22,6 +22,7 @@ import androidx.collection.arrayMapOf
 import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FileController.saveRemoteFiles
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
@@ -301,7 +302,7 @@ object FolderFilesProvider {
 
         return when {
             apiResponseData != null -> {
-                val isCompleteFolder = !apiResponse.hasMore || apiResponseData.count() < ApiRepository.PER_PAGE
+                val isCompleteFolder = !apiResponse.hasMore || apiResponseData.count() < ApiRoutes.PER_PAGE
                 saveRemoteFiles(
                     realm = realm,
                     localFolderProxy = folderProxy,

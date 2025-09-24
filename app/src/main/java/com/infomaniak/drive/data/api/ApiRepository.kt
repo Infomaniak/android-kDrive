@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.api
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
@@ -43,7 +44,6 @@ import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.data.models.drive.DriveInfo
-import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileLastActivityBody
 import com.infomaniak.drive.data.models.file.LastFileAction
 import com.infomaniak.drive.data.models.file.ListingFiles
@@ -53,7 +53,6 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.FileId
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.DELETE
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.GET
@@ -69,8 +68,6 @@ import okhttp3.OkHttpClient
 import com.infomaniak.core.ksuite.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
-
-    var PER_PAGE = 50
 
     private inline fun <reified T> callApi(
         url: String,
@@ -347,88 +344,6 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.shareLink(file), DELETE)
     }
 
-    //region Public Share
-    fun getPublicShareInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
-        val okhttpClient = AccountUtils.currentUser?.let { HttpClient.okHttpClient } ?: HttpClient.okHttpClientNoTokenInterceptor
-        return callApi(
-            url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
-            method = GET,
-            okHttpClient = okhttpClient,
-        )
-    }
-
-    fun submitPublicSharePassword(driveId: Int, linkUuid: String, password: String): ApiResponse<Boolean> {
-        return callApi(
-            url = ApiRoutes.submitPublicSharePassword(driveId, linkUuid),
-            method = POST,
-            body = mapOf("password" to password),
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
-        )
-    }
-
-    fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
-        return callApi(
-            url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId),
-            method = GET,
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
-        )
-    }
-
-    fun getPublicShareChildrenFiles(
-        driveId: Int,
-        linkUuid: String,
-        folderId: FileId,
-        sortType: SortType,
-        cursor: String?,
-    ): CursorApiResponse<List<File>> {
-        val url = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
-        return callApiWithCursor(url, GET, okHttpClient = HttpClient.okHttpClientNoTokenInterceptor)
-    }
-
-    fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount> {
-        return callApi(
-            url = ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId),
-            method = GET,
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
-        )
-    }
-
-    fun buildPublicShareArchive(driveId: Int, linkUuid: String, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
-        return callApi(
-            url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid),
-            method = POST,
-            body = archiveBody,
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
-        )
-    }
-
-    fun importPublicShareFiles(
-        sourceDriveId: Int,
-        linkUuid: String,
-        destinationDriveId: Int,
-        destinationFolderId: Int,
-        fileIds: List<Int>,
-        exceptedFileIds: List<Int>,
-        password: String = "",
-    ): ApiResponse<List<FileExternalImport>> {
-        val body: MutableMap<String, Any> = mutableMapOf(
-            "source_drive_id" to sourceDriveId,
-            "sharelink_uuid" to linkUuid,
-            "destination_folder_id" to destinationFolderId,
-        )
-
-        if (password.isNotBlank()) body["password"] = password
-        if (fileIds.isNotEmpty()) body["file_ids"] = fileIds.toTypedArray()
-        if (exceptedFileIds.isNotEmpty()) body["except_file_ids"] = exceptedFileIds.toTypedArray()
-
-        return callApi(
-            url = ApiRoutes.importPublicShareFiles(destinationDriveId),
-            method = POST,
-            body = body,
-        )
-    }
-    //endregion
-
     fun postFileShareCheck(file: File, body: Map<String, Any>): ApiResponse<ArrayList<FileCheckResult>> {
         return callApi(ApiRoutes.checkFileShare(file), POST, body)
     }
@@ -579,11 +494,5 @@ object ApiRepository : ApiRepositoryCore() {
             okHttpClient = okHttpClient,
             useKotlinxSerialization = true,
         )
-    }
-
-    private fun pagination(page: Int, perPage: Int = PER_PAGE) = "page=$page&per_page=$perPage"
-
-    private fun loadCursor(cursor: String?, perPage: Int = PER_PAGE): String {
-        return "limit=$perPage${if (cursor == null) "" else "&cursor=$cursor"}"
     }
 }

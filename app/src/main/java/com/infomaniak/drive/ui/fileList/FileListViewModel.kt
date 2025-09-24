@@ -29,6 +29,7 @@ import com.infomaniak.core.cancellable
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
+import com.infomaniak.drive.data.api.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.File
@@ -230,7 +231,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     fun getFileCount(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
         lastItemCount?.let { emit(it) }
         val apiResponse = if (folder.isPublicShared()) {
-            ApiRepository.getPublicShareFileCount(folder.driveId, folder.publicShareUuid, folder.id)
+            PublicShareApiRepository.getPublicShareFileCount(folder.driveId, folder.publicShareUuid, folder.id)
         } else {
             ApiRepository.getFileCount(folder)
         }
