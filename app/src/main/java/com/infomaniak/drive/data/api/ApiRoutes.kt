@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ import java.net.URLEncoder
 import java.util.Date
 
 object ApiRoutes {
+
+    var PER_PAGE = 50
 
     private const val fileWithQuery = "with=capabilities,categories,conversion_capabilities,dropbox,dropbox.capabilities," +
             "external_import,is_favorite,path,sharelink,sorted_name,supported_by"
@@ -86,6 +88,10 @@ object ApiRoutes {
                 "drives.account,drives.quota"
 
     private const val noDefaultAvatar = "no_avatar_default=1"
+
+    fun loadCursor(cursor: String?, perPage: Int = PER_PAGE): String {
+        return "limit=$perPage${if (cursor == null) "" else "&cursor=$cursor"}"
+    }
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 

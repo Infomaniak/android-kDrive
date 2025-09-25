@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -324,7 +324,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
             pdfJob.cancel()
             pdfJob = Job()
 
-            return liveData(Dispatchers.IO + pdfJob) {
+            return liveData(pdfJob) {
                 val pdfFile = PreviewPDFUtils.convertPdfFileToIOFile(context, file, userDrive) {
                     viewModelScope.launch(Dispatchers.Main) {
                         downloadProgress.value = it

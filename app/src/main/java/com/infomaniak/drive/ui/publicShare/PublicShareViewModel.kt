@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@ import androidx.lifecycle.viewModelScope
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MainApplication
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
+import com.infomaniak.drive.data.api.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderArgs
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderResult
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -39,7 +39,6 @@ import com.infomaniak.lib.core.models.ApiError
 import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.sentry.Sentry
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.BufferOverflow
@@ -95,22 +94,28 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         super.onCleared()
     }
 
-    fun initPublicShare() {
-        val apiResponse = ApiRepository.getPublicShareInfo(driveId, publicShareUuid)
+    fun initPublicShare() = viewModelScope.launch {
+        val apiResponse = PublicShareApiRepository.getPublicShareInfo(driveId, publicShareUuid)
         val result = if (apiResponse.isSuccess()) null to apiResponse.data else apiResponse.error to null
 
         initPublicShareResult.postValue(result)
     }
 
-    fun submitPublicSharePassword(password: String) = viewModelScope.launch(Dispatchers.IO) {
-        submitPasswordResult.postValue(ApiRepository.submitPublicSharePassword(driveId, publicShareUuid, password).data)
+    fun submitPublicSharePassword(password: String) = viewModelScope.launch {
+        val passwordResult = PublicShareApiRepository.submitPublicSharePassword(
+            driveId = driveId,
+            linkUuid = publicShareUuid,
+            password = password,
+        ).data
+
+        submitPasswordResult.postValue(passwordResult)
     }
 
-    fun downloadPublicShareRootFile() = viewModelScope.launch(Dispatchers.IO) {
+    fun downloadPublicShareRootFile() = viewModelScope.launch {
         val file = if (fileId == ROOT_SHARED_FILE_ID) {
             rootSharedFile.value
         } else {
-            val apiResponse = ApiRepository.getPublicShareRootFile(driveId, publicShareUuid, fileId)
+            val apiResponse = PublicShareApiRepository.getPublicShareRootFile(driveId, publicShareUuid, fileId)
             if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
             apiResponse.data
         }
@@ -121,9 +126,9 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     fun getFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
         getPublicShareFilesJob = Job()
 
-        viewModelScope.launch(Dispatchers.IO + getPublicShareFilesJob) {
+        viewModelScope.launch(getPublicShareFilesJob) {
 
-            tailrec fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
+            tailrec suspend fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
 
                 val folderFilesProviderResult = loadFromRemote(
                     FolderFilesProviderArgs(folderId = folderId, isFirstPage = isFirstPage, order = sortType),
@@ -159,8 +164,8 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         destinationFolderId: Int,
         fileIds: List<Int>,
         exceptedFileIds: List<Int>,
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        val apiResponse = ApiRepository.importPublicShareFiles(
+    ) = viewModelScope.launch {
+        val apiResponse = PublicShareApiRepository.importPublicShareFiles(
             sourceDriveId = driveId,
             linkUuid = publicShareUuid,
             destinationDriveId = destinationDriveId,
@@ -174,8 +179,8 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         importPublicShareResult.postValue(error to destinationPath)
     }
 
-    fun buildArchive(archiveBody: ArchiveUUID.ArchiveBody) = viewModelScope.launch(Dispatchers.IO) {
-        val apiResponse = ApiRepository.buildPublicShareArchive(driveId, publicShareUuid, archiveBody)
+    fun buildArchive(archiveBody: ArchiveUUID.ArchiveBody) = viewModelScope.launch {
+        val apiResponse = PublicShareApiRepository.buildPublicShareArchive(driveId, publicShareUuid, archiveBody)
         val result = apiResponse.data?.let { archiveUuid -> null to archiveUuid } ?: (apiResponse.translateError() to null)
 
         buildArchiveResult.postValue(result)
@@ -189,7 +194,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     fun fetchCacheFileForAction(file: File?, action: DownloadAction, navigateToDownloadDialog: suspend () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             runCatching {
                 _fetchCacheFileForActionResult.emit(
                     file!!.convertToIOFile(
@@ -206,8 +211,8 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         }
     }
 
-    private fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
-        val apiResponse = ApiRepository.getPublicShareChildrenFiles(
+    private suspend fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
+        val apiResponse = PublicShareApiRepository.getPublicShareChildrenFiles(
             driveId = driveId,
             linkUuid = publicShareUuid,
             folderId = folderFilesProviderArgs.folderId,

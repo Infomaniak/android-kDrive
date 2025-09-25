@@ -53,6 +53,9 @@ import io.realm.RealmResults
 import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -479,19 +482,26 @@ open class File(
         onProgress: (progress: Int) -> Unit,
         navigateToDownloadDialog: (suspend () -> Unit)? = null,
     ): IOFile {
-        val isPublicShared = isPublicShared()
-        val cacheFile = when {
-            isPublicShared -> getPublicShareCache(context)
-            isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
-            isOffline -> getOfflineFile(context, userDrive.userId)!!
-            else -> getCacheFile(context, userDrive)
+        val fileNeedDownload: Boolean
+        val cacheFile: IOFile
+        val isPublicShared: Boolean
+
+        withContext(Dispatchers.IO) {
+            isPublicShared = isPublicShared()
+            cacheFile = when {
+                isPublicShared -> getPublicShareCache(context)
+                isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
+                isOffline -> getOfflineFile(context, userDrive.userId)!!
+                else -> getCacheFile(context, userDrive)
+            }
+
+            fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         }
 
-        val fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         if (fileNeedDownload) {
             navigateToDownloadDialog?.invoke()
             downloadFile(cacheFile, file = this, shouldBePdf, onProgress, isPublicShared)
-            cacheFile.setLastModified(getLastModifiedInMilliSecond())
+            Dispatchers.IO { cacheFile.setLastModified(getLastModifiedInMilliSecond()) }
         }
 
         return cacheFile

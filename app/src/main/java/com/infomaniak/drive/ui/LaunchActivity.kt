@@ -32,8 +32,8 @@ import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
+import com.infomaniak.drive.data.api.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.DeepLinkType
@@ -202,7 +202,7 @@ class LaunchActivity : AppCompatActivity() {
         Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
             val (driveId, publicShareUuid) = match.destructured
 
-            val apiResponse = ApiRepository.getPublicShareInfo(driveId.toInt(), publicShareUuid)
+            val apiResponse = PublicShareApiRepository.getPublicShareInfo(driveId.toInt(), publicShareUuid)
             when (apiResponse.result) {
                 ApiResponseStatus.SUCCESS -> {
                     val shareLink = apiResponse.data!!
