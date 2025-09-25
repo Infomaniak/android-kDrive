@@ -149,9 +149,9 @@ class UploadTask(
     }
 
     private suspend fun launchTask() = coroutineScope {
-        val chunkConfig = getChunkConfig()
-        val totalChunks = chunkConfig.totalChunks
         val uploadedChunks = uploadFile.getValidChunks()
+        val chunkConfig = getChunkConfig(uploadedChunks)
+        val totalChunks = chunkConfig.totalChunks
         val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
 
         val uploadHost = if (isNewUploadSession) {
@@ -195,11 +195,11 @@ class UploadTask(
         if (isActive) onFinish(uploadFile.getUriObject())
     }
 
-    private fun getChunkConfig(): FileChunkSizeManager.ChunkConfig {
+    private fun getChunkConfig(validChunks: ValidChunks?): FileChunkSizeManager.ChunkConfig {
         return try {
             fileChunkSizeManager.computeChunkConfig(
                 fileSize = uploadFile.fileSize,
-                defaultFileChunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong(),
+                defaultFileChunkSize = validChunks?.validChuckSize?.toLong(),
             )
         } catch (exception: IllegalArgumentException) {
             uploadFile.resetUploadTokenAndCancelSession()
