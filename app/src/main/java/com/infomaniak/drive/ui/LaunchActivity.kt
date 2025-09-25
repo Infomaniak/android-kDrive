@@ -115,7 +115,10 @@ class LaunchActivity : AppCompatActivity() {
             when (destinationClass) {
                 MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
                 LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
-                PublicShareActivity::class.java -> publicShareActivityExtras?.let(::putExtras)
+                PublicShareActivity::class.java -> {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                    publicShareActivityExtras?.let(::putExtras)
+                }
             }
         }.also(::startActivity)
     }

@@ -194,7 +194,7 @@ class PublicShareListFragment : FileListFragment() {
     private fun onBackPressed() {
         publicShareViewModel.cancelDownload()
         if (folderId == publicShareViewModel.rootSharedFile.value?.id || folderId == ROOT_SHARED_FILE_ID) {
-            requireActivity().finish()
+            requireActivity().finishAndRemoveTask()
         } else {
             findNavController().popBackStack()
         }
