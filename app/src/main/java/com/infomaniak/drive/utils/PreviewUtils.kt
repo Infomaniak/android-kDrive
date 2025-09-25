@@ -30,6 +30,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
+import com.infomaniak.core.network.utils.bodyAsStringOrNull
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
@@ -51,6 +52,8 @@ import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.core.utils.isNightModeEnabled
 import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import okhttp3.Response
 import java.io.BufferedInputStream
 
@@ -183,14 +186,14 @@ private fun Context.printPdf(
     }
 }
 
-fun downloadFile(
+suspend fun downloadFile(
     externalOutputFile: IOFile,
     file: File,
     shouldBePdf: Boolean,
     onProgress: (progress: Int) -> Unit,
     isPublicShared: Boolean,
 ) {
-    if (externalOutputFile.exists()) externalOutputFile.delete()
+    Dispatchers.IO { if (externalOutputFile.exists()) externalOutputFile.delete() }
     val downloadUrl = ApiRoutes.getDownloadFileUrl(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
     val okHttpClient = if (isPublicShared) HttpClient.okHttpClientNoTokenInterceptor else HttpClient.okHttpClient
@@ -201,7 +204,7 @@ fun downloadFile(
         okHttpClient = okHttpClient,
     ).use {
         if (!it.isSuccessful) {
-            val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
+            val errorCode = JsonParser.parseString(it.bodyAsStringOrNull()).asJsonObject.getAsJsonPrimitive("error").asString
             if (errorCode == "password_protected_error") {
                 throw PasswordProtectedException()
             } else {
@@ -218,7 +221,7 @@ fun downloadFile(
     }
 }
 
-private fun createTempFile(response: Response, file: IOFile) {
+private suspend fun createTempFile(response: Response, file: IOFile) = Dispatchers.IO {
     BufferedInputStream(response.body?.byteStream(), BUFFER_SIZE).use { input ->
         file.outputStream().use { output -> input.copyTo(output, BUFFER_SIZE) }
     }
