@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui.publicShare
 
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
@@ -53,6 +54,7 @@ class PublicShareActivity : AppCompatActivity() {
             view.setMargins(left = margin + insets.left, right = margin + insets.right, bottom = margin + insets.bottom)
         }
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+        onBackPressedDispatcher.addCallback { finishAndRemoveTask() }
     }
 
     override fun onDestroy() {
