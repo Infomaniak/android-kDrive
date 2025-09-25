@@ -253,7 +253,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     private fun setPrintButtonVisibility(isGone: Boolean) {
         when (bottomSheetView) {
             is FileInfoActionsView -> (bottomSheetView as FileInfoActionsView).setPrintVisibility(isGone)
-            is ExternalFileInfoActionsView -> (bottomSheetView as ExternalFileInfoActionsView).isPrintingHidden(isGone)
         }
     }
 
