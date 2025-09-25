@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api.publicshare
 
+import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.CursorApiResponse
@@ -33,6 +34,7 @@ import com.infomaniak.lib.core.api.ApiController.ApiMethod.GET
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.POST
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
+import okhttp3.OkHttpClient
 
 object PublicShareApiRepository {
 
@@ -40,6 +42,7 @@ object PublicShareApiRepository {
         return callApi(
             url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
             method = GET,
+            okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
         )
     }
 
@@ -107,11 +110,17 @@ object PublicShareApiRepository {
             url = ApiRoutes.importPublicShareFiles(destinationDriveId),
             method = POST,
             body = body,
+            okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
         )
     }
 
-    private suspend inline fun <reified T> callApi(url: String, method: ApiController.ApiMethod, body: Any? = null): T {
-        return ApiController.callApi(url, method, body, PublicShareHttpClient.okHttpClientWithTokenInterceptor)
+    private suspend inline fun <reified T> callApi(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+    ): T {
+        return ApiController.callApi(url, method, body, okHttpClient)
     }
 
     private suspend inline fun <reified T> callApiWithCursor(
@@ -123,7 +132,7 @@ object PublicShareApiRepository {
             url = url,
             method = method,
             body = body,
-            okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
+            okHttpClient = HttpClient.okHttpClient,
             buildErrorResult = { apiError, translatedErrorRes ->
                 CursorApiResponse<Any>(
                     result = ApiResponseStatus.ERROR,
