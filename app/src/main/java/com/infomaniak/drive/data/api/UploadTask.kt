@@ -121,7 +121,7 @@ class UploadTask(
         try {
             if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask()
             return true
-        } catch(exception: CancellationException) {
+        } catch (exception: CancellationException) {
             throw exception
         } catch (exception: ValidationRuleMaxException) {
             Sentry.captureException(exception) { scope ->
