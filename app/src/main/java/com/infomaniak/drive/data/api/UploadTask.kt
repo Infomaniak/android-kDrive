@@ -19,10 +19,12 @@
 
 package com.infomaniak.drive.data.api
 
+import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toFile
 import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
@@ -83,6 +85,7 @@ import java.io.InputStream
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.minusAssign
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.reflect.KSuspendFunction1
 import kotlin.time.Duration.Companion.seconds
 
@@ -118,6 +121,16 @@ class UploadTask(
         try {
             if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask()
             return true
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: ValidationRuleMaxException) {
+            Sentry.captureException(exception) { scope ->
+                scope.level = SentryLevel.ERROR
+                scope.setExtra("fileModifiedAt", "${uploadFile.fileModifiedAt}")
+                scope.setExtra("fileCreatedAt", "${uploadFile.fileCreatedAt}")
+            }
+
+            uploadFile.deleteIfExists()
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
             SentryLog.w(TAG, "file not found", exception)
@@ -407,10 +420,10 @@ class UploadTask(
     private fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
         val sessionBody = UploadSession.StartSessionBody(
             conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
-            createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
+            createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1_000L,
             directoryId = remoteFolder,
             fileName = fileName,
-            lastModifiedAt = fileModifiedAt.time / 1000,
+            lastModifiedAt = fileModifiedAt.time / 1_000L,
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
             totalSize = fileSize,
@@ -455,6 +468,7 @@ class UploadTask(
                 throw UploadErrorException()
             }
             LIMIT_EXCEEDED_ERROR_CODE -> throw LimitExceededException()
+            "validation_rule_max" -> throw ValidationRuleMaxException()
             else -> {
                 if (error?.exception is ApiController.ServerErrorException) {
                     uploadFile.resetUploadTokenAndCancelSession()
@@ -483,6 +497,7 @@ class UploadTask(
     class NetworkException : Exception()
     class NotAuthorizedException : Exception()
     class ProductBlockedException : Exception()
+    class ValidationRuleMaxException : Exception()
     class ProductMaintenanceException : Exception()
     class QuotaExceededException : Exception()
     class UploadErrorException : Exception()
