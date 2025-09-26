@@ -39,7 +39,10 @@ class FileChunkSizeManager(
      * @throws AllowedFileSizeExceededException If the file is large enough to chunk with the current config.
      */
     fun computeChunkConfig(fileSize: Long, defaultFileChunkSize: Long? = null): ChunkConfig {
-        val fileChunkSize = defaultFileChunkSize ?: computeChunkSize(fileSize)
+        val fileChunkSize = when {
+            defaultFileChunkSize != null && defaultFileChunkSize >= chunkMinSize -> defaultFileChunkSize
+            else -> computeChunkSize(fileSize)
+        }
         val totalChunks = computeFileChunks(fileSize, fileChunkSize)
 
         require(totalChunks <= maxChunkCount)
