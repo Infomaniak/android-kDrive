@@ -74,7 +74,7 @@ object SyncUtils {
                 Date(dateModifiedValue * 1_000L)
             }
             fileCreatedAt != null -> {
-                SentryLog.d(TAG, "fileCreatedAt != null")
+                SentryLog.d(TAG, "fileCreatedAt != null with $fileCreatedAt")
                 fileCreatedAt
             }
             else -> null

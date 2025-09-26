@@ -25,7 +25,6 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
-import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.utils.SECONDS_IN_A_DAY
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.data.api.ApiRepository
@@ -213,13 +212,6 @@ open class UploadFile(
                 val results = pendingUploadsQuery(realm).findAll()
                 val priorityUploadFiles = results.where().notEqualTo(UploadFile::type.name, Type.SYNC.name).findAll()
                 val syncUploadFiles = results.where().equalTo(UploadFile::type.name, Type.SYNC.name).findAll()
-
-                priorityUploadFiles.forEach {
-                    SentryLog.d("UploadFile", "priorityUploadFiles => fileModifiedAt = ${it.fileModifiedAt} fileCreatedAt = ${it.fileCreatedAt}")
-                }
-                syncUploadFiles.forEach {
-                    SentryLog.d("UploadFile", "syncUploadFiles => fileModifiedAt = ${it.fileModifiedAt} fileCreatedAt = ${it.fileCreatedAt}")
-                }
 
                 arrayListOf(
                     *realm.copyFromRealm(priorityUploadFiles, 0).toTypedArray(),
