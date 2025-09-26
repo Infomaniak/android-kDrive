@@ -505,11 +505,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         val messageLog = "localMediaFound > $fileName found in folder ${mediaFolder.name}"
         SentryLog.d(TAG, messageLog)
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = BREADCRUMB_TAG
-            message = messageLog
-            level = SentryLevel.INFO
-        })
+        val dateLog = "fileCreatedAt => $fileCreatedAt, fileModifiedAt => $fileModifiedAt"
+        SentryLog.d(TAG, dateLog)
 
         if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
             UploadFile(

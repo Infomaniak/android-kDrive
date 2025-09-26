@@ -407,10 +407,10 @@ class UploadTask(
     private fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
         val sessionBody = UploadSession.StartSessionBody(
             conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
-            createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
+            createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1_000L,
             directoryId = remoteFolder,
             fileName = fileName,
-            lastModifiedAt = fileModifiedAt.time / 1000,
+            lastModifiedAt = fileModifiedAt.time / 1_000L,
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
             totalSize = fileSize,
