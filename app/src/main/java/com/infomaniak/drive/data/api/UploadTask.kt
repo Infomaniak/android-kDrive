@@ -200,7 +200,15 @@ class UploadTask(
             fileChunkSizeManager.computeChunkConfig(
                 fileSize = uploadFile.fileSize,
                 defaultFileChunkSize = validChunks?.validChuckSize?.toLong(),
-            )
+            ).also {
+                val validChuckSize = validChunks?.validChuckSize
+                if (validChuckSize != null && validChuckSize != it.fileChunkSize.toInt()) {
+                    SentryLog.e(TAG, "Expected api size different") { scope ->
+                        scope.setExtra("expected api chunk size", validChuckSize.toString())
+                        scope.setExtra("calculated chunk size", it.fileChunkSize.toString())
+                    }
+                }
+            }
         } catch (exception: IllegalArgumentException) {
             uploadFile.resetUploadTokenAndCancelSession()
             fileChunkSizeManager.computeChunkConfig(fileSize = uploadFile.fileSize)
