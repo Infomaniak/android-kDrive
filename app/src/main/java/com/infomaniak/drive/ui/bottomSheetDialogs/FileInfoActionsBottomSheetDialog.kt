@@ -207,6 +207,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             } else {
                 if (drive.isKSuiteMaxTier) {
                     showSnackbar(getString(R.string.errorDropboxLimitExceeded), true)
+                    findNavController().popBackStack()
                 } else {
                     openKSuiteUpgradeBottomSheet(MatomoName.ConvertToDropbox.value, drive)
                 }
@@ -224,6 +225,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             },
             onError = { translatedError ->
                 showSnackbar(translatedError, showAboveFab = true)
+                findNavController().popBackStack()
                 onActionFinished()
             },
         )
