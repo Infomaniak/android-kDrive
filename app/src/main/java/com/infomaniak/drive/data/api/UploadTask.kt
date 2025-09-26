@@ -455,6 +455,12 @@ class UploadTask(
                 throw UploadErrorException()
             }
             LIMIT_EXCEEDED_ERROR_CODE -> throw LimitExceededException()
+            "validation_rule_max" -> {
+                SentryLog.d(
+                    TAG,
+                    "validation_rule_max exception => fileModifiedAt: ${uploadFile.fileModifiedAt} fileCreatedAt: ${uploadFile.fileCreatedAt}"
+                )
+            }
             else -> {
                 if (error?.exception is ApiController.ServerErrorException) {
                     uploadFile.resetUploadTokenAndCancelSession()
