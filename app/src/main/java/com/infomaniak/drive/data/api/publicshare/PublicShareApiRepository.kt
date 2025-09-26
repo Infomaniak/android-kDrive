@@ -15,9 +15,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.api
+package com.infomaniak.drive.data.api.publicshare
 
+import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
+import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.ArchiveUUID
 import com.infomaniak.drive.data.models.ArchiveUUID.ArchiveBody
 import com.infomaniak.drive.data.models.File
@@ -25,24 +28,21 @@ import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileCount
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.file.FileExternalImport
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import com.infomaniak.lib.core.api.ApiController
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.GET
 import com.infomaniak.lib.core.api.ApiController.ApiMethod.POST
 import com.infomaniak.lib.core.models.ApiResponse
 import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.networking.HttpClient
 import okhttp3.OkHttpClient
 
 object PublicShareApiRepository {
 
     suspend fun getPublicShareInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
-        val okhttpClient = AccountUtils.currentUser?.let { HttpClient.okHttpClient } ?: HttpClient.okHttpClientNoTokenInterceptor
         return callApi(
             url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
             method = GET,
-            okHttpClient = okhttpClient,
+            okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
         )
     }
 
@@ -51,7 +51,6 @@ object PublicShareApiRepository {
             url = ApiRoutes.submitPublicSharePassword(driveId, linkUuid),
             method = POST,
             body = mapOf("password" to password),
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
         )
     }
 
@@ -59,7 +58,6 @@ object PublicShareApiRepository {
         return callApi(
             url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId),
             method = GET,
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
         )
     }
 
@@ -71,14 +69,13 @@ object PublicShareApiRepository {
         cursor: String?,
     ): CursorApiResponse<List<File>> {
         val url = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
-        return callApiWithCursor(url, GET, okHttpClient = HttpClient.okHttpClientNoTokenInterceptor)
+        return callApiWithCursor(url, GET)
     }
 
     suspend fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount> {
         return callApi(
             url = ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId),
             method = GET,
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
         )
     }
 
@@ -87,7 +84,6 @@ object PublicShareApiRepository {
             url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid),
             method = POST,
             body = archiveBody,
-            okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
         )
     }
 
@@ -114,6 +110,7 @@ object PublicShareApiRepository {
             url = ApiRoutes.importPublicShareFiles(destinationDriveId),
             method = POST,
             body = body,
+            okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
         )
     }
 
@@ -130,15 +127,20 @@ object PublicShareApiRepository {
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): T {
-        return ApiController.callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
-            CursorApiResponse<Any>(
-                result = ApiResponseStatus.ERROR,
-                error = apiError
-            ).apply {
-                translatedError = translatedErrorRes
-            } as T
-        })
+        return ApiController.callApi(
+            url = url,
+            method = method,
+            body = body,
+            okHttpClient = HttpClient.okHttpClient,
+            buildErrorResult = { apiError, translatedErrorRes ->
+                CursorApiResponse<Any>(
+                    result = ApiResponseStatus.ERROR,
+                    error = apiError
+                ).apply {
+                    translatedError = translatedErrorRes
+                } as T
+            }
+        )
     }
 }

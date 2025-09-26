@@ -53,6 +53,21 @@ object TokenInterceptorListenerProvider {
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
 
+    fun publicShareTokenInterceptorListener(
+        coroutineScope: CoroutineScope,
+    ): com.infomaniak.core.auth.TokenInterceptorListener = object : com.infomaniak.core.auth.TokenInterceptorListener {
+        val userTokenFlow by lazy { AppSettings.currentUserIdFlow.mapToApiToken(coroutineScope) }
+
+        override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
+            onRefreshTokenSuccessCommon(apiToken, AccountUtils.currentUser)
+        }
+
+        override suspend fun onRefreshTokenError() = Unit
+        override suspend fun getApiToken(): ApiToken? = userTokenFlow.first()
+        override fun getCurrentUserId(): Int = AccountUtils.currentUserId
+    }
+
     fun tokenInterceptorListenerByUserId(
         refreshTokenError: (User) -> Unit,
         userId: Int,

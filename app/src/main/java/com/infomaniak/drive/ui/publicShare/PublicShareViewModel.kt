@@ -26,7 +26,7 @@ import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.CursorApiResponse
-import com.infomaniak.drive.data.api.PublicShareApiRepository
+import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderArgs
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderResult
 import com.infomaniak.drive.data.models.ArchiveUUID

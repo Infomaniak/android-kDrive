@@ -33,7 +33,7 @@ import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
-import com.infomaniak.drive.data.api.PublicShareApiRepository
+import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.DeepLinkType

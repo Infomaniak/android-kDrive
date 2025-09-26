@@ -39,8 +39,10 @@ import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpda
 import com.infomaniak.core.network.NetworkConfiguration
 import com.infomaniak.core.sentry.SentryConfig.configureSentry
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
+import com.infomaniak.drive.TokenInterceptorListenerProvider.publicShareTokenInterceptorListener
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
+import com.infomaniak.drive.data.api.publicshare.PublicShareHttpClient
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
@@ -129,6 +131,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             ),
         )
         HttpClient.init(tokenInterceptorListener)
+        PublicShareHttpClient.init(publicShareTokenInterceptorListener(applicationScope))
         MqttClientWrapper.init(applicationContext)
 
         MyKSuiteDataUtils.initDatabase(this)
