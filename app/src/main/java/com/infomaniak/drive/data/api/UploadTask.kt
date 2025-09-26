@@ -458,7 +458,7 @@ class UploadTask(
             "validation_rule_max" -> {
                 SentryLog.d(
                     TAG,
-                    "validation_rule_max exception => fileModifiedAt: ${uploadFile.fileModifiedAt} fileCreatedAt: ${uploadFile.fileCreatedAt}"
+                    "validation_rule_max exception => fileModifiedAt: ${uploadFile.fileModifiedAt} fileCreatedAt: ${uploadFile.fileCreatedAt}",
                 )
             }
             else -> {
