@@ -1,16 +1,15 @@
-<center>
-
 [English](README.md) | **Русский**
 
 <br>
+<br>
 
-<img src="fastlane/metadata/android/en-US/images/icon.png" alt="Logo" style="max-width: 150px; height: auto;">
+![Logo](fastlane/metadata/android/en-US/images/icon.png)
 
 <br>
 
 # Приложение Infomaniak kDrive
 
-</center>
+<br>
 
 ## Современное Android-приложение для [kDrive от Infomaniak](https://www.infomaniak.com/kdrive).
 ### Синхронизация, совместное использование, совместная работа. Швейцарское облако с полной защитой данных.
@@ -50,58 +49,18 @@
 Структура приложения, алгоритмы и общее функционирование совпадают с iOS-версией.
 
 ### Разрешения
-<div style="overflow-x: auto;">
-<table style="width: 100%; min-width: 320px; border-collapse: collapse;" border="1" cellpadding="5" cellspacing="0">
-<thead>
-<tr>
-<th>Название разрешения</th>
-<th>Использование</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>GET_ACCOUNTS</code>, <code>AUTHENTICATE_ACCOUNTS</code>, <code>MANAGE_ACCOUNTS</code>, <code>USE_CREDENTIALS</code></td>
-<td>Доступ и управление AccountManager.</td>
-</tr>
-<tr>
-<td><code>com.infomaniak.permission.ASK_CREDENTIAL</code>, <code>com.infomaniak.permission.RECEIVE_CREDENTIAL</code></td>
-<td><em>(*Временно не используется*)</em> Позволяет kDrive обмениваться учетными данными с другими приложениями Infomaniak для аутентификации без повторного ввода логина.</td>
-</tr>
-<tr>
-<td><code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code></td>
-<td>Проверка доступа к Интернету для обновления интерфейса и ограничения функций в офлайн-режиме.</td>
-</tr>
-<tr>
-<td><code>READ_EXTERNAL_STORAGE</code>, <code>WRITE_EXTERNAL_STORAGE</code></td>
-<td>Чтение файлов с устройства для их загрузки в kDrive. Запись используется для скачивания файлов из kDrive и работы с MediaStore.</td>
-</tr>
-<tr>
-<td><code>READ_SYNC_SETTINGS</code>, <code>WRITE_SYNC_SETTINGS</code>, <code>READ_SYNC_STATS</code></td>
-<td>Управление автоматической синхронизацией (проверка, включение и т.д.)</td>
-</tr>
-<tr>
-<td><code>RECEIVE_BOOT_COMPLETED</code></td>
-<td>Определение запуска устройства для перезапуска службы синхронизации.</td>
-</tr>
-<tr>
-<td><code>FOREGROUND_SERVICE</code></td>
-<td>Используется для фоновой загрузки файлов и службы синхронизации.</td>
-</tr>
-<tr>
-<td><code>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS</code></td>
-<td>Позволяет скачивать файлы в фоне.</td>
-</tr>
-<tr>
-<td><code>USE_BIOMETRIC</code></td>
-<td>Используется для блокировки/разблокировки приложения.</td>
-</tr>
-<tr>
-<td><code>REQUEST_INSTALL_PACKAGES</code></td>
-<td>Позволяет устанавливать APK-файлы из приложения kDrive.</td>
-</tr>
-</tbody>
-</table>
-</div>
+| Название разрешения | Использование |
+|---|---|
+| `GET_ACCOUNTS`, `AUTHENTICATE_ACCOUNTS`, `MANAGE_ACCOUNTS`, `USE_CREDENTIALS` | Доступ и управление AccountManager. |
+| `com.infomaniak.permission.ASK_CREDENTIAL`, `com.infomaniak.permission.RECEIVE_CREDENTIAL` | (*Временно не используется*) Позволяет kDrive обмениваться учетными данными с другими приложениями Infomaniak для аутентификации без повторного ввода логина. |
+| `INTERNET`, `ACCESS_NETWORK_STATE` | Проверка доступа к Интернету для обновления интерфейса и ограничения функций в офлайн-режиме. |
+| `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE` | Чтение файлов с устройства для их загрузки в kDrive. Запись используется для скачивания файлов из kDrive и работы с MediaStore. |
+| `READ_SYNC_SETTINGS`, `WRITE_SYNC_SETTINGS`, `READ_SYNC_STATS` | Управление автоматической синхронизацией (проверка, включение и т.д.) |
+| `RECEIVE_BOOT_COMPLETED` | Определение запуска устройства для перезапуска службы синхронизации. |
+| `FOREGROUND_SERVICE` | Используется для фоновой загрузки файлов и службы синхронизации. |
+| `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` | Позволяет скачивать файлы в фоне. |
+| `USE_BIOMETRIC` | Используется для блокировки/разблокировки приложения. |
+| `REQUEST_INSTALL_PACKAGES` | Позволяет устанавливать APK-файлы из приложения kDrive. |
 
 ## Тесты
 
