@@ -1,4 +1,15 @@
+**English** | [Русский](README_RU.md)
+
+<br>
+<br>
+
+![Logo](fastlane/metadata/android/en-US/images/icon.png)
+
+<br>
+
 # Infomaniak kDrive app
+
+<br>
 
 ## A modern Android application for [kDrive by Infomaniak](https://www.infomaniak.com/kdrive).
 ### Synchronise, share, collaborate.  The Swiss cloud that’s 100% secure.
