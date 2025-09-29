@@ -205,6 +205,8 @@ class UploadTask(
                     SentryLog.e(TAG, "Expected api size different") { scope ->
                         scope.setExtra("expected api chunk size", validChuckSize.toString())
                         scope.setExtra("calculated chunk size", it.fileChunkSize.toString())
+                        scope.setExtra("expected api chunks count", validChunks.expectedChunksCount.toString())
+                        scope.setExtra("calculated chunks count", it.totalChunks.toString())
                     }
                 }
             }
