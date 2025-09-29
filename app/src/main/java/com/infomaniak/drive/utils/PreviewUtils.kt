@@ -198,7 +198,7 @@ suspend fun downloadFile(
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
     val okHttpClient = if (isPublicShared) HttpClient.okHttpClientNoTokenInterceptor else HttpClient.okHttpClient
 
-    DownloadOfflineFileManager.downloadFileResponse(
+    DownloadOfflineFileManager.downloadFileResponseAsync(
         fileUrl = downloadUrl,
         downloadInterceptor = downloadProgressInterceptor,
         okHttpClient = okHttpClient,

@@ -1,6 +1,6 @@
 [versions]
 androidJunit5 = "1.13.4.0"
-androidPdfview = "3.2.13"
+androidPdfview = "3.2.14"
 androidTest = "1.8.0"
 checkerFramework = "3.51.0"
 ddPlist = "1.28"
