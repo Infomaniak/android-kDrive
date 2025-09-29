@@ -195,7 +195,7 @@ class UploadTask(
     }
 
     private fun getChunkConfig(validChunks: ValidChunks?): FileChunkSizeManager.ChunkConfig {
-        val validChuckSize = validChunks?.validChuckSize
+        val validChuckSize = validChunks?.validChunkSize
         return try {
             fileChunkSizeManager.computeChunkConfig(
                 fileSize = uploadFile.fileSize,
@@ -348,7 +348,7 @@ class UploadTask(
     }
 
     private fun ValidChunks.needToResetUpload(chunkSize: Long): Boolean {
-        return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize.toInt()) {
+        return if (expectedSize != uploadFile.fileSize || validChunkSize != chunkSize.toInt()) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
         } else {
