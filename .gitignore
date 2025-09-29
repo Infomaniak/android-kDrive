@@ -12,6 +12,7 @@ env.properties
 .gradle
 **/.idea
 !.idea/icon.svg
+/.idea/navEditor.xml
 *.iml
 .kotlin/errors
 .kotlin/sessions
