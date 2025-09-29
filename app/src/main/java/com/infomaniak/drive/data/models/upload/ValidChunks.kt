@@ -34,5 +34,5 @@ data class ValidChunks(
 ) {
     inline val validChunksIds get() = chunks.map { it.number }
 
-    inline val validChuckSize get() = chunks.firstOrNull()?.size ?: 0
+    inline val validChunkSize get() = chunks.firstOrNull()?.size ?: 0
 }

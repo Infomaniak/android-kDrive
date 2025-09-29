@@ -19,12 +19,10 @@
 
 package com.infomaniak.drive.data.api
 
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toFile
 import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
@@ -149,12 +147,13 @@ class UploadTask(
     }
 
     private suspend fun launchTask() = coroutineScope {
-        val chunkConfig = getChunkConfig()
+        var uploadedChunks = uploadFile.getValidChunks()
+        val chunkConfig = getChunkConfig(uploadedChunks)
         val totalChunks = chunkConfig.totalChunks
-        val uploadedChunks = uploadFile.getValidChunks()
         val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
 
         val uploadHost = if (isNewUploadSession) {
+            uploadedChunks = null
             uploadFile.prepareUploadSession(totalChunks)
         } else {
             uploadFile.uploadHost
@@ -195,12 +194,22 @@ class UploadTask(
         if (isActive) onFinish(uploadFile.getUriObject())
     }
 
-    private fun getChunkConfig(): FileChunkSizeManager.ChunkConfig {
+    private fun getChunkConfig(validChunks: ValidChunks?): FileChunkSizeManager.ChunkConfig {
+        val validChunkSize = validChunks?.validChunkSize
         return try {
             fileChunkSizeManager.computeChunkConfig(
                 fileSize = uploadFile.fileSize,
-                defaultFileChunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong(),
-            )
+                defaultFileChunkSize = validChunkSize?.toLong(),
+            ).also {
+                if (validChunkSize != null && validChunkSize != it.fileChunkSize.toInt()) {
+                    SentryLog.e(TAG, "Expected api size different") { scope ->
+                        scope.setExtra("expected api chunk size", validChunkSize.toString())
+                        scope.setExtra("calculated chunk size", it.fileChunkSize.toString())
+                        scope.setExtra("expected api chunks count", validChunks.expectedChunksCount.toString())
+                        scope.setExtra("calculated chunks count", it.totalChunks.toString())
+                    }
+                }
+            }
         } catch (exception: IllegalArgumentException) {
             uploadFile.resetUploadTokenAndCancelSession()
             fileChunkSizeManager.computeChunkConfig(fileSize = uploadFile.fileSize)
@@ -339,7 +348,7 @@ class UploadTask(
     }
 
     private fun ValidChunks.needToResetUpload(chunkSize: Long): Boolean {
-        return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize.toInt()) {
+        return if (expectedSize != uploadFile.fileSize || validChunkSize != chunkSize.toInt()) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
         } else {
