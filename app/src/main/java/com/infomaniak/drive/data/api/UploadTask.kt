@@ -19,12 +19,10 @@
 
 package com.infomaniak.drive.data.api
 
-import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.net.toFile
 import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
@@ -149,12 +147,13 @@ class UploadTask(
     }
 
     private suspend fun launchTask() = coroutineScope {
-        val uploadedChunks = uploadFile.getValidChunks()
+        var uploadedChunks = uploadFile.getValidChunks()
         val chunkConfig = getChunkConfig(uploadedChunks)
         val totalChunks = chunkConfig.totalChunks
         val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
 
         val uploadHost = if (isNewUploadSession) {
+            uploadedChunks = null
             uploadFile.prepareUploadSession(totalChunks)
         } else {
             uploadFile.uploadHost
