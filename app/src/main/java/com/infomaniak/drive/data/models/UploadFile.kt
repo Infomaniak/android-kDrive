@@ -91,7 +91,10 @@ open class UploadFile(
     fun resetUploadToken() {
         getRealmInstance().use { realm ->
             uploadFileByUriQuery(realm, uri).findFirst()?.apply {
-                realm.executeTransaction { uploadToken = null }
+                realm.executeTransaction {
+                    uploadToken = null
+                    uploadHost = null
+                }
             }
         }
     }
