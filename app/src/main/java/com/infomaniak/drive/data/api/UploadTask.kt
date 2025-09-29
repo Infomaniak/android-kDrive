@@ -195,12 +195,12 @@ class UploadTask(
     }
 
     private fun getChunkConfig(validChunks: ValidChunks?): FileChunkSizeManager.ChunkConfig {
+        val validChuckSize = validChunks?.validChuckSize
         return try {
             fileChunkSizeManager.computeChunkConfig(
                 fileSize = uploadFile.fileSize,
-                defaultFileChunkSize = validChunks?.validChuckSize?.toLong(),
+                defaultFileChunkSize = validChuckSize?.toLong(),
             ).also {
-                val validChuckSize = validChunks?.validChuckSize
                 if (validChuckSize != null && validChuckSize != it.fileChunkSize.toInt()) {
                     SentryLog.e(TAG, "Expected api size different") { scope ->
                         scope.setExtra("expected api chunk size", validChuckSize.toString())
