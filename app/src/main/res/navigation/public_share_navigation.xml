@@ -139,6 +139,7 @@
             app:nullable="true" />
         <argument
             android:name="isPublicShared"
+            android:defaultValue="false"
             app:argType="boolean" />
     </fragment>
 
