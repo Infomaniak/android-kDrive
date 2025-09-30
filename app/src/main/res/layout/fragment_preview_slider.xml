@@ -61,7 +61,7 @@
         android:id="@+id/bottomSheetFileInfos"
         style="?attr/bottomSheetStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:visibility="gone"
         app:layout_behavior="@string/bottom_sheet_behavior"
         tools:visibility="visible" />

@@ -70,6 +70,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
 
     override val isPublicShared = false
+    override val canDownloadFiles = true
     override val ownerFragment = this
 
     override val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
@@ -102,7 +103,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior)
+        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
 
         bottomSheetView.apply {
             init(

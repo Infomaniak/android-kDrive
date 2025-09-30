@@ -46,6 +46,8 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
         get() = BottomSheetBehavior.from(bottomSheetView)
 
     override val isPublicShared = true
+    override val canDownloadFiles
+        get() = publicShareViewModel.canDownloadFiles
     override val ownerFragment = this
 
     override fun initCurrentFile() {
@@ -89,6 +91,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     private fun initBottomSheet() = with(bottomSheetView) {
         requireActivity().setupBottomSheetFileBehavior(
             bottomSheetBehavior = bottomSheetBehavior,
+            isDraggable = publicShareViewModel.canDownloadFiles,
             isFitToContents = true,
         )
         viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { updateWithExternalFile(currentFile) }
