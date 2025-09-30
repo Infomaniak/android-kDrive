@@ -206,6 +206,11 @@ class FileInfoActionsView @JvmOverloads constructor(
         binding.scrollView.fullScroll(FOCUS_UP)
     }
 
+    fun setupActions(isVisible: Boolean) = with(binding) {
+        actionListLayout.isVisible = isVisible
+        quickActionsLayout.isVisible = isVisible
+    }
+
     private fun isGoToFolderVisible(): Boolean {
         val previousDestinationId = ownerFragment.findNavController().previousBackStackEntry?.destination?.id
         val parentFile = FileController.getParentFile(currentFile.id)

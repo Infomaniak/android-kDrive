@@ -89,7 +89,6 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     private fun initBottomSheet() = with(bottomSheetView) {
         requireActivity().setupBottomSheetFileBehavior(
             bottomSheetBehavior = bottomSheetBehavior,
-            isDraggable = true,
             isFitToContents = true,
         )
         viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { updateWithExternalFile(currentFile) }

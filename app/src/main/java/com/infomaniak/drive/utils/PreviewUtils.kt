@@ -61,13 +61,11 @@ private const val BUFFER_SIZE = 8192
 
 fun Activity.setupBottomSheetFileBehavior(
     bottomSheetBehavior: BottomSheetBehavior<View>,
-    isDraggable: Boolean,
     isFitToContents: Boolean = false,
 ) {
     setColorNavigationBar(SystemBarsColorScheme.AppBar)
     bottomSheetBehavior.apply {
         isHideable = true
-        this.isDraggable = isDraggable
         this.isFitToContents = isFitToContents
         addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {

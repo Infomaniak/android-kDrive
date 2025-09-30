@@ -57,12 +57,12 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
         downloadFile.isVisible = true
     }
 
-    fun setupActions(canDownloadFile: Boolean) {
-        binding.openWith.isVisible = canDownloadFile
-        binding.shareFile.isVisible = canDownloadFile
-        binding.saveToKDrive.isVisible = canDownloadFile
-        binding.downloadFile.isVisible = canDownloadFile
-        binding.print.isVisible = canDownloadFile
+    fun setupActions(isVisible: Boolean) = with(binding) {
+        openWith.isVisible = isVisible
+        shareFile.isVisible = isVisible
+        saveToKDrive.isVisible = isVisible
+        downloadFile.isVisible = isVisible
+        print.isVisible = isVisible
     }
 
     fun initOnClickListener(onItemClickListener: OnItemClickListener) = with(binding) {
