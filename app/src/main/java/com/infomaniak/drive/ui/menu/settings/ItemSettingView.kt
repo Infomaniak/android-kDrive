@@ -26,9 +26,9 @@ import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.infomaniak.core.legacy.utils.getAttributes
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewItemSettingBinding
-import com.infomaniak.lib.core.utils.getAttributes
 
 class ItemSettingView @JvmOverloads constructor(
     context: Context,

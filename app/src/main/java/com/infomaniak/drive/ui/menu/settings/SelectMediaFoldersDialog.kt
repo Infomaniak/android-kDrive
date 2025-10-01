@@ -25,13 +25,13 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.views.DividerItemDecorator
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentBottomSheetSelectMediaFoldersBinding
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import com.infomaniak.drive.views.NoItemsLayoutView
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.views.DividerItemDecorator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

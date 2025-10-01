@@ -18,11 +18,11 @@
 package com.infomaniak.drive.ui.fileList
 
 import androidx.lifecycle.ViewModel
+import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.SearchCategoriesOwnershipFilter
 import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.lib.core.utils.SingleLiveEvent
 
 class SearchFiltersViewModel : ViewModel() {
 

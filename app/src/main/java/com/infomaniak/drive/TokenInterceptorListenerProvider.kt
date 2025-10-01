@@ -17,12 +17,12 @@
  */
 package com.infomaniak.drive
 
+import com.infomaniak.core.legacy.auth.TokenInterceptorListener
+import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.AccountUtils.getUserById
 import com.infomaniak.drive.utils.AccountUtils.setUserToken
-import com.infomaniak.lib.core.auth.TokenInterceptorListener
-import com.infomaniak.lib.core.models.user.User
 import com.infomaniak.lib.login.ApiToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first

@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive
 
+import com.infomaniak.core.legacy.utils.Utils.getDefaultAcceptedLanguage
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRepository.addMultiAccess
 import com.infomaniak.drive.data.api.ApiRepository.getFolderFiles
@@ -40,7 +41,6 @@ import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
 import com.infomaniak.drive.utils.ApiTestUtils.deleteTestFile
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.Utils.getDefaultAcceptedLanguage
 import io.realm.Realm
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach

@@ -22,13 +22,13 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.databinding.ActivityNoDriveBinding
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 import kotlinx.coroutines.launch
 
 class MaintenanceActivity : AppCompatActivity() {

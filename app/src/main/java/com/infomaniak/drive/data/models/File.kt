@@ -24,6 +24,8 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.core.legacy.utils.contains
+import com.infomaniak.core.legacy.utils.guessMimeType
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -45,8 +47,6 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.downloadFile
 import com.infomaniak.drive.utils.isUrlFile
 import com.infomaniak.drive.utils.isWeblocFile
-import com.infomaniak.lib.core.utils.contains
-import com.infomaniak.lib.core.utils.guessMimeType
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults

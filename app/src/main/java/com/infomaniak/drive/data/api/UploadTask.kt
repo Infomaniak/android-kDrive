@@ -28,6 +28,13 @@ import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.io.skipExactly
 import com.infomaniak.core.ktor.toOutgoingContent
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.api.ApiController.gson
+import com.infomaniak.core.legacy.models.ApiError
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.networking.HttpUtils
+import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.rateLimit
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
@@ -42,13 +49,6 @@ import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.api.ApiController.gson
-import com.infomaniak.lib.core.models.ApiError
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.onUpload

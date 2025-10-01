@@ -19,10 +19,10 @@ package com.infomaniak.drive
 
 import androidx.fragment.app.Fragment
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
+import com.infomaniak.core.legacy.utils.capitalizeFirstChar
 import com.infomaniak.core.matomo.Matomo
 import com.infomaniak.core.matomo.Matomo.TrackerAction
 import com.infomaniak.drive.data.models.BulkOperationType
-import com.infomaniak.lib.core.utils.capitalizeFirstChar
 import org.matomo.sdk.Tracker
 
 object MatomoDrive : Matomo {

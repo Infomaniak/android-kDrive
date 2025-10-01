@@ -19,10 +19,10 @@ package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.legacy.utils.Utils.enumValueOfOrNull
+import com.infomaniak.core.legacy.utils.firstOrEmpty
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
-import com.infomaniak.lib.core.utils.firstOrEmpty
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import kotlinx.parcelize.Parcelize

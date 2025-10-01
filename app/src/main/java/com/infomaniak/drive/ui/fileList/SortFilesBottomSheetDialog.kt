@@ -20,10 +20,10 @@ package com.infomaniak.drive.ui.fileList
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.views.SelectBottomSheetDialog
-import com.infomaniak.lib.core.utils.setBackNavigationResult
 
 class SortFilesBottomSheetDialog : SelectBottomSheetDialog() {
 

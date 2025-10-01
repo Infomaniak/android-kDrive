@@ -22,8 +22,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isGone
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.databinding.FragmentFileDetailsActivitiesBinding
-import com.infomaniak.lib.core.utils.safeBinding
 
 class FileDetailsActivitiesFragment : FileDetailsSubFragment() {
 

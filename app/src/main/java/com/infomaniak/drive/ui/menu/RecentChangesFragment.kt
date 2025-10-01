@@ -22,12 +22,12 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.core.legacy.utils.setPagination
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.RecentChangesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.setPagination
 
 class RecentChangesFragment : FileSubTypeListFragment() {
 

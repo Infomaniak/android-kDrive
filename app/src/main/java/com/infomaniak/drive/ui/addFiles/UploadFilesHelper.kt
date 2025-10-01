@@ -22,11 +22,11 @@ import android.net.Uri
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavController
+import com.infomaniak.core.legacy.utils.FilePicker
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.lib.core.utils.FilePicker
 
 class UploadFilesHelper private constructor(
     private val context: Context,

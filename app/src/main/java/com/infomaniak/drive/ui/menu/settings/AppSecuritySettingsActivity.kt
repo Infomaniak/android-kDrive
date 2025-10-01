@@ -21,11 +21,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.infomaniak.core.legacy.applock.LockActivity
+import com.infomaniak.core.legacy.applock.Utils.silentlyReverseSwitch
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
-import com.infomaniak.lib.applock.LockActivity
-import com.infomaniak.lib.applock.Utils.silentlyReverseSwitch
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
 

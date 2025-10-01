@@ -26,6 +26,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityPublicShareBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
@@ -34,7 +35,6 @@ import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.setColorNavigationBar
 import com.infomaniak.drive.utils.setColorStatusBar
-import com.infomaniak.lib.core.utils.setMargins
 
 class PublicShareActivity : AppCompatActivity() {
 

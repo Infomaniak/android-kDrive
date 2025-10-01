@@ -24,6 +24,8 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.infomaniak.core.legacy.utils.context
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.CardviewFileListBinding
@@ -31,8 +33,6 @@ import com.infomaniak.drive.ui.SaveExternalUriAdapter.SaveExternalUriViewHolder
 import com.infomaniak.drive.ui.fileList.FileAdapter.Companion.setCorners
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setFileItemWithoutCategories
-import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.utils.setMargins
 
 class SaveExternalUriAdapter(val uris: MutableList<Pair<Uri, String>>) : Adapter<SaveExternalUriViewHolder>() {
 

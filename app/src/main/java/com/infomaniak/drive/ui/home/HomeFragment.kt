@@ -30,6 +30,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
@@ -40,8 +42,6 @@ import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.setDriveHeader
 import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {

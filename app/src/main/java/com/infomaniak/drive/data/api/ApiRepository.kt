@@ -20,6 +20,17 @@ package com.infomaniak.drive.data.api
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.api.ApiController.ApiMethod.DELETE
+import com.infomaniak.core.legacy.api.ApiController.ApiMethod.GET
+import com.infomaniak.core.legacy.api.ApiController.ApiMethod.POST
+import com.infomaniak.core.legacy.api.ApiController.ApiMethod.PUT
+import com.infomaniak.core.legacy.api.ApiController.callApiBlocking
+import com.infomaniak.core.legacy.api.ApiRepositoryCore
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.models.ApiResponseStatus
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.networking.HttpClient.okHttpClientLongTimeout
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -53,17 +64,6 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartSessionBody
 import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.api.ApiController.ApiMethod.DELETE
-import com.infomaniak.lib.core.api.ApiController.ApiMethod.GET
-import com.infomaniak.lib.core.api.ApiController.ApiMethod.POST
-import com.infomaniak.lib.core.api.ApiController.ApiMethod.PUT
-import com.infomaniak.lib.core.api.ApiController.callApiBlocking
-import com.infomaniak.lib.core.api.ApiRepositoryCore
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpClient.okHttpClientLongTimeout
 import okhttp3.OkHttpClient
 import com.infomaniak.core.ksuite.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 

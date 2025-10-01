@@ -24,8 +24,8 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.databinding.BottomSheetKSuiteProBinding
-import com.infomaniak.lib.core.utils.safeBinding
 
 class KSuiteProBottomSheetDialog : BottomSheetDialogFragment() {
 

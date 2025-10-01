@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.services
 
 import androidx.work.ListenableWorker.Result
+import com.infomaniak.core.legacy.utils.isNetworkException
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
@@ -30,7 +31,6 @@ import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExce
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.lib.core.utils.isNetworkException
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel

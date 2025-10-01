@@ -44,7 +44,7 @@
                 app:shapeAppearanceOverlay="@style/CircleImageView"
                 tools:src="@tools:sample/avatars" />
 
-            <com.infomaniak.lib.core.views.LoaderTextView
+            <com.infomaniak.core.legacy.views.LoaderTextView
                 android:id="@+id/commentUserName"
                 style="@style/Subtitle2"
                 android:layout_width="0dp"
@@ -59,7 +59,7 @@
                 app:loader_corner="@dimen/radius"
                 tools:text="@tools:sample/full_names" />
 
-            <com.infomaniak.lib.core.views.LoaderTextView
+            <com.infomaniak.core.legacy.views.LoaderTextView
                 android:id="@+id/commentValue"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -82,7 +82,7 @@
                 app:layout_constraintTop_toTopOf="@id/commentDateValue"
                 tools:ignore="ContentDescription" />
 
-            <com.infomaniak.lib.core.views.LoaderTextView
+            <com.infomaniak.core.legacy.views.LoaderTextView
                 android:id="@+id/commentDateValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

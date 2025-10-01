@@ -20,6 +20,13 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.infomaniak.core.legacy.auth.CredentialManager
+import com.infomaniak.core.legacy.auth.TokenAuthenticator
+import com.infomaniak.core.legacy.models.ApiResponseStatus
+import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.room.UserDatabase
+import com.infomaniak.core.legacy.stores.StoresSettingsRepository
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
@@ -34,13 +41,6 @@ import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import com.infomaniak.lib.core.auth.CredentialManager
-import com.infomaniak.lib.core.auth.TokenAuthenticator
-import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.room.UserDatabase
-import com.infomaniak.lib.stores.StoresSettingsRepository
 import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope

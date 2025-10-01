@@ -23,6 +23,7 @@ import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.BulkOperationType
@@ -32,7 +33,6 @@ import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomShee
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.utils.safeNavigate
 
 class FavoritesFragment : FileListFragment() {
 

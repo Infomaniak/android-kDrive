@@ -36,6 +36,10 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
+import com.infomaniak.core.legacy.utils.calculateFileSize
+import com.infomaniak.core.legacy.utils.getFileName
+import com.infomaniak.core.legacy.utils.getFileSize
+import com.infomaniak.core.legacy.utils.hasPermissions
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
@@ -60,10 +64,6 @@ import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.uri
-import com.infomaniak.lib.core.utils.calculateFileSize
-import com.infomaniak.lib.core.utils.getFileName
-import com.infomaniak.lib.core.utils.getFileSize
-import com.infomaniak.lib.core.utils.hasPermissions
 import io.realm.Realm
 import io.sentry.Breadcrumb
 import io.sentry.Sentry

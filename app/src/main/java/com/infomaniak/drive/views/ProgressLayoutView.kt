@@ -23,11 +23,11 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.infomaniak.core.legacy.utils.getAttributes
+import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ViewProgressLayoutBinding
-import com.infomaniak.lib.core.utils.getAttributes
-import com.infomaniak.lib.core.utils.toPx
 
 class ProgressLayoutView @JvmOverloads constructor(
     context: Context,
