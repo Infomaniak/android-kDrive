@@ -169,7 +169,7 @@
     <string name="buttonSharePublicLink">Condividere il link pubblico</string>
     <string name="buttonStopUpload">Arresta l’importazione del file</string>
     <string name="buttonSwitchDrive">Cambia drive</string>
-    <string name="buttonTakePhotoOrVideo">Scatta una foto o gira un video</string>
+    <string name="buttonTakePhoto">Scattare una foto</string>
     <string name="buttonToggleDisplay">Passa in modalità a griglia o a elenco</string>
     <string name="buttonUpgrade">Aggiornamento</string>
     <string name="buttonUpgradeOffer">Fai evolvere la tua offerta</string>

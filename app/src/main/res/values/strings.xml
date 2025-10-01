@@ -180,7 +180,7 @@
     <string name="buttonSharePublicLink">Share public link</string>
     <string name="buttonStopUpload">Stop uploading this file</string>
     <string name="buttonSwitchDrive">Change drive</string>
-    <string name="buttonTakePhotoOrVideo">Take a photo or video</string>
+    <string name="buttonTakePhoto">Take a photo</string>
     <string name="buttonToggleDisplay">Switch to grid or list mode</string>
     <string name="buttonUpgrade">Upgrade</string>
     <string name="buttonUpgradeOffer">Upgrade my plan</string>
