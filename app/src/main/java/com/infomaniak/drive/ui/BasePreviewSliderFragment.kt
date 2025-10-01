@@ -249,7 +249,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     private fun clearEdgeToEdge() = with(requireActivity()) {
         toggleSystemBar(true)
-        window.toggleEdgeToEdge(false)
     }
 
     private fun setPrintButtonVisibility(isGone: Boolean) {

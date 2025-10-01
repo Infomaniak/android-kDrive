@@ -115,7 +115,6 @@ import com.infomaniak.lib.core.utils.lightNavigationBar
 import com.infomaniak.lib.core.utils.lightStatusBar
 import com.infomaniak.lib.core.utils.loadAvatar
 import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
@@ -176,7 +175,6 @@ fun Activity.setupStatusBarForPreview() {
         statusBarColor = ContextCompat.getColor(this@setupStatusBarForPreview, R.color.previewBackgroundTransparent)
 
         lightStatusBar(false)
-        toggleEdgeToEdge(true)
     }
 }
 
