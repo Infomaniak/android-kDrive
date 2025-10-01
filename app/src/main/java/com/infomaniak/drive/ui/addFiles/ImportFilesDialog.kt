@@ -109,7 +109,10 @@ class ImportFilesDialog : DialogFragment() {
             runCatching {
                 initUpload(iterator.next())
             }.onFailure { exception ->
-                if (exception is CancellationException) throw exception
+                if (exception is CancellationException) {
+                    dismissAllowingStateLoss()
+                    throw exception
+                }
                 when {
                     exception is IOException && exception.message?.contains("ENOSPC|No space left".toRegex()) == true -> {
                         isLowDeviceStorage = true
@@ -130,7 +133,6 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
-        ensureActive()
         fun captureWithSentry(cursorState: String) {
             // We have cases where importation has failed,
             // but we've added enough information to know the cause.
@@ -151,6 +153,7 @@ class ImportFilesDialog : DialogFragment() {
 
     private suspend fun processCursorData(cursor: Cursor, uri: Uri) = coroutineScope {
         var outputFile: IOFile? = null
+        var uploadFile: UploadFile? = null
         runCatching {
             SentryLog.i(TAG, "processCursorData: uri=$uri")
             val fileName = cursor.getFileName(uri)
@@ -158,7 +161,7 @@ class ImportFilesDialog : DialogFragment() {
 
             outputFile = getOutputFile(uri, fileModifiedAt)
             ensureActive()
-            UploadFile(
+            uploadFile = UploadFile(
                 uri = outputFile.toUri().toString(),
                 driveId = navArgs.driveId,
                 fileCreatedAt = fileCreatedAt,
@@ -168,11 +171,13 @@ class ImportFilesDialog : DialogFragment() {
                 remoteFolder = navArgs.folderId,
                 type = UploadFile.Type.UPLOAD.name,
                 userId = AccountUtils.currentUserId,
-            ).store()
+            )
+            uploadFile.store(currentCoroutineContext())
             successCount++
             currentImportFile = null
         }.onFailure { exception ->
             if (outputFile?.exists() == true) outputFile.delete()
+            uploadFile?.deleteIfExists()
             throw exception
         }
     }
