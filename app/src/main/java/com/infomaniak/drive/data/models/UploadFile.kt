@@ -44,9 +44,12 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
 import io.realm.kotlin.oneOf
 import io.sentry.Sentry
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.util.Date
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 open class UploadFile(
     @PrimaryKey var uri: String = "",
@@ -72,10 +75,11 @@ open class UploadFile(
         remoteSubFolder = parent + if (createDatedSubFolders) "/${fileModifiedAt.format("yyyy/MM")}" else ""
     }
 
-    fun store() {
+    fun store(coroutineContext: CoroutineContext = EmptyCoroutineContext) {
         getRealmInstance().use {
             it.executeTransaction { realm ->
                 realm.insertOrUpdate(this)
+                coroutineContext.ensureActive()
             }
         }
     }
