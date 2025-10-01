@@ -171,7 +171,7 @@ class ImportFilesDialog : DialogFragment() {
                 remoteFolder = navArgs.folderId,
                 type = UploadFile.Type.UPLOAD.name,
                 userId = AccountUtils.currentUserId,
-            ).store()
+            ).store(currentCoroutineContext())
             successCount++
             currentImportFile = null
         }.onFailure { exception ->
