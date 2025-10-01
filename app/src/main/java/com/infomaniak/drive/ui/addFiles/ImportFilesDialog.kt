@@ -109,7 +109,10 @@ class ImportFilesDialog : DialogFragment() {
             runCatching {
                 initUpload(iterator.next())
             }.onFailure { exception ->
-                if (exception is CancellationException) throw exception
+                if (exception is CancellationException) {
+                    dismissAllowingStateLoss()
+                    throw exception
+                }
                 when {
                     exception is IOException && exception.message?.contains("ENOSPC|No space left".toRegex()) == true -> {
                         isLowDeviceStorage = true
