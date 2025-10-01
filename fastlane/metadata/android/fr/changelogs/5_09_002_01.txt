@@ -1,0 +1,5 @@
+- Correction d'un plantage lors de l'ouverture d'un fichier PDF avec kDrive
+- Amélioration de la stabilité des téléchargements
+- Correction d'une déconnexion lors de l'ouverture d'un partage public protégé par mot de passe
+- Correction d'un problème empêchant l'affichage des aperçus des fichiers partagés publiquement lorsque l'utilisateur n'est pas connecté
+- Suppression de l'option permettant d'enregistrer une vidéo dans le panneau inférieur « Ajouter un fichier »
