@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,13 +161,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
                     putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
                 }
-                val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
-                    putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(true))
-                }
-                val chooserIntent = Intent.createChooser(takePictureIntent, getString(R.string.buttonTakePhotoOrVideo)).apply {
-                    putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takeVideoIntent))
-                }
-                captureMediaResultLauncher.launch(chooserIntent)
+                captureMediaResultLauncher.launch(takePictureIntent)
             } catch (e: IOException) {
                 e.printStackTrace()
             }

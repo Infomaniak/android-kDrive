@@ -169,7 +169,7 @@
     <string name="buttonSharePublicLink">Öffentlichen Link freigeben</string>
     <string name="buttonStopUpload">Import dieser Datei abbrechen</string>
     <string name="buttonSwitchDrive">Drive wechseln</string>
-    <string name="buttonTakePhotoOrVideo">Foto oder Video aufnehmen</string>
+    <string name="buttonTakePhoto">Foto machen</string>
     <string name="buttonToggleDisplay">Zum Raster- oder Listenmodus wechseln</string>
     <string name="buttonUpgrade">Upgrade</string>
     <string name="buttonUpgradeOffer">Mein Angebot erweitern</string>
