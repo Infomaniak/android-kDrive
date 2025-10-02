@@ -30,7 +30,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
-import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.setup
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
@@ -89,8 +89,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     }
 
     private fun initBottomSheet() = with(bottomSheetView) {
-        requireActivity().setupBottomSheetFileBehavior(
-            bottomSheetBehavior = bottomSheetBehavior,
+        bottomSheetBehavior.setup(
             isDraggable = publicShareViewModel.canDownloadFiles,
             isFitToContents = true,
         )

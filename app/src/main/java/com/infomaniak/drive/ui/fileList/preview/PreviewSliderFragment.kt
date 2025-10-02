@@ -52,7 +52,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.navigateToParentFolder
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.printPdf
-import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.setup
 import com.infomaniak.drive.utils.shareText
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
@@ -103,7 +103,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
+        bottomSheetBehavior.setup(!navigationArgs.hideActions)
 
         bottomSheetView.apply {
             init(

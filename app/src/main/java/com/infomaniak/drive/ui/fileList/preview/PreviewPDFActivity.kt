@@ -38,7 +38,7 @@ import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.saveToKDrive
-import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
+import com.infomaniak.drive.utils.setup
 import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
@@ -86,7 +86,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     private fun initBottomSheet() = with(binding) {
-        setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true, isFitToContents = true)
+        bottomSheetBehavior.setup(isDraggable = true, isFitToContents = true)
         bottomSheetFileInfos.apply {
             lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { updateWithExternalFile(getFakeFile()) }
             initOnClickListener(this@PreviewPDFActivity)
