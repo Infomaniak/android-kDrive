@@ -77,9 +77,6 @@ import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.context
-import com.infomaniak.core.legacy.utils.isNightModeEnabled
-import com.infomaniak.core.legacy.utils.lightNavigationBar
-import com.infomaniak.core.legacy.utils.lightStatusBar
 import com.infomaniak.core.legacy.utils.loadAvatar
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.sentry.SentryLog
@@ -113,16 +110,6 @@ import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.views.PendingFilesView
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import com.infomaniak.lib.core.utils.isNightModeEnabled
-import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.utils.lightNavigationBar
-import com.infomaniak.lib.core.utils.lightStatusBar
-import com.infomaniak.lib.core.utils.loadAvatar
-import com.infomaniak.lib.core.utils.safeNavigate
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList

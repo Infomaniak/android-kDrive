@@ -33,8 +33,6 @@ import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.setColorNavigationBar
-import com.infomaniak.drive.utils.setColorStatusBar
 
 class PublicShareActivity : AppCompatActivity() {
 
