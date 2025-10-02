@@ -31,6 +31,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
+import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
@@ -62,12 +68,6 @@ import com.infomaniak.drive.utils.shareText
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setBackNavigationResult
-import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

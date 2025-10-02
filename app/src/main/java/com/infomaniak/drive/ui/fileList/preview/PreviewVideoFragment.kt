@@ -43,6 +43,9 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.FileDataSource
 import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.networking.HttpUtils
+import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMediaPlayerEvent
 import com.infomaniak.drive.R
@@ -51,9 +54,6 @@ import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 
 open class PreviewVideoFragment : PreviewFragment() {
 

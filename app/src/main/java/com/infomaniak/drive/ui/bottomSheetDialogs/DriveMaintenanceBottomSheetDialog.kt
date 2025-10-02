@@ -21,8 +21,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.utils.toPx
 
 class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
 

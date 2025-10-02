@@ -35,6 +35,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
+import com.infomaniak.core.legacy.BuildConfig.AUTOLOG_URL
+import com.infomaniak.core.legacy.BuildConfig.TERMINATE_ACCOUNT_URL
+import com.infomaniak.core.legacy.applock.LockActivity
+import com.infomaniak.core.legacy.bugtracker.BugTrackerActivity
+import com.infomaniak.core.legacy.bugtracker.BugTrackerActivityArgs
+import com.infomaniak.core.legacy.ui.WebViewActivity
+import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.legacy.utils.openAppNotificationSettings
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
@@ -50,16 +60,6 @@ import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.getDashboardData
-import com.infomaniak.lib.applock.LockActivity
-import com.infomaniak.lib.bugtracker.BugTrackerActivity
-import com.infomaniak.lib.bugtracker.BugTrackerActivityArgs
-import com.infomaniak.lib.core.BuildConfig.AUTOLOG_URL
-import com.infomaniak.lib.core.BuildConfig.TERMINATE_ACCOUNT_URL
-import com.infomaniak.lib.core.ui.WebViewActivity
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import com.infomaniak.lib.core.utils.openAppNotificationSettings
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
 
 class SettingsFragment : Fragment() {
 

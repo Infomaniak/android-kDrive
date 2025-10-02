@@ -29,6 +29,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH_DAY_ONE_CHAR
 import com.infomaniak.core.utils.FORMAT_DATE_SHORT_DAY_ONE_CHAR
 import com.infomaniak.core.utils.day
@@ -42,7 +43,6 @@ import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
 import com.infomaniak.drive.databinding.FragmentBottomSheetSearchFilterDateBinding
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
-import com.infomaniak.lib.core.utils.safeBinding
 import java.util.Calendar
 import java.util.Date
 import androidx.core.util.Pair as AndroidPair

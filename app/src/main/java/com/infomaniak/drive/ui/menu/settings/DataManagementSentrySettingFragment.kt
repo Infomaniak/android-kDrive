@@ -23,10 +23,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentDataManagementSentrySettingBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.lib.core.utils.safeBinding
 
 class DataManagementSentrySettingFragment : Fragment() {
 

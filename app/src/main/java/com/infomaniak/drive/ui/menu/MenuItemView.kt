@@ -21,9 +21,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import com.infomaniak.core.legacy.utils.getAttributes
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewMenuItemBinding
-import com.infomaniak.lib.core.utils.getAttributes
 
 class MenuItemView @JvmOverloads constructor(
     context: Context,

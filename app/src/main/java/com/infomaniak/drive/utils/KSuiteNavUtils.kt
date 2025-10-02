@@ -29,12 +29,12 @@ import com.infomaniak.core.ksuite.myksuite.ui.screens.KSuiteApp
 import com.infomaniak.core.ksuite.myksuite.ui.screens.MyKSuiteDashboardScreenData
 import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
+import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.drive.MatomoDrive.trackKSuiteProBottomSheetEvent
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteUpgradeBottomSheetEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.ui.bottomSheetDialogs.KSuiteProBottomSheetDialogArgs
-import com.infomaniak.lib.core.models.user.User
 
 fun Fragment.getDashboardData(myKSuiteData: MyKSuiteData, user: User): MyKSuiteDashboardScreenData {
     return MyKSuiteUiUtils.getDashboardData(

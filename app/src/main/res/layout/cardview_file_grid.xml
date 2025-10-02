@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.infomaniak.lib.core.views.LoaderCardView
+    <com.infomaniak.core.legacy.views.LoaderCardView
         android:id="@+id/fileCardView"
         style="@style/CardViewInfomaniak"
         android:layout_width="0dp"
@@ -124,7 +124,7 @@
                     app:layout_constraintStart_toEndOf="@id/progressLayout"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <com.infomaniak.lib.core.views.LoaderTextView
+                    <com.infomaniak.core.legacy.views.LoaderTextView
                         android:id="@+id/fileName"
                         style="@style/Subtitle2"
                         android:layout_width="match_parent"
@@ -171,5 +171,5 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone" />
-    </com.infomaniak.lib.core.views.LoaderCardView>
+    </com.infomaniak.core.legacy.views.LoaderCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

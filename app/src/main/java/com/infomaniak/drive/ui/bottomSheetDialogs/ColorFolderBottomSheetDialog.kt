@@ -23,10 +23,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.drive.databinding.FragmentBottomSheetColorFolderBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderAdapter.Companion.COLORS
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.setBackNavigationResult
 
 class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
 

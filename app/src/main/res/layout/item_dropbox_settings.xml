@@ -109,7 +109,7 @@
             app:layout_constraintTop_toBottomOf="@id/passwordDescription"
             tools:visibility="visible" />
 
-        <com.infomaniak.lib.core.views.EndIconTextInputLayout
+        <com.infomaniak.core.legacy.views.EndIconTextInputLayout
             android:id="@+id/passwordTextLayout"
             style="@style/TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
@@ -132,7 +132,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPassword" />
 
-        </com.infomaniak.lib.core.views.EndIconTextInputLayout>
+        </com.infomaniak.core.legacy.views.EndIconTextInputLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

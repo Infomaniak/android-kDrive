@@ -22,7 +22,7 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import com.infomaniak.lib.core.utils.setMargins
+import com.infomaniak.core.legacy.utils.setMargins
 
 fun View.onApplyWindowInsetsListener(
     shouldConsumeInsets: Boolean = false,

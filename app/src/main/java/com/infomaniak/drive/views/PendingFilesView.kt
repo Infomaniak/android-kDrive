@@ -26,10 +26,10 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.google.android.material.shape.CornerFamily
+import com.infomaniak.core.legacy.utils.getAttributes
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.utils.navigateToUploadView
-import com.infomaniak.lib.core.utils.getAttributes
 
 class PendingFilesView @JvmOverloads constructor(
     context: Context,

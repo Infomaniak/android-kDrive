@@ -33,6 +33,8 @@ import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.ImageRequest.Listener
 import coil.request.SuccessResult
+import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.coil.ImageLoaderType
@@ -40,8 +42,6 @@ import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

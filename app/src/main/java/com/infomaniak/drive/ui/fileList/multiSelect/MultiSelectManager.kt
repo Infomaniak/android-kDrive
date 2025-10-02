@@ -19,12 +19,12 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
+import com.infomaniak.core.legacy.models.ApiResponse
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.CancellableAction
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.lib.core.models.ApiResponse
 import io.realm.OrderedRealmCollection
 import io.realm.RealmList
 import kotlinx.coroutines.Dispatchers

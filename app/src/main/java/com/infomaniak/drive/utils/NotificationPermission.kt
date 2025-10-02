@@ -23,8 +23,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import com.infomaniak.core.legacy.utils.hasPermissions
 import com.infomaniak.drive.utils.DrivePermissions.Companion.resultPermissions
-import com.infomaniak.lib.core.utils.hasPermissions
 
 class NotificationPermission {
 

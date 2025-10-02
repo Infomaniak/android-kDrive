@@ -25,6 +25,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.infomaniak.core.legacy.api.ApiController
 import com.infomaniak.core.utils.SECONDS_IN_A_DAY
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.data.api.ApiRepository
@@ -34,7 +35,6 @@ import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmModules
-import com.infomaniak.lib.core.api.ApiController
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmObject

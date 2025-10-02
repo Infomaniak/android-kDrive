@@ -20,8 +20,8 @@ package com.infomaniak.drive.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
+import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
-import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

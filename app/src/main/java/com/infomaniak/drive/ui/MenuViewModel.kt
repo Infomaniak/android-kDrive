@@ -21,9 +21,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
+import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.models.user.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

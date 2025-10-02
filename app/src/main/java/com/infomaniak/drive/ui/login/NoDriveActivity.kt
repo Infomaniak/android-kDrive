@@ -19,10 +19,10 @@ package com.infomaniak.drive.ui.login
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.ActivityNoDriveBinding
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
 
 class NoDriveActivity : AppCompatActivity() {
 

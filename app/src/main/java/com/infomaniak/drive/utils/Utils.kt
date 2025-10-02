@@ -44,6 +44,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.legacy.utils.DownloadManagerUtils
+import com.infomaniak.core.legacy.utils.showKeyboard
+import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.BulkOperationType
@@ -64,9 +67,6 @@ import com.infomaniak.drive.ui.fileList.preview.PreviewPDFActivity
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderFragmentArgs
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.views.FileInfoActionsView.Companion.SINGLE_OPERATION_CUSTOM_TAG
-import com.infomaniak.lib.core.utils.DownloadManagerUtils
-import com.infomaniak.lib.core.utils.showKeyboard
-import com.infomaniak.lib.core.utils.showToast
 import java.util.Date
 import kotlin.math.pow
 

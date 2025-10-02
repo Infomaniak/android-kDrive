@@ -25,14 +25,14 @@ import androidx.core.view.isGone
 import androidx.core.view.marginBottom
 import androidx.core.view.marginTop
 import androidx.fragment.app.Fragment
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentMenuGalleryBinding
 import com.infomaniak.drive.databinding.MultiSelectLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.fileList.multiSelect.GalleryMultiSelectActionsBottomSheetDialog
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.toPx
 
 class MenuGalleryFragment : Fragment() {
 

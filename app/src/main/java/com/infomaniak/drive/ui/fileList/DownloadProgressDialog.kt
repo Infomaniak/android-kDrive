@@ -23,9 +23,9 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.setBackNavigationResult
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 

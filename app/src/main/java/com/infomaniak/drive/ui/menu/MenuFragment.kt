@@ -37,6 +37,7 @@ import com.infomaniak.core.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.coil.loadAvatar
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.data.KSuite
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -47,7 +48,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
-import com.infomaniak.lib.core.utils.safeBinding
 
 class MenuFragment : Fragment() {
 

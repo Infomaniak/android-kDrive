@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api
 
+import com.infomaniak.core.legacy.BuildConfig
 import com.infomaniak.drive.BuildConfig.DRIVE_API_V2
 import com.infomaniak.drive.BuildConfig.DRIVE_API_V3
 import com.infomaniak.drive.BuildConfig.MANAGER_URL
@@ -29,7 +30,6 @@ import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.utils.FileId
-import com.infomaniak.lib.core.BuildConfig
 import java.net.URLEncoder
 import java.util.Date
 

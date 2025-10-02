@@ -33,6 +33,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
+import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.legacy.utils.setPagination
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.BulkOperationType
@@ -48,9 +51,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getAdjustedColumnNumber
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.views.NoItemsLayoutView
-import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.setPagination
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

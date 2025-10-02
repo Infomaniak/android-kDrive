@@ -21,11 +21,11 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.core.net.toUri
+import com.infomaniak.core.legacy.R
+import com.infomaniak.core.legacy.utils.clearStack
+import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.ui.LaunchActivity
-import com.infomaniak.lib.core.R
-import com.infomaniak.lib.core.utils.clearStack
-import com.infomaniak.lib.core.utils.showToast
 
 object PublicShareUtils {
 

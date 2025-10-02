@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.models.drive
 
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.lib.core.utils.Utils.enumValueOfOrNull
+import com.infomaniak.core.legacy.utils.Utils.enumValueOfOrNull
 import io.realm.RealmObject
 import io.realm.annotations.RealmClass
 

@@ -21,7 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.infomaniak.lib.core.views.EndIconTextInputLayout
+    <com.infomaniak.core.legacy.views.EndIconTextInputLayout
         android:id="@+id/timeValueLayout"
         style="@style/TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
@@ -37,6 +37,6 @@
             android:layout_height="wrap_content"
             android:inputType="date"
             tools:text="16:42" />
-    </com.infomaniak.lib.core.views.EndIconTextInputLayout>
+    </com.infomaniak.core.legacy.views.EndIconTextInputLayout>
 
 </FrameLayout>

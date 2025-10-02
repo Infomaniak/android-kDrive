@@ -26,6 +26,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
@@ -48,9 +51,6 @@ import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.observeNavigateFileListTo
 import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.launch
 
 class RootFilesFragment : BaseRootFolderFragment() {

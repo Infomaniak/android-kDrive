@@ -19,17 +19,17 @@ package com.infomaniak.drive.data.models
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+import com.infomaniak.core.legacy.networking.AccessTokenUsageInterceptor.ApiCallRecord
+import com.infomaniak.core.legacy.utils.SharedValues
+import com.infomaniak.core.legacy.utils.sharedValue
+import com.infomaniak.core.legacy.utils.sharedValueWithOrdinal
+import com.infomaniak.core.legacy.utils.transaction
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.SyncSettings.SavePicturesDate
 import com.infomaniak.drive.ui.bottomSheetDialogs.BackgroundSyncPermissionsBottomSheetDialog.Companion.manufacturerWarning
 import com.infomaniak.drive.ui.home.RootFileTreeCategory
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.networking.AccessTokenUsageInterceptor.ApiCallRecord
-import com.infomaniak.lib.core.utils.SharedValues
-import com.infomaniak.lib.core.utils.sharedValue
-import com.infomaniak.lib.core.utils.sharedValueWithOrdinal
-import com.infomaniak.lib.core.utils.transaction
 
 class UiSettings(context: Context) : SharedValues {
 

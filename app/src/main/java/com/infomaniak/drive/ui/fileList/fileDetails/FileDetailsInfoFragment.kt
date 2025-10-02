@@ -30,6 +30,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -50,9 +53,6 @@ import com.infomaniak.drive.utils.loadAvatar
 import com.infomaniak.drive.utils.navigateToParentFolder
 import com.infomaniak.drive.views.ShareLinkContainerView
 import com.infomaniak.drive.views.UserAvatarView
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setMargins
 
 class FileDetailsInfoFragment : FileDetailsSubFragment(), ShareLinkManageable {
 

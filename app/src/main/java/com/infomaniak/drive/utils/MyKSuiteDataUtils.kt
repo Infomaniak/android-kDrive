@@ -20,9 +20,9 @@ package com.infomaniak.drive.utils
 import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteDataManager
+import com.infomaniak.core.legacy.networking.HttpClient
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
-import com.infomaniak.lib.core.networking.HttpClient
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlin.coroutines.cancellation.CancellationException

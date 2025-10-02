@@ -18,11 +18,11 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.models.ApiResponseStatus
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.models.ApiResponseStatus
 
 object PreviewPDFUtils {
 

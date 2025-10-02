@@ -22,10 +22,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentIntroBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.lib.core.utils.safeBinding
 
 class IntroFragment : Fragment() {
 

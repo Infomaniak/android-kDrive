@@ -37,6 +37,10 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.infomaniak.core.cancellable
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
@@ -71,10 +75,6 @@ import com.infomaniak.drive.utils.SyncUtils.isSyncScheduled
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
 import io.realm.kotlin.toFlow
 import io.sentry.Breadcrumb

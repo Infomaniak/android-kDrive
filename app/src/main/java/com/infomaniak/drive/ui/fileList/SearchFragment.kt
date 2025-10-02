@@ -28,6 +28,8 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setPagination
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
@@ -39,8 +41,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.DebouncingTextWatcher
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setPagination
 
 class SearchFragment : FileListFragment() {
 

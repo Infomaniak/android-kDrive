@@ -26,6 +26,10 @@ import com.dd.plist.NSDictionary
 import com.dd.plist.NSString
 import com.dd.plist.PropertyListParser
 import com.infomaniak.core.cancellable
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.legacy.utils.capitalizeFirstChar
+import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -46,10 +50,6 @@ import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.menu.TrashFragmentArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragmentArgs
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import com.infomaniak.lib.core.utils.capitalizeFirstChar
-import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

@@ -20,13 +20,13 @@ package com.infomaniak.drive.data.services
 import android.content.Context
 import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
+import com.infomaniak.core.legacy.api.ApiController.gson
+import com.infomaniak.core.legacy.utils.Utils
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
 import com.infomaniak.drive.utils.isPositive
-import com.infomaniak.lib.core.api.ApiController.gson
-import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

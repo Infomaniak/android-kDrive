@@ -29,6 +29,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setPagination
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentHomeActivitiesBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
@@ -37,8 +39,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.navigateToParentFolder
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setPagination
 
 class HomeActivitiesFragment : Fragment() {
 

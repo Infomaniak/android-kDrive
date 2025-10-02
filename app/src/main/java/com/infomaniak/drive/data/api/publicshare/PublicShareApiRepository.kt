@@ -17,6 +17,11 @@
  */
 package com.infomaniak.drive.data.api.publicshare
 
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.api.ApiController.ApiMethod.GET
+import com.infomaniak.core.legacy.api.ApiController.ApiMethod.POST
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
@@ -29,11 +34,6 @@ import com.infomaniak.drive.data.models.FileCount
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.utils.FileId
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.api.ApiController.ApiMethod.GET
-import com.infomaniak.lib.core.api.ApiController.ApiMethod.POST
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.models.ApiResponseStatus
 import okhttp3.OkHttpClient
 
 object PublicShareApiRepository {
