@@ -37,6 +37,7 @@ import android.provider.MediaStore
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
@@ -185,6 +186,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        enableEdgeToEdge()
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 
