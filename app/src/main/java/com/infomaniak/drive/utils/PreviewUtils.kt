@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.utils
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -54,16 +53,14 @@ import java.io.BufferedInputStream
 
 private const val BUFFER_SIZE = 8192
 
-fun Activity.setupBottomSheetFileBehavior(
-    bottomSheetBehavior: BottomSheetBehavior<View>,
+fun BottomSheetBehavior<View>.setup(
     isDraggable: Boolean,
     isFitToContents: Boolean = false,
 ) {
-    bottomSheetBehavior.apply {
-        isHideable = true
-        this.isDraggable = isDraggable
-        this.isFitToContents = isFitToContents
-    }
+    isHideable = true
+
+    this.isDraggable = isDraggable
+    this.isFitToContents = isFitToContents
 }
 
 fun Context.saveToKDrive(externalFileUri: Uri) {
