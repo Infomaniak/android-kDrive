@@ -25,7 +25,6 @@ import android.net.Uri
 import android.print.PrintAttributes
 import android.print.PrintManager
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -43,7 +42,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.ui.MainActivity.SystemBarsColorScheme
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.DownloadProgressViewModel.Companion.PROGRESS_COMPLETE
@@ -64,27 +62,10 @@ fun Activity.setupBottomSheetFileBehavior(
     isDraggable: Boolean,
     isFitToContents: Boolean = false,
 ) {
-    setColorNavigationBar(SystemBarsColorScheme.AppBar)
     bottomSheetBehavior.apply {
         isHideable = true
         this.isDraggable = isDraggable
         this.isFitToContents = isFitToContents
-        addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                window.lightStatusBar(!isNightModeEnabled() && bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
-
-                when (bottomSheetBehavior.state) {
-                    BottomSheetBehavior.STATE_HIDDEN -> {
-                        window?.navigationBarColor =
-                            ContextCompat.getColor(this@setupBottomSheetFileBehavior, R.color.previewBackgroundTransparent)
-                        window?.lightNavigationBar(false)
-                    }
-                    else -> setColorNavigationBar(SystemBarsColorScheme.AppBar)
-                }
-            }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
-        })
     }
 }
 
