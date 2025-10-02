@@ -70,6 +70,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
 
     override val isPublicShared = false
+    override val canDownloadFiles = true
     override val ownerFragment = this
 
     override val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
@@ -118,6 +119,8 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
                 openWith.isGone = isDownloading
             }
+
+            setupActions(isVisible = !navigationArgs.hideActions)
         }
     }
 

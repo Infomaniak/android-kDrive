@@ -49,6 +49,7 @@ import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getHeader
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getPreviewPDFHandler
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
+import com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragment
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.drive.utils.printPdf
@@ -184,8 +185,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         thumbnailRatio(THUMBNAIL_RATIO)
                         onLoad { pageCount ->
                             // We can arrive here with a file different from a real PDF like OpenOffice documents
-                            val canPrintFile = externalFileUri != null || file.extensionType == ExtensionType.PDF.value
-                            shouldHidePrintOption(isGone = !canPrintFile)
+                            shouldHidePrintOption(isGone = !canPrintFile())
 
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
@@ -216,6 +216,14 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                     }
                 }
             }
+        }
+    }
+
+    private fun canPrintFile(): Boolean {
+        return if (parentFragment is PublicSharePreviewSliderFragment) {
+            (parentFragment as PublicSharePreviewSliderFragment).publicShareViewModel.canDownloadFiles && file.isPDF()
+        } else {
+            previewPDFHandler.externalFileUri != null || file.isPDF()
         }
     }
 

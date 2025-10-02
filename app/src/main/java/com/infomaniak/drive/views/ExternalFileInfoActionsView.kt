@@ -57,6 +57,14 @@ class ExternalFileInfoActionsView @JvmOverloads constructor(
         downloadFile.isVisible = true
     }
 
+    fun setupActions(isVisible: Boolean) = with(binding) {
+        openWith.isVisible = isVisible
+        shareFile.isVisible = isVisible
+        saveToKDrive.isVisible = isVisible
+        downloadFile.isVisible = isVisible
+        print.isVisible = isVisible
+    }
+
     fun initOnClickListener(onItemClickListener: OnItemClickListener) = with(binding) {
         openWith.setOnClickListener { onItemClickListener.openWith() }
         shareFile.setOnClickListener { onItemClickListener.shareFile() }
