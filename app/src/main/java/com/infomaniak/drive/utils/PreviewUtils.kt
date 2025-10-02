@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -29,6 +30,8 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
 import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.utils.isNightModeEnabled
+import com.infomaniak.core.legacy.utils.lightStatusBar
 import com.infomaniak.core.network.utils.bodyAsStringOrNull
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
@@ -53,14 +56,24 @@ import java.io.BufferedInputStream
 
 private const val BUFFER_SIZE = 8192
 
-fun BottomSheetBehavior<View>.setup(
+fun Activity.setupBottomSheetFileBehavior(
+    bottomSheetBehavior: BottomSheetBehavior<View>,
     isDraggable: Boolean,
     isFitToContents: Boolean = false,
-) {
+) = with(bottomSheetBehavior) {
     isHideable = true
 
     this.isDraggable = isDraggable
     this.isFitToContents = isFitToContents
+
+    // Status bar need to be light when the bottom sheet is expanded for preview fragments
+    addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        override fun onStateChanged(bottomSheet: View, newState: Int) {
+            window.lightStatusBar(!isNightModeEnabled() && bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
+        }
+
+        override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+    })
 }
 
 fun Context.saveToKDrive(externalFileUri: Uri) {
