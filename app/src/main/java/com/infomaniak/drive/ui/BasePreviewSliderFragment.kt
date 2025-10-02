@@ -54,7 +54,6 @@ import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.PreviewHeaderView
 import com.infomaniak.lib.core.utils.getBackNavigationResult
 import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
