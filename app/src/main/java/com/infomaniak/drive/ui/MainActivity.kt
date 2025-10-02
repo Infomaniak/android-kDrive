@@ -112,8 +112,6 @@ import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.drive.utils.setColorNavigationBar
-import com.infomaniak.drive.utils.setColorStatusBar
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -187,6 +185,7 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         enableEdgeToEdge()
+        window.lightStatusBar(!isNightModeEnabled())
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 
@@ -493,25 +492,6 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        when (destination.id) {
-            R.id.myKSuiteDashboardFragment, R.id.kSuiteProBottomSheetDialog -> {
-                setColorStatusBar(SystemBarsColorScheme.KSuite)
-                setColorNavigationBar(SystemBarsColorScheme.KSuite)
-            }
-            R.id.fileDetailsFragment -> {
-                setColorNavigationBar(SystemBarsColorScheme.AppBar)
-            }
-            R.id.fileShareLinkSettingsFragment -> {
-                setColorStatusBar(SystemBarsColorScheme.AppBar)
-                setColorNavigationBar(SystemBarsColorScheme.AppBar)
-            }
-            R.id.downloadProgressDialog, R.id.previewSliderFragment, R.id.selectPermissionBottomSheetDialog -> Unit
-            else -> {
-                setColorStatusBar()
-                setColorNavigationBar()
-            }
-        }
-
         destination.trackDestination()
     }
 
@@ -678,15 +658,6 @@ class MainActivity : BaseActivity() {
 
     fun clickOnBottomBarFolders() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
-    }
-
-    enum class SystemBarsColorScheme(@ColorRes val statusBarColor: Int, @ColorRes val navigationBarColor: Int = statusBarColor) {
-        AppBar(R.color.appBar),
-        Default(R.color.background),
-        KSuite(
-            statusBarColor = R.color.myKSuiteDashboardStatusBarBackground,
-            navigationBarColor = R.color.myKSuiteDashboardNavigationBarBackground,
-        ),
     }
 
     companion object {

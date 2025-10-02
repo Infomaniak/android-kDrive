@@ -102,7 +102,6 @@ import com.infomaniak.drive.databinding.ItemUserBinding
 import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
 import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.drive.ui.MainActivity.SystemBarsColorScheme
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
@@ -179,30 +178,12 @@ fun Cursor.uri(contentUri: Uri): Uri {
 
 fun Number.isPositive(): Boolean = toLong() > 0
 
-fun Activity.setupStatusBarForPreview() {
-    window?.apply {
-        statusBarColor = ContextCompat.getColor(this@setupStatusBarForPreview, R.color.previewBackgroundTransparent)
-
-        lightStatusBar(false)
-    }
-}
-
 fun Activity.toggleSystemBar(show: Boolean) {
     ViewCompat.getWindowInsetsController(window.decorView)?.apply {
         systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         val systemBars = WindowInsetsCompat.Type.systemBars()
         if (show) show(systemBars) else hide(systemBars)
     }
-}
-
-fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
-    statusBarColor = ContextCompat.getColor(this@setColorStatusBar, colorScheme.statusBarColor)
-    lightStatusBar(!isNightModeEnabled())
-}
-
-fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
-    navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
-    lightNavigationBar(!isNightModeEnabled())
 }
 
 fun String.isValidUrl(): Boolean = Patterns.WEB_URL.matcher(this).matches()

@@ -49,7 +49,6 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.openOnlyOfficeDocument
 import com.infomaniak.drive.utils.printPdf
-import com.infomaniak.drive.utils.setupStatusBarForPreview
 import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
@@ -97,6 +96,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().window.lightStatusBar(false)
 
         setBackActionHandlers()
 
@@ -187,11 +187,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        requireActivity().setupStatusBarForPreview()
-    }
-
     override fun onPause() {
         super.onPause()
         if (noPreviewList()) return
@@ -207,6 +202,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         super.onDestroyView()
         _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
         _binding = null
+        requireActivity().window.lightStatusBar(!requireActivity().isNightModeEnabled())
     }
 
     override fun onDestroy() {
