@@ -714,7 +714,7 @@ class CloudStorageProvider : DocumentsProvider() {
                             syncPermissionNotifId,
                             Intent(
                                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                                Uri.parse("package:${context.packageName}"),
+                                "package:${context.packageName}".toUri(),
                             ),
                             NotificationUtilsCore.PENDING_INTENT_FLAGS,
                         ),

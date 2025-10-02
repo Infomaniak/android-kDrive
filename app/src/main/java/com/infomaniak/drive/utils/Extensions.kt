@@ -73,7 +73,6 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
-import com.infomaniak.core.legacy.models.ApiResponse
 import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
@@ -252,22 +251,6 @@ fun Activity.getScreenSizeInDp(): Point {
     return point
 }
 
-/**
- * Get the nearest value of precised Int in a typed-array of Ints
- */
-fun Array<Int>.getNearestValue(number: Int): Int {
-    var finalIndex = 0
-    var initialDistance: Int = abs(this[0] - number)
-    for (value in 1 until size) {
-        val currentDistance = abs(this[value] - number)
-        if (currentDistance < initialDistance) {
-            finalIndex = value
-            initialDistance = currentDistance
-        }
-    }
-    return this[finalIndex]
-}
-
 fun String.isEmail(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
@@ -291,12 +274,6 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     handleActionDone { if (text.isNotBlank()) !availableUsersAdapter.addFirstAvailableItem() }
 
     return availableUsersAdapter
-}
-
-fun Collection<DriveUser>.removeCommonUsers(intersectedUsers: ArrayList<Int>): ArrayList<DriveUser> {
-    return this.filterNot { availableUser ->
-        intersectedUsers.any { it == availableUser.id }
-    } as ArrayList<DriveUser>
 }
 
 fun Fragment.showSnackbar(
@@ -372,7 +349,7 @@ fun Context.shareText(text: String, title: String? = null) {
         title?.let { putExtra(Intent.EXTRA_TITLE, it) }
         type = "text/plain"
     }
-    ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
+    startActivity(Intent.createChooser(intent, null), null)
 }
 
 fun Category.getName(context: Context): String = when (name) {
@@ -414,8 +391,6 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
     val screenWidth = getScreenSizeInDp().x
     return min(max(minColumns, screenWidth / expectedItemSize), maxColumns)
 }
-
-fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
 
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
@@ -550,7 +525,7 @@ fun Fragment.observeAndDisplayNetworkAvailability(
             }
 
             noNetworkBinding.noNetwork.isGone = isNetworkAvailable != false
-            additionalChanges?.invoke(isNetworkAvailable != false)
+            additionalChanges?.invoke(isNetworkAvailable)
         }
     }
 }
