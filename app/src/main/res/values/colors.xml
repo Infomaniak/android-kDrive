@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2022-2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
     <color name="backgroundShortcut">#F5F5F5</color>
     <color name="myKSuiteChipOnBackground">#FFFFFF</color>
     <color name="myKSuiteChipOnCardBackground">#F1F1F1</color>
-    <color name="myKSuiteDashboardStatusBarBackground">@color/background</color>
-    <color name="myKSuiteDashboardNavigationBarBackground">@color/white</color>
     <color name="folderDefaultColor">@color/secondaryText</color>
 
     <!--Bottom sheet-->
