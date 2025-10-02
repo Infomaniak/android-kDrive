@@ -45,6 +45,7 @@ import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
@@ -57,7 +58,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     val previewPDFHandler by lazy {
         PreviewPDFHandler(
             context = this,
-            externalFileUri = Uri.parse(intent.dataString),
+            externalFileUri = intent.dataString?.toUri(),
             setPrintVisibility = binding.bottomSheetFileInfos::isPrintingHidden,
         )
     }
