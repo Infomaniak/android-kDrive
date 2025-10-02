@@ -39,7 +39,6 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.saveToKDrive
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
-import com.infomaniak.drive.utils.setupStatusBarForPreview
 import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
@@ -105,8 +104,6 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         ) {
             pdfContainer.setMargins(right = it?.right ?: 0)
         }
-
-        setupStatusBarForPreview()
     }
 
     fun toggleFullscreen() {
