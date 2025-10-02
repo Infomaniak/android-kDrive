@@ -22,6 +22,8 @@ jobs:
       NEW_USER_PASSWORD: ${{ secrets.NEW_USER_PASSWORD }}
       GENIUS_SCAN_ENV_PATH: "app/src/standard/java/com/infomaniak/drive/GeniusScanEnv.kt"
       GENIUS_SCAN_KEY: ${{ secrets.GENIUS_SCAN_KEY }}
+      SENTRY_AUTH_ENV_PATH: "env.properties"
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
     steps:
       - name: Checkout the code
@@ -32,6 +34,8 @@ jobs:
 
       - name: Create test env
         run: |
+          touch $SENTRY_AUTH_ENV_PATH
+          echo "sentryAuthToken=$SENTRY_AUTH_TOKEN" > $SENTRY_AUTH_ENV_PATH
           touch $ENV_PATH
           echo "package com.infomaniak.drive.utils; object Env { const val USE_CURRENT_USER = false; const val TOKEN: String = \"$ACCESS_TOKEN\";  const val DRIVE_ID = $DRIVE_ID; const val INVITE_USER_NAME: String = \"$INVITE_USER_NAME\"; const val NEW_USER_ID = $NEW_USER_ID; const val NEW_USER_NAME: String = \"$NEW_USER_NAME\"; const val NEW_USER_PASSWORD: String = \"$NEW_USER_PASSWORD\" }" > $ENV_PATH
           touch $GENIUS_SCAN_ENV_PATH
@@ -47,7 +51,7 @@ jobs:
       # Making sure the app compiles
       - name: Build app
         run: |
-          ./gradlew buildFdroidDebug
+          ./gradlew buildFdroidRelease
           ./gradlew buildStandardDebug
 
       - name: Run unit tests
