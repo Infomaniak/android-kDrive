@@ -83,7 +83,7 @@ open class UploadFile(
                 mutableRealm.insertOrUpdate(this)
                 coroutineContext.ensureActive()
             }
-        } catch (_: Exception) {
+        } finally {
             if (customRealm == null) realm?.close()
         }
     }
