@@ -22,6 +22,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
@@ -77,6 +78,7 @@ class LaunchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         setDefaultLocaleIfNeeded()
 

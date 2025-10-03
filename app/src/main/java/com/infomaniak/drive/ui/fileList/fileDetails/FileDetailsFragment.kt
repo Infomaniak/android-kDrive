@@ -83,8 +83,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     override fun onStart() {
         super.onStart()
         activity?.window?.apply {
-            statusBarColor = Color.TRANSPARENT
-
             requireView().onApplyWindowInsetsListener { _, windowInsets ->
                 binding.toolbar.setMargins(left = windowInsets.left, top = windowInsets.top)
                 binding.tabsContent.setMargins(left = windowInsets.left, right = windowInsets.right)

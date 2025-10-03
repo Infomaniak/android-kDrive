@@ -20,6 +20,7 @@ package com.infomaniak.drive.ui
 import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -35,6 +36,8 @@ class SwitchUserActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
         setContentView(root)
 
         toolbar.setNavigationOnClickListener {
