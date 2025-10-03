@@ -22,16 +22,11 @@
     </style>
 
     <style name="AppTheme" parent="AppThemeBase">
-        <item name="android:navigationBarColor">@color/background</item>
-        <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
         <item name="colorOnSurface">@android:color/white</item>
     </style>
 
-    <style name="AppTheme.Login" parent="AppTheme.LoginBase">
-        <item name="android:navigationBarColor">@color/appBar</item>
-        <item name="android:statusBarColor">@color/background</item>
-    </style>
+    <style name="AppTheme.Login" parent="AppTheme.LoginBase"/>
 
     <style name="AppTheme.BugTracker" parent="AppTheme.BugTrackerBase" />
 
