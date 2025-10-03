@@ -402,46 +402,43 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         SentryLog.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
-        getRealmInstance().use {
-            it.executeTransaction { realm ->
+        getRealmInstance().use { realm ->
+            MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
+                ensureActive()
+                // Add log
+                Sentry.addBreadcrumb(Breadcrumb().apply {
+                    category = BREADCRUMB_TAG
+                    message = "sync ${mediaFolder.id}"
+                    level = SentryLevel.DEBUG
+                })
+                SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
 
-                MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
-                    ensureActive()
-                    // Add log
-                    Sentry.addBreadcrumb(Breadcrumb().apply {
-                        category = BREADCRUMB_TAG
-                        message = "sync ${mediaFolder.id}"
-                        level = SentryLevel.DEBUG
-                    })
-                    SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
+                // Sync media folder
+                customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
+                customArgs = args + mediaFolder.id.toString()
 
-                    // Sync media folder
-                    customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
-                    customArgs = args + mediaFolder.id.toString()
+                fetchRecentLocalMediasToSync(
+                    coroutineScope = this,
+                    realm = realm,
+                    syncSettings = syncSettings,
+                    contentUri = MediaFoldersProvider.imagesExternalUri,
+                    selection = customSelection,
+                    args = customArgs,
+                    mediaFolder = mediaFolder,
+                )
+
+                if (syncSettings.syncVideo) {
+                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
 
                     fetchRecentLocalMediasToSync(
                         coroutineScope = this,
                         realm = realm,
                         syncSettings = syncSettings,
-                        contentUri = MediaFoldersProvider.imagesExternalUri,
+                        contentUri = MediaFoldersProvider.videosExternalUri,
                         selection = customSelection,
                         args = customArgs,
                         mediaFolder = mediaFolder,
                     )
-
-                    if (syncSettings.syncVideo) {
-                        customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
-
-                        fetchRecentLocalMediasToSync(
-                            coroutineScope = this,
-                            realm = realm,
-                            syncSettings = syncSettings,
-                            contentUri = MediaFoldersProvider.videosExternalUri,
-                            selection = customSelection,
-                            args = customArgs,
-                            mediaFolder = mediaFolder,
-                        )
-                    }
                 }
             }
         }
@@ -517,15 +514,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 remoteFolder = syncSettings.syncFolder,
                 userId = syncSettings.userId
             ).apply {
-                deleteIfExists(makeTransaction = false, customRealm = realm)
+                deleteIfExists(customRealm = realm)
                 createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
-                realm.insertOrUpdate(this)
+                store(customRealm = realm)
                 SentryLog.i(TAG, "localMediaFound> $fileName saved in realm")
             }
 
             UploadFile.setAppSyncSettings(
                 customRealm = realm,
-                makeTransaction = false,
                 syncSettings = syncSettings.apply {
                     if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
                 },
