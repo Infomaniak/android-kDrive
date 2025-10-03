@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2022-2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -17,19 +17,16 @@
   -->
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme.Launcher" parent="AppTheme.LauncherBase" />
+    <style name="AppTheme.Launcher" parent="AppTheme.LauncherBase">
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 
     <style name="AppTheme" parent="AppThemeBase">
-        <item name="android:navigationBarColor">@color/background</item>
-        <item name="android:statusBarColor">@color/background</item>
         <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
         <item name="colorOnSurface">@android:color/white</item>
     </style>
 
-    <style name="AppTheme.Login" parent="AppTheme.LoginBase">
-        <item name="android:navigationBarColor">@color/appBar</item>
-        <item name="android:statusBarColor">@color/background</item>
-    </style>
+    <style name="AppTheme.Login" parent="AppTheme.LoginBase"/>
 
     <style name="AppTheme.BugTracker" parent="AppTheme.BugTrackerBase" />
 
