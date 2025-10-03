@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -141,7 +141,7 @@ class SyncSettingsActivity : BaseActivity() {
         binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
             binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
         }
-        if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onResume() {
