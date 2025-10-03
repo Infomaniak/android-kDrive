@@ -139,7 +139,7 @@ open class UploadFile(
         uploadToken = newUploadToken
     }
 
-    fun deleteIfExists(keepFile: Boolean = false, makeTransaction: Boolean = true, customRealm: Realm? = null) {
+    fun deleteIfExists(keepFile: Boolean = false, customRealm: Realm? = null) {
         val block: (Realm) -> Unit? = { realm ->
             uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFileProxy ->
                 // Cancel session if exists
@@ -149,12 +149,11 @@ open class UploadFile(
                     }
                 }
                 // Delete in realm
-                val deleteFromRealm: (Realm) -> Unit = {
+                realm.executeTransaction {
                     if (uploadFileProxy.isValid) {
                         if (keepFile) uploadFileProxy.deletedAt = Date() else uploadFileProxy.deleteFromRealm()
                     }
                 }
-                if (makeTransaction) realm.executeTransaction(deleteFromRealm) else deleteFromRealm(realm)
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
@@ -423,10 +422,9 @@ open class UploadFile(
             }
         }
 
-        fun setAppSyncSettings(syncSettings: SyncSettings, customRealm: Realm? = null, makeTransaction: Boolean = true) {
+        fun setAppSyncSettings(syncSettings: SyncSettings, customRealm: Realm? = null) {
             val block: (Realm) -> Unit = { realm ->
-                val transaction: (Realm) -> Unit = { it.insertOrUpdate(syncSettings) }
-                if (makeTransaction) realm.executeTransaction(transaction) else transaction(realm)
+                realm.executeTransaction { it.insertOrUpdate(syncSettings) }
             }
             customRealm?.let(block) ?: getRealmInstance().use(block)
         }
