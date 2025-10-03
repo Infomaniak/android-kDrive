@@ -17,30 +17,23 @@
   -->
 <resources>
 
-    <style name="AppTheme.Launcher" parent="AppTheme.LauncherBase"/>
+    <style name="AppTheme.Launcher" parent="AppTheme.LauncherBase" />
 
     <style name="AppTheme" parent="AppThemeBase">
-        <item name="android:navigationBarColor">@color/background</item>
         <item name="android:windowLightNavigationBar">true</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 
-    <style name="AppTheme.Login">
-        <item name="android:navigationBarColor">@color/appBar</item>
+    <style name="AppTheme.Login" parent="AppTheme.LoginBase" >
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
     <style name="AppTheme.Lock">
-        <item name="android:navigationBarColor">@color/background</item>
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
-    <style name="BottomSheetDialogTheme" parent="BottomSheetDialogTheme.Base">
-        <item name="android:navigationBarColor">@color/appBar</item>
-    </style>
+    <style name="BottomSheetDialogTheme" parent="BottomSheetDialogTheme.Base" />
 
-    <style name="FullScreenBottomSheetDialogTheme" parent="FullScreenBottomSheetDialogTheme.Base">
-        <item name="android:navigationBarColor">@color/background</item>
-    </style>
+    <style name="FullScreenBottomSheetDialogTheme" parent="FullScreenBottomSheetDialogTheme.Base" />
 
 </resources>
