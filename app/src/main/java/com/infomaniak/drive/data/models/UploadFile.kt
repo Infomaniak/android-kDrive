@@ -75,12 +75,16 @@ open class UploadFile(
         remoteSubFolder = parent + if (createDatedSubFolders) "/${fileModifiedAt.format("yyyy/MM")}" else ""
     }
 
-    fun store(coroutineContext: CoroutineContext = EmptyCoroutineContext) {
-        getRealmInstance().use {
-            it.executeTransaction { realm ->
-                realm.insertOrUpdate(this)
+    fun store(coroutineContext: CoroutineContext = EmptyCoroutineContext, customRealm: Realm? = null) {
+        var realm: Realm? = null
+        try {
+            realm = customRealm ?: getRealmInstance()
+            realm.executeTransaction { mutableRealm ->
+                mutableRealm.insertOrUpdate(this)
                 coroutineContext.ensureActive()
             }
+        } catch (_: Exception) {
+            if (customRealm == null) realm?.close()
         }
     }
 
