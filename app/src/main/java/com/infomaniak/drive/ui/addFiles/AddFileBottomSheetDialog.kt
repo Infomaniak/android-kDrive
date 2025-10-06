@@ -54,6 +54,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetAddFileBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.bottomSheetDialogs.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.AccountUtils
@@ -75,7 +76,7 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Date
 
-class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
+class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private var binding: FragmentBottomSheetAddFileBinding by safeBinding()
 

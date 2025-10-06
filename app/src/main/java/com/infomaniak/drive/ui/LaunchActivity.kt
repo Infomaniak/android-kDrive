@@ -20,8 +20,10 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asFlow
@@ -98,8 +100,11 @@ class LaunchActivity : AppCompatActivity() {
             // so that even when we return, the activity will still be closed.
             finish()
         }
+
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
+    @Suppress("DEPRECATION")
     override fun onPause() {
         super.onPause()
         if (SDK_INT >= 34) {

@@ -186,8 +186,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        enableEdgeToEdge()
-        window.lightStatusBar(!isNightModeEnabled())
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 

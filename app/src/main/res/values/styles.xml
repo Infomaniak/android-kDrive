@@ -142,6 +142,7 @@
     <!--BottomSheetDialogTheme-->
 
     <style name="BottomSheetDialogTheme.Base" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowIsFloating">false</item>
         <item name="bottomSheetStyle">@style/BottomSheetDialogTheme.ModalStyle</item>
         <item name="colorAccent">@color/primary</item>

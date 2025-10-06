@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,9 @@ import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.databinding.FragmentBottomSheetSelectBinding
+import com.infomaniak.drive.ui.bottomSheetDialogs.EdgeToEdgeBottomSheetDialog
 
-open class SelectBottomSheetDialog : BottomSheetDialogFragment() {
+open class SelectBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
     protected var binding: FragmentBottomSheetSelectBinding by safeBinding()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

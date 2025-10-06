@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,12 @@
 package com.infomaniak.drive.views
 
 import android.app.Dialog
+import android.os.Build
+import android.os.Build.VERSION
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import androidx.core.view.WindowCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -30,11 +33,16 @@ open class FullScreenBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_FRAME, R.style.FullScreenBottomSheetDialogTheme)
+        setStyle(STYLE_NORMAL, R.style.FullScreenBottomSheetDialogTheme)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = BottomSheetDialog(requireContext(), theme)
+
+        dialog.window?.let {
+            WindowCompat.setDecorFitsSystemWindows(it, false)
+        }
+
         dialog.setOnShowListener { dialogInterface ->
             val bottomSheetDialog = dialogInterface as BottomSheetDialog
             val parentLayout = bottomSheetDialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
@@ -46,6 +54,11 @@ open class FullScreenBottomSheetDialog : BottomSheetDialogFragment() {
             }
         }
         return dialog
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (VERSION.SDK_INT >= 29) dialog?.window?.isNavigationBarContrastEnforced = false
     }
 
     private fun setupFullHeight(bottomSheet: View) {
