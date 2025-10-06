@@ -26,8 +26,8 @@ import com.infomaniak.core.legacy.models.ApiError
 import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.SHARE_URL_V1
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderArgs
@@ -175,7 +175,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         )
 
         val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
-        val destinationPath = "${BuildConfig.SHARE_URL_V1}drive/$destinationDriveId/files/$destinationFolderId"
+        val destinationPath = "${SHARE_URL_V1}drive/$destinationDriveId/files/$destinationFolderId"
         importPublicShareResult.postValue(error to destinationPath)
     }
 

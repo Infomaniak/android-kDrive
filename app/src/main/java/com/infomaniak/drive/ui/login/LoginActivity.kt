@@ -54,7 +54,9 @@ import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.observe
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.drive.BuildConfig
+import com.infomaniak.drive.CREATE_ACCOUNT_CANCEL_HOST
+import com.infomaniak.drive.CREATE_ACCOUNT_SUCCESS_HOST
+import com.infomaniak.drive.CREATE_ACCOUNT_URL
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.MatomoDrive.trackUserId
@@ -204,9 +206,9 @@ class LoginActivity : ComponentActivity() {
     private fun startAccountCreation() {
         infomaniakLogin.startCreateAccountWebView(
             resultLauncher = createAccountResultLauncher,
-            createAccountUrl = BuildConfig.CREATE_ACCOUNT_URL,
-            successHost = BuildConfig.CREATE_ACCOUNT_SUCCESS_HOST,
-            cancelHost = BuildConfig.CREATE_ACCOUNT_CANCEL_HOST,
+            createAccountUrl = CREATE_ACCOUNT_URL,
+            successHost = CREATE_ACCOUNT_SUCCESS_HOST,
+            cancelHost = CREATE_ACCOUNT_CANCEL_HOST,
         )
     }
 

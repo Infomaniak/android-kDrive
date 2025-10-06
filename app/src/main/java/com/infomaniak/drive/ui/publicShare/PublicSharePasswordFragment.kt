@@ -34,10 +34,10 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.SHARE_URL_V1
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
@@ -77,7 +77,7 @@ class PublicSharePasswordFragment : Fragment() {
 
     //region Hack TODO: Remove this when the back will support bearer token
     private fun getPublicShareUrl(): String {
-        return "${BuildConfig.SHARE_URL_V1}share/${publicShareViewModel.driveId}/${publicShareViewModel.publicShareUuid}"
+        return "${SHARE_URL_V1}share/${publicShareViewModel.driveId}/${publicShareViewModel.publicShareUuid}"
     }
     //endregion
 

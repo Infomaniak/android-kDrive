@@ -17,15 +17,15 @@
  */
 package com.infomaniak.drive.data.api
 
-import com.infomaniak.core.legacy.BuildConfig
-import com.infomaniak.drive.BuildConfig.DRIVE_API_V2
-import com.infomaniak.drive.BuildConfig.DRIVE_API_V3
-import com.infomaniak.drive.BuildConfig.MANAGER_URL
-import com.infomaniak.drive.BuildConfig.OFFICE_URL
-import com.infomaniak.drive.BuildConfig.SHARE_URL_V1
-import com.infomaniak.drive.BuildConfig.SHARE_URL_V2
-import com.infomaniak.drive.BuildConfig.SHARE_URL_V3
-import com.infomaniak.drive.BuildConfig.SHOP_URL
+import com.infomaniak.core.network.AUTOLOG_URL
+import com.infomaniak.core.network.MANAGER_URL
+import com.infomaniak.core.network.SHOP_URL
+import com.infomaniak.drive.DRIVE_API_V2
+import com.infomaniak.drive.DRIVE_API_V3
+import com.infomaniak.drive.OFFICE_URL
+import com.infomaniak.drive.SHARE_URL_V1
+import com.infomaniak.drive.SHARE_URL_V2
+import com.infomaniak.drive.SHARE_URL_V3
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
@@ -144,7 +144,7 @@ object ApiRoutes {
         if (isPublicShared()) {
             showPublicShareOfficeFile(driveId, publicShareUuid, id)
         } else {
-            "${BuildConfig.AUTOLOG_URL}?url=" + showOffice(file)
+            "${AUTOLOG_URL}?url=" + showOffice(file)
         }
     }
     //endregion
