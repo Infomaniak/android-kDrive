@@ -64,8 +64,7 @@ object SyncUtils {
         SentryLog.d(TAG, "lastModifiedIndex = $lastModifiedIndex dateModifiedIndex = $dateModifiedIndex")
         var fileModifiedAt = when {
             cursor.isValidDate(lastModifiedIndex) -> {
-                val lastModifiedValue = cursor.getLong(lastModifiedIndex)
-                SentryLog.d(TAG, "lastModifiedIndex is a valid date with $lastModifiedValue")
+                val lastModifiedValue = getLastModifiedOrNow(cursor, lastModifiedIndex)
                 Date(lastModifiedValue)
             }
             cursor.isValidDate(dateModifiedIndex) -> {
@@ -86,6 +85,17 @@ object SyncUtils {
         }
 
         return Pair(fileCreatedAt, fileModifiedAt)
+    }
+
+    private fun getLastModifiedOrNow(cursor: Cursor, lastModifiedIndex: Int): Long {
+        val lastModifiedValue = cursor.getLong(lastModifiedIndex)
+        val currentTimeMillis = System.currentTimeMillis()
+        return if (lastModifiedValue > currentTimeMillis) {
+            SentryLog.w(TAG, "lastModifiedIndex is not a valid date with $lastModifiedValue")
+            currentTimeMillis
+        } else {
+            lastModifiedValue
+        }
     }
 
     private fun Cursor.isValidDate(index: Int) = index != -1 && this.getLong(index) > 0
