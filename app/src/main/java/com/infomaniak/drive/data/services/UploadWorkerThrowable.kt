@@ -17,7 +17,9 @@
  */
 package com.infomaniak.drive.data.services
 
+import android.os.Build
 import androidx.work.ListenableWorker.Result
+import androidx.work.WorkInfo.Companion.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT
 import com.infomaniak.core.legacy.utils.isNetworkException
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
@@ -27,6 +29,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotifica
 import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.productForegroundQuotaNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils
@@ -61,8 +64,12 @@ object UploadWorkerThrowable {
             Result.retry()
 
         } catch (exception: CancellationException) { // Work has been cancelled
-            Result.retry()
-
+            if (Build.VERSION.SDK_INT >= 31 && stopReason == STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) {
+                currentUploadFile?.productForegroundQuotaNotification(applicationContext)
+                Result.failure()
+            } else {
+                Result.retry()
+            }
         } catch (exception: UploadTask.LockErrorException) {
             currentUploadFile?.lockErrorNotification(applicationContext)
             Result.retry()

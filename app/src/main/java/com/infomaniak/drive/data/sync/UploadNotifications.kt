@@ -132,6 +132,17 @@ object UploadNotifications {
         )
     }
 
+    fun UploadFile.productForegroundQuotaNotification(context: Context) {
+        val description = "To continue uploading, please go back to the app"
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadInterruptedErrorTitle),
+            description = description,
+            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
+            contentIntent = progressPendingIntent(context),
+        )
+    }
+
     fun permissionErrorNotification(context: Context) {
         val mainActivityIntent = PendingIntent.getActivity(
             context, NotificationUtils.UPLOAD_STATUS_ID,
