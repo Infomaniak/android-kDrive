@@ -46,46 +46,38 @@ object UploadWorkerThrowable {
         return try {
             block()
 
-        } catch (exception: UploadTask.FolderNotFoundException) {
+        } catch (_: UploadTask.FolderNotFoundException) {
             currentUploadFile?.folderNotFoundNotification(applicationContext)
             Result.failure()
-
-        } catch (exception: UploadTask.QuotaExceededException) {
-            currentUploadFile?.quotaExceededNotification(applicationContext)
+        } catch (_: UploadTask.QuotaExceededException) {
+            this.currentUploadFile?.quotaExceededNotification(applicationContext)
             Result.failure()
-
-        } catch (exception: AllowedFileSizeExceededException) {
+        } catch (_: AllowedFileSizeExceededException) {
             currentUploadFile?.allowedFileSizeExceededNotification(applicationContext)
             Result.failure()
-
         } catch (exception: OutOfMemoryError) {
             exception.printStackTrace()
             currentUploadFile?.outOfMemoryNotification(applicationContext)
             Result.retry()
-
-        } catch (exception: CancellationException) { // Work has been cancelled
+        } catch (_: CancellationException) { // Work has been cancelled
             if (Build.VERSION.SDK_INT >= 31 && stopReason == STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) {
                 currentUploadFile?.productForegroundQuotaNotification(applicationContext)
                 Result.failure()
             } else {
                 Result.retry()
             }
-        } catch (exception: UploadTask.LockErrorException) {
+        } catch (_: UploadTask.LockErrorException) {
             currentUploadFile?.lockErrorNotification(applicationContext)
             Result.retry()
-
-        } catch (exception: UploadTask.ProductBlockedException) {
+        } catch (_: UploadTask.ProductBlockedException) {
             currentUploadFile?.productMaintenanceExceptionNotification(applicationContext, false)
             Result.failure()
-
-        } catch (exception: UploadTask.ProductMaintenanceException) {
+        } catch (_: UploadTask.ProductMaintenanceException) {
             currentUploadFile?.productMaintenanceExceptionNotification(applicationContext, true)
             Result.failure()
-
         } catch (exception: Exception) {
             exception.printStackTrace()
             handleGenericException(exception)
-
         } finally {
             cancelUploadNotification()
         }
