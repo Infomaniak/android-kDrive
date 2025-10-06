@@ -18,7 +18,6 @@
 package com.infomaniak.drive.views
 
 import android.app.Dialog
-import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
 import android.view.View
