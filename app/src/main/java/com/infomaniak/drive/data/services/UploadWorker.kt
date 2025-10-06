@@ -268,7 +268,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         updateUploadCountNotification()
 
         try {
-            if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+            if (isSchemeFile()) {
                 uploadSchemeFile(uri)
             } else {
                 uploadSchemeContent(uri)

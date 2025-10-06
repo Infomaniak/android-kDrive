@@ -23,6 +23,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toFile
 import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
@@ -128,7 +129,7 @@ class UploadTask(
                 scope.setExtra("fileModifiedAt", "${uploadFile.fileModifiedAt.time}")
                 scope.setExtra("fileCreatedAt", "${uploadFile.fileCreatedAt?.time}")
             }
-
+            if (uploadFile.isSchemeFile()) Dispatchers.IO { uploadFile.getUriObject().toFile().delete() }
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())

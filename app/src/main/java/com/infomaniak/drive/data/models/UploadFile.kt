@@ -71,6 +71,8 @@ open class UploadFile(
     @delegate:Ignore
     val okHttpClient: OkHttpClient by lazy { runBlocking { AccountUtils.getHttpClient(userId = userId, timeout = 120) } }
 
+    fun isSchemeFile() = getUriObject().scheme.equals(ContentResolver.SCHEME_FILE)
+
     fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {
         remoteSubFolder = parent + if (createDatedSubFolders) "/${fileModifiedAt.format("yyyy/MM")}" else ""
     }
