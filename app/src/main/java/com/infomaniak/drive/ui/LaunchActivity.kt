@@ -22,7 +22,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
@@ -68,7 +67,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @SuppressLint("CustomSplashScreen")
-class LaunchActivity : AppCompatActivity() {
+class LaunchActivity : EdgeToEdgeActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
@@ -78,7 +77,6 @@ class LaunchActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         setDefaultLocaleIfNeeded()
 
@@ -98,8 +96,6 @@ class LaunchActivity : AppCompatActivity() {
             // so that even when we return, the activity will still be closed.
             finish()
         }
-
-        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     @Suppress("DEPRECATION")

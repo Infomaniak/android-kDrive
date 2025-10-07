@@ -219,7 +219,6 @@ class MainActivity : BaseActivity() {
             )
             binding.searchFab.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + windowInsets.bottom)
         }
-        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onStart() {

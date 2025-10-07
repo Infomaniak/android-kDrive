@@ -141,7 +141,6 @@ class SyncSettingsActivity : BaseActivity() {
         binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
             binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
         }
-        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onResume() {

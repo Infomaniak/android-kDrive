@@ -18,10 +18,7 @@
 package com.infomaniak.drive.ui
 
 import android.content.Intent
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
@@ -30,13 +27,12 @@ import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 
-class SwitchUserActivity : AppCompatActivity() {
+class SwitchUserActivity : EdgeToEdgeActivity() {
 
     private val binding: ViewSwitchSettingsBinding by lazy { ViewSwitchSettingsBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         setContentView(root)
 
@@ -59,7 +55,5 @@ class SwitchUserActivity : AppCompatActivity() {
             trackAccountEvent(MatomoName.Add)
             startActivity(Intent(this@SwitchUserActivity, LoginActivity::class.java))
         }
-
-        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 }

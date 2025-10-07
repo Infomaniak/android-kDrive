@@ -18,7 +18,7 @@
 package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.app.Dialog
-import android.os.Build.VERSION
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.WindowCompat
@@ -34,7 +34,7 @@ abstract class EdgeToEdgeBottomSheetDialog : BottomSheetDialogFragment() {
 
                 window?.let {
                     WindowCompat.setDecorFitsSystemWindows(it, false)
-                    if (VERSION.SDK_INT >= 29) it.isNavigationBarContrastEnforced = false
+                    if (SDK_INT >= 29) it.isNavigationBarContrastEnforced = false
                 }
 
                 findViewById<View>(com.google.android.material.R.id.container)?.apply {

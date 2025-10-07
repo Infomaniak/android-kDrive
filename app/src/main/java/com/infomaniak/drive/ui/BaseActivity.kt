@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -27,11 +28,10 @@ import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.runBlocking
 
-open class BaseActivity : AppCompatActivity() {
+open class BaseActivity : EdgeToEdgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         window.lightStatusBar(!isNightModeEnabled())
 
         if (AccountUtils.currentUser == null) {
@@ -39,5 +39,15 @@ open class BaseActivity : AppCompatActivity() {
             trackUserId(AccountUtils.currentUserId)
         }
         trackScreen()
+    }
+}
+
+abstract class EdgeToEdgeActivity(): AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 }
