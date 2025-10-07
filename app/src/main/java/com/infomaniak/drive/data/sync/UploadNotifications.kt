@@ -132,7 +132,7 @@ object UploadNotifications {
         )
     }
 
-    fun UploadFile.foregroundQuotaNotification(context: Context) {
+    fun UploadFile.foregroundServiceQuotaNotification(context: Context) {
         showNotification(
             context = context,
             title = context.getString(R.string.uploadPausedTitle),

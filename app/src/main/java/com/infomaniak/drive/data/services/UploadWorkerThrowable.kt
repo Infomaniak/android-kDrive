@@ -29,7 +29,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotifica
 import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.foregroundQuotaNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.foregroundServiceQuotaNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils
@@ -61,7 +61,7 @@ object UploadWorkerThrowable {
             Result.retry()
         } catch (_: CancellationException) { // Work has been cancelled
             if (Build.VERSION.SDK_INT >= 31 && stopReason == STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) {
-                currentUploadFile?.foregroundQuotaNotification(applicationContext)
+                currentUploadFile?.foregroundServiceQuotaNotification(applicationContext)
                 Result.failure()
             } else {
                 Result.retry()
