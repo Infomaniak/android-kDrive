@@ -95,7 +95,7 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
             isFitToContents = true,
         )
         viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { updateWithExternalFile(currentFile) }
-        setupActions(publicShareViewModel.canDownloadFiles)
+        setupActions(publicShareViewModel.canDownloadFiles, currentFile)
 
         initOnClickListener(onItemClickListener = this@PublicSharePreviewSliderFragment)
     }
