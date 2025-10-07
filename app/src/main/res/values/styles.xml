@@ -38,6 +38,8 @@
         <item name="android:textColorSecondary">@color/secondaryText</item>
         <item name="android:textSize">14sp</item>
         <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <item name="appBarLayoutStyle">@style/AppTheme.AppBarOverlay</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
         <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
@@ -61,10 +63,11 @@
     <style name="AppTheme" parent="AppThemeBase" />
 
     <style name="AppTheme.LoginBase" parent="AppThemeBase">
+        <item name="android:windowBackground">@color/appBar</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <!-- Used for the onboarding horizontal pager indicator and cross app login selected accounts button -->
         <item name="colorOutlineVariant">@color/border</item>
         <item name="colorSurface">@color/appBar</item>
-        <item name="android:windowBackground">@color/appBar</item>
     </style>
 
     <style name="AppTheme.Login" parent="AppTheme.LoginBase" />
@@ -90,6 +93,7 @@
     </style>
 
     <style name="AppTheme.LockBase" parent="AppThemeBase">
+        <item name="android:windowLightNavigationBar">true</item>
         <item name="appIcon">@drawable/ic_logo</item>
         <item name="primaryButtonStyle">@style/ButtonInfomaniak</item>
         <item name="titleStyle">@style/H2</item>
