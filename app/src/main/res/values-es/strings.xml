@@ -744,6 +744,8 @@
     <string name="uploadNetworkErrorTitle">Importación suspendida</string>
     <string name="uploadNetworkErrorWifiRequired">A la espera de red WiFi</string>
     <string name="uploadOutOfMemoryError">Insuficiente memoria RAM disponible</string>
+    <string name="uploadPausedDescription">Algunas subidas siguen en curso en kDrive. Abre la aplicación y mantén el dispositivo conectado para acelerar la carga.</string>
+    <string name="uploadPausedTitle">Pausa de importación</string>
     <string name="uploadPermissionError">Permisos adicionales solicitados</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/6351a88b-79c5-46ba-9e8a-a5942a5bf65d/</string>
     <string name="userInviteByEmail">Invitar por correo</string>

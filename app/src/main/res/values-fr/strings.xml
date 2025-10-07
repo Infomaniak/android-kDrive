@@ -744,6 +744,8 @@
     <string name="uploadNetworkErrorTitle">Importation suspendue</string>
     <string name="uploadNetworkErrorWifiRequired">En attente de réseau Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Mémoire vive disponible insuffisante</string>
+    <string name="uploadPausedDescription">Des importations sont toujours en cours dans kDrive. Ouvrez l’app et gardez l’appareil branché pour accélérer l’upload.</string>
+    <string name="uploadPausedTitle">Importation en pause</string>
     <string name="uploadPermissionError">Autorisations supplémentaires demandées</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/62305caf-7dd2-4573-9422-bb0d255fe834/</string>
     <string name="userInviteByEmail">Inviter par e-mail</string>

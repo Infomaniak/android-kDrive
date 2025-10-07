@@ -755,6 +755,8 @@
     <string name="uploadNetworkErrorTitle">Upload suspended</string>
     <string name="uploadNetworkErrorWifiRequired">Waiting for WiFi network</string>
     <string name="uploadOutOfMemoryError">Insufficient available ram memory</string>
+    <string name="uploadPausedDescription">Some uploads are still in progress in kDrive. Open the app and keep the device connected to speed up the upload.</string>
+    <string name="uploadPausedTitle">Upload suspended</string>
     <string name="uploadPermissionError">Additional permissions requested</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/1d484922-97e1-4a43-a4c9-4d19bc1b5494/</string>
     <string name="userInviteByEmail">Invite via email</string>

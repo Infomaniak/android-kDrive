@@ -133,11 +133,10 @@ object UploadNotifications {
     }
 
     fun UploadFile.foregroundQuotaNotification(context: Context) {
-        val description = "To continue uploading, please go back to the app"
         showNotification(
             context = context,
-            title = context.getString(R.string.uploadInterruptedErrorTitle),
-            description = description,
+            title = context.getString(R.string.uploadPausedTitle),
+            description = context.getString(R.string.uploadPausedDescription),
             notificationId = NotificationUtils.UPLOAD_STATUS_ID,
             contentIntent = progressPendingIntent(context),
         )
