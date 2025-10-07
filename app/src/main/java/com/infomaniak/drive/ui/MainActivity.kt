@@ -37,12 +37,10 @@ import android.provider.MediaStore
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
-import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -112,8 +110,6 @@ import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.drive.utils.setColorNavigationBar
-import com.infomaniak.drive.utils.setColorStatusBar
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -186,7 +182,6 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        enableEdgeToEdge()
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 
@@ -224,7 +219,6 @@ class MainActivity : BaseActivity() {
             )
             binding.searchFab.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + windowInsets.bottom)
         }
-        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onStart() {
@@ -493,25 +487,6 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        when (destination.id) {
-            R.id.myKSuiteDashboardFragment, R.id.kSuiteProBottomSheetDialog -> {
-                setColorStatusBar(SystemBarsColorScheme.KSuite)
-                setColorNavigationBar(SystemBarsColorScheme.KSuite)
-            }
-            R.id.fileDetailsFragment -> {
-                setColorNavigationBar(SystemBarsColorScheme.AppBar)
-            }
-            R.id.fileShareLinkSettingsFragment -> {
-                setColorStatusBar(SystemBarsColorScheme.AppBar)
-                setColorNavigationBar(SystemBarsColorScheme.AppBar)
-            }
-            R.id.downloadProgressDialog, R.id.previewSliderFragment, R.id.selectPermissionBottomSheetDialog -> Unit
-            else -> {
-                setColorStatusBar()
-                setColorNavigationBar()
-            }
-        }
-
         destination.trackDestination()
     }
 
@@ -678,15 +653,6 @@ class MainActivity : BaseActivity() {
 
     fun clickOnBottomBarFolders() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
-    }
-
-    enum class SystemBarsColorScheme(@ColorRes val statusBarColor: Int, @ColorRes val navigationBarColor: Int = statusBarColor) {
-        AppBar(R.color.appBar),
-        Default(R.color.background),
-        KSuite(
-            statusBarColor = R.color.myKSuiteDashboardStatusBarBackground,
-            navigationBarColor = R.color.myKSuiteDashboardNavigationBarBackground,
-        ),
     }
 
     companion object {

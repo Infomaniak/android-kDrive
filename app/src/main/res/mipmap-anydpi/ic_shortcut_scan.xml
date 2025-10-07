@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2023-2024 Infomaniak Network SA
+  ~ Copyright (C) 2023-2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -17,6 +17,6 @@
   -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/backgroundShortcut" />
-    <foreground android:drawable="@drawable/ic_shortcut_feedback_foreground" />
-    <monochrome android:drawable="@drawable/ic_shortcut_feedback_foreground" />
+    <foreground android:drawable="@drawable/ic_shortcut_scan_foreground" />
+    <monochrome android:drawable="@drawable/ic_shortcut_scan_foreground" />
 </adaptive-icon>
