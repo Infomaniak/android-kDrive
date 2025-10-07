@@ -18,17 +18,16 @@
 package com.infomaniak.drive.fcm
 
 import android.content.Context
+import androidx.lifecycle.asFlow
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.infomaniak.core.auth.BuildConfig.INFOMANIAK_API_V1
+import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.cancellable
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpRequestRetry
@@ -44,11 +43,11 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.SerializationException
 import operations.OperationHandler
 import operations.httpLogging
-import operations.plus
 import operations.runOperation
 import operations.then
 import java.io.IOException
@@ -59,7 +58,7 @@ class RegisterForNotificationsWorker(
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = runCatching {
-        val allUsers = AccountUtils.allUsers()
+        val allUsers = AccountUtils.getAllUsers().asFlow().first() //TODO: Replace with
         val token = Firebase.messaging.token.await()
         val registrationInfo = RegistrationInfo(token = token)
         val results = coroutineScope { allUsers.map { user -> async { sendTokenForUser(user, registrationInfo) } }.awaitAll() }
@@ -73,7 +72,7 @@ class RegisterForNotificationsWorker(
     private val registerHttpHandler = OperationHandler.httpLogging(
         tag = TAG,
         operationName = "Register for notifications",
-    ) + OperationHandler<HttpResponse, Outcome>(
+    ) then OperationHandler<HttpResponse, Outcome>(
         onException = { _ -> Outcome.ShouldRetry },
         onResponse = { response -> if (response.status.value in 500..599) Outcome.ShouldRetry else Outcome.Done }
     )

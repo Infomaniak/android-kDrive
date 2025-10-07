@@ -177,6 +177,9 @@ dependencies {
     implementation(core.compose.ui.tooling.preview)
 
     implementation(core.ktor.client.okhttp)
+    implementation(core.ktor.client.core)
+    implementation(core.ktor.client.json)
+    implementation(core.ktor.client.content.negociation)
 
     implementation(core.androidx.work.runtime)
     androidTestImplementation(core.androidx.work.testing)
