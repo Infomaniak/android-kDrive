@@ -18,11 +18,22 @@
 package operations
 
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.request
 import io.ktor.http.ContentType
-import io.ktor.http.contentType
+import io.ktor.http.HttpHeaders
 
-fun HttpResponse.hasExpectedContentType(expectedContentType: ContentType?): Boolean {
-    val actualContentType = expectedContentType?.let { contentType() }
-    val noCheckNeeded = expectedContentType == null
-    return noCheckNeeded || actualContentType?.match(expectedContentType) ?: false
+fun HttpResponse.hasExpectedContentType(): Boolean {
+    val acceptedContentType = request.headers[HttpHeaders.Accept]
+    val receivedContentType = headers[HttpHeaders.ContentType]
+
+    when (acceptedContentType) {
+        receivedContentType, null -> return true
+    }
+
+    val expectedContentType = ContentType.parse(acceptedContentType)
+
+    if (expectedContentType == ContentType.Any) return true
+
+    val actualContentType = receivedContentType?.let { ContentType.parse(it) }
+    return actualContentType?.match(expectedContentType) ?: false
 }

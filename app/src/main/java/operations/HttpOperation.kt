@@ -68,7 +68,7 @@ fun OperationHandler.Companion.httpLogging(
             else log(logLevels.otherException, tag, "$operationName failed", t)
         },
         onResponse = { response ->
-            logResponse(tag, operationName, response, logLevels, expectedContentType)
+            logResponse(tag, operationName, response, logLevels)
         }
     )
 }
@@ -77,19 +77,17 @@ private fun logResponse(
     tag: String,
     operationName: String,
     response: HttpResponse,
-    logLevels: LogLevels,
-    expectedContentType: ContentType?
+    logLevels: LogLevels
 ) {
     val httpStatusCode = response.status.value
     val logLevel: LogLevel?
     val message = if (response.status.isSuccess()) {
-        if (response.hasExpectedContentType(expectedContentType)) {
+        if (response.hasExpectedContentType()) {
             logLevel = logLevels.success
             "$operationName succeeded"
         } else {
             logLevel = logLevels.wrongContentType
-            "$operationName led to http $httpStatusCode with the wrong ContentType. " +
-                    "Expected $expectedContentType but got ${response.contentType()}"
+            "$operationName led to http $httpStatusCode with the wrong ContentType: ${response.contentType()}"
         }
     } else {
         logLevel = when (httpStatusCode) {
