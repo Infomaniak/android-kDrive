@@ -59,7 +59,12 @@ object UploadWorkerThrowable {
             exception.printStackTrace()
             currentUploadFile?.outOfMemoryNotification(applicationContext)
             Result.retry()
-        } catch (_: CancellationException) { // Work has been cancelled
+        } catch (_: CancellationException) {
+            // A CancellationException is thrown if, of course, the worker has been cancelled but also if the quota for foreground
+            // services has been reached. Since Android 15, app's foreground services is authorized to run 6 hours / day in the
+            // background at most. To reset this quota, the app need to be brought in foreground. So in that case, we display a
+            // notification to ask the user to go back in the app.
+            // See https://developer.android.com/develop/background-work/services/fgs/timeout for more info.
             if (Build.VERSION.SDK_INT >= 31 && stopReason == STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) {
                 currentUploadFile?.foregroundServiceQuotaNotification(applicationContext)
                 Result.failure()
