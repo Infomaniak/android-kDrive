@@ -132,7 +132,7 @@ object UploadNotifications {
         )
     }
 
-    fun UploadFile.productForegroundQuotaNotification(context: Context) {
+    fun UploadFile.foregroundQuotaNotification(context: Context) {
         val description = "To continue uploading, please go back to the app"
         showNotification(
             context = context,
