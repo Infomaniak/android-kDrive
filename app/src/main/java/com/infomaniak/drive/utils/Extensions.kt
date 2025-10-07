@@ -79,9 +79,10 @@ import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.loadAvatar
 import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.network.LOGIN_ENDPOINT_URL
+import com.infomaniak.core.network.SUPPORT_URL
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
@@ -119,7 +120,6 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import com.infomaniak.core.auth.BuildConfig as AuthBuildConfig
 
 typealias FileId = Int
 typealias IOFile = java.io.File
@@ -372,7 +372,7 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
 
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
-    loginUrl = AuthBuildConfig.LOGIN_ENDPOINT_URL,
+    loginUrl = LOGIN_ENDPOINT_URL,
     appUID = BuildConfig.APPLICATION_ID,
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,

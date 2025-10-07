@@ -35,8 +35,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
-import com.infomaniak.core.legacy.BuildConfig.AUTOLOG_URL
-import com.infomaniak.core.legacy.BuildConfig.TERMINATE_ACCOUNT_URL
 import com.infomaniak.core.legacy.applock.LockActivity
 import com.infomaniak.core.legacy.bugtracker.BugTrackerActivity
 import com.infomaniak.core.legacy.bugtracker.BugTrackerActivityArgs
@@ -45,6 +43,9 @@ import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.openAppNotificationSettings
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.network.AUTOLOG_URL
+import com.infomaniak.core.network.ApiEnvironment
+import com.infomaniak.core.network.TERMINATE_ACCOUNT_URL
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
@@ -217,7 +218,7 @@ class SettingsFragment : Fragment() {
     }
 
     companion object {
-        private const val URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION = "login.infomaniak.com"
-        private const val TERMINATE_ACCOUNT_FULL_URL = "$AUTOLOG_URL/?url=$TERMINATE_ACCOUNT_URL"
+        private val URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION = "login.${ApiEnvironment.current.host}"
+        private val TERMINATE_ACCOUNT_FULL_URL = "$AUTOLOG_URL/?url=$TERMINATE_ACCOUNT_URL"
     }
 }

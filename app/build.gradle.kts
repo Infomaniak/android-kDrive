@@ -37,19 +37,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "CLIENT_ID", "\"9473D73C-C20F-4971-9E10-D957C563FA68\"")
-        buildConfigField("String", "CREATE_ACCOUNT_URL", "\"https://welcome.infomaniak.com/signup/ikdrive?app=true\"")
-        buildConfigField("String", "CREATE_ACCOUNT_SUCCESS_HOST", "\"kdrive.infomaniak.com\"")
-        buildConfigField("String", "CREATE_ACCOUNT_CANCEL_HOST", "\"welcome.infomaniak.com\"")
-        buildConfigField("String", "DRIVE_API_V1", "\"https://api.kdrive.infomaniak.com/drive/\"")
-        buildConfigField("String", "DRIVE_API_V2", "\"https://api.kdrive.infomaniak.com/2/drive/\"")
-        buildConfigField("String", "DRIVE_API_V3", "\"https://api.kdrive.infomaniak.com/3/drive/\"")
-        buildConfigField("String", "MANAGER_URL", "\"https://manager.infomaniak.com/v3/\"")
-        buildConfigField("String", "OFFICE_URL", "\"https://kdrive.infomaniak.com/app/office/\"")
-        buildConfigField("String", "SHARE_URL_V1", "\"https://kdrive.infomaniak.com/app/\"")
-        buildConfigField("String", "SHARE_URL_V2", "\"https://kdrive.infomaniak.com/2/app/\"")
-        buildConfigField("String", "SHARE_URL_V3", "\"https://kdrive.infomaniak.com/3/app/\"")
-        buildConfigField("String", "SHOP_URL", "\"https://shop.infomaniak.com/order/\"")
-        buildConfigField("String", "SUPPORT_URL", "\"https://support.infomaniak.com/\"")
 
         buildConfigField("String", "BUGTRACKER_DRIVE_BUCKET_ID", "\"app_drive\"")
         buildConfigField("String", "BUGTRACKER_DRIVE_PROJECT_NAME", "\"drive\"")
