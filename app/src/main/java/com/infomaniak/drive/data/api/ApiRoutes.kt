@@ -95,8 +95,8 @@ object ApiRoutes {
 
     private fun orderQuery(order: SortType) = "order_for[${order.orderBy}]=${order.order}&order_by=${order.orderBy}"
 
-    private fun driveURLV2(driveId: Int) = "${DRIVE_API_V2}${driveId}"
-    private fun driveURL(driveId: Int) = "${DRIVE_API_V3}${driveId}"
+    private fun driveURLV2(driveId: Int) = "$DRIVE_API_V2/$driveId"
+    private fun driveURL(driveId: Int) = "$DRIVE_API_V3/$driveId"
 
     private fun filesURLV2(driveId: Int) = "${driveURLV2(driveId)}/files"
     private fun filesURL(driveId: Int) = "${driveURL(driveId)}/files"
@@ -144,14 +144,14 @@ object ApiRoutes {
         if (isPublicShared()) {
             showPublicShareOfficeFile(driveId, publicShareUuid, id)
         } else {
-            "${AUTOLOG_URL}?url=" + showOffice(file)
+            "$AUTOLOG_URL?url=${showOffice(file)}"
         }
     }
     //endregion
 
     /** Drive */
     //region Drive
-    fun getAllDrivesData() = "${DRIVE_API_V2}init?$noDefaultAvatar&$driveInitWith"
+    fun getAllDrivesData() = "${DRIVE_API_V2}/init?${noDefaultAvatar}&${driveInitWith}"
     //endregion
 
     /** Archive */
@@ -268,7 +268,7 @@ object ApiRoutes {
 
     fun getFilesLastActivities(driveId: Int) = "${filesURL(driveId)}/listing/partial"
 
-    fun getSharedWithMeFiles(order: SortType) = "${DRIVE_API_V3}files/shared_with_me?$fileWithQuery&${orderQuery(order)}"
+    fun getSharedWithMeFiles(order: SortType) = "$DRIVE_API_V3/files/shared_with_me?$fileWithQuery&${orderQuery(order)}"
 
     fun getFileDetails(file: File) = "${fileURL(file)}?$fileExtraWithQuery"
 
@@ -306,7 +306,7 @@ object ApiRoutes {
     //region Share link
     fun shareLink(file: File) = "${fileURLV2(file)}/link"
 
-    fun restrictedShareLink(file: File) = "${SHARE_URL_V1}drive/${file.driveId}/redirect/${file.id}"
+    fun restrictedShareLink(file: File) = "${SHARE_URL_V1}/drive/${file.driveId}/redirect/${file.id}"
     //endregion
 
     /** Public Share */
@@ -316,12 +316,12 @@ object ApiRoutes {
     fun submitPublicSharePassword(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/auth"
 
     fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId?$sharedFileWithQuery"
+        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId?$sharedFileWithQuery"
     }
 
     fun getPublicShareChildrenFiles(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
         val orderQuery = "order_by=${sortType.orderBy}&order=${sortType.order}"
-        return "$SHARE_URL_V3$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery"
+        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery"
     }
 
     fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): String {
@@ -342,7 +342,7 @@ object ApiRoutes {
 
     private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int): String {
         // For now, this call fails because the back hasn't dev the conversion of office files to pdf for mobile
-        return "${SHARE_URL_V1}share/$driveId/$linkUuid/preview/text/${fileId}"
+        return "$SHARE_URL_V1/share/$driveId/$linkUuid/preview/text/$fileId"
     }
 
     fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
@@ -359,7 +359,7 @@ object ApiRoutes {
         return "${getPublicShareUrlV2(driveId, linkUuid)}/files/$fileId"
     }
 
-    private fun getPublicShareUrlV2(driveId: Int, linkUuid: String) = "$SHARE_URL_V2$driveId/share/$linkUuid"
+    private fun getPublicShareUrlV2(driveId: Int, linkUuid: String) = "$SHARE_URL_V2/$driveId/share/$linkUuid"
     //endregion
 
     /** External import */
@@ -437,10 +437,10 @@ object ApiRoutes {
 
     /** Others */
     //region Others
-    fun orderDrive() = "${SHOP_URL}drive"
+    fun orderDrive() = "$SHOP_URL/drive"
 
-    fun renewDrive(accountId: Int) = "${MANAGER_URL}$accountId/accounts/accounting/renewal"
+    fun renewDrive(accountId: Int) = "$MANAGER_URL/$accountId/accounts/accounting/renewal"
 
-    private fun showOffice(file: File) = "${OFFICE_URL}${file.driveId}/${file.id}"
+    private fun showOffice(file: File) = "${OFFICE_URL}/${file.driveId}/${file.id}"
     //endregion
 }
