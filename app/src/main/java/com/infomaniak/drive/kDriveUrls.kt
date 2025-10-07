@@ -24,7 +24,6 @@ private val host = ApiEnvironment.current.host
 val CREATE_ACCOUNT_URL = "https://welcome.$host/signup/ikdrive?app=true"
 val CREATE_ACCOUNT_SUCCESS_HOST = "kdrive.$host"
 val CREATE_ACCOUNT_CANCEL_HOST = "welcome.$host"
-val DRIVE_API_V1 = "https://api.kdrive.$host/drive/" // Unused… Shall we remove it?
 val DRIVE_API_V2 = "https://api.kdrive.$host/2/drive/"
 val DRIVE_API_V3 = "https://api.kdrive.$host/3/drive/"
 val OFFICE_URL = "https://kdrive.$host/app/office/"
