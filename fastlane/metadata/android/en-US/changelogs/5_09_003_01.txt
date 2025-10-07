@@ -1,0 +1,5 @@
+- Continue upload's improvements
+- Fix fDroid build
+- Fix bottom navigation bar padding
+- Ensure to dismiss import dialog when an error has been occurred
+- Various fixes
