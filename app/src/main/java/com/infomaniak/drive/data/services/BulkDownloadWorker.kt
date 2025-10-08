@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
 package com.infomaniak.drive.data.services
 
 import android.content.Context
-import android.content.Intent
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import com.infomaniak.drive.R
@@ -69,7 +67,7 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
     override fun onFinish() {
         FileController.markFilesAsOffline(filesId = files.map { it.id }, isMarkedAsOffline = false)
         clearLastDownloadedFile()
-        notifyDownloadCancelled()
+        DownloadReceiver.notifyDownloadCancelled()
         notificationManagerCompat.cancel(BULK_DOWNLOAD_ID)
     }
 
@@ -101,13 +99,6 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
         }
 
         return result
-    }
-
-    private fun notifyDownloadCancelled() {
-        Intent().apply {
-            action = TAG
-            LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(this)
-        }
     }
 
     companion object {

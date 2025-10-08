@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,22 +17,18 @@
  */
 package com.infomaniak.drive.data.services
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import com.infomaniak.drive.ui.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 
-class DownloadReceiver(private val mainViewModel: MainViewModel) : BroadcastReceiver() {
-    override fun onReceive(context: Context?, intent: Intent) {
-        val fileId = intent.getIntExtra(CANCELLED_FILE_ID, 0)
+object DownloadReceiver {
 
-        if (fileId > 0 || intent.action == BulkDownloadWorker.TAG) {
-            mainViewModel.updateVisibleFiles.value = true
-        }
-    }
+    private val _cancelDownloadTrigger: MutableSharedFlow<Unit> = MutableSharedFlow()
+    val cancelDownloadTrigger = _cancelDownloadTrigger.asSharedFlow()
 
-    companion object {
-        const val TAG = "DownloadReceiver"
-        const val CANCELLED_FILE_ID = "CANCELLED_FILE_ID"
+    fun notifyDownloadCancelled() {
+        CoroutineScope(Dispatchers.Default).launch { _cancelDownloadTrigger.emit(Unit) }
     }
 }

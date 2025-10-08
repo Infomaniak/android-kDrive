@@ -21,7 +21,6 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ContentResolver
 import android.content.Context
-import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -48,7 +47,6 @@ import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -73,6 +71,7 @@ import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.observe
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
@@ -187,7 +186,6 @@ class MainActivity : BaseActivity() {
 
         checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
-        downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
 
         setupBottomNavigation()
@@ -200,12 +198,11 @@ class MainActivity : BaseActivity() {
         handleShortcuts()
         handleNavigateToDestinationFileId()
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
-
         initAppUpdateManager()
         initAppReviewManager()
         observeCurrentFolder()
         observeBulkDownloadRunning()
+        observeDownloadCancellation()
         observeFailureDownloadWorkerOffline()
 
         LockActivity.scheduleLockIfNeeded(
@@ -367,6 +364,10 @@ class MainActivity : BaseActivity() {
         mainViewModel.isBulkDownloadRunning.observe(this) { isRunning ->
             if (!isRunning) mainViewModel.syncOfflineFiles()
         }
+    }
+
+    private fun observeDownloadCancellation() {
+        DownloadReceiver.cancelDownloadTrigger.observe(this) { mainViewModel.updateVisibleFiles.value = true }
     }
 
     private fun observeFailureDownloadWorkerOffline() {
@@ -573,7 +574,6 @@ class MainActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         fileObserver.stopWatching()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
     }
 
     private fun displayInformationPanel() = with(uiSettings) {
