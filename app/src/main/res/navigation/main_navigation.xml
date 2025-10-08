@@ -369,6 +369,16 @@
     </activity>
 
     <activity
+        android:id="@+id/videoActivity"
+        android:name="com.infomaniak.drive.ui.fileList.preview.playback.VideoActivity"
+        android:label="VideoActivity"
+        tools:layout="@layout/activity_video">
+        <argument
+            android:name="fileId"
+            app:argType="integer" />
+    </activity>
+
+    <activity
         android:id="@+id/selectFolderActivity"
         android:name="com.infomaniak.drive.ui.fileList.SelectFolderActivity"
         android:label="SelectFolderActivity"
