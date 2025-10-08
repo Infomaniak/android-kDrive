@@ -77,7 +77,7 @@ class PublicSharePasswordFragment : Fragment() {
 
     //region Hack TODO: Remove this when the back will support bearer token
     private fun getPublicShareUrl(): String {
-        return "${SHARE_URL_V1}share/${publicShareViewModel.driveId}/${publicShareViewModel.publicShareUuid}"
+        return "${SHARE_URL_V1}/share/${publicShareViewModel.driveId}/${publicShareViewModel.publicShareUuid}"
     }
     //endregion
 

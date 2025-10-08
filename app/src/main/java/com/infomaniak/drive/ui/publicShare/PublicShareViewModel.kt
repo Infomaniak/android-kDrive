@@ -175,7 +175,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         )
 
         val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
-        val destinationPath = "${SHARE_URL_V1}drive/$destinationDriveId/files/$destinationFolderId"
+        val destinationPath = "$SHARE_URL_V1/drive/$destinationDriveId/files/$destinationFolderId"
         importPublicShareResult.postValue(error to destinationPath)
     }
 
