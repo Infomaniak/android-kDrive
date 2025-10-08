@@ -2,6 +2,7 @@ import java.util.Properties
 
 plugins {
     alias(core.plugins.compose.compiler)
+    alias(core.plugins.sentry.plugin)
     alias(libs.plugins.android.application)
     alias(libs.plugins.junit5)
     alias(libs.plugins.kotlin.android)
@@ -9,7 +10,6 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
-    alias(core.plugins.sentry.plugin)
 }
 
 val appCompileSdk: Int by rootProject.extra
