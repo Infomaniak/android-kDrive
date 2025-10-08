@@ -26,6 +26,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import coil.load
+import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
@@ -37,7 +38,6 @@ import com.infomaniak.drive.databinding.ItemShareableItemBinding
 import com.infomaniak.drive.ui.fileList.fileShare.SharedItemsAdapter.SharedItemsViewHolder
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.lib.core.utils.context
 
 class SharedItemsAdapter(
     private val file: File,

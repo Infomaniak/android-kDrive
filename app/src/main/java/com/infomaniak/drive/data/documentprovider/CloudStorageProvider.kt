@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.core.cancellable
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.utils.NotificationUtilsCore
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -57,10 +61,6 @@ import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.copyToCancellable
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.NotificationUtilsCore
-import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
 import io.sentry.Sentry
 import io.sentry.SentryEvent
@@ -604,10 +604,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 }
             } else {
                 exception.printStackTrace()
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.INFO
-                    Sentry.captureException(exception)
-                }
+                Sentry.captureException(exception) { scope -> scope.level = SentryLevel.INFO }
             }
         }
     }
@@ -717,7 +714,7 @@ class CloudStorageProvider : DocumentsProvider() {
                             syncPermissionNotifId,
                             Intent(
                                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                                Uri.parse("package:${context.packageName}"),
+                                "package:${context.packageName}".toUri(),
                             ),
                             NotificationUtilsCore.PENDING_INTENT_FLAGS,
                         ),

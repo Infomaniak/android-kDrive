@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentPreviewSliderBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment
 import com.infomaniak.drive.ui.fileList.preview.PreviewSliderViewModel
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
@@ -45,7 +45,9 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
     override val bottomSheetBehavior: BottomSheetBehavior<View>
         get() = BottomSheetBehavior.from(bottomSheetView)
 
-    override val isPublicShare = true
+    override val isPublicShared = true
+    override val canDownloadFiles
+        get() = publicShareViewModel.canDownloadFiles
     override val ownerFragment = this
 
     override fun initCurrentFile() {
@@ -93,6 +95,8 @@ class PublicSharePreviewSliderFragment : BasePreviewSliderFragment(), OnPublicSh
             isFitToContents = true,
         )
         viewLifecycleOwner.lifecycleScope.launch(start = CoroutineStart.UNDISPATCHED) { updateWithExternalFile(currentFile) }
+        setupActions(publicShareViewModel.canDownloadFiles, currentFile)
+
         initOnClickListener(onItemClickListener = this@PublicSharePreviewSliderFragment)
     }
 }

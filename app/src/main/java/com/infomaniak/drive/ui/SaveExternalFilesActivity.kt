@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
+import com.infomaniak.core.legacy.applock.LockActivity
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.getFileName
+import com.infomaniak.core.legacy.utils.hideProgressCatching
+import com.infomaniak.core.legacy.utils.initProgress
+import com.infomaniak.core.legacy.utils.parcelableArrayListExtra
+import com.infomaniak.core.legacy.utils.parcelableExtra
+import com.infomaniak.core.legacy.utils.showProgressCatching
+import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.MatomoDrive.trackUserId
@@ -64,15 +73,6 @@ import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.isUrlFile
 import com.infomaniak.drive.utils.isValidUrl
 import com.infomaniak.drive.utils.showOrHideEmptyError
-import com.infomaniak.lib.applock.LockActivity
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.getFileName
-import com.infomaniak.lib.core.utils.hideProgressCatching
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.parcelableArrayListExtra
-import com.infomaniak.lib.core.utils.parcelableExtra
-import com.infomaniak.lib.core.utils.showProgressCatching
-import com.infomaniak.lib.core.utils.whenResultIsOk
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
@@ -156,9 +156,8 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     private fun isExtrasNull(): Boolean {
         if (intent?.extras == null) {
-            Sentry.withScope { scope ->
+            Sentry.captureException(IllegalStateException("Activity $this has null extras in $intent")) { scope ->
                 scope.level = SentryLevel.WARNING
-                Sentry.captureException(IllegalStateException("Activity $this has null extras in $intent"))
             }
             return true
         }
@@ -346,10 +345,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             } catch (exception: Exception) {
                 exception.printStackTrace()
                 showSnackbar(R.string.anErrorHasOccurred)
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.WARNING
-                    Sentry.captureException(exception)
-                }
+                Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
                 finish()
             }
         }
@@ -454,11 +450,10 @@ class SaveExternalFilesActivity : BaseActivity() {
         } catch (exception: Exception) {
             exception.printStackTrace()
             showSnackbar(R.string.anErrorHasOccurred)
-            Sentry.withScope { scope ->
+            Sentry.captureException(exception) { scope ->
                 scope.setExtra("lifecycleState", lifecycle.currentState.name)
                 scope.setExtra("sharedFolderExists", sharedFolder.exists().toString())
                 scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
             }
             false
         }

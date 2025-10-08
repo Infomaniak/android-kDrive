@@ -30,11 +30,11 @@ import androidx.work.ForegroundInfo
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.google.common.util.concurrent.ListenableFuture
+import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
 import com.infomaniak.drive.data.models.ActionProgress
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
 import java.util.Date
 import java.util.UUID
 

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,22 +17,37 @@
  */
 package com.infomaniak.drive.ui
 
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.infomaniak.core.legacy.utils.isNightModeEnabled
+import com.infomaniak.core.legacy.utils.lightStatusBar
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.runBlocking
 
-open class BaseActivity : AppCompatActivity() {
+open class BaseActivity : EdgeToEdgeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.lightStatusBar(!isNightModeEnabled())
 
         if (AccountUtils.currentUser == null) {
             runBlocking { AccountUtils.requestCurrentUser() }
             trackUserId(AccountUtils.currentUserId)
         }
         trackScreen()
+    }
+}
+
+abstract class EdgeToEdgeActivity(): AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
+        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 }

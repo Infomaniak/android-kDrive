@@ -19,12 +19,12 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 
 import android.os.Bundle
 import android.view.View
+import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.utils.safeNavigate
 
 class SyncConfigureBottomSheetDialog : InformationBottomSheetDialog() {
 

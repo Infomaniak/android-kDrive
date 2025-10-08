@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.infomaniak.core.compose.basics.Typography
+import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.Companion.filterSelectedAccounts
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
 import com.infomaniak.core.crossapplogin.front.data.CrossLoginDefaults
@@ -60,10 +61,8 @@ fun OnboardingScreen(
     skippedIds: () -> Set<Long>,
     isLoginButtonLoading: () -> Boolean,
     isSignUpButtonLoading: () -> Boolean,
-    onLogin: () -> Unit,
-    onContinueWithSelectedAccounts: () -> Unit,
+    onLoginRequest: (accounts: List<ExternalAccount>) -> Unit,
     onCreateAccount: () -> Unit,
-    onUseAnotherAccountClicked: () -> Unit,
     onSaveSkippedAccounts: (Set<Long>) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { Page.entries.size })
@@ -83,10 +82,10 @@ fun OnboardingScreen(
                 isSignUpButtonLoading = isSignUpButtonLoading,
                 titleColor = colorResource(R.color.title),
                 descriptionColor = colorResource(R.color.primaryText),
-                onLogin = onLogin,
-                onContinueWithSelectedAccounts = onContinueWithSelectedAccounts,
+                onLogin = { onLoginRequest(emptyList()) },
+                onContinueWithSelectedAccounts = { onLoginRequest(accounts().filterSelectedAccounts(skippedIds())) },
                 onCreateAccount = onCreateAccount,
-                onUseAnotherAccountClicked = onUseAnotherAccountClicked,
+                onUseAnotherAccountClicked = { onLoginRequest(emptyList()) },
                 onSaveSkippedAccounts = onSaveSkippedAccounts,
                 nextButtonShape = CircleShape,
                 primaryButtonShape = RoundedCornerShape(dimensionResource(R.dimen.primaryButtonRadius)),
@@ -157,10 +156,8 @@ private fun Preview(@PreviewParameter(AccountsPreviewParameter::class) accounts:
             OnboardingScreen(
                 accounts = { accounts },
                 skippedIds = { emptySet() },
-                onLogin = {},
-                onContinueWithSelectedAccounts = {},
+                onLoginRequest = {},
                 onCreateAccount = {},
-                onUseAnotherAccountClicked = {},
                 onSaveSkippedAccounts = {},
                 isLoginButtonLoading = { false },
                 isSignUpButtonLoading = { false },

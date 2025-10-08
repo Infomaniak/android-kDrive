@@ -31,8 +31,8 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.Insets
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.utils.toPx
 import kotlin.math.abs
 
 class CollapsingSubTitleToolbarBehavior @JvmOverloads constructor(

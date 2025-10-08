@@ -22,6 +22,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
@@ -39,7 +40,6 @@ import com.infomaniak.drive.utils.saveToKDrive
 import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
-import com.infomaniak.lib.core.utils.safeNavigate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch

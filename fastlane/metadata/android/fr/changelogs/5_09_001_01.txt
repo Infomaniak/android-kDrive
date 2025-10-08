@@ -1,0 +1,2 @@
+- Ajout des liens profonds manquants pour kSuite
+- Correction d'un problème rare qui entraînait l'ouverture d'un dossier vide lors de l'ouverture d'un partage public.

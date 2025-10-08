@@ -20,13 +20,14 @@ package com.infomaniak.drive.data.services
 import android.content.Context
 import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
+import com.infomaniak.core.legacy.api.ApiController.gson
+import com.infomaniak.core.legacy.utils.Utils
+import com.infomaniak.core.network.ApiEnvironment
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.utils.BulkOperationsUtils.isBulkOperationActive
 import com.infomaniak.drive.utils.isPositive
-import com.infomaniak.lib.core.api.ApiController.gson
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.Utils
 import info.mqtt.android.service.MqttAndroidClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -54,7 +55,8 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
 
     private const val MQTT_USER = "ips:ips-public"
     private const val MQTT_PASS = "8QC5EwBqpZ2Z" // Yes it's normal, non-sensitive information
-    private const val MQTT_URI = "wss://info-mq.infomaniak.com/ws"
+    private val host = ApiEnvironment.current.host
+    private val MQTT_URI = "wss://info-mq.$host/ws"
 
     private val client: MqttAndroidClient by lazy { MqttAndroidClient(appContext, MQTT_URI, clientId) }
 

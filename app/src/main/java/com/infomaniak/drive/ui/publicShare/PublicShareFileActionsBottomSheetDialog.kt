@@ -25,12 +25,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentBottomSheetPublicShareFileActionsBinding
 import com.infomaniak.drive.utils.DrivePermissions
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.safeBinding
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 

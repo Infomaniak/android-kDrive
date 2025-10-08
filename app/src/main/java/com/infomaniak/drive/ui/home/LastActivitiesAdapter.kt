@@ -30,6 +30,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
 import coil.load
+import com.infomaniak.core.legacy.utils.context
+import com.infomaniak.core.legacy.views.LoaderAdapter
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.DriveUser
@@ -41,8 +43,6 @@ import com.infomaniak.drive.databinding.EmptyIconLayoutBinding
 import com.infomaniak.drive.databinding.ItemLastActivitiesSubtitleBinding
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.utils.loadAvatar
-import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.views.LoaderAdapter
 
 class LastActivitiesAdapter : LoaderAdapter<FileActivity>() {
 

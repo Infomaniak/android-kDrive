@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,9 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
+import com.infomaniak.core.legacy.utils.contains
+import com.infomaniak.core.legacy.utils.guessMimeType
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -44,16 +47,15 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.downloadFile
 import com.infomaniak.drive.utils.isUrlFile
 import com.infomaniak.drive.utils.isWeblocFile
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.contains
-import com.infomaniak.lib.core.utils.guessMimeType
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.RealmResults
 import io.realm.annotations.Ignore
 import io.realm.annotations.LinkingObjects
 import io.realm.annotations.PrimaryKey
-import io.sentry.Sentry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.WriteWith
@@ -375,10 +377,9 @@ open class File(
             runCatching {
                 // Because RealmList.sort will crash in case objects are not managed.
                 categories.sortedBy { it.addedAt }.map { it.categoryId }
-            }.onFailure {
-                Sentry.withScope { scope ->
+            }.onFailure { exception ->
+                SentryLog.e("getSortedCategoriesIds", "Failed to do sortBy on unmanaged RealmList??", exception) { scope ->
                     scope.setExtra("categories", categories.joinToString { "id: ${it.categoryId} addedAt: ${it.addedAt}" })
-                    SentryLog.e("getSortedCategoriesIds", "Failed to do sortBy on unmanaged RealmList??", it)
                 }
             }.getOrDefault(emptyList())
         }
@@ -482,18 +483,26 @@ open class File(
         onProgress: (progress: Int) -> Unit,
         navigateToDownloadDialog: (suspend () -> Unit)? = null,
     ): IOFile {
-        val cacheFile = when {
-            isPublicShared() -> getPublicShareCache(context)
-            isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
-            isOffline -> getOfflineFile(context, userDrive.userId)!!
-            else -> getCacheFile(context, userDrive)
+        val fileNeedDownload: Boolean
+        val cacheFile: IOFile
+        val isPublicShared: Boolean
+
+        withContext(Dispatchers.IO) {
+            isPublicShared = isPublicShared()
+            cacheFile = when {
+                isPublicShared -> getPublicShareCache(context)
+                isOnlyOfficePreview() -> getConvertedPdfCache(context, userDrive)
+                isOffline -> getOfflineFile(context, userDrive.userId)!!
+                else -> getCacheFile(context, userDrive)
+            }
+
+            fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         }
 
-        val fileNeedDownload = if (isOnlyOfficePreview()) isObsolete(cacheFile) else isObsoleteOrNotIntact(cacheFile)
         if (fileNeedDownload) {
             navigateToDownloadDialog?.invoke()
-            downloadFile(cacheFile, file = this, shouldBePdf, onProgress)
-            cacheFile.setLastModified(getLastModifiedInMilliSecond())
+            downloadFile(cacheFile, file = this, shouldBePdf, onProgress, isPublicShared)
+            Dispatchers.IO { cacheFile.setLastModified(getLastModifiedInMilliSecond()) }
         }
 
         return cacheFile

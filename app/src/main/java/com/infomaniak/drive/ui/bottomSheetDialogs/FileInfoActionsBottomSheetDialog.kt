@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
+import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
@@ -62,17 +67,11 @@ import com.infomaniak.drive.utils.shareText
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setBackNavigationResult
-import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoActionsView.OnItemClickListener {
+class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfoActionsView.OnItemClickListener {
 
     private var binding: FragmentBottomSheetFileInfoActionsBinding by safeBinding()
 
@@ -207,6 +206,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             } else {
                 if (drive.isKSuiteMaxTier) {
                     showSnackbar(getString(R.string.errorDropboxLimitExceeded), true)
+                    findNavController().popBackStack()
                 } else {
                     openKSuiteUpgradeBottomSheet(MatomoName.ConvertToDropbox.value, drive)
                 }
@@ -224,6 +224,7 @@ class FileInfoActionsBottomSheetDialog : BottomSheetDialogFragment(), FileInfoAc
             },
             onError = { translatedError ->
                 showSnackbar(translatedError, showAboveFab = true)
+                findNavController().popBackStack()
                 onActionFinished()
             },
         )

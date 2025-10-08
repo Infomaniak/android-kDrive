@@ -33,6 +33,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
+import com.infomaniak.core.legacy.utils.isNightModeEnabled
+import com.infomaniak.core.legacy.utils.lightStatusBar
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
@@ -51,14 +55,10 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.openOnlyOfficeDocument
 import com.infomaniak.drive.utils.printPdf
-import com.infomaniak.drive.utils.setupStatusBarForPreview
 import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.ExternalFileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.PreviewHeaderView
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import io.sentry.Sentry
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -77,7 +77,8 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     protected lateinit var previewSliderAdapter: PreviewSliderAdapter
     protected lateinit var userDrive: UserDrive
-    protected abstract val isPublicShare: Boolean
+    protected abstract val isPublicShared: Boolean
+    protected abstract val canDownloadFiles: Boolean
     private var isOverlayShown = true
 
     override val currentContext by lazy { requireContext() }
@@ -110,6 +111,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().window.lightStatusBar(false)
 
         setBackActionHandlers()
 
@@ -135,6 +137,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             manager = childFragmentManager,
             lifecycle = lifecycle,
             userDrive = previewSliderViewModel.userDrive,
+            isPublicShared = isPublicShared,
         )
 
         initViewPager()
@@ -148,11 +151,10 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
             val position = previewSliderAdapter.getPosition(currentFile)
             runCatching {
                 viewPager.setCurrentItem(position, false)
-            }.onFailure {
-                Sentry.withScope { scope ->
+            }.onFailure { exception ->
+                Sentry.captureException(exception) { scope ->
                     scope.setExtra("currentFile", "id: ${currentFile.id}")
                     scope.setExtra("files.values", files.values.joinToString { "id: ${it.id}" })
-                    Sentry.captureException(it)
                 }
                 currentFile = files.values.first()
                 viewPager.setCurrentItem(0, false)
@@ -200,6 +202,7 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         super.onDestroyView()
         _binding?.previewSliderParent?.let(TransitionManager::endTransitions)
         _binding = null
+        requireActivity().window.lightStatusBar(!requireActivity().isNightModeEnabled())
     }
 
     override fun onDestroy() {
@@ -250,14 +253,13 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                         toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
                     }
 
-                    setPrintButtonVisibility(isGone = !currentFile.isPDF())
+                    setPrintButtonVisibility(isGone = !file.isPDF() || !canDownloadFiles)
                     (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
                     bottomSheetUpdates.tryEmit(file)
                 }
             })
         }
     }
-
 
     private fun navigateBack() {
         hasNavigateBack = true
@@ -294,7 +296,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
 
     private fun clearEdgeToEdge() = with(requireActivity()) {
         toggleSystemBar(true)
-        window.toggleEdgeToEdge(false)
     }
 
     private fun setPrintButtonVisibility(isGone: Boolean) {

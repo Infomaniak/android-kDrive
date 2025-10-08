@@ -65,6 +65,18 @@ import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
+import com.infomaniak.core.legacy.applock.LockActivity
+import com.infomaniak.core.legacy.stores.StoreUtils.checkUpdateIsRequired
+import com.infomaniak.core.legacy.stores.StoreUtils.launchInAppReview
+import com.infomaniak.core.legacy.stores.reviewmanagers.InAppReviewManager
+import com.infomaniak.core.legacy.stores.updatemanagers.InAppUpdateManager
+import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
+import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
+import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
@@ -103,21 +115,7 @@ import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.drive.utils.setColorNavigationBar
-import com.infomaniak.drive.utils.setColorStatusBar
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
-import com.infomaniak.lib.applock.LockActivity
-import com.infomaniak.lib.core.utils.CoilUtils.simpleImageLoader
-import com.infomaniak.lib.core.utils.SnackbarUtils.showIndefiniteSnackbar
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.UtilsUi.generateInitialsAvatarDrawable
-import com.infomaniak.lib.core.utils.UtilsUi.getBackgroundColorBasedOnId
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.whenResultIsOk
-import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
-import com.infomaniak.lib.stores.StoreUtils.launchInAppReview
-import com.infomaniak.lib.stores.reviewmanagers.InAppReviewManager
-import com.infomaniak.lib.stores.updatemanagers.InAppUpdateManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -226,7 +224,6 @@ class MainActivity : BaseActivity() {
             )
             binding.searchFab.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + windowInsets.bottom)
         }
-        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onStart() {
@@ -506,25 +503,6 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        when (destination.id) {
-            R.id.myKSuiteDashboardFragment, R.id.kSuiteProBottomSheetDialog -> {
-                setColorStatusBar(SystemBarsColorScheme.KSuite)
-                setColorNavigationBar(SystemBarsColorScheme.KSuite)
-            }
-            R.id.fileDetailsFragment -> {
-                setColorNavigationBar(SystemBarsColorScheme.AppBar)
-            }
-            R.id.fileShareLinkSettingsFragment -> {
-                setColorStatusBar(SystemBarsColorScheme.AppBar)
-                setColorNavigationBar(SystemBarsColorScheme.AppBar)
-            }
-            R.id.downloadProgressDialog, R.id.previewSliderFragment, R.id.selectPermissionBottomSheetDialog -> Unit
-            else -> {
-                setColorStatusBar()
-                setColorNavigationBar()
-            }
-        }
-
         destination.trackDestination()
     }
 
@@ -691,15 +669,6 @@ class MainActivity : BaseActivity() {
 
     fun clickOnBottomBarFolders() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
-    }
-
-    enum class SystemBarsColorScheme(@ColorRes val statusBarColor: Int, @ColorRes val navigationBarColor: Int = statusBarColor) {
-        AppBar(R.color.appBar),
-        Default(R.color.background),
-        KSuite(
-            statusBarColor = R.color.myKSuiteDashboardStatusBarBackground,
-            navigationBarColor = R.color.myKSuiteDashboardNavigationBarBackground,
-        ),
     }
 
     companion object {

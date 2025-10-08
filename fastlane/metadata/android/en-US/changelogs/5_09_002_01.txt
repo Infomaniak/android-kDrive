@@ -1,0 +1,5 @@
+- Fix a crash when opening a pdf with kDrive
+- Try to make uploads more stable
+- Fix deconnection when opening a password protected public share
+- Fix public share's files previews not working when not connected
+- Remove the choice to take a video in the add file bottomSheet

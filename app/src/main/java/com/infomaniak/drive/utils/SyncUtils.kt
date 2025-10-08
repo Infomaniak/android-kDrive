@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.services.PeriodicUploadWorker
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.MediaObserverWorker
-import com.infomaniak.lib.core.utils.SentryLog
 import kotlinx.coroutines.flow.first
 import java.util.Date
 
@@ -56,15 +56,26 @@ object SyncUtils {
 
         val fileCreatedAt = when {
             cursor.isValidDate(dateTakenIndex) -> Date(cursor.getLong(dateTakenIndex))
-            cursor.isValidDate(dateAddedIndex) -> Date(cursor.getLong(dateAddedIndex) * 1000)
+            cursor.isValidDate(dateAddedIndex) -> Date(cursor.getLong(dateAddedIndex) * 1_000L)
             lastModifiedDateFromUri.isValidDate() -> Date(lastModifiedDateFromUri!!)
             else -> null
         }
 
+        SentryLog.d(TAG, "lastModifiedIndex = $lastModifiedIndex dateModifiedIndex = $dateModifiedIndex")
         var fileModifiedAt = when {
-            cursor.isValidDate(lastModifiedIndex) -> Date(cursor.getLong(lastModifiedIndex))
-            cursor.isValidDate(dateModifiedIndex) -> Date(cursor.getLong(dateModifiedIndex) * 1000)
-            fileCreatedAt != null -> fileCreatedAt
+            cursor.isValidDate(lastModifiedIndex) -> {
+                val lastModifiedValue = getLastModifiedOrNow(cursor, lastModifiedIndex)
+                Date(lastModifiedValue)
+            }
+            cursor.isValidDate(dateModifiedIndex) -> {
+                val dateModifiedValue = cursor.getLong(dateModifiedIndex)
+                SentryLog.d(TAG, "dateModifiedIndex is a valid date with $dateModifiedValue")
+                Date(dateModifiedValue * 1_000L)
+            }
+            fileCreatedAt != null -> {
+                SentryLog.d(TAG, "fileCreatedAt != null with $fileCreatedAt")
+                fileCreatedAt
+            }
             else -> null
         }
 
@@ -74,6 +85,17 @@ object SyncUtils {
         }
 
         return Pair(fileCreatedAt, fileModifiedAt)
+    }
+
+    private fun getLastModifiedOrNow(cursor: Cursor, lastModifiedIndex: Int): Long {
+        val lastModifiedValue = cursor.getLong(lastModifiedIndex)
+        val currentTimeMillis = System.currentTimeMillis()
+        return if (lastModifiedValue > currentTimeMillis) {
+            SentryLog.w(TAG, "lastModifiedIndex is not a valid date with $lastModifiedValue")
+            currentTimeMillis
+        } else {
+            lastModifiedValue
+        }
     }
 
     private fun Cursor.isValidDate(index: Int) = index != -1 && this.getLong(index) > 0

@@ -1,0 +1,5 @@
+- Poursuite des améliorations du téléchargement
+- Correction des builds fDroid
+- Correction du positionnement de la barre de navigation principale
+- Correction de la boîte de dialogue d'importation qui ne se fermait pas lorsqu'une erreur s'était produite
+- Diverses corrections

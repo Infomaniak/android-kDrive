@@ -25,14 +25,23 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
+import com.infomaniak.core.legacy.models.ApiError
+import com.infomaniak.core.legacy.models.ApiResponseStatus
+import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.legacy.room.UserDatabase
+import com.infomaniak.core.legacy.stores.StoreUtils.checkUpdateIsRequired
+import com.infomaniak.core.legacy.utils.showToast
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
+import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.DeepLinkType
@@ -48,15 +57,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.extensions.setDefaultLocaleIfNeeded
-import com.infomaniak.lib.core.models.ApiError
-import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.room.UserDatabase
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.showToast
-import com.infomaniak.lib.stores.StoreUtils.checkUpdateIsRequired
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -67,7 +67,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @SuppressLint("CustomSplashScreen")
-class LaunchActivity : AppCompatActivity() {
+class LaunchActivity : EdgeToEdgeActivity() {
 
     private val navigationArgs: LaunchActivityArgs? by lazy { intent?.extras?.let { LaunchActivityArgs.fromBundle(it) } }
     private var mainActivityExtras: Bundle? = null
@@ -98,6 +98,7 @@ class LaunchActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onPause() {
         super.onPause()
         if (SDK_INT >= 34) {
@@ -115,7 +116,10 @@ class LaunchActivity : AppCompatActivity() {
             when (destinationClass) {
                 MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
                 LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
-                PublicShareActivity::class.java -> publicShareActivityExtras?.let(::putExtras)
+                PublicShareActivity::class.java -> {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+                    publicShareActivityExtras?.let(::putExtras)
+                }
             }
         }.also(::startActivity)
     }
@@ -199,7 +203,7 @@ class LaunchActivity : AppCompatActivity() {
         Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
             val (driveId, publicShareUuid) = match.destructured
 
-            val apiResponse = ApiRepository.getPublicShareInfo(driveId.toInt(), publicShareUuid)
+            val apiResponse = PublicShareApiRepository.getPublicShareInfo(driveId.toInt(), publicShareUuid)
             when (apiResponse.result) {
                 ApiResponseStatus.SUCCESS -> {
                     val shareLink = apiResponse.data!!

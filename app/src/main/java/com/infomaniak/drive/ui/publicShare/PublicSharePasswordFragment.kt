@@ -24,26 +24,26 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.infomaniak.drive.BuildConfig
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.models.ApiError
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.hideProgressCatching
+import com.infomaniak.core.legacy.utils.initProgress
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.legacy.utils.showProgressCatching
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.SHARE_URL_V1
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.PublicShareUtils
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.models.ApiError
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.hideProgressCatching
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.showProgressCatching
 
 class PublicSharePasswordFragment : Fragment() {
 
@@ -69,13 +69,15 @@ class PublicSharePasswordFragment : Fragment() {
         observeInitResult()
 
         binding.root.enableEdgeToEdge(withPadding = true, withBottom = false) {
-            binding.passwordValidateButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandardMedium).toInt() + it.bottom)
+            binding.passwordValidateButton.setMargins(
+                bottom = resources.getDimension(R.dimen.marginStandardMedium).toInt() + it.bottom
+            )
         }
     }
 
     //region Hack TODO: Remove this when the back will support bearer token
     private fun getPublicShareUrl(): String {
-        return "${BuildConfig.SHARE_URL_V1}share/${publicShareViewModel.driveId}/${publicShareViewModel.publicShareUuid}"
+        return "${SHARE_URL_V1}/share/${publicShareViewModel.driveId}/${publicShareViewModel.publicShareUuid}"
     }
     //endregion
 

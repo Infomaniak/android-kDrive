@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.drive.databinding.FragmentBottomSheetColorFolderBinding
 import com.infomaniak.drive.ui.bottomSheetDialogs.ColorFolderAdapter.Companion.COLORS
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.setBackNavigationResult
 
-class ColorFolderBottomSheetDialog : BottomSheetDialogFragment() {
+class ColorFolderBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private var binding: FragmentBottomSheetColorFolderBinding by safeBinding()
     private val navigationArgs: ColorFolderBottomSheetDialogArgs by navArgs()

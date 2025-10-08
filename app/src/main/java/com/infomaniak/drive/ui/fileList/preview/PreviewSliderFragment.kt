@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.R
@@ -52,10 +56,6 @@ import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
 import com.infomaniak.drive.utils.shareText
 import com.infomaniak.drive.views.FileInfoActionsView
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.launch
 
 class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.OnItemClickListener {
@@ -69,7 +69,8 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override val bottomSheetBehavior: BottomSheetBehavior<View>
         get() = BottomSheetBehavior.from(binding.bottomSheetFileInfos)
 
-    override val isPublicShare = false
+    override val isPublicShared = false
+    override val canDownloadFiles = true
     override val ownerFragment = this
 
     override val selectFolderResultLauncher = registerForActivityResult(StartActivityForResult()) {
@@ -118,6 +119,8 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
             previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
                 openWith.isGone = isDownloading
             }
+
+            setupActions(isVisible = !navigationArgs.hideActions)
         }
     }
 

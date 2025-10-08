@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,14 +58,13 @@ open class PreviewFragment : Fragment() {
         FileController.getFileById(fileId, previewSliderViewModel.userDrive) ?: mainViewModel.currentPreviewFileList[fileId]
     }.getOrElse { exception ->
         exception.printStackTrace()
-        Sentry.withScope { scope ->
-            val backStackEntry = findNavController().currentBackStackEntry
+        Sentry.captureException(exception) { scope ->
             val previousName = findNavController().previousBackStackEntry?.destination?.displayName
+            val backStackEntry = findNavController().currentBackStackEntry
             scope.setExtra("destination", "${backStackEntry?.destination?.displayName}")
             scope.setExtra("destination lifecycle", "${backStackEntry?.lifecycle?.currentState}")
             scope.setExtra("previous", previousName ?: "")
             scope.setExtra("exception", exception.stackTraceToString())
-            Sentry.captureException(exception)
         }
         null
     }

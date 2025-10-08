@@ -25,6 +25,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.infomaniak.core.legacy.api.ApiController
 import com.infomaniak.core.utils.SECONDS_IN_A_DAY
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.data.api.ApiRepository
@@ -34,7 +35,6 @@ import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmModules
-import com.infomaniak.lib.core.api.ApiController
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmObject
@@ -44,9 +44,12 @@ import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
 import io.realm.kotlin.oneOf
 import io.sentry.Sentry
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.util.Date
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 open class UploadFile(
     @PrimaryKey var uri: String = "",
@@ -68,15 +71,22 @@ open class UploadFile(
     @delegate:Ignore
     val okHttpClient: OkHttpClient by lazy { runBlocking { AccountUtils.getHttpClient(userId = userId, timeout = 120) } }
 
+    fun isSchemeFile() = getUriObject().scheme.equals(ContentResolver.SCHEME_FILE)
+
     fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {
         remoteSubFolder = parent + if (createDatedSubFolders) "/${fileModifiedAt.format("yyyy/MM")}" else ""
     }
 
-    fun store() {
-        getRealmInstance().use {
-            it.executeTransaction { realm ->
-                realm.insertOrUpdate(this)
+    fun store(coroutineContext: CoroutineContext = EmptyCoroutineContext, customRealm: Realm? = null) {
+        var realm: Realm? = null
+        try {
+            realm = customRealm ?: getRealmInstance()
+            realm.executeTransaction { mutableRealm ->
+                mutableRealm.insertOrUpdate(this)
+                coroutineContext.ensureActive()
             }
+        } finally {
+            if (customRealm == null) realm?.close()
         }
     }
 
@@ -91,7 +101,10 @@ open class UploadFile(
     fun resetUploadToken() {
         getRealmInstance().use { realm ->
             uploadFileByUriQuery(realm, uri).findFirst()?.apply {
-                realm.executeTransaction { uploadToken = null }
+                realm.executeTransaction {
+                    uploadToken = null
+                    uploadHost = null
+                }
             }
         }
     }
@@ -128,7 +141,7 @@ open class UploadFile(
         uploadToken = newUploadToken
     }
 
-    fun deleteIfExists(keepFile: Boolean = false, makeTransaction: Boolean = true, customRealm: Realm? = null) {
+    fun deleteIfExists(keepFile: Boolean = false, customRealm: Realm? = null) {
         val block: (Realm) -> Unit? = { realm ->
             uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFileProxy ->
                 // Cancel session if exists
@@ -138,12 +151,11 @@ open class UploadFile(
                     }
                 }
                 // Delete in realm
-                val deleteFromRealm: (Realm) -> Unit = {
+                realm.executeTransaction {
                     if (uploadFileProxy.isValid) {
                         if (keepFile) uploadFileProxy.deletedAt = Date() else uploadFileProxy.deleteFromRealm()
                     }
                 }
-                if (makeTransaction) realm.executeTransaction(deleteFromRealm) else deleteFromRealm(realm)
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
@@ -412,10 +424,9 @@ open class UploadFile(
             }
         }
 
-        fun setAppSyncSettings(syncSettings: SyncSettings, customRealm: Realm? = null, makeTransaction: Boolean = true) {
+        fun setAppSyncSettings(syncSettings: SyncSettings, customRealm: Realm? = null) {
             val block: (Realm) -> Unit = { realm ->
-                val transaction: (Realm) -> Unit = { it.insertOrUpdate(syncSettings) }
-                if (makeTransaction) realm.executeTransaction(transaction) else transaction(realm)
+                realm.executeTransaction { it.insertOrUpdate(syncSettings) }
             }
             customRealm?.let(block) ?: getRealmInstance().use(block)
         }

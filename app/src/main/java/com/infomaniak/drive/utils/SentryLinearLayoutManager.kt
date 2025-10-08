@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,13 +40,12 @@ class SentryLinearLayoutManager(private val navController: NavController, contex
     companion object {
         fun layoutManagerSentryLog(navController: NavController, exception: IndexOutOfBoundsException) {
             exception.printStackTrace()
-            Sentry.withScope { scope ->
+            Sentry.captureException(exception) { scope ->
                 navController.currentDestination?.displayName?.let { name ->
                     scope.setExtra("navigation", name)
                 }
                 scope.level = SentryLevel.WARNING
                 scope.setExtra("message", "Data modified in different thread")
-                Sentry.captureException(exception)
             }
         }
     }

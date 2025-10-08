@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,14 @@ import android.net.Uri
 import android.print.PrintAttributes
 import android.print.PrintManager
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.utils.isNightModeEnabled
+import com.infomaniak.core.legacy.utils.lightStatusBar
+import com.infomaniak.core.network.utils.bodyAsStringOrNull
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
 import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
@@ -38,7 +41,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.ui.MainActivity.SystemBarsColorScheme
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.DownloadProgressViewModel.Companion.PROGRESS_COMPLETE
@@ -47,9 +49,8 @@ import com.infomaniak.drive.ui.fileList.preview.PDFDocumentAdapter
 import com.infomaniak.drive.utils.PreviewPDFUtils.PasswordProtectedException
 import com.infomaniak.drive.utils.Utils.openWith
 import com.infomaniak.drive.utils.Utils.openWithIntentExceptkDrive
-import com.infomaniak.lib.core.utils.isNightModeEnabled
-import com.infomaniak.lib.core.utils.lightNavigationBar
-import com.infomaniak.lib.core.utils.lightStatusBar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import okhttp3.Response
 import java.io.BufferedInputStream
 
@@ -59,29 +60,20 @@ fun Activity.setupBottomSheetFileBehavior(
     bottomSheetBehavior: BottomSheetBehavior<View>,
     isDraggable: Boolean,
     isFitToContents: Boolean = false,
-) {
-    setColorNavigationBar(SystemBarsColorScheme.AppBar)
-    bottomSheetBehavior.apply {
-        isHideable = true
-        this.isDraggable = isDraggable
-        this.isFitToContents = isFitToContents
-        addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                window.lightStatusBar(!isNightModeEnabled() && bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
+) = with(bottomSheetBehavior) {
+    isHideable = true
 
-                when (bottomSheetBehavior.state) {
-                    BottomSheetBehavior.STATE_HIDDEN -> {
-                        window?.navigationBarColor =
-                            ContextCompat.getColor(this@setupBottomSheetFileBehavior, R.color.previewBackgroundTransparent)
-                        window?.lightNavigationBar(false)
-                    }
-                    else -> setColorNavigationBar(SystemBarsColorScheme.AppBar)
-                }
-            }
+    this.isDraggable = isDraggable
+    this.isFitToContents = isFitToContents
 
-            override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
-        })
-    }
+    // Status bar need to be light when the bottom sheet is expanded for preview fragments
+    addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        override fun onStateChanged(bottomSheet: View, newState: Int) {
+            window.lightStatusBar(!isNightModeEnabled() && bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED)
+        }
+
+        override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
+    })
 }
 
 fun Context.saveToKDrive(externalFileUri: Uri) {
@@ -182,19 +174,25 @@ private fun Context.printPdf(
     }
 }
 
-fun downloadFile(
+suspend fun downloadFile(
     externalOutputFile: IOFile,
     file: File,
     shouldBePdf: Boolean,
     onProgress: (progress: Int) -> Unit,
+    isPublicShared: Boolean,
 ) {
-    if (externalOutputFile.exists()) externalOutputFile.delete()
+    Dispatchers.IO { if (externalOutputFile.exists()) externalOutputFile.delete() }
     val downloadUrl = ApiRoutes.getDownloadFileUrl(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
+    val okHttpClient = if (isPublicShared) HttpClient.okHttpClientNoTokenInterceptor else HttpClient.okHttpClient
 
-    DownloadOfflineFileManager.downloadFileResponse(downloadUrl, downloadInterceptor = downloadProgressInterceptor).use {
+    DownloadOfflineFileManager.downloadFileResponseAsync(
+        fileUrl = downloadUrl,
+        downloadInterceptor = downloadProgressInterceptor,
+        okHttpClient = okHttpClient,
+    ).use {
         if (!it.isSuccessful) {
-            val errorCode = JsonParser.parseString(it.body?.string()).asJsonObject.getAsJsonPrimitive("error").asString
+            val errorCode = JsonParser.parseString(it.bodyAsStringOrNull()).asJsonObject.getAsJsonPrimitive("error").asString
             if (errorCode == "password_protected_error") {
                 throw PasswordProtectedException()
             } else {
@@ -211,7 +209,7 @@ fun downloadFile(
     }
 }
 
-private fun createTempFile(response: Response, file: IOFile) {
+private suspend fun createTempFile(response: Response, file: IOFile) = Dispatchers.IO {
     BufferedInputStream(response.body?.byteStream(), BUFFER_SIZE).use { input ->
         file.outputStream().use { output -> input.copyTo(output, BUFFER_SIZE) }
     }

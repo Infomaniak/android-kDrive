@@ -36,6 +36,11 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
+import com.infomaniak.core.legacy.utils.calculateFileSize
+import com.infomaniak.core.legacy.utils.getFileName
+import com.infomaniak.core.legacy.utils.getFileSize
+import com.infomaniak.core.legacy.utils.hasPermissions
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
@@ -59,11 +64,6 @@ import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.uri
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.calculateFileSize
-import com.infomaniak.lib.core.utils.getFileName
-import com.infomaniak.lib.core.utils.getFileSize
-import com.infomaniak.lib.core.utils.hasPermissions
 import io.realm.Realm
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
@@ -250,12 +250,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount(realm)
         if (allPendingUploadsCount != pendingCount) {
             val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriorityCount(realm)
-            Sentry.withScope { scope ->
+            Sentry.captureMessage("An upload count inconsistency has been detected", SentryLevel.ERROR) { scope ->
                 scope.setExtra("uploadFiles pending count", "$pendingCount")
                 scope.setExtra("realmAllPendingUploadsCount", "$allPendingUploadsCount")
                 scope.setExtra("allPendingUploadsWithoutPriorityCount", "$allPendingUploadsWithoutPriorityCount")
-                Sentry.captureMessage("An upload count inconsistency has been detected", SentryLevel.ERROR)
             }
+
             if (pendingCount == 0) throw CancellationException("Stop several restart")
         }
     }
@@ -268,7 +268,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         updateUploadCountNotification()
 
         try {
-            if (uri.scheme.equals(ContentResolver.SCHEME_FILE)) {
+            if (isSchemeFile()) {
                 uploadSchemeFile(uri)
             } else {
                 uploadSchemeContent(uri)
@@ -276,11 +276,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         } catch (exception: CancellationException) {
             throw exception
         } catch (exception: AllowedFileSizeExceededException) {
-            Sentry.withScope { scope ->
+            SentryLog.e(TAG, "total chunks exceeded", exception) { scope ->
                 scope.setExtra("half heap", "${Runtime.getRuntime().maxMemory() / 2}")
                 scope.setExtra("available ram memory", "${applicationContext.getAvailableMemory().availMem}")
                 scope.setExtra("available service memory", "${applicationContext.getAvailableMemory().threshold}")
-                SentryLog.e(TAG, "total chunks exceeded", exception)
             }
             if (isLastFile) throw exception
             false
@@ -403,46 +402,43 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         SentryLog.d(TAG, "checkLocalLastMedias> started with $lastUploadDate")
 
-        getRealmInstance().use {
-            it.executeTransaction { realm ->
+        getRealmInstance().use { realm ->
+            MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
+                ensureActive()
+                // Add log
+                Sentry.addBreadcrumb(Breadcrumb().apply {
+                    category = BREADCRUMB_TAG
+                    message = "sync ${mediaFolder.id}"
+                    level = SentryLevel.DEBUG
+                })
+                SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
 
-                MediaFolder.getAllSyncedFolders(realm).forEach { mediaFolder ->
-                    ensureActive()
-                    // Add log
-                    Sentry.addBreadcrumb(Breadcrumb().apply {
-                        category = BREADCRUMB_TAG
-                        message = "sync ${mediaFolder.id}"
-                        level = SentryLevel.DEBUG
-                    })
-                    SentryLog.d(TAG, "checkLocalLastMedias> sync folder ${mediaFolder.id} ${mediaFolder.name}")
+                // Sync media folder
+                customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
+                customArgs = args + mediaFolder.id.toString()
 
-                    // Sync media folder
-                    customSelection = "$selection AND $IMAGES_BUCKET_ID = ? ${moreCustomConditions()}"
-                    customArgs = args + mediaFolder.id.toString()
+                fetchRecentLocalMediasToSync(
+                    coroutineScope = this,
+                    realm = realm,
+                    syncSettings = syncSettings,
+                    contentUri = MediaFoldersProvider.imagesExternalUri,
+                    selection = customSelection,
+                    args = customArgs,
+                    mediaFolder = mediaFolder,
+                )
+
+                if (syncSettings.syncVideo) {
+                    customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
 
                     fetchRecentLocalMediasToSync(
                         coroutineScope = this,
                         realm = realm,
                         syncSettings = syncSettings,
-                        contentUri = MediaFoldersProvider.imagesExternalUri,
+                        contentUri = MediaFoldersProvider.videosExternalUri,
                         selection = customSelection,
                         args = customArgs,
                         mediaFolder = mediaFolder,
                     )
-
-                    if (syncSettings.syncVideo) {
-                        customSelection = "$selection AND $VIDEO_BUCKET_ID = ? ${moreCustomConditions()}"
-
-                        fetchRecentLocalMediasToSync(
-                            coroutineScope = this,
-                            realm = realm,
-                            syncSettings = syncSettings,
-                            contentUri = MediaFoldersProvider.videosExternalUri,
-                            selection = customSelection,
-                            args = customArgs,
-                            mediaFolder = mediaFolder,
-                        )
-                    }
                 }
             }
         }
@@ -506,11 +502,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         val messageLog = "localMediaFound > $fileName found in folder ${mediaFolder.name}"
         SentryLog.d(TAG, messageLog)
-        Sentry.addBreadcrumb(Breadcrumb().apply {
-            category = BREADCRUMB_TAG
-            message = messageLog
-            level = SentryLevel.INFO
-        })
 
         if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
             UploadFile(
@@ -523,15 +514,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 remoteFolder = syncSettings.syncFolder,
                 userId = syncSettings.userId
             ).apply {
-                deleteIfExists(makeTransaction = false, customRealm = realm)
+                deleteIfExists(customRealm = realm)
                 createSubFolder(mediaFolder.name, syncSettings.createDatedSubFolders)
-                realm.insertOrUpdate(this)
+                store(customRealm = realm)
                 SentryLog.i(TAG, "localMediaFound> $fileName saved in realm")
             }
 
             UploadFile.setAppSyncSettings(
                 customRealm = realm,
-                makeTransaction = false,
                 syncSettings = syncSettings.apply {
                     if (fileModifiedAt > lastSync) lastSync = fileModifiedAt
                 },

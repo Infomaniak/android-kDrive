@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,12 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.infomaniak.core.cancellable
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
@@ -70,11 +75,6 @@ import com.infomaniak.drive.utils.SyncUtils.isSyncScheduled
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.SingleLiveEvent
 import io.realm.Realm
 import io.realm.kotlin.toFlow
 import io.sentry.Breadcrumb
@@ -534,9 +534,8 @@ class MainViewModel(
                             isIOFilesDeleted.add(IOFile(pathname).delete())
                             fileDeleteContentResolver.add(getContext().contentResolver.delete(uri, null, null))
                         } catch (_: NullPointerException) {
-                            Sentry.withScope { scope ->
+                            Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()")) { scope ->
                                 scope.setExtra("columnIndex", columnIndex.toString())
-                                Sentry.captureException(Exception("deleteSynchronizedFilesOnDevice()"))
                             }
                         } finally {
                             fileDeleted.add(uploadFile)

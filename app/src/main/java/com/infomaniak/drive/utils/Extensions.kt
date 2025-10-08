@@ -74,8 +74,16 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
+import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.legacy.utils.context
+import com.infomaniak.core.legacy.utils.loadAvatar
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.network.LOGIN_ENDPOINT_URL
+import com.infomaniak.core.network.SUPPORT_URL
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
-import com.infomaniak.drive.BuildConfig.SUPPORT_URL
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
@@ -93,7 +101,6 @@ import com.infomaniak.drive.databinding.ItemUserBinding
 import com.infomaniak.drive.databinding.LayoutNoNetworkSmallBinding
 import com.infomaniak.drive.databinding.LayoutSwitchDriveBinding
 import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.drive.ui.MainActivity.SystemBarsColorScheme
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.OnlyOfficeActivity
 import com.infomaniak.drive.ui.bottomSheetDialogs.NotSupportedExtensionBottomSheetDialogArgs
@@ -105,18 +112,6 @@ import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.views.PendingFilesView
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.utils.isNightModeEnabled
-import com.infomaniak.lib.core.utils.lightNavigationBar
-import com.infomaniak.lib.core.utils.lightStatusBar
-import com.infomaniak.lib.core.utils.loadAvatar
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
@@ -126,7 +121,6 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import com.infomaniak.core.auth.BuildConfig as AuthBuildConfig
 
 typealias FileId = Int
 typealias IOFile = java.io.File
@@ -172,31 +166,12 @@ fun Cursor.uri(contentUri: Uri): Uri {
 
 fun Number.isPositive(): Boolean = toLong() > 0
 
-fun Activity.setupStatusBarForPreview() {
-    window?.apply {
-        statusBarColor = ContextCompat.getColor(this@setupStatusBarForPreview, R.color.previewBackgroundTransparent)
-
-        lightStatusBar(false)
-        toggleEdgeToEdge(true)
-    }
-}
-
 fun Activity.toggleSystemBar(show: Boolean) {
     ViewCompat.getWindowInsetsController(window.decorView)?.apply {
         systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         val systemBars = WindowInsetsCompat.Type.systemBars()
         if (show) show(systemBars) else hide(systemBars)
     }
-}
-
-fun Activity.setColorStatusBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
-    statusBarColor = ContextCompat.getColor(this@setColorStatusBar, colorScheme.statusBarColor)
-    lightStatusBar(!isNightModeEnabled())
-}
-
-fun Activity.setColorNavigationBar(colorScheme: SystemBarsColorScheme = SystemBarsColorScheme.Default) = with(window) {
-    navigationBarColor = ContextCompat.getColor(this@setColorNavigationBar, colorScheme.navigationBarColor)
-    lightNavigationBar(!isNightModeEnabled())
 }
 
 fun Activity.shouldExcludeFromRecents(exclude: Boolean) {
@@ -262,22 +237,6 @@ fun Activity.getScreenSizeInDp(): Point {
     return point
 }
 
-/**
- * Get the nearest value of precised Int in a typed-array of Ints
- */
-fun Array<Int>.getNearestValue(number: Int): Int {
-    var finalIndex = 0
-    var initialDistance: Int = abs(this[0] - number)
-    for (value in 1 until size) {
-        val currentDistance = abs(this[value] - number)
-        if (currentDistance < initialDistance) {
-            finalIndex = value
-            initialDistance = currentDistance
-        }
-    }
-    return this[finalIndex]
-}
-
 fun String.isEmail(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
@@ -301,12 +260,6 @@ fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     handleActionDone { if (text.isNotBlank()) !availableUsersAdapter.addFirstAvailableItem() }
 
     return availableUsersAdapter
-}
-
-fun Collection<DriveUser>.removeCommonUsers(intersectedUsers: ArrayList<Int>): ArrayList<DriveUser> {
-    return this.filterNot { availableUser ->
-        intersectedUsers.any { it == availableUser.id }
-    } as ArrayList<DriveUser>
 }
 
 fun Fragment.showSnackbar(
@@ -382,7 +335,7 @@ fun Context.shareText(text: String, title: String? = null) {
         title?.let { putExtra(Intent.EXTRA_TITLE, it) }
         type = "text/plain"
     }
-    ContextCompat.startActivity(this, Intent.createChooser(intent, null), null)
+    startActivity(Intent.createChooser(intent, null), null)
 }
 
 fun Category.getName(context: Context): String = when (name) {
@@ -425,11 +378,9 @@ fun Activity.getAdjustedColumnNumber(expectedItemSize: Int, minColumns: Int = 2,
     return min(max(minColumns, screenWidth / expectedItemSize), maxColumns)
 }
 
-fun <T> ApiResponse<ArrayList<T>>.isLastPage() = (data?.size ?: 0) < itemsPerPage
-
 fun Context.getInfomaniakLogin() = InfomaniakLogin(
     context = this,
-    loginUrl = AuthBuildConfig.LOGIN_ENDPOINT_URL,
+    loginUrl = "${LOGIN_ENDPOINT_URL}/",
     appUID = BuildConfig.APPLICATION_ID,
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,
@@ -560,7 +511,7 @@ fun Fragment.observeAndDisplayNetworkAvailability(
             }
 
             noNetworkBinding.noNetwork.isGone = isNetworkAvailable != false
-            additionalChanges?.invoke(isNetworkAvailable != false)
+            additionalChanges?.invoke(isNetworkAvailable)
         }
     }
 }

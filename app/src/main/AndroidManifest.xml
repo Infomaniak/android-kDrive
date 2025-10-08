@@ -243,16 +243,16 @@
             android:theme="@style/WebViewTheme" />
 
         <activity
-            android:name="com.infomaniak.lib.applock.LockActivity"
+            android:name="com.infomaniak.core.legacy.applock.LockActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Lock" />
 
         <activity
-            android:name="com.infomaniak.lib.stores.updaterequired.UpdateRequiredActivity"
+            android:name="com.infomaniak.core.legacy.stores.updaterequired.UpdateRequiredActivity"
             android:theme="@style/AppTheme.RequiredUpdate" />
 
         <activity
-            android:name="com.infomaniak.lib.bugtracker.BugTrackerActivity"
+            android:name="com.infomaniak.core.legacy.bugtracker.BugTrackerActivity"
             android:configChanges="orientation|screenSize"
             android:exported="false"
             android:theme="@style/AppTheme.BugTracker" />

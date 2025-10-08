@@ -22,6 +22,7 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
@@ -30,7 +31,6 @@ import com.infomaniak.drive.data.models.File.FolderPermission.ONLY_ME
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.utils.safeNavigate
 
 class CreatePrivateFolderFragment : CreateFolderFragment() {
 

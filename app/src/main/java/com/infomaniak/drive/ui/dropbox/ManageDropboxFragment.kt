@@ -30,6 +30,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.hideProgressCatching
+import com.infomaniak.core.legacy.utils.initProgress
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.matomo.Matomo.TrackerAction
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.toFloat
@@ -43,11 +48,6 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.showOrHideEmptyError
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.hideProgressCatching
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.showProgressCatching
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Date

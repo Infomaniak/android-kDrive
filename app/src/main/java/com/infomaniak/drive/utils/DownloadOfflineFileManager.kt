@@ -28,6 +28,14 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.core.cancellable
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.networking.HttpUtils
+import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.await
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -42,15 +50,6 @@ import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.await
-import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -215,9 +214,8 @@ class DownloadOfflineFileManager(
             // This line is here to help some devices that don't succeed in automatically creating the file…
             offlineFile.createNewFile()
         }.onFailure {
-            Sentry.withScope { scope ->
+            SentryLog.e(TAG, "Failed to create a new file", it) { scope ->
                 scope.setExtra("does parent exist", parentExists.toString())
-                SentryLog.e(TAG, "Failed to create a new file", it)
             }
 
             return null

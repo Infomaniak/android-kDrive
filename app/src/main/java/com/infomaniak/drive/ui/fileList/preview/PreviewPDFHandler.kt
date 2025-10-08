@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,10 @@ import android.content.Context
 import android.net.Uri
 import android.print.PrintAttributes
 import android.print.PrintManager
+import com.infomaniak.core.legacy.utils.getFileNameAndSize
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
-import com.infomaniak.lib.core.utils.getFileNameAndSize
-import io.sentry.Sentry
-import io.sentry.SentryLevel
 
 class PreviewPDFHandler(
     context: Context,
@@ -78,10 +77,11 @@ class PreviewPDFHandler(
             }
         }.onFailure {
             onError()
-            Sentry.withScope { scope ->
-                scope.setExtra("exception", it.stackTraceToString())
-                Sentry.captureMessage("Exception while printing a PDF", SentryLevel.ERROR)
-            }
+            SentryLog.e(tag = TAG, msg = "Exception while printing a PDF", throwable = it)
         }.getOrNull()
+    }
+
+    companion object {
+        private const val TAG = "PreviewPDFHandler"
     }
 }

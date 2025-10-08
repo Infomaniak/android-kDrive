@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,9 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
@@ -46,12 +49,10 @@ import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getHeader
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.getPreviewPDFHandler
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
+import com.infomaniak.drive.ui.publicShare.PublicSharePreviewSliderFragment
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PreviewPDFUtils
 import com.infomaniak.drive.utils.printPdf
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.safeBinding
 import com.infomaniak.lib.pdfview.PDFView
 import com.infomaniak.lib.pdfview.scroll.DefaultScrollHandle
 import com.shockwave.pdfium.PdfPasswordException
@@ -184,8 +185,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                         thumbnailRatio(THUMBNAIL_RATIO)
                         onLoad { pageCount ->
                             // We can arrive here with a file different from a real PDF like OpenOffice documents
-                            val canPrintFile = externalFileUri != null || file.extensionType == ExtensionType.PDF.value
-                            shouldHidePrintOption(isGone = !canPrintFile)
+                            shouldHidePrintOption(isGone = !canPrintFile())
 
                             dismissPasswordDialog()
                             updatePageNumber(totalPage = pageCount)
@@ -216,6 +216,14 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
                     }
                 }
             }
+        }
+    }
+
+    private fun canPrintFile(): Boolean {
+        return if (parentFragment is PublicSharePreviewSliderFragment) {
+            (parentFragment as PublicSharePreviewSliderFragment).publicShareViewModel.canDownloadFiles && file.isPDF()
+        } else {
+            previewPDFHandler.externalFileUri != null || file.isPDF()
         }
     }
 
@@ -324,7 +332,7 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
             pdfJob.cancel()
             pdfJob = Job()
 
-            return liveData(Dispatchers.IO + pdfJob) {
+            return liveData(pdfJob) {
                 val pdfFile = PreviewPDFUtils.convertPdfFileToIOFile(context, file, userDrive) {
                     viewModelScope.launch(Dispatchers.Main) {
                         downloadProgress.value = it

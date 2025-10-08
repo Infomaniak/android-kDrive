@@ -20,13 +20,13 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.os.Bundle
 import android.view.View
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import com.infomaniak.lib.core.utils.toPx
 
 class DriveBlockedBottomSheetDialog : InformationBottomSheetDialog() {
 

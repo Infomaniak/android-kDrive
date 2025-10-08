@@ -18,6 +18,8 @@
 package com.infomaniak.drive.utils
 
 import androidx.collection.arrayMapOf
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.models.ApiResponse
 import com.infomaniak.drive.KDriveTest.Companion.context
 import com.infomaniak.drive.KDriveTest.Companion.okHttpClient
 import com.infomaniak.drive.KDriveTest.Companion.userDrive
@@ -29,8 +31,6 @@ import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.models.ApiResponse
 import org.junit.jupiter.api.Assertions
 import java.util.UUID
 

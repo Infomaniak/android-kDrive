@@ -18,6 +18,10 @@
 package com.infomaniak.drive.data.cache
 
 import android.content.Context
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.utils.removeAccents
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.CursorApiResponse
@@ -36,10 +40,6 @@ import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.removeAccents
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmList
@@ -263,16 +263,16 @@ object FileController {
                         if (!keepFiles.contains(it.id)) removeFile(it.id, keepFileCaches, keepFiles, realm)
                     }
                 }
-                try {
+                runCatching {
                     if (!keepFileCaches.contains(fileId)) file.deleteCaches(Realm.getApplicationContext()!!)
                     if (!keepFiles.contains(fileId)) realm.executeTransaction { if (file.isValid) file.deleteFromRealm() }
-                } catch (exception: Exception) {
-                    Sentry.withScope { scope ->
+                }.onFailure { exception ->
+                    Sentry.captureException(exception) { scope ->
                         scope.setExtra("with custom realm", "${customRealm != null}")
                         scope.setExtra("recursive", "$recursive")
-                        Sentry.captureException(exception)
                     }
                 }
+                Unit
             }
         }
         customRealm?.let(block) ?: getRealmInstance().use(block)
@@ -357,10 +357,7 @@ object FileController {
             realm?.let(block) ?: getRealmInstance(userDrive).use(block)
         } catch (exception: Exception) {
             exception.printStackTrace()
-            Sentry.withScope { scope ->
-                scope.setExtra("custom realm", "${realm != null}")
-                Sentry.captureException(exception)
-            }
+            Sentry.captureException(exception) { scope -> scope.setExtra("custom realm", "${realm != null}") }
         }
     }
 

@@ -33,6 +33,10 @@ import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import coil.ImageLoader
 import coil.imageLoader
 import com.google.android.material.card.MaterialCardView
+import com.infomaniak.core.legacy.databinding.ItemLoadingBinding
+import com.infomaniak.core.legacy.utils.context
+import com.infomaniak.core.legacy.utils.toPx
+import com.infomaniak.core.legacy.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
@@ -48,10 +52,6 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.setupFileProgress
-import com.infomaniak.lib.core.databinding.ItemLoadingBinding
-import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.utils.toPx
-import com.infomaniak.lib.core.views.LoaderAdapter.Companion.VIEW_TYPE_LOADING
 import io.realm.OrderedRealmCollection
 import io.realm.Realm
 import io.realm.RealmList

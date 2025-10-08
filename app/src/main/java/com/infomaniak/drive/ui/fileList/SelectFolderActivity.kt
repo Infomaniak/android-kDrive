@@ -25,6 +25,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.navArgs
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -36,7 +37,6 @@ import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.Utils.ROOT_ID
-import com.infomaniak.lib.core.utils.setMargins
 
 class SelectFolderActivity : BaseActivity() {
 

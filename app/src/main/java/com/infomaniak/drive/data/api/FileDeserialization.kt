@@ -21,8 +21,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
+import com.infomaniak.core.legacy.api.ApiController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.lib.core.api.ApiController
 import java.lang.reflect.Type
 
 class FileDeserialization : JsonDeserializer<File> {

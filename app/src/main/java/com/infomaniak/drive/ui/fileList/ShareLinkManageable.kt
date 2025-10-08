@@ -18,10 +18,10 @@
 package com.infomaniak.drive.ui.fileList
 
 import androidx.fragment.app.Fragment
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.ShareLinkContainerView
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
 
 interface ShareLinkManageable {
 

@@ -23,9 +23,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.legacy.utils.showKeyboard
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.DialogFragmentPasswordBinding
-import com.infomaniak.lib.core.utils.showKeyboard
 import handleActionDone
 
 class PasswordDialogFragment : DialogFragment() {

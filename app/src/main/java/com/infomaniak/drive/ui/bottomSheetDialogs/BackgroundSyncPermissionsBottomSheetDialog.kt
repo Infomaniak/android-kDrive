@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,11 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentBottomSheetBackgroundSyncBinding
-import com.infomaniak.lib.core.utils.UtilsUi.openUrl
-import com.infomaniak.lib.core.utils.safeBinding
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.flow.first
@@ -112,14 +112,11 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                 "package:$packageName".toUri()
             ).apply { permissionResultLauncher.launch(this) }
-        } catch (activityNotFoundException: ActivityNotFoundException) {
-            try {
+        } catch (_: ActivityNotFoundException) {
+            runCatching {
                 permissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-            } catch (exception: Exception) {
-                Sentry.withScope { scope ->
-                    scope.level = SentryLevel.WARNING
-                    Sentry.captureException(exception)
-                }
+            }.onFailure { exception ->
+                Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
             }
         }
     }

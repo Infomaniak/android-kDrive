@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,21 @@ import android.content.Context
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.net.toFile
 import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.io.skipExactly
 import com.infomaniak.core.ktor.toOutgoingContent
+import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.legacy.api.ApiController.gson
+import com.infomaniak.core.legacy.models.ApiError
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.networking.HttpUtils
+import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.rateLimit
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
 import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
 import com.infomaniak.drive.data.models.UploadFile
@@ -41,14 +50,6 @@ import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
-import com.infomaniak.lib.core.api.ApiController
-import com.infomaniak.lib.core.api.ApiController.gson
-import com.infomaniak.lib.core.models.ApiError
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.SentryLog
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.onUpload
@@ -83,6 +84,7 @@ import java.io.InputStream
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.minusAssign
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.reflect.KSuspendFunction1
 import kotlin.time.Duration.Companion.seconds
 
@@ -118,20 +120,25 @@ class UploadTask(
         try {
             if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask()
             return true
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: ValidationFailedException) {
+            Sentry.captureException(exception) { scope ->
+                scope.level = SentryLevel.ERROR
+                scope.setExtra("uri", uploadFile.uri)
+                scope.setExtra("fileModifiedAt", "${uploadFile.fileModifiedAt.time}")
+                scope.setExtra("fileCreatedAt", "${uploadFile.fileCreatedAt?.time}")
+            }
+            if (uploadFile.isSchemeFile()) Dispatchers.IO { uploadFile.getUriObject().toFile().delete() }
+            uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
         } catch (exception: FileNotFoundException) {
             uploadFile.deleteIfExists(keepFile = uploadFile.isSync())
             SentryLog.w(TAG, "file not found", exception)
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
-            }
+            Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
         } catch (exception: UploadNotTerminated) {
             SentryLog.w(TAG, "upload not terminated", exception)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
-            Sentry.withScope { scope ->
-                scope.level = SentryLevel.WARNING
-                Sentry.captureException(exception)
-            }
+            Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
         } catch (exception: Exception) {
             exception.printStackTrace()
             throw exception
@@ -142,12 +149,13 @@ class UploadTask(
     }
 
     private suspend fun launchTask() = coroutineScope {
-        val chunkConfig = getChunkConfig()
+        var uploadedChunks = uploadFile.getValidChunks()
+        val chunkConfig = getChunkConfig(uploadedChunks)
         val totalChunks = chunkConfig.totalChunks
-        val uploadedChunks = uploadFile.getValidChunks()
         val isNewUploadSession = uploadedChunks?.needToResetUpload(chunkConfig.fileChunkSize) ?: true
 
         val uploadHost = if (isNewUploadSession) {
+            uploadedChunks = null
             uploadFile.prepareUploadSession(totalChunks)
         } else {
             uploadFile.uploadHost
@@ -188,12 +196,22 @@ class UploadTask(
         if (isActive) onFinish(uploadFile.getUriObject())
     }
 
-    private fun getChunkConfig(): FileChunkSizeManager.ChunkConfig {
+    private fun getChunkConfig(validChunks: ValidChunks?): FileChunkSizeManager.ChunkConfig {
+        val validChunkSize = validChunks?.validChunkSize
         return try {
             fileChunkSizeManager.computeChunkConfig(
                 fileSize = uploadFile.fileSize,
-                defaultFileChunkSize = uploadFile.getValidChunks()?.validChuckSize?.toLong(),
-            )
+                defaultFileChunkSize = validChunkSize?.toLong(),
+            ).also {
+                if (validChunkSize != null && validChunkSize != it.fileChunkSize.toInt()) {
+                    SentryLog.e(TAG, "Expected api size different") { scope ->
+                        scope.setExtra("expected api chunk size", validChunkSize.toString())
+                        scope.setExtra("calculated chunk size", it.fileChunkSize.toString())
+                        scope.setExtra("expected api chunks count", validChunks.expectedChunksCount.toString())
+                        scope.setExtra("calculated chunks count", it.totalChunks.toString())
+                    }
+                }
+            }
         } catch (exception: IllegalArgumentException) {
             uploadFile.resetUploadTokenAndCancelSession()
             fileChunkSizeManager.computeChunkConfig(fileSize = uploadFile.fileSize)
@@ -332,7 +350,7 @@ class UploadTask(
     }
 
     private fun ValidChunks.needToResetUpload(chunkSize: Long): Boolean {
-        return if (expectedSize != uploadFile.fileSize || validChuckSize != chunkSize.toInt()) {
+        return if (expectedSize != uploadFile.fileSize || validChunkSize != chunkSize.toInt()) {
             uploadFile.resetUploadTokenAndCancelSession()
             true
         } else {
@@ -346,11 +364,14 @@ class UploadTask(
         if (!isSuccessful) {
             val bytes = response.bodyAsChannel().toByteArray().also { bytes ->
                 val expectedContentLength = response.contentLength() ?: bytes.size
-                if (expectedContentLength != bytes.size) Sentry.withScope { scope ->
-                    scope.setExtra("contentLength", expectedContentLength.toString())
-                    scope.setExtra("received", bytes.size.toString())
-                    scope.level = SentryLevel.WARNING
-                    Sentry.captureMessage("Backend provided more or fewer bytes than the contentLength it declared!")
+                if (expectedContentLength != bytes.size) {
+                    Sentry.captureMessage(
+                        "Backend provided more or fewer bytes than the contentLength it declared!",
+                        SentryLevel.WARNING,
+                    ) { scope ->
+                        scope.setExtra("contentLength", expectedContentLength.toString())
+                        scope.setExtra("received", bytes.size.toString())
+                    }
                 }
             }
             val bodyResponse = String(bytes)
@@ -408,12 +429,14 @@ class UploadTask(
     }
 
     private fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
+        val currentTimeMillis = System.currentTimeMillis()
+        val lastModifiedAt = if (fileModifiedAt.time > currentTimeMillis) currentTimeMillis else fileModifiedAt.time
         val sessionBody = UploadSession.StartSessionBody(
             conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
-            createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1000,
+            createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1_000L,
             directoryId = remoteFolder,
             fileName = fileName,
-            lastModifiedAt = fileModifiedAt.time / 1000,
+            lastModifiedAt = lastModifiedAt / 1_000L,
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
             totalSize = fileSize,
@@ -458,6 +481,7 @@ class UploadTask(
                 throw UploadErrorException()
             }
             LIMIT_EXCEEDED_ERROR_CODE -> throw LimitExceededException()
+            "validation_failed" -> throw ValidationFailedException()
             else -> {
                 if (error?.exception is ApiController.ServerErrorException) {
                     uploadFile.resetUploadTokenAndCancelSession()
@@ -486,6 +510,7 @@ class UploadTask(
     class NetworkException : Exception()
     class NotAuthorizedException : Exception()
     class ProductBlockedException : Exception()
+    class ValidationFailedException : Exception()
     class ProductMaintenanceException : Exception()
     class QuotaExceededException : Exception()
     class UploadErrorException : Exception()

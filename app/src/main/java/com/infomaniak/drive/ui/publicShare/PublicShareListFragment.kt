@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,11 +31,16 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.FileListNavigationType
+import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
@@ -54,13 +59,10 @@ import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
-import com.infomaniak.lib.core.R as RCore
+import com.infomaniak.core.legacy.R as RCore
 
 class PublicShareListFragment : FileListFragment() {
 
@@ -179,6 +181,8 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     private fun populateFileList(files: List<File>, isNewSort: Boolean) {
+        val mainApp = requireContext().applicationContext as MainApplication
+        fileAdapter.newImageLoader = mainApp.newImageLoader(ImageLoaderType.PublicShared)
         fileAdapter.setFiles(files, isFileListResetNeeded = isNewSort)
         fileAdapter.isComplete = true
         showLoadingTimer.cancel()
@@ -190,7 +194,7 @@ class PublicShareListFragment : FileListFragment() {
     private fun onBackPressed() {
         publicShareViewModel.cancelDownload()
         if (folderId == publicShareViewModel.rootSharedFile.value?.id || folderId == ROOT_SHARED_FILE_ID) {
-            requireActivity().finish()
+            requireActivity().finishAndRemoveTask()
         } else {
             findNavController().popBackStack()
         }

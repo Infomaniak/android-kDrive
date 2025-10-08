@@ -20,6 +20,9 @@ package com.infomaniak.drive
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.runner.permission.PermissionRequester
+import com.infomaniak.core.legacy.auth.TokenAuthenticator.Companion.changeAccessToken
+import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.legacy.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.UserDrive
@@ -31,9 +34,6 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.Env
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.RealmModules
-import com.infomaniak.lib.core.auth.TokenAuthenticator.Companion.changeAccessToken
-import com.infomaniak.lib.core.models.user.User
-import com.infomaniak.lib.core.networking.HttpClient
 import com.infomaniak.lib.login.ApiToken
 import io.realm.Realm
 import io.realm.RealmConfiguration

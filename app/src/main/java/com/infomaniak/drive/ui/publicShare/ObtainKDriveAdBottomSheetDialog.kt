@@ -25,10 +25,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.databinding.FragmentBottomSheetObtainKdriveAdBinding
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.LoginActivityArgs
-import com.infomaniak.lib.core.utils.safeBinding
 
 class ObtainKDriveAdBottomSheetDialog : BottomSheetDialogFragment() {
 

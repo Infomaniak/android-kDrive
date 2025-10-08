@@ -21,12 +21,12 @@ import androidx.collection.arrayMapOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.google.gson.JsonObject
+import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.lib.core.utils.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 
 class DropboxViewModel : ViewModel() {

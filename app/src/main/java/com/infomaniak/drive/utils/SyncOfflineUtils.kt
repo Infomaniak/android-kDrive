@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.net.Uri
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -35,9 +36,7 @@ import com.infomaniak.drive.data.models.file.LastFileAction
 import com.infomaniak.drive.utils.MediaUtils.deleteInMediaScan
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
-import com.infomaniak.lib.core.utils.SentryLog
 import io.realm.Realm
-import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
@@ -186,9 +185,8 @@ object SyncOfflineUtils {
         val ioFileLastModified = ioFile.lastModified()
         when {
             remoteFile == null -> {
-                Sentry.withScope { scope ->
+                SentryLog.e("SyncOffline", "Expect remote file instead of null file") { scope ->
                     scope.setExtra("fileAction", "${fileAction.lastAction}")
-                    SentryLog.e("SyncOffline", "Expect remote file instead of null file")
                 }
                 return
             }

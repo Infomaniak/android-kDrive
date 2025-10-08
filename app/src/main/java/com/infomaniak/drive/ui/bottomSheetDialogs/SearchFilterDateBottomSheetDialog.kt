@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH_DAY_ONE_CHAR
 import com.infomaniak.core.utils.FORMAT_DATE_SHORT_DAY_ONE_CHAR
 import com.infomaniak.core.utils.day
@@ -42,12 +43,11 @@ import com.infomaniak.drive.data.models.SearchDateFilter
 import com.infomaniak.drive.data.models.SearchDateFilter.DateFilterKey
 import com.infomaniak.drive.databinding.FragmentBottomSheetSearchFilterDateBinding
 import com.infomaniak.drive.ui.fileList.SearchFiltersViewModel
-import com.infomaniak.lib.core.utils.safeBinding
 import java.util.Calendar
 import java.util.Date
 import androidx.core.util.Pair as AndroidPair
 
-class SearchFilterDateBottomSheetDialog : BottomSheetDialogFragment() {
+class SearchFilterDateBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private var binding: FragmentBottomSheetSearchFilterDateBinding by safeBinding()
 

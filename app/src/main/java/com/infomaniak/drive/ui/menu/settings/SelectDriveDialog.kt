@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import android.widget.PopupWindow
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentBottomSheetSelectDriveBinding
@@ -32,7 +33,6 @@ import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.setUserView
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
-import com.infomaniak.lib.core.utils.safeBinding
 
 class SelectDriveDialog : FullScreenBottomSheetDialog() {
 

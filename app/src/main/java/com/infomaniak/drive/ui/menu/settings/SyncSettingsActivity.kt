@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,15 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.context
+import com.infomaniak.core.legacy.utils.hideProgressCatching
+import com.infomaniak.core.legacy.utils.initProgress
+import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.legacy.utils.showProgressCatching
+import com.infomaniak.core.legacy.utils.startAppSettingsConfig
+import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH
 import com.infomaniak.core.utils.format
 import com.infomaniak.core.utils.startOfTheDay
@@ -60,15 +69,6 @@ import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.utils.hideProgressCatching
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.showProgressCatching
-import com.infomaniak.lib.core.utils.startAppSettingsConfig
-import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.isActive
@@ -141,7 +141,6 @@ class SyncSettingsActivity : BaseActivity() {
         binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
             binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
         }
-        if (Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 
     override fun onResume() {

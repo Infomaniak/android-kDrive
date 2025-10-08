@@ -31,6 +31,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.SnackbarUtils
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
@@ -50,14 +58,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.getName
 import com.infomaniak.drive.utils.setCornersRadius
 import com.infomaniak.drive.views.DebouncingTextWatcher
-import com.infomaniak.lib.core.models.ApiResponse
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.SnackbarUtils
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setBackNavigationResult
-import com.infomaniak.lib.core.utils.setMargins
 import java.util.Date
 
 class SelectCategoriesFragment : Fragment() {

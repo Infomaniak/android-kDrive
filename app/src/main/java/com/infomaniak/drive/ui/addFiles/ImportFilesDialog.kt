@@ -29,6 +29,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.legacy.utils.getFileName
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager
 import com.infomaniak.drive.data.models.UploadFile
@@ -41,9 +43,6 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.getFileName
-import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -110,7 +109,10 @@ class ImportFilesDialog : DialogFragment() {
             runCatching {
                 initUpload(iterator.next())
             }.onFailure { exception ->
-                if (exception is CancellationException) throw exception
+                if (exception is CancellationException) {
+                    dismissAllowingStateLoss()
+                    throw exception
+                }
                 when {
                     exception is IOException && exception.message?.contains("ENOSPC|No space left".toRegex()) == true -> {
                         isLowDeviceStorage = true
@@ -131,14 +133,10 @@ class ImportFilesDialog : DialogFragment() {
     }
 
     private suspend fun initUpload(uri: Uri) = withContext(Dispatchers.IO) {
-        ensureActive()
         fun captureWithSentry(cursorState: String) {
             // We have cases where importation has failed,
             // but we've added enough information to know the cause.
-            Sentry.withScope { scope ->
-                scope.setExtra("uri", uri.toString())
-                SentryLog.e(TAG, "Uri found but cursor is $cursorState")
-            }
+            SentryLog.e(TAG, "Uri found but cursor is $cursorState") { scope -> scope.setExtra("uri", uri.toString()) }
         }
 
         requireContext().contentResolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -155,6 +153,7 @@ class ImportFilesDialog : DialogFragment() {
 
     private suspend fun processCursorData(cursor: Cursor, uri: Uri) = coroutineScope {
         var outputFile: IOFile? = null
+        var uploadFile: UploadFile? = null
         runCatching {
             SentryLog.i(TAG, "processCursorData: uri=$uri")
             val fileName = cursor.getFileName(uri)
@@ -162,7 +161,7 @@ class ImportFilesDialog : DialogFragment() {
 
             outputFile = getOutputFile(uri, fileModifiedAt)
             ensureActive()
-            UploadFile(
+            uploadFile = UploadFile(
                 uri = outputFile.toUri().toString(),
                 driveId = navArgs.driveId,
                 fileCreatedAt = fileCreatedAt,
@@ -172,11 +171,13 @@ class ImportFilesDialog : DialogFragment() {
                 remoteFolder = navArgs.folderId,
                 type = UploadFile.Type.UPLOAD.name,
                 userId = AccountUtils.currentUserId,
-            ).store()
+            )
+            uploadFile.store(currentCoroutineContext())
             successCount++
             currentImportFile = null
         }.onFailure { exception ->
             if (outputFile?.exists() == true) outputFile.delete()
+            uploadFile?.deleteIfExists()
             throw exception
         }
     }
@@ -189,9 +190,8 @@ class ImportFilesDialog : DialogFragment() {
     private suspend fun getOutputFile(uri: Uri, fileModifiedAt: Date): IOFile {
 
         fun captureCannotProcessCopyData() {
-            Sentry.withScope { scope ->
+            SentryLog.e(TAG, "Uri is valid but data cannot be copied from the import file") { scope ->
                 scope.setExtra("uri", uri.toString())
-                SentryLog.e(TAG, "Uri is valid but data cannot be copied from the import file")
             }
         }
 

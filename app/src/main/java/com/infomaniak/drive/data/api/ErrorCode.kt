@@ -17,8 +17,8 @@
  */
 package com.infomaniak.drive.data.api
 
+import com.infomaniak.core.legacy.utils.ApiErrorCode
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.utils.ApiErrorCode
 
 object ErrorCode {
 

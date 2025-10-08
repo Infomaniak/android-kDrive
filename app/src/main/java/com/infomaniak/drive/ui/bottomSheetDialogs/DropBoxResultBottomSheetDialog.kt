@@ -22,8 +22,8 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.R
-import com.infomaniak.lib.core.utils.toPx
 
 class DropBoxResultBottomSheetDialog : InformationBottomSheetDialog() {
 

@@ -43,6 +43,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.WorkInfo
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.appbar.MaterialToolbar
+import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
+import com.infomaniak.core.legacy.utils.hideProgressCatching
+import com.infomaniak.core.legacy.utils.initProgress
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.legacy.utils.setPagination
+import com.infomaniak.core.legacy.utils.showProgressCatching
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -63,6 +72,7 @@ import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -96,15 +106,6 @@ import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.observeNavigateFileListTo
 import com.infomaniak.drive.utils.showSnackbar
 import com.infomaniak.drive.views.NoItemsLayoutView
-import com.infomaniak.lib.core.utils.SentryLog
-import com.infomaniak.lib.core.utils.Utils.createRefreshTimer
-import com.infomaniak.lib.core.utils.getBackNavigationResult
-import com.infomaniak.lib.core.utils.hideProgressCatching
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.setPagination
-import com.infomaniak.lib.core.utils.showProgressCatching
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
@@ -519,8 +520,6 @@ open class FileListFragment : MultiSelectFragment(
             updateMultiSelect = { onUpdateMultiSelect() }
         }
 
-        val mainApp = requireContext().applicationContext as MainApplication
-
         fileAdapter = FileAdapter(
             multiSelectManager = multiSelectManager,
             fileList = FileController.emptyList(mainViewModel.realm),
@@ -531,9 +530,7 @@ open class FileListFragment : MultiSelectFragment(
 
             onEmptyList = { checkIfNoFiles() }
 
-            if (userDrive != null && userDrive?.userId != AccountUtils.currentUserId) {
-                newImageLoader = mainApp.newImageLoader(userDrive?.userId)
-            }
+            configNewImageLoader(userDrive)
 
             onFileClicked = getFunctionByFileType()
 
@@ -571,6 +568,13 @@ open class FileListFragment : MultiSelectFragment(
                 context?.let { fileAdapter.toggleOfflineMode(it, !isInternetAvailable) }
             },
         )
+    }
+
+    private fun FileAdapter.configNewImageLoader(userDrive: UserDrive?) {
+        if (userDrive != null && userDrive.userId != AccountUtils.currentUserId) {
+            val mainApp = requireContext().applicationContext as MainApplication
+            newImageLoader = mainApp.newImageLoader(ImageLoaderType.SpecificUser(userDrive.userId))
+        }
     }
 
     private fun getFunctionByFileType(): (File) -> Unit = { file ->

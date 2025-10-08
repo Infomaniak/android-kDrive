@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,11 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.button.MaterialButton
+import com.infomaniak.core.legacy.utils.context
+import com.infomaniak.core.legacy.utils.isNightModeEnabled
+import com.infomaniak.core.legacy.utils.lightStatusBar
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -46,12 +51,6 @@ import com.infomaniak.drive.utils.TabViewPagerUtils.setup
 import com.infomaniak.drive.utils.getFolderIcon
 import com.infomaniak.drive.utils.loadAny
 import com.infomaniak.drive.views.CollapsingSubTitleToolbarBehavior
-import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.utils.isNightModeEnabled
-import com.infomaniak.lib.core.utils.lightStatusBar
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.setMargins
-import com.infomaniak.lib.core.utils.toggleEdgeToEdge
 import kotlin.math.abs
 
 class FileDetailsFragment : FileDetailsSubFragment() {
@@ -84,8 +83,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
     override fun onStart() {
         super.onStart()
         activity?.window?.apply {
-            statusBarColor = Color.TRANSPARENT
-
             requireView().onApplyWindowInsetsListener { _, windowInsets ->
                 binding.toolbar.setMargins(left = windowInsets.left, top = windowInsets.top)
                 binding.tabsContent.setMargins(left = windowInsets.left, right = windowInsets.right)
@@ -106,11 +103,6 @@ class FileDetailsFragment : FileDetailsSubFragment() {
         super.onPause()
         // TODO Understand why we need to do this
         binding.toolbar.setNavigationIconTint(ContextCompat.getColor(requireContext(), R.color.primary))
-    }
-
-    override fun onStop() {
-        requireActivity().window.toggleEdgeToEdge(false)
-        super.onStop()
     }
 
     private fun setFile(file: File) {

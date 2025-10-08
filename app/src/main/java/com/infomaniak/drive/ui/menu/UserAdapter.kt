@@ -22,11 +22,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
+import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.drive.databinding.CardviewUserBinding
 import com.infomaniak.drive.databinding.ItemUserBinding
 import com.infomaniak.drive.ui.menu.UserAdapter.UserViewHolder
 import com.infomaniak.drive.utils.setUserView
-import com.infomaniak.lib.core.models.user.User
 
 class UserAdapter(
     private val users: List<User>,

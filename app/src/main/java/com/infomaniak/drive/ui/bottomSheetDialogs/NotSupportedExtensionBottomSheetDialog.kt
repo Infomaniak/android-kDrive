@@ -21,16 +21,16 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.models.ApiResponseStatus
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.initProgress
+import com.infomaniak.core.legacy.utils.showProgressCatching
+import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.openOnlyOfficeActivity
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.models.ApiResponseStatus
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.initProgress
-import com.infomaniak.lib.core.utils.showProgressCatching
-import com.infomaniak.lib.core.utils.toPx
 
 class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
 

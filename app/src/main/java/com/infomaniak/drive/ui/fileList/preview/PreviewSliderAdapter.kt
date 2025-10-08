@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ class PreviewSliderAdapter(
     manager: FragmentManager,
     lifecycle: Lifecycle,
     private val userDrive: UserDrive,
+    private val isPublicShared: Boolean = false,
 ) : FragmentStateAdapter(manager, lifecycle) {
 
     private var files = ArrayList<File>()
@@ -42,7 +43,7 @@ class PreviewSliderAdapter(
     @OptIn(UnstableApi::class)
     override fun createFragment(position: Int): Fragment {
         val file = getFile(position)
-        val args = PreviewFragmentArgs(fileId = file.id, userDrive = userDrive).toBundle()
+        val args = PreviewFragmentArgs(fileId = file.id, userDrive = userDrive, isPublicShared = isPublicShared).toBundle()
 
         return when (file.getFileType()) {
             ExtensionType.IMAGE -> PreviewPictureFragment()

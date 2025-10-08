@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.context
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
@@ -49,6 +54,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetAddFileBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.bottomSheetDialogs.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.AccountUtils
@@ -62,11 +68,6 @@ import com.infomaniak.drive.utils.openOnlyOfficeActivity
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.context
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.safeNavigate
-import com.infomaniak.lib.core.utils.whenResultIsOk
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -75,7 +76,7 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Date
 
-class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
+class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private var binding: FragmentBottomSheetAddFileBinding by safeBinding()
 
@@ -87,7 +88,6 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
     private lateinit var openCameraPermissions: CameraPermissions
 
     private var mediaPhotoPath = ""
-    private var mediaVideoPath = ""
 
     private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
         backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
@@ -159,15 +159,9 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             binding.openCamera.isEnabled = false
             try {
                 val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                    putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(false))
+                    putExtra(MediaStore.EXTRA_OUTPUT, createMediaPhotoFile())
                 }
-                val takeVideoIntent = Intent(MediaStore.ACTION_VIDEO_CAPTURE).apply {
-                    putExtra(MediaStore.EXTRA_OUTPUT, createMediaFile(true))
-                }
-                val chooserIntent = Intent.createChooser(takePictureIntent, getString(R.string.buttonTakePhotoOrVideo)).apply {
-                    putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(takeVideoIntent))
-                }
-                captureMediaResultLauncher.launch(chooserIntent)
+                captureMediaResultLauncher.launch(takePictureIntent)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
@@ -235,7 +229,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun onCaptureMediaResult(): Job = lifecycleScope.launch(Dispatchers.IO) {
         try {
-            val file = IOFile(mediaPhotoPath).takeIf { it.length() != 0L } ?: IOFile(mediaVideoPath)
+            val file = IOFile(mediaPhotoPath)
             val fileModifiedAt = Date(file.lastModified())
             val applicationContext = context?.applicationContext
             val cacheUri = Utils.copyDataToUploadCache(requireContext(), file, fileModifiedAt)
@@ -261,10 +255,10 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun createMediaFile(isVideo: Boolean): Uri {
+    private fun createMediaPhotoFile(): Uri {
         val date = Date()
         val timeStamp: String = date.format(FORMAT_NEW_FILE)
-        val fileName = "${timeStamp}.${if (isVideo) "mp4" else "jpg"}"
+        val fileName = "${timeStamp}.jpg"
 
         val fileData = IOFile(createExposedTempUploadDir(), fileName).apply {
             if (exists()) delete()
@@ -272,7 +266,7 @@ class AddFileBottomSheetDialog : BottomSheetDialogFragment() {
             setLastModified(date.time)
         }
 
-        if (isVideo) mediaVideoPath = fileData.path else mediaPhotoPath = fileData.path
+        mediaPhotoPath = fileData.path
         return FileProvider.getUriForFile(requireContext(), getString(R.string.FILE_AUTHORITY), fileData)
     }
 

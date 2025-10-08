@@ -25,6 +25,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
 import com.infomaniak.drive.R
@@ -37,14 +39,12 @@ import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.openWith
 import com.infomaniak.drive.utils.saveToKDrive
 import com.infomaniak.drive.utils.setupBottomSheetFileBehavior
-import com.infomaniak.drive.utils.setupStatusBarForPreview
 import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
-import com.infomaniak.lib.core.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.lib.core.utils.setMargins
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
@@ -57,7 +57,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     val previewPDFHandler by lazy {
         PreviewPDFHandler(
             context = this,
-            externalFileUri = Uri.parse(intent.dataString),
+            externalFileUri = intent.dataString?.toUri(),
             setPrintVisibility = binding.bottomSheetFileInfos::isPrintingHidden,
         )
     }
@@ -104,8 +104,6 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         ) {
             pdfContainer.setMargins(right = it?.right ?: 0)
         }
-
-        setupStatusBarForPreview()
     }
 
     fun toggleFullscreen() {

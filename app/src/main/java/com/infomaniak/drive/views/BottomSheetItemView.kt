@@ -25,9 +25,9 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import com.infomaniak.core.legacy.utils.getAttributes
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewBottomSheetItemBinding
-import com.infomaniak.lib.core.utils.getAttributes
 
 class BottomSheetItemView @JvmOverloads constructor(
     context: Context,

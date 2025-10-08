@@ -17,25 +17,23 @@
  */
 package com.infomaniak.drive.ui.publicShare
 
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
+import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityPublicShareBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
+import com.infomaniak.drive.ui.EdgeToEdgeActivity
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.setColorNavigationBar
-import com.infomaniak.drive.utils.setColorStatusBar
-import com.infomaniak.lib.core.utils.setMargins
 
-class PublicShareActivity : AppCompatActivity() {
+class PublicShareActivity : EdgeToEdgeActivity() {
 
     private val binding by lazy { ActivityPublicShareBinding.inflate(layoutInflater) }
     private val publicShareViewModel: PublicShareViewModel by viewModels()
@@ -52,7 +50,7 @@ class PublicShareActivity : AppCompatActivity() {
             val margin = resources.getDimension(R.dimen.marginStandard).toInt()
             view.setMargins(left = margin + insets.left, right = margin + insets.right, bottom = margin + insets.bottom)
         }
-        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
+        onBackPressedDispatcher.addCallback { finishAndRemoveTask() }
     }
 
     override fun onDestroy() {
@@ -66,9 +64,6 @@ class PublicShareActivity : AppCompatActivity() {
 
         if (destination.id == R.id.publicShareListFragment || destination.id == R.id.publicShareBottomSheetFileActions) {
             binding.bottomNavigationBackgroundView.isVisible = true
-
-            setColorStatusBar()
-            setColorNavigationBar()
         } else {
             binding.bottomNavigationBackgroundView.isGone = true
         }

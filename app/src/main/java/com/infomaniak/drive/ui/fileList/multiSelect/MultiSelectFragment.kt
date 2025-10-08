@@ -33,6 +33,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.trackBulkActionEvent
 import com.infomaniak.drive.R
@@ -59,8 +61,6 @@ import com.infomaniak.drive.utils.Utils.downloadAsOfflineFiles
 import com.infomaniak.drive.utils.Utils.duplicateFilesClicked
 import com.infomaniak.drive.utils.Utils.moveFileClicked
 import com.infomaniak.drive.utils.showSnackbar
-import com.infomaniak.lib.core.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.lib.core.utils.whenResultIsOk
 
 abstract class MultiSelectFragment(private val matomoCategory: MatomoCategory) : Fragment(), MultiSelectResult {
 
