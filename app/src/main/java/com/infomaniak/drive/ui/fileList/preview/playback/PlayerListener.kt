@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@ import android.app.Activity
 import android.content.Context
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MatomoDrive.trackEvent
-import com.infomaniak.lib.core.utils.SentryLog
 
 class PlayerListener(
     private val activity: Activity?,

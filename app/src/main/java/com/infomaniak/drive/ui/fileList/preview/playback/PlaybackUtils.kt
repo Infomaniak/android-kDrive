@@ -45,16 +45,16 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
+import com.infomaniak.core.legacy.networking.HttpClient
+import com.infomaniak.core.legacy.networking.HttpUtils
+import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
+import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.lib.core.networking.HttpClient
-import com.infomaniak.lib.core.networking.HttpUtils
-import com.infomaniak.lib.core.networking.ManualAuthorizationRequired
-import com.infomaniak.lib.core.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import java.util.concurrent.Executor
 
 @UnstableApi

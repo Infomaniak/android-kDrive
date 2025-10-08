@@ -181,11 +181,6 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        requireActivity().setupStatusBarForPreview()
-    }
-
     override fun onPause() {
         super.onPause()
         if (noPreviewList()) return
@@ -250,11 +245,11 @@ abstract class BasePreviewSliderFragment : Fragment(), FileInfoActionsView.OnIte
                     with(header) {
                         toggleEditVisibility(isVisible = currentFile.isOnlyOfficePreview())
                         setPageNumberVisibility(isVisible = shouldDisplayPageNumber)
-                        toggleOpenWithVisibility(isVisible = !isPublicShare && !currentFile.isOnlyOfficePreview())
+                        toggleOpenWithVisibility(isVisible = !isPublicShared && !currentFile.isOnlyOfficePreview())
                     }
 
                     setPrintButtonVisibility(isGone = !file.isPDF() || !canDownloadFiles)
-                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShare
+                    (bottomSheetView as? FileInfoActionsView)?.openWith?.isGone = isPublicShared
                     bottomSheetUpdates.tryEmit(file)
                 }
             })
