@@ -17,11 +17,11 @@
  */
 package com.infomaniak.drive.data.api.publicshare
 
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.api.ApiController.ApiMethod.GET
-import com.infomaniak.core.legacy.api.ApiController.ApiMethod.POST
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.models.ApiResponseStatus
+import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.core.network.api.ApiController.ApiMethod.GET
+import com.infomaniak.core.network.api.ApiController.ApiMethod.POST
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor

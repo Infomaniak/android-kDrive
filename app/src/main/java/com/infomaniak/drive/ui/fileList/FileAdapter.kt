@@ -30,8 +30,8 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
-import coil.ImageLoader
-import coil.imageLoader
+import coil3.ImageLoader
+import coil3.imageLoader
 import com.google.android.material.card.MaterialCardView
 import com.infomaniak.core.legacy.databinding.ItemLoadingBinding
 import com.infomaniak.core.legacy.utils.context
