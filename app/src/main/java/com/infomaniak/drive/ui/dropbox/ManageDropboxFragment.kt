@@ -36,6 +36,7 @@ import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.matomo.Matomo.TrackerAction
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.toFloat
 import com.infomaniak.drive.MatomoDrive.trackDropboxEvent
