@@ -64,10 +64,10 @@ class BulkDownloadWorker(context: Context, workerParams: WorkerParameters) : Bas
 
     override suspend fun downloadAction(): Result = downloadFiles()
 
-    override fun onFinish() {
+    override suspend fun onFinish() {
         FileController.markFilesAsOffline(filesId = files.map { it.id }, isMarkedAsOffline = false)
         clearLastDownloadedFile()
-        DownloadReceiver.notifyDownloadCancelled()
+        notifyDownloadFinished()
         notificationManagerCompat.cancel(BULK_DOWNLOAD_ID)
     }
 

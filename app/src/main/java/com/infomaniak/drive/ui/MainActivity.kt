@@ -91,8 +91,8 @@ import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
-import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
@@ -123,8 +123,6 @@ class MainActivity : BaseActivity() {
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
     private val uiSettings by lazy { UiSettings(this) }
     private val navController by lazy { setupNavController() }
-
-    private lateinit var downloadReceiver: DownloadReceiver
 
     private var hasDisplayedInformationPanel: Boolean = false
 
@@ -367,7 +365,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun observeDownloadCancellation() {
-        DownloadReceiver.cancelDownloadTrigger.observe(this) { mainViewModel.updateVisibleFiles.value = true }
+        BaseDownloadWorker.notifyRefreshUi.observe(this) { mainViewModel.updateVisibleFiles.value = true }
     }
 
     private fun observeFailureDownloadWorkerOffline() {

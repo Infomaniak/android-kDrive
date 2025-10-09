@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@ import com.infomaniak.drive.utils.RemoteFileException
 import com.infomaniak.drive.utils.getAvailableStorageInBytes
 import io.sentry.Sentry
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
@@ -107,7 +109,7 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
     abstract suspend fun downloadAction(): Result
 
     // Flush data when success or failure
-    abstract fun onFinish()
+    abstract suspend fun onFinish()
 
     abstract fun isForOneFile(): Boolean
 
@@ -134,5 +136,12 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
 
         private const val MIN_SPACE_LEFT_AFTER_DOWNLOAD_MB = 500
         private const val BYTES_TO_MB = 1_000_000
+
+        private val _notifyRefreshUi: MutableSharedFlow<Unit> = MutableSharedFlow()
+        val notifyRefreshUi = _notifyRefreshUi.asSharedFlow()
+
+        suspend fun notifyDownloadFinished() {
+            _notifyRefreshUi.emit(Unit)
+        }
     }
 }

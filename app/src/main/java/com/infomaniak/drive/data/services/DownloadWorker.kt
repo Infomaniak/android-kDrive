@@ -53,7 +53,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     override suspend fun downloadAction(): Result = downloadFile()
 
-    override fun onFinish(): Unit = Unit
+    override suspend fun onFinish(): Unit = Unit
 
     override fun isForOneFile() = true
 
@@ -74,7 +74,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
                 )
             }
 
-            if (result == Result.failure() && fileId > 0) DownloadReceiver.notifyDownloadCancelled()
+            if (result == Result.failure() && fileId > 0) notifyDownloadFinished()
             applicationContext.cancelNotification(fileId)
         }
 
