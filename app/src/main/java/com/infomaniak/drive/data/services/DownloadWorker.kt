@@ -53,7 +53,7 @@ class DownloadWorker(context: Context, workerParams: WorkerParameters) : BaseDow
 
     override suspend fun downloadAction(): Result = downloadFile()
 
-    override suspend fun onFinish(): Unit = Unit
+    override fun onFinish(): Unit = Unit
 
     override fun isForOneFile() = true
 

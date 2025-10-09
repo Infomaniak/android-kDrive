@@ -109,7 +109,7 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
     abstract suspend fun downloadAction(): Result
 
     // Flush data when success or failure
-    abstract suspend fun onFinish()
+    abstract fun onFinish()
 
     abstract fun isForOneFile(): Boolean
 
@@ -137,11 +137,11 @@ abstract class BaseDownloadWorker(context: Context, workerParams: WorkerParamete
         private const val MIN_SPACE_LEFT_AFTER_DOWNLOAD_MB = 500
         private const val BYTES_TO_MB = 1_000_000
 
-        private val _notifyRefreshUi: MutableSharedFlow<Unit> = MutableSharedFlow()
+        private val _notifyRefreshUi: MutableSharedFlow<Unit> = MutableSharedFlow(extraBufferCapacity = 1)
         val notifyRefreshUi = _notifyRefreshUi.asSharedFlow()
 
-        suspend fun notifyDownloadFinished() {
-            _notifyRefreshUi.emit(Unit)
+        fun notifyDownloadFinished() {
+            _notifyRefreshUi.tryEmit(Unit)
         }
     }
 }
