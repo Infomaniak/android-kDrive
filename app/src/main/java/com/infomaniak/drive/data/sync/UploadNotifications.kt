@@ -132,6 +132,16 @@ object UploadNotifications {
         )
     }
 
+    fun UploadFile.foregroundServiceQuotaNotification(context: Context) {
+        showNotification(
+            context = context,
+            title = context.getString(R.string.uploadPausedTitle),
+            description = context.getString(R.string.uploadPausedDescription),
+            notificationId = NotificationUtils.UPLOAD_STATUS_ID,
+            contentIntent = progressPendingIntent(context),
+        )
+    }
+
     fun permissionErrorNotification(context: Context) {
         val mainActivityIntent = PendingIntent.getActivity(
             context, NotificationUtils.UPLOAD_STATUS_ID,

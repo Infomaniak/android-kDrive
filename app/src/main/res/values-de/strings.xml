@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2022-2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -744,6 +744,8 @@
     <string name="uploadNetworkErrorTitle">Import ausgesetzt</string>
     <string name="uploadNetworkErrorWifiRequired">Warten auf WLAN</string>
     <string name="uploadOutOfMemoryError">Unzureichend verfügbarer RAM</string>
+    <string name="uploadPausedDescription">Einige Uploads sind in kDrive noch im Gange. Öffnen Sie die App und lassen Sie das Gerät verbunden, um den Upload zu beschleunigen.</string>
+    <string name="uploadPausedTitle">Pause importieren</string>
     <string name="uploadPermissionError">Zusätzlich beantragte Genehmigungen</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/32a6039b-49e8-4bea-b0e7-f402f555794e/</string>
     <string name="userInviteByEmail">Per E-Mail einladen</string>

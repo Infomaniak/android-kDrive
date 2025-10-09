@@ -17,7 +17,9 @@
  */
 package com.infomaniak.drive.data.services
 
+import android.os.Build
 import androidx.work.ListenableWorker.Result
+import androidx.work.WorkInfo.Companion.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT
 import com.infomaniak.core.legacy.utils.isNetworkException
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
@@ -27,6 +29,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotifica
 import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.foregroundServiceQuotaNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils
@@ -43,42 +46,43 @@ object UploadWorkerThrowable {
         return try {
             block()
 
-        } catch (exception: UploadTask.FolderNotFoundException) {
+        } catch (_: UploadTask.FolderNotFoundException) {
             currentUploadFile?.folderNotFoundNotification(applicationContext)
             Result.failure()
-
-        } catch (exception: UploadTask.QuotaExceededException) {
-            currentUploadFile?.quotaExceededNotification(applicationContext)
+        } catch (_: UploadTask.QuotaExceededException) {
+            this.currentUploadFile?.quotaExceededNotification(applicationContext)
             Result.failure()
-
-        } catch (exception: AllowedFileSizeExceededException) {
+        } catch (_: AllowedFileSizeExceededException) {
             currentUploadFile?.allowedFileSizeExceededNotification(applicationContext)
             Result.failure()
-
         } catch (exception: OutOfMemoryError) {
             exception.printStackTrace()
             currentUploadFile?.outOfMemoryNotification(applicationContext)
             Result.retry()
-
-        } catch (exception: CancellationException) { // Work has been cancelled
-            Result.retry()
-
-        } catch (exception: UploadTask.LockErrorException) {
+        } catch (_: CancellationException) {
+            // A CancellationException is thrown if, of course, the worker has been cancelled but also if the quota for foreground
+            // services has been reached. Since Android 15, app's foreground services is authorized to run 6 hours / day in the
+            // background at most. To reset this quota, the app need to be brought in foreground. So in that case, we display a
+            // notification to ask the user to go back in the app.
+            // See https://developer.android.com/develop/background-work/services/fgs/timeout for more info.
+            if (Build.VERSION.SDK_INT >= 31 && stopReason == STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) {
+                currentUploadFile?.foregroundServiceQuotaNotification(applicationContext)
+                Result.failure()
+            } else {
+                Result.retry()
+            }
+        } catch (_: UploadTask.LockErrorException) {
             currentUploadFile?.lockErrorNotification(applicationContext)
             Result.retry()
-
-        } catch (exception: UploadTask.ProductBlockedException) {
+        } catch (_: UploadTask.ProductBlockedException) {
             currentUploadFile?.productMaintenanceExceptionNotification(applicationContext, false)
             Result.failure()
-
-        } catch (exception: UploadTask.ProductMaintenanceException) {
+        } catch (_: UploadTask.ProductMaintenanceException) {
             currentUploadFile?.productMaintenanceExceptionNotification(applicationContext, true)
             Result.failure()
-
         } catch (exception: Exception) {
             exception.printStackTrace()
             handleGenericException(exception)
-
         } finally {
             cancelUploadNotification()
         }
