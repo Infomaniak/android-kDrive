@@ -29,24 +29,25 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import coil.ImageLoader
-import coil.ImageLoaderFactory
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.gif.AnimatedImageDecoder
+import coil3.gif.GifDecoder
 import com.facebook.stetho.Stetho
+import com.infomaniak.core.auth.AccessTokenUsageInterceptor
 import com.infomaniak.core.auth.AuthConfiguration
+import com.infomaniak.core.auth.models.user.User
+import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.coil.ImageLoaderProvider
 import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpdateManager
+import com.infomaniak.core.extensions.clearStack
 import com.infomaniak.core.legacy.InfomaniakCore
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.models.user.User
-import com.infomaniak.core.legacy.networking.AccessTokenUsageInterceptor
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.networking.HttpClientConfig
 import com.infomaniak.core.legacy.stores.AppUpdateScheduler
-import com.infomaniak.core.legacy.utils.CoilUtils
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
-import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.network.NetworkConfiguration
+import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.core.network.networking.HttpClientConfig
 import com.infomaniak.core.sentry.SentryConfig.configureSentry
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.TokenInterceptorListenerProvider.publicShareTokenInterceptorListener
@@ -73,7 +74,7 @@ import kotlinx.coroutines.runBlocking
 import splitties.init.injectAsAppCtx
 import java.util.UUID
 
-class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
+class MainApplication : Application(), SingletonImageLoader.Factory, DefaultLifecycleObserver {
 
     init {
         injectAsAppCtx() // Ensures it is always initialized
@@ -192,7 +193,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         super.onStop(owner)
     }
 
-    override fun newImageLoader(): ImageLoader {
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
         return newImageLoader(ImageLoaderType.CurrentUser)
     }
 
@@ -209,12 +210,12 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         }
 
         val factory = if (SDK_INT >= 28) {
-            ImageDecoderDecoder.Factory()
+            AnimatedImageDecoder.Factory()
         } else {
             GifDecoder.Factory()
         }
 
-        return CoilUtils.newImageLoader(applicationContext, tokenInterceptorListener, customFactories = listOf(factory))
+        return ImageLoaderProvider.newImageLoader(applicationContext, tokenInterceptorListener, customFactories = listOf(factory))
     }
 
     private val refreshTokenError: (User) -> Unit = { user ->

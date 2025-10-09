@@ -36,12 +36,12 @@ import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
+import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -256,7 +256,7 @@ class MainViewModel(
     }
 
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         val apiResponse = ApiRepository.getFileShare(okHttpClient, File(id = fileId, driveId = driveId))
         emit(apiResponse)

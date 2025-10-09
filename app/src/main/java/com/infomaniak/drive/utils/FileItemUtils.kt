@@ -29,9 +29,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
-import coil.ImageLoader
-import coil.imageLoader
-import coil.load
+import coil3.ImageLoader
+import coil3.imageLoader
+import coil3.load
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.infomaniak.core.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.legacy.utils.context

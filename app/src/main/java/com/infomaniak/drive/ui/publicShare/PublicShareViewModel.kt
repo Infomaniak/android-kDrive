@@ -22,9 +22,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.legacy.models.ApiError
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
+import com.infomaniak.core.network.models.ApiError
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.SHARE_URL_V1
