@@ -21,8 +21,8 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.infomaniak.core.legacy.utils.isNightModeEnabled
-import com.infomaniak.core.legacy.utils.lightStatusBar
+import com.infomaniak.core.extensions.isNightModeEnabled
+import com.infomaniak.core.extensions.lightStatusBar
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.utils.AccountUtils

@@ -45,8 +45,8 @@ import androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF
 import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
 import androidx.webkit.WebViewClientCompat
 import androidx.webkit.WebViewFeature
+import com.infomaniak.core.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
-import com.infomaniak.core.legacy.utils.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R

@@ -18,7 +18,6 @@
 package com.infomaniak.drive.ui.fileList.fileDetails
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,9 +33,9 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.button.MaterialButton
+import com.infomaniak.core.extensions.isNightModeEnabled
+import com.infomaniak.core.extensions.lightStatusBar
 import com.infomaniak.core.legacy.utils.context
-import com.infomaniak.core.legacy.utils.isNightModeEnabled
-import com.infomaniak.core.legacy.utils.lightStatusBar
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.utils.format
