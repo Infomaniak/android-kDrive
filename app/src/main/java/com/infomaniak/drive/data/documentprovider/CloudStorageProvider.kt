@@ -891,8 +891,13 @@ class CloudStorageProvider : DocumentsProvider() {
         private fun getDriveFromDocId(documentId: String): DriveDocument {
             val parentDocumentId = documentId.substringBeforeLast(SEPARATOR)
             return if (documentId.contains(DRIVE_SEPARATOR)) {
-                val drive = parentDocumentId.substringAfter(SEPARATOR).split(DRIVE_SEPARATOR)
-                DriveDocument(name = drive[0], id = drive[1].toInt())
+                val drivePath = parentDocumentId.substringAfter(SEPARATOR)
+                val driveName = drivePath.substringBeforeLast(DRIVE_SEPARATOR)
+                val driveId = drivePath.substringAfterLast(DRIVE_SEPARATOR).toInt()
+                DriveDocument(
+                    name = driveName,
+                    id = driveId
+                )
             } else DriveDocument(name = "", id = -1)
         }
 
