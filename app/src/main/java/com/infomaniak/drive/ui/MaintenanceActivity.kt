@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
@@ -28,10 +27,11 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.databinding.ActivityNoDriveBinding
+import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.launch
 
-class MaintenanceActivity : AppCompatActivity() {
+class MaintenanceActivity : EdgeToEdgeActivity() {
 
     private val binding: ActivityNoDriveBinding by lazy { ActivityNoDriveBinding.inflate(layoutInflater) }
 
@@ -85,6 +85,8 @@ class MaintenanceActivity : AppCompatActivity() {
         anotherProfileButton.setOnClickListener {
             startActivity(Intent(this@MaintenanceActivity, SwitchUserActivity::class.java))
         }
+
+        binding.root.enableEdgeToEdge()
     }
 
     override fun onResume() {
