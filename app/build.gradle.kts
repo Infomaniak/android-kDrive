@@ -251,7 +251,7 @@ dependencies {
     androidTestImplementation(libs.android.test.core)
     androidTestRuntimeOnly(libs.android.test.runner)
 
-    implementation(core.coil.two.gif)
+    implementation(core.coil.gif)
 
     // Compose
     implementation(libs.androidx.ui.android)

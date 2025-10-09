@@ -39,19 +39,19 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.Xor
+import com.infomaniak.core.auth.TokenAuthenticator.Companion.changeAccessToken
+import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.cancellable
 import com.infomaniak.core.ui.compose.basics.CallableState
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
-import com.infomaniak.core.legacy.auth.TokenAuthenticator.Companion.changeAccessToken
-import com.infomaniak.core.legacy.models.ApiError
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.models.ApiResponseStatus
-import com.infomaniak.core.legacy.models.user.User
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.extensions.clearStack
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
-import com.infomaniak.core.legacy.utils.clearStack
+import com.infomaniak.core.network.models.ApiError
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.observe
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
@@ -247,7 +247,7 @@ class LoginActivity : ComponentActivity() {
 
         runCatching {
             infomaniakLogin.deleteToken(
-                okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+                okHttpClient = HttpClient.okHttpClient,
                 token = token,
             )?.let { errorStatus ->
                 SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
@@ -261,7 +261,7 @@ class LoginActivity : ComponentActivity() {
         lifecycleScope.launch {
             runCatching {
                 val tokenResult = infomaniakLogin.getToken(
-                    okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+                    okHttpClient = HttpClient.okHttpClient,
                     code = authCode,
                 )
 
@@ -304,7 +304,7 @@ class LoginActivity : ComponentActivity() {
 
             runCatching {
                 infomaniakLogin.deleteToken(
-                    okHttpClient = HttpClient.okHttpClientNoTokenInterceptor,
+                    okHttpClient = HttpClient.okHttpClient,
                     token = apiToken,
                 )?.let { errorStatus ->
                     SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
@@ -346,7 +346,7 @@ class LoginActivity : ComponentActivity() {
             val dbUser = AccountUtils.getUserById(apiToken.userId)
             if (dbUser != null) return Xor.Second(getErrorResponse(R.string.errorUserAlreadyPresent))
 
-            val okhttpClient = HttpClient.okHttpClientNoTokenInterceptor
+            val okhttpClient = HttpClient.okHttpClient
                 .newBuilder()
                 .addInterceptor { chain ->
                     val newRequest = changeAccessToken(chain.request(), apiToken)
