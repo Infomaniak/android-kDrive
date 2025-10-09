@@ -1,15 +1,15 @@
 import java.util.Properties
 
 plugins {
-    alias(core.plugins.compose.compiler)
-    alias(core.plugins.sentry.plugin)
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.application) // This line should be 1st, or you'll have Gradle sync issue
     alias(libs.plugins.junit5)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
+    alias(core.plugins.compose.compiler)
+    alias(core.plugins.kotlin.parcelize)
+    alias(core.plugins.sentry.plugin)
 }
 
 val appCompileSdk: Int by rootProject.extra
