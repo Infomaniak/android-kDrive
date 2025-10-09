@@ -18,9 +18,9 @@
 package com.infomaniak.drive.data.api
 
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.legacy.models.ApiError
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.models.ApiResponseStatus
+import com.infomaniak.core.network.models.ApiError
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponseStatus
 
 class CursorApiResponse<T>(
     result: ApiResponseStatus = ApiResponseStatus.UNKNOWN,
