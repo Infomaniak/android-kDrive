@@ -19,7 +19,7 @@ package com.infomaniak.drive.data.models
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-import com.infomaniak.core.legacy.networking.AccessTokenUsageInterceptor.ApiCallRecord
+import com.infomaniak.core.auth.AccessTokenUsageInterceptor.ApiCallRecord
 import com.infomaniak.core.legacy.utils.SharedValues
 import com.infomaniak.core.legacy.utils.sharedValue
 import com.infomaniak.core.legacy.utils.sharedValueWithOrdinal

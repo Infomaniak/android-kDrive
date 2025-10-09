@@ -33,8 +33,8 @@ import com.infomaniak.core.legacy.models.ApiResponse
 import com.infomaniak.core.legacy.networking.HttpClient
 import com.infomaniak.core.legacy.networking.HttpUtils
 import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.await
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository

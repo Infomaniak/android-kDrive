@@ -21,11 +21,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.legacy.models.ApiResponseStatus
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.toPx
+import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.ui.MainViewModel

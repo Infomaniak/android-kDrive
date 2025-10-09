@@ -43,7 +43,6 @@ import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
@@ -62,9 +61,12 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OutOfQuotaPolicy
-import coil.ImageLoader
-import coil.imageLoader
-import coil.load
+import coil3.ImageLoader
+import coil3.imageLoader
+import coil3.load
+import coil3.request.fallback
+import coil3.request.error
+import coil3.request.placeholder
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.card.MaterialCardView
@@ -72,12 +74,12 @@ import com.google.android.material.shape.CornerFamily
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.infomaniak.core.auth.models.user.User
+import com.infomaniak.core.coil.loadAvatar
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
-import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.context
-import com.infomaniak.core.legacy.utils.loadAvatar
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.LOGIN_ENDPOINT_URL
 import com.infomaniak.core.network.SUPPORT_URL
@@ -116,7 +118,6 @@ import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
