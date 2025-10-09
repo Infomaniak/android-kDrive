@@ -894,10 +894,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 val drivePath = parentDocumentId.substringAfter(SEPARATOR)
                 val driveName = drivePath.substringBeforeLast(DRIVE_SEPARATOR)
                 val driveId = drivePath.substringAfterLast(DRIVE_SEPARATOR).toInt()
-                DriveDocument(
-                    name = driveName,
-                    id = driveId
-                )
+                DriveDocument(name = driveName, id = driveId)
             } else DriveDocument(name = "", id = -1)
         }
 
