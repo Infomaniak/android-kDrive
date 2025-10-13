@@ -1,0 +1,3 @@
+- Validation des e-mails avec le validateur Rfc5321 au lieu de celui du système
+- Gestion de la limitation de 6 heures pour les téléchargements en arrière-plan sur Android 16+
+- Gestion du mode Bord à bord dans l'écran de maintenance

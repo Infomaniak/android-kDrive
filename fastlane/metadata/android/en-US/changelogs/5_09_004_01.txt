@@ -1,0 +1,3 @@
+- Validate emails with Rfc5321 validator instead of system's
+- Manage background upload's 6h limitation on Android 16+
+- Handle EdgeToEdge mode in maintenance screen
