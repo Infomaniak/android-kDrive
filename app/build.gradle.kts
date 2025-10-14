@@ -1,7 +1,10 @@
 import java.util.Properties
 
+/**
+ * Don't change the order in this `plugins` block, it will mess things up.
+ */
 plugins {
-    alias(libs.plugins.android.application) // This line should be 1st, or you'll have Gradle sync issue
+    alias(libs.plugins.android.application)
     alias(libs.plugins.junit5)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)

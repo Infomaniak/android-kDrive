@@ -19,11 +19,10 @@ buildscript {
 }
 
 plugins {
-    alias(core.plugins.ksp) version "2.1.21-2.0.1" apply false
-    val kotlinVersion = "2.1.21"
-    alias(libs.plugins.kotlin.serialization) version kotlinVersion apply false
-    alias(core.plugins.compose.compiler) version kotlinVersion apply false
-    alias(core.plugins.kotlin.android) version kotlinVersion apply false
+    alias(core.plugins.compose.compiler) apply false
+    alias(core.plugins.kotlin.android) apply false
+    alias(core.plugins.kotlin.serialization) apply false
+    alias(core.plugins.ksp) apply false
 }
 
 tasks.register<Delete>("clean") {
