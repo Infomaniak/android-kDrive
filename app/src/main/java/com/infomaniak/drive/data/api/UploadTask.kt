@@ -118,7 +118,14 @@ class UploadTask(
         }
 
         try {
-            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask()
+            val httpClient = HttpClient(OkHttp) {
+                engine { preconfigured = uploadFile.okHttpClient }
+            }
+            when {
+                uploadFile.fileSize == 0L -> uploadEmptyFile(uploadFile)
+                uploadFile.fileSize <= CHUNK_UPLOAD_THRESHOLD -> uploadDirectly(httpClient)
+                else -> launchTask()
+            }
             return true
         } catch (exception: CancellationException) {
             throw exception
@@ -146,6 +153,20 @@ class UploadTask(
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         }
         return false
+    }
+
+    private suspend fun uploadDirectly(httpClient: HttpClient) {
+        SentryLog.i(TAG, "upload ${uploadFile.uri} directly with ${uploadFile.fileSize}")
+        getInputStream().buffered().use { inputStream ->
+            val url = ApiRoutes.uploadFileDirectlyUrl(
+                driveId = uploadFile.driveId,
+                directoryId = uploadFile.remoteFolder,
+                fileName = uploadFile.fileName,
+                fileSize = uploadFile.fileSize,
+                conflictOption = uploadFile.uploadConflictOption()
+            )
+            uploadChunkUnchecked(inputStream, httpClient, url = url, length = uploadFile.fileSize)
+        }
     }
 
     private suspend fun launchTask() = coroutineScope {
@@ -177,11 +198,7 @@ class UploadTask(
                     chunkConfig = chunkConfig,
                     validChunksIds = uploadedChunks?.validChunksIds ?: emptyList(),
                     isNewUploadSession = isNewUploadSession,
-                    getInputStream = {
-                        val uri = uploadFile.getOriginalUri(context)
-                        context.contentResolver.openInputStream(uri)
-                            ?: throw IOException("The provider for the following Uri recently crashed: $uri")
-                    },
+                    getInputStream = { getInputStream() },
                     uploadHost = uploadHost,
                 )
             },
@@ -194,6 +211,12 @@ class UploadTask(
         )
 
         if (isActive) onFinish(uploadFile.getUriObject())
+    }
+
+    private fun getInputStream(): InputStream {
+        val uri = uploadFile.getOriginalUri(context)
+        return context.contentResolver.openInputStream(uri)
+            ?: throw IOException("The provider for the following Uri recently crashed: $uri")
     }
 
     private fun getChunkConfig(validChunks: ValidChunks?): FileChunkSizeManager.ChunkConfig {
@@ -522,6 +545,9 @@ class UploadTask(
         private val TAG = UploadTask::class.java.simpleName
 
         const val LIMIT_EXCEEDED_ERROR_CODE = "limit_exceeded_error"
+
+        /** Minimum size at which chunks are used.  */
+        private const val CHUNK_UPLOAD_THRESHOLD = 5 * 1024 * 1024 // Mb
 
         enum class ConflictOption {
             @SerializedName("error")
