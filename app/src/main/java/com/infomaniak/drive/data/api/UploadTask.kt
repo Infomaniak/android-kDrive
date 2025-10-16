@@ -124,7 +124,7 @@ class UploadTask(
             when {
                 uploadFile.fileSize == 0L -> uploadEmptyFile(uploadFile)
                 uploadFile.fileSize <= CHUNK_UPLOAD_THRESHOLD -> uploadDirectly(httpClient)
-                else -> launchTask()
+                else -> uploadInChunks(httpClient)
             }
             return true
         } catch (exception: CancellationException) {
@@ -169,7 +169,7 @@ class UploadTask(
         }
     }
 
-    private suspend fun launchTask() = coroutineScope {
+    private suspend fun uploadInChunks(httpClient: HttpClient) = coroutineScope {
         var uploadedChunks = uploadFile.getValidChunks()
         val chunkConfig = getChunkConfig(uploadedChunks)
         val totalChunks = chunkConfig.totalChunks
@@ -195,6 +195,7 @@ class UploadTask(
         raceOf(
             {
                 uploadChunks(
+                    httpClient = httpClient,
                     chunkConfig = chunkConfig,
                     validChunksIds = uploadedChunks?.validChunksIds ?: emptyList(),
                     isNewUploadSession = isNewUploadSession,
@@ -242,6 +243,7 @@ class UploadTask(
     }
 
     private suspend fun uploadChunks(
+        httpClient: HttpClient,
         chunkConfig: FileChunkSizeManager.ChunkConfig,
         validChunksIds: List<Int>,
         isNewUploadSession: Boolean,
@@ -249,9 +251,6 @@ class UploadTask(
         uploadHost: String,
     ) = coroutineScope {
         val requestSemaphore = Semaphore(chunkConfig.parallelChunks)
-        val httpClient = HttpClient(OkHttp) {
-            engine { preconfigured = uploadFile.okHttpClient }
-        }
 
         for (chunkNumber in 1..chunkConfig.totalChunks) launch {
             requestSemaphore.withPermit {
