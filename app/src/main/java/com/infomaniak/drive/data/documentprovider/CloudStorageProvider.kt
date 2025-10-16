@@ -44,7 +44,7 @@ import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.api.ApiRoutes.uploadEmptyFileUrl
+import com.infomaniak.drive.data.api.ApiRoutes.uploadFileDirectlyUrl
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -550,10 +550,11 @@ class CloudStorageProvider : DocumentsProvider() {
         val parentFolderId = getFileIdFromDocumentId(parentDocumentId)
         val userDrive = createUserDrive(parentDocumentId)
 
-        val uploadUrl = uploadEmptyFileUrl(
+        val uploadUrl = uploadFileDirectlyUrl(
             driveId = driveId,
             directoryId = parentFolderId,
             fileName = displayName,
+            fileSize = 0L,
             conflictOption = ConflictOption.RENAME,
             lastModifiedAt = Date(),
         )
