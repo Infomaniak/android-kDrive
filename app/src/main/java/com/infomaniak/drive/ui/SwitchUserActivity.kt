@@ -19,7 +19,10 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.core.os.bundleOf
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
@@ -35,6 +38,8 @@ class SwitchUserActivity : EdgeToEdgeActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(root)
+        val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel) }
 
         toolbar.setNavigationOnClickListener {
             onBackPressed()

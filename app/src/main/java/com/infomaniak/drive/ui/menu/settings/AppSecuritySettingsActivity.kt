@@ -18,14 +18,18 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.infomaniak.core.legacy.applock.LockActivity
 import com.infomaniak.core.legacy.applock.Utils.silentlyReverseSwitch
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
+import com.infomaniak.drive.ui.TwoFactorAuthViewModel
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
 
@@ -34,6 +38,8 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
+        val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel) }
         toolbar.setNavigationOnClickListener { onBackPressed() }
 
         switchSettingsTitle.text = getString(R.string.appSecurityTitle)

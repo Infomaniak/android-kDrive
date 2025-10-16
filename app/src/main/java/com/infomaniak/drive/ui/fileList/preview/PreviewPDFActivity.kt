@@ -17,9 +17,9 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -45,6 +45,9 @@ import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.twofactorauth.front.addComposeOverlay
+import com.infomaniak.drive.ui.TwoFactorAuthViewModel
 
 class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
@@ -75,6 +78,8 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
         with(binding) {
             setContentView(root)
+            val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
+            addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel) }
 
             navController.navigate(R.id.previewPDFFragment)
 

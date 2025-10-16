@@ -114,6 +114,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
+        addTwoFactorAuthOverlay()
 
         if (!isAuth() || isExtrasNull()) {
             finish()
