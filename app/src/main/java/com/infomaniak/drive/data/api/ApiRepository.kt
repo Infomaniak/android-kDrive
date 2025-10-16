@@ -208,10 +208,11 @@ object ApiRepository : ApiRepositoryCore() {
     }
 
     suspend fun uploadEmptyFile(uploadFile: UploadFile) = with(uploadFile) {
-        val uploadUrl = ApiRoutes.uploadEmptyFileUrl(
+        val uploadUrl = ApiRoutes.uploadFileDirectlyUrl(
             driveId = driveId,
             directoryId = remoteFolder,
             fileName = fileName,
+            fileSize = 0L,
             conflictOption = ConflictOption.RENAME,
             directoryPath = remoteSubFolder,
         )
