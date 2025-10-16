@@ -54,6 +54,7 @@ class SelectFolderActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        addTwoFactorAuthOverlay()
 
         val userId = navigationArgs.userId
         val driveId = navigationArgs.driveId
