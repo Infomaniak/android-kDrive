@@ -432,7 +432,7 @@ class UploadTask(
         val currentTimeMillis = System.currentTimeMillis()
         val lastModifiedAt = if (fileModifiedAt.time > currentTimeMillis) currentTimeMillis else fileModifiedAt.time
         val sessionBody = UploadSession.StartSessionBody(
-            conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
+            conflict = uploadConflictOption(),
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1_000L,
             directoryId = remoteFolder,
             fileName = fileName,
