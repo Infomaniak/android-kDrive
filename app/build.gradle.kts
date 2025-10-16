@@ -181,6 +181,7 @@ dependencies {
     implementation(project(":Core:RecyclerView"))
     implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
+    implementation(project(":Core:TwoFactorAuth:Front"))
 
     // Compose
     implementation(platform(core.compose.bom))

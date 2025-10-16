@@ -54,6 +54,7 @@ import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.observe
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.drive.CREATE_ACCOUNT_CANCEL_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_SUCCESS_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_URL
@@ -67,6 +68,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
 import com.infomaniak.drive.ui.MainActivity
+import com.infomaniak.drive.ui.TwoFactorAuthViewModel
 import com.infomaniak.drive.ui.login.components.OnboardingScreen
 import com.infomaniak.drive.ui.theme.DriveTheme
 import com.infomaniak.drive.utils.AccountUtils
@@ -125,6 +127,7 @@ class LoginActivity : ComponentActivity() {
         enableEdgeToEdge(navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT))
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
 
+        val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
         setContent {
             val accounts by crossAppLoginViewModel.availableAccounts.collectAsStateWithLifecycle()
             val skippedIds by crossAppLoginViewModel.skippedAccountIds.collectAsStateWithLifecycle()
@@ -142,6 +145,7 @@ class LoginActivity : ComponentActivity() {
                     )
                 }
             }
+            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel)
         }
 
         handleNavigationFlags()

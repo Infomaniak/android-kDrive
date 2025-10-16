@@ -19,9 +19,12 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -38,6 +41,8 @@ class MaintenanceActivity : EdgeToEdgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
+        val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel) }
 
         DriveInfosController.getDrives(AccountUtils.currentUserId).apply {
             val firstDrive = firstOrNull()
