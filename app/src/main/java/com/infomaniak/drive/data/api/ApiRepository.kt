@@ -207,7 +207,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getSession(driveId, uploadToken), DELETE, okHttpClient = okHttpClient)
     }
 
-    fun uploadEmptyFile(uploadFile: UploadFile) = with(uploadFile) {
+    suspend fun uploadEmptyFile(uploadFile: UploadFile) = with(uploadFile) {
         val uploadUrl = ApiRoutes.uploadEmptyFileUrl(
             driveId = driveId,
             directoryId = remoteFolder,
@@ -216,7 +216,7 @@ object ApiRepository : ApiRepositoryCore() {
             directoryPath = remoteSubFolder,
         )
 
-        callApi<ApiResponse<File>>(uploadUrl, POST)
+        ApiController.callApi<ApiResponse<File>>(uploadUrl, POST)
     }
 
     fun createFolder(
