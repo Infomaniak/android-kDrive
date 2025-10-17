@@ -46,7 +46,7 @@ class SwitchDriveDialog : SelectBottomSheetDialog() {
                 if (drive.isTechnicalMaintenance) {
                     findNavController().navigate(
                         R.id.driveMaintenanceBottomSheetFragment,
-                        DriveMaintenanceBottomSheetDialogArgs(drive.name).toBundle()
+                        DriveMaintenanceBottomSheetDialogArgs(drive.name, drive.isAsleep).toBundle()
                     )
                 } else {
                     findNavController().navigate(

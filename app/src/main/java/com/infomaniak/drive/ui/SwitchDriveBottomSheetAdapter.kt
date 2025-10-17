@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.models.drive.MaintenanceType
 import com.infomaniak.drive.databinding.ItemSelectBottomSheetBinding
 import com.infomaniak.drive.ui.SwitchDriveBottomSheetAdapter.SwitchDriveViewHolder
 import com.infomaniak.drive.utils.AccountUtils
