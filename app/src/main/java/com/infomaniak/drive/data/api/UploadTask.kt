@@ -123,7 +123,7 @@ class UploadTask(
             }
             when {
                 uploadFile.fileSize == 0L -> uploadEmptyFile(uploadFile)
-                uploadFile.fileSize <= CHUNK_UPLOAD_THRESHOLD -> uploadDirectly(httpClient)
+                uploadFile.fileSize <= MIN_FILE_SIZE_FOR_CHUNKING -> uploadDirectly(httpClient)
                 else -> uploadInChunks(httpClient)
             }
             return true
@@ -545,8 +545,7 @@ class UploadTask(
 
         const val LIMIT_EXCEEDED_ERROR_CODE = "limit_exceeded_error"
 
-        /** Minimum size at which chunks are used.  */
-        private const val CHUNK_UPLOAD_THRESHOLD = 5 * 1024 * 1024 // Mb
+        private const val MIN_FILE_SIZE_FOR_CHUNKING = 5 * 1024 * 1024 // Mb
 
         enum class ConflictOption {
             @SerializedName("error")
