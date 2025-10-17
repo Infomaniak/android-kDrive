@@ -474,6 +474,9 @@
     <string name="localizedFilenamePrivateTeamSpace">La mia cartella</string>
     <string name="localizedFilenameTeamSpace">Cartelle comuni</string>
     <string name="locateButton">Localizzare</string>
+    <string name="maintenanceAsleepDescription">Per ridurre l’impatto sull’ambiente, il tuo kDrive entra in modalità stand-by in caso di inattività prolungata.\nRiavvialo per riottenere l’accesso ai tuoi file!</string>
+    <string name="maintenanceAsleepTitle">Il tuo kDrive %s ha fatto un riposino!</string>
+    <string name="maintenanceWakeUpButton">Riavvia il mio kDrive</string>
     <string name="manageCategoriesCreateTitle">Crea %s</string>
     <string name="manageCategoriesNoCategory">Nessuna categoria</string>
     <string name="manageCategoriesTitle">Gestisci le categorie</string>
