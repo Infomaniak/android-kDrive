@@ -22,9 +22,7 @@ import io.realm.annotations.RealmClass
 
 @RealmClass(embedded = true)
 open class MaintenanceType : RealmObject() {
-    var name: String = ""
     var code: String = ""
-    var description: String = ""
 
     inline val type get() = MaintenanceTypeValue.entries.find { it.value == code } ?: MaintenanceTypeValue.UNKNOWN
 
