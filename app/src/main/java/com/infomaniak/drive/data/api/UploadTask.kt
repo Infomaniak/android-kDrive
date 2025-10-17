@@ -118,7 +118,14 @@ class UploadTask(
         }
 
         try {
-            if (uploadFile.fileSize == 0L) uploadEmptyFile(uploadFile) else launchTask()
+            val httpClient = HttpClient(OkHttp) {
+                engine { preconfigured = uploadFile.okHttpClient }
+            }
+            when {
+                uploadFile.fileSize == 0L -> uploadEmptyFile(uploadFile)
+                uploadFile.fileSize <= MIN_FILE_SIZE_FOR_CHUNKING -> uploadDirectly(httpClient)
+                else -> uploadInChunks(httpClient)
+            }
             return true
         } catch (exception: CancellationException) {
             throw exception
@@ -148,7 +155,21 @@ class UploadTask(
         return false
     }
 
-    private suspend fun launchTask() = coroutineScope {
+    private suspend fun uploadDirectly(httpClient: HttpClient) {
+        SentryLog.i(TAG, "upload ${uploadFile.uri} directly with ${uploadFile.fileSize}")
+        getInputStream().buffered().use { inputStream ->
+            val url = ApiRoutes.uploadFileDirectlyUrl(
+                driveId = uploadFile.driveId,
+                directoryId = uploadFile.remoteFolder,
+                fileName = uploadFile.fileName,
+                fileSize = uploadFile.fileSize,
+                conflictOption = uploadFile.uploadConflictOption()
+            )
+            uploadChunkUnchecked(inputStream, httpClient, url = url, length = uploadFile.fileSize)
+        }
+    }
+
+    private suspend fun uploadInChunks(httpClient: HttpClient) = coroutineScope {
         var uploadedChunks = uploadFile.getValidChunks()
         val chunkConfig = getChunkConfig(uploadedChunks)
         val totalChunks = chunkConfig.totalChunks
@@ -174,14 +195,11 @@ class UploadTask(
         raceOf(
             {
                 uploadChunks(
+                    httpClient = httpClient,
                     chunkConfig = chunkConfig,
                     validChunksIds = uploadedChunks?.validChunksIds ?: emptyList(),
                     isNewUploadSession = isNewUploadSession,
-                    getInputStream = {
-                        val uri = uploadFile.getOriginalUri(context)
-                        context.contentResolver.openInputStream(uri)
-                            ?: throw IOException("The provider for the following Uri recently crashed: $uri")
-                    },
+                    getInputStream = { getInputStream() },
                     uploadHost = uploadHost,
                 )
             },
@@ -194,6 +212,12 @@ class UploadTask(
         )
 
         if (isActive) onFinish(uploadFile.getUriObject())
+    }
+
+    private fun getInputStream(): InputStream {
+        val uri = uploadFile.getOriginalUri(context)
+        return context.contentResolver.openInputStream(uri)
+            ?: throw IOException("The provider for the following Uri recently crashed: $uri")
     }
 
     private fun getChunkConfig(validChunks: ValidChunks?): FileChunkSizeManager.ChunkConfig {
@@ -219,6 +243,7 @@ class UploadTask(
     }
 
     private suspend fun uploadChunks(
+        httpClient: HttpClient,
         chunkConfig: FileChunkSizeManager.ChunkConfig,
         validChunksIds: List<Int>,
         isNewUploadSession: Boolean,
@@ -226,9 +251,6 @@ class UploadTask(
         uploadHost: String,
     ) = coroutineScope {
         val requestSemaphore = Semaphore(chunkConfig.parallelChunks)
-        val httpClient = HttpClient(OkHttp) {
-            engine { preconfigured = uploadFile.okHttpClient }
-        }
 
         for (chunkNumber in 1..chunkConfig.totalChunks) launch {
             requestSemaphore.withPermit {
@@ -432,7 +454,7 @@ class UploadTask(
         val currentTimeMillis = System.currentTimeMillis()
         val lastModifiedAt = if (fileModifiedAt.time > currentTimeMillis) currentTimeMillis else fileModifiedAt.time
         val sessionBody = UploadSession.StartSessionBody(
-            conflict = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME,
+            conflict = uploadConflictOption(),
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1_000L,
             directoryId = remoteFolder,
             fileName = fileName,
@@ -522,6 +544,8 @@ class UploadTask(
         private val TAG = UploadTask::class.java.simpleName
 
         const val LIMIT_EXCEEDED_ERROR_CODE = "limit_exceeded_error"
+
+        private const val MIN_FILE_SIZE_FOR_CHUNKING = 5 * 1024 * 1024 // Mb
 
         enum class ConflictOption {
             @SerializedName("error")

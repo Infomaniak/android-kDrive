@@ -403,16 +403,17 @@ object ApiRoutes {
         return addChunkToSession(uploadHost, driveId, uploadToken!!) + chunkParam
     }
 
-    fun uploadEmptyFileUrl(
+    fun uploadFileDirectlyUrl(
         driveId: Int,
         directoryId: Int,
         fileName: String,
+        fileSize: Long,
         conflictOption: ConflictOption,
         directoryPath: String? = null,
         lastModifiedAt: Date? = null,
     ): String {
         var params = "?directory_id=$directoryId" +
-                "&total_size=0" +
+                "&total_size=$fileSize" +
                 "&file_name=${URLEncoder.encode(fileName, "UTF-8")}" +
                 "&conflict=" + conflictOption.toString()
 
