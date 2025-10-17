@@ -474,6 +474,9 @@
     <string name="localizedFilenamePrivateTeamSpace">Mein Ordner</string>
     <string name="localizedFilenameTeamSpace">Gemeinsame Ordner</string>
     <string name="locateButton">Finden Sie</string>
+    <string name="maintenanceAsleepDescription">Um die Umweltbelastung zu verringern, hat sich Ihr kDrive nach längerer Inaktivität in den Standby-Modus versetzt.\nStarten Sie ihn neu, um wieder Zugriff auf Ihre Dateien zu erhalten!</string>
+    <string name="maintenanceAsleepTitle">Ihr kDrive %s hat sich ein kleines Nickerchen gegönnt!</string>
+    <string name="maintenanceWakeUpButton">Meinen kDrive neu starten</string>
     <string name="manageCategoriesCreateTitle">%s erstellen</string>
     <string name="manageCategoriesNoCategory">Keine Kategorie</string>
     <string name="manageCategoriesTitle">Kategorien verwalten</string>

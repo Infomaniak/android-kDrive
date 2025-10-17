@@ -21,14 +21,16 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.toPx
+import com.infomaniak.drive.KDRIVE_WEB
 import com.infomaniak.drive.R
 
 class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
 
     private val navigationArgs: DriveMaintenanceBottomSheetDialogArgs by navArgs()
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
         illu.apply {
@@ -37,14 +39,27 @@ class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
             setImageResource(R.drawable.ic_maintenance)
         }
 
-        title.text = resources.getQuantityString(R.plurals.driveMaintenanceTitle, 1, navigationArgs.driveName)
-        description.setText(R.string.driveMaintenanceDescription)
-        actionButton.apply {
-            setText(R.string.buttonClose)
-            setOnClickListener { dismiss() }
-        }
+        if (navigationArgs.isAsleep) {
+            title.text = resources.getString(R.string.maintenanceAsleepTitle, navigationArgs.driveName)
+            description.text = getString(R.string.maintenanceAsleepDescription)
+            actionButton.apply {
+                setText(R.string.buttonClose)
+                setOnClickListener { dismiss() }
+            }
+            secondaryActionButton.apply {
+                setText(R.string.maintenanceWakeUpButton)
+                setOnClickListener { context.openUrl(KDRIVE_WEB) }
+            }
+        } else {
+            title.text = resources.getQuantityString(R.plurals.driveMaintenanceTitle, 1, navigationArgs.driveName)
+            description.text = getString(R.string.driveMaintenanceDescription)
+            actionButton.apply {
+                setText(R.string.buttonClose)
+                setOnClickListener { dismiss() }
+            }
 
-        secondaryActionButton.isGone = true
+            secondaryActionButton.isGone = true
+        }
     }
 
 }
