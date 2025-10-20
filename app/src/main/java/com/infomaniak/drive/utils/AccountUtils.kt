@@ -20,6 +20,7 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
+import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpdateManager
 import com.infomaniak.core.legacy.auth.CredentialManager
 import com.infomaniak.core.legacy.auth.TokenAuthenticator
 import com.infomaniak.core.legacy.models.ApiResponseStatus
@@ -106,6 +107,7 @@ object AccountUtils : CredentialManager() {
     suspend fun addUser(user: User) {
         currentDriveId = -1
         currentUser = user
+        DeviceInfoUpdateManager.sharedInstance.resetInfoKey(user.id.toLong())
         userDatabase.userDao().insert(user)
     }
 
@@ -213,6 +215,7 @@ object AccountUtils : CredentialManager() {
     }
 
     suspend fun removeUser(context: Context, user: User) {
+        DeviceInfoUpdateManager.sharedInstance.resetInfoKey(user.id.toLong())
         userDatabase.userDao().delete(user)
         FileController.deleteUserDriveFiles(user.id)
 
