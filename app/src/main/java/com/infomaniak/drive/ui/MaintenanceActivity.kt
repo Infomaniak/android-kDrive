@@ -19,7 +19,6 @@ package com.infomaniak.drive.ui
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
