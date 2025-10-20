@@ -21,14 +21,38 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
 import com.infomaniak.core.extensions.isNightModeEnabled
 import com.infomaniak.core.extensions.lightStatusBar
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
+import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.runBlocking
 
 open class BaseActivity : EdgeToEdgeActivity() {
+
+    /**
+     * Enables the auto-managed 2 factor authentication challenge overlay for View-based Activities.
+     *
+     * ### 2 important things:
+     *
+     * 1. **Always call this after [setContentView].**
+     * 2. If you need to use it inside a compose-based Activity (i.e. w/ `setContent`), use [TwoFactorAuthAutoManagedBottomSheet]
+     */
+    protected fun addTwoFactorAuthOverlay() {
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
+    }
+
+    /**
+     * Enables the auto-managed 2 factor authentication challenge overlay for Compose-based Activities.
+     */
+    @Composable
+    protected fun TwoFactorAuthAutoManagedBottomSheet() {
+        TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

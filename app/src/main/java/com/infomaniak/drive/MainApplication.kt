@@ -48,6 +48,7 @@ import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.network.NetworkConfiguration
 import com.infomaniak.core.sentry.SentryConfig.configureSentry
+import com.infomaniak.core.twofactorauth.back.TwoFactorAuthManager
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
 import com.infomaniak.drive.TokenInterceptorListenerProvider.publicShareTokenInterceptorListener
 import com.infomaniak.drive.data.api.ErrorCode
@@ -72,6 +73,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import splitties.init.injectAsAppCtx
 import java.util.UUID
+
+/**
+ * Singleton for incoming 2FA (two factor authentication) challenges.
+ *
+ * Not a ViewModel because the state needs to be scoped for the entire app.
+ */
+val twoFactorAuthManager = TwoFactorAuthManager { userId -> AccountUtils.getHttpClient(userId) }
 
 class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
 

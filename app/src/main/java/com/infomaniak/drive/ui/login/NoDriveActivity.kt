@@ -20,9 +20,12 @@ package com.infomaniak.drive.ui.login
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.databinding.ActivityNoDriveBinding
+import com.infomaniak.drive.twoFactorAuthManager
 
 class NoDriveActivity : AppCompatActivity() {
 
@@ -31,6 +34,7 @@ class NoDriveActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
 
         noDriveIconLayout.icon.setImageResource(R.drawable.ic_no_drive)
 

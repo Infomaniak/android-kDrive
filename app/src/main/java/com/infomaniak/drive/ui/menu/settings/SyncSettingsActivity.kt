@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui.menu.settings
 import android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.activity.addCallback
@@ -102,6 +101,7 @@ class SyncSettingsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
+        addTwoFactorAuthOverlay()
 
         setOnBackPressed()
 
