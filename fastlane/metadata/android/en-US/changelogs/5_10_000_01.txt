@@ -1,0 +1,3 @@
+- Add 2 factor authentication confirmation
+- Fix crash when selecting a file in external app from drives with @ in their name
+- Improve import speed for file below 5 MB
