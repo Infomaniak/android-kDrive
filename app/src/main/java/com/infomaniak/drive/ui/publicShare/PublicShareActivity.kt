@@ -32,8 +32,8 @@ import com.infomaniak.drive.databinding.ActivityPublicShareBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
+import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.ui.EdgeToEdgeActivity
-import com.infomaniak.drive.ui.TwoFactorAuthViewModel
 import com.infomaniak.drive.utils.IOFile
 
 class PublicShareActivity : EdgeToEdgeActivity() {
@@ -47,8 +47,7 @@ class PublicShareActivity : EdgeToEdgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel) }
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
 
         navController.addOnDestinationChangedListener { _, dest, _ -> onDestinationChanged(dest) }
         binding.mainPublicShareButton.onApplyWindowInsetsListener { view, insets ->

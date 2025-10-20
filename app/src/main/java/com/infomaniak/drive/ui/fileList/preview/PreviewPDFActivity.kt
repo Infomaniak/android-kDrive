@@ -19,14 +19,16 @@ package com.infomaniak.drive.ui.fileList.preview
 
 import android.os.Bundle
 import android.view.View
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPdfActivityActionEvent
 import com.infomaniak.drive.R
@@ -34,6 +36,7 @@ import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.ActivityPreviewPdfBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.Utils.ROOT_ID
 import com.infomaniak.drive.utils.openWith
@@ -44,10 +47,6 @@ import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
-import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
-import com.infomaniak.core.twofactorauth.front.addComposeOverlay
-import com.infomaniak.drive.ui.TwoFactorAuthViewModel
 
 class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
@@ -78,8 +77,7 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
         with(binding) {
             setContentView(root)
-            val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
-            addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel) }
+            addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
 
             navController.navigate(R.id.previewPDFFragment)
 

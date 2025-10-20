@@ -67,8 +67,8 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.ui.MainActivity
-import com.infomaniak.drive.ui.TwoFactorAuthViewModel
 import com.infomaniak.drive.ui.login.components.OnboardingScreen
 import com.infomaniak.drive.ui.theme.DriveTheme
 import com.infomaniak.drive.utils.AccountUtils
@@ -127,7 +127,6 @@ class LoginActivity : ComponentActivity() {
         enableEdgeToEdge(navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT))
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
 
-        val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
         setContent {
             val accounts by crossAppLoginViewModel.availableAccounts.collectAsStateWithLifecycle()
             val skippedIds by crossAppLoginViewModel.skippedAccountIds.collectAsStateWithLifecycle()
@@ -145,7 +144,7 @@ class LoginActivity : ComponentActivity() {
                     )
                 }
             }
-            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel)
+            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager)
         }
 
         handleNavigationFlags()

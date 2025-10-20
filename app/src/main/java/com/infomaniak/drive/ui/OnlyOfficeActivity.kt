@@ -38,7 +38,6 @@ import android.webkit.WebView
 import androidx.activity.addCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.webkit.WebSettingsCompat
@@ -54,6 +53,7 @@ import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedB
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityOnlyOfficeBinding
+import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.AccountUtils
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -78,8 +78,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        val twoFactorAuthViewModel: TwoFactorAuthViewModel by viewModels()
-        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthViewModel = twoFactorAuthViewModel) }
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
 
         val url = intent.getStringExtra(ONLYOFFICE_URL_TAG)!!
         val filename = intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)!!
