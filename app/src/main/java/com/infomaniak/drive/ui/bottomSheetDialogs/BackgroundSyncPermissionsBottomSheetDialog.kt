@@ -43,6 +43,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentBottomSheetBackgroundSyncBinding
 import io.sentry.Sentry
 import io.sentry.SentryLevel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import splitties.init.appCtx
@@ -69,12 +70,7 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.lifecycle.currentStateFlow.first { it == Lifecycle.State.RESUMED }
-            // Ensure this Fragment is in the resumed state (and that the Fragment is attached) before
-            // launch is called on the permissionResultLauncher, to avoid undocumented IllegalStateException.
-            setAllowBackgroundSyncSwitch(checkBatteryLifePermission(requestPermission = false))
-        }
+        setAllowBackgroundSyncSwitch(checkBatteryLifePermission(requestPermission = false))
 
         with(binding) {
             allowBackgroundSyncSwitch.setOnCheckedChangeListener { _, isChecked -> setAllowBackgroundSyncSwitch(isChecked) }
@@ -105,7 +101,10 @@ class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     @SuppressLint("BatteryLife")
-    private fun requestBatteryOptimizationPermission() {
+    private fun requestBatteryOptimizationPermission(): Job = viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.lifecycle.currentStateFlow.first { it == Lifecycle.State.RESUMED }
+        // Ensure this Fragment is in the resumed state (and that the Fragment is attached) before
+        // launch is called on the permissionResultLauncher, to avoid undocumented IllegalStateException.
         val packageName = appCtx.packageName
         try {
             Intent(
