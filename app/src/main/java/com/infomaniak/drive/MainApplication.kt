@@ -96,6 +96,8 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
     override fun onCreate() {
         super<Application>.onCreate()
 
+        configureInfomaniakCore()
+
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         val uiSettings = UiSettings(this)
@@ -125,8 +127,6 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
                 startActivity(this)
             }
         }
-
-        configureInfomaniakCore()
 
         AccountUtils.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
