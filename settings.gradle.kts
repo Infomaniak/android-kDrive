@@ -51,4 +51,5 @@ include(
     ":Core:Thumbnails",
     ":Core:TwoFactorAuth:Front",
     ":Core:TwoFactorAuth:Back",
+    ":Core:UiView:EdgeToEdge"
 )

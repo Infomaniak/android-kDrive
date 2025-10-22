@@ -182,6 +182,7 @@ dependencies {
     implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:TwoFactorAuth:Front"))
+    implementation(project(":Core:UiView:EdgeToEdge"))
 
     // Compose
     implementation(platform(core.compose.bom))

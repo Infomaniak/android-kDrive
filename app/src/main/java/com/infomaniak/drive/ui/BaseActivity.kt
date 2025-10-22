@@ -17,15 +17,13 @@
  */
 package com.infomaniak.drive.ui
 
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import com.infomaniak.core.extensions.isNightModeEnabled
 import com.infomaniak.core.extensions.lightStatusBar
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.twoFactorAuthManager
@@ -63,15 +61,5 @@ open class BaseActivity : EdgeToEdgeActivity() {
             trackUserId(AccountUtils.currentUserId)
         }
         trackScreen()
-    }
-}
-
-abstract class EdgeToEdgeActivity(): AppCompatActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enableEdgeToEdge()
-        if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
     }
 }

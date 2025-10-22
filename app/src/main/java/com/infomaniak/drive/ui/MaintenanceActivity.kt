@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
