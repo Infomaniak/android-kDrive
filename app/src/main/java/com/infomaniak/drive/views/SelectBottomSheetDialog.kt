@@ -21,10 +21,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.databinding.FragmentBottomSheetSelectBinding
-import com.infomaniak.drive.ui.bottomSheetDialogs.EdgeToEdgeBottomSheetDialog
 
 open class SelectBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
     protected var binding: FragmentBottomSheetSelectBinding by safeBinding()

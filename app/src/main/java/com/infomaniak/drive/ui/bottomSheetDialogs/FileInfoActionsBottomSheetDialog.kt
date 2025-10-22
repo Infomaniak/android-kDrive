@@ -36,6 +36,7 @@ import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.UploadTask.Companion.LIMIT_EXCEEDED_ERROR_CODE
