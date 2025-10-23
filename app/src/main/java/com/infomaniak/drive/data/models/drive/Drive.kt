@@ -163,6 +163,5 @@ open class Drive(
         DEMO_END("demo_end"),
         INVOICE_OVERDUE("invoice_overdue"),
         TECHNICAL("technical"),
-        UNKNOWN("unknown")
     }
 }
