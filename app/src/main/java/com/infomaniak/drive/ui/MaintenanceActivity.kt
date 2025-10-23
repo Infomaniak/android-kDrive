@@ -55,16 +55,16 @@ class MaintenanceActivity : EdgeToEdgeActivity() {
             }
             noDriveIconLayout.icon.setImageResource(icon)
 
-            val title = if (firstDrive == null) {
-                getString(R.string.errorNetwork)
-            } else if (firstDrive.isAsleep) {
-                resources.getString(R.string.maintenanceAsleepTitle, firstDrive.name)
-            } else {
-                resources.getQuantityString(
-                    if (firstDrive.isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
-                    this.size,
-                    firstDrive.name
-                )
+            val title = when {
+                firstDrive == null -> getString(R.string.errorNetwork)
+                firstDrive.isAsleep -> resources.getString(R.string.maintenanceAsleepTitle, firstDrive.name)
+                else -> {
+                    resources.getQuantityString(
+                        if (firstDrive.isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
+                        this.size,
+                        firstDrive.name
+                    )
+                }
             }
             noDriveTitle.text = title
 

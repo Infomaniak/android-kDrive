@@ -474,7 +474,7 @@
     <string name="localizedFilenamePrivateTeamSpace">Mon dossier</string>
     <string name="localizedFilenameTeamSpace">Dossiers communs</string>
     <string name="locateButton">Localiser</string>
-    <string name="maintenanceAsleepDescription">Pour réduire l’impact écologique, votre kDrive s’est mis en veille suite à une inactivité prolongée.\nRelancer-le pour retrouver l’accès à vos fichiers !</string>
+    <string name="maintenanceAsleepDescription">Pour réduire l’impact écologique, votre kDrive s’est mis en veille suite à une inactivité prolongée.\nRelancez-le pour retrouver l’accès à vos fichiers !</string>
     <string name="maintenanceAsleepTitle">Votre kDrive %s s’est offert une petite sieste !</string>
     <string name="maintenanceWakeUpButton">Relancer mon kDrive</string>
     <string name="manageCategoriesCreateTitle">Créer %s</string>
