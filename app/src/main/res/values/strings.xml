@@ -485,6 +485,9 @@
     <string name="localizedFilenamePrivateTeamSpace">My folder</string>
     <string name="localizedFilenameTeamSpace">Common folders</string>
     <string name="locateButton">Locate</string>
+    <string name="maintenanceAsleepDescription">To reduce the impact on the environment, your kDrive has gone into standby mode following prolonged inactivity.\nRestart it to regain access to your files!</string>
+    <string name="maintenanceAsleepTitle">Your kDrive %s has taken a little nap!</string>
+    <string name="maintenanceWakeUpButton">Restart my kDrive</string>
     <string name="manageCategoriesCreateTitle">Create %s</string>
     <string name="manageCategoriesNoCategory">No category</string>
     <string name="manageCategoriesTitle">Manage categories</string>
