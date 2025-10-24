@@ -29,6 +29,7 @@ import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.PrintManager
+import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
@@ -107,6 +108,19 @@ class OnlyOfficeActivity : AppCompatActivity() {
                 if (url.endsWith(".pdf")) sendToPrintPDF(url, filename) else openUrl(url)
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (isFinishing) destroyWebView()
+        super.onDestroy()
+    }
+
+    private fun destroyWebView(): Unit = with(binding.webView) {
+        stopLoading()
+        (parent as? ViewGroup)?.removeView(this)
+        webChromeClient = null
+        removeAllViews()
+        destroy()
     }
 
     @SuppressLint("RequiresFeature")
