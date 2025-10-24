@@ -116,6 +116,8 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     private fun destroyWebView(): Unit = with(binding.webView) {
+        // Close the webview properly so that OnlyOffice is notified that the document has been closed and releases its lock.
+        // We also ensure release without its plant on certain devices.
         stopLoading()
         (parent as? ViewGroup)?.removeView(this)
         webChromeClient = null
