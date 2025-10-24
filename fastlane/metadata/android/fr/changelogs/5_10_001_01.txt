@@ -1,0 +1,3 @@
+- Amélioration de l'authentification à deux facteurs
+- Correction d'un plantage dans la demande de permission pour la batterie
+- Correction du login inter app qui ne fonctionnait plus
