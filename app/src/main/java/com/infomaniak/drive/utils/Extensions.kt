@@ -43,7 +43,6 @@ import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
@@ -117,7 +116,6 @@ import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
