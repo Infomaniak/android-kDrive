@@ -1,0 +1,2 @@
+- Amélioration de la gestion mémoire d'onlyoffice
+- Corrections de bugs mineurs

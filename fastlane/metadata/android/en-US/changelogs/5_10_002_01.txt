@@ -1,0 +1,2 @@
+- Improve memory consumption when managing OnlyOffice files
+- Minor bugs fixes
