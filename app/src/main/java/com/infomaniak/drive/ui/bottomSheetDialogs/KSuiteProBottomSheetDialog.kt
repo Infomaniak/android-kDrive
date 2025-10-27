@@ -23,11 +23,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.databinding.BottomSheetKSuiteProBinding
 
-class KSuiteProBottomSheetDialog : BottomSheetDialogFragment() {
+class KSuiteProBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private var binding: BottomSheetKSuiteProBinding by safeBinding()
     private val navArgs: KSuiteProBottomSheetDialogArgs by navArgs()
