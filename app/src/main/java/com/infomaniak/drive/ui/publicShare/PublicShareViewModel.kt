@@ -60,7 +60,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
     val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, ShareLink?>>()
-    val importPublicShareResult = SingleLiveEvent<Pair<Int?, String>>()
+    val importPublicShareResult = SingleLiveEvent<PublicShareImportResult>()
     val submitPasswordResult = SingleLiveEvent<Boolean?>()
     var hasBeenAuthenticated = false
     var canDownloadFiles = canDownload
@@ -187,7 +187,12 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             )
             val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
             val destinationPath = "$SHARE_URL_V1/drive/$destinationDriveId/files/$destinationFolderId"
-            importPublicShareResult.postValue(error to destinationPath)
+            val result = PublicShareImportResult(
+                userId = AccountUtils.currentUserId,
+                destinationPath = destinationPath,
+                errorRes = error,
+            )
+            importPublicShareResult.postValue(result)
         } finally {
             if (shouldImportOnOtherUser) AccountUtils.currentUserId = realCurrentUserId // Reset to currently logged user
         }
@@ -271,6 +276,12 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         val files: List<File>,
         val shouldUpdate: Boolean,
         val isNewSort: Boolean,
+    )
+
+    data class PublicShareImportResult(
+        val userId: Int,
+        val destinationPath: String,
+        val errorRes: Int?,
     )
 
     companion object {
