@@ -90,7 +90,6 @@ object PublicShareApiRepository {
     suspend fun importPublicShareFiles(
         sourceDriveId: Int,
         linkUuid: String,
-        destinationUserId: Int,
         destinationDriveId: Int,
         destinationFolderId: Int,
         fileIds: List<Int>,
