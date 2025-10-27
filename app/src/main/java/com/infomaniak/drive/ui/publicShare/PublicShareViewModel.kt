@@ -160,6 +160,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     fun importFilesToDrive(
+        destinationUserId: Int,
         destinationDriveId: Int,
         destinationFolderId: Int,
         fileIds: List<Int>,
@@ -168,6 +169,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         val apiResponse = PublicShareApiRepository.importPublicShareFiles(
             sourceDriveId = driveId,
             linkUuid = publicShareUuid,
+            destinationUserId = destinationUserId,
             destinationDriveId = destinationDriveId,
             destinationFolderId = destinationFolderId,
             fileIds = fileIds,

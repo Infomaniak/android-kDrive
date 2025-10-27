@@ -44,6 +44,7 @@ import com.infomaniak.drive.data.models.coil.ImageLoaderType
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_DRIVE_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_FOLDER_ID_KEY
+import com.infomaniak.drive.ui.SaveExternalFilesActivity.Companion.DESTINATION_USER_ID_KEY
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
 import com.infomaniak.drive.ui.fileList.FileListFragment
@@ -287,6 +288,7 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     private fun onDriveAndFolderSelected(data: Intent?) {
+        val destinationUserId = data?.getIntExtra(DESTINATION_USER_ID_KEY, PUBLIC_SHARE_DEFAULT_ID) ?: PUBLIC_SHARE_DEFAULT_ID
         val destinationDriveId = data?.getIntExtra(DESTINATION_DRIVE_ID_KEY, PUBLIC_SHARE_DEFAULT_ID) ?: PUBLIC_SHARE_DEFAULT_ID
         val destinationFolderId = data?.getIntExtra(DESTINATION_FOLDER_ID_KEY, PUBLIC_SHARE_DEFAULT_ID) ?: PUBLIC_SHARE_DEFAULT_ID
 
@@ -303,6 +305,7 @@ class PublicShareListFragment : FileListFragment() {
             }
             closeMultiSelect()
             publicShareViewModel.importFilesToDrive(
+                destinationUserId = destinationUserId,
                 destinationDriveId = destinationDriveId,
                 destinationFolderId = destinationFolderId,
                 fileIds = fileIds,
