@@ -90,12 +90,14 @@ object PublicShareApiRepository {
     suspend fun importPublicShareFiles(
         sourceDriveId: Int,
         linkUuid: String,
+        destinationUserId: Int,
         destinationDriveId: Int,
         destinationFolderId: Int,
         fileIds: List<Int>,
         exceptedFileIds: List<Int>,
         password: String = "",
     ): ApiResponse<List<FileExternalImport>> {
+
         val body: MutableMap<String, Any> = mutableMapOf(
             "source_drive_id" to sourceDriveId,
             "sharelink_uuid" to linkUuid,
