@@ -35,9 +35,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentBottomSheetBackgroundSyncBinding
@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 import splitties.init.appCtx
 import splitties.systemservices.powerManager
 
-class BackgroundSyncPermissionsBottomSheetDialog : BottomSheetDialogFragment() {
+class BackgroundSyncPermissionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private var binding: FragmentBottomSheetBackgroundSyncBinding by safeBinding()
 

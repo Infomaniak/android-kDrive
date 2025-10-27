@@ -26,10 +26,10 @@ import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
+import com.infomaniak.drive.data.sync.UploadNotifications.foregroundServiceQuotaNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.lockErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.networkErrorNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.outOfMemoryNotification
-import com.infomaniak.drive.data.sync.UploadNotifications.foregroundServiceQuotaNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils

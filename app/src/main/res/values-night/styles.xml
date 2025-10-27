@@ -26,7 +26,7 @@
         <item name="colorOnSurface">@android:color/white</item>
     </style>
 
-    <style name="AppTheme.Login" parent="AppTheme.LoginBase"/>
+    <style name="AppTheme.Login" parent="AppTheme.LoginBase" />
 
     <style name="AppTheme.BugTracker" parent="AppTheme.BugTrackerBase" />
 

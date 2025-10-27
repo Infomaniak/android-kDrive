@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.databinding.FragmentBottomSheetPublicShareFileActionsBinding
@@ -34,7 +34,7 @@ import com.infomaniak.drive.utils.DrivePermissions
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 
-class PublicShareFileActionsBottomSheetDialog : BottomSheetDialogFragment(), OnPublicShareItemClickListener {
+class PublicShareFileActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), OnPublicShareItemClickListener {
 
     private var binding: FragmentBottomSheetPublicShareFileActionsBinding by safeBinding()
     override val publicShareViewModel: PublicShareViewModel by activityViewModels()

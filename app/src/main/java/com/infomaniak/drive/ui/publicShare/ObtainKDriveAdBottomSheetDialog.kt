@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +24,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.databinding.FragmentBottomSheetObtainKdriveAdBinding
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.LoginActivityArgs
 
-class ObtainKDriveAdBottomSheetDialog : BottomSheetDialogFragment() {
+class ObtainKDriveAdBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private var binding: FragmentBottomSheetObtainKdriveAdBinding by safeBinding()
     private val publicShareViewModel: PublicShareViewModel by activityViewModels()
