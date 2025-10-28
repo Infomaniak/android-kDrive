@@ -57,7 +57,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     val downloadProgressLiveData = MutableLiveData(0)
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
     val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, ShareLink?>>()
-    val importPublicShareResult = SingleLiveEvent<Pair<Int?, String>>()
+    val importPublicShareResult = SingleLiveEvent<PublicShareImportResult>()
     val submitPasswordResult = SingleLiveEvent<Boolean?>()
     var hasBeenAuthenticated = false
     var canDownloadFiles = canDownload
@@ -160,23 +160,30 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     fun importFilesToDrive(
+        destinationUserId: Int,
         destinationDriveId: Int,
         destinationFolderId: Int,
         fileIds: List<Int>,
         exceptedFileIds: List<Int>,
     ) = viewModelScope.launch {
+
         val apiResponse = PublicShareApiRepository.importPublicShareFiles(
             sourceDriveId = driveId,
             linkUuid = publicShareUuid,
+            destinationUserId = destinationUserId,
             destinationDriveId = destinationDriveId,
             destinationFolderId = destinationFolderId,
             fileIds = fileIds,
             exceptedFileIds = exceptedFileIds,
         )
-
         val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
         val destinationPath = "$SHARE_URL_V1/drive/$destinationDriveId/files/$destinationFolderId"
-        importPublicShareResult.postValue(error to destinationPath)
+        val result = PublicShareImportResult(
+            userId = destinationUserId,
+            destinationPath = destinationPath,
+            errorRes = error,
+        )
+        importPublicShareResult.postValue(result)
     }
 
     fun buildArchive(archiveBody: ArchiveUUID.ArchiveBody) = viewModelScope.launch {
@@ -257,6 +264,12 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         val files: List<File>,
         val shouldUpdate: Boolean,
         val isNewSort: Boolean,
+    )
+
+    data class PublicShareImportResult(
+        val userId: Int,
+        val destinationPath: String,
+        val errorRes: Int?,
     )
 
     companion object {
