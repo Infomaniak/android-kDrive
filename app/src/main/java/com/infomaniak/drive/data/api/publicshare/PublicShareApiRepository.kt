@@ -33,6 +33,7 @@ import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileCount
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.file.FileExternalImport
+import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
 import okhttp3.OkHttpClient
 
@@ -90,6 +91,7 @@ object PublicShareApiRepository {
     suspend fun importPublicShareFiles(
         sourceDriveId: Int,
         linkUuid: String,
+        destinationUserId: Int,
         destinationDriveId: Int,
         destinationFolderId: Int,
         fileIds: List<Int>,
@@ -111,7 +113,11 @@ object PublicShareApiRepository {
             url = ApiRoutes.importPublicShareFiles(destinationDriveId),
             method = POST,
             body = body,
-            okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
+            okHttpClient = AccountUtils.getHttpClient(
+                userId = destinationUserId,
+                getAuthenticator = null,
+                getInterceptor = { tokenInterceptorListener -> PublicShareLegacyTokenInterceptor(tokenInterceptorListener) }
+            ),
         )
     }
 
