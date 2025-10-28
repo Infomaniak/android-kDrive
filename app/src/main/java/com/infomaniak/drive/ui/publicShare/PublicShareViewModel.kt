@@ -37,14 +37,11 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
-import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
 import io.sentry.Sentry
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -169,33 +166,24 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         fileIds: List<Int>,
         exceptedFileIds: List<Int>,
     ) = viewModelScope.launch {
-        val realCurrentUserId = AccountUtils.currentUserId
-        val shouldImportOnOtherUser = destinationUserId != PUBLIC_SHARE_DEFAULT_ID
-        try {
-            if (shouldImportOnOtherUser) {
-                AccountUtils.currentUserId = destinationUserId
-                delay(200) // Let the flow in tokenInterceptor update itself
-            }
 
-            val apiResponse = PublicShareApiRepository.importPublicShareFiles(
-                sourceDriveId = driveId,
-                linkUuid = publicShareUuid,
-                destinationDriveId = destinationDriveId,
-                destinationFolderId = destinationFolderId,
-                fileIds = fileIds,
-                exceptedFileIds = exceptedFileIds,
-            )
-            val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
-            val destinationPath = "$SHARE_URL_V1/drive/$destinationDriveId/files/$destinationFolderId"
-            val result = PublicShareImportResult(
-                userId = AccountUtils.currentUserId,
-                destinationPath = destinationPath,
-                errorRes = error,
-            )
-            importPublicShareResult.postValue(result)
-        } finally {
-            if (shouldImportOnOtherUser) AccountUtils.currentUserId = realCurrentUserId // Reset to currently logged user
-        }
+        val apiResponse = PublicShareApiRepository.importPublicShareFiles(
+            sourceDriveId = driveId,
+            linkUuid = publicShareUuid,
+            destinationUserId = destinationUserId,
+            destinationDriveId = destinationDriveId,
+            destinationFolderId = destinationFolderId,
+            fileIds = fileIds,
+            exceptedFileIds = exceptedFileIds,
+        )
+        val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
+        val destinationPath = "$SHARE_URL_V1/drive/$destinationDriveId/files/$destinationFolderId"
+        val result = PublicShareImportResult(
+            userId = destinationUserId,
+            destinationPath = destinationPath,
+            errorRes = error,
+        )
+        importPublicShareResult.postValue(result)
     }
 
     fun buildArchive(archiveBody: ArchiveUUID.ArchiveBody) = viewModelScope.launch {
