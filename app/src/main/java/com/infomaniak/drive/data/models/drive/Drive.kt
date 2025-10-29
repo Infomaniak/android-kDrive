@@ -22,6 +22,7 @@ import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.legacy.utils.Utils.enumValueOfOrNull
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.drive.DrivePack.DrivePackType
+import com.infomaniak.drive.data.models.drive.MaintenanceType.MaintenanceTypeValue
 import io.realm.RealmList
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
@@ -70,6 +71,8 @@ open class Drive(
     var maintenance: Boolean = false,
     @SerializedName("maintenance_reason")
     var maintenanceReason: String = "",
+    @SerializedName("maintenance_types")
+    var maintenanceTypes: RealmList<MaintenanceType> = RealmList(),
     var pack: DrivePack? = DrivePack(),
     var size: Long = 0,
     var version: String = "",
@@ -132,6 +135,7 @@ open class Drive(
     //endregion
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
+    inline val isAsleep get() = maintenanceTypes.any { it.type == MaintenanceTypeValue.Asleep }
 
     inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (isKSuiteMaxTier || quotas.canCreateDropbox)
     inline val canCreateShareLink get() = isKSuiteMaxTier || quotas.canCreateShareLink

@@ -26,6 +26,7 @@ import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedB
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.core.utils.format
+import com.infomaniak.drive.KDRIVE_WEBAPP
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -54,19 +55,22 @@ class MaintenanceActivity : EdgeToEdgeActivity() {
             }
             noDriveIconLayout.icon.setImageResource(icon)
 
-            val title = if (firstDrive == null) {
-                getString(R.string.errorNetwork)
-            } else {
-                resources.getQuantityString(
-                    if (firstDrive.isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
-                    this.size,
-                    firstDrive.name
-                )
+            val title = when {
+                firstDrive == null -> getString(R.string.errorNetwork)
+                firstDrive.isAsleep -> resources.getString(R.string.maintenanceAsleepTitle, firstDrive.name)
+                else -> {
+                    resources.getQuantityString(
+                        if (firstDrive.isTechnicalMaintenance) R.plurals.driveMaintenanceTitle else R.plurals.driveBlockedTitle,
+                        this.size,
+                        firstDrive.name
+                    )
+                }
             }
             noDriveTitle.text = title
 
             noDriveDescription.text = when {
                 firstDrive == null -> getString(R.string.connectionError)
+                firstDrive.isAsleep -> getString(R.string.maintenanceAsleepDescription)
                 firstDrive.isTechnicalMaintenance -> getString(R.string.driveMaintenanceDescription)
                 else -> resources.getQuantityString(
                     R.plurals.driveBlockedDescription,
@@ -78,6 +82,10 @@ class MaintenanceActivity : EdgeToEdgeActivity() {
             noDriveActionButton.apply {
                 when {
                     firstDrive == null -> isGone = true
+                    firstDrive.isAsleep -> {
+                        noDriveActionButton.text = getString(R.string.maintenanceWakeUpButton)
+                        setOnClickListener { openUrl(KDRIVE_WEBAPP) }
+                    }
                     firstDrive.isTechnicalMaintenance -> isGone = true
                     else -> {
                         noDriveActionButton.text = getString(R.string.buttonRenew)

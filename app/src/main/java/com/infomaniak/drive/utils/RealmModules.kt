@@ -43,6 +43,7 @@ import com.infomaniak.drive.data.models.drive.DriveQuotas
 import com.infomaniak.drive.data.models.drive.DriveRights
 import com.infomaniak.drive.data.models.drive.DriveTeamsCategories
 import com.infomaniak.drive.data.models.drive.DriveUsersCategories
+import com.infomaniak.drive.data.models.drive.MaintenanceType
 import com.infomaniak.drive.data.models.file.FileConversion
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileVersion
@@ -74,7 +75,7 @@ object RealmModules {
             Drive::class, DrivePreferences::class, DriveUsersCategories::class, DriveUser::class,
             Team::class, TeamDetails::class, DriveTeamsCategories::class, Category::class, CategoryRights::class,
             DriveCapabilities::class, DrivePack::class, DrivePackCapabilities::class, DriveRights::class, DriveAccount::class,
-            DriveQuotas::class, DriveQuota::class,
+            DriveQuotas::class, DriveQuota::class, MaintenanceType::class
         ]
     )
     class DriveFilesModule
