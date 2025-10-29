@@ -17,16 +17,16 @@
  */
 package com.infomaniak.drive.data.models.drive
 
+import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.utils.ApiEnum
 import com.infomaniak.core.utils.apiEnum
 import io.realm.RealmObject
 import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
-import kotlinx.serialization.SerialName
 
 @RealmClass(embedded = true)
 open class MaintenanceType : RealmObject() {
-    @SerialName("code")
+    @SerializedName("code")
     private var _code: String? = null
 
     @delegate:Ignore
@@ -34,10 +34,10 @@ open class MaintenanceType : RealmObject() {
 
     enum class MaintenanceTypeValue(override val apiValue: String) : ApiEnum {
         ManagerInMaintenance("manager_in_maintenance"),
-        ManagerIsBlocked("managerIsBlocked"),
+        ManagerIsBlocked("manager_is_blocked"),
         MoveNs("move_ns"),
-        MoveSqlMaster("move_sql_cluster"),
-        MoveSqlCluster("managerIsBlocked"),
+        MoveSqlMaster("move_sql_master"),
+        MoveSqlCluster("move_sql_cluster"),
         Rewind("rewind"),
         UpgradeSchema("upgrade_schema"),
         HardDelete("hard_delete"),

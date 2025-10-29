@@ -60,7 +60,7 @@ class DriveMigration : RealmMigration {
         // Migrated to version 3
         if (oldVersion < 3L) {
             val maintenanceTypeSchema = schema.create("MaintenanceType").apply {
-                addField("_code", String::class.java, FieldAttribute.REQUIRED)
+                addField("_code", String::class.java)
                 isEmbedded = true
             }
             schema["Drive"]?.apply {
