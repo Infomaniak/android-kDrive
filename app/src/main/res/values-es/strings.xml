@@ -668,9 +668,9 @@
     <string name="sortTitle">Clasificar</string>
     <string name="sortYear">Por año</string>
     <string name="supportTitle">Ayuda y asistencia</string>
+    <string name="switchAccountTitle">Cambiar de cuenta</string>
     <string name="switchDriveSearchViewHint">Buscar un kDrive</string>
     <string name="switchUserDescription">Consultar las kDrives de tus otros perfiles Infomaniak. Puedes añadir tantos perfiles de usuario como desees.</string>
-    <string name="switchUserTitle">Cambiar el usuario</string>
     <string name="syncConfigureDescription">Tus fotos, vídeos y capturas de pantalla se guardarán automáticamente en tu kDrive %s.</string>
     <string name="syncConfigureTitle">Haz copia de seguridad de tus recuerdos en un lugar seguro</string>
     <string name="syncSettingsButtonActiveSync">Activar la copia de seguridad automática</string>
