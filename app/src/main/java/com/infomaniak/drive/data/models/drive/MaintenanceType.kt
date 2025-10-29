@@ -17,16 +17,22 @@
  */
 package com.infomaniak.drive.data.models.drive
 
+import com.infomaniak.core.utils.ApiEnum
+import com.infomaniak.core.utils.apiEnum
 import io.realm.RealmObject
+import io.realm.annotations.Ignore
 import io.realm.annotations.RealmClass
+import kotlinx.serialization.SerialName
 
 @RealmClass(embedded = true)
 open class MaintenanceType : RealmObject() {
-    var code: String = ""
+    @SerialName("code")
+    private var _code: String? = null
 
-    inline val type get() = MaintenanceTypeValue.entries.find { it.value == code } ?: MaintenanceTypeValue.Unknown
+    @delegate:Ignore
+    val type: MaintenanceTypeValue? by apiEnum(::_code)
 
-    enum class MaintenanceTypeValue(val value: String) {
+    enum class MaintenanceTypeValue(override val apiValue: String) : ApiEnum {
         ManagerInMaintenance("manager_in_maintenance"),
         ManagerIsBlocked("managerIsBlocked"),
         MoveNs("move_ns"),
