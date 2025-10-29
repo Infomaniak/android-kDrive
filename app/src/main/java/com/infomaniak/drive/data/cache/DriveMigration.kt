@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.cache
 
 import io.realm.DynamicRealm
-import io.realm.FieldAttribute
 import io.realm.RealmMigration
 
 class DriveMigration : RealmMigration {
