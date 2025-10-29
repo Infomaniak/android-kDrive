@@ -23,7 +23,7 @@ import androidx.core.view.isGone
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.toPx
-import com.infomaniak.drive.KDRIVE_WEB
+import com.infomaniak.drive.KDRIVE_WEBAPP
 import com.infomaniak.drive.R
 
 class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
@@ -42,23 +42,19 @@ class DriveMaintenanceBottomSheetDialog : InformationBottomSheetDialog() {
         if (navigationArgs.isAsleep) {
             title.text = resources.getString(R.string.maintenanceAsleepTitle, navigationArgs.driveName)
             description.text = getString(R.string.maintenanceAsleepDescription)
-            actionButton.apply {
-                setText(R.string.buttonClose)
-                setOnClickListener { dismiss() }
-            }
             secondaryActionButton.apply {
                 setText(R.string.maintenanceWakeUpButton)
-                setOnClickListener { context.openUrl(KDRIVE_WEB) }
+                setOnClickListener { context.openUrl(KDRIVE_WEBAPP) }
             }
         } else {
             title.text = resources.getQuantityString(R.plurals.driveMaintenanceTitle, 1, navigationArgs.driveName)
             description.text = getString(R.string.driveMaintenanceDescription)
-            actionButton.apply {
-                setText(R.string.buttonClose)
-                setOnClickListener { dismiss() }
-            }
-
             secondaryActionButton.isGone = true
+        }
+
+        actionButton.apply {
+            setText(R.string.buttonClose)
+            setOnClickListener { dismiss() }
         }
     }
 

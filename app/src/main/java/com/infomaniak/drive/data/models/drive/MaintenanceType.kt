@@ -24,20 +24,20 @@ import io.realm.annotations.RealmClass
 open class MaintenanceType : RealmObject() {
     var code: String = ""
 
-    inline val type get() = MaintenanceTypeValue.entries.find { it.value == code } ?: MaintenanceTypeValue.UNKNOWN
+    inline val type get() = MaintenanceTypeValue.entries.find { it.value == code } ?: MaintenanceTypeValue.Unknown
 
     enum class MaintenanceTypeValue(val value: String) {
-        MANAGER_IN_MAINTENANCE("manager_in_maintenance"),
-        MANAGER_IS_BLOCKED("managerIsBlocked"),
-        MOVE_NS("move_ns"),
-        MOVE_SQL_MASTER("move_sql_cluster"),
-        MOVE_SQL_CLUSTER("managerIsBlocked"),
-        REWIND("rewind"),
-        UPGRADE_SCHEMA("upgrade_schema"),
-        HARD_DELETE("hard_delete"),
-        ASLEEP("asleep"),
-        WAKING_UP("waking_up"),
-        UNINITIALIZING("uninitializing"),
-        UNKNOWN("unknown")
+        ManagerInMaintenance("manager_in_maintenance"),
+        ManagerIsBlocked("managerIsBlocked"),
+        MoveNs("move_ns"),
+        MoveSqlMaster("move_sql_cluster"),
+        MoveSqlCluster("managerIsBlocked"),
+        Rewind("rewind"),
+        UpgradeSchema("upgrade_schema"),
+        HardDelete("hard_delete"),
+        Asleep("asleep"),
+        WakingUp("waking_up"),
+        Uninitializing("uninitializing"),
+        Unknown("unknown")
     }
 }

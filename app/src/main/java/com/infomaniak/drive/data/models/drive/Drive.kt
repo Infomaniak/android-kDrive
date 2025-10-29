@@ -135,7 +135,7 @@ open class Drive(
     //endregion
 
     inline val isTechnicalMaintenance get() = maintenanceReason == MaintenanceReason.TECHNICAL.value
-    inline val isAsleep get() = maintenanceTypes.any { it.type == MaintenanceTypeValue.ASLEEP }
+    inline val isAsleep get() = maintenanceTypes.any { it.type == MaintenanceTypeValue.Asleep }
 
     inline val canCreateDropbox get() = pack?.capabilities?.useDropbox == true && (isKSuiteMaxTier || quotas.canCreateDropbox)
     inline val canCreateShareLink get() = isKSuiteMaxTier || quotas.canCreateShareLink
