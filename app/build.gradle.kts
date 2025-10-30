@@ -103,6 +103,11 @@ android {
         compose = true
     }
 
+    packaging {
+        // There is a conflict between 'pdfium' and 'dotlottie' libs, which both have 'libc++_shared.so'
+        jniLibs.pickFirsts.add("**/libc++_shared.so")
+    }
+
     lint {
         // Temporary fix waiting for the gradual update of some libs (androidx lifecycle, mqtt)
         disable += "NullSafeMutableLiveData"
