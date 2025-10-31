@@ -26,19 +26,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.infomaniak.core.compose.basics.ButtonType
 import com.infomaniak.core.compose.basics.Typography
 import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.Companion.filterSelectedAccounts
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
@@ -80,18 +79,18 @@ fun OnboardingScreen(
                 skippedIds = skippedIds,
                 isLoginButtonLoading = isLoginButtonLoading,
                 isSignUpButtonLoading = isSignUpButtonLoading,
-                titleColor = colorResource(R.color.title),
-                descriptionColor = colorResource(R.color.primaryText),
                 onLogin = { onLoginRequest(emptyList()) },
                 onContinueWithSelectedAccounts = { onLoginRequest(accounts().filterSelectedAccounts(skippedIds())) },
                 onCreateAccount = onCreateAccount,
                 onUseAnotherAccountClicked = { onLoginRequest(emptyList()) },
                 onSaveSkippedAccounts = onSaveSkippedAccounts,
                 nextButtonShape = CircleShape,
-                primaryButtonShape = RoundedCornerShape(dimensionResource(R.dimen.primaryButtonRadius)),
-                primaryButtonHeight = dimensionResource(R.dimen.primaryButtonHeight) - dimensionResource(R.dimen.primaryButtonVerticalInset) * 2,
-                accountsBottomSheetCustomization = CrossLoginDefaults.customize(
-                    colors = CrossLoginDefaults.colors(descriptionColor = colorResource(R.color.primaryText))
+                customization = CrossLoginDefaults.customize(
+                    buttonStyle = ButtonType.Drive,
+                    colors = CrossLoginDefaults.colors(
+                        titleColor = colorResource(R.color.title),
+                        descriptionColor = colorResource(R.color.primaryText),
+                    ),
                 ),
             )
         },
