@@ -1,0 +1,3 @@
+- Correction de la synchronisation des photos dont la taille est inférieure à 5 Mo
+- Meilleure prise en charge des Drives "endormis"
+- Modifications mineures des clés de traductions

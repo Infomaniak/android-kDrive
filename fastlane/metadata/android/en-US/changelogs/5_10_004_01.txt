@@ -1,0 +1,3 @@
+- Fix the photo synchronization for photo weighing less than 5 MB
+- Better support of "asleep" drives
+- Minor wordings change
