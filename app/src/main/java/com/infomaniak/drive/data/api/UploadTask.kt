@@ -161,6 +161,7 @@ class UploadTask(
             val url = ApiRoutes.uploadFileDirectlyUrl(
                 driveId = uploadFile.driveId,
                 directoryId = uploadFile.remoteFolder,
+                directoryPath = uploadFile.remoteSubFolder,
                 fileName = uploadFile.fileName,
                 fileSize = uploadFile.fileSize,
                 conflictOption = uploadFile.uploadConflictOption()
