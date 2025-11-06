@@ -17,10 +17,8 @@
  */
 package com.infomaniak.drive.ui.fileList.preview.playback
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Rational
 import android.view.WindowManager
@@ -28,10 +26,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.infomaniak.core.extensions.isDontKeepActivitiesEnabled
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityVideoBinding
 import com.infomaniak.drive.ui.fileList.preview.playback.PlaybackUtils.CONTROLLER_SHOW_TIMEOUT_MS
@@ -85,13 +83,6 @@ class VideoActivity : AppCompatActivity() {
         }
     }
 
-    private val finishPlayerReceiver = object : BroadcastReceiver() {
-
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == TAG) finish()
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -112,14 +103,16 @@ class VideoActivity : AppCompatActivity() {
         loadVideo(intent)
 
         toggleSystemBar(show = false)
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(finishPlayerReceiver, IntentFilter(TAG))
     }
 
     override fun onDestroy() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(finishPlayerReceiver)
         binding.playerView.player?.release()
         super.onDestroy()
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        (application as MainApplication).isVideoActivityInPIPMode = isInPictureInPictureMode
     }
 
     private fun setPIPParams() {
@@ -139,9 +132,5 @@ class VideoActivity : AppCompatActivity() {
                 finish()
             }
         }
-    }
-
-    companion object {
-        const val TAG = "VideoActivity"
     }
 }
