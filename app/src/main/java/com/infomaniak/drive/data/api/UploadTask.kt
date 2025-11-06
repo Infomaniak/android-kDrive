@@ -126,6 +126,7 @@ class UploadTask(
                 uploadFile.fileSize <= MIN_FILE_SIZE_FOR_CHUNKING -> uploadDirectly(httpClient)
                 else -> uploadInChunks(httpClient)
             }
+            finishUpload(uploadFile.getUriObject())
             return true
         } catch (exception: CancellationException) {
             throw exception
@@ -212,7 +213,14 @@ class UploadTask(
             },
         )
 
-        if (isActive) onFinish(uploadFile.getUriObject())
+        if (isActive) {
+            val closedSessionResponse = ApiRepository.finishSession(
+                driveId = uploadFile.driveId,
+                uploadToken = uploadFile.uploadToken!!,
+                okHttpClient = uploadFile.okHttpClient
+            )
+            if (!closedSessionResponse.isSuccess()) closedSessionResponse.manageUploadErrors()
+        }
     }
 
     private fun getInputStream(): InputStream {
@@ -271,10 +279,7 @@ class UploadTask(
         }
     }
 
-    private suspend fun onFinish(uri: Uri) = with(uploadFile) {
-        with(ApiRepository.finishSession(driveId, uploadToken!!, okHttpClient)) {
-            if (!isSuccess()) manageUploadErrors()
-        }
+    private suspend fun finishUpload(uri: Uri) {
         uploadNotification.apply {
             setOngoing(false)
             setContentText("100%")
