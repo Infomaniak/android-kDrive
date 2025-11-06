@@ -29,6 +29,7 @@ import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.print.PrintManager
+import android.view.ViewGroup
 import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.ValueCallback
@@ -45,12 +46,15 @@ import androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF
 import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
 import androidx.webkit.WebViewClientCompat
 import androidx.webkit.WebViewFeature
+import com.infomaniak.core.extensions.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
-import com.infomaniak.core.legacy.utils.isNightModeEnabled
 import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
+import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityOnlyOfficeBinding
+import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.AccountUtils
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -75,6 +79,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
 
         val url = intent.getStringExtra(ONLYOFFICE_URL_TAG)!!
         val filename = intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)!!
@@ -103,6 +108,21 @@ class OnlyOfficeActivity : AppCompatActivity() {
                 if (url.endsWith(".pdf")) sendToPrintPDF(url, filename) else openUrl(url)
             }
         }
+    }
+
+    override fun onDestroy() {
+        if (isFinishing) destroyWebView()
+        super.onDestroy()
+    }
+
+    private fun destroyWebView(): Unit = with(binding.webView) {
+        // Close the webview properly so that OnlyOffice is notified that the document has been closed and releases its lock.
+        // We also ensure release without its plant on certain devices.
+        stopLoading()
+        (parent as? ViewGroup)?.removeView(this)
+        webChromeClient = null
+        removeAllViews()
+        destroy()
     }
 
     @SuppressLint("RequiresFeature")

@@ -485,6 +485,9 @@
     <string name="localizedFilenamePrivateTeamSpace">My folder</string>
     <string name="localizedFilenameTeamSpace">Common folders</string>
     <string name="locateButton">Locate</string>
+    <string name="maintenanceAsleepDescription">To reduce the impact on the environment, your kDrive has gone into standby mode following prolonged inactivity.\nRestart it to regain access to your files!</string>
+    <string name="maintenanceAsleepTitle">Your kDrive %s has taken a little nap!</string>
+    <string name="maintenanceWakeUpButton">Restart my kDrive</string>
     <string name="manageCategoriesCreateTitle">Create %s</string>
     <string name="manageCategoriesNoCategory">No category</string>
     <string name="manageCategoriesTitle">Manage categories</string>
@@ -676,9 +679,9 @@
     <string name="sortTitle">Sort</string>
     <string name="sortYear">Per year</string>
     <string name="supportTitle">Help &amp; support</string>
+    <string name="switchAccountTitle">Switch account</string>
     <string name="switchDriveSearchViewHint">Search a kDrive</string>
     <string name="switchUserDescription">View the kDrives of your other Infomaniak profiles. You can add as many user profiles as you like.</string>
-    <string name="switchUserTitle">Change user</string>
     <string name="syncConfigureDescription">Your photos, videos and screenshots will be automatically saved in your kDrive %s.</string>
     <string name="syncConfigureTitle">Save your memories in a safe place</string>
     <string name="syncSettingsButtonActiveSync">Enable automatic backup</string>
@@ -755,6 +758,8 @@
     <string name="uploadNetworkErrorTitle">Upload suspended</string>
     <string name="uploadNetworkErrorWifiRequired">Waiting for WiFi network</string>
     <string name="uploadOutOfMemoryError">Insufficient available ram memory</string>
+    <string name="uploadPausedDescription">Some uploads are still in progress in kDrive. Open the app and keep the device connected to speed up the upload.</string>
+    <string name="uploadPausedTitle">Upload suspended</string>
     <string name="uploadPermissionError">Additional permissions requested</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/1d484922-97e1-4a43-a4c9-4d19bc1b5494/</string>
     <string name="userInviteByEmail">Invite via email</string>

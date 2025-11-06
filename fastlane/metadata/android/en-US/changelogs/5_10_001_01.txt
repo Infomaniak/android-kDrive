@@ -1,0 +1,3 @@
+- Improved two-factor authentication
+- Fixed a crash in the battery permission request
+- Fixed inter-app login that was no longer working

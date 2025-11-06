@@ -757,6 +757,10 @@
         <argument
             android:name="driveName"
             app:argType="string" />
+        <argument
+            android:name="isAsleep"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </dialog>
 
     <dialog

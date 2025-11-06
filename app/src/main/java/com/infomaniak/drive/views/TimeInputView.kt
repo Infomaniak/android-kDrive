@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
-import com.infomaniak.core.legacy.utils.isNightModeEnabled
+import com.infomaniak.core.extensions.isNightModeEnabled
 import com.infomaniak.core.utils.FORMAT_HOUR_MINUTES
 import com.infomaniak.core.utils.format
 import com.infomaniak.core.utils.hours

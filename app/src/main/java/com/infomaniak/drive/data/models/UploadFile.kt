@@ -30,6 +30,7 @@ import com.infomaniak.core.utils.SECONDS_IN_A_DAY
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.UploadTask
+import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
@@ -97,6 +98,8 @@ open class UploadFile(
     private fun isCloudStorage() = type == Type.CLOUD_STORAGE.name
 
     fun replaceOnConflict() = isSync() || isSyncOffline() || isCloudStorage()
+
+    fun uploadConflictOption() = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME
 
     fun resetUploadToken() {
         getRealmInstance().use { realm ->

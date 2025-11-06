@@ -29,9 +29,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
+import com.infomaniak.core.extensions.isNightModeEnabled
+import com.infomaniak.core.extensions.lightStatusBar
 import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.utils.isNightModeEnabled
-import com.infomaniak.core.legacy.utils.lightStatusBar
 import com.infomaniak.core.network.utils.bodyAsStringOrNull
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent

@@ -1,0 +1,1 @@
+- Support cross-app login for future app

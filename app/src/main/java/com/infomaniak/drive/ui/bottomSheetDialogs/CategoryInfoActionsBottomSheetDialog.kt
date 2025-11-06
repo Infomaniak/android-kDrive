@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.models.ApiResponse
 import com.infomaniak.core.legacy.models.ApiResponseStatus
 import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
@@ -36,6 +35,7 @@ import com.infomaniak.core.legacy.utils.SnackbarUtils
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setBackNavigationResult
+import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R
@@ -47,7 +47,7 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
 import kotlinx.coroutines.Dispatchers
 
-class CategoryInfoActionsBottomSheetDialog : BottomSheetDialogFragment() {
+class CategoryInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private val categoryInfoActionViewModel: CategoryInfoActionViewModel by viewModels()
     private val navigationArgs: CategoryInfoActionsBottomSheetDialogArgs by navArgs()

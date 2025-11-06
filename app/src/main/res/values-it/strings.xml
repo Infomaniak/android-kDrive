@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2024 Infomaniak Network SA
+  ~ Copyright (C) 2022-2025 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -474,6 +474,9 @@
     <string name="localizedFilenamePrivateTeamSpace">La mia cartella</string>
     <string name="localizedFilenameTeamSpace">Cartelle comuni</string>
     <string name="locateButton">Localizzare</string>
+    <string name="maintenanceAsleepDescription">Per ridurre l’impatto sull’ambiente, il tuo kDrive entra in modalità stand-by in caso di inattività prolungata.\nRiavvialo per riottenere l’accesso ai tuoi file!</string>
+    <string name="maintenanceAsleepTitle">Il tuo kDrive %s ha fatto un riposino!</string>
+    <string name="maintenanceWakeUpButton">Riavvia il mio kDrive</string>
     <string name="manageCategoriesCreateTitle">Crea %s</string>
     <string name="manageCategoriesNoCategory">Nessuna categoria</string>
     <string name="manageCategoriesTitle">Gestisci le categorie</string>
@@ -665,9 +668,9 @@
     <string name="sortTitle">Ordina</string>
     <string name="sortYear">Per anno</string>
     <string name="supportTitle">Aiuto e supporto</string>
+    <string name="switchAccountTitle">Cambia account</string>
     <string name="switchDriveSearchViewHint">Cerca un kDrive</string>
     <string name="switchUserDescription">Consulta le kDrives dei tuoi altri profili Infomaniak. Puoi aggiungere tutti i profili utente che vuoi.</string>
-    <string name="switchUserTitle">Cambia utente</string>
     <string name="syncConfigureDescription">Le tue foto, i tuoi video e le tue schermate verranno salvati automaticamente nel tuo kDrive %s.</string>
     <string name="syncConfigureTitle">Salva i tuoi ricordi in un luogo sicuro</string>
     <string name="syncSettingsButtonActiveSync">Attiva il backup automatico</string>
@@ -744,6 +747,8 @@
     <string name="uploadNetworkErrorTitle">Importazione sospesa</string>
     <string name="uploadNetworkErrorWifiRequired">In attesa di connessione alla rete Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Insufficiente RAM disponibile</string>
+    <string name="uploadPausedDescription">Alcuni caricamenti sono ancora in corso in kDrive. Aprite l’app e mantenete il dispositivo connesso per accelerare il caricamento.</string>
+    <string name="uploadPausedTitle">Pausa importazione</string>
     <string name="uploadPermissionError">Permessi aggiuntivi richiesti</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/761c3930-850f-4d5b-805a-703ff4b832aa/</string>
     <string name="userInviteByEmail">Invita tramite e-mail</string>

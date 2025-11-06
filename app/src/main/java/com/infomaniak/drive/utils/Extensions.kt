@@ -44,7 +44,6 @@ import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.ViewCompat
@@ -83,6 +82,7 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.LOGIN_ENDPOINT_URL
 import com.infomaniak.core.network.SUPPORT_URL
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.utils.isEmailRfc5321Compliant
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -117,7 +117,6 @@ import handleActionDone
 import io.realm.RealmList
 import io.sentry.Sentry
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -237,7 +236,7 @@ fun Activity.getScreenSizeInDp(): Point {
     return point
 }
 
-fun String.isEmail(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
+fun String.isEmail(): Boolean = isEmailRfc5321Compliant()
 
 fun MaterialAutoCompleteTextView.setupAvailableShareableItems(
     context: Context,

@@ -206,7 +206,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/marginStandardMedium"
                         android:layout_marginEnd="@dimen/marginStandard"
-                        android:text="@string/switchUserTitle"
+                        android:text="@string/switchAccountTitle"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@id/changeUserChevron"
                         app:layout_constraintStart_toEndOf="@id/changeUserIcon"

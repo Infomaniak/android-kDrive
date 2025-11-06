@@ -54,6 +54,7 @@ import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.core.observe
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.drive.CREATE_ACCOUNT_CANCEL_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_SUCCESS_HOST
 import com.infomaniak.drive.CREATE_ACCOUNT_URL
@@ -66,6 +67,7 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.drive.DriveInfo
+import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.login.components.OnboardingScreen
 import com.infomaniak.drive.ui.theme.DriveTheme
@@ -142,6 +144,7 @@ class LoginActivity : ComponentActivity() {
                     )
                 }
             }
+            TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager)
         }
 
         handleNavigationFlags()

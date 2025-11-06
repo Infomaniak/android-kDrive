@@ -1,0 +1,1 @@
+- Support du login inter app pour la prochaine application

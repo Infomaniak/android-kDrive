@@ -1,15 +1,18 @@
 import java.util.Properties
 
+/**
+ * Don't change the order in this `plugins` block, it will mess things up.
+ */
 plugins {
-    alias(core.plugins.compose.compiler)
     alias(libs.plugins.android.application)
     alias(libs.plugins.junit5)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
-    alias(libs.plugins.sentry)
+    alias(core.plugins.compose.compiler)
+    alias(core.plugins.kotlin.parcelize)
+    alias(core.plugins.sentry.plugin)
 }
 
 val appCompileSdk: Int by rootProject.extra
@@ -30,8 +33,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_09_003_01
-        versionName = "5.9.3"
+        versionCode = 5_010_004_01
+        versionName = "5.10.4"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -100,6 +103,11 @@ android {
         compose = true
     }
 
+    packaging {
+        // There is a conflict between 'pdfium' and 'dotlottie' libs, which both have 'libc++_shared.so'
+        jniLibs.pickFirsts.add("**/libc++_shared.so")
+    }
+
     lint {
         // Temporary fix waiting for the gradual update of some libs (androidx lifecycle, mqtt)
         disable += "NullSafeMutableLiveData"
@@ -112,14 +120,24 @@ android {
 
 val isRelease = gradle.startParameter.taskNames.any { it.contains("release", ignoreCase = true) }
 
-val envProperties = rootProject.file("env.properties").takeIf { it.exists() }?.let { file ->
-    Properties().also { it.load(file.reader()) }
-}
+val envProperties = rootProject.file("env.properties")
+    .takeIf { it.exists() }
+    ?.let { file -> Properties().also { it.load(file.reader()) } }
 
-val sentryAuthToken = envProperties?.getProperty("sentryAuthToken").takeUnless { it.isNullOrBlank() }
+val sentryAuthToken = envProperties?.getProperty("sentryAuthToken")
+    .takeUnless { it.isNullOrBlank() }
     ?: if (isRelease) error("The `sentryAuthToken` property in `env.properties` must be specified (see `env.example.properties`).") else ""
 
+configurations.configureEach {
+    // The Matomo SDK logs network issues to Timber, and the Sentry plugin detects the Timber dependency,
+    // and adds its integration, which generates noise.
+    // Since we're not using Timber for anything else, it's safe to completely disabled it,
+    // as specified in Sentry's documentation: https://docs.sentry.io/platforms/android/integrations/timber/#disable
+    exclude(group = "io.sentry", module = "sentry-android-timber")
+}
+
 sentry {
+    autoInstallation.sentryVersion.set(core.versions.sentry)
     org = "sentry"
     projectName = "kdrive-android"
     authToken = sentryAuthToken
@@ -168,6 +186,9 @@ dependencies {
     implementation(project(":Core:RecyclerView"))
     implementation(project(":Core:Sentry"))
     implementation(project(":Core:Thumbnails"))
+    implementation(project(":Core:TwoFactorAuth:Front"))
+    implementation(project(":Core:TwoFactorAuth:Back:WithUserDb"))
+    implementation(project(":Core:UiView:EdgeToEdge"))
 
     // Compose
     implementation(platform(core.compose.bom))

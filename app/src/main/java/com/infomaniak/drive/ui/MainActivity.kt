@@ -21,8 +21,6 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -51,8 +49,6 @@ import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -77,6 +73,7 @@ import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.observe
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
@@ -96,8 +93,8 @@ import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
-import com.infomaniak.drive.data.services.DownloadReceiver
 import com.infomaniak.drive.databinding.ActivityMainBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
@@ -129,8 +126,6 @@ class MainActivity : BaseActivity() {
     private val navigationArgs: MainActivityArgs? by lazy { intent?.extras?.let { MainActivityArgs.fromBundle(it) } }
     private val uiSettings by lazy { UiSettings(this) }
     private val navController by lazy { setupNavController() }
-
-    private lateinit var downloadReceiver: DownloadReceiver
 
     private var hasDisplayedInformationPanel: Boolean = false
 
@@ -187,12 +182,12 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        addTwoFactorAuthOverlay()
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 
         checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
-        downloadReceiver = DownloadReceiver(mainViewModel)
         fileObserver.startWatching()
 
         setupBottomNavigation()
@@ -205,12 +200,11 @@ class MainActivity : BaseActivity() {
         handleShortcuts()
         handleNavigateToDestinationFileId()
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(downloadReceiver, IntentFilter(DownloadReceiver.TAG))
-
         initAppUpdateManager()
         initAppReviewManager()
         observeCurrentFolder()
         observeBulkDownloadRunning()
+        observeDownloadCancellation()
         observeFailureDownloadWorkerOffline()
 
         LockActivity.scheduleLockIfNeeded(
@@ -372,6 +366,10 @@ class MainActivity : BaseActivity() {
         mainViewModel.isBulkDownloadRunning.observe(this) { isRunning ->
             if (!isRunning) mainViewModel.syncOfflineFiles()
         }
+    }
+
+    private fun observeDownloadCancellation() {
+        BaseDownloadWorker.notifyRefreshUi.observe(this) { mainViewModel.updateVisibleFiles.value = true }
     }
 
     private fun observeFailureDownloadWorkerOffline() {
@@ -589,7 +587,6 @@ class MainActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         fileObserver.stopWatching()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(downloadReceiver)
     }
 
     private fun displayInformationPanel() = with(uiSettings) {

@@ -114,6 +114,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(root)
+        addTwoFactorAuthOverlay()
 
         if (!isAuth() || isExtrasNull()) {
             finish()
@@ -300,6 +301,7 @@ class SaveExternalFilesActivity : BaseActivity() {
                     Intent().apply {
                         putExtra(DESTINATION_DRIVE_ID_KEY, selectDriveViewModel.selectedDrive.value?.id)
                         putExtra(DESTINATION_FOLDER_ID_KEY, saveExternalFilesViewModel.folderId.value)
+                        putExtra(DESTINATION_USER_ID_KEY, selectedUserId.value)
                         setResult(RESULT_OK, this)
                     }
                     finish()
@@ -555,5 +557,6 @@ class SaveExternalFilesActivity : BaseActivity() {
         const val LAST_MODIFIED_URI_KEY = "last_modified"
         const val DESTINATION_DRIVE_ID_KEY = "destination_drive_id"
         const val DESTINATION_FOLDER_ID_KEY = "destination_folder_id"
+        const val DESTINATION_USER_ID_KEY = "destination_user_id"
     }
 }

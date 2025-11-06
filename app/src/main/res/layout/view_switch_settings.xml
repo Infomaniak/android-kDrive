@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/marginStandard"
             android:layout_marginTop="54dp"
-            android:text="@string/switchUserTitle"
+            android:text="@string/switchAccountTitle"
             android:textSize="20sp" />
 
         <View

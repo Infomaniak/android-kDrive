@@ -49,4 +49,8 @@ include(
     ":Core:RecyclerView",
     ":Core:Sentry",
     ":Core:Thumbnails",
+    ":Core:TwoFactorAuth:Front",
+    ":Core:TwoFactorAuth:Back",
+    ":Core:TwoFactorAuth:Back:WithUserDb",
+    ":Core:UiView:EdgeToEdge"
 )
