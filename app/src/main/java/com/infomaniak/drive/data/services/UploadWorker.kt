@@ -332,9 +332,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return UploadTask(context = applicationContext, uploadFile = this, setProgress = ::setProgress).run {
             currentUploadTask = this
             start().also { isUploaded ->
-                if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
-                    deleteIfExists(keepFile = isSync())
-                }
+                if (isUploaded) deleteIfExists(keepFile = isSync())
 
                 SentryLog.d(TAG, "startUploadFile> end upload file")
             }
