@@ -430,6 +430,10 @@ class SyncSettingsActivity : BaseActivity() {
                         SentryLog.i(TAG, "start update appSettings")
                         UploadFile.setAppSyncSettings(syncSettings)
                         SentryLog.i(TAG, "appSettings updated")
+                        if (oldSyncSettings?.driveId != syncSettings.driveId) {
+                            UploadFile.deleteAllSyncFile()
+                            SentryLog.i(TAG, "New drive detected -> old sync files has been deleted")
+                        }
                         applicationContext.activateAutoSync(syncSettings)
                         SentryLog.i(TAG, "auto sync enabled")
                     }
