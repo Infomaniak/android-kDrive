@@ -150,9 +150,8 @@ class UploadTask(
         } catch (exception: QuotaExceededException) {
             if (UploadFile.getAppSyncSettings()?.driveId == uploadFile.driveId) {
                 throw exception
-            } else {
-                uploadFile.deleteIfExists()
             }
+            uploadFile.deleteIfExists()
         } catch (exception: Exception) {
             exception.printStackTrace()
             throw exception
