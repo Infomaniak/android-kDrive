@@ -23,6 +23,7 @@ import androidx.work.WorkInfo.Companion.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT
 import com.infomaniak.core.legacy.utils.isNetworkException
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
@@ -65,7 +66,9 @@ object UploadWorkerThrowable {
             // background at most. To reset this quota, the app need to be brought in foreground. So in that case, we display a
             // notification to ask the user to go back in the app.
             // See https://developer.android.com/develop/background-work/services/fgs/timeout for more info.
-            currentUploadFile?.foregroundServiceQuotaNotification(applicationContext)
+            if (UploadFile.getAllPendingUploadsCount() > 0) {
+                currentUploadFile?.foregroundServiceQuotaNotification(applicationContext)
+            }
             if (Build.VERSION.SDK_INT >= 31 && stopReason == STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) {
                 Result.failure()
             } else {
