@@ -40,6 +40,7 @@ import com.infomaniak.core.legacy.utils.calculateFileSize
 import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.getFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
+import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
@@ -139,7 +140,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             } while (syncNewPendingUploads && retryError < MAX_RETRY_COUNT)
 
             if (retryError == MAX_RETRY_COUNT) {
-                SentryLog.wtf(TAG, "A file has been restarted several times")
+                SentryLog.e(TAG, "A file has been restarted several times") { scope ->
+                    scope.setExtra("appSettings", gson.toJson(UploadFile.getAppSyncSettings()))
+                }
                 result = Result.failure()
             }
 
@@ -332,9 +335,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return UploadTask(context = applicationContext, uploadFile = this, setProgress = ::setProgress).run {
             currentUploadTask = this
             start().also { isUploaded ->
-                if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
-                    deleteIfExists(keepFile = isSync())
-                }
+                if (isUploaded) deleteIfExists(keepFile = isSync())
 
                 SentryLog.d(TAG, "startUploadFile> end upload file")
             }
