@@ -147,6 +147,12 @@ class UploadTask(
             SentryLog.w(TAG, "upload not terminated", exception)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
+        } catch (exception: QuotaExceededException) {
+            if (UploadFile.getAppSyncSettings()?.driveId == uploadFile.driveId) {
+                throw exception
+            } else {
+                uploadFile.deleteIfExists()
+            }
         } catch (exception: Exception) {
             exception.printStackTrace()
             throw exception
