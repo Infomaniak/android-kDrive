@@ -66,6 +66,7 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
+import com.infomaniak.drive.utils.SyncUtils.cancelPeriodicSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
 import kotlinx.coroutines.Dispatchers
@@ -432,6 +433,7 @@ class SyncSettingsActivity : BaseActivity() {
                         SentryLog.i(TAG, "appSettings updated")
                         if (oldSyncSettings?.driveId != syncSettings.driveId) {
                             UploadFile.deleteAllSyncFile()
+                            applicationContext.cancelPeriodicSync()
                             SentryLog.i(TAG, "New drive detected -> old sync files has been deleted")
                         }
                         applicationContext.activateAutoSync(syncSettings)

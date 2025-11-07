@@ -154,7 +154,7 @@ object SyncUtils {
         }
     }
 
-    private fun Context.cancelPeriodicSync() {
+    fun Context.cancelPeriodicSync() {
         WorkManager.getInstance(this).cancelUniqueWork(UploadWorker.TAG)
         WorkManager.getInstance(this).cancelUniqueWork(PeriodicUploadWorker.TAG)
     }
