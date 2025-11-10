@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive
 
-import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.infomaniak.core.sentry.SentryLog
@@ -25,7 +24,6 @@ import com.infomaniak.core.sentry.SentryLog
 class DriveMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
-        Log.d("onNewToken", token)
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
