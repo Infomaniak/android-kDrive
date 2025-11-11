@@ -22,6 +22,7 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore
+import com.infomaniak.core.twofactorauth.back.notifications.TwoFactorAuthNotifications
 import com.infomaniak.drive.R
 
 object NotificationUtils : NotificationUtilsCore() {
@@ -144,6 +145,8 @@ object NotificationUtils : NotificationUtilsCore() {
             NotificationManager.IMPORTANCE_DEFAULT
         )
         channelList.add(generalChannel)
+
+        channelList.add(TwoFactorAuthNotifications.channel())
 
         createNotificationChannels(channelList)
     }

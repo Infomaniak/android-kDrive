@@ -19,16 +19,35 @@ package com.infomaniak.drive
 
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.infomaniak.core.notifications.registration.NotificationsRegistrationManager
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.twofactorauth.back.notifications.TwoFactorAuthNotifications
 
 class DriveMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
+        SentryLog.i(TAG, "onNewToken: new token received")
+        NotificationsRegistrationManager.onNewToken(token)
     }
 
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        if (remoteMessage.data.isNotEmpty()) {
-            SentryLog.d("onMessageReceived", "Message data payload size: " + remoteMessage.data.size)
+    override fun onMessageReceived(message: RemoteMessage) {
+        if (message.data.isNotEmpty()) {
+            SentryLog.d(TAG, "onMessageReceived: Message data payload size: " + message.data.size)
         }
+        val type = message.data["type"]
+        SentryLog.i(TAG, "onMessageReceived: type=$type")
+
+        when (type) {
+            TwoFactorAuthNotifications.TYPE -> twoFactorAuthManager.onApprovalChallengePushed(
+                remoteMessageData = message.data,
+                remoteMessageSentTimeUtcMillis = message.sentTime,
+                remoteMessageTimeToLiveSeconds = message.ttl // Note: could be 0 if not set.
+            )
+            else -> SentryLog.e(TAG, "Unexpected notification type")
+        }
+    }
+
+    companion object {
+        private const val TAG = "DriveMessagingService"
     }
 }
