@@ -100,8 +100,6 @@ open class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycle
         configureInfomaniakCore()
 
         userDataCleanableList = listOf<AssociatedUserDataCleanable>(DeviceInfoUpdateManager)
-        //TODO: Add missing stuff for "standard" Play Services variant.
-        //TODO: Plug the worker scheduling
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
@@ -168,6 +166,7 @@ open class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycle
             appId = BuildConfig.APPLICATION_ID,
             appVersionCode = BuildConfig.VERSION_CODE,
             appVersionName = BuildConfig.VERSION_NAME,
+//            apiEnvironment = ApiEnvironment.PreProd
         )
 
         AuthConfiguration.init(
