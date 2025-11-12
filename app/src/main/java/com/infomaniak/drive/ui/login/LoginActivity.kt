@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,13 +128,13 @@ class LoginActivity : ComponentActivity() {
         if (SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
 
         setContent {
-            val accounts by crossAppLoginViewModel.availableAccounts.collectAsStateWithLifecycle()
+            val accountCheckingState by crossAppLoginViewModel.accountsCheckingState.collectAsStateWithLifecycle()
             val skippedIds by crossAppLoginViewModel.skippedAccountIds.collectAsStateWithLifecycle()
 
             DriveTheme {
                 Surface {
                     OnboardingScreen(
-                        accounts = { accounts },
+                        accountsCheckingState = { accountCheckingState },
                         skippedIds = { skippedIds },
                         isLoginButtonLoading = { loginRequest.isAwaitingCall.not() || isLoginButtonLoading },
                         isSignUpButtonLoading = { isSignUpButtonLoading },

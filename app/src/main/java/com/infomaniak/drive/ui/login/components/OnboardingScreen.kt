@@ -39,7 +39,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.infomaniak.core.compose.basics.ButtonType
 import com.infomaniak.core.compose.basics.Typography
-import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.Companion.filterSelectedAccounts
+import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountCheckingStatus
+import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingState
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
 import com.infomaniak.core.crossapplogin.front.data.CrossLoginDefaults
@@ -56,7 +57,7 @@ import com.infomaniak.drive.ui.theme.DriveTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
-    accounts: () -> List<ExternalAccount>,
+    accountsCheckingState: () -> AccountsCheckingState,
     skippedIds: () -> Set<Long>,
     isLoginButtonLoading: () -> Boolean,
     isSignUpButtonLoading: () -> Boolean,
@@ -77,12 +78,12 @@ fun OnboardingScreen(
                     .padding(paddingValues)
                     .consumeWindowInsets(paddingValues),
                 pagerState = pagerState,
-                accounts = accounts,
+                accountsCheckingState = accountsCheckingState,
                 skippedIds = skippedIds,
                 isLoginButtonLoading = isLoginButtonLoading,
                 isSignUpButtonLoading = isSignUpButtonLoading,
                 onLogin = { onLoginRequest(emptyList()) },
-                onContinueWithSelectedAccounts = { onLoginRequest(accounts().filterSelectedAccounts(skippedIds())) },
+                onContinueWithSelectedAccounts = { selectedAccounts -> onLoginRequest(selectedAccounts) },
                 onCreateAccount = onCreateAccount,
                 onUseAnotherAccountClicked = { onLoginRequest(emptyList()) },
                 onSaveSkippedAccounts = onSaveSkippedAccounts,
@@ -155,7 +156,9 @@ private fun Preview(@PreviewParameter(AccountsPreviewParameter::class) accounts:
     DriveTheme {
         Surface {
             OnboardingScreen(
-                accounts = { accounts },
+                accountsCheckingState = {
+                    AccountsCheckingState(status = AccountCheckingStatus.Ongoing, checkedAccounts = { accounts })
+                },
                 skippedIds = { emptySet() },
                 onLoginRequest = {},
                 onCreateAccount = {},
