@@ -29,6 +29,7 @@ import com.infomaniak.core.legacy.networking.HttpClient
 import com.infomaniak.core.legacy.room.UserDatabase
 import com.infomaniak.core.legacy.stores.StoresSettingsRepository
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -107,7 +108,8 @@ object AccountUtils : CredentialManager() {
     suspend fun addUser(user: User) {
         currentDriveId = -1
         currentUser = user
-        DeviceInfoUpdateManager.sharedInstance.resetInfoKey(user.id.toLong())
+        val userId = user.id.toLong()
+        MainApplication.userDataCleanableList.forEach { it.resetForUser(userId) }
         userDatabase.userDao().insert(user)
     }
 
@@ -215,7 +217,8 @@ object AccountUtils : CredentialManager() {
     }
 
     suspend fun removeUser(context: Context, user: User) {
-        DeviceInfoUpdateManager.sharedInstance.resetInfoKey(user.id.toLong())
+        val userId = user.id.toLong()
+        MainApplication.userDataCleanableList.forEach { it.resetForUser(userId) }
         userDatabase.userDao().delete(user)
         FileController.deleteUserDriveFiles(user.id)
 

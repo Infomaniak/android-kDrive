@@ -18,7 +18,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <application tools:ignore="MissingApplicationIcon">
+    <application
+        android:name=".StandardMainApplication"
+        tools:ignore="MissingApplicationIcon"
+        tools:replace="android:name">
+
+    <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
 
         <service
             android:name=".DriveMessagingService"

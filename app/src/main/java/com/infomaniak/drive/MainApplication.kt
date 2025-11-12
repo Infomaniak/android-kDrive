@@ -34,6 +34,7 @@ import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import com.facebook.stetho.Stetho
+import com.infomaniak.core.AssociatedUserDataCleanable
 import com.infomaniak.core.auth.AuthConfiguration
 import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpdateManager
 import com.infomaniak.core.legacy.InfomaniakCore
@@ -81,7 +82,7 @@ import java.util.UUID
  */
 val twoFactorAuthManager = TwoFactorAuthManager { userId -> AccountUtils.getHttpClient(userId) }
 
-class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
+open class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObserver {
 
     init {
         injectAsAppCtx() // Ensures it is always initialized
@@ -91,12 +92,14 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
 
-    private val applicationScope = CoroutineScope(Dispatchers.Default + CoroutineName("MainApplication"))
+    protected val applicationScope = CoroutineScope(Dispatchers.Default + CoroutineName("MainApplication"))
 
     override fun onCreate() {
         super<Application>.onCreate()
 
         configureInfomaniakCore()
+
+        userDataCleanableList = listOf<AssociatedUserDataCleanable>(DeviceInfoUpdateManager)
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
@@ -104,7 +107,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
         AppCompatDelegate.setDefaultNightMode(uiSettings.nightMode)
 
         applicationScope.launch {
-            DeviceInfoUpdateManager.sharedInstance.scheduleWorkerOnDeviceInfoUpdate<DeviceInfoUpdateWorker>()
+            DeviceInfoUpdateManager.scheduleWorkerOnDeviceInfoUpdate<DeviceInfoUpdateWorker>()
         }
 
         if (BuildConfig.DEBUG) {
@@ -163,6 +166,7 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             appId = BuildConfig.APPLICATION_ID,
             appVersionCode = BuildConfig.VERSION_CODE,
             appVersionName = BuildConfig.VERSION_NAME,
+//            apiEnvironment = ApiEnvironment.PreProd
         )
 
         AuthConfiguration.init(
@@ -245,5 +249,11 @@ class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycleObser
             isDebug = BuildConfig.DEBUG,
             isSentryTrackingEnabled = UiSettings(applicationContext).isSentryTrackingEnabled,
         )
+    }
+
+    companion object {
+        @JvmStatic
+        var userDataCleanableList: List<AssociatedUserDataCleanable> = emptyList()
+            protected set
     }
 }
