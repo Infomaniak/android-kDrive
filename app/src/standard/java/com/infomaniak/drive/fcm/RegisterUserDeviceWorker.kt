@@ -22,6 +22,7 @@ import androidx.work.WorkerParameters
 import com.infomaniak.core.isChannelEnabled
 import com.infomaniak.core.isChannelEnabledFlow
 import com.infomaniak.core.notifications.registration.AbstractNotificationsRegistrationWorker
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.twofactorauth.back.notifications.TwoFactorAuthNotifications
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.flow.Flow
@@ -53,9 +54,13 @@ fun notificationTopicsForUser(
 
 private fun getNotificationTopicsForUser(canShow2faNotifications: Boolean?): List<String> {
     return when (canShow2faNotifications) {
-        true, null -> { // Should not be null if channels are created before, and are not deleted.
-            listOf(TwoFactorAuthNotifications.TOPIC)
+        true -> listOf(TwoFactorAuthNotifications.TOPIC)
+        false -> emptyList()
+        null -> {
+            SentryLog.wtf(TAG, "The channel was created too late, or was deleted by the app!")
+            emptyList()
         }
-        else -> emptyList()
     }
 }
+
+private const val TAG = "RegisterUserDeviceWorker"
