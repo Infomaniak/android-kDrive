@@ -52,6 +52,7 @@ class ObtainKDriveAdBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
                 LoginActivityArgs(
                     shouldLaunchAccountCreation = shouldLaunchAccountCreation,
                     publicShareDeeplink = "https://kdrive.infomaniak.com/app/share/$driveId/$publicShareUuid",
+                    displayOnlyLastPage = false,
                 ).toBundle()
             )
         }.also(::startActivity)

@@ -63,12 +63,14 @@ fun OnboardingScreen(
     onLoginRequest: (accounts: List<ExternalAccount>) -> Unit,
     onCreateAccount: () -> Unit,
     onSaveSkippedAccounts: (Set<Long>) -> Unit,
+    displayOnlyLastPage: Boolean = false,
 ) {
-    val pagerState = rememberPagerState(pageCount = { Page.entries.size })
+    val entries = if (displayOnlyLastPage) listOf(Page.entries.last()) else Page.entries
+    val pagerState = rememberPagerState(pageCount = { entries.size })
 
     OnboardingScaffold(
         pagerState = pagerState,
-        onboardingPages = Page.entries.mapIndexed { index, page -> page.toOnboardingPage(pagerState, index) },
+        onboardingPages = entries.mapIndexed { index, page -> page.toOnboardingPage(pagerState, index) },
         bottomContent = { paddingValues ->
             OnboardingComponents.CrossLoginBottomContent(
                 modifier = Modifier

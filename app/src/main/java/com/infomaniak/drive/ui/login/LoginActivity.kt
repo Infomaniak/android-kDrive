@@ -141,6 +141,7 @@ class LoginActivity : ComponentActivity() {
                         onLoginRequest = { accounts -> loginRequest(accounts) },
                         onCreateAccount = { openAccountCreationWebView() },
                         onSaveSkippedAccounts = { crossAppLoginViewModel.skippedAccountIds.value = it },
+                        displayOnlyLastPage = navigationArgs?.displayOnlyLastPage == true,
                     )
                 }
             }

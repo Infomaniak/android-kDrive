@@ -447,6 +447,9 @@
             android:name="publicShareDeeplink"
             android:defaultValue=""
             app:argType="string" />
+        <argument
+            android:name="displayOnlyLastPage"
+            app:argType="boolean" />
     </activity>
 
     <dialog

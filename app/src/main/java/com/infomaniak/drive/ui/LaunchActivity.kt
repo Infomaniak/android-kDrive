@@ -50,6 +50,7 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.ui.login.LoginActivityArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
@@ -116,7 +117,10 @@ class LaunchActivity : EdgeToEdgeActivity() {
         Intent(this, destinationClass).apply {
             when (destinationClass) {
                 MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
-                LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                LoginActivity::class.java -> {
+                    putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                    putExtras(LoginActivityArgs(displayOnlyLastPage = false).toBundle())
+                }
                 PublicShareActivity::class.java -> {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                     publicShareActivityExtras?.let(::putExtras)
