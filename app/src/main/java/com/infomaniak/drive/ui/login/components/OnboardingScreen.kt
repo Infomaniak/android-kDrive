@@ -39,7 +39,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.infomaniak.core.compose.basics.ButtonType
 import com.infomaniak.core.compose.basics.Typography
-import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountCheckingStatus
+import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingStatus
 import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingState
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
@@ -157,7 +157,7 @@ private fun Preview(@PreviewParameter(AccountsPreviewParameter::class) accounts:
         Surface {
             OnboardingScreen(
                 accountsCheckingState = {
-                    AccountsCheckingState(status = AccountCheckingStatus.Ongoing, checkedAccounts = { accounts })
+                    AccountsCheckingState(status = AccountsCheckingStatus.Checking, checkedAccounts = accounts)
                 },
                 skippedIds = { emptySet() },
                 onLoginRequest = {},
