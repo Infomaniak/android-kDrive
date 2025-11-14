@@ -24,6 +24,7 @@ rootProject.name = "kDrive"
 include(
     ":app",
     ":Core:AppIntegrity",
+    ":Core:AppVersionChecker",
     ":Core:Auth",
     ":Core:Avatar",
     ":Core:Coil",
