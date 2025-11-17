@@ -1,0 +1,3 @@
+- Add two factor authentication notifications support
+- Cross application login improvement
+- Only display the last page of the onboarding when adding more accounts
