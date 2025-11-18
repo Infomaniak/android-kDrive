@@ -116,7 +116,7 @@ object PublicShareApiRepository {
             okHttpClient = AccountUtils.getHttpClient(
                 userId = destinationUserId,
                 getAuthenticator = null,
-                getInterceptor = { tokenInterceptorListener -> PublicShareLegacyTokenInterceptor(tokenInterceptorListener) }
+                getInterceptor = { tokenInterceptorListener -> PublicShareTokenInterceptor(tokenInterceptorListener) }
             ),
         )
     }
