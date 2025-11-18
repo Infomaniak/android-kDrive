@@ -23,13 +23,13 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import coil.load
+import coil3.load
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.RelativeCornerSize
 import com.google.android.material.shape.ShapeAppearanceModel
-import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.auth.models.user.User
+import com.infomaniak.core.coil.loadAvatar
 import com.infomaniak.core.legacy.utils.context
-import com.infomaniak.core.legacy.utils.loadAvatar
 import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Permission
