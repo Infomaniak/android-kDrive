@@ -40,7 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.Xor
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.compose.basics.CallableState
+import com.infomaniak.core.ui.compose.basics.CallableState
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.legacy.auth.TokenAuthenticator.Companion.changeAccessToken
 import com.infomaniak.core.legacy.models.ApiError

@@ -29,7 +29,7 @@ import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH_DAY_ONE_CHAR
 import com.infomaniak.core.utils.FORMAT_DATE_SHORT_DAY_ONE_CHAR
 import com.infomaniak.core.utils.day

@@ -22,7 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.databinding.FragmentBottomSheetInformationBinding
 
 open class InformationBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {

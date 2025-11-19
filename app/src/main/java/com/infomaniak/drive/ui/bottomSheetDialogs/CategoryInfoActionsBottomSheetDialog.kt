@@ -35,7 +35,7 @@ import com.infomaniak.core.legacy.utils.SnackbarUtils
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setBackNavigationResult
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackCategoriesEvent
 import com.infomaniak.drive.R

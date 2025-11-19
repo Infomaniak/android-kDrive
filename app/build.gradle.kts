@@ -167,9 +167,6 @@ dependencies {
     implementation(project(":Core:Auth"))
     implementation(project(":Core:Avatar"))
     implementation(project(":Core:Coil"))
-    implementation(project(":Core:Compose:Basics"))
-    implementation(project(":Core:Compose:Margin"))
-    implementation(project(":Core:Compose:MaterialThemeFromXml"))
     implementation(project(":Core:CrossAppLogin:Back"))
     implementation(project(":Core:CrossAppLogin:Front"))
     implementation(project(":Core:FragmentNavigation"))
@@ -188,7 +185,10 @@ dependencies {
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:TwoFactorAuth:Front"))
     implementation(project(":Core:TwoFactorAuth:Back:WithUserDb"))
-    implementation(project(":Core:UiView:EdgeToEdge"))
+    implementation(project(":Core:Ui:Compose:Basics"))
+    implementation(project(":Core:Ui:Compose:Margin"))
+    implementation(project(":Core:Ui:Compose:MaterialThemeFromXml"))
+    implementation(project(":Core:Ui:View:EdgeToEdge"))
 
     // Compose
     implementation(platform(core.compose.bom))

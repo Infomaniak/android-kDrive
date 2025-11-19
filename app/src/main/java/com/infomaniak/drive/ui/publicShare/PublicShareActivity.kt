@@ -27,7 +27,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeActivity
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ActivityPublicShareBinding
 import com.infomaniak.drive.extensions.addSentryBreadcrumb

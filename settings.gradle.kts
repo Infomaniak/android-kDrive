@@ -28,10 +28,6 @@ include(
     ":Core:Auth",
     ":Core:Avatar",
     ":Core:Coil",
-    ":Core:Compose:BasicButton",
-    ":Core:Compose:Basics",
-    ":Core:Compose:Margin",
-    ":Core:Compose:MaterialThemeFromXml",
     ":Core:CrossAppLogin:Back",
     ":Core:CrossAppLogin:Front",
     ":Core:FragmentNavigation",
@@ -55,5 +51,9 @@ include(
     ":Core:TwoFactorAuth:Front",
     ":Core:TwoFactorAuth:Back",
     ":Core:TwoFactorAuth:Back:WithUserDb",
-    ":Core:UiView:EdgeToEdge"
+    ":Core:Ui:Compose:BasicButton",
+    ":Core:Ui:Compose:Basics",
+    ":Core:Ui:Compose:Margin",
+    ":Core:Ui:Compose:MaterialThemeFromXml",
+    ":Core:Ui:View:EdgeToEdge"
 )

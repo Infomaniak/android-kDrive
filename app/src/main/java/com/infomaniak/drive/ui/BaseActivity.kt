@@ -23,7 +23,7 @@ import com.infomaniak.core.extensions.isNightModeEnabled
 import com.infomaniak.core.extensions.lightStatusBar
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeActivity
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.twoFactorAuthManager

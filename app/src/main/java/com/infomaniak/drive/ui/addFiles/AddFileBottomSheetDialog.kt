@@ -37,7 +37,7 @@ import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.whenResultIsOk
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.core.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
