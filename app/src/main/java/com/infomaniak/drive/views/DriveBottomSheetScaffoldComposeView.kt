@@ -35,10 +35,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.Dp
-import com.infomaniak.core.compose.basics.bottomsheet.LocalBottomSheetTheme
-import com.infomaniak.core.compose.basics.bottomsheet.ProvideBottomSheetTheme
-import com.infomaniak.core.compose.basics.bottomsheet.ThemedBottomSheetScaffold
-import com.infomaniak.core.compose.margin.Margin
+import com.infomaniak.core.ui.compose.basics.bottomsheet.LocalBottomSheetTheme
+import com.infomaniak.core.ui.compose.basics.bottomsheet.ProvideBottomSheetTheme
+import com.infomaniak.core.ui.compose.basics.bottomsheet.ThemedBottomSheetScaffold
+import com.infomaniak.core.ui.compose.margin.Margin
 import com.infomaniak.drive.ui.theme.DriveTheme
 import kotlinx.coroutines.launch
 
