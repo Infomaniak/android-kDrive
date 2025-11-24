@@ -42,7 +42,6 @@ import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PreviewPictureFragment : PreviewFragment() {
@@ -91,7 +90,7 @@ class PreviewPictureFragment : PreviewFragment() {
         val previewRequest = buildPreviewRequest()
         val imageLoader = getImageLoader()
 
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+        viewLifecycleOwner.lifecycleScope.launch {
             imageLoader.execute(thumbnailPreviewRequest)
             imageLoader.execute(previewRequest)
         }
