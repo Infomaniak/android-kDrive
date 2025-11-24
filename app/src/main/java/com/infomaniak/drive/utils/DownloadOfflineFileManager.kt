@@ -27,14 +27,15 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.reflect.TypeToken
+import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.networking.HttpUtils
-import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
-import com.infomaniak.core.legacy.utils.await
+import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.exceptions.NetworkException
+import com.infomaniak.core.network.networking.HttpUtils
+import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.network.utils.await
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -151,7 +152,7 @@ class DownloadOfflineFileManager(
             }
             remoteFile
         } else {
-            if (fileDetails.error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
+            if (fileDetails.error?.exception is NetworkException) throw UploadTask.NetworkException()
 
             val translateError = fileDetails.translateError()
             val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
@@ -320,7 +321,7 @@ class DownloadOfflineFileManager(
 
         fun downloadFileResponse(
             fileUrl: String,
-            okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+            okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
             downloadInterceptor: Interceptor? = null
         ): Response {
             @OptIn(ManualAuthorizationRequired::class)
@@ -333,7 +334,7 @@ class DownloadOfflineFileManager(
 
         suspend fun downloadFileResponseAsync(
             fileUrl: String,
-            okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+            okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
             downloadInterceptor: Interceptor? = null
         ): Response {
             @OptIn(ManualAuthorizationRequired::class)
