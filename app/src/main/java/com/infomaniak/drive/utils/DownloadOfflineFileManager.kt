@@ -352,7 +352,7 @@ class DownloadOfflineFileManager(
             outputStream: ParcelFileDescriptor.AutoCloseOutputStream? = null,
         ): Boolean {
             SentryLog.d(tag, "Save remote data to ${outputFile?.path}")
-            return response.body?.byteStream()?.buffered()?.use { input ->
+            return response.body.byteStream().buffered().use { input ->
                 if (outputFile?.parentFile?.exists() == false) outputFile.parentFile?.mkdirs()
                 if (outputFile?.exists() == false) outputFile.createNewFile()
                 val stream = outputStream ?: outputFile?.outputStream()
