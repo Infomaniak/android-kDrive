@@ -1,0 +1,2 @@
+- Fixed display on fDroid versions of the inter-app connection
+- Minor fixes and code improvements
