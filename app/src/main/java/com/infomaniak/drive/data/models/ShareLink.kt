@@ -21,8 +21,8 @@ import android.os.Parcelable
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.legacy.api.ApiController.gson
-import com.infomaniak.core.legacy.utils.Utils.enumValueOfOrNull
+import com.infomaniak.core.network.api.ApiController.gson
+import com.infomaniak.core.utils.enumValueOfOrNull
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.file.sharelink.ShareLinkCapabilities
 import com.infomaniak.drive.utils.AccountUtils
