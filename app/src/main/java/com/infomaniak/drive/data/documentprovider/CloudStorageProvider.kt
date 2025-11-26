@@ -90,9 +90,15 @@ class CloudStorageProvider : DocumentsProvider() {
         Dispatchers.IO + CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
 
-    // Currently, there is a bug on ChromeOS file explorer.
-    // When the contentResolver is notified asynchronously, the file explorer does not necessarily refresh the view and does not request the updated file list again.
-    // The file list is therefore only loaded synchronously on Chrome OS.
+    /**
+     * Indicates whether the current platform is Chrome OS.
+     *
+     * ### Why this matters:
+     * There is a known issue on Chrome OS where the file explorer **does not reliably refresh its view** when file content changes are notified **asynchronously**.
+     * As a result, file listings must be **loaded synchronously** on Chrome OS to ensure the UI reflects the latest state.
+     *
+     * This flag is used to adapt execution behavior in [runOnPlatformAdaptively] and [runSuspendOnPlatformAdaptively].
+     */
     private var isChromeOs = false
 
     override fun onCreate(): Boolean {
