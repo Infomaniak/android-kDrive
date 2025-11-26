@@ -42,6 +42,7 @@ import com.infomaniak.core.ui.compose.basics.Typography
 import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingState
 import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingStatus
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
+import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomButton
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
 import com.infomaniak.core.crossapplogin.front.data.CrossLoginDefaults
 import com.infomaniak.core.crossapplogin.front.previews.AccountsPreviewParameter
@@ -81,12 +82,15 @@ fun OnboardingScreen(
                 accountsCheckingState = accountsCheckingState,
                 skippedIds = skippedIds,
                 isLoginButtonLoading = isLoginButtonLoading,
-                isSignUpButtonLoading = isSignUpButtonLoading,
-                onLogin = { onLoginRequest(emptyList()) },
                 onContinueWithSelectedAccounts = { selectedAccounts -> onLoginRequest(selectedAccounts) },
-                onCreateAccount = onCreateAccount,
                 onUseAnotherAccountClicked = { onLoginRequest(emptyList()) },
                 onSaveSkippedAccounts = onSaveSkippedAccounts,
+                noAccountsBottomButtons = CrossLoginBottomButton.accountRequired(
+                    onLogin = { onLoginRequest(emptyList()) },
+                    onCreateAccount = onCreateAccount,
+                    isLoginButtonLoading = isLoginButtonLoading,
+                    isSignUpButtonLoading = isSignUpButtonLoading,
+                ),
                 nextButtonShape = CircleShape,
                 customization = CrossLoginDefaults.customize(
                     buttonStyle = ButtonType.Drive,
