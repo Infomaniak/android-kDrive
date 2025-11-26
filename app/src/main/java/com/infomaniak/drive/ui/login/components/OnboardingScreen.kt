@@ -85,7 +85,7 @@ fun OnboardingScreen(
                 onContinueWithSelectedAccounts = { selectedAccounts -> onLoginRequest(selectedAccounts) },
                 onUseAnotherAccountClicked = { onLoginRequest(emptyList()) },
                 onSaveSkippedAccounts = onSaveSkippedAccounts,
-                noAccountsBottomButtons = CrossLoginBottomButton.default(
+                noAccountsBottomButtons = CrossLoginBottomButton.accountRequired(
                     onLogin = { onLoginRequest(emptyList()) },
                     onCreateAccount = onCreateAccount,
                     isLoginButtonLoading = isLoginButtonLoading,
