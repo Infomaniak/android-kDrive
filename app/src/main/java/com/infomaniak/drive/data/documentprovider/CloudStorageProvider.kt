@@ -94,7 +94,8 @@ class CloudStorageProvider : DocumentsProvider() {
      * Indicates whether the current platform is Chrome OS.
      *
      * ### Why this matters:
-     * There is a known issue on Chrome OS where the file explorer **does not reliably refresh its view** when file content changes are notified **asynchronously**.
+     * There is a known issue on Chrome OS :
+     * Where the file explorer **does not reliably refresh its view** when file content changes are notified **asynchronously**.
      * As a result, file listings must be **loaded synchronously** on Chrome OS to ensure the UI reflects the latest state.
      *
      * This flag is used to adapt execution behavior in [runOnPlatformAdaptively] and [runSuspendOnPlatformAdaptively].
