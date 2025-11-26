@@ -87,7 +87,7 @@ class CloudStorageProvider : DocumentsProvider() {
 
     private lateinit var cacheDir: IOFile
     private val cloudScope = CoroutineScope(
-        Dispatchers.IO + CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
 
     /**
