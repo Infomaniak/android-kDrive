@@ -90,6 +90,9 @@ class CloudStorageProvider : DocumentsProvider() {
         Dispatchers.IO + CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
 
+    // Currently, there is a bug in the Chrome OS file explorer.
+    // When the contentResolver is notified asynchronously, the file explorer does not necessarily refresh the view and does not request the updated file list again.
+    // The file list is therefore only loaded synchronously on Chrome OS.
     private var isChromeOs = false
 
     override fun onCreate(): Boolean {
@@ -765,6 +768,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     private fun MatrixCursor.addFile(file: File?, documentId: String, name: String = "", isRootFolder: Boolean = false) {
+        
         if (context == null && file != null) return
 
         var flags = 0
