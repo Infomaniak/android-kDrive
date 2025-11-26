@@ -90,7 +90,7 @@ class CloudStorageProvider : DocumentsProvider() {
         Dispatchers.IO + CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
 
-    // Currently, there is a bug in the Chrome OS file explorer.
+    // Currently, there is a bug on ChromeOS file explorer.
     // When the contentResolver is notified asynchronously, the file explorer does not necessarily refresh the view and does not request the updated file list again.
     // The file list is therefore only loaded synchronously on Chrome OS.
     private var isChromeOs = false
@@ -217,7 +217,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 cursor.addFile(null, documentId, name)
             }
             isSharedWithMeFolder -> {
-                runIfChromeOsOrLaunch(cursor.job) {
+                runOnPlatformAdaptively(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
                             realm = realm,
@@ -231,7 +231,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
             isMySharesDrive -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
             isMySharesRoot -> {
-                runBlockingIfChromeOsOrLaunch(cursor.job) {
+                runSuspendOnPlatformAdaptively(cursor.job) {
                     FileController.getMySharedFiles(
                         userDrive = UserDrive(userId, driveId),
                         sortType = sortType,
@@ -239,7 +239,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 }
             }
             else -> {
-                runIfChromeOsOrLaunch(cursor.job) {
+                runOnPlatformAdaptively(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
                             realm = realm,
@@ -340,7 +340,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val userId = getUserId(parentDocumentId)
         val userDrive = UserDrive(userId.toInt(), driveId, comeFromSharedWithMe(parentDocumentId))
 
-        cloudScope.launch(cursor.job) {
+        runSuspendOnPlatformAdaptively(cursor.job) {
             FileController.cloudStorageSearch(userDrive, query, onResponse = { files ->
                 cursor.job.ensureActive()
                 files.forEach { file ->
@@ -768,7 +768,7 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     private fun MatrixCursor.addFile(file: File?, documentId: String, name: String = "", isRootFolder: Boolean = false) {
-        
+
         if (context == null && file != null) return
 
         var flags = 0
@@ -831,7 +831,11 @@ class CloudStorageProvider : DocumentsProvider() {
         job = cursor.job
     }
 
-    private fun runIfChromeOsOrLaunch(context: CoroutineContext = EmptyCoroutineContext, block: () -> Unit) {
+    /**
+     * Executes the given block either synchronously on the current thread (if on Chrome OS)
+     * or asynchronously in [cloudScope] otherwise.
+     */
+    private fun runOnPlatformAdaptively(context: CoroutineContext = EmptyCoroutineContext, block: () -> Unit) {
         if (isChromeOs) {
             block()
         } else {
@@ -839,7 +843,12 @@ class CloudStorageProvider : DocumentsProvider() {
         }
     }
 
-    private fun runBlockingIfChromeOsOrLaunch(context: CoroutineContext = EmptyCoroutineContext, block: suspend () -> Unit) {
+    /**
+     * Executes the given suspend block adaptively:
+     * - On Chrome OS: runs it synchronously (blocking the current thread) using [runBlocking].
+     * - Otherwise: launches it asynchronously in [cloudScope].
+     */
+    private fun runSuspendOnPlatformAdaptively(context: CoroutineContext = EmptyCoroutineContext, block: suspend () -> Unit) {
         if (isChromeOs) {
             runBlocking { block() }
         } else {
