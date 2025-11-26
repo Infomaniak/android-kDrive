@@ -111,6 +111,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 cacheDir = IOFile(it.filesDir, "cloud_storage_temp_files")
                 it.initRealm()
                 result = true
+                // As describe here: https://developer.android.com/games/playgames/pg-chromeos#detect_the_platform
                 isChromeOs = context?.packageManager?.hasSystemFeature("org.chromium.arc") == true
             }
         }
