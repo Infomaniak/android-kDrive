@@ -80,6 +80,8 @@ import java.net.URLEncoder
 import java.util.Date
 import java.util.UUID
 import java.util.concurrent.Executors
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class CloudStorageProvider : DocumentsProvider() {
 
@@ -87,6 +89,8 @@ class CloudStorageProvider : DocumentsProvider() {
     private val cloudScope = CoroutineScope(
         Dispatchers.IO + CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
+
+    private var isChromeOs = false
 
     override fun onCreate(): Boolean {
         SentryLog.d(TAG, "onCreate")
@@ -97,6 +101,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 cacheDir = IOFile(it.filesDir, "cloud_storage_temp_files")
                 it.initRealm()
                 result = true
+                isChromeOs = context?.packageManager?.hasSystemFeature("org.chromium.arc") == true
             }
         }
         return result
@@ -209,7 +214,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 cursor.addFile(null, documentId, name)
             }
             isSharedWithMeFolder -> {
-                cloudScope.launch(cursor.job) {
+                runIfChromeOsOrLaunch(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
                             realm = realm,
@@ -223,7 +228,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
             isMySharesDrive -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
             isMySharesRoot -> {
-                cloudScope.launch(cursor.job) {
+                runBlockingIfChromeOsOrLaunch(cursor.job) {
                     FileController.getMySharedFiles(
                         userDrive = UserDrive(userId, driveId),
                         sortType = sortType,
@@ -231,7 +236,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 }
             }
             else -> {
-                cloudScope.launch(cursor.job) {
+                runIfChromeOsOrLaunch(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
                             realm = realm,
@@ -760,7 +765,6 @@ class CloudStorageProvider : DocumentsProvider() {
     }
 
     private fun MatrixCursor.addFile(file: File?, documentId: String, name: String = "", isRootFolder: Boolean = false) {
-
         if (context == null && file != null) return
 
         var flags = 0
@@ -821,6 +825,22 @@ class CloudStorageProvider : DocumentsProvider() {
             position++
         }
         job = cursor.job
+    }
+
+    private fun runIfChromeOsOrLaunch(context: CoroutineContext = EmptyCoroutineContext, block: () -> Unit) {
+        if (isChromeOs) {
+            block()
+        } else {
+            cloudScope.launch(context) { block() }
+        }
+    }
+
+    private fun runBlockingIfChromeOsOrLaunch(context: CoroutineContext = EmptyCoroutineContext, block: suspend () -> Unit) {
+        if (isChromeOs) {
+            runBlocking { block() }
+        } else {
+            cloudScope.launch(context) { block() }
+        }
     }
 
     private data class DriveDocument(val name: String, val id: Int)
