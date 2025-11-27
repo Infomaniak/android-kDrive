@@ -80,13 +80,27 @@ import java.net.URLEncoder
 import java.util.Date
 import java.util.UUID
 import java.util.concurrent.Executors
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 class CloudStorageProvider : DocumentsProvider() {
 
     private lateinit var cacheDir: IOFile
     private val cloudScope = CoroutineScope(
-        Dispatchers.IO + CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+        CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
+
+    /**
+     * Indicates whether the current platform is Chrome OS.
+     *
+     * ### Why this matters:
+     * There is a known issue on Chrome OS :
+     * Where the file explorer **does not reliably refresh its view** when file content changes are notified **asynchronously**.
+     * As a result, file listings must be **loaded synchronously** on Chrome OS to ensure the UI reflects the latest state.
+     *
+     * This flag is used to adapt execution behavior in [runOnPlatformAdaptively] and [runSuspendOnPlatformAdaptively].
+     */
+    private var isChromeOs = false
 
     override fun onCreate(): Boolean {
         SentryLog.d(TAG, "onCreate")
@@ -97,6 +111,8 @@ class CloudStorageProvider : DocumentsProvider() {
                 cacheDir = IOFile(it.filesDir, "cloud_storage_temp_files")
                 it.initRealm()
                 result = true
+                // As describe here: https://developer.android.com/games/playgames/pg-chromeos#detect_the_platform
+                isChromeOs = context?.packageManager?.hasSystemFeature("org.chromium.arc") == true
             }
         }
         return result
@@ -209,7 +225,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 cursor.addFile(null, documentId, name)
             }
             isSharedWithMeFolder -> {
-                cloudScope.launch(cursor.job) {
+                runOnPlatformAdaptively(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
                             realm = realm,
@@ -223,7 +239,7 @@ class CloudStorageProvider : DocumentsProvider() {
             }
             isMySharesDrive -> cursor.addRootDrives(userId, MY_SHARES_FOLDER_ID)
             isMySharesRoot -> {
-                cloudScope.launch(cursor.job) {
+                runSuspendOnPlatformAdaptively(cursor.job) {
                     FileController.getMySharedFiles(
                         userDrive = UserDrive(userId, driveId),
                         sortType = sortType,
@@ -231,7 +247,7 @@ class CloudStorageProvider : DocumentsProvider() {
                 }
             }
             else -> {
-                cloudScope.launch(cursor.job) {
+                runOnPlatformAdaptively(cursor.job) {
                     FileController.getRealmInstance(userDrive).use { realm ->
                         FolderFilesProvider.getCloudStorageFiles(
                             realm = realm,
@@ -332,7 +348,7 @@ class CloudStorageProvider : DocumentsProvider() {
         val userId = getUserId(parentDocumentId)
         val userDrive = UserDrive(userId.toInt(), driveId, comeFromSharedWithMe(parentDocumentId))
 
-        cloudScope.launch(cursor.job) {
+        runSuspendOnPlatformAdaptively(cursor.job) {
             FileController.cloudStorageSearch(userDrive, query, onResponse = { files ->
                 cursor.job.ensureActive()
                 files.forEach { file ->
@@ -821,6 +837,31 @@ class CloudStorageProvider : DocumentsProvider() {
             position++
         }
         job = cursor.job
+    }
+
+    /**
+     * Executes the given block either synchronously on the current thread (if on Chrome OS)
+     * or asynchronously in [cloudScope] otherwise.
+     */
+    private fun runOnPlatformAdaptively(context: CoroutineContext = EmptyCoroutineContext, block: () -> Unit) {
+        if (isChromeOs) {
+            block()
+        } else {
+            cloudScope.launch(context) { block() }
+        }
+    }
+
+    /**
+     * Executes the given suspend block adaptively:
+     * - On Chrome OS: runs it synchronously (blocking the current thread) using [runBlocking].
+     * - Otherwise: launches it asynchronously in [cloudScope].
+     */
+    private fun runSuspendOnPlatformAdaptively(context: CoroutineContext = EmptyCoroutineContext, block: suspend () -> Unit) {
+        if (isChromeOs) {
+            runBlocking { block() }
+        } else {
+            cloudScope.launch(context) { block() }
+        }
     }
 
     private data class DriveDocument(val name: String, val id: Int)
