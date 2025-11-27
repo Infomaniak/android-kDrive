@@ -35,10 +35,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
-import com.infomaniak.core.legacy.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.network.networking.HttpUtils
+import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.core.ui.showToast
+import com.infomaniak.core.utils.DownloadManagerUtils
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -660,6 +663,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         companion object {
+            @OptIn(ManualAuthorizationRequired::class)
             fun Context.downloadFile(downloadPermissions: DrivePermissions, file: File, onSuccess: (() -> Unit)? = null) {
                 if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
@@ -669,6 +673,8 @@ class FileInfoActionsView @JvmOverloads constructor(
                         url = ApiRoutes.getDownloadFileUrl(file),
                         name = fileName,
                         userBearerToken = userBearerToken,
+                        extraHeaders = HttpUtils.getHeaders(),
+                        onError = { showToast(title = it) }
                     )
                     onSuccess?.invoke()
                 }
