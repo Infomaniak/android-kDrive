@@ -185,6 +185,7 @@ dependencies {
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:TwoFactorAuth:Front"))
     implementation(project(":Core:TwoFactorAuth:Back:WithUserDb"))
+    implementation(project(":Core:Ui"))
     implementation(project(":Core:Ui:Compose:Basics"))
     implementation(project(":Core:Ui:Compose:Margin"))
     implementation(project(":Core:Ui:Compose:MaterialThemeFromXml"))
