@@ -37,13 +37,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.infomaniak.core.ui.compose.basics.ButtonType
-import com.infomaniak.core.ui.compose.basics.Typography
 import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingState
 import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingStatus
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
-import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomButton
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
+import com.infomaniak.core.crossapplogin.front.components.NoCrossAppLoginAccountsContent
 import com.infomaniak.core.crossapplogin.front.data.CrossLoginDefaults
 import com.infomaniak.core.crossapplogin.front.previews.AccountsPreviewParameter
 import com.infomaniak.core.onboarding.OnboardingPage
@@ -52,6 +50,8 @@ import com.infomaniak.core.onboarding.components.OnboardingComponents
 import com.infomaniak.core.onboarding.components.OnboardingComponents.DefaultBackground
 import com.infomaniak.core.onboarding.components.OnboardingComponents.DefaultLottieIllustration
 import com.infomaniak.core.onboarding.components.OnboardingComponents.DefaultTitleAndDescription
+import com.infomaniak.core.ui.compose.basics.ButtonType
+import com.infomaniak.core.ui.compose.basics.Typography
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.theme.DriveTheme
 
@@ -85,7 +85,7 @@ fun OnboardingScreen(
                 onContinueWithSelectedAccounts = { selectedAccounts -> onLoginRequest(selectedAccounts) },
                 onUseAnotherAccountClicked = { onLoginRequest(emptyList()) },
                 onSaveSkippedAccounts = onSaveSkippedAccounts,
-                noAccountsBottomButtons = CrossLoginBottomButton.accountRequired(
+                noCrossAppLoginAccountsContent = NoCrossAppLoginAccountsContent.accountRequired(
                     onLogin = { onLoginRequest(emptyList()) },
                     onCreateAccount = onCreateAccount,
                     isLoginButtonLoading = isLoginButtonLoading,
