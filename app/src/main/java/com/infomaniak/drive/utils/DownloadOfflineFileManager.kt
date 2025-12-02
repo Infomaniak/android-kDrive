@@ -52,6 +52,7 @@ import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -135,12 +136,14 @@ class DownloadOfflineFileManager(
         return@withContext false
     }
 
-    private fun getFileFromRemote(
+    private suspend fun getFileFromRemote(
         context: Context,
         fileId: Int,
         userDrive: UserDrive = UserDrive(),
     ): File {
-        val fileDetails = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
+        val fileDetails = Dispatchers.IO {
+            ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
+        }
         val remoteFile = fileDetails.data
         val file = if (fileDetails.isSuccess() && remoteFile != null) {
             FileController.getRealmInstance(userDrive).use { realm ->
