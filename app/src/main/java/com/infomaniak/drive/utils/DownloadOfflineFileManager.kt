@@ -120,14 +120,19 @@ class DownloadOfflineFileManager(
         }
     }
 
-    private fun moveCacheFileIfIntact(context: Context, file: File, cacheFile: IOFile, offlineFile: IOFile): Boolean {
+    private suspend fun moveCacheFileIfIntact(
+        context: Context,
+        file: File,
+        cacheFile: IOFile,
+        offlineFile: IOFile,
+    ): Boolean = withContext(Dispatchers.IO) {
         if (!file.isObsoleteOrNotIntact(cacheFile)) {
             Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
             notifyCompleted(file, offlineFile, context)
             lastDownloadedFile = offlineFile
-            return true
+            return@withContext true
         }
-        return false
+        return@withContext false
     }
 
     private fun getFileFromRemote(
