@@ -86,6 +86,13 @@ class DownloadOfflineFileManager(
             return ListenableWorker.Result.failure()
         }
 
+        if (!file.isObsoleteOrNotIntact(cacheFile)) {
+            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+            notifyCompleted(file, offlineFile, context)
+            lastDownloadedFile = offlineFile
+            return ListenableWorker.Result.success()
+        }
+
         if (file.isOfflineAndIntact(offlineFile)) {
             // We can have this case for example when we try to put a lot of files at once in offline mode
             // and for some reason, the worker is cancelled after a long time, the worker is restarted
