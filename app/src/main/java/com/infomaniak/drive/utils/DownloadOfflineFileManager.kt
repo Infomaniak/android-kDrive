@@ -86,12 +86,7 @@ class DownloadOfflineFileManager(
             return ListenableWorker.Result.failure()
         }
 
-        if (!file.isObsoleteOrNotIntact(cacheFile)) {
-            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
-            notifyCompleted(file, offlineFile, context)
-            lastDownloadedFile = offlineFile
-            return ListenableWorker.Result.success()
-        }
+        if (moveCacheFileIfIntact(context, file, cacheFile, offlineFile)) return ListenableWorker.Result.success()
 
         if (file.isOfflineAndIntact(offlineFile)) {
             // We can have this case for example when we try to put a lot of files at once in offline mode
@@ -123,6 +118,16 @@ class DownloadOfflineFileManager(
         lastDownloadedFile?.let {
             if (it.exists() && currentFile?.isIntactFile(it) == false) it.delete()
         }
+    }
+
+    private fun moveCacheFileIfIntact(context: Context, file: File, cacheFile: IOFile, offlineFile: IOFile): Boolean {
+        if (!file.isObsoleteOrNotIntact(cacheFile)) {
+            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+            notifyCompleted(file, offlineFile, context)
+            lastDownloadedFile = offlineFile
+            return true
+        }
+        return false
     }
 
     private fun getFileFromRemote(
