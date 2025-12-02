@@ -97,12 +97,11 @@ class DownloadOfflineFileManager(
         if (cacheFile.exists()) cacheFile.delete()
 
         if (offlineFile == null) {
-            getFileFromRemote(context, file.id, userDrive) { downloadedFile ->
-                currentFile = downloadedFile
-                downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { updatedOfflineFile ->
-                    lastDownloadedFile = offlineFile
-                    offlineFile = updatedOfflineFile
-                }
+            val remoteFile = getFileFromRemote(context, file.id, userDrive)
+            currentFile = remoteFile
+            remoteFile.getOfflineFile(context, userDrive.driveId)?.let { updatedOfflineFile ->
+                lastDownloadedFile = offlineFile
+                offlineFile = updatedOfflineFile
             }
         } else {
             lastDownloadedFile = offlineFile
@@ -129,8 +128,7 @@ class DownloadOfflineFileManager(
         context: Context,
         fileId: Int,
         userDrive: UserDrive = UserDrive(),
-        onFileDownloaded: (downloadedFile: File) -> Unit
-    ) {
+    ): File {
         val fileDetails = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
         val remoteFile = fileDetails.data
         val file = if (fileDetails.isSuccess() && remoteFile != null) {
@@ -147,7 +145,8 @@ class DownloadOfflineFileManager(
             val responseJson = ApiController.gson.toJson(fileDetails, responseGsonType)
             throw RemoteFileException("$responseJson $translatedErrorText")
         }
-        onFileDownloaded.invoke(file)
+
+        return file
     }
 
     private suspend fun startOfflineDownload(
