@@ -318,7 +318,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         if (Utils.getInvalidFileNameCharacter(name) != null) return@with false
 
         val cacheFile = getCacheFile(context)
-        if (cacheFile.exists()) {
+
+        if (cacheFile.exists() && path.isNotEmpty() && !isObsoleteOrNotIntact(cacheFile)) {
             getOfflineFile(context)?.let { offlineFile ->
                 Utils.moveCacheFileToOffline(file = this, cacheFile, offlineFile)
                 CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, isOffline = true) }
