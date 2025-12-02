@@ -77,37 +77,31 @@ class DownloadOfflineFileManager(
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
 
+        val file = if (file.path.isEmpty()) getFileFromRemote(context, file.id, userDrive) else file
         currentFile = file
-        var offlineFile = file.getOfflineFile(context, userDrive.userId)
         val cacheFile = file.getCacheFile(context, userDrive)
+        val offlineFile = file.getOfflineFile(context, userDrive.userId)
+        if (offlineFile == null) {
+            SentryLog.e(TAG, "offline must not be null")
+            return ListenableWorker.Result.failure()
+        }
 
-        offlineFile?.let {
-            if (file.isOfflineAndIntact(it)) {
-                // We can have this case for example when we try to put a lot of files at once in offline mode
-                // and for some reason, the worker is cancelled after a long time, the worker is restarted
-                filesDownloaded += 1
-                lastDownloadedFile = offlineFile
-                return ListenableWorker.Result.success()
-            }
+        if (file.isOfflineAndIntact(offlineFile)) {
+            // We can have this case for example when we try to put a lot of files at once in offline mode
+            // and for some reason, the worker is cancelled after a long time, the worker is restarted
+            filesDownloaded += 1
+            lastDownloadedFile = offlineFile
+            return ListenableWorker.Result.success()
         }
 
         onProgress(0, file.id)
 
-        if (offlineFile?.exists() == true) offlineFile.delete()
+        if (offlineFile.exists()) offlineFile.delete()
         if (cacheFile.exists()) cacheFile.delete()
 
-        if (offlineFile == null) {
-            val remoteFile = getFileFromRemote(context, file.id, userDrive)
-            currentFile = remoteFile
-            remoteFile.getOfflineFile(context, userDrive.driveId)?.let { updatedOfflineFile ->
-                lastDownloadedFile = offlineFile
-                offlineFile = updatedOfflineFile
-            }
-        } else {
-            lastDownloadedFile = offlineFile
-        }
+        lastDownloadedFile = offlineFile
 
-        return if (offlineFile == null || currentFile?.rights?.canRead == false) {
+        return if (currentFile?.rights?.canRead == false) {
             ListenableWorker.Result.failure()
         } else {
             runCatching {
@@ -191,10 +185,7 @@ class DownloadOfflineFileManager(
 
             if (remoteDataHasBeenSaved && offlineFile.exists()) {
                 onProgress(100, file.id)
-                FileController.updateOfflineStatus(file.id, true)
-                offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
-                if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
-                fileDownloaded(context, file.id)
+                notifyCompleted(file, offlineFile, context)
                 ListenableWorker.Result.success()
             } else {
                 ListenableWorker.Result.failure()
@@ -203,6 +194,13 @@ class DownloadOfflineFileManager(
             offlineFile.delete()
             throw it
         }
+    }
+
+    private fun notifyCompleted(file: File, offlineFile: java.io.File, context: Context) {
+        FileController.updateOfflineStatus(file.id, true)
+        offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
+        if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
+        fileDownloaded(context, file.id)
     }
 
     private fun makeSureFileExists(offlineFile: java.io.File): Unit? {
