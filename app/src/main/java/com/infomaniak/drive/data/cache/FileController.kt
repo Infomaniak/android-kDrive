@@ -908,6 +908,7 @@ object FileController {
         isComplete = oldFile.isComplete
         isOffline = oldFile.isOffline
         responseAt = oldFile.responseAt
+        if (path.isEmpty() && oldFile.path.isNotEmpty()) path = oldFile.path
         if (oldFile.revisedAt > revisedAt) revisedAt = oldFile.revisedAt
         if (oldFile.lastActionAt > lastActionAt) lastActionAt = oldFile.lastActionAt
         if (oldFile.updatedAt > updatedAt) updatedAt = oldFile.updatedAt
