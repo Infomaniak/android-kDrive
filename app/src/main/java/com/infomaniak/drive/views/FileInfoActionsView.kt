@@ -552,7 +552,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onDuplicateFile(destinationFolder: File)
         fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean = false)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
-        fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
+        fun removeOfflineFile(offlineLocalPath: IOFile?, cacheFile: IOFile)
 
         @CallSuper
         fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent(MatomoName.ShareLink)
@@ -592,7 +592,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         trackFileActionEvent(MatomoName.Offline, false)
                         val offlineLocalPath = getOfflineFile(currentContext)
                         val cacheFile = getCacheFile(currentContext)
-                        offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
+                        removeOfflineFile(offlineLocalPath, cacheFile)
                     }
                 }
             }

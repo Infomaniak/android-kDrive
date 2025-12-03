@@ -267,9 +267,9 @@ class FileInfoActionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog(), FileInfo
         }
     }
 
-    override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) {
+    override fun removeOfflineFile(offlineLocalPath: IOFile?, cacheFile: IOFile) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile)
+            if (offlineLocalPath != null) mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile)
             withContext(Dispatchers.Main) {
                 currentFile.isOffline = false
                 if (findNavController().previousBackStackEntry?.destination?.id == R.id.offlineFileFragment) {

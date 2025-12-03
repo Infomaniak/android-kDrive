@@ -168,5 +168,5 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     override fun onLeaveShare(onApiResponse: () -> Unit) = Unit
     override fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean) = Unit
     override fun onRenameFile(newName: String, onApiResponse: () -> Unit) = Unit
-    override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) = Unit
+    override fun removeOfflineFile(offlineLocalPath: IOFile?, cacheFile: IOFile) = Unit
 }
