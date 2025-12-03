@@ -148,7 +148,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         addFavorites.isVisible = rights.canUseFavorite == true && !isSharedWithMe
-        availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
+        availableOffline.isGone = isSharedWithMe // Is it still needed to add `|| currentFile.getOfflineFile(context) == null`
         deleteFile.isVisible = rights.canDelete == true && !file.isImporting() && !isSharedWithMe
         downloadFile.isVisible = rights.canRead == true
         duplicateFile.isGone = rights.canRead == false
