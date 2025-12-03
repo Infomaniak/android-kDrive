@@ -1,0 +1,2 @@
+- Correction des fichiers hors ligne qui ne se téléchargent pas correctement à partir de la vue Favoris
+- Correction des fichiers qui ne s'affichent pas correctement dans l'explorateur de fichiers sur ChromeOS

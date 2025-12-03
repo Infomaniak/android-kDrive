@@ -1,0 +1,2 @@
+- Fix offline files not downloaded correctly from the Favorite view
+- Fix files not correctly displaying in the file explorer on ChromeOS
