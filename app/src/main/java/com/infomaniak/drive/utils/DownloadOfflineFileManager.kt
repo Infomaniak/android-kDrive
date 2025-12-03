@@ -78,7 +78,7 @@ class DownloadOfflineFileManager(
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
 
-        val file = if (file.path.isEmpty()) getFileFromRemote(context, file.id, userDrive) else file
+        val file = getFileFromRemote(context, file.id, userDrive)
         currentFile = file
         val cacheFile = file.getCacheFile(context, userDrive)
         val offlineFile = file.getOfflineFile(context, userDrive.userId)
