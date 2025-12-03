@@ -420,16 +420,13 @@ class MainActivity : BaseActivity() {
 
     private fun handleDeletionOfUploadedPhotos() {
 
-        fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
-            return uploadFiles
-                .filter {
-                    !it.getUriObject().scheme.equals(ContentResolver.SCHEME_FILE) &&
-                            !DocumentsContract.isDocumentUri(this, it.getUriObject())
-                }
-                .map { it.getUriObject() }
+        fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> = uploadFiles.mapNotNull { file ->
+            file.getUriObject().takeUnless { uri ->
+                uri.scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this, uri)
+            }
         }
 
-        fun onConfirmation(filesUploadedRecently: ArrayList<UploadFile>, filesUriToDelete: List<Uri>) {
+        fun onConfirmation(filesUploadedRecently: List<UploadFile>, filesUriToDelete: List<Uri>) {
             if (SDK_INT >= 30) {
                 lifecycleScope.launch {
                     pendingFilesUrisQueue.clear()
