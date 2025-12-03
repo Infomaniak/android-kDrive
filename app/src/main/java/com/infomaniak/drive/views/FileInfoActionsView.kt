@@ -148,7 +148,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         }
 
         addFavorites.isVisible = rights.canUseFavorite == true && !isSharedWithMe
-        availableOffline.isGone = isSharedWithMe || currentFile.getOfflineFile(context) == null
+        availableOffline.isGone = isSharedWithMe // Is it still needed to add `|| currentFile.getOfflineFile(context) == null`
         deleteFile.isVisible = rights.canDelete == true && !file.isImporting() && !isSharedWithMe
         downloadFile.isVisible = rights.canRead == true
         duplicateFile.isGone = rights.canRead == false
@@ -318,7 +318,8 @@ class FileInfoActionsView @JvmOverloads constructor(
         if (Utils.getInvalidFileNameCharacter(name) != null) return@with false
 
         val cacheFile = getCacheFile(context)
-        if (cacheFile.exists()) {
+
+        if (cacheFile.exists() && path.isNotEmpty() && !isObsoleteOrNotIntact(cacheFile)) {
             getOfflineFile(context)?.let { offlineFile ->
                 Utils.moveCacheFileToOffline(file = this, cacheFile, offlineFile)
                 CoroutineScope(Dispatchers.IO).launch { FileController.updateOfflineStatus(id, isOffline = true) }
@@ -551,7 +552,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         fun onDuplicateFile(destinationFolder: File)
         fun onMoveFile(destinationFolder: File, isSharedWithMe: Boolean = false)
         fun onRenameFile(newName: String, onApiResponse: () -> Unit)
-        fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile)
+        fun removeOfflineFile(offlineLocalPath: IOFile?, cacheFile: IOFile)
 
         @CallSuper
         fun sharePublicLink(onActionFinished: () -> Unit) = trackFileActionEvent(MatomoName.ShareLink)
@@ -591,7 +592,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                         trackFileActionEvent(MatomoName.Offline, false)
                         val offlineLocalPath = getOfflineFile(currentContext)
                         val cacheFile = getCacheFile(currentContext)
-                        offlineLocalPath?.let { removeOfflineFile(offlineLocalPath, cacheFile) }
+                        removeOfflineFile(offlineLocalPath, cacheFile)
                     }
                 }
             }

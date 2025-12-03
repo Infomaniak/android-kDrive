@@ -146,13 +146,13 @@ object FileController {
         }
     }
 
-    private fun generatePath(file: File, userDrive: UserDrive): String {
+    private tailrec fun generatePath(file: File, userDrive: UserDrive, recPath: StringBuilder = StringBuilder()): String {
         // id > 0 to exclude other root parents, home root has priority
         val folder = file.localParent?.createSnapshot()?.firstOrNull { it.id > 0 }
         return when {
             folder == null -> ""
-            folder.id == ROOT_ID -> (userDrive.driveName ?: "") + "/${file.name}"
-            else -> generatePath(folder, userDrive) + "/${file.name}"
+            folder.id == ROOT_ID -> recPath.insert(0, "${userDrive.driveName ?: ""}/${file.name}").toString()
+            else -> generatePath(folder, userDrive, recPath.insert(0, "/${file.name}"))
         }
     }
 
@@ -908,6 +908,7 @@ object FileController {
         isComplete = oldFile.isComplete
         isOffline = oldFile.isOffline
         responseAt = oldFile.responseAt
+        if (path.isEmpty() && oldFile.path.isNotEmpty()) path = oldFile.path
         if (oldFile.revisedAt > revisedAt) revisedAt = oldFile.revisedAt
         if (oldFile.lastActionAt > lastActionAt) lastActionAt = oldFile.lastActionAt
         if (oldFile.updatedAt > updatedAt) updatedAt = oldFile.updatedAt

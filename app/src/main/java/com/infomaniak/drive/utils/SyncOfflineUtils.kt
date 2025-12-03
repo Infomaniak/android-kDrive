@@ -61,6 +61,7 @@ object SyncOfflineUtils {
             val userDrive = UserDrive(driveId = drive.id)
 
             FileController.getRealmInstance(userDrive).use { realm ->
+                // INFO(offline): We can get remote files when the local files path is empty to prevent sync bug
                 val localFiles = FileController.getOfflineFiles(order = null, customRealm = realm)
 
                 // The api doesn't support sending a list of files that exceeds a certain limit,
