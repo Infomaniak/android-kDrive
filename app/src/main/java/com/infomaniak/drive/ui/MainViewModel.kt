@@ -516,7 +516,7 @@ class MainViewModel(
         val fileDeleted: MutableList<UploadFile> = mutableListOf()
         val isIOFilesDeleted: MutableList<Boolean> = mutableListOf()
         val fileDeleteContentResolver: MutableIntList = mutableIntListOf()
-        var incrementFileError = 0
+        var inconsistenciesCount = 0
         val tag = "deleteSynchronizedFilesOnDevice"
 
         SentryLog.i(tag, "filesToDelete (size): ${filesToDelete.size}")
@@ -541,8 +541,8 @@ class MainViewModel(
                             fileDeleted.add(uploadFile)
                         }
                     } else {
-                        // When the app is killed before updating `deleteAt` field in realm, you need to update this value
-                        incrementFileError++
+                        // The app was killed before updating `deleteAt` in the realm db
+                        inconsistenciesCount++
                         fileDeleted.add(uploadFile)
                     }
                 } ?: fileDeleted.add(uploadFile)
@@ -552,11 +552,11 @@ class MainViewModel(
                 fileDeleted.add(uploadFile)
             }
         }
-        SentryLog.i(tag, "table fileIO: $isIOFilesDeleted with size (${isIOFilesDeleted.size})")
-        SentryLog.i(tag, "table contentResolver: $fileDeleteContentResolver with size (${fileDeleteContentResolver.size})")
-        SentryLog.i(tag, "fileDeleted (size) after increment: ${fileDeleted.size}")
-        SentryLog.i(tag, "file don't existe in device but don't write (deleteAt) in realm: $incrementFileError")
-        Sentry.captureMessage("End deleteSynchronizedFilesOnDevice. Nb of error $incrementFileError")
+        SentryLog.i(tag, "isIOFilesDeleted[${isIOFilesDeleted.size}]: $isIOFilesDeleted")
+        SentryLog.i(tag, "fileDeleteContentResolver[${fileDeleteContentResolver.size}]: $fileDeleteContentResolver")
+        SentryLog.i(tag, "fileDeleted size after increment: ${fileDeleted.size}")
+        SentryLog.i(tag, "file doesn't exist on device but deleteAt isn't up to date in the realm db: $inconsistenciesCount")
+        Sentry.captureMessage("End deleteSynchronizedFilesOnDevice. Nb of error $inconsistenciesCount")
 
         UploadFile.deleteAll(fileDeleted)
     }
