@@ -429,7 +429,7 @@ class MainActivity : BaseActivity() {
                 .map { it.getUriObject() }
         }
 
-        fun onConfirmation(filesUploadedRecently: ArrayList<UploadFile>, filesUriToDelete: List<Uri>) {
+        fun onConfirmation(filesUploadedRecently: List<UploadFile>, filesUriToDelete: List<Uri>) {
             if (SDK_INT >= 30) {
                 lifecycleScope.launch {
                     pendingFilesUrisQueue.clear()

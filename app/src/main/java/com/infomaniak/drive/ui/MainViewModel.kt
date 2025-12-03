@@ -512,7 +512,7 @@ class MainViewModel(
     }
 
     // Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()
-    fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
+    fun deleteSynchronizedFilesOnDevice(filesToDelete: List<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
         val fileDeleted: MutableList<UploadFile> = mutableListOf()
         val isIOFilesDeleted: MutableList<Boolean> = mutableListOf()
         val fileDeleteContentResolver: MutableIntList = mutableIntListOf()

@@ -281,12 +281,12 @@ open class UploadFile(
             ).findAllAsync()
         }
 
-        fun getAllUploadedFiles(type: String = Type.SYNC.name): ArrayList<UploadFile>? = getRealmInstance().use { realm ->
+        fun getAllUploadedFiles(type: String = Type.SYNC.name): List<UploadFile>? = getRealmInstance().use { realm ->
             realm.uploadTable
                 .equalTo(UploadFile::type.name, type)
                 .isNull(UploadFile::deletedAt.name)
                 .isNotNull(UploadFile::uploadAt.name)
-                .findAll()?.map { realm.copyFromRealm(it, 0) } as? ArrayList<UploadFile>
+                .findAll()?.map { realm.copyFromRealm(it, 0) }
         }
 
         fun uploadFinished(uri: Uri) {
