@@ -145,23 +145,25 @@ open class UploadFile(
     }
 
     fun deleteIfExists(keepFile: Boolean = false, customRealm: Realm? = null) {
-        val block: (Realm) -> Unit? = { realm ->
-            uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFileProxy ->
-                // Cancel session if exists
-                uploadFileProxy.uploadToken?.let {
-                    with(ApiRepository.cancelSession(uploadFileProxy.driveId, it, okHttpClient)) {
-                        if (error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
-                    }
-                }
-                // Delete in realm
-                realm.executeTransaction {
-                    if (uploadFileProxy.isValid) {
-                        if (keepFile) uploadFileProxy.deletedAt = Date() else uploadFileProxy.deleteFromRealm()
-                    }
-                }
+        when (customRealm) {
+            null -> getRealmInstance().use { deleteIfExistsInternal(keepFile = keepFile, it) }
+            else -> deleteIfExistsInternal(keepFile = keepFile, customRealm)
+        }
+    }
+
+    private fun deleteIfExistsInternal(keepFile: Boolean = false, realm: Realm) {
+        val uploadFileProxy = uploadFileByUriQuery(realm, uri).findFirst() ?: return
+        // Cancel session if exists
+        uploadFileProxy.uploadToken?.let { uploadToken ->
+            val response = ApiRepository.cancelSession(uploadFileProxy.driveId, uploadToken, okHttpClient)
+            if (response.error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
+        }
+        // Delete in realm
+        realm.executeTransaction {
+            if (uploadFileProxy.isValid) {
+                if (keepFile) uploadFileProxy.deletedAt = Date() else uploadFileProxy.deleteFromRealm()
             }
         }
-        customRealm?.let(block) ?: getRealmInstance().use(block)
     }
 
     enum class Type {
@@ -439,7 +441,7 @@ open class UploadFile(
                 val realmObject = realm.where(SyncSettings::class.java).findFirst()
                 realmObject?.let {
                     realm.copyFromRealm(it, 0)
-                } ?: run { null }
+                }
             }
         }
     }

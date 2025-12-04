@@ -35,20 +35,28 @@ import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExce
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
-object UploadWorkerThrowable {
+object UploadWorkerErrorHandling {
 
     suspend fun UploadWorker.runUploadCatching(block: suspend () -> Result): Result {
         return try {
             block()
 
         } catch (_: UploadTask.FolderNotFoundException) {
-            currentUploadFile?.folderNotFoundNotification(applicationContext)
+            currentUploadFile?.let { uploadFile ->
+                UploadFile.deleteAll(uploadFile.remoteFolder, permanently = true)
+                if (uploadFile.isSync()) {
+                    Sentry.captureMessage("FolderNotFoundNotification: disableAutoSync")
+                    applicationContext.disableAutoSync()
+                }
+                uploadFile.folderNotFoundNotification(applicationContext)
+            }
             Result.failure()
         } catch (_: UploadTask.QuotaExceededException) {
             this.currentUploadFile?.quotaExceededNotification(applicationContext)
