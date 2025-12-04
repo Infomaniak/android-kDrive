@@ -338,7 +338,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return UploadTask(context = applicationContext, uploadFile = this, setProgress = ::setProgress).run {
             currentUploadTask = this
             start().also { isUploaded ->
-                if (isUploaded) deleteIfExists(keepFile = isSync())
+                if (isUploaded) {
+                    // If the below is true, will be deleted after the user confirms pictures deletion.
+                    val doNotDeleteNow = UploadFile.getAppSyncSettings()?.deleteAfterSync == true && isSync()
+                    if (!doNotDeleteNow) deleteIfExists(keepFile = isSync())
+                }
 
                 SentryLog.d(TAG, "startUploadFile> end upload file")
             }
