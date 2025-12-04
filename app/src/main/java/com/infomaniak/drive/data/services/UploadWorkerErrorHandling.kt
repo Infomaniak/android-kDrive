@@ -41,7 +41,7 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
-object UploadWorkerThrowable {
+object UploadWorkerErrorHandling {
 
     suspend fun UploadWorker.runUploadCatching(block: suspend () -> Result): Result {
         return try {
