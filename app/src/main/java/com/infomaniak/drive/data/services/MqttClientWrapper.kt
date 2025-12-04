@@ -20,9 +20,9 @@ package com.infomaniak.drive.data.services
 import android.content.Context
 import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
-import com.infomaniak.core.legacy.api.ApiController.gson
 import com.infomaniak.core.legacy.utils.Utils
 import com.infomaniak.core.network.ApiEnvironment
+import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.models.IpsToken
 import com.infomaniak.drive.data.models.MqttNotification

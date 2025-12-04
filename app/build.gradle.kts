@@ -185,6 +185,7 @@ dependencies {
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:TwoFactorAuth:Front"))
     implementation(project(":Core:TwoFactorAuth:Back:WithUserDb"))
+    implementation(project(":Core:Ui"))
     implementation(project(":Core:Ui:Compose:Basics"))
     implementation(project(":Core:Ui:Compose:Margin"))
     implementation(project(":Core:Ui:Compose:MaterialThemeFromXml"))
@@ -254,7 +255,7 @@ dependencies {
     androidTestImplementation(libs.android.test.core)
     androidTestRuntimeOnly(libs.android.test.runner)
 
-    implementation(core.coil.two.gif)
+    implementation(core.coil.gif)
 
     // Compose
     implementation(libs.androidx.ui.android)

@@ -25,7 +25,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
-import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.core.utils.SECONDS_IN_A_DAY
 import com.infomaniak.core.utils.format
 import com.infomaniak.drive.data.api.ApiRepository
@@ -150,7 +150,7 @@ open class UploadFile(
                 // Cancel session if exists
                 uploadFileProxy.uploadToken?.let {
                     with(ApiRepository.cancelSession(uploadFileProxy.driveId, it, okHttpClient)) {
-                        if (error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
+                        if (error?.exception is NetworkException) throw UploadTask.NetworkException()
                     }
                 }
                 // Delete in realm
