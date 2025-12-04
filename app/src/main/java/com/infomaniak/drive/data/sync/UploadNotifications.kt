@@ -37,8 +37,6 @@ import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_SERVICE_ID
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
-import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
-import io.sentry.Sentry
 import java.util.UUID
 
 object UploadNotifications {
@@ -78,15 +76,11 @@ object UploadNotifications {
     }
 
     fun UploadFile.folderNotFoundNotification(context: Context) {
-        UploadFile.deleteAll(remoteFolder, permanently = true)
 
         val description: Int
         val contentIntent: PendingIntent?
 
         if (isSync()) {
-            Sentry.captureMessage("FolderNotFoundNotification: disableAutoSync")
-            context.disableAutoSync()
-
             description = R.string.uploadFolderNotFoundSyncDisabledError
             contentIntent = context.syncSettingsActivityPendingIntent()
         } else {
