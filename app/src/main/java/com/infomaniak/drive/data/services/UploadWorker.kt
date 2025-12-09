@@ -50,7 +50,7 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UploadFile.Companion.getRealmInstance
-import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
+import com.infomaniak.drive.data.services.UploadWorkerErrorHandling.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
@@ -338,7 +338,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return UploadTask(context = applicationContext, uploadFile = this, setProgress = ::setProgress).run {
             currentUploadTask = this
             start().also { isUploaded ->
-                if (isUploaded) deleteIfExists(keepFile = isSync())
+                if (isUploaded) {
+                    // If the below is true, will be deleted after the user confirms pictures deletion.
+                    val toBeDeletedLater = UploadFile.getAppSyncSettings()?.deleteAfterSync == true && isSync()
+                    if (!toBeDeletedLater) deleteIfExists(keepFile = isSync())
+                }
 
                 SentryLog.d(TAG, "startUploadFile> end upload file")
             }
