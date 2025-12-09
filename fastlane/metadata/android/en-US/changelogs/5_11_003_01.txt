@@ -1,0 +1,1 @@
+- Fix the synchronized photos deletion's popup not showing anymore
