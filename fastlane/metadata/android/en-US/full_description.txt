@@ -10,4 +10,6 @@ With the kDrive app, you can:
 - View, create and edit Word, Excel and PowerPoint files
 - Manage multiple Infomaniak kDrives
 
+The kDrive app is available in French, English, German, Italian, and Spanish.
+
 Infomaniak is an independent company owned by its founders and employees. We don’t analyse or resell your data. You retain full control of your data and can work and collaborate without any limits in a secure ecosystem.
