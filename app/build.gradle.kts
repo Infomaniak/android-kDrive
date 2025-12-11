@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
+    alias(core.plugins.ksp)
+    alias(core.plugins.dagger.hilt)
     alias(core.plugins.compose.compiler)
     alias(core.plugins.kotlin.parcelize)
     alias(core.plugins.sentry.plugin)
@@ -211,6 +213,11 @@ dependencies {
     implementation(libs.androidx.webkit)
 
     implementation(core.splitties.mainthread)
+
+    implementation(core.hilt.android)
+    implementation(core.hilt.work)
+    ksp(core.hilt.compiler)
+    ksp(core.hilt.androidx.compiler)
 
     implementation(libs.exoplayer)
     implementation(libs.exoplayer.core)

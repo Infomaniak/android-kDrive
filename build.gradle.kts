@@ -22,6 +22,7 @@ plugins {
     alias(core.plugins.compose.compiler) apply false
     alias(core.plugins.kotlin.android) apply false
     alias(core.plugins.kotlin.serialization) apply false
+    alias(core.plugins.dagger.hilt) apply false
     alias(core.plugins.ksp) apply false
 }
 
