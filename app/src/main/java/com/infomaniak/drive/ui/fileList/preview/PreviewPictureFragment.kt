@@ -27,12 +27,12 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import coil.Coil
-import coil.ImageLoader
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.ImageRequest.Listener
-import coil.request.SuccessResult
+import coil3.ImageLoader
+import coil3.asDrawable
+import coil3.imageLoader
+import coil3.request.ErrorResult
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.drive.MainApplication
@@ -42,7 +42,6 @@ import com.infomaniak.drive.databinding.FragmentPreviewPictureBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class PreviewPictureFragment : PreviewFragment() {
@@ -55,7 +54,7 @@ class PreviewPictureFragment : PreviewFragment() {
             binding.imageView.isGone = true
         }
     }
-    private val previewRequestListener = object : Listener {
+    private val previewRequestListener = object : ImageRequest.Listener {
         override fun onStart(request: ImageRequest) = binding.onPreviewRequestStart()
         override fun onSuccess(request: ImageRequest, result: SuccessResult) = binding.onPreviewRequestSuccess(result)
         override fun onError(request: ImageRequest, result: ErrorResult) = binding.onPreviewRequestError()
@@ -91,7 +90,7 @@ class PreviewPictureFragment : PreviewFragment() {
         val previewRequest = buildPreviewRequest()
         val imageLoader = getImageLoader()
 
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+        viewLifecycleOwner.lifecycleScope.launch {
             imageLoader.execute(thumbnailPreviewRequest)
             imageLoader.execute(previewRequest)
         }
@@ -102,7 +101,7 @@ class PreviewPictureFragment : PreviewFragment() {
             val mainApp = requireContext().applicationContext as MainApplication
             mainApp.newImageLoader(ImageLoaderType.PublicShared)
         } else {
-            Coil.imageLoader(requireContext())
+            requireContext().imageLoader
         }
     }
 
@@ -134,9 +133,10 @@ class PreviewPictureFragment : PreviewFragment() {
         loader.isGone = true
         noThumbnailLayout.root.isGone = true
         imageView.isVisible = true
-        imageView.setImageDrawable(result.drawable)
+        val drawable = result.image.asDrawable(resources)
+        imageView.setImageDrawable(drawable)
         // This is to start the GIF animation. Otherwise, it'll stay at the first frame.
-        (result.drawable as? Animatable)?.start()
+        (drawable as? Animatable)?.start()
     }
 
     private fun FragmentPreviewPictureBinding.onPreviewRequestError() {
