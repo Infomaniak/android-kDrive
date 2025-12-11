@@ -89,16 +89,6 @@ android {
         }
     }
 
-    // As of Gradle 8, there is no sane replacement for gradle.buildFinished. See this closed issue: https://github.com/gradle/gradle/issues/20151
-    // This block is not essential, so we can remove it if needed, or replace it with a trusted Gradle plugin providing the same functionality.
-    @Suppress("Deprecation")
-    gradle.buildFinished {
-        try {
-            exec { commandLine("say", "Ok") }
-        } catch (_: Throwable) {
-        }
-    }
-
     buildFeatures {
         viewBinding = true
         buildConfig = true
