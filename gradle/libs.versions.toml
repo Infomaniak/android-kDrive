@@ -16,7 +16,6 @@ kotlinFaker = "1.16.0"
 lifecycleProcess = "2.10.0"
 materialDateTimePicker = "4.2.3"
 mockWebServer = "5.3.2"
-navigationSafeArgsGradlePlugin = "2.9.6"
 pahoMqttAndroid = "4.4.1"
 realmAndroidAdapters = "v4.0.0"
 realmGradlePlugin = "10.19.0"
@@ -30,7 +29,6 @@ webkit = "1.14.0"
 android-junit5 = { module = "de.mannodermaus.gradle.plugins:android-junit5", version.ref = "androidJunit5" }
 android-pdfview = { module = "com.github.Infomaniak:android-pdfview", version.ref = "androidPdfview" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycleProcess" }
-androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigationSafeArgsGradlePlugin" }
 androidx-ui-android = { module = "androidx.compose.ui:ui-android", version.ref = "uiAndroid" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }

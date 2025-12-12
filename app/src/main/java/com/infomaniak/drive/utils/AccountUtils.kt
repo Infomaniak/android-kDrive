@@ -22,11 +22,12 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.infomaniak.core.auth.CredentialManager
 import com.infomaniak.core.auth.TokenAuthenticator
-import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.auth.room.UserDatabase
-import com.infomaniak.core.legacy.stores.StoresSettingsRepository
+import com.infomaniak.core.inappreview.AppReviewSettingsRepository
+import com.infomaniak.core.inappupdate.AppUpdateSettingsRepository
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
@@ -268,7 +269,8 @@ object AccountUtils : CredentialManager() {
         if (getAllUsersCount() == 0) {
             AppSettings.resetAppSettings()
             UiSettings(context).removeUiSettings()
-            StoresSettingsRepository(context).clear()
+            AppReviewSettingsRepository(context).clear()
+            AppUpdateSettingsRepository(context).clear()
 
             if (isEnableAppSync()) {
                 Sentry.captureMessage(DISABLE_AUTO_SYNC)

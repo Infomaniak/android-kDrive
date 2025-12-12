@@ -20,35 +20,39 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.activityViewModels
 import com.infomaniak.core.extensions.goToAppStore
-import com.infomaniak.core.legacy.stores.StoresSettingsRepository
-import com.infomaniak.core.legacy.stores.StoresViewModel
+import com.infomaniak.core.inappupdate.AppUpdateSettingsRepository
+import com.infomaniak.core.inappupdate.updatemanagers.InAppUpdateManager
 import com.infomaniak.core.legacy.utils.getAppName
+import com.infomaniak.drive.MatomoDrive
+import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.R
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
-
-    private val storesViewModel: StoresViewModel by activityViewModels()
+    @Inject
+    lateinit var inAppUpdateManager: InAppUpdateManager
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        storesViewModel.isUpdateBottomSheetShown = true
+        inAppUpdateManager.isUpdateBottomSheetShown = true
 
         title.setText(R.string.updateAvailableTitle)
         description.text = getString(R.string.updateAvailableDescription, requireContext().getAppName())
         illu.setAnimation(R.raw.illu_upgrade)
 
         secondaryActionButton.setOnClickListener {
-            storesViewModel.set(StoresSettingsRepository.IS_USER_WANTING_UPDATES_KEY, false)
+            inAppUpdateManager.set(AppUpdateSettingsRepository.IS_USER_WANTING_UPDATES_KEY, false)
             dismiss()
         }
 
         actionButton.apply {
             setText(R.string.buttonUpdate)
             setOnClickListener {
-                storesViewModel.set(StoresSettingsRepository.IS_USER_WANTING_UPDATES_KEY, true)
+                inAppUpdateManager.set(AppUpdateSettingsRepository.IS_USER_WANTING_UPDATES_KEY, true)
                 requireContext().goToAppStore()
                 dismiss()
             }
@@ -56,7 +60,8 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
     }
 
     override fun onDismiss(dialog: DialogInterface) {
-        storesViewModel.isUpdateBottomSheetShown = false
+        trackInAppUpdate(MatomoDrive.MatomoName.DiscoverLater)
+        inAppUpdateManager.isUpdateBottomSheetShown = false
         super.onDismiss(dialog)
     }
 }

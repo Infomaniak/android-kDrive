@@ -28,7 +28,6 @@ import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
-import com.infomaniak.core.legacy.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
@@ -82,7 +81,8 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         setDefaultLocaleIfNeeded()
 
-        checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
+        // TODO: Use inAppUpdateManager.isUpdateRequired
+        // checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
         trackScreen()
 
         lifecycleScope.launch {

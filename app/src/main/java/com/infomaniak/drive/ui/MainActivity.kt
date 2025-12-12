@@ -46,6 +46,8 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -59,11 +61,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
+import com.infomaniak.core.inappreview.BaseInAppReviewManager
+import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
+import com.infomaniak.core.inappreview.view.ReviewAlertDialog.Companion.showAppReviewDialog
+import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
+import com.infomaniak.core.inappupdate.updatemanagers.InAppUpdateManager
+import com.infomaniak.core.inappupdate.updaterequired.ui.UpdateRequiredActivity.Companion.startUpdateRequiredActivity
 import com.infomaniak.core.legacy.applock.LockActivity
-import com.infomaniak.core.legacy.stores.StoreUtils.checkUpdateIsRequired
-import com.infomaniak.core.legacy.stores.StoreUtils.launchInAppReview
-import com.infomaniak.core.legacy.stores.reviewmanagers.InAppReviewManager
-import com.infomaniak.core.legacy.stores.updatemanagers.InAppUpdateManager
 import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
@@ -110,10 +114,14 @@ import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import com.infomaniak.core.legacy.R as RCore
 
+@AndroidEntryPoint
 class MainActivity : BaseActivity() {
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
@@ -164,17 +172,23 @@ class MainActivity : BaseActivity() {
             }
         }
 
-    private val inAppUpdateManager by lazy { InAppUpdateManager(this, BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) }
+    @Inject
+    lateinit var inAppUpdateManager: InAppUpdateManager
+    // private val inAppUpdateManager = InAppUpdateManager(this)
+    //private val inAppUpdateManager by lazy { InAppUpdateManager(this, BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) }
     private var inAppUpdateSnackbar: Snackbar? = null
 
-    private val inAppReviewManager by lazy {
-        InAppReviewManager(
-            activity = this,
-            reviewDialogTheme = R.style.DialogStyle,
-            reviewDialogTitleResId = R.string.reviewAlertTitle,
-            feedbackUrlResId = R.string.urlUserReportAndroid,
-        )
-    }
+    @Inject
+    lateinit var inAppReviewManager: InAppReviewManager
+    // private val inAppReviewManager = InAppReviewManager(this)
+//    private val inAppReviewManager by lazy {
+//        InAppReviewManager(
+//            activity = this,
+//            reviewDialogTheme = R.style.DialogStyle,
+//            reviewDialogTitleResId = R.string.reviewAlertTitle,
+//            feedbackUrlResId = R.string.urlUserReportAndroid,
+//        )
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -183,7 +197,8 @@ class MainActivity : BaseActivity() {
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
 
-        checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
+        // TODO: Remove
+        // checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
         fileObserver.startWatching()
 
@@ -193,7 +208,8 @@ class MainActivity : BaseActivity() {
 
         setupFabs()
         setupDrivePermissions()
-        handleInAppReview()
+        // TODO: Remove
+        // handleInAppReview()
         handleShortcuts()
         handleNavigateToDestinationFileId()
 
@@ -329,12 +345,28 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleInAppReview() = with(AppSettings) {
-        if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
-    }
+    // TODO: Remove handleInAppReview and AppSettingsRealm
+//    private fun handleInAppReview() = with(AppSettings) {
+//        if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
+//    }
 
     //region In-App Updates
     private fun initAppUpdateManager() {
+        lifecycleScope.launch {
+            inAppUpdateManager.isUpdateRequired
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { isUpdateRequired ->
+                    if (isUpdateRequired) {
+                        startUpdateRequiredActivity(
+                            context = this@MainActivity,
+                            appId = BuildConfig.APPLICATION_ID,
+                            versionCode = BuildConfig.VERSION_CODE,
+                            appTheme = R.style.AppTheme
+                        )
+                    }
+                }
+        }
+
         inAppUpdateManager.init(
             onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) MatomoName.DiscoverNow else MatomoName.DiscoverLater) },
             onInstallStart = { trackInAppUpdate(MatomoName.InstallUpdate) },
@@ -387,8 +419,36 @@ class MainActivity : BaseActivity() {
 
     //region In-App Review
     private fun initAppReviewManager() {
+        lifecycleScope.launch {
+            inAppReviewManager.shouldDisplayReviewDialog
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { shouldDisplayReviewDialog ->
+                    if (shouldDisplayReviewDialog) {
+                        trackInAppReview(MatomoName.PresentAlert)
+                        inAppReviewManager.onUserWantsToDismiss()
+                        showAppReviewDialog(
+                            activity = this@MainActivity,
+                            reviewDialogTheme = R.style.DialogStyle,
+                            reviewDialogTitleStyle = R.style.DialogReviewStyleTextAppearance,
+                            reviewAlertDialogData = ReviewAlertDialogData(
+                                title = getString(R.string.reviewAlertTitle),
+                                positiveText = getString(RCore.string.buttonYes),
+                                negativeText = getString(RCore.string.buttonNo),
+                                onPositiveButtonClicked = inAppReviewManager::onUserWantsToReview,
+                                onNegativeButtonClicked = {
+                                    inAppReviewManager.onUserWantsToGiveFeedback(getString(R.string.urlUserReportAndroid))
+                                },
+                                onDismiss = inAppReviewManager::onUserWantsToDismiss
+                            )
+                        )
+                    }
+                }
+        }
+
         inAppReviewManager.init(
-            onDialogShown = { trackInAppReview(MatomoName.PresentAlert) },
+            countdownBehavior = BaseInAppReviewManager.Behavior.LifecycleBased,
+            appReviewThreshold = DEFAULT_APP_REVIEW_LAUNCHES,
+            maxAppReviewThreshold = MAX_APP_REVIEW_LAUNCHES,
             onUserWantToReview = { trackInAppReview(MatomoName.Like) },
             onUserWantToGiveFeedback = { trackInAppReview(MatomoName.Dislike) },
         )
@@ -658,5 +718,8 @@ class MainActivity : BaseActivity() {
         // When you exceed this value, the system may not propagate dialog to delete the images,
         // and when you exceed 10_000 you receive a `NullPointerException`.
         private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5_000
+
+        private const val DEFAULT_APP_REVIEW_LAUNCHES = 3
+        private const val MAX_APP_REVIEW_LAUNCHES = 3
     }
 }
