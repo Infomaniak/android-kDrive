@@ -81,8 +81,6 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         setDefaultLocaleIfNeeded()
 
-        // TODO: Use inAppUpdateManager.isUpdateRequired
-        // checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
         trackScreen()
 
         lifecycleScope.launch {
