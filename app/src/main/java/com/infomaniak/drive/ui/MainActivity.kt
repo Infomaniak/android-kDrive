@@ -66,7 +66,6 @@ import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog.Companion.showAppReviewDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
 import com.infomaniak.core.inappupdate.updatemanagers.InAppUpdateManager
-import com.infomaniak.core.inappupdate.updaterequired.ui.UpdateRequiredActivity.Companion.startUpdateRequiredActivity
 import com.infomaniak.core.legacy.applock.LockActivity
 import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
@@ -76,7 +75,6 @@ import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.observe
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
@@ -352,21 +350,6 @@ class MainActivity : BaseActivity() {
 
     //region In-App Updates
     private fun initAppUpdateManager() {
-        lifecycleScope.launch {
-            inAppUpdateManager.isUpdateRequired
-                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-                .collect { isUpdateRequired ->
-                    if (isUpdateRequired) {
-                        startUpdateRequiredActivity(
-                            context = this@MainActivity,
-                            appId = BuildConfig.APPLICATION_ID,
-                            versionCode = BuildConfig.VERSION_CODE,
-                            appTheme = R.style.AppTheme
-                        )
-                    }
-                }
-        }
-
         inAppUpdateManager.init(
             onUserChoice = { isWantingUpdate -> trackInAppUpdate(if (isWantingUpdate) MatomoName.DiscoverNow else MatomoName.DiscoverLater) },
             onInstallStart = { trackInAppUpdate(MatomoName.InstallUpdate) },
