@@ -208,6 +208,12 @@
         <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlayDialogRounded</item>
     </style>
 
+    <style name="DialogReviewStyleTextAppearance">
+        <item name="android:fontFamily">@font/suisseintl_medium</item>
+        <item name="android:textColor">@color/title</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:fontFamily">@font/suisseintl_medium</item>
         <item name="android:letterSpacing">0</item>

@@ -31,7 +31,6 @@ import com.infomaniak.core.legacy.models.ApiError
 import com.infomaniak.core.legacy.models.ApiResponseStatus
 import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.core.legacy.room.UserDatabase
-import com.infomaniak.core.legacy.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
@@ -82,7 +81,8 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         setDefaultLocaleIfNeeded()
 
-        checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
+        // TODO: Use inAppUpdateManager.isUpdateRequired
+        // checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
         trackScreen()
 
         lifecycleScope.launch {

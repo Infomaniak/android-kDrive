@@ -10,7 +10,6 @@ buildscript {
     }
 
     dependencies {
-        classpath(libs.androidx.navigation.safe.args.gradle.plugin)
         classpath(libs.realm.gradle.plugin)
         classpath(libs.gradle)
         classpath(libs.google.services)
@@ -24,6 +23,7 @@ plugins {
     alias(core.plugins.kotlin.serialization) apply false
     alias(core.plugins.dagger.hilt) apply false
     alias(core.plugins.ksp) apply false
+    alias(core.plugins.navigation.safeargs) apply false
 }
 
 tasks.register<Delete>("clean") {
