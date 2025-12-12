@@ -19,12 +19,15 @@ package com.infomaniak.drive.di
 
 import android.app.Application
 import android.content.Context
+import com.infomaniak.core.inappreview.AppReviewSettingsRepository
+import com.infomaniak.core.inappupdate.AppUpdateSettingsRepository
 import com.infomaniak.drive.MainApplication
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -34,4 +37,12 @@ object ApplicationModule {
 
     @Provides
     fun providesApplicationContext(@ApplicationContext context: Context) = context
+
+    @Provides
+    @Singleton
+    fun providesAppUpdateSettingsRepository(appContext: Context): AppUpdateSettingsRepository = AppUpdateSettingsRepository(appContext)
+
+    @Provides
+    @Singleton
+    fun providesAppReviewSettingsRepository(appContext: Context): AppReviewSettingsRepository = AppReviewSettingsRepository(appContext)
 }
