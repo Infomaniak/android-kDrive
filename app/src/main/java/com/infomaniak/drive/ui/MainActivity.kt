@@ -172,21 +172,11 @@ class MainActivity : BaseActivity() {
 
     @Inject
     lateinit var inAppUpdateManager: InAppUpdateManager
-    // private val inAppUpdateManager = InAppUpdateManager(this)
-    //private val inAppUpdateManager by lazy { InAppUpdateManager(this, BuildConfig.APPLICATION_ID, BuildConfig.VERSION_CODE) }
-    private var inAppUpdateSnackbar: Snackbar? = null
 
     @Inject
     lateinit var inAppReviewManager: InAppReviewManager
-    // private val inAppReviewManager = InAppReviewManager(this)
-//    private val inAppReviewManager by lazy {
-//        InAppReviewManager(
-//            activity = this,
-//            reviewDialogTheme = R.style.DialogStyle,
-//            reviewDialogTitleResId = R.string.reviewAlertTitle,
-//            feedbackUrlResId = R.string.urlUserReportAndroid,
-//        )
-//    }
+
+    private var inAppUpdateSnackbar: Snackbar? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -194,9 +184,6 @@ class MainActivity : BaseActivity() {
         addTwoFactorAuthOverlay()
 
         mainViewModel.initUploadFilesHelper(fragmentActivity = this, navController)
-
-        // TODO: Remove
-        // checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
 
         fileObserver.startWatching()
 
@@ -206,8 +193,6 @@ class MainActivity : BaseActivity() {
 
         setupFabs()
         setupDrivePermissions()
-        // TODO: Remove
-        // handleInAppReview()
         handleShortcuts()
         handleNavigateToDestinationFileId()
 
