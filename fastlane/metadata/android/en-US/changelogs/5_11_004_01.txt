@@ -1,0 +1,1 @@
+- Hide Cross app login when it's encountering an error
