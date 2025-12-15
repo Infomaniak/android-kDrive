@@ -328,11 +328,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    // TODO: Remove handleInAppReview and AppSettingsRealm
-//    private fun handleInAppReview() = with(AppSettings) {
-//        if (appLaunches == 20 || (appLaunches != 0 && appLaunches % 100 == 0)) launchInAppReview()
-//    }
-
     //region In-App Updates
     private fun initAppUpdateManager() {
         inAppUpdateManager.init(
@@ -429,8 +424,6 @@ class MainActivity : BaseActivity() {
         launchAllUpload(syncPermissions)
 
         mainViewModel.checkBulkDownloadStatus()
-
-        AppSettings.appLaunches++
 
         displayInformationPanel()
 

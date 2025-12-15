@@ -20,10 +20,10 @@ package com.infomaniak.drive.ui.bottomSheetDialogs
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
+import com.infomaniak.core.extensions.appName
 import com.infomaniak.core.extensions.goToAppStore
 import com.infomaniak.core.inappupdate.AppUpdateSettingsRepository
 import com.infomaniak.core.inappupdate.updatemanagers.InAppUpdateManager
-import com.infomaniak.core.legacy.utils.getAppName
 import com.infomaniak.drive.MatomoDrive
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.R
@@ -41,7 +41,7 @@ class UpdateAvailableBottomSheetDialog : InformationBottomSheetDialog() {
         inAppUpdateManager.isUpdateBottomSheetShown = true
 
         title.setText(R.string.updateAvailableTitle)
-        description.text = getString(R.string.updateAvailableDescription, requireContext().getAppName())
+        description.text = getString(R.string.updateAvailableDescription, appName)
         illu.setAnimation(R.raw.illu_upgrade)
 
         secondaryActionButton.setOnClickListener {
