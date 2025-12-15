@@ -91,6 +91,7 @@ open class MainApplication : Application(), ImageLoaderFactory, DefaultLifecycle
     }
 
     var geniusScanIsReady = false
+    var isVideoActivityInPIPMode = false
 
     private val appUpdateWorkerScheduler by lazy { AppUpdateScheduler(applicationContext) }
 
