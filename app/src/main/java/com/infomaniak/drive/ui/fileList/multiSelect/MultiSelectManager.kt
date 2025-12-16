@@ -19,7 +19,7 @@ package com.infomaniak.drive.ui.fileList.multiSelect
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import com.infomaniak.core.legacy.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.models.BulkOperation
 import com.infomaniak.drive.data.models.BulkOperationType

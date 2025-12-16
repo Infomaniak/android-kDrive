@@ -21,6 +21,7 @@ import android.graphics.Color
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.avatar.getBackgroundColorResBasedOnId
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.data.KSuite
@@ -29,7 +30,6 @@ import com.infomaniak.core.ksuite.myksuite.ui.screens.KSuiteApp
 import com.infomaniak.core.ksuite.myksuite.ui.screens.MyKSuiteDashboardScreenData
 import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils
 import com.infomaniak.core.ksuite.myksuite.ui.utils.MyKSuiteUiUtils.openMyKSuiteUpgradeBottomSheet
-import com.infomaniak.core.legacy.models.user.User
 import com.infomaniak.drive.MatomoDrive.trackKSuiteProBottomSheetEvent
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteUpgradeBottomSheetEvent
 import com.infomaniak.drive.R

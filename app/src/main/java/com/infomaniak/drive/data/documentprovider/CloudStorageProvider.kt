@@ -37,9 +37,9 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.models.ApiResponse
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore
+import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository

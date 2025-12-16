@@ -25,14 +25,13 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.auth.models.user.User
+import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
-import com.infomaniak.core.legacy.models.ApiError
-import com.infomaniak.core.legacy.models.ApiResponseStatus
-import com.infomaniak.core.legacy.models.user.User
-import com.infomaniak.core.legacy.room.UserDatabase
 import com.infomaniak.core.legacy.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.core.legacy.utils.showToast
+import com.infomaniak.core.network.models.ApiError
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.BuildConfig
@@ -67,6 +66,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.infomaniak.core.network.models.exceptions.NetworkException as ApiControllerNetworkException
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : EdgeToEdgeActivity() {
@@ -222,7 +222,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
         when {
-            error?.exception is ApiController.NetworkException -> {
+            error?.exception is ApiControllerNetworkException -> {
                 Dispatchers.Main { showToast(R.string.errorNetwork) }
                 finishAndRemoveTask()
             }

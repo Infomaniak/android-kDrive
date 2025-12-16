@@ -20,13 +20,12 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
-import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpdateManager
-import com.infomaniak.core.legacy.auth.CredentialManager
-import com.infomaniak.core.legacy.auth.TokenAuthenticator
-import com.infomaniak.core.legacy.models.ApiResponseStatus
-import com.infomaniak.core.legacy.models.user.User
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.room.UserDatabase
+import com.infomaniak.core.auth.CredentialManager
+import com.infomaniak.core.auth.TokenAuthenticator
+import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.auth.models.user.User
+import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.stores.StoresSettingsRepository
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
@@ -53,6 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 
 object AccountUtils : CredentialManager() {
 
@@ -117,7 +117,7 @@ object AccountUtils : CredentialManager() {
         context: Context,
         fromMaintenance: Boolean = false,
         fromCloudStorage: Boolean = false,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
     ) = withContext(Dispatchers.IO) {
 
         val (userResult, user) = with(ApiRepository.getUserProfile(okHttpClient)) {
@@ -200,7 +200,7 @@ object AccountUtils : CredentialManager() {
         launch {
             runCatching {
                 context.getInfomaniakLogin().deleteToken(
-                    HttpClient.okHttpClientNoTokenInterceptor,
+                    unauthenticatedHttpClient,
                     user.apiToken,
                 )?.let { errorStatus ->
                     val loginErrorDescription = LoginActivity.getLoginErrorDescription(context, errorStatus)
