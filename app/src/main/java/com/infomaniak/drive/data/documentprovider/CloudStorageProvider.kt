@@ -408,7 +408,7 @@ class CloudStorageProvider : DocumentsProvider() {
                     val event = SentryEvent(exception).apply {
                         message = Message().apply { message = "An error has occurred on generateThumbnail" }
                     }
-                    Sentry.captureEvent(event)
+                    if (exception !is IOException) Sentry.captureEvent(event)
                     writePipe.closeWithError(exception.message)
                 }
             }
