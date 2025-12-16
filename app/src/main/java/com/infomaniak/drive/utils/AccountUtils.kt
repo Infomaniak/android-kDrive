@@ -52,6 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 
 object AccountUtils : CredentialManager() {
 
@@ -199,7 +200,7 @@ object AccountUtils : CredentialManager() {
         launch {
             runCatching {
                 context.getInfomaniakLogin().deleteToken(
-                    com.infomaniak.core.network.networking.HttpClient.okHttpClient,
+                    unauthenticatedHttpClient,
                     user.apiToken,
                 )?.let { errorStatus ->
                     val loginErrorDescription = LoginActivity.getLoginErrorDescription(context, errorStatus)

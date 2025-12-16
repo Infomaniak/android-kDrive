@@ -54,6 +54,7 @@ import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
+import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 
 open class PreviewVideoFragment : PreviewFragment() {
 
@@ -209,10 +210,9 @@ open class PreviewVideoFragment : PreviewFragment() {
     private fun getDataSourceFactory(context: Context): DataSource.Factory {
         val appContext = context.applicationContext
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
-        val okHttpClient = if (navigationArgs?.isPublicShared == true) {
-            com.infomaniak.core.network.networking.HttpClient.okHttpClient
-        } else {
-            HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient = when (navigationArgs?.isPublicShared) {
+            true -> unauthenticatedHttpClient
+            else -> HttpClient.okHttpClientWithTokenInterceptor
         }
         val okHttpDataSource = OkHttpDataSource.Factory(okHttpClient).apply {
             setUserAgent(userAgent)

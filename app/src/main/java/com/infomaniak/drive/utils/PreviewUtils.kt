@@ -53,6 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import okhttp3.Response
 import java.io.BufferedInputStream
+import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 
 private const val BUFFER_SIZE = 8192
 
@@ -185,7 +186,7 @@ suspend fun downloadFile(
     val downloadUrl = ApiRoutes.getDownloadFileUrl(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
     val okHttpClient = when {
-        isPublicShared -> com.infomaniak.core.network.networking.HttpClient.okHttpClient
+        isPublicShared -> unauthenticatedHttpClient
         else -> HttpClient.okHttpClientWithTokenInterceptor
     }
 
