@@ -21,6 +21,7 @@ import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
 import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.HttpClient.okHttpClientLongTimeoutWithTokenInterceptor as okHttpClientLongTimeout
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.api.ApiController.ApiMethod.DELETE
@@ -30,7 +31,6 @@ import com.infomaniak.core.network.api.ApiController.ApiMethod.PUT
 import com.infomaniak.core.network.api.ApiController.callApiBlocking
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
-import com.infomaniak.core.network.networking.HttpClient.okHttpClientLongTimeout
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.ArchiveUUID
