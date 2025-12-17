@@ -388,7 +388,6 @@ class MainActivity : BaseActivity() {
                 .collect { shouldDisplayReviewDialog ->
                     if (shouldDisplayReviewDialog) {
                         trackInAppReview(MatomoName.PresentAlert)
-                        inAppReviewManager.onUserWantsToDismiss()
                         showAppReviewDialog(
                             activity = this@MainActivity,
                             reviewDialogTheme = R.style.DialogStyle,
@@ -680,7 +679,7 @@ class MainActivity : BaseActivity() {
         // and when you exceed 10_000 you receive a `NullPointerException`.
         private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5_000
 
-        private const val DEFAULT_APP_REVIEW_LAUNCHES = 3
-        private const val MAX_APP_REVIEW_LAUNCHES = 3
+        private const val DEFAULT_APP_REVIEW_LAUNCHES = 20
+        private const val MAX_APP_REVIEW_LAUNCHES = 100
     }
 }
