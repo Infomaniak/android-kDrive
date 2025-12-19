@@ -69,7 +69,7 @@ open class BaseActivity : EdgeToEdgeActivity() {
             trackUserId(AccountUtils.currentUserId)
         }
         checkUpdateIsRequired(
-            manager = hiltEntryPoint.inAppUpdateManager(),
+            manager = inAppUpdateManager,
             applicationId = BuildConfig.APPLICATION_ID,
             applicationVersionCode = BuildConfig.VERSION_CODE,
             theme = R.style.AppTheme
