@@ -4,6 +4,7 @@ pluginManagement {
         google()
         mavenCentral()
     }
+    includeBuild("Core/build-logic")
 }
 
 dependencyResolutionManagement {
@@ -20,44 +21,14 @@ dependencyResolutionManagement {
     }
 }
 
+plugins {
+    id("com.infomaniak.core.composite")
+}
+
 rootProject.name = "kDrive"
 include(
     ":app",
-    ":Core:AppIntegrity",
-    ":Core:AppVersionChecker",
-    ":Core:Auth",
-    ":Core:Avatar",
-    ":Core:Coil",
-    ":Core:CrossAppLogin:Back",
-    ":Core:CrossAppLogin:Front",
-    ":Core:FragmentNavigation",
-    ":Core:InAppReview",
-    ":Core:InAppUpdate",
-    ":Core:Ktor",
     ":Core:Legacy",
     ":Core:Legacy:AppLock",
     ":Core:Legacy:BugTracker",
-    ":Core:Matomo",
-    ":Core:KSuite",
-    ":Core:KSuite:KSuitePro",
-    ":Core:KSuite:MyKSuite",
-    ":Core:Network",
-    ":Core:Network:Ktor",
-    ":Core:Network:Models",
-    ":Core:Notifications:Registration",
-    ":Core:Onboarding",
-    ":Core:RecyclerView",
-    ":Core:Sentry",
-    ":Core:Thumbnails",
-    ":Core:TwoFactorAuth:Front",
-    ":Core:TwoFactorAuth:Back",
-    ":Core:TwoFactorAuth:Back:WithUserDb",
-    ":Core:Ui:Compose:BasicButton",
-    ":Core:Ui:Compose:Basics",
-    ":Core:Ui:Compose:Margin",
-    ":Core:Ui:Compose:BottomStickyButtonScaffolds",
-    ":Core:Ui:Compose:MaterialThemeFromXml",
-    ":Core:Ui:Compose:Preview",
-    ":Core:Ui:View:EdgeToEdge",
-    ":Core:WebView",
 )

@@ -4,7 +4,7 @@ import java.util.Properties
  * Don't change the order in this `plugins` block, it will mess things up.
  */
 plugins {
-    alias(libs.plugins.android.application)
+    alias(core.plugins.android.application)
     alias(libs.plugins.junit5)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
@@ -155,34 +155,34 @@ sentry {
 
 dependencies {
 
-    implementation(project(":Core"))
-    implementation(project(":Core:Auth"))
-    implementation(project(":Core:Avatar"))
-    implementation(project(":Core:Coil"))
-    implementation(project(":Core:CrossAppLogin:Back"))
-    implementation(project(":Core:CrossAppLogin:Front"))
-    implementation(project(":Core:FragmentNavigation"))
+    implementation("com.infomaniak.core:Core")
+    implementation("com.infomaniak.core:Ui")
+    implementation("com.infomaniak.core:Auth")
+    implementation("com.infomaniak.core:Avatar")
+    implementation("com.infomaniak.core:Coil")
+    implementation("com.infomaniak.core:CrossAppLogin.Front")
+    implementation("com.infomaniak.core:FragmentNavigation")
     implementation(project(":Core:InAppReview"))
     implementation(project(":Core:InAppUpdate"))
-    implementation(project(":Core:Ktor"))
+    implementation("com.infomaniak.core:KSuite")
+    implementation("com.infomaniak.core:KSuite.KSuitePro")
+    implementation("com.infomaniak.core:KSuite.MyKSuite")
+    implementation("com.infomaniak.core:Ktor")
+    implementation("com.infomaniak.core:Matomo")
+    implementation("com.infomaniak.core:Network")
+    implementation("com.infomaniak.core:RecyclerView")
+    implementation("com.infomaniak.core:Sentry")
+    implementation("com.infomaniak.core:Thumbnails")
+    implementation("com.infomaniak.core:TwoFactorAuth.Back.WithUserDb")
+    implementation("com.infomaniak.core:TwoFactorAuth.Front")
+    implementation("com.infomaniak.core:Ui.Compose.Basics")
+    implementation("com.infomaniak.core:Ui.Compose.Margin")
+    implementation("com.infomaniak.core:Ui.Compose.MaterialThemeFromXml")
+    implementation("com.infomaniak.core:Ui.View.EdgeToEdge")
+
     implementation(project(":Core:Legacy"))
     implementation(project(":Core:Legacy:AppLock"))
     implementation(project(":Core:Legacy:BugTracker"))
-    implementation(project(":Core:Matomo"))
-    implementation(project(":Core:KSuite"))
-    implementation(project(":Core:KSuite:KSuitePro"))
-    implementation(project(":Core:KSuite:MyKSuite"))
-    implementation(project(":Core:Network"))
-    implementation(project(":Core:RecyclerView"))
-    implementation(project(":Core:Sentry"))
-    implementation(project(":Core:Thumbnails"))
-    implementation(project(":Core:TwoFactorAuth:Front"))
-    implementation(project(":Core:TwoFactorAuth:Back:WithUserDb"))
-    implementation(project(":Core:Ui"))
-    implementation(project(":Core:Ui:Compose:Basics"))
-    implementation(project(":Core:Ui:Compose:Margin"))
-    implementation(project(":Core:Ui:Compose:MaterialThemeFromXml"))
-    implementation(project(":Core:Ui:View:EdgeToEdge"))
 
     // Compose
     implementation(platform(core.compose.bom))
@@ -226,7 +226,7 @@ dependencies {
 
     implementation(libs.realm.android.adapters)
 
-    "standardImplementation"(project(":Core:Notifications:Registration"))
+    "standardImplementation"("com.infomaniak.core:Notifications.Registration")
     "standardImplementation"(libs.firebase.messaging.ktx)
     "standardImplementation"(libs.gs.sdk)
 
