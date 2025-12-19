@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ class DownloadProgressViewModel : ViewModel() {
                     downloadProgressLiveData.postValue(null)
                 }
             }.cancellable().onFailure { exception ->
-                SentryLog.e(TAG, "downloadFile failed", exception)
+                if (exception !is java.io.IOException) SentryLog.e(TAG, "downloadFile failed", exception)
                 downloadProgressLiveData.postValue(null)
             }
         } else {
