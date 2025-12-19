@@ -11,13 +11,14 @@ buildscript {
 
     dependencies {
         classpath(libs.realm.gradle.plugin)
-        classpath(libs.gradle)
         classpath(libs.google.services)
         classpath(libs.android.junit5)
     }
 }
 
 plugins {
+    alias(core.plugins.android.application) apply false
+    alias(core.plugins.android.library) apply false
     alias(core.plugins.compose.compiler) apply false
     alias(core.plugins.kotlin.android) apply false
     alias(core.plugins.kotlin.serialization) apply false
