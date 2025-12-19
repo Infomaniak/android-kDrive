@@ -38,6 +38,8 @@ import kotlinx.coroutines.runBlocking
 open class BaseActivity : EdgeToEdgeActivity() {
     private val hiltEntryPoint by lazy { EntryPointAccessors.fromActivity(this, ActivityModule.ActivityEntrypointInterface::class.java) }
 
+    protected val inAppUpdateManager by lazy { hiltEntryPoint.inAppUpdateManager() }
+
     /**
      * Enables the auto-managed 2 factor authentication challenge overlay for View-based Activities.
      *

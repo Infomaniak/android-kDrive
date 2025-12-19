@@ -65,7 +65,6 @@ import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
-import com.infomaniak.core.inappupdate.updatemanagers.InAppUpdateManager
 import com.infomaniak.core.legacy.applock.LockActivity
 import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
@@ -172,9 +171,6 @@ class MainActivity : BaseActivity() {
                 it?.let { data -> scanResultProcessing(data, folder = null) }
             }
         }
-
-    @Inject
-    lateinit var inAppUpdateManager: InAppUpdateManager
 
     @Inject
     lateinit var inAppReviewManager: InAppReviewManager
@@ -693,7 +689,7 @@ class MainActivity : BaseActivity() {
         // and when you exceed 10_000 you receive a `NullPointerException`.
         private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5_000
 
-        private const val DEFAULT_APP_REVIEW_LAUNCHES = 20
-        private const val MAX_APP_REVIEW_LAUNCHES = 100
+        private const val DEFAULT_APP_REVIEW_LAUNCHES = 3
+        private const val MAX_APP_REVIEW_LAUNCHES = 3
     }
 }
