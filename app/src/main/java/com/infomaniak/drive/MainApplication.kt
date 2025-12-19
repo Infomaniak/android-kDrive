@@ -43,8 +43,8 @@ import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.coil.ImageLoaderProvider
 import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpdateManager
 import com.infomaniak.core.extensions.clearStack
+import com.infomaniak.core.inappupdate.AppUpdateScheduler
 import com.infomaniak.core.legacy.InfomaniakCore
-import com.infomaniak.core.legacy.stores.AppUpdateScheduler
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.network.NetworkConfiguration
 import com.infomaniak.core.network.api.ApiController

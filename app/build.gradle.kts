@@ -162,11 +162,12 @@ dependencies {
     implementation(project(":Core:CrossAppLogin:Back"))
     implementation(project(":Core:CrossAppLogin:Front"))
     implementation(project(":Core:FragmentNavigation"))
+    implementation(project(":Core:InAppReview"))
+    implementation(project(":Core:InAppUpdate"))
     implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))
     implementation(project(":Core:Legacy:AppLock"))
     implementation(project(":Core:Legacy:BugTracker"))
-    implementation(project(":Core:Legacy:Stores"))
     implementation(project(":Core:Matomo"))
     implementation(project(":Core:KSuite"))
     implementation(project(":Core:KSuite:KSuitePro"))
@@ -197,6 +198,8 @@ dependencies {
 
     implementation(core.androidx.work.runtime)
     androidTestImplementation(core.androidx.work.testing)
+
+    implementation(core.androidx.datastore.preferences)
 
     implementation(core.androidx.concurrent.futures.ktx)
     implementation(libs.androidx.lifecycle.process)
