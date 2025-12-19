@@ -8,7 +8,6 @@ espresso = "3.7.0"
 exoplayer = "2.19.1"
 firebaseMessagingKtx = "24.1.2"
 googleServices = "4.4.4"
-gradle = "8.13.1"
 gravitySnapHelper = "2.2.2"
 gsSdk = "5.13.0"
 junitJupiter = "5.13.4"
@@ -39,7 +38,6 @@ exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.r
 extension-okhttp = { module = "com.google.android.exoplayer:extension-okhttp", version.ref = "exoplayer" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
-gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gravity-snap-helper = { module = "com.github.rubensousa:gravitysnaphelper", version.ref = "gravitySnapHelper" }
 gs-sdk = { module = "com.geniusscansdk:gssdk", version.ref = "gsSdk" }
 kotlin-faker = { module = "io.github.serpro69:kotlin-faker", version.ref = "kotlinFaker" }
@@ -60,7 +58,6 @@ junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.re
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
 
 [plugins]
-android-application = { id = "com.android.application" }
 junit5 = { id = "de.mannodermaus.android-junit5" }
 kotlin-android = { id = "kotlin-android" }
 kotlin-kapt = { id = "kotlin-kapt" }
