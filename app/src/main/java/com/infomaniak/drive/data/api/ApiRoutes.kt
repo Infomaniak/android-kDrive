@@ -282,7 +282,7 @@ object ApiRoutes {
 
     fun downloadFile(file: File) = "${fileURLV2(file)}/download"
 
-    fun convertFile(file: File): String = "${fileURLV2(file)}/convert?$fileWithQuery"
+    fun convertFile(file: File): String = "${fileURL(file)}/convert?$fileWithQuery"
 
     fun moveFile(file: File, newParentId: Int) = "${fileURL(file)}/move/$newParentId"
 
