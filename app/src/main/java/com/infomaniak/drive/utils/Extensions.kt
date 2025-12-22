@@ -64,8 +64,8 @@ import androidx.work.OutOfQuotaPolicy
 import coil3.ImageLoader
 import coil3.imageLoader
 import coil3.load
-import coil3.request.fallback
 import coil3.request.error
+import coil3.request.fallback
 import coil3.request.placeholder
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -281,7 +281,7 @@ fun Fragment.openOnlyOfficeDocument(file: File, isInternetAvailable: Boolean) {
         if (file.conversion?.whenOnlyoffice == true) {
             findNavController().navigate(
                 R.id.notSupportedExtensionBottomSheetDialog,
-                NotSupportedExtensionBottomSheetDialogArgs(file.id).toBundle()
+                NotSupportedExtensionBottomSheetDialogArgs(file.id, file.isSharedWithMe()).toBundle()
             )
         } else {
             requireContext().openOnlyOfficeActivity(file)
