@@ -69,6 +69,7 @@ import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.cancelPeriodicSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.isActive
@@ -76,6 +77,7 @@ import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.TimeZone
 
+@AndroidEntryPoint
 class SyncSettingsActivity : BaseActivity() {
 
     private val binding: ActivitySyncSettingsBinding by lazy { ActivitySyncSettingsBinding.inflate(layoutInflater) }
