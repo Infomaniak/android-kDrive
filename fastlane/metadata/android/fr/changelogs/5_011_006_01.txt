@@ -1,0 +1,2 @@
+- Correction de la conversion des fichiers ODT vers DOCX
+- Correction de l’affichage de l’alerte pour la conversion des fichiers ODT partagés

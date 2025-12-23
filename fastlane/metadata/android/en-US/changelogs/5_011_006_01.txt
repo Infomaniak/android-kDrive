@@ -1,0 +1,2 @@
+- Fixed conversion of ODT files to DOCX
+- Fixed display of alert for conversion of shared ODT files
