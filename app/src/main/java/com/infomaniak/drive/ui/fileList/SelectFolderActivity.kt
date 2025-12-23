@@ -37,7 +37,9 @@ import com.infomaniak.drive.ui.BaseActivity
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.Utils.ROOT_ID
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SelectFolderActivity : BaseActivity() {
 
     private val binding: ActivitySelectFolderBinding by lazy { ActivitySelectFolderBinding.inflate(layoutInflater) }
