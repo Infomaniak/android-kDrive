@@ -156,7 +156,6 @@ sentry {
 dependencies {
 
     implementation("com.infomaniak.core:Core")
-    implementation("com.infomaniak.core:Ui")
     implementation("com.infomaniak.core:Auth")
     implementation("com.infomaniak.core:Avatar")
     implementation("com.infomaniak.core:Coil")
@@ -175,6 +174,7 @@ dependencies {
     implementation("com.infomaniak.core:Thumbnails")
     implementation("com.infomaniak.core:TwoFactorAuth.Back.WithUserDb")
     implementation("com.infomaniak.core:TwoFactorAuth.Front")
+    implementation("com.infomaniak.core:Ui")
     implementation("com.infomaniak.core:Ui.Compose.Basics")
     implementation("com.infomaniak.core:Ui.Compose.Margin")
     implementation("com.infomaniak.core:Ui.Compose.MaterialThemeFromXml")
