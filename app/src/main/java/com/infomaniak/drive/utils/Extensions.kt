@@ -33,6 +33,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Environment
 import android.os.StatFs
 import android.provider.MediaStore
+import android.provider.Settings
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.transition.TransitionSet
@@ -172,6 +173,13 @@ fun Activity.toggleSystemBar(show: Boolean) {
         systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         val systemBars = WindowInsetsCompat.Type.systemBars()
         if (show) show(systemBars) else hide(systemBars)
+    }
+}
+
+fun Activity.shouldExcludeFromRecents(exclude: Boolean) {
+    val tasks = (getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).appTasks
+    if (tasks != null && tasks.isNotEmpty()) {
+        tasks[0].setExcludeFromRecents(exclude)
     }
 }
 

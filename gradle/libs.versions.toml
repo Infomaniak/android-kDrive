@@ -5,7 +5,7 @@ androidTest = "1.9.0"
 checkerFramework = "3.52.0"
 ddPlist = "1.28"
 espresso = "3.7.0"
-exoplayer = "2.19.1"
+exoplayer = "1.8.0"
 firebaseMessagingKtx = "24.1.2"
 googleServices = "4.4.4"
 gradle = "8.13.1"
@@ -33,10 +33,11 @@ androidx-ui-android = { module = "androidx.compose.ui:ui-android", version.ref =
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "webkit" }
 dd-plist = { module = "com.googlecode.plist:dd-plist", version.ref = "ddPlist" }
-exoplayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "exoplayer" }
-exoplayer-core = { module = "com.google.android.exoplayer:exoplayer-core", version.ref = "exoplayer" }
-exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.ref = "exoplayer" }
-extension-okhttp = { module = "com.google.android.exoplayer:extension-okhttp", version.ref = "exoplayer" }
+exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "exoplayer" }
+exoplayer-dash = { module = "androidx.media3:media3-exoplayer-dash", version.ref = "exoplayer" }
+exoplayer-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "exoplayer" }
+exoplayer-media3-datasource = { module = "androidx.media3:media3-datasource-okhttp", version.ref = "exoplayer" }
+exoplayer-media3-session = { module = "androidx.media3:media3-session", version.ref = "exoplayer" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx", version.ref = "firebaseMessagingKtx" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }

@@ -21,6 +21,8 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -40,6 +42,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.activity.viewModels
+import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -49,6 +52,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
@@ -76,6 +80,7 @@ import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.observe
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
+import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
@@ -101,6 +106,7 @@ import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
+import com.infomaniak.drive.ui.fileList.preview.playback.VideoActivity
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.DrivePermissions
@@ -427,6 +433,7 @@ class MainActivity : BaseActivity() {
     }
     //endregion
 
+    @OptIn(UnstableApi::class)
     override fun onResume() {
         super.onResume()
 
@@ -438,6 +445,19 @@ class MainActivity : BaseActivity() {
 
         setBottomNavigationUserAvatar(this)
         startContentObserverService()
+
+        finishPIPActivity()
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun finishPIPActivity() {
+        lifecycleScope.launch {
+            if ((application as MainApplication).isVideoActivityInPIPMode) {
+                startActivity(Intent(this@MainActivity, VideoActivity::class.java).apply {
+                    flags = FLAG_ACTIVITY_REORDER_TO_FRONT
+                })
+            }
+        }
     }
 
     private fun launchNextDeleteRequest() {
