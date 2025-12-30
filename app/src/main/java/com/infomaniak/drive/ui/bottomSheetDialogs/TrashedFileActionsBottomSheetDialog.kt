@@ -27,10 +27,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
-import com.infomaniak.core.legacy.api.InternalTranslatedErrorCode
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.whenResultIsOk
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
+import com.infomaniak.core.network.api.InternalTranslatedErrorCode
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackTrashEvent
 import com.infomaniak.drive.R

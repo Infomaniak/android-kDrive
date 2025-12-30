@@ -36,12 +36,12 @@ import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
+import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -256,7 +256,7 @@ class MainViewModel(
     }
 
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClient
+        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         val apiResponse = ApiRepository.getFileShare(okHttpClient, File(id = fileId, driveId = driveId))
         emit(apiResponse)
@@ -512,11 +512,11 @@ class MainViewModel(
     }
 
     // Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()
-    fun deleteSynchronizedFilesOnDevice(filesToDelete: ArrayList<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
+    fun deleteSynchronizedFilesOnDevice(filesToDelete: List<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
         val fileDeleted: MutableList<UploadFile> = mutableListOf()
         val isIOFilesDeleted: MutableList<Boolean> = mutableListOf()
         val fileDeleteContentResolver: MutableIntList = mutableIntListOf()
-        var incrementFileError = 0
+        var inconsistenciesCount = 0
         val tag = "deleteSynchronizedFilesOnDevice"
 
         SentryLog.i(tag, "filesToDelete (size): ${filesToDelete.size}")
@@ -541,8 +541,8 @@ class MainViewModel(
                             fileDeleted.add(uploadFile)
                         }
                     } else {
-                        // When the app is killed before updating `deleteAt` field in realm, you need to update this value
-                        incrementFileError++
+                        // The app was killed before updating `deleteAt` in the realm db
+                        inconsistenciesCount++
                         fileDeleted.add(uploadFile)
                     }
                 } ?: fileDeleted.add(uploadFile)
@@ -552,11 +552,11 @@ class MainViewModel(
                 fileDeleted.add(uploadFile)
             }
         }
-        SentryLog.i(tag, "table fileIO: $isIOFilesDeleted with size (${isIOFilesDeleted.size})")
-        SentryLog.i(tag, "table contentResolver: $fileDeleteContentResolver with size (${fileDeleteContentResolver.size})")
-        SentryLog.i(tag, "fileDeleted (size) after increment: ${fileDeleted.size}")
-        SentryLog.i(tag, "file don't existe in device but don't write (deleteAt) in realm: $incrementFileError")
-        Sentry.captureMessage("End deleteSynchronizedFilesOnDevice. Nb of error $incrementFileError")
+        SentryLog.i(tag, "isIOFilesDeleted[${isIOFilesDeleted.size}]: $isIOFilesDeleted")
+        SentryLog.i(tag, "fileDeleteContentResolver[${fileDeleteContentResolver.size}]: $fileDeleteContentResolver")
+        SentryLog.i(tag, "fileDeleted size after increment: ${fileDeleted.size}")
+        SentryLog.i(tag, "file doesn't exist on device but deleteAt isn't up to date in the realm db: $inconsistenciesCount")
+        Sentry.captureMessage("End deleteSynchronizedFilesOnDevice. Nb of error $inconsistenciesCount")
 
         UploadFile.deleteAll(fileDeleted)
     }

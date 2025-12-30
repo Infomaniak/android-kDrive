@@ -29,9 +29,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
+import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.extensions.isNightModeEnabled
 import com.infomaniak.core.extensions.lightStatusBar
-import com.infomaniak.core.legacy.networking.HttpClient
 import com.infomaniak.core.network.utils.bodyAsStringOrNull
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackFileActionEvent
@@ -53,6 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import okhttp3.Response
 import java.io.BufferedInputStream
+import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 
 private const val BUFFER_SIZE = 8192
 
@@ -184,7 +185,10 @@ suspend fun downloadFile(
     Dispatchers.IO { if (externalOutputFile.exists()) externalOutputFile.delete() }
     val downloadUrl = ApiRoutes.getDownloadFileUrl(file) + if (file.isOnlyOfficePreview()) "?as=pdf" else ""
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
-    val okHttpClient = if (isPublicShared) HttpClient.okHttpClientNoTokenInterceptor else HttpClient.okHttpClient
+    val okHttpClient = when {
+        isPublicShared -> unauthenticatedHttpClient
+        else -> HttpClient.okHttpClientWithTokenInterceptor
+    }
 
     DownloadOfflineFileManager.downloadFileResponseAsync(
         fileUrl = downloadUrl,

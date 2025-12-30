@@ -189,6 +189,10 @@ open class File(
 
     fun isPublicShared() = publicShareUuid.isNotBlank()
 
+    fun isSharedWithMe(): Boolean {
+        return getVisibilityType() == VisibilityType.IS_SHARED_SPACE || getVisibilityType() == VisibilityType.IS_IN_SHARED_SPACE
+    }
+
     fun isPDF() = getFileType() == ExtensionType.PDF
     fun isVideo() = getFileType() == ExtensionType.VIDEO
 

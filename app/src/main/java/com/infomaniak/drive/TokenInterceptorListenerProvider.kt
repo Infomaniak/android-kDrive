@@ -17,8 +17,8 @@
  */
 package com.infomaniak.drive
 
-import com.infomaniak.core.legacy.auth.TokenInterceptorListener
-import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.auth.TokenInterceptorListener
+import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.AccountUtils.getUserById
@@ -48,14 +48,14 @@ object TokenInterceptorListenerProvider {
             onRefreshTokenErrorCommon(refreshTokenError, AccountUtils.currentUser!!)
         }
 
-        override suspend fun getUserApiToken(): ApiToken? = userTokenFlow.first()
+        override suspend fun getApiToken(): ApiToken? = userTokenFlow.first()
 
         override fun getCurrentUserId(): Int = AccountUtils.currentUserId
     }
 
     fun publicShareTokenInterceptorListener(
         coroutineScope: CoroutineScope,
-    ): com.infomaniak.core.auth.TokenInterceptorListener = object : com.infomaniak.core.auth.TokenInterceptorListener {
+    ): TokenInterceptorListener = object : TokenInterceptorListener {
         val userTokenFlow by lazy { AppSettings.currentUserIdFlow.mapToApiToken(coroutineScope) }
 
         override suspend fun onRefreshTokenSuccess(apiToken: ApiToken) {
@@ -82,7 +82,7 @@ object TokenInterceptorListenerProvider {
             onRefreshTokenErrorCommon(refreshTokenError, user)
         }
 
-        override suspend fun getUserApiToken(): ApiToken? {
+        override suspend fun getApiToken(): ApiToken? {
             val user = getUserById(userId)
             return user?.apiToken
         }

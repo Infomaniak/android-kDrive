@@ -24,7 +24,7 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.databinding.BottomSheetKSuiteProBinding
 
 class KSuiteProBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {

@@ -209,9 +209,11 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
         showSnackbar(getString(id, name))
     }
 
-    override fun removeOfflineFile(offlineLocalPath: IOFile, cacheFile: IOFile) {
+    override fun removeOfflineFile(offlineLocalPath: IOFile?, cacheFile: IOFile) {
         lifecycleScope.launch {
-            mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile, userDrive)
+            if (offlineLocalPath != null) {
+                mainViewModel.removeOfflineFile(currentFile, offlineLocalPath, cacheFile, userDrive)
+            }
             previewSliderAdapter.updateFile(currentFile.id) { file -> file.isOffline = false }
 
             currentFile.isOffline = false

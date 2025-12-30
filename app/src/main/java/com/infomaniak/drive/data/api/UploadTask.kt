@@ -29,13 +29,12 @@ import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
 import com.infomaniak.core.io.skipExactly
 import com.infomaniak.core.ktor.toOutgoingContent
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.api.ApiController.gson
-import com.infomaniak.core.legacy.models.ApiError
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.networking.HttpUtils
-import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.network.api.ApiController.gson
+import com.infomaniak.core.network.models.ApiError
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.networking.HttpUtils
+import com.infomaniak.core.network.networking.ManualAuthorizationRequired
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.rateLimit
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
@@ -87,6 +86,8 @@ import kotlin.concurrent.atomics.minusAssign
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.reflect.KSuspendFunction1
 import kotlin.time.Duration.Companion.seconds
+import com.infomaniak.core.network.models.exceptions.NetworkException as ApiControllerNetworkException
+import com.infomaniak.core.network.models.exceptions.ServerErrorException as ApiControllerServerErrorException
 
 class UploadTask(
     private val context: Context,
@@ -126,6 +127,7 @@ class UploadTask(
                 uploadFile.fileSize <= MIN_FILE_SIZE_FOR_CHUNKING -> uploadDirectly(httpClient)
                 else -> uploadInChunks(httpClient)
             }
+            finishUpload(uploadFile.getUriObject())
             return true
         } catch (exception: CancellationException) {
             throw exception
@@ -146,6 +148,11 @@ class UploadTask(
             SentryLog.w(TAG, "upload not terminated", exception)
             notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
+        } catch (exception: QuotaExceededException) {
+            if (UploadFile.getAppSyncSettings()?.driveId == uploadFile.driveId) {
+                throw exception
+            }
+            uploadFile.deleteIfExists()
         } catch (exception: Exception) {
             exception.printStackTrace()
             throw exception
@@ -212,7 +219,14 @@ class UploadTask(
             },
         )
 
-        if (isActive) onFinish(uploadFile.getUriObject())
+        if (isActive) {
+            val closedSessionResponse = ApiRepository.finishSession(
+                driveId = uploadFile.driveId,
+                uploadToken = uploadFile.uploadToken!!,
+                okHttpClient = uploadFile.okHttpClient
+            )
+            if (!closedSessionResponse.isSuccess()) closedSessionResponse.manageUploadErrors()
+        }
     }
 
     private fun getInputStream(): InputStream {
@@ -271,10 +285,7 @@ class UploadTask(
         }
     }
 
-    private suspend fun onFinish(uri: Uri) = with(uploadFile) {
-        with(ApiRepository.finishSession(driveId, uploadToken!!, okHttpClient)) {
-            if (!isSuccess()) manageUploadErrors()
-        }
+    private suspend fun finishUpload(uri: Uri) {
         uploadNotification.apply {
             setOngoing(false)
             setContentText("100%")
@@ -475,7 +486,7 @@ class UploadTask(
     }
 
     private fun <T> ApiResponse<T>.manageUploadErrors() {
-        if (error?.exception is ApiController.NetworkException) throw NetworkException()
+        if (error?.exception is ApiControllerNetworkException) throw NetworkException()
         when (error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()
@@ -506,7 +517,7 @@ class UploadTask(
             LIMIT_EXCEEDED_ERROR_CODE -> throw LimitExceededException()
             "validation_failed" -> throw ValidationFailedException()
             else -> {
-                if (error?.exception is ApiController.ServerErrorException) {
+                if (error?.exception is ApiControllerServerErrorException) {
                     uploadFile.resetUploadTokenAndCancelSession()
                     throw UploadErrorException()
                 } else {

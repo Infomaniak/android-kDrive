@@ -21,13 +21,14 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.legacy.models.ApiResponseStatus
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.toPx
+import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.openOnlyOfficeActivity
 import com.infomaniak.drive.utils.showSnackbar
@@ -37,10 +38,12 @@ class NotSupportedExtensionBottomSheetDialog : InformationBottomSheetDialog() {
     val mainViewModel: MainViewModel by activityViewModels()
     private val navigationArgs: NotSupportedExtensionBottomSheetDialogArgs by navArgs()
 
+    private val userDrive by lazy { UserDrive(sharedWithMe = navigationArgs.isSharedWithMe) }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        FileController.getFileById(navigationArgs.fileId)?.let { currentFile ->
+        FileController.getFileById(navigationArgs.fileId, userDrive)?.let { currentFile ->
 
             title.text = getString(R.string.notSupportedExtensionTitle, currentFile.getFileExtension())
             description.text = getString(R.string.notSupportedExtensionDescription, currentFile.name)

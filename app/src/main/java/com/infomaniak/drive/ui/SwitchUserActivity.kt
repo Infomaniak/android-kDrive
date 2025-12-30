@@ -22,12 +22,13 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeActivity
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackAccountEvent
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
 import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.ui.login.LoginActivityArgs
 import com.infomaniak.drive.ui.menu.UserAdapter
 import com.infomaniak.drive.utils.AccountUtils
 
@@ -58,7 +59,10 @@ class SwitchUserActivity : EdgeToEdgeActivity() {
 
         addUser.setOnClickListener {
             trackAccountEvent(MatomoName.Add)
-            startActivity(Intent(this@SwitchUserActivity, LoginActivity::class.java))
+            val intent = Intent(this@SwitchUserActivity, LoginActivity::class.java).apply {
+                putExtras(LoginActivityArgs(displayOnlyLastPage = true).toBundle())
+            }
+            startActivity(intent)
         }
     }
 }

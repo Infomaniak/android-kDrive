@@ -66,8 +66,10 @@ import com.infomaniak.drive.ui.fileList.SelectFolderActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
+import com.infomaniak.drive.utils.SyncUtils.cancelPeriodicSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.isActive
@@ -75,6 +77,7 @@ import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.TimeZone
 
+@AndroidEntryPoint
 class SyncSettingsActivity : BaseActivity() {
 
     private val binding: ActivitySyncSettingsBinding by lazy { ActivitySyncSettingsBinding.inflate(layoutInflater) }
@@ -430,6 +433,11 @@ class SyncSettingsActivity : BaseActivity() {
                         SentryLog.i(TAG, "start update appSettings")
                         UploadFile.setAppSyncSettings(syncSettings)
                         SentryLog.i(TAG, "appSettings updated")
+                        if (oldSyncSettings?.driveId != syncSettings.driveId) {
+                            UploadFile.deleteAllSyncFile()
+                            applicationContext.cancelPeriodicSync()
+                            SentryLog.i(TAG, "New drive detected -> old sync files has been deleted")
+                        }
                         applicationContext.activateAutoSync(syncSettings)
                         SentryLog.i(TAG, "auto sync enabled")
                     }

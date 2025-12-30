@@ -27,14 +27,15 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.reflect.TypeToken
+import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.cancellable
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.networking.HttpUtils
-import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.core.legacy.utils.await
+import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.exceptions.NetworkException
+import com.infomaniak.core.network.networking.HttpUtils
+import com.infomaniak.core.network.networking.ManualAuthorizationRequired
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.network.utils.await
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -52,6 +53,7 @@ import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
 import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -77,38 +79,33 @@ class DownloadOfflineFileManager(
         onProgress: (progress: Int, fileId: Int) -> Unit,
     ): ListenableWorker.Result {
 
+        val file = getFileFromRemote(context, file.id, userDrive)
         currentFile = file
-        var offlineFile = file.getOfflineFile(context, userDrive.userId)
         val cacheFile = file.getCacheFile(context, userDrive)
+        val offlineFile = file.getOfflineFile(context, userDrive.userId)
+        if (offlineFile == null) {
+            SentryLog.e(TAG, "offline must not be null")
+            return ListenableWorker.Result.failure()
+        }
 
-        offlineFile?.let {
-            if (file.isOfflineAndIntact(it)) {
-                // We can have this case for example when we try to put a lot of files at once in offline mode
-                // and for some reason, the worker is cancelled after a long time, the worker is restarted
-                filesDownloaded += 1
-                lastDownloadedFile = offlineFile
-                return ListenableWorker.Result.success()
-            }
+        if (moveCacheFileIfIntact(context, file, cacheFile, offlineFile)) return ListenableWorker.Result.success()
+
+        if (file.isOfflineAndIntact(offlineFile)) {
+            // We can have this case for example when we try to put a lot of files at once in offline mode
+            // and for some reason, the worker is cancelled after a long time, the worker is restarted
+            filesDownloaded += 1
+            lastDownloadedFile = offlineFile
+            return ListenableWorker.Result.success()
         }
 
         onProgress(0, file.id)
 
-        if (offlineFile?.exists() == true) offlineFile.delete()
+        if (offlineFile.exists()) offlineFile.delete()
         if (cacheFile.exists()) cacheFile.delete()
 
-        if (offlineFile == null) {
-            getFileFromRemote(context, file.id, userDrive) { downloadedFile ->
-                currentFile = downloadedFile
-                downloadedFile.getOfflineFile(context, userDrive.driveId)?.let { updatedOfflineFile ->
-                    lastDownloadedFile = offlineFile
-                    offlineFile = updatedOfflineFile
-                }
-            }
-        } else {
-            lastDownloadedFile = offlineFile
-        }
+        lastDownloadedFile = offlineFile
 
-        return if (offlineFile == null || currentFile?.rights?.canRead == false) {
+        return if (currentFile?.rights?.canRead == false) {
             ListenableWorker.Result.failure()
         } else {
             runCatching {
@@ -125,13 +122,29 @@ class DownloadOfflineFileManager(
         }
     }
 
-    private fun getFileFromRemote(
+    private suspend fun moveCacheFileIfIntact(
+        context: Context,
+        file: File,
+        cacheFile: IOFile,
+        offlineFile: IOFile,
+    ): Boolean = withContext(Dispatchers.IO) {
+        if (!file.isObsoleteOrNotIntact(cacheFile)) {
+            Utils.moveCacheFileToOffline(file, cacheFile, offlineFile)
+            notifyCompleted(file, offlineFile, context)
+            lastDownloadedFile = offlineFile
+            return@withContext true
+        }
+        return@withContext false
+    }
+
+    private suspend fun getFileFromRemote(
         context: Context,
         fileId: Int,
         userDrive: UserDrive = UserDrive(),
-        onFileDownloaded: (downloadedFile: File) -> Unit
-    ) {
-        val fileDetails = ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
+    ): File {
+        val fileDetails = Dispatchers.IO {
+            ApiRepository.getFileDetails(File(id = fileId, driveId = userDrive.driveId))
+        }
         val remoteFile = fileDetails.data
         val file = if (fileDetails.isSuccess() && remoteFile != null) {
             FileController.getRealmInstance(userDrive).use { realm ->
@@ -139,7 +152,7 @@ class DownloadOfflineFileManager(
             }
             remoteFile
         } else {
-            if (fileDetails.error?.exception is ApiController.NetworkException) throw UploadTask.NetworkException()
+            if (fileDetails.error?.exception is NetworkException) throw UploadTask.NetworkException()
 
             val translateError = fileDetails.translateError()
             val responseGsonType = object : TypeToken<ApiResponse<File>>() {}.type
@@ -147,7 +160,8 @@ class DownloadOfflineFileManager(
             val responseJson = ApiController.gson.toJson(fileDetails, responseGsonType)
             throw RemoteFileException("$responseJson $translatedErrorText")
         }
-        onFileDownloaded.invoke(file)
+
+        return file
     }
 
     private suspend fun startOfflineDownload(
@@ -192,10 +206,7 @@ class DownloadOfflineFileManager(
 
             if (remoteDataHasBeenSaved && offlineFile.exists()) {
                 onProgress(100, file.id)
-                FileController.updateOfflineStatus(file.id, true)
-                offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
-                if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
-                fileDownloaded(context, file.id)
+                notifyCompleted(file, offlineFile, context)
                 ListenableWorker.Result.success()
             } else {
                 ListenableWorker.Result.failure()
@@ -204,6 +215,13 @@ class DownloadOfflineFileManager(
             offlineFile.delete()
             throw it
         }
+    }
+
+    private fun notifyCompleted(file: File, offlineFile: java.io.File, context: Context) {
+        FileController.updateOfflineStatus(file.id, true)
+        offlineFile.setLastModified(file.getLastModifiedInMilliSecond())
+        if (file.isMedia()) MediaUtils.scanFile(context, offlineFile)
+        fileDownloaded(context, file.id)
     }
 
     private fun makeSureFileExists(offlineFile: java.io.File): Unit? {
@@ -303,7 +321,7 @@ class DownloadOfflineFileManager(
 
         fun downloadFileResponse(
             fileUrl: String,
-            okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+            okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
             downloadInterceptor: Interceptor? = null
         ): Response {
             @OptIn(ManualAuthorizationRequired::class)
@@ -316,7 +334,7 @@ class DownloadOfflineFileManager(
 
         suspend fun downloadFileResponseAsync(
             fileUrl: String,
-            okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+            okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
             downloadInterceptor: Interceptor? = null
         ): Response {
             @OptIn(ManualAuthorizationRequired::class)
@@ -334,7 +352,7 @@ class DownloadOfflineFileManager(
             outputStream: ParcelFileDescriptor.AutoCloseOutputStream? = null,
         ): Boolean {
             SentryLog.d(tag, "Save remote data to ${outputFile?.path}")
-            return response.body?.byteStream()?.buffered()?.use { input ->
+            return response.body.byteStream().buffered().use { input ->
                 if (outputFile?.parentFile?.exists() == false) outputFile.parentFile?.mkdirs()
                 if (outputFile?.exists() == false) outputFile.createNewFile()
                 val stream = outputStream ?: outputFile?.outputStream()

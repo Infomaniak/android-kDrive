@@ -23,6 +23,7 @@ import androidx.work.WorkInfo.Companion.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT
 import com.infomaniak.core.legacy.utils.isNetworkException
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
 import com.infomaniak.drive.data.api.UploadTask
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.sync.UploadNotifications.allowedFileSizeExceededNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.exceptionNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.folderNotFoundNotification
@@ -34,20 +35,28 @@ import com.infomaniak.drive.data.sync.UploadNotifications.productMaintenanceExce
 import com.infomaniak.drive.data.sync.UploadNotifications.quotaExceededNotification
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
+import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
-object UploadWorkerThrowable {
+object UploadWorkerErrorHandling {
 
     suspend fun UploadWorker.runUploadCatching(block: suspend () -> Result): Result {
         return try {
             block()
 
         } catch (_: UploadTask.FolderNotFoundException) {
-            currentUploadFile?.folderNotFoundNotification(applicationContext)
+            currentUploadFile?.let { uploadFile ->
+                UploadFile.deleteAll(uploadFile.remoteFolder, permanently = true)
+                if (uploadFile.isSync()) {
+                    Sentry.captureMessage("FolderNotFoundNotification: disableAutoSync")
+                    applicationContext.disableAutoSync()
+                }
+                uploadFile.folderNotFoundNotification(applicationContext)
+            }
             Result.failure()
         } catch (_: UploadTask.QuotaExceededException) {
             this.currentUploadFile?.quotaExceededNotification(applicationContext)
@@ -65,8 +74,10 @@ object UploadWorkerThrowable {
             // background at most. To reset this quota, the app need to be brought in foreground. So in that case, we display a
             // notification to ask the user to go back in the app.
             // See https://developer.android.com/develop/background-work/services/fgs/timeout for more info.
-            if (Build.VERSION.SDK_INT >= 31 && stopReason == STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) {
+            if (UploadFile.getAllPendingUploadsCount() > 0) {
                 currentUploadFile?.foregroundServiceQuotaNotification(applicationContext)
+            }
+            if (Build.VERSION.SDK_INT >= 31 && stopReason == STOP_REASON_FOREGROUND_SERVICE_TIMEOUT) {
                 Result.failure()
             } else {
                 Result.retry()

@@ -10,6 +10,8 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.navigation.safeargs)
     alias(libs.plugins.realm.android)
+    alias(core.plugins.ksp)
+    alias(core.plugins.dagger.hilt)
     alias(core.plugins.compose.compiler)
     alias(core.plugins.kotlin.parcelize)
     alias(core.plugins.sentry.plugin)
@@ -33,8 +35,8 @@ android {
         applicationId = "com.infomaniak.drive"
         minSdk = appMinSdk
         targetSdk = appTargetSdk
-        versionCode = 5_010_004_01
-        versionName = "5.10.4"
+        versionCode = 5_011_006_01
+        versionName = "5.11.6"
 
         setProperty("archivesBaseName", "kdrive-$versionName ($versionCode)")
 
@@ -84,16 +86,6 @@ android {
             buildConfigField("String", "DRIVE_API_V2", "\"https://kdrive.preprod.dev.infomaniak.ch/2/drive/\"")
             buildConfigField("String", "DRIVE_API_V3", "\"https://kdrive.preprod.dev.infomaniak.ch/3/drive/\"")
             matchingFallbacks += "standard"
-        }
-    }
-
-    // As of Gradle 8, there is no sane replacement for gradle.buildFinished. See this closed issue: https://github.com/gradle/gradle/issues/20151
-    // This block is not essential, so we can remove it if needed, or replace it with a trusted Gradle plugin providing the same functionality.
-    @Suppress("Deprecation")
-    gradle.buildFinished {
-        try {
-            exec { commandLine("say", "Ok") }
-        } catch (_: Throwable) {
         }
     }
 
@@ -167,17 +159,15 @@ dependencies {
     implementation(project(":Core:Auth"))
     implementation(project(":Core:Avatar"))
     implementation(project(":Core:Coil"))
-    implementation(project(":Core:Compose:Basics"))
-    implementation(project(":Core:Compose:Margin"))
-    implementation(project(":Core:Compose:MaterialThemeFromXml"))
     implementation(project(":Core:CrossAppLogin:Back"))
     implementation(project(":Core:CrossAppLogin:Front"))
     implementation(project(":Core:FragmentNavigation"))
+    implementation(project(":Core:InAppReview"))
+    implementation(project(":Core:InAppUpdate"))
     implementation(project(":Core:Ktor"))
     implementation(project(":Core:Legacy"))
     implementation(project(":Core:Legacy:AppLock"))
     implementation(project(":Core:Legacy:BugTracker"))
-    implementation(project(":Core:Legacy:Stores"))
     implementation(project(":Core:Matomo"))
     implementation(project(":Core:KSuite"))
     implementation(project(":Core:KSuite:KSuitePro"))
@@ -188,7 +178,11 @@ dependencies {
     implementation(project(":Core:Thumbnails"))
     implementation(project(":Core:TwoFactorAuth:Front"))
     implementation(project(":Core:TwoFactorAuth:Back:WithUserDb"))
-    implementation(project(":Core:UiView:EdgeToEdge"))
+    implementation(project(":Core:Ui"))
+    implementation(project(":Core:Ui:Compose:Basics"))
+    implementation(project(":Core:Ui:Compose:Margin"))
+    implementation(project(":Core:Ui:Compose:MaterialThemeFromXml"))
+    implementation(project(":Core:Ui:View:EdgeToEdge"))
 
     // Compose
     implementation(platform(core.compose.bom))
@@ -198,9 +192,14 @@ dependencies {
     implementation(core.compose.ui.tooling.preview)
 
     implementation(core.ktor.client.okhttp)
+    implementation(core.ktor.client.core)
+    implementation(core.ktor.client.json)
+    implementation(core.ktor.client.content.negociation)
 
     implementation(core.androidx.work.runtime)
     androidTestImplementation(core.androidx.work.testing)
+
+    implementation(core.androidx.datastore.preferences)
 
     implementation(core.androidx.concurrent.futures.ktx)
     implementation(libs.androidx.lifecycle.process)
@@ -208,6 +207,11 @@ dependencies {
     implementation(libs.androidx.webkit)
 
     implementation(core.splitties.mainthread)
+
+    implementation(core.hilt.android)
+    implementation(core.hilt.work)
+    ksp(core.hilt.compiler)
+    ksp(core.hilt.androidx.compiler)
 
     implementation(libs.exoplayer)
     implementation(libs.exoplayer.dash)
@@ -223,6 +227,7 @@ dependencies {
 
     implementation(libs.realm.android.adapters)
 
+    "standardImplementation"(project(":Core:Notifications:Registration"))
     "standardImplementation"(libs.firebase.messaging.ktx)
     "standardImplementation"(libs.gs.sdk)
 
@@ -251,7 +256,7 @@ dependencies {
     androidTestImplementation(libs.android.test.core)
     androidTestRuntimeOnly(libs.android.test.runner)
 
-    implementation(core.coil.two.gif)
+    implementation(core.coil.gif)
 
     // Compose
     implementation(libs.androidx.ui.android)

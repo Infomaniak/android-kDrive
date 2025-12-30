@@ -73,6 +73,7 @@ import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.isUrlFile
 import com.infomaniak.drive.utils.isValidUrl
 import com.infomaniak.drive.utils.showOrHideEmptyError
+import dagger.hilt.android.AndroidEntryPoint
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
@@ -81,6 +82,7 @@ import kotlinx.coroutines.withContext
 import java.net.URLDecoder
 import java.util.Date
 
+@AndroidEntryPoint
 class SaveExternalFilesActivity : BaseActivity() {
 
     private val binding by lazy { ActivitySaveExternalFileBinding.inflate(layoutInflater) }

@@ -1,0 +1,2 @@
+- Fixed synchronization restarting every time a new photo is taken
+- Fixed disconnection during external import to a drive other than the current one

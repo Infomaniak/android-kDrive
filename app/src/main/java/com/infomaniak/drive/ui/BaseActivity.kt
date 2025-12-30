@@ -21,16 +21,24 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import com.infomaniak.core.extensions.isNightModeEnabled
 import com.infomaniak.core.extensions.lightStatusBar
+import com.infomaniak.core.inappupdate.BaseInAppUpdateManager.Companion.checkUpdateIsRequired
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeActivity
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
+import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.trackScreen
 import com.infomaniak.drive.MatomoDrive.trackUserId
+import com.infomaniak.drive.R
+import com.infomaniak.drive.di.ActivityModule
 import com.infomaniak.drive.twoFactorAuthManager
 import com.infomaniak.drive.utils.AccountUtils
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.runBlocking
 
 open class BaseActivity : EdgeToEdgeActivity() {
+    private val hiltEntryPoint by lazy { EntryPointAccessors.fromActivity(this, ActivityModule.ActivityEntrypointInterface::class.java) }
+
+    protected val inAppUpdateManager by lazy { hiltEntryPoint.inAppUpdateManager() }
 
     /**
      * Enables the auto-managed 2 factor authentication challenge overlay for View-based Activities.
@@ -60,6 +68,12 @@ open class BaseActivity : EdgeToEdgeActivity() {
             runBlocking { AccountUtils.requestCurrentUser() }
             trackUserId(AccountUtils.currentUserId)
         }
+        checkUpdateIsRequired(
+            manager = inAppUpdateManager,
+            applicationId = BuildConfig.APPLICATION_ID,
+            applicationVersionCode = BuildConfig.VERSION_CODE,
+            theme = R.style.AppTheme
+        )
         trackScreen()
     }
 }

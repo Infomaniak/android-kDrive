@@ -37,9 +37,9 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.ExtensionType
 import com.infomaniak.drive.data.models.File
@@ -239,12 +239,12 @@ class PreviewPDFFragment : PreviewFragment(), PDFPrintListener {
     private fun handleException(exception: Throwable) = with(previewPDFHandler) {
         shouldHidePrintOption(isGone = true)
 
-        when {
-            exception is PdfPasswordException -> {
+        when (exception) {
+            is PdfPasswordException -> {
                 isPasswordProtected = true
                 onPDFPasswordError()
             }
-            exception is IOException && fileSize == 0L -> {
+            is IOException if fileSize == 0L -> {
                 displayError(isEmptyFileError = true)
             }
             else -> {

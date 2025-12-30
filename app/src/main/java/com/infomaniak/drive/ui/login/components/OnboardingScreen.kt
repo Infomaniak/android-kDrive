@@ -37,11 +37,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.infomaniak.core.compose.basics.ButtonType
-import com.infomaniak.core.compose.basics.Typography
-import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.Companion.filterSelectedAccounts
+import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingState
+import com.infomaniak.core.crossapplogin.back.BaseCrossAppLoginViewModel.AccountsCheckingStatus
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.crossapplogin.front.components.CrossLoginBottomContent
+import com.infomaniak.core.crossapplogin.front.components.NoCrossAppLoginAccountsContent
 import com.infomaniak.core.crossapplogin.front.data.CrossLoginDefaults
 import com.infomaniak.core.crossapplogin.front.previews.AccountsPreviewParameter
 import com.infomaniak.core.onboarding.OnboardingPage
@@ -50,40 +50,47 @@ import com.infomaniak.core.onboarding.components.OnboardingComponents
 import com.infomaniak.core.onboarding.components.OnboardingComponents.DefaultBackground
 import com.infomaniak.core.onboarding.components.OnboardingComponents.DefaultLottieIllustration
 import com.infomaniak.core.onboarding.components.OnboardingComponents.DefaultTitleAndDescription
+import com.infomaniak.core.ui.compose.basics.ButtonType
+import com.infomaniak.core.ui.compose.basics.Typography
 import com.infomaniak.drive.R
 import com.infomaniak.drive.ui.theme.DriveTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
-    accounts: () -> List<ExternalAccount>,
+    accountsCheckingState: () -> AccountsCheckingState,
     skippedIds: () -> Set<Long>,
     isLoginButtonLoading: () -> Boolean,
     isSignUpButtonLoading: () -> Boolean,
     onLoginRequest: (accounts: List<ExternalAccount>) -> Unit,
     onCreateAccount: () -> Unit,
     onSaveSkippedAccounts: (Set<Long>) -> Unit,
+    displayOnlyLastPage: Boolean = false,
 ) {
-    val pagerState = rememberPagerState(pageCount = { Page.entries.size })
+    val entries = if (displayOnlyLastPage) listOf(Page.entries.last()) else Page.entries
+    val pagerState = rememberPagerState(pageCount = { entries.size })
 
     OnboardingScaffold(
         pagerState = pagerState,
-        onboardingPages = Page.entries.mapIndexed { index, page -> page.toOnboardingPage(pagerState, index) },
+        onboardingPages = entries.mapIndexed { index, page -> page.toOnboardingPage(pagerState, index) },
         bottomContent = { paddingValues ->
             OnboardingComponents.CrossLoginBottomContent(
                 modifier = Modifier
                     .padding(paddingValues)
                     .consumeWindowInsets(paddingValues),
                 pagerState = pagerState,
-                accounts = accounts,
+                accountsCheckingState = accountsCheckingState,
                 skippedIds = skippedIds,
                 isLoginButtonLoading = isLoginButtonLoading,
-                isSignUpButtonLoading = isSignUpButtonLoading,
-                onLogin = { onLoginRequest(emptyList()) },
-                onContinueWithSelectedAccounts = { onLoginRequest(accounts().filterSelectedAccounts(skippedIds())) },
-                onCreateAccount = onCreateAccount,
+                onContinueWithSelectedAccounts = { selectedAccounts -> onLoginRequest(selectedAccounts) },
                 onUseAnotherAccountClicked = { onLoginRequest(emptyList()) },
                 onSaveSkippedAccounts = onSaveSkippedAccounts,
+                noCrossAppLoginAccountsContent = NoCrossAppLoginAccountsContent.accountRequired(
+                    onLogin = { onLoginRequest(emptyList()) },
+                    onCreateAccount = onCreateAccount,
+                    isLoginButtonLoading = isLoginButtonLoading,
+                    isSignUpButtonLoading = isSignUpButtonLoading,
+                ),
                 nextButtonShape = CircleShape,
                 customization = CrossLoginDefaults.customize(
                     buttonStyle = ButtonType.Drive,
@@ -153,7 +160,9 @@ private fun Preview(@PreviewParameter(AccountsPreviewParameter::class) accounts:
     DriveTheme {
         Surface {
             OnboardingScreen(
-                accounts = { accounts },
+                accountsCheckingState = {
+                    AccountsCheckingState(status = AccountsCheckingStatus.Checking, checkedAccounts = accounts)
+                },
                 skippedIds = { emptySet() },
                 onLoginRequest = {},
                 onCreateAccount = {},

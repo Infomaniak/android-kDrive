@@ -21,7 +21,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.legacy.models.user.User
+import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch

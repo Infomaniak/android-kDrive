@@ -457,6 +457,9 @@
             android:name="publicShareDeeplink"
             android:defaultValue=""
             app:argType="string" />
+        <argument
+            android:name="displayOnlyLastPage"
+            app:argType="boolean" />
     </activity>
 
     <dialog
@@ -759,8 +762,8 @@
             app:argType="string" />
         <argument
             android:name="isAsleep"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <dialog
@@ -794,6 +797,10 @@
             android:name="fileId"
             android:defaultValue="-1"
             app:argType="integer" />
+        <argument
+            android:name="isSharedWithMe"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </dialog>
 
     <fragment

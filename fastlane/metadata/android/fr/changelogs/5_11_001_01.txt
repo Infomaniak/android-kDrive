@@ -1,0 +1,2 @@
+- Correction l'affichage sur les versions fDroid de la connexion inter app
+- Petits fix et améliorations du code

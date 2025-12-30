@@ -25,16 +25,14 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.core.legacy.api.ApiController
+import com.infomaniak.core.auth.models.user.User
+import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
-import com.infomaniak.core.legacy.models.ApiError
-import com.infomaniak.core.legacy.models.ApiResponseStatus
-import com.infomaniak.core.legacy.models.user.User
-import com.infomaniak.core.legacy.room.UserDatabase
-import com.infomaniak.core.legacy.stores.StoreUtils.checkUpdateIsRequired
 import com.infomaniak.core.legacy.utils.showToast
+import com.infomaniak.core.network.models.ApiError
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeActivity
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
@@ -50,6 +48,7 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
+import com.infomaniak.drive.ui.login.LoginActivityArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareActivityArgs
@@ -66,6 +65,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.infomaniak.core.network.models.exceptions.NetworkException as ApiControllerNetworkException
 
 @SuppressLint("CustomSplashScreen")
 class LaunchActivity : EdgeToEdgeActivity() {
@@ -81,7 +81,6 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         setDefaultLocaleIfNeeded()
 
-        checkUpdateIsRequired(BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, R.style.AppTheme)
         trackScreen()
 
         lifecycleScope.launch {
@@ -116,7 +115,10 @@ class LaunchActivity : EdgeToEdgeActivity() {
         Intent(this, destinationClass).apply {
             when (destinationClass) {
                 MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
-                LoginActivity::class.java -> putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                LoginActivity::class.java -> {
+                    putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
+                    putExtras(LoginActivityArgs(displayOnlyLastPage = false).toBundle())
+                }
                 PublicShareActivity::class.java -> {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                     publicShareActivityExtras?.let(::putExtras)
@@ -218,7 +220,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
         when {
-            error?.exception is ApiController.NetworkException -> {
+            error?.exception is ApiControllerNetworkException -> {
                 Dispatchers.Main { showToast(R.string.errorNetwork) }
                 finishAndRemoveTask()
             }

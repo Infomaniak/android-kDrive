@@ -19,18 +19,18 @@ package com.infomaniak.drive.data.api
 
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
+import com.infomaniak.core.auth.api.ApiRepositoryCore
+import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.HttpClient.okHttpClientLongTimeoutWithTokenInterceptor as okHttpClientLongTimeout
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
-import com.infomaniak.core.legacy.api.ApiController
-import com.infomaniak.core.legacy.api.ApiController.ApiMethod.DELETE
-import com.infomaniak.core.legacy.api.ApiController.ApiMethod.GET
-import com.infomaniak.core.legacy.api.ApiController.ApiMethod.POST
-import com.infomaniak.core.legacy.api.ApiController.ApiMethod.PUT
-import com.infomaniak.core.legacy.api.ApiController.callApiBlocking
-import com.infomaniak.core.legacy.api.ApiRepositoryCore
-import com.infomaniak.core.legacy.models.ApiResponse
-import com.infomaniak.core.legacy.models.ApiResponseStatus
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.networking.HttpClient.okHttpClientLongTimeout
+import com.infomaniak.core.network.api.ApiController
+import com.infomaniak.core.network.api.ApiController.ApiMethod.DELETE
+import com.infomaniak.core.network.api.ApiController.ApiMethod.GET
+import com.infomaniak.core.network.api.ApiController.ApiMethod.POST
+import com.infomaniak.core.network.api.ApiController.ApiMethod.PUT
+import com.infomaniak.core.network.api.ApiController.callApiBlocking
+import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -73,7 +73,7 @@ object ApiRepository : ApiRepositoryCore() {
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
     ): T {
         return callApiBlocking(url, method, body, okHttpClient)
     }
@@ -82,7 +82,7 @@ object ApiRepository : ApiRepositoryCore() {
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
     ): T {
         return callApiBlocking(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
@@ -105,7 +105,7 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         order: SortType,
         cursor: String?,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor
     ): CursorApiResponse<ArrayList<File>> {
         val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${loadCursor(cursor)}"
         return callApiWithCursor(
@@ -257,7 +257,7 @@ object ApiRepository : ApiRepositoryCore() {
         date: Pair<String, String>? = null,
         type: String? = null,
         categories: String? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor
     ): CursorApiResponse<ArrayList<File>> {
         var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${loadCursor(cursor)}"
         if (!query.isNullOrBlank()) url += "&query=$query"
@@ -292,7 +292,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileShare(file), GET, okHttpClient = okHttpClient)
     }
 
-    fun getFileDetails(file: File, okHttpClient: OkHttpClient = HttpClient.okHttpClient): ApiResponse<File> {
+    fun getFileDetails(file: File, okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor): ApiResponse<File> {
         return callApi(ApiRoutes.getFileDetails(file), GET, okHttpClient = okHttpClient)
     }
 

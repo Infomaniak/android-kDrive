@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.launch
 
 open class AppSettings(
-    var _appLaunchesCount: Int = 0,
     var _appSecurityEnabled: Boolean = false,
     var _currentDriveId: Int = -1,
     var _currentUserId: Int = -1,
@@ -44,7 +43,6 @@ open class AppSettings(
 ) : RealmObject() {
 
     fun update(appSettings: AppSettings) {
-        this._appLaunchesCount = appSettings._appLaunchesCount
         this._appSecurityEnabled = appSettings._appSecurityEnabled
         this._currentDriveId = appSettings._currentDriveId
         this._currentUserId = appSettings._currentUserId
@@ -103,8 +101,7 @@ open class AppSettings(
 
         fun resetAppSettings() {
             updateAppSettings { appSettings ->
-                val newAppSettings = AppSettings().apply { _appLaunchesCount = appSettings._appLaunchesCount }
-                appSettings.update(newAppSettings)
+                appSettings.update(AppSettings())
             }
         }
 
@@ -115,14 +112,6 @@ open class AppSettings(
                 }
             }
         }
-
-        var appLaunches: Int = getAppSettings()._appLaunchesCount
-            set(value) {
-                field = value
-                scope.launch(Dispatchers.IO) {
-                    updateAppSettings { appSettings -> appSettings._appLaunchesCount = value }
-                }
-            }
 
         var appSecurityLock: Boolean = getAppSettings()._appSecurityEnabled
             set(value) {
@@ -152,7 +141,13 @@ open class AppSettings(
             //region Migrate to version 1: Remove migrated
             if (oldVersionTemp == 0L) {
                 // Remove some fields in SyncSettings
-                schema.get(AppSettings::class.java.simpleName)!!.removeField("_migrated")
+                schema.get(AppSettings::class.java.simpleName)?.removeField("_migrated")
+
+                oldVersionTemp++
+            }
+
+            if (oldVersionTemp == 1L) {
+                schema.get(AppSettings::class.java.simpleName)?.removeField("_appLaunchesCount")
 
                 oldVersionTemp++
             }
@@ -160,7 +155,7 @@ open class AppSettings(
         }
 
         companion object {
-            const val DB_VERSION = 1L // Must be bumped when the schema changes
+            const val DB_VERSION = 2L // Must be bumped when the schema changes
         }
     }
 }

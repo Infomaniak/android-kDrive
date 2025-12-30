@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2025 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.DropBox
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.drive.Category
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions
 import java.util.UUID
 
@@ -63,7 +64,7 @@ object ApiTestUtils {
     }
 
     fun getCategory(driveId: Int): ApiResponse<Array<Category>> {
-        return ApiController.callApi(ApiRoutes.categories(driveId), ApiController.ApiMethod.GET)
+        return runBlocking { ApiController.callApi(ApiRoutes.categories(driveId), ApiController.ApiMethod.GET) }
     }
 
     // Creates a file, puts it in trash and returns it

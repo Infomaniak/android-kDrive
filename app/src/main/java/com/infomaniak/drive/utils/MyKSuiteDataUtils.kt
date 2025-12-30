@@ -17,10 +17,10 @@
  */
 package com.infomaniak.drive.utils
 
+import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteDataManager
-import com.infomaniak.core.legacy.networking.HttpClient
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -42,7 +42,7 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
         val kSuite = AccountUtils.getCurrentDrive()?.kSuite
         if (kSuite !is KSuite.Perso) return@runCatching null
 
-        val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClient)
+        val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClientWithTokenInterceptor)
         if (apiResponse.data == null) {
             @OptIn(ExperimentalSerializationApi::class)
             apiResponse.error?.exception?.let {

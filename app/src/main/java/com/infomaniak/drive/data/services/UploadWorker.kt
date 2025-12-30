@@ -40,6 +40,7 @@ import com.infomaniak.core.legacy.utils.calculateFileSize
 import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.getFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
+import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
@@ -49,7 +50,7 @@ import com.infomaniak.drive.data.models.MediaFolder
 import com.infomaniak.drive.data.models.SyncSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UploadFile.Companion.getRealmInstance
-import com.infomaniak.drive.data.services.UploadWorkerThrowable.runUploadCatching
+import com.infomaniak.drive.data.services.UploadWorkerErrorHandling.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
@@ -139,7 +140,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             } while (syncNewPendingUploads && retryError < MAX_RETRY_COUNT)
 
             if (retryError == MAX_RETRY_COUNT) {
-                SentryLog.wtf(TAG, "A file has been restarted several times")
+                SentryLog.e(TAG, "A file has been restarted several times") { scope ->
+                    scope.setExtra("appSettings", gson.toJson(UploadFile.getAppSyncSettings()))
+                }
                 result = Result.failure()
             }
 
@@ -250,11 +253,14 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount(realm)
         if (allPendingUploadsCount != pendingCount) {
             val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriorityCount(realm)
-            Sentry.captureMessage("An upload count inconsistency has been detected", SentryLevel.ERROR) { scope ->
-                scope.setExtra("uploadFiles pending count", "$pendingCount")
-                scope.setExtra("realmAllPendingUploadsCount", "$allPendingUploadsCount")
-                scope.setExtra("allPendingUploadsWithoutPriorityCount", "$allPendingUploadsWithoutPriorityCount")
-            }
+            SentryLog.i(
+                tag = TAG,
+                msg = "Pending uploads count change (" +
+                        "pendingCount = $pendingCount, " +
+                        "realmAllPendingUploadsCount = $allPendingUploadsCount, " +
+                        "allPendingUploadsWithoutPriorityCount = $allPendingUploadsWithoutPriorityCount" +
+                        ")"
+            )
 
             if (pendingCount == 0) throw CancellationException("Stop several restart")
         }
@@ -332,8 +338,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return UploadTask(context = applicationContext, uploadFile = this, setProgress = ::setProgress).run {
             currentUploadTask = this
             start().also { isUploaded ->
-                if (isUploaded && UploadFile.getAppSyncSettings()?.deleteAfterSync != true) {
-                    deleteIfExists(keepFile = isSync())
+                if (isUploaded) {
+                    // If the below is true, will be deleted after the user confirms pictures deletion.
+                    val toBeDeletedLater = UploadFile.getAppSyncSettings()?.deleteAfterSync == true && isSync()
+                    if (!toBeDeletedLater) deleteIfExists(keepFile = isSync())
                 }
 
                 SentryLog.d(TAG, "startUploadFile> end upload file")

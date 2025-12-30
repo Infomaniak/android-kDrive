@@ -25,7 +25,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.uiview.edgetoedge.EdgeToEdgeBottomSheetDialog
+import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
 import com.infomaniak.drive.databinding.FragmentBottomSheetObtainKdriveAdBinding
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.LoginActivityArgs
@@ -52,6 +52,7 @@ class ObtainKDriveAdBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
                 LoginActivityArgs(
                     shouldLaunchAccountCreation = shouldLaunchAccountCreation,
                     publicShareDeeplink = "https://kdrive.infomaniak.com/app/share/$driveId/$publicShareUuid",
+                    displayOnlyLastPage = false,
                 ).toBundle()
             )
         }.also(::startActivity)

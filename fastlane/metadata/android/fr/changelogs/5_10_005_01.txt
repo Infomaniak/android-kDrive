@@ -1,0 +1,2 @@
+- Correction de la synchronisation qui se relance à chaque fois qu'une nouvelle photo est prise
+- Correction d'une déconnexion lors d'un import externe sur un  autre drive que le courant
