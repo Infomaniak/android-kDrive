@@ -45,10 +45,10 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
-import com.infomaniak.core.legacy.networking.HttpClient
-import com.infomaniak.core.legacy.networking.HttpUtils
-import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
+import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
+import com.infomaniak.core.network.networking.HttpUtils
+import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.models.ExtensionType
@@ -177,7 +177,7 @@ object PlaybackUtils {
 
     @OptIn(ManualAuthorizationRequired::class)
     private fun Context.getDataSourceFactory(): DataSource.Factory {
-        val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClient).apply {
+        val okHttpDataSource = OkHttpDataSource.Factory(HttpClient.okHttpClientWithTokenInterceptor).apply {
             setUserAgent(Util.getUserAgent(this@getDataSourceFactory, getString(R.string.app_name)))
             setDefaultRequestProperties(HttpUtils.getHeaders().toMap())
         }
