@@ -759,5 +759,5 @@
     <string name="userPermissionReadDescription">Consultation uniquement\nTéléchargement\nAjout de commentaire</string>
     <string name="userPermissionRemove">L’utilisateur n’aura plus accès à ce fichier.</string>
     <string name="userPermissionWrite">Peut modifier</string>
-    <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier</string>
+    <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression de ses propres fichiers / dossiers</string>
 </resources>

@@ -770,5 +770,5 @@
     <string name="userPermissionReadDescription">View only\nDownload\nAdd comments</string>
     <string name="userPermissionRemove">User will no longer have access to this file.</string>
     <string name="userPermissionWrite">Can change</string>
-    <string name="userPermissionWriteDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDeleting the file</string>
+    <string name="userPermissionWriteDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete your own files / folders</string>
 </resources>
