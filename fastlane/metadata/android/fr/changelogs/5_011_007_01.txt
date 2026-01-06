@@ -1,0 +1,1 @@
+- Ajout de l'identifiant du login inter app pour les comptes staff
