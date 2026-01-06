@@ -30,8 +30,11 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.auth.room.UserDatabase
+import com.infomaniak.core.crossapplogin.back.CrossAppLogin
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
@@ -61,6 +64,10 @@ import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.getDashboardData
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlin.uuid.ExperimentalUuidApi
 
 class SettingsFragment : Fragment() {
 
@@ -111,6 +118,22 @@ class SettingsFragment : Fragment() {
         feedback.setOnClickListener { navigateToFeedback() }
         setDeleteAccountClickListener()
         binding.root.enableEdgeToEdge()
+
+        showCrossAppDeviceIdIfStaff(binding.crossAppDeviceId)
+    }
+
+    private fun showCrossAppDeviceIdIfStaff(targetView: ItemSettingView) {
+        lifecycleScope.launch {
+            UserDatabase().userDao().allUsers.map { list -> list.any { it.isStaff } }.collectLatest { hasStaffAccount ->
+                if (!hasStaffAccount) return@collectLatest
+                targetView.isVisible = true
+                val crossAppLogin = CrossAppLogin.forContext(requireContext(), this)
+                @OptIn(ExperimentalUuidApi::class)
+                crossAppLogin.sharedDeviceIdFlow.collect { crossAppDeviceId ->
+                    targetView.setDescription(crossAppDeviceId.toHexDashString())
+                }
+            }
+        }
     }
 
     private fun toggleMyKSuiteLayoutVisibility(isVisible: Boolean) {

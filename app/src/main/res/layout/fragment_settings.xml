@@ -177,6 +177,15 @@
                         android:layout_height="wrap_content"
                         app:itemAction="chevron"
                         app:title="@string/deleteMyAccount" />
+
+                    <com.infomaniak.drive.ui.menu.settings.ItemSettingView
+                        android:id="@+id/crossAppDeviceId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:description="-"
+                        app:itemAction="none"
+                        app:title="Cross app device ID" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
