@@ -756,8 +756,9 @@
     <string name="userPermissionManageDescription">Modifica dei file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione dei file\nCondivisione con altri utenti</string>
     <string name="userPermissionNotAvailable">Non disponibile per gli utenti esterni del kDrive</string>
     <string name="userPermissionRead">Può consultare</string>
-    <string name="userPermissionReadDescription">Solo consultazione\nDownload\nAggiunta di commenti</string>
+    <string name="userPermissionReadDescription">Solo consultazione\nDownload</string>
     <string name="userPermissionRemove">L’utente non avrà più accesso a questo file.</string>
     <string name="userPermissionWrite">Può modificare</string>
-    <string name="userPermissionWriteDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione dei propri file / cartelle</string>
+    <string name="userPermissionWriteDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file / cartelle</string>
+    <string name="userPermissionWriteExternalDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione dei propri file / cartelle</string>
 </resources>
