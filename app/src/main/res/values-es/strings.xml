@@ -153,6 +153,7 @@
     <string name="buttonPlayerPrev">Anterior</string>
     <string name="buttonPlayerRew">Retroceder unos segundos</string>
     <string name="buttonRefresh">Actualizar</string>
+    <string name="buttonRemoveDriveAccess">Retirar el acceso al drive</string>
     <string name="buttonRemoveFavorites">Eliminar los favoritos</string>
     <string name="buttonRename">Cambiar el nombre</string>
     <string name="buttonRenew">Renovar</string>

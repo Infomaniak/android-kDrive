@@ -164,6 +164,7 @@
     <string name="buttonPlayerPrev">Previous</string>
     <string name="buttonPlayerRew">Back a few seconds</string>
     <string name="buttonRefresh">Update</string>
+    <string name="buttonRemoveDriveAccess">Remove access to the drive</string>
     <string name="buttonRemoveFavorites">Delete from favorites</string>
     <string name="buttonRename">Rename</string>
     <string name="buttonRenew">Renew</string>

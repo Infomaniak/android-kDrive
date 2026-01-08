@@ -82,6 +82,13 @@ interface Shareable : Parcelable {
             translation = R.string.buttonDelete,
             description = R.string.userPermissionRemove,
             apiValue = "delete"
+        ),
+
+        REMOVE_DRIVE_ACCESS(
+            icon = R.drawable.ic_bin,
+            translation = R.string.buttonRemoveDriveAccess,
+            description = null,
+            apiValue = "remove_from_drive"
         )
     }
 }
