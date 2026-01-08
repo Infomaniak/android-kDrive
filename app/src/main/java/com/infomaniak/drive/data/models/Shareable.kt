@@ -34,9 +34,9 @@ interface Shareable : Parcelable {
         }
     }
 
-    fun getFilePermission(): ShareablePermission = when (right) {
+    fun getFilePermission(isExternal: Boolean = false): ShareablePermission = when (right) {
         ShareablePermission.READ.apiValue -> ShareablePermission.READ
-        ShareablePermission.WRITE.apiValue -> ShareablePermission.WRITE
+        ShareablePermission.WRITE.apiValue -> if (isExternal) ShareablePermission.WRITE_EXTERNAL else ShareablePermission.WRITE
         ShareablePermission.MANAGE.apiValue -> ShareablePermission.MANAGE
         else -> ShareablePermission.READ
     }
@@ -63,6 +63,12 @@ interface Shareable : Parcelable {
             "write"
         ),
 
+        WRITE_EXTERNAL(
+            R.drawable.ic_edit,
+            R.string.userPermissionWrite,
+            R.string.userPermissionWriteExternalDescription,
+            "write"
+        ),
 
         MANAGE(
             R.drawable.ic_crown,

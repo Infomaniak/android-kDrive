@@ -299,7 +299,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                 currentShareable = shareable,
                 currentFileId = file.id,
-                currentPermission = shareable.getFilePermission(),
+                currentPermission = shareable.getFilePermission(isExternal = permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS),
                 permissionsGroup = permissionsGroup,
             )
         )
