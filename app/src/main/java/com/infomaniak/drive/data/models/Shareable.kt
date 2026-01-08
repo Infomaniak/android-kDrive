@@ -18,7 +18,6 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import kotlinx.parcelize.Parcelize
 
@@ -52,7 +51,6 @@ interface Shareable : Parcelable {
         val apiValue: String
     ) : Permission {
 
-        @SerializedName("read")
         READ(
             R.drawable.ic_view,
             R.string.userPermissionRead,
@@ -60,7 +58,6 @@ interface Shareable : Parcelable {
             "read"
         ),
 
-        @SerializedName("write")
         WRITE(
             R.drawable.ic_edit,
             R.string.userPermissionWrite,
@@ -68,7 +65,7 @@ interface Shareable : Parcelable {
             "write"
         ),
 
-        @SerializedName("manage")
+
         MANAGE(
             R.drawable.ic_crown,
             R.string.userPermissionManage,
@@ -76,7 +73,6 @@ interface Shareable : Parcelable {
             "manage"
         ),
 
-        @SerializedName("delete")
         DELETE(
             R.drawable.ic_bin,
             R.string.buttonDelete,
