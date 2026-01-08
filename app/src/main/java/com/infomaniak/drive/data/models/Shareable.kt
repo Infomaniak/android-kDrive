@@ -45,7 +45,7 @@ interface Shareable : Parcelable {
     enum class ShareablePermission(
         override val icon: Int,
         override val translation: Int,
-        override val description: Int,
+        override val description: Int?,
         val apiValue: String
     ) : Permission {
 

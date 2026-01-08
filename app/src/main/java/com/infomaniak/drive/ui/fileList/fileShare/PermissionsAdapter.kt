@@ -94,7 +94,15 @@ class PermissionsAdapter(
 
     private fun CardviewPermissionBinding.setupTexts(permission: Permission) {
         permissionTitle.setText(permission.translation)
-        permissionDescription.text = context.getString(permission.description, AccountUtils.getCurrentDrive()?.name)
+        setupDescription(permission.description)
+    }
+
+    private fun CardviewPermissionBinding.setupDescription(description: Int?) {
+        if (description != null) {
+            permissionDescription.text = context.getString(description, AccountUtils.getCurrentDrive()?.name)
+        } else {
+            permissionDescription.isGone = true
+        }
     }
 
     private fun CardviewPermissionBinding.setupMainIcon() {
