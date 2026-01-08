@@ -34,13 +34,11 @@ interface Shareable : Parcelable {
         }
     }
 
-    fun getFilePermission(): ShareablePermission {
-        return when {
-            right.equals(ShareablePermission.READ.toString(), true) -> ShareablePermission.READ
-            right.equals(ShareablePermission.WRITE.toString(), true) -> ShareablePermission.WRITE
-            right.equals(ShareablePermission.MANAGE.toString(), true) -> ShareablePermission.MANAGE
-            else -> ShareablePermission.READ
-        }
+    fun getFilePermission(): ShareablePermission = when (right) {
+        ShareablePermission.READ.apiValue -> ShareablePermission.READ
+        ShareablePermission.WRITE.apiValue -> ShareablePermission.WRITE
+        ShareablePermission.MANAGE.apiValue -> ShareablePermission.MANAGE
+        else -> ShareablePermission.READ
     }
 
     @Parcelize
