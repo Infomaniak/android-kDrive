@@ -117,7 +117,11 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 ShareablePermission.WRITE,
                 ShareablePermission.MANAGE
             )
-            PermissionsGroup.EXTERNAL_USERS_RIGHTS,
+            PermissionsGroup.EXTERNAL_USERS_RIGHTS -> arrayListOf(
+                ShareablePermission.READ,
+                ShareablePermission.WRITE_EXTERNAL,
+                ShareablePermission.DELETE
+            )
             PermissionsGroup.USERS_RIGHTS -> arrayListOf(
                 ShareablePermission.READ,
                 ShareablePermission.WRITE,
