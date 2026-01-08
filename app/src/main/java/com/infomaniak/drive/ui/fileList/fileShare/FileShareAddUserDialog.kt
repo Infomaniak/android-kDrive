@@ -30,7 +30,6 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils
 import com.infomaniak.core.legacy.utils.Utils.getDefaultAcceptedLanguage
@@ -231,7 +230,7 @@ class FileShareAddUserDialog : FullScreenBottomSheetDialog() {
                 "emails" to ArrayList(selectedItems.invitations.map { it.email }),
                 "user_ids" to ArrayList(selectedItems.driveUsers.map { it.id }),
                 "team_ids" to ArrayList(selectedItems.teams.map { it.id }),
-                "right" to newPermission,
+                "right" to newPermission.apiValue,
                 "lang" to getDefaultAcceptedLanguage(),
                 "message" to shareMessage.text.toString(),
             )
