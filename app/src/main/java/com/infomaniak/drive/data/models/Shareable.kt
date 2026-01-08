@@ -50,38 +50,38 @@ interface Shareable : Parcelable {
     ) : Permission {
 
         READ(
-            R.drawable.ic_view,
-            R.string.userPermissionRead,
-            R.string.userPermissionReadDescription,
-            "read"
+            icon = R.drawable.ic_view,
+            translation = R.string.userPermissionRead,
+            description = R.string.userPermissionReadDescription,
+            apiValue = "read"
         ),
 
         WRITE(
-            R.drawable.ic_edit,
-            R.string.userPermissionWrite,
-            R.string.userPermissionWriteDescription,
-            "write"
+            icon = R.drawable.ic_edit,
+            translation = R.string.userPermissionWrite,
+            description = R.string.userPermissionWriteDescription,
+            apiValue = "write"
         ),
 
         WRITE_EXTERNAL(
-            R.drawable.ic_edit,
-            R.string.userPermissionWrite,
-            R.string.userPermissionWriteExternalDescription,
-            "write"
+            icon = R.drawable.ic_edit,
+            translation = R.string.userPermissionWrite,
+            description = R.string.userPermissionWriteExternalDescription,
+            apiValue = "write"
         ),
 
         MANAGE(
-            R.drawable.ic_crown,
-            R.string.userPermissionManage,
-            R.string.userPermissionManageDescription,
-            "manage"
+            icon = R.drawable.ic_crown,
+            translation = R.string.userPermissionManage,
+            description = R.string.userPermissionManageDescription,
+            apiValue = "manage"
         ),
 
         DELETE(
-            R.drawable.ic_bin,
-            R.string.buttonDelete,
-            R.string.userPermissionRemove,
-            "delete"
+            icon = R.drawable.ic_bin,
+            translation = R.string.buttonDelete,
+            description = R.string.userPermissionRemove,
+            apiValue = "delete"
         )
     }
 }
