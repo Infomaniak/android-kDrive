@@ -98,7 +98,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         binding.permissionsRecyclerView.adapter = adapter
     }
 
-    private fun getPermissions(): ArrayList<Permission> {
+    private fun getPermissions(): List<Permission> {
         return when (permissionsGroup) {
             PermissionsGroup.SHARE_LINK_FILE_SETTINGS -> arrayListOf(
                 ShareLinkFilePermission.RESTRICTED,

@@ -48,24 +48,19 @@ class PermissionsAdapter(
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
 ) : Adapter<PermissionsViewHolder>() {
 
-    var permissionList: ArrayList<Permission> = ArrayList()
+    var permissionList: List<Permission> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionsViewHolder {
         return PermissionsViewHolder(CardviewPermissionBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    fun setAll(newPermissions: ArrayList<Permission>) {
+    fun setAll(newPermissions: List<Permission>) {
         permissionList = newPermissions
         notifyItemRangeInserted(0, newPermissions.size)
     }
 
     fun setUsers(users: ArrayList<UserFileAccess>) {
         sharedUsers = users
-    }
-
-    fun addItem(permission: Permission) {
-        permissionList.add(permission)
-        notifyItemInserted(permissionList.size)
     }
 
     override fun onBindViewHolder(holder: PermissionsViewHolder, position: Int) = with(holder.binding) {
