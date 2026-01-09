@@ -32,4 +32,7 @@ data class Invitation(
     val user: DriveUser? = null,
     @SerializedName("invitation_drive_id")
     val invitationDriveId: Int = -1,
-) : Parcelable, Shareable
+) : Parcelable, Shareable {
+    override val isExternalUser: Boolean
+        get() = true
+}

@@ -24,6 +24,8 @@ import kotlinx.parcelize.Parcelize
 interface Shareable : Parcelable {
     var id: Int
     var right: String
+    val isExternalUser: Boolean
+        get() = false
 
     fun getFilterValue(): String {
         return when (this) {

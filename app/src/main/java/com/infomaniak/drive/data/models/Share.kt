@@ -45,7 +45,8 @@ data class Share(
         var role: DriveUser.Role,
     ) : Parcelable, Shareable {
 
-        inline val isExternalUser get() = role == DriveUser.Role.EXTERNAL
+        override val isExternalUser
+            get() = role == DriveUser.Role.EXTERNAL
 
         enum class UserFileAccessStatus {
             /** User has access to the Drive */

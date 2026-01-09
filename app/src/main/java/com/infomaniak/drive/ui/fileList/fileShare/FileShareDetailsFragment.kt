@@ -39,7 +39,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
@@ -291,7 +290,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
     private fun openSelectPermissionDialog(shareable: Shareable) {
 
         val permissionsGroup = when {
-            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
+            shareable.isExternalUser -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
             else -> PermissionsGroup.USERS_RIGHTS
         }
 
