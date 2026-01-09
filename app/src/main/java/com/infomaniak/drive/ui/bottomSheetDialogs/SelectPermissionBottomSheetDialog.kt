@@ -54,7 +54,6 @@ import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.databinding.FragmentSelectPermissionBinding
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
-import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.parcelize.Parcelize
@@ -121,8 +120,11 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             PermissionsGroup.EXTERNAL_USERS_RIGHTS -> listOfNotNull(
                 ShareablePermission.READ,
                 ShareablePermission.WRITE_EXTERNAL,
-                ShareablePermission.DELETE,
+                ShareablePermission.DELETE
+                /*  Item removed temporarily, waiting the go from backend to ensure functionality is  ready
+                ,
                 ShareablePermission.REMOVE_DRIVE_ACCESS.takeIf { AccountUtils.getCurrentDrive()?.isOrganisationAdmin == true }
+                */
             )
             PermissionsGroup.USERS_RIGHTS -> listOfNotNull(
                 ShareablePermission.READ,
