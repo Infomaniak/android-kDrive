@@ -178,14 +178,17 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun updatePermission(file: File, shareableItem: Shareable?, permission: ShareablePermission? = null) = with(binding) {
         shareableItem?.let { shareable ->
-            if (permission == ShareablePermission.DELETE || permission == null) {
-                trackShareRightsEvent(MatomoName.DeleteUser)
-                deleteShare(file, shareable, permission)
-            } else {
-                trackShareRightsEvent(permission.name.lowercase() + "Right")
-                editShare(file, shareable, permission)
             saveButton.initProgress(viewLifecycleOwner)
             saveButton.showProgressCatching()
+            when (permission) {
+                ShareablePermission.DELETE, null -> {
+                    trackShareRightsEvent(MatomoName.DeleteUser)
+                    deleteShare(file, shareable, permission)
+                }
+                else -> {
+                    trackShareRightsEvent(permission.name.lowercase() + "Right")
+                    editShare(file, shareable, permission)
+                }
             }
         }
     }
