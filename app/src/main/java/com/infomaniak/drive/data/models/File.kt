@@ -181,7 +181,7 @@ open class File(
         return hasOnlyoffice || conversion?.whenOnlyoffice == true
     }
 
-    fun isDropBox() = getVisibilityType() == VisibilityType.IS_DROPBOX
+    fun isDropBox() = hasVisibilities(VisibilityType.IS_DROPBOX)
 
     fun isTrashed(): Boolean {
         return status?.contains("trash") == true
@@ -190,7 +190,7 @@ open class File(
     fun isPublicShared() = publicShareUuid.isNotBlank()
 
     fun isSharedWithMe(): Boolean {
-        return getVisibilityType() == VisibilityType.IS_SHARED_SPACE || getVisibilityType() == VisibilityType.IS_IN_SHARED_SPACE
+        return hasVisibilities(VisibilityType.IS_SHARED_SPACE, VisibilityType.IS_IN_SHARED_SPACE)
     }
 
     fun isPDF() = getFileType() == ExtensionType.PDF
@@ -334,6 +334,8 @@ open class File(
     }
 
     fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
+
+    fun hasVisibilities(vararg types: VisibilityType) = getVisibilityType() in types
 
     fun getWorkerTag() = "${id}_$driveId"
 
