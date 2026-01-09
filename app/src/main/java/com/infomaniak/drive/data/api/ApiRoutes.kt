@@ -176,6 +176,8 @@ object ApiRoutes {
     fun userAccess(file: File, driveUserId: Int) = "${accessUrl(file)}/users/$driveUserId"
 
     fun forceFolderAccess(file: File) = "${accessUrl(file)}/force"
+
+    fun driveUser(driveId: Int, driveUserId: Int) = "${driveURLV2(driveId)}/users/$driveUserId"
     //endregion
 
     /** Action */

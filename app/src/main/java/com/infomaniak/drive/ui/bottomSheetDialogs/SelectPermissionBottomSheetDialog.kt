@@ -185,6 +185,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                     trackShareRightsEvent(MatomoName.DeleteUser)
                     deleteShare(file, shareable, permission)
                 }
+                ShareablePermission.REMOVE_DRIVE_ACCESS -> {
+                    trackShareRightsEvent(MatomoName.RemoveDriveUser)
+                    removeDriveUser(file, shareable, permission)
+                }
                 else -> {
                     trackShareRightsEvent(permission.name.lowercase() + "Right")
                     editShare(file, shareable, permission)
@@ -197,6 +201,13 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         selectPermissionViewModel.deleteFileShare(file, shareable).observe(viewLifecycleOwner) { apiResponse ->
             val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
             handleFileShareApiResponse(apiResponse, UPDATE_USERS_RIGHTS_NAV_KEY, bundle, R.string.errorDelete)
+        }
+    }
+
+    private fun removeDriveUser(file: File, shareable: Shareable, permission: ShareablePermission?) {
+        selectPermissionViewModel.removeDriveUser(file, shareable).observe(viewLifecycleOwner) { apiResponse ->
+            val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
+            handleFileShareApiResponse(apiResponse, UPDATE_USERS_RIGHTS_NAV_KEY, bundle, R.string.errorRightModification)
         }
     }
 
@@ -213,10 +224,11 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         bundle: Bundle,
         @StringRes errorMessage: Int,
     ) {
-        if (apiResponse.data == true) {
-            setBackNavigationResult(key, bundle)
-        } else {
-            SnackbarUtils.showSnackbar(requireView(), errorMessage)
+        val errorDescription = apiResponse.error?.description
+        when {
+            errorDescription != null -> SnackbarUtils.showSnackbar(requireView(), errorDescription)
+            apiResponse.data == true -> setBackNavigationResult(key, bundle)
+            else -> SnackbarUtils.showSnackbar(requireView(), errorMessage)
         }
         binding.saveButton.hideProgressCatching(R.string.buttonSave)
     }
@@ -240,6 +252,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
         fun editFileShare(file: File, shareableItem: Shareable, permission: ShareablePermission) = liveData(Dispatchers.IO) {
             emit(ApiRepository.putFileShare(file, shareableItem, mapOf("right" to permission.apiValue)))
+        }
+
+        fun removeDriveUser(file: File, shareable: Shareable) = liveData(Dispatchers.IO) {
+            emit(ApiRepository.deleteDriveUser(file = file, shareableItem = shareable))
         }
     }
 
