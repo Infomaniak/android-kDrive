@@ -701,7 +701,7 @@
     <string name="trashActionDelete">Eliminar definitivamente</string>
     <string name="trashActionRestoreFileIn">Restaurar en</string>
     <string name="trashActionRestoreFileOriginalPlace">Restaurar en el emplazamiento original</string>
-    <string name="trashAutoClearDescription">La basura se limpia automáticamente cada 30 días.\n¿Desea aumentar este periodo?</string>
+    <string name="trashAutoClearDescription">La papelera se limpia automáticamente cada 30 días.\n¿Desea aumentar este periodo?</string>
     <string name="trashNoFile">No se ha eliminado ningún archivo</string>
     <string name="trashTitle">Papelera</string>
     <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
