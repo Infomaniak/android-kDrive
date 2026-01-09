@@ -113,10 +113,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 ShareLinkDocumentPermission.RESTRICTED,
                 ShareLinkDocumentPermission.PUBLIC
             )
-            PermissionsGroup.FILE_SHARE_UPDATE -> arrayListOf(
+            PermissionsGroup.FILE_SHARE_UPDATE -> listOfNotNull(
                 ShareablePermission.READ,
                 ShareablePermission.WRITE,
-                ShareablePermission.MANAGE
+                ShareablePermission.MANAGE.takeIf { selectPermissionViewModel.currentFile?.isChildOfCommonDirectory() == true }
             )
             PermissionsGroup.EXTERNAL_USERS_RIGHTS -> listOfNotNull(
                 ShareablePermission.READ,
@@ -124,9 +124,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 ShareablePermission.DELETE,
                 ShareablePermission.REMOVE_DRIVE_ACCESS.takeIf { AccountUtils.getCurrentDrive()?.isAdmin == true }
             )
-            PermissionsGroup.USERS_RIGHTS -> arrayListOf(
+            PermissionsGroup.USERS_RIGHTS -> listOfNotNull(
                 ShareablePermission.READ,
                 ShareablePermission.WRITE,
+                ShareablePermission.MANAGE.takeIf { selectPermissionViewModel.currentFile?.isChildOfCommonDirectory() == true },
                 ShareablePermission.DELETE
             )
             PermissionsGroup.SHARE_LINK_FILE_OFFICE -> arrayListOf(

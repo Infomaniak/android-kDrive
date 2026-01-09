@@ -335,6 +335,10 @@ open class File(
 
     fun isCancelingImport() = externalImport?.status == FileExternalImportStatus.CANCELING.value
 
+    fun isChildOfCommonDirectory(): Boolean = hasVisibilities(
+        VisibilityType.IS_IN_TEAM_SPACE_FOLDER, VisibilityType.IS_TEAM_SPACE_FOLDER
+    )
+
     fun hasVisibilities(vararg types: VisibilityType) = getVisibilityType() in types
 
     fun getWorkerTag() = "${id}_$driveId"
