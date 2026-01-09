@@ -66,9 +66,17 @@ class DriveMigration : RealmMigration {
                 addRealmListField("maintenanceTypes", maintenanceTypeSchema)
             }
         }
+
+        // Migrated to version 4
+        if (oldVersion < 4L) {
+            schema["Drive"]?.apply {
+                renameField("isAdmin", "isOrganisationAdmin")
+            }
+        }
+
     }
 
     companion object {
-        const val DB_VERSION = 3L // Must be bumped when the schema changes
+        const val DB_VERSION = 4L // Must be bumped when the schema changes
     }
 }

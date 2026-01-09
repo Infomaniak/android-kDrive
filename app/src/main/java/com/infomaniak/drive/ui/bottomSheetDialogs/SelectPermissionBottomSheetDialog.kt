@@ -122,7 +122,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 ShareablePermission.READ,
                 ShareablePermission.WRITE_EXTERNAL,
                 ShareablePermission.DELETE,
-                ShareablePermission.REMOVE_DRIVE_ACCESS.takeIf { AccountUtils.getCurrentDrive()?.isAdmin == true }
+                ShareablePermission.REMOVE_DRIVE_ACCESS.takeIf { AccountUtils.getCurrentDrive()?.isOrganisationAdmin == true }
             )
             PermissionsGroup.USERS_RIGHTS -> listOfNotNull(
                 ShareablePermission.READ,
