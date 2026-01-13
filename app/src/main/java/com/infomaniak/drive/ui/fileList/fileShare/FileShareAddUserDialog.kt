@@ -55,8 +55,8 @@ import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.databinding.FragmentBottomSheetFileShareBinding
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.getDriveUsers
 import com.infomaniak.drive.utils.setupAvailableShareableItems

@@ -50,8 +50,8 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.FragmentFileShareLinkSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.showOrHideEmptyError
