@@ -30,9 +30,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.hideKeyboard
-import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
@@ -257,7 +257,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             isOnlyOffice = file.hasOnlyoffice,
             shareLinkExist = shareLink != null,
         )
-        safeNavigate(
+        safelyNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                 currentFileId = file.id,
                 currentPermission = currentPermission,
@@ -268,7 +268,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
 
     private fun handleOnShareLinkSettingsClicked(newShareLink: ShareLink) {
         shareLink = newShareLink
-        safeNavigate(
+        safelyNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareLinkSettings(
                 fileId = file.id,
                 driveId = file.driveId,
@@ -294,18 +294,18 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             else -> PermissionsGroup.USERS_RIGHTS
         }
 
-        safeNavigate(
+        safelyNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                 currentShareable = shareable,
                 currentFileId = file.id,
-                currentPermission = shareable.getFilePermission(isExternal = permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS),
+                currentPermission = shareable.getFilePermission(),
                 permissionsGroup = permissionsGroup,
             )
         )
     }
 
     private fun openAddUserDialog(element: Shareable) = with(availableShareableItemsAdapter) {
-        safeNavigate(
+        safelyNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedItem = element,
                 notShareableIds = notShareableIds.toIntArray(),
