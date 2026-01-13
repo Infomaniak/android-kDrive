@@ -36,9 +36,9 @@ interface Shareable : Parcelable {
         }
     }
 
-    fun getFilePermission(isExternal: Boolean = false): ShareablePermission = when (right) {
+    fun getFilePermission(): ShareablePermission = when (right) {
         ShareablePermission.READ.apiValue -> ShareablePermission.READ
-        ShareablePermission.WRITE.apiValue -> if (isExternal) ShareablePermission.WRITE_EXTERNAL else ShareablePermission.WRITE
+        ShareablePermission.WRITE.apiValue -> if (isExternalUser) ShareablePermission.WRITE_EXTERNAL else ShareablePermission.WRITE
         ShareablePermission.MANAGE.apiValue -> ShareablePermission.MANAGE
         else -> ShareablePermission.READ
     }
