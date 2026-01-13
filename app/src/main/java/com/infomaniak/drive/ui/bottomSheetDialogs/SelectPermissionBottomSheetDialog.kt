@@ -37,6 +37,7 @@ import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R
@@ -227,11 +228,9 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         bundle: Bundle,
         @StringRes errorMessage: Int,
     ) {
-        val errorDescription = apiResponse.error?.description
         when {
-            errorDescription != null -> SnackbarUtils.showSnackbar(requireView(), errorDescription)
-            apiResponse.data == true -> setBackNavigationResult(key, bundle)
-            else -> SnackbarUtils.showSnackbar(requireView(), errorMessage)
+            apiResponse.isSuccess() -> setBackNavigationResult(key, bundle)
+            else -> SnackbarUtils.showSnackbar(requireView(), apiResponse.translateError(errorMessage))
         }
         binding.saveButton.hideProgressCatching(R.string.buttonSave)
     }
