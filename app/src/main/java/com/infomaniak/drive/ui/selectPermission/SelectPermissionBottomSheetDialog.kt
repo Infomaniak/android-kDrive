@@ -89,15 +89,15 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private fun getPermissions(): List<Permission> {
         return when (permissionsGroup) {
-            PermissionsGroup.SHARE_LINK_FILE_SETTINGS -> arrayListOf(
+            PermissionsGroup.SHARE_LINK_FILE_SETTINGS -> listOf(
                 ShareLink.ShareLinkFilePermission.RESTRICTED,
                 ShareLink.ShareLinkFilePermission.PUBLIC
             )
-            PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS -> arrayListOf(
+            PermissionsGroup.SHARE_LINK_FOLDER_SETTINGS -> listOf(
                 ShareLink.ShareLinkFolderPermission.RESTRICTED,
                 ShareLink.ShareLinkFolderPermission.PUBLIC
             )
-            PermissionsGroup.SHARE_LINK_DOCUMENT_SETTINGS -> arrayListOf(
+            PermissionsGroup.SHARE_LINK_DOCUMENT_SETTINGS -> listOf(
                 ShareLink.ShareLinkDocumentPermission.RESTRICTED,
                 ShareLink.ShareLinkDocumentPermission.PUBLIC
             )
@@ -121,11 +121,11 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 Shareable.ShareablePermission.MANAGE.takeIf { selectPermissionViewModel.currentFile?.isChildOfCommonDirectory() == true },
                 Shareable.ShareablePermission.DELETE
             )
-            PermissionsGroup.SHARE_LINK_FILE_OFFICE -> arrayListOf(
+            PermissionsGroup.SHARE_LINK_FILE_OFFICE -> listOf(
                 ShareLink.OfficeFilePermission.READ,
                 ShareLink.OfficeFilePermission.WRITE
             )
-            PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> arrayListOf(
+            PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> listOf(
                 ShareLink.OfficeFolderPermission.READ,
                 ShareLink.OfficeFolderPermission.WRITE
             )
