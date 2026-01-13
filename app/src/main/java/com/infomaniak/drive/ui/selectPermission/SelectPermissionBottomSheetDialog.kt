@@ -43,7 +43,6 @@ import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.databinding.FragmentSelectPermissionBinding
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.parcelize.Parcelize
