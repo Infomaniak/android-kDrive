@@ -155,6 +155,7 @@
     <string name="buttonRefresh">Aggiorna</string>
     <string name="buttonRemoveDriveAccess">Ritira l’accesso al drive</string>
     <string name="buttonRemoveFavorites">Elimina i preferiti</string>
+    <string name="buttonRemoveUserFromShare">Elimina la condivisione</string>
     <string name="buttonRename">Rinomina</string>
     <string name="buttonRenew">Rinnovare</string>
     <string name="buttonRetry">Riprova</string>
@@ -473,7 +474,7 @@
     <string name="kDrivePdfViewer">Visualizzatore di PDF kDrive</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
     <string name="localizedFilenamePrivateTeamSpace">La mia cartella</string>
-    <string name="localizedFilenameTeamSpace">Cartelle comuni</string>
+    <string name="localizedFilenameTeamSpace">Cartelle dell’organizzazione</string>
     <string name="locateButton">Localizzare</string>
     <string name="maintenanceAsleepDescription">Per ridurre l’impatto sull’ambiente, il tuo kDrive entra in modalità stand-by in caso di inattività prolungata.\nRiavvialo per riottenere l’accesso ai tuoi file!</string>
     <string name="maintenanceAsleepTitle">Il tuo kDrive %s ha fatto un riposino!</string>

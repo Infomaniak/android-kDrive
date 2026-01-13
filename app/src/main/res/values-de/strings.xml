@@ -155,6 +155,7 @@
     <string name="buttonRefresh">Aktualisieren</string>
     <string name="buttonRemoveDriveAccess">Zugang zum Drive entfernen</string>
     <string name="buttonRemoveFavorites">Von den Favoriten entfernen</string>
+    <string name="buttonRemoveUserFromShare">Freigabe entfernen</string>
     <string name="buttonRename">Umbenennen</string>
     <string name="buttonRenew">Erneuern</string>
     <string name="buttonRetry">Erneut versuchen</string>
@@ -473,7 +474,7 @@
     <string name="kDrivePdfViewer">kDrive PDF-Betrachter</string>
     <string name="lastEditsTitle">Letzte Änderungen</string>
     <string name="localizedFilenamePrivateTeamSpace">Mein Ordner</string>
-    <string name="localizedFilenameTeamSpace">Gemeinsame Ordner</string>
+    <string name="localizedFilenameTeamSpace">Organisationsordner</string>
     <string name="locateButton">Finden Sie</string>
     <string name="maintenanceAsleepDescription">Um die Umweltbelastung zu verringern, hat sich Ihr kDrive nach längerer Inaktivität in den Standby-Modus versetzt.\nStarten Sie ihn neu, um wieder Zugriff auf Ihre Dateien zu erhalten!</string>
     <string name="maintenanceAsleepTitle">Ihr kDrive %s hat sich ein kleines Nickerchen gegönnt!</string>
@@ -760,6 +761,6 @@
     <string name="userPermissionReadDescription">Nur Anzeige\nDownload</string>
     <string name="userPermissionRemove">Der Benutzer hat keinen Zugriff auf diese Datei mehr.</string>
     <string name="userPermissionWrite">Kann ändern</string>
-    <string name="userPermissionWriteDescription">Änderung der Datei\nDownload\nHinzufügen eines Kommentars\nHinzufügen und Anlegen einer Datei / eines Ordners\nLöschung von Dateien / Ordnern</string>
+    <string name="userPermissionWriteDescription">Änderung der Datei\nDownload\nHinzufügen eines Kommentars\nHinzufügen und Erstellen einer Datei / eines Ordners\nLöschen einer Datei / eines Ordners</string>
     <string name="userPermissionWriteExternalDescription">Änderung der Datei\nDownload\nHinzufügen eines Kommentars\nHinzufügen und Anlegen einer Datei / eines Ordners\nLöschung eigener Dateien / Ordner</string>
 </resources>

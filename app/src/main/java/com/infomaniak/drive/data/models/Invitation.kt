@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.models
 
-import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
@@ -32,7 +31,5 @@ data class Invitation(
     val user: DriveUser? = null,
     @SerializedName("invitation_drive_id")
     val invitationDriveId: Int = -1,
-) : Parcelable, Shareable {
-    override val isExternalUser: Boolean
-        get() = true
-}
+    override val isExternalUser: Boolean = true
+) : Shareable

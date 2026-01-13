@@ -31,9 +31,9 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Invitation
-import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Shareable
 import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.data.models.UserFileAccess
 import com.infomaniak.drive.databinding.ItemShareableItemBinding
 import com.infomaniak.drive.ui.fileList.fileShare.SharedItemsAdapter.SharedItemsViewHolder
 import com.infomaniak.drive.utils.loadAny

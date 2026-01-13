@@ -155,6 +155,7 @@
     <string name="buttonRefresh">Actualiser</string>
     <string name="buttonRemoveDriveAccess">Retirer l’accès au drive</string>
     <string name="buttonRemoveFavorites">Supprimer des favoris</string>
+    <string name="buttonRemoveUserFromShare">Supprimer le partage</string>
     <string name="buttonRename">Renommer</string>
     <string name="buttonRenew">Renouveler</string>
     <string name="buttonRetry">Réessayer</string>
@@ -473,7 +474,7 @@
     <string name="kDrivePdfViewer">Lecteur PDF de kDrive</string>
     <string name="lastEditsTitle">Dernières modifications</string>
     <string name="localizedFilenamePrivateTeamSpace">Mon dossier</string>
-    <string name="localizedFilenameTeamSpace">Dossiers communs</string>
+    <string name="localizedFilenameTeamSpace">Dossiers de l’organisation</string>
     <string name="locateButton">Localiser</string>
     <string name="maintenanceAsleepDescription">Pour réduire l’impact écologique, votre kDrive s’est mis en veille suite à une inactivité prolongée.\nRelancez-le pour retrouver l’accès à vos fichiers !</string>
     <string name="maintenanceAsleepTitle">Votre kDrive %s s’est offert une petite sieste !</string>
@@ -761,5 +762,5 @@
     <string name="userPermissionRemove">L’utilisateur n’aura plus accès à ce fichier.</string>
     <string name="userPermissionWrite">Peut modifier</string>
     <string name="userPermissionWriteDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression de fichier / dossier</string>
-    <string name="userPermissionWriteExternalDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression de ses propres fichiers / dossiers</string>
+    <string name="userPermissionWriteExternalDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichiers / dossiers\nSuppression de ses propres fichiers / dossiers</string>
 </resources>

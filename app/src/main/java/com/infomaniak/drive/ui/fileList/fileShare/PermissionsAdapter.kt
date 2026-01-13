@@ -33,8 +33,8 @@ import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
+import com.infomaniak.drive.data.models.UserFileAccess
 import com.infomaniak.drive.databinding.CardviewPermissionBinding
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter.PermissionsViewHolder
 import com.infomaniak.drive.utils.AccountUtils

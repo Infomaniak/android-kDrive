@@ -37,8 +37,8 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Share
-import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Team
+import com.infomaniak.drive.data.models.UserFileAccess
 import com.infomaniak.drive.databinding.FragmentCreateFolderBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel

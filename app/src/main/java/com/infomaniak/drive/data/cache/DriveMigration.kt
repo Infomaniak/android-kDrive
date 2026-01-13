@@ -29,7 +29,6 @@ class DriveMigration : RealmMigration {
 
         // Migrated to version 1
         if (oldVersion < 1L) {
-
             val driveQuotaSchema = schema.create("DriveQuota").apply {
                 addField("current", Int::class.java)
                 addField("max", Int::class.java)
@@ -50,7 +49,6 @@ class DriveMigration : RealmMigration {
 
         // Migrated to version 2
         if (oldVersion < 2L) {
-
             schema["Drive"]?.apply {
                 renameField("accountAdmin", "isAdmin")
             }
@@ -73,7 +71,6 @@ class DriveMigration : RealmMigration {
                 renameField("isAdmin", "isOrganisationAdmin")
             }
         }
-
     }
 
     companion object {
