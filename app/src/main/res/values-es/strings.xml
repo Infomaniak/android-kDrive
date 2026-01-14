@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2025 Infomaniak Network SA
+  ~ Copyright (C) 2022-2026 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -583,7 +583,6 @@
     <string name="publicShareOutdatedLinkTitle">Los archivos ya no están disponibles</string>
     <string name="publicSharePasswordNeededDescription">Introduzca la contraseña que se le ha facilitado para acceder al contenido.</string>
     <string name="publicSharePasswordNeededTitle">Contenido seguro</string>
-    <string name="publicSharePasswordNotSupportedDescription">Los enlaces protegidos por contraseña aún no están disponibles en la aplicación móvil.</string>
     <string name="publicSharedLinkTitle">Enlace de uso compartido público</string>
     <string name="recentActivityMeTitle">Por mí</string>
     <string name="recentActivityMyTeam">Por mi equipo</string>
