@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,12 +57,7 @@ class PublicSharePasswordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        // TODO: Remove this and call setupValidationButton instead
-        //  Also change the layout (description, button's title, input visibility)
-        passwordValidateButton.setOnClickListener {
-            trackPublicShareActionEvent(MatomoName.OpenInBrowser)
-            PublicShareUtils.openDeepLinkInBrowser(requireActivity(), getPublicShareUrl())
-        }
+        setupValidationButton()
 
         publicSharePasswordEditText.addTextChangedListener { publicSharePasswordLayout.error = null }
         observeSubmitPasswordResult()
@@ -87,6 +82,7 @@ class PublicSharePasswordFragment : Fragment() {
             if (isFieldBlank()) return@setOnClickListener
 
             showProgressCatching()
+            trackPublicShareActionEvent(MatomoName.ValidatePassword)
             val password = binding.publicSharePasswordEditText.text?.trim().toString()
             publicShareViewModel.submitPublicSharePassword(password)
         }
