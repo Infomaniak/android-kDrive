@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -313,48 +313,69 @@ object ApiRoutes {
 
     /** Public Share */
     //region Public share
-    fun getPublicShareInfo(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/init"
+    fun getPublicShareInfo(driveId: Int, linkUuid: String, authToken: String? = null): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${getPublicShareUrlV2(driveId, linkUuid)}/init$authParam"
+    }
 
     fun submitPublicSharePassword(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/auth"
 
-    fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId?$sharedFileWithQuery"
+    fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
+        val authParam = authToken?.let { "&sharelink_token=$it" } ?: ""
+        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId?$sharedFileWithQuery$authParam"
+        // todo
     }
 
-    fun getPublicShareChildrenFiles(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
+    fun getPublicShareChildrenFiles(
+        driveId: Int,
+        linkUuid: String,
+        fileId: Int,
+        sortType: SortType,
+        authToken: String? = null
+    ): String {
+        val authParam = authToken?.let { "&sharelink_token=$it" } ?: ""
         val orderQuery = "order_by=${sortType.orderBy}&order=${sortType.order}"
-        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery"
+        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery$authParam"
+        // TODO
     }
 
     fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): String {
         return "${publicShareFile(driveId, linkUuid, fileId)}/count"
     }
 
-    private fun getPublicShareFileThumbnail(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "${publicShareFile(driveId, linkUuid, fileId)}/thumbnail"
+    private fun getPublicShareFileThumbnail(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${publicShareFile(driveId, linkUuid, fileId)}/thumbnail$authParam" // tODO
     }
 
-    private fun getPublicShareFilePreview(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "${publicShareFile(driveId, linkUuid, fileId)}/preview"
+    private fun getPublicShareFilePreview(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${publicShareFile(driveId, linkUuid, fileId)}/preview$authParam" //TODO
     }
 
-    private fun downloadPublicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "${publicShareFile(driveId, linkUuid, fileId)}/download"
+    private fun downloadPublicShareFile(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${publicShareFile(driveId, linkUuid, fileId)}/download$authParam" // TODO
     }
 
-    private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int): String {
+    private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
         // For now, this call fails because the back hasn't dev the conversion of office files to pdf for mobile
-        return "$SHARE_URL_V1/share/$driveId/$linkUuid/preview/text/$fileId"
+        return "$SHARE_URL_V1/share/$driveId/$linkUuid/preview/text/$fileId" // TODO CHeck
     }
 
-    fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
+    fun importPublicShareFiles(driveId: Int, authToken: String? = null) = "${driveURLV2(driveId)}/imports/sharelink" // TODO
 
-    fun buildPublicShareArchive(driveId: Int, linkUuid: String): String {
+    fun buildPublicShareArchive(driveId: Int, linkUuid: String, authToken: String? = null): String {
         return "${getPublicShareUrlV2(driveId, linkUuid)}/archive"
     }
 
-    fun downloadPublicShareArchive(driveId: Int, publicShareUuid: String, archiveUuid: String): String {
-        return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download"
+    fun downloadPublicShareArchive(
+        driveId: Int,
+        publicShareUuid: String,
+        archiveUuid: String,
+        authToken: String? = null
+    ): String {
+        return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download" // TODO
     }
 
     private fun publicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
