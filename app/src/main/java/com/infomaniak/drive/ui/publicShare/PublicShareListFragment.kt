@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -352,7 +352,7 @@ class PublicShareListFragment : FileListFragment() {
                 cancelDownload()
 
                 if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
-                    downloadPublicShareRootFile()
+                    downloadPublicShareRootFile(rootFileId = folderId)
                 } else {
                     getFiles(folderId, fileListViewModel.sortType, isNewSort)
                 }
