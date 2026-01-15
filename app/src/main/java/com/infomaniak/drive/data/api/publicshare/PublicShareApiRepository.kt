@@ -17,7 +17,6 @@
  */
 package com.infomaniak.drive.data.api.publicshare
 
-import android.util.Log
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.api.ApiController.ApiMethod.GET
 import com.infomaniak.core.network.api.ApiController.ApiMethod.POST
@@ -25,6 +24,7 @@ import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.api.ApiRoutes.appendQuery
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -153,14 +153,7 @@ object PublicShareApiRepository {
         body: Any? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): T {
-        Log.e("TOTO", "callPublicShareApi: $authToken")
-        val authParam = authToken?.let { token ->
-            val paramPrefix = if (url.contains("?")) "&" else "?"
-            "${paramPrefix}sharelink_token=$token"
-        } ?: ""
-
-        val authentifiedUrl = url + authParam
-        Log.e("TOTO", "callPublicShareApi: $authentifiedUrl")
+        val authentifiedUrl = authToken?.let { token -> url.appendQuery("sharelink_token=$token") } ?: url
         return ApiController.callApi(authentifiedUrl, method, body, okHttpClient)
     }
 

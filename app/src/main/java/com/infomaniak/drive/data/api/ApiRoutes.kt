@@ -137,8 +137,7 @@ object ApiRoutes {
             imagePreviewFile(file)
         }
 
-        val querySeparator = if (url.contains("?")) "&" else "?"
-        return "$url${querySeparator}width=2500&height=1500&quality=80"
+        return url.appendQuery("width=2500&height=1500&quality=80")
     }
 
     fun getOnlyOfficeUrl(file: File) = with(file) {
@@ -345,12 +344,12 @@ object ApiRoutes {
 
     private fun getPublicShareFilePreview(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
         val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
-        return "${publicShareFile(driveId, linkUuid, fileId)}/preview$authParam" //TODO
+        return "${publicShareFile(driveId, linkUuid, fileId)}/preview$authParam"
     }
 
     private fun downloadPublicShareFile(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
         val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
-        return "${publicShareFile(driveId, linkUuid, fileId)}/download$authParam" // TODO
+        return "${publicShareFile(driveId, linkUuid, fileId)}/download$authParam"
     }
 
     private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
@@ -463,4 +462,9 @@ object ApiRoutes {
 
     private fun showOffice(file: File) = "${OFFICE_URL}/${file.driveId}/${file.id}"
     //endregion
+
+    fun String.appendQuery(query: String): String {
+        val querySeparator = if (contains("?")) "&" else "?"
+        return this + querySeparator + query
+    }
 }
