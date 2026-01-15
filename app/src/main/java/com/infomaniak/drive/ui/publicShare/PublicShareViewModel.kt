@@ -124,7 +124,11 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             apiResponse.data
         }
 
-        rootSharedFile.postValue(file?.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid })
+        val publicShareFile = file?.apply {
+            publicShareUuid = this@PublicShareViewModel.publicShareUuid
+            publicShareAuthToken = submitPasswordResult.value
+        }
+        rootSharedFile.postValue(publicShareFile)
     }
 
     fun getFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
@@ -144,7 +148,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
                 val newFiles = mutableListOf<File>().apply {
                     childrenLiveData.value?.files?.let(::addAll)
-                    addAll(folderFilesProviderResult.folderFiles.addPublicShareUuid())
+                    addAll(folderFilesProviderResult.folderFiles.addPublicShareInfo())
                     if (any(File::isFolder)) sortByDescending(File::isFolder)
                 }
 
@@ -269,7 +273,12 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         }
     }
 
-    private fun List<File>.addPublicShareUuid() = map { it.apply { publicShareUuid = this@PublicShareViewModel.publicShareUuid } }
+    private fun List<File>.addPublicShareInfo() = map {
+        it.apply {
+            publicShareUuid = this@PublicShareViewModel.publicShareUuid
+            publicShareAuthToken = submitPasswordResult.value
+        }
+    }
 
     data class PublicShareFilesResult(
         val files: List<File>,
