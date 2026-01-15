@@ -41,8 +41,9 @@ object PublicShareApiRepository {
 
     suspend fun getPublicShareInfo(driveId: Int, linkUuid: String, authToken: String? = null): ApiResponse<ShareLink> {
         return callPublicShareApi(
-            url = ApiRoutes.getPublicShareInfo(driveId, linkUuid, authToken),
+            url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
             method = GET,
+            authToken = authToken,
             okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
         )
     }
@@ -62,8 +63,9 @@ object PublicShareApiRepository {
         authToken: String? = null
     ): ApiResponse<File> {
         return callPublicShareApi(
-            url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId, authToken),
+            url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId),
             method = GET,
+            authToken = authToken,
         )
     }
 
@@ -75,16 +77,23 @@ object PublicShareApiRepository {
         cursor: String?,
         authToken: String? = null,
     ): CursorApiResponse<List<File>> {
-        val url =
-            ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType, authToken) + "&${loadCursor(cursor)}"
+        val baseUrl = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType)
+        val authParam = authToken?.let { "&sharelink_token=$it" } ?: ""
+        val url = baseUrl + authParam + "&${loadCursor(cursor)}"
+
         return callApiWithCursor(url, GET)
     }
 
-    suspend fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount> {
-        // TODO auth
+    suspend fun getPublicShareFileCount(
+        driveId: Int,
+        linkUuid: String,
+        fileId: Int,
+        authToken: String? = null,
+    ): ApiResponse<FileCount> {
         return callPublicShareApi(
             url = ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId),
             method = GET,
+            authToken = authToken,
         )
     }
 
@@ -95,9 +104,10 @@ object PublicShareApiRepository {
         authToken: String? = null
     ): ApiResponse<ArchiveUUID> {
         return callPublicShareApi(
-            url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid, authToken),
+            url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid),
             method = POST,
             body = archiveBody,
+            authToken = authToken,
         )
     }
 
@@ -124,8 +134,9 @@ object PublicShareApiRepository {
         if (exceptedFileIds.isNotEmpty()) body["except_file_ids"] = exceptedFileIds.toTypedArray()
 
         return callPublicShareApi(
-            url = ApiRoutes.importPublicShareFiles(destinationDriveId, authToken),
+            url = ApiRoutes.importPublicShareFiles(destinationDriveId),
             method = POST,
+            authToken = authToken,
             body = body,
             okHttpClient = AccountUtils.getHttpClient(
                 userId = destinationUserId,
