@@ -237,10 +237,11 @@ class SettingsFragment : Fragment() {
 
     private fun registerFileSyncSettingResultListener() {
         getBackNavigationResult<Boolean>(KEY_BACK_ACTION_BOTTOM_SHEET) { isOnlyWifiSyncOffline ->
-            binding.fileSync.title =
-                getString(if (isOnlyWifiSyncOffline) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle)
-            binding.fileSync.description =
-                getString(if (isOnlyWifiSyncOffline) R.string.syncOnlyWifiDescription else R.string.syncWifiAndMobileDataDescription)
+            val (title, description) =
+                if (isOnlyWifiSyncOffline) R.string.syncOnlyWifiTitle to R.string.syncOnlyWifiDescription
+                else R.string.syncWifiAndMobileDataTitle to R.string.syncWifiAndMobileDataDescription
+            binding.fileSync.title = getString(title)
+            binding.fileSync.description = getString(description)
         }
     }
 
