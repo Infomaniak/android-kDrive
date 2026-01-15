@@ -37,6 +37,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.ui.fileList.BaseDownloadProgressDialog.DownloadAction
+import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
 import com.infomaniak.drive.utils.IOFile
 import io.sentry.Sentry
 import kotlinx.coroutines.Job
@@ -61,6 +62,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     val submitPasswordResult = SingleLiveEvent<String>()
     var hasBeenAuthenticated = false
     var canDownloadFiles = canDownload
+    var fileId = PUBLIC_SHARE_DEFAULT_ID
 
     private val _fetchCacheFileForActionResult = MutableSharedFlow<Pair<IOFile?, DownloadAction>>(
         extraBufferCapacity = 1,
@@ -70,9 +72,6 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
     val driveId: Int
         inline get() = savedStateHandle[PublicShareActivityArgs::driveId.name] ?: ROOT_SHARED_FILE_ID
-
-    val fileId: Int
-        inline get() = savedStateHandle[PublicShareActivityArgs::fileId.name] ?: ROOT_SHARED_FILE_ID
 
     val publicShareUuid: String
         inline get() = savedStateHandle[PublicShareActivityArgs::publicShareUuid.name] ?: ""
@@ -111,14 +110,14 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         submitPasswordResult.postValue(token)
     }
 
-    fun downloadPublicShareRootFile(rootFileId: Int) = viewModelScope.launch {
-        val file = if (rootFileId == ROOT_SHARED_FILE_ID) {
+    fun downloadPublicShareRootFile() = viewModelScope.launch {
+        val file = if (fileId == ROOT_SHARED_FILE_ID) {
             rootSharedFile.value
         } else {
             val apiResponse = PublicShareApiRepository.getPublicShareRootFile(
                 driveId = driveId,
                 linkUuid = publicShareUuid,
-                fileId = rootFileId,
+                fileId = fileId,
                 authToken = submitPasswordResult.value,
             )
             if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
