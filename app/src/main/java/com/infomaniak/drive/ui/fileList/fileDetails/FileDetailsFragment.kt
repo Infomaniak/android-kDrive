@@ -33,12 +33,12 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.button.MaterialButton
-import com.infomaniak.core.extensions.isNightModeEnabled
-import com.infomaniak.core.extensions.lightStatusBar
+import com.infomaniak.core.common.extensions.isNightModeEnabled
+import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.setMargins
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.FileController

@@ -31,8 +31,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.infomaniak.core.extensions.isNightModeEnabled
-import com.infomaniak.core.extensions.lightStatusBar
+import com.infomaniak.core.common.extensions.isNightModeEnabled
+import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.MatomoDrive.trackScreen

@@ -35,14 +35,14 @@ import coil3.SingletonImageLoader
 import coil3.gif.AnimatedImageDecoder
 import coil3.gif.GifDecoder
 import com.facebook.stetho.Stetho
-import com.infomaniak.core.AssociatedUserDataCleanable
 import com.infomaniak.core.auth.AccessTokenUsageInterceptor
 import com.infomaniak.core.auth.AuthConfiguration
 import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.coil.ImageLoaderProvider
+import com.infomaniak.core.common.AssociatedUserDataCleanable
+import com.infomaniak.core.common.extensions.clearStack
 import com.infomaniak.core.crossapplogin.back.internal.deviceinfo.DeviceInfoUpdateManager
-import com.infomaniak.core.extensions.clearStack
 import com.infomaniak.core.inappupdate.AppUpdateScheduler
 import com.infomaniak.core.legacy.InfomaniakCore
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS

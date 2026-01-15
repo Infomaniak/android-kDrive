@@ -25,7 +25,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
-import com.infomaniak.core.cancellable
+import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication

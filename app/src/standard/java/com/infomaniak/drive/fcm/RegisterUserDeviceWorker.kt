@@ -19,8 +19,8 @@ package com.infomaniak.drive.fcm
 
 import android.content.Context
 import androidx.work.WorkerParameters
-import com.infomaniak.core.isChannelEnabled
-import com.infomaniak.core.isChannelEnabledFlow
+import com.infomaniak.core.common.isChannelEnabled
+import com.infomaniak.core.common.isChannelEnabledFlow
 import com.infomaniak.core.notifications.registration.AbstractNotificationsRegistrationWorker
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.twofactorauth.back.notifications.TwoFactorAuthNotifications

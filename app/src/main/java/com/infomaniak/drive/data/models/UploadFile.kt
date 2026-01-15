@@ -26,8 +26,8 @@ import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.infomaniak.core.network.models.exceptions.NetworkException
-import com.infomaniak.core.utils.SECONDS_IN_A_DAY
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.SECONDS_IN_A_DAY
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption

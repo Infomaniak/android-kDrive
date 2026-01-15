@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.models
 
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.utils.ApiEnum
+import com.infomaniak.core.common.utils.ApiEnum
 
 enum class FileActivityType(override val apiValue: String) : ApiEnum {
     @SerializedName("file_access")
