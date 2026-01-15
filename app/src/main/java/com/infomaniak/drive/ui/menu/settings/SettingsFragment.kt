@@ -43,6 +43,7 @@ import com.infomaniak.core.legacy.bugtracker.BugTrackerActivity
 import com.infomaniak.core.legacy.bugtracker.BugTrackerActivityArgs
 import com.infomaniak.core.legacy.ui.WebViewActivity
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
+import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.openAppNotificationSettings
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
@@ -59,10 +60,7 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
-import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
-import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.getDashboardData
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
@@ -87,16 +85,6 @@ class SettingsFragment : Fragment() {
 
         toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        val syncPermissions = DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).apply {
-            registerPermissions(this@SettingsFragment) { authorized -> if (authorized) requireActivity().syncImmediately() }
-        }
-
-        onlyWifiSync.isChecked = AppSettings.onlyWifiSync
-        onlyWifiSync.setOnCheckedChangeListener { _, isChecked ->
-            trackSettingsEvent(MatomoName.OnlyWifiTransfer, isChecked)
-            AppSettings.onlyWifiSync = isChecked
-            requireActivity().launchAllUpload(syncPermissions)
-        }
 
         setupMyKSuiteLayout()
 
@@ -114,6 +102,9 @@ class SettingsFragment : Fragment() {
                 isGone = true
             }
         }
+
+        fileSync.setOnClickListener { safelyNavigate(R.id.syncFilesBottomSheetDialog) }
+        registerFileSyncSettingResultListener()
         about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
         feedback.setOnClickListener { navigateToFeedback() }
         setDeleteAccountClickListener()
@@ -244,32 +235,18 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    private fun registerFileSyncSettingResultListener() {
+        getBackNavigationResult<Boolean>(KEY_BACK_ACTION_BOTTOM_SHEET) { isOnlyWifiSyncOffline ->
+            binding.fileSync.title =
+                getString(if (isOnlyWifiSyncOffline) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle)
+            binding.fileSync.description =
+                getString(if (isOnlyWifiSyncOffline) R.string.syncOnlyWifiDescription else R.string.syncWifiAndMobileDataDescription)
+        }
+    }
+
     companion object {
         private val URL_REDIRECT_SUCCESSFUL_ACCOUNT_DELETION = "login.${ApiEnvironment.current.host}"
         private val TERMINATE_ACCOUNT_FULL_URL = "$AUTOLOG_URL/?url=$TERMINATE_ACCOUNT_URL"
-    }
-
-    private fun performSyncUpdate() {
-        requireActivity().launchAllUpload(drivePermissions)
-    }
-
-    private fun listenBackNavigationResultBottomSheet() {
-        getBackNavigationResult<SyncFilesOption>(KEY_BACK_ACTION_BOTTOM_SHEET) { result ->
-            AppSettings.onlyWifiSync = result == SyncFilesOption.ONLY_WIFI
-            binding.fileSyncValue.text = requireContext().getString(result.title)
-            performSyncUpdate()
-        }
-    }
-
-    private fun setupDrivePermission() {
-        drivePermissions = DrivePermissions().apply {
-            registerPermissions(this@SettingsFragment) { authorized ->
-                if (authorized) requireActivity().syncImmediately()
-            }
-        }
-    }
-
-    companion object {
         const val KEY_BACK_ACTION_BOTTOM_SHEET = "syncFilesBottomSheetDialog"
 
         enum class SyncFilesOption(@StringRes val title: Int) {
