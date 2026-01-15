@@ -20,6 +20,7 @@ package com.infomaniak.drive.data.models
 import com.infomaniak.core.common.flowOnNewHandlerThread
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.DynamicRealm
+import io.realm.FieldAttribute
 import io.realm.Realm
 import io.realm.RealmConfiguration
 import io.realm.RealmMigration
@@ -86,47 +87,30 @@ open class AppSettings(
             replay = 1,
         )
 
-        fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
-            return getRealmInstance().use { realm ->
-                var appSettings = getAppSettingsQuery(realm)
-
-                realm.executeTransaction {
-                    if (appSettings == null) {
-                        appSettings = it.copyToRealm(AppSettings())
+        fun updateAppSettings(scope: CoroutineScope = Companion.scope, onUpdate: AppSettings.() -> Unit) {
+            scope.launch(Dispatchers.IO) {
+                getRealmInstance().use { realm ->
+                    realm.executeTransaction {
+                        onUpdate(getAppSettingsQuery(realm) ?: it.copyToRealm(AppSettings()))
                     }
-                    onUpdate(appSettings!!)
                 }
             }
         }
 
         fun resetAppSettings() {
-            updateAppSettings { appSettings ->
-                appSettings.update(AppSettings())
-            }
-        }
-
-        fun removeAppSettings() {
-            getRealmInstance().use { realm ->
-                realm.executeTransaction {
-                    it.where(AppSettings::class.java).findFirst()?.deleteFromRealm()
-                }
-            }
+            updateAppSettings { update(AppSettings()) }
         }
 
         var appSecurityLock: Boolean = getAppSettings()._appSecurityEnabled
             set(value) {
                 field = value
-                scope.launch(Dispatchers.IO) {
-                    updateAppSettings { appSettings -> appSettings._appSecurityEnabled = value }
-                }
+                updateAppSettings { _appSecurityEnabled = value }
             }
 
         var onlyWifiSyncOffline: Boolean = getAppSettings()._onlyWifiSyncOffline
             set(value) {
                 field = value
-                scope.launch(Dispatchers.IO) {
-                    updateAppSettings { appSettings -> appSettings._onlyWifiSyncOffline = value }
-                }
+                updateAppSettings { _onlyWifiSyncOffline = value }
             }
     }
 
