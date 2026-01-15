@@ -21,10 +21,10 @@ import androidx.collection.IntList
 import androidx.collection.IntObjectMap
 import androidx.collection.buildIntList
 import androidx.collection.buildIntObjectMap
-import com.infomaniak.core.DynamicLazyMap
-import com.infomaniak.core.flowForKey
-import com.infomaniak.core.maxElements
-import com.infomaniak.core.sharedFlow
+import com.infomaniak.core.common.DynamicLazyMap
+import com.infomaniak.core.common.flowForKey
+import com.infomaniak.core.common.maxElements
+import com.infomaniak.core.common.sharedFlow
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Team

@@ -43,9 +43,9 @@ import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.startAppSettingsConfig
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.utils.FORMAT_DATE_CLEAR_MONTH
-import com.infomaniak.core.utils.format
-import com.infomaniak.core.utils.startOfTheDay
+import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
+import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.common.utils.startOfTheDay
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
 import com.infomaniak.drive.R

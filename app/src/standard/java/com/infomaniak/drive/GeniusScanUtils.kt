@@ -34,8 +34,8 @@ import com.geniusscansdk.scanflow.ScanResult
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.Utils
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.utils.FORMAT_NEW_FILE
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs

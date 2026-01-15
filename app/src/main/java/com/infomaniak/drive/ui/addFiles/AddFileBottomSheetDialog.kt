@@ -38,8 +38,8 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
-import com.infomaniak.core.utils.FORMAT_NEW_FILE
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MainApplication
