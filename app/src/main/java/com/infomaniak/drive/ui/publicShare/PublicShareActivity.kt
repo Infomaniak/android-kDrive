@@ -58,7 +58,7 @@ class PublicShareActivity : EdgeToEdgeActivity() {
         }
         onBackPressedDispatcher.addCallback { finishAndRemoveTask() }
 
-        publicShareViewModel.fileId = navigationArgs.fileId
+        publicShareViewModel.rootFileId = navigationArgs.fileId
     }
 
     override fun onDestroy() {

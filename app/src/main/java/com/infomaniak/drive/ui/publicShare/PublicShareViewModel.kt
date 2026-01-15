@@ -62,7 +62,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     val submitPasswordResult = SingleLiveEvent<String>()
     var hasBeenAuthenticated = false
     var canDownloadFiles = canDownload
-    var fileId = PUBLIC_SHARE_DEFAULT_ID
+    var rootFileId = PUBLIC_SHARE_DEFAULT_ID
 
     private val _fetchCacheFileForActionResult = MutableSharedFlow<Pair<IOFile?, DownloadAction>>(
         extraBufferCapacity = 1,
@@ -111,13 +111,13 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     fun downloadPublicShareRootFile() = viewModelScope.launch {
-        val file = if (fileId == ROOT_SHARED_FILE_ID) {
+        val file = if (rootFileId == ROOT_SHARED_FILE_ID) {
             rootSharedFile.value
         } else {
             val apiResponse = PublicShareApiRepository.getPublicShareRootFile(
                 driveId = driveId,
                 linkUuid = publicShareUuid,
-                fileId = fileId,
+                fileId = rootFileId,
                 authToken = submitPasswordResult.value,
             )
             if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
