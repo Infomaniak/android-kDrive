@@ -24,10 +24,15 @@ import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.setBackNavigationResult
+import com.infomaniak.drive.MatomoDrive.MatomoName
+import com.infomaniak.drive.MatomoDrive.trackSettingsEvent
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.FragmentBottomSheetSyncFilesBinding
 import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.KEY_BACK_ACTION_BOTTOM_SHEET
 import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.SyncFilesOption
+import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
+import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 
 class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -38,20 +43,30 @@ class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val syncPermissions = registerDrivePermission()
         with(binding.syncOnlyWifi) {
             isInactive = !AppSettings.onlyWifiSync
-            setOnClickListener { onSelectOption(SyncFilesOption.ONLY_WIFI) }
+            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.ONLY_WIFI) }
         }
-
         with(binding.syncWithAll) {
             isInactive = AppSettings.onlyWifiSync
-            setOnClickListener { onSelectOption(SyncFilesOption.ALL_DATA) }
+            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.ALL_DATA) }
         }
         super.onViewCreated(view, savedInstanceState)
     }
 
-    private fun onSelectOption(option: SyncFilesOption) {
-        setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, option)
+    private fun registerDrivePermission(): DrivePermissions {
+        return DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).apply {
+            registerPermissions(this@SyncFilesBottomSheetDialog) { authorized -> if (authorized) requireActivity().syncImmediately() }
+        }
+    }
+
+    private fun onSelectOption(syncPermissions: DrivePermissions, option: SyncFilesOption) {
+        val isOnlyWifiSyncOffline = option == SyncFilesOption.ONLY_WIFI
+        trackSettingsEvent(MatomoName.OnlyWifiTransfer, isOnlyWifiSyncOffline)
+        AppSettings.onlyWifiSync = isOnlyWifiSyncOffline
+        requireContext().launchAllUpload(syncPermissions)
+        setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, isOnlyWifiSyncOffline)
         dismiss()
     }
 }
