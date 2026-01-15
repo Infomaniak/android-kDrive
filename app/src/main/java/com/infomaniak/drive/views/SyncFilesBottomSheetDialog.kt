@@ -39,17 +39,17 @@ class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(binding.syncOnlyWifi) {
-            isActive = AppSettings.onlyWifiSync
             setOnClickListener {
                 setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, SyncFilesOption.ONLY_WIFI)
             }
+            isInactive = !AppSettings.onlyWifiSync
         }
 
         with(binding.syncWithAll) {
-            isActive = !AppSettings.onlyWifiSync
             setOnClickListener {
                 setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, SyncFilesOption.ALL_DATA)
             }
+            isInactive = AppSettings.onlyWifiSync
         }
         super.onViewCreated(view, savedInstanceState)
     }
