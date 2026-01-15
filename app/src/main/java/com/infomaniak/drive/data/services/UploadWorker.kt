@@ -563,7 +563,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10_000L // 10s (in ms)
 
         fun workConstraints(): Constraints {
-            val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+            val networkType = if (AppSettings.onlyWifiSyncOffline) NetworkType.UNMETERED else NetworkType.CONNECTED
             return Constraints.Builder()
                 .setRequiredNetworkType(networkType)
                 .build()

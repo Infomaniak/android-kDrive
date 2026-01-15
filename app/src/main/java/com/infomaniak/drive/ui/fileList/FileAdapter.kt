@@ -481,7 +481,7 @@ open class FileAdapter(
     }
 
     fun checkIsPendingWifi(context: Context) {
-        if (uploadInProgress && AppSettings.onlyWifiSync) {
+        if (uploadInProgress && AppSettings.onlyWifiSyncOffline) {
             pendingWifiConnection = context.isSyncActive(false)
         }
     }

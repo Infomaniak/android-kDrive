@@ -328,7 +328,7 @@ object Utils {
             BaseDownloadWorker.USER_ID to userDrive.userId,
             BaseDownloadWorker.DRIVE_ID to userDrive.driveId,
         )
-        val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val networkType = if (AppSettings.onlyWifiSyncOffline) NetworkType.UNMETERED else NetworkType.CONNECTED
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(networkType)
             .setRequiresStorageNotLow(true)
@@ -358,7 +358,7 @@ object Utils {
             BaseDownloadWorker.USER_ID to userDrive.userId,
             BaseDownloadWorker.DRIVE_ID to userDrive.driveId,
         )
-        val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+        val networkType = if (AppSettings.onlyWifiSyncOffline) NetworkType.UNMETERED else NetworkType.CONNECTED
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(networkType)
             .setRequiresStorageNotLow(true)
