@@ -22,7 +22,6 @@ import android.database.Cursor
 import android.os.Build.VERSION.SDK_INT
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import androidx.fragment.app.FragmentActivity
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -102,7 +101,7 @@ object SyncUtils {
 
     private fun Long?.isValidDate() = this != null && this > 0
 
-    fun FragmentActivity.launchAllUpload(syncPermissions: DrivePermissions) {
+    fun Context.launchAllUpload(syncPermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
             syncPermissions.hasNeededPermissions() &&
             UploadFile.getAllPendingUploads().isNotEmpty()
