@@ -24,7 +24,7 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.infomaniak.core.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.common.FormatterFileSize.formatShortFileSize
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.databinding.ViewNotEnoughStorageBinding

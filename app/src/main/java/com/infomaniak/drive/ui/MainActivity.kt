@@ -73,7 +73,7 @@ import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
-import com.infomaniak.core.observe
+import com.infomaniak.core.common.observe
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.MatomoCategory

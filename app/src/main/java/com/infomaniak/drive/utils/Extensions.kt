@@ -84,7 +84,7 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.LOGIN_ENDPOINT_URL
 import com.infomaniak.core.network.SUPPORT_URL
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.utils.isEmailRfc5321Compliant
+import com.infomaniak.core.common.utils.isEmailRfc5321Compliant
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent

@@ -33,7 +33,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.common.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.coil.loadAvatar
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.data.KSuite

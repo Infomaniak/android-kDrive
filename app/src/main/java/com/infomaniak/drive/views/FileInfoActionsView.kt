@@ -41,7 +41,7 @@ import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.showToast
-import com.infomaniak.core.utils.DownloadManagerUtils
+import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent

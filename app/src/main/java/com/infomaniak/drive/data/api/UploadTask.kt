@@ -27,7 +27,8 @@ import androidx.core.net.toFile
 import androidx.work.Data
 import androidx.work.workDataOf
 import com.google.gson.annotations.SerializedName
-import com.infomaniak.core.io.skipExactly
+import com.infomaniak.core.common.io.skipExactly
+import com.infomaniak.core.common.rateLimit
 import com.infomaniak.core.ktor.toOutgoingContent
 import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.network.models.ApiError
@@ -35,7 +36,6 @@ import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
-import com.infomaniak.core.rateLimit
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
 import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl

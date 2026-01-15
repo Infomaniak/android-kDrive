@@ -33,12 +33,12 @@ import coil3.ImageLoader
 import coil3.imageLoader
 import coil3.load
 import com.google.android.material.progressindicator.CircularProgressIndicator
-import com.infomaniak.core.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.common.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.core.thumbnails.ThumbnailsUtils.getLocalThumbnail
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.cache.DriveInfosController

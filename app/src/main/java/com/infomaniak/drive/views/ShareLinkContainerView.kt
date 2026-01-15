@@ -25,7 +25,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.infomaniak.core.ksuite.data.KSuite
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
 import com.infomaniak.drive.R

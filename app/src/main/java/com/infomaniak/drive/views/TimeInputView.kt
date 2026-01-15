@@ -28,11 +28,11 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentManager
-import com.infomaniak.core.extensions.isNightModeEnabled
-import com.infomaniak.core.utils.FORMAT_HOUR_MINUTES
-import com.infomaniak.core.utils.format
-import com.infomaniak.core.utils.hours
-import com.infomaniak.core.utils.minutes
+import com.infomaniak.core.common.extensions.isNightModeEnabled
+import com.infomaniak.core.common.utils.FORMAT_HOUR_MINUTES
+import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.common.utils.hours
+import com.infomaniak.core.common.utils.minutes
 import com.infomaniak.drive.databinding.ViewTimeInputBinding
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
 import com.wdullaer.materialdatetimepicker.time.TimePickerDialog.OnTimeSetListener

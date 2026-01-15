@@ -17,7 +17,7 @@
  */
 package com.infomaniak.drive.data.models
 
-import com.infomaniak.core.flowOnNewHandlerThread
+import com.infomaniak.core.common.flowOnNewHandlerThread
 import com.infomaniak.drive.utils.RealmModules
 import io.realm.DynamicRealm
 import io.realm.Realm

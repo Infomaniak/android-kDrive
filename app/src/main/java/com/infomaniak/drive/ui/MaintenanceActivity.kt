@@ -25,7 +25,7 @@ import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
-import com.infomaniak.core.utils.format
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.KDRIVE_WEBAPP
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRoutes

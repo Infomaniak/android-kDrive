@@ -28,7 +28,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.reflect.TypeToken
 import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.cancellable
+import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.exceptions.NetworkException
