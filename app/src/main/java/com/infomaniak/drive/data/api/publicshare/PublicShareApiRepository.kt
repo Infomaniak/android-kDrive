@@ -40,7 +40,7 @@ import okhttp3.OkHttpClient
 object PublicShareApiRepository {
 
     suspend fun getPublicShareInfo(driveId: Int, linkUuid: String, authToken: String? = null): ApiResponse<ShareLink> {
-        return callApi(
+        return callPublicShareApi(
             url = ApiRoutes.getPublicShareInfo(driveId, linkUuid, authToken),
             method = GET,
             okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
@@ -48,7 +48,7 @@ object PublicShareApiRepository {
     }
 
     suspend fun submitPublicSharePassword(driveId: Int, linkUuid: String, password: String): ApiResponse<PublicShareToken> {
-        return callApi(
+        return callPublicShareApi(
             url = ApiRoutes.submitPublicSharePassword(driveId, linkUuid),
             method = POST,
             body = mapOf("password" to password),
@@ -61,7 +61,7 @@ object PublicShareApiRepository {
         fileId: FileId,
         authToken: String? = null
     ): ApiResponse<File> {
-        return callApi(
+        return callPublicShareApi(
             url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId, authToken),
             method = GET,
         )
@@ -81,7 +81,8 @@ object PublicShareApiRepository {
     }
 
     suspend fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount> {
-        return callApi(
+        // TODO auth
+        return callPublicShareApi(
             url = ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId),
             method = GET,
         )
@@ -93,7 +94,7 @@ object PublicShareApiRepository {
         archiveBody: ArchiveBody,
         authToken: String? = null
     ): ApiResponse<ArchiveUUID> {
-        return callApi(
+        return callPublicShareApi(
             url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid, authToken),
             method = POST,
             body = archiveBody,
@@ -122,7 +123,7 @@ object PublicShareApiRepository {
         if (fileIds.isNotEmpty()) body["file_ids"] = fileIds.toTypedArray()
         if (exceptedFileIds.isNotEmpty()) body["except_file_ids"] = exceptedFileIds.toTypedArray()
 
-        return callApi(
+        return callPublicShareApi(
             url = ApiRoutes.importPublicShareFiles(destinationDriveId, authToken),
             method = POST,
             body = body,
@@ -134,13 +135,20 @@ object PublicShareApiRepository {
         )
     }
 
-    private suspend inline fun <reified T> callApi(
+    private suspend inline fun <reified T> callPublicShareApi(
         url: String,
         method: ApiController.ApiMethod,
+        authToken: String? = null,
         body: Any? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): T {
-        return ApiController.callApi(url, method, body, okHttpClient)
+        val authParam = authToken?.let { token ->
+            val paramPrefix = if (url.contains("?")) "&" else "?"
+            "${paramPrefix}sharelink_token=$token"
+        } ?: ""
+
+        val authentifiedUrl = url + authParam
+        return ApiController.callApi(authentifiedUrl, method, body, okHttpClient)
     }
 
     private suspend inline fun <reified T> callApiWithCursor(
