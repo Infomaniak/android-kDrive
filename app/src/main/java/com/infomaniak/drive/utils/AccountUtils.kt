@@ -72,17 +72,13 @@ object AccountUtils : CredentialManager() {
     override var currentUserId: Int = AppSettings.getAppSettings()._currentUserId
         set(userId) {
             field = userId
-            scope.launch(Dispatchers.IO) {
-                AppSettings.updateAppSettings { appSettings -> if (appSettings.isValid) appSettings._currentUserId = userId }
-            }
+            AppSettings.updateAppSettings(scope) { if (isValid) _currentUserId = userId }
         }
 
     var currentDriveId: Int = AppSettings.getAppSettings()._currentDriveId
         set(driveId) {
             field = driveId
-            scope.launch(Dispatchers.IO) {
-                AppSettings.updateAppSettings { appSettings -> if (appSettings.isValid) appSettings._currentDriveId = driveId }
-            }
+            AppSettings.updateAppSettings(scope) { if (isValid) _currentDriveId = driveId }
         }
 
     override var currentUser: User? = null
