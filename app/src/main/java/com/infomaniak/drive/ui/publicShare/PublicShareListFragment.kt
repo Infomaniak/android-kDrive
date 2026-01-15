@@ -102,6 +102,8 @@ class PublicShareListFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         folderName = navigationArgs.fileName
         folderId = navigationArgs.fileId
+        if (publicShareViewModel.fileId == PUBLIC_SHARE_DEFAULT_ID) publicShareViewModel.fileId = navigationArgs.fileId
+
         publicShareViewModel.cancelDownload()
         downloadFiles = DownloadFiles()
 
@@ -352,7 +354,7 @@ class PublicShareListFragment : FileListFragment() {
                 cancelDownload()
 
                 if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
-                    downloadPublicShareRootFile(rootFileId = folderId)
+                    downloadPublicShareRootFile()
                 } else {
                     getFiles(folderId, fileListViewModel.sortType, isNewSort)
                 }
