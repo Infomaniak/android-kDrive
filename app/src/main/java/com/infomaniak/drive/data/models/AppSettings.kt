@@ -39,14 +39,14 @@ open class AppSettings(
     var _appSecurityEnabled: Boolean = false,
     var _currentDriveId: Int = -1,
     var _currentUserId: Int = -1,
-    var _onlyWifiSync: Boolean = false,
+    var _onlyWifiSyncOffline: Boolean = false,
 ) : RealmObject() {
 
     fun update(appSettings: AppSettings) {
         this._appSecurityEnabled = appSettings._appSecurityEnabled
         this._currentDriveId = appSettings._currentDriveId
         this._currentUserId = appSettings._currentUserId
-        this._onlyWifiSync = appSettings._onlyWifiSync
+        this._onlyWifiSyncOffline = appSettings._onlyWifiSyncOffline
     }
 
     companion object {
@@ -121,11 +121,11 @@ open class AppSettings(
                 }
             }
 
-        var onlyWifiSync: Boolean = getAppSettings()._onlyWifiSync
+        var onlyWifiSyncOffline: Boolean = getAppSettings()._onlyWifiSyncOffline
             set(value) {
                 field = value
                 scope.launch(Dispatchers.IO) {
-                    updateAppSettings { appSettings -> appSettings._onlyWifiSync = value }
+                    updateAppSettings { appSettings -> appSettings._onlyWifiSyncOffline = value }
                 }
             }
     }
@@ -141,12 +141,15 @@ open class AppSettings(
                     if (oldVersion < 2L) {
                         removeField("_appLaunchesCount")
                     }
+                    if (oldVersion < 3L) {
+                        renameField("_onlyWifiSync", "_onlyWifiSyncOffline")
+                    }
                 }
             }
         }
 
         companion object {
-            const val DB_VERSION = 2L // Must be bumped when the schema changes
+            const val DB_VERSION = 3L // Must be bumped when the schema changes
         }
     }
 }
