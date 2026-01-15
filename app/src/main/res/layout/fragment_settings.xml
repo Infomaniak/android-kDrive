@@ -161,6 +161,14 @@
                         app:title="@string/settingsOnlyWifiSyncTitle" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
+                        android:id="@+id/fileSync"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:description="@string/syncOnlyWifiDescription"
+                        app:itemAction="chevron"
+                        app:title="@string/syncWifiSettingsTitle" />
+
+                    <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/about"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -189,6 +197,7 @@
                         app:description="-"
                         app:itemAction="none"
                         app:title="Cross app device ID" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
