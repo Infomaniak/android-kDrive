@@ -78,9 +78,8 @@ object PublicShareApiRepository {
         cursor: String?,
         authToken: String? = null,
     ): CursorApiResponse<List<File>> {
-        val baseUrl = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType)
-        val authParam = authToken?.let { "&sharelink_token=$it" } ?: ""
-        val url = baseUrl + authParam + "&${loadCursor(cursor)}"
+        val baseUrl = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType, authToken)
+        val url = baseUrl + "&${loadCursor(cursor)}"
 
         return callApiWithCursor(url, GET)
     }
