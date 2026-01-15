@@ -130,7 +130,7 @@ class SettingsFragment : Fragment() {
                 val crossAppLogin = CrossAppLogin.forContext(requireContext(), this)
                 @OptIn(ExperimentalUuidApi::class)
                 crossAppLogin.sharedDeviceIdFlow.collect { crossAppDeviceId ->
-                    targetView.setDescription(crossAppDeviceId.toHexDashString())
+                    targetView.description = crossAppDeviceId.toHexDashString()
                 }
             }
         }
