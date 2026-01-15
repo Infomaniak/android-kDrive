@@ -41,6 +41,7 @@ open class AppSettings(
     var _currentDriveId: Int = -1,
     var _currentUserId: Int = -1,
     var _onlyWifiSyncOffline: Boolean = false,
+    var _onlyWifiSyncMedia: Boolean = false,
 ) : RealmObject() {
 
     fun update(appSettings: AppSettings) {
@@ -112,6 +113,12 @@ open class AppSettings(
                 field = value
                 updateAppSettings { _onlyWifiSyncOffline = value }
             }
+
+        var onlyWifiSyncMedia: Boolean = getAppSettings()._onlyWifiSyncMedia
+            set(value) {
+                field = value
+                updateAppSettings { _onlyWifiSyncMedia = value }
+            }
     }
 
     class AppSettingsMigration : RealmMigration {
@@ -127,6 +134,7 @@ open class AppSettings(
                     }
                     if (oldVersion < 3L) {
                         renameField("_onlyWifiSync", "_onlyWifiSyncOffline")
+                        addField("_onlyWifiSyncMedia", Boolean::class.java, FieldAttribute.REQUIRED)
                     }
                 }
             }
