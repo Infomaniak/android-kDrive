@@ -45,11 +45,11 @@ class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val syncPermissions = registerDrivePermission()
         with(binding.syncOnlyWifi) {
-            isInactive = !AppSettings.onlyWifiSync
+            isInactive = !AppSettings.onlyWifiSyncOffline
             setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.ONLY_WIFI) }
         }
         with(binding.syncWithAll) {
-            isInactive = AppSettings.onlyWifiSync
+            isInactive = AppSettings.onlyWifiSyncOffline
             setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.ALL_DATA) }
         }
         super.onViewCreated(view, savedInstanceState)
@@ -64,7 +64,7 @@ class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
     private fun onSelectOption(syncPermissions: DrivePermissions, option: SyncFilesOption) {
         val isOnlyWifiSyncOffline = option == SyncFilesOption.ONLY_WIFI
         trackSettingsEvent(MatomoName.OnlyWifiTransfer, isOnlyWifiSyncOffline)
-        AppSettings.onlyWifiSync = isOnlyWifiSyncOffline
+        AppSettings.onlyWifiSyncOffline = isOnlyWifiSyncOffline
         requireContext().launchAllUpload(syncPermissions)
         setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, isOnlyWifiSyncOffline)
         dismiss()
