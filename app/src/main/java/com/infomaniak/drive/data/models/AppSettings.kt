@@ -133,25 +133,16 @@ open class AppSettings(
     class AppSettingsMigration : RealmMigration {
 
         override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
-            var oldVersionTemp = oldVersion
-
-            // DynamicRealm exposes an editable schema
-            val schema = realm.schema
-
-            //region Migrate to version 1: Remove migrated
-            if (oldVersionTemp == 0L) {
-                // Remove some fields in SyncSettings
-                schema.get(AppSettings::class.java.simpleName)?.removeField("_migrated")
-
-                oldVersionTemp++
+            if (oldVersion < newVersion) {
+                realm.schema?.get(AppSettings::class.java.simpleName)?.run {
+                    if (oldVersion < 1L) {
+                        removeField("_migrated")
+                    }
+                    if (oldVersion < 2L) {
+                        removeField("_appLaunchesCount")
+                    }
+                }
             }
-
-            if (oldVersionTemp == 1L) {
-                schema.get(AppSettings::class.java.simpleName)?.removeField("_appLaunchesCount")
-
-                oldVersionTemp++
-            }
-            //endregion
         }
 
         companion object {
