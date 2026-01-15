@@ -102,7 +102,7 @@ class PublicShareListFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         folderName = navigationArgs.fileName
         folderId = navigationArgs.fileId
-        if (publicShareViewModel.fileId == PUBLIC_SHARE_DEFAULT_ID) publicShareViewModel.fileId = navigationArgs.fileId
+        if (publicShareViewModel.rootFileId == PUBLIC_SHARE_DEFAULT_ID) publicShareViewModel.rootFileId = navigationArgs.fileId
 
         publicShareViewModel.cancelDownload()
         downloadFiles = DownloadFiles()
@@ -300,7 +300,7 @@ class PublicShareListFragment : FileListFragment() {
         } else {
             val rootSharedFileId = publicShareViewModel.rootSharedFile.value?.id
             val fileIds = multiSelectManager.selectedItemsIds.toList().ifEmpty {
-                if (folderId == rootSharedFileId || publicShareViewModel.fileId == rootSharedFileId) {
+                if (folderId == rootSharedFileId || publicShareViewModel.rootFileId == rootSharedFileId) {
                     emptyList()
                 } else {
                     listOf(folderId)
