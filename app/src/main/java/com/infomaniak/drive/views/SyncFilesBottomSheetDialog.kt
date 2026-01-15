@@ -22,12 +22,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.infomaniak.core.legacy.utils.safeBinding
+import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.FragmentBottomSheetSyncFilesBinding
 import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.KEY_BACK_ACTION_BOTTOM_SHEET
 import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.SyncFilesOption
-import com.infomaniak.lib.core.utils.safeBinding
-import com.infomaniak.lib.core.utils.setBackNavigationResult
 
 class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
 
@@ -39,18 +39,19 @@ class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(binding.syncOnlyWifi) {
-            setOnClickListener {
-                setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, SyncFilesOption.ONLY_WIFI)
-            }
             isInactive = !AppSettings.onlyWifiSync
+            setOnClickListener { onSelectOption(SyncFilesOption.ONLY_WIFI) }
         }
 
         with(binding.syncWithAll) {
-            setOnClickListener {
-                setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, SyncFilesOption.ALL_DATA)
-            }
             isInactive = AppSettings.onlyWifiSync
+            setOnClickListener { onSelectOption(SyncFilesOption.ALL_DATA) }
         }
         super.onViewCreated(view, savedInstanceState)
+    }
+
+    private fun onSelectOption(option: SyncFilesOption) {
+        setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, option)
+        dismiss()
     }
 }
