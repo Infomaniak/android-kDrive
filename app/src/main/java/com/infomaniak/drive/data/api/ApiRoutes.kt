@@ -137,7 +137,8 @@ object ApiRoutes {
             imagePreviewFile(file)
         }
 
-        return "$url?width=2500&height=1500&quality=80"
+        val querySeparator = if (url.contains("?")) "&" else "?"
+        return "$url${querySeparator}width=2500&height=1500&quality=80"
     }
 
     fun getOnlyOfficeUrl(file: File) = with(file) {
@@ -326,9 +327,11 @@ object ApiRoutes {
         linkUuid: String,
         fileId: Int,
         sortType: SortType,
+        authToken: String?,
     ): String {
         val orderQuery = "order_by=${sortType.orderBy}&order=${sortType.order}"
-        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery"
+        val authParam = authToken?.let { "&sharelink_token=$it" } ?: ""
+        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery$authParam"
     }
 
     fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): String {
@@ -337,7 +340,7 @@ object ApiRoutes {
 
     private fun getPublicShareFileThumbnail(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
         val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
-        return "${publicShareFile(driveId, linkUuid, fileId)}/thumbnail$authParam" // tODO
+        return "${publicShareFile(driveId, linkUuid, fileId)}/thumbnail$authParam"
     }
 
     private fun getPublicShareFilePreview(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
@@ -355,7 +358,7 @@ object ApiRoutes {
         return "$SHARE_URL_V1/share/$driveId/$linkUuid/preview/text/$fileId$authParam" // TODO CHeck
     }
 
-    fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink" // TODO
+    fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
 
     fun buildPublicShareArchive(driveId: Int, linkUuid: String): String {
         return "${getPublicShareUrlV2(driveId, linkUuid)}/archive"
@@ -367,7 +370,8 @@ object ApiRoutes {
         archiveUuid: String,
         authToken: String? = null
     ): String {
-        return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download" // TODO
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download$authParam"
     }
 
     private fun publicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
