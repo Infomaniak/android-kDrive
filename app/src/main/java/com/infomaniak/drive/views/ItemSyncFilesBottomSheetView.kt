@@ -22,10 +22,9 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
+import com.infomaniak.core.legacy.utils.getAttributes
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.ViewItemSyncFilesBottomSheetBinding
-import com.infomaniak.lib.core.utils.getAttributes
 
 class ItemSyncFilesBottomSheetView @JvmOverloads constructor(
     context: Context,
@@ -35,30 +34,14 @@ class ItemSyncFilesBottomSheetView @JvmOverloads constructor(
 
     private val binding by lazy { ViewItemSyncFilesBottomSheetBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    var textTitle: CharSequence?
-        get() = binding.title.text
-        set(value) {
-            binding.title.text = value
-        }
-
-    var textDescription: CharSequence?
-        get() = binding.description.text
-        set(value) {
-            binding.description.text = value
-        }
-
-    var isActive: Boolean
-        get() = binding.itemSelectActiveIcon.isVisible
-        set(value) {
-            binding.itemSelectActiveIcon.isInvisible = !value
-        }
+    var textTitle: CharSequence? by binding.title::text
+    var textDescription: CharSequence? by binding.description::text
+    var isInactive: Boolean by binding.itemSelectActiveIcon::isInvisible
 
     init {
         attrs?.getAttributes(context, R.styleable.BottomSheetItemView) {
-            with(binding) {
-                getString(R.styleable.BottomSheetItemView_text)?.let { textTitle = it }
-                getString(R.styleable.BottomSheetItemView_descText)?.let { textDescription = it }
-            }
+            getString(R.styleable.BottomSheetItemView_text)?.let { textTitle = it }
+            getString(R.styleable.BottomSheetItemView_descText)?.let { textDescription = it }
         }
     }
 }
