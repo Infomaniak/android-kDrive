@@ -24,8 +24,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.drive.MatomoDrive
-import com.infomaniak.drive.MatomoDrive.trackSettingsEvent
+import com.infomaniak.drive.MatomoDrive.MatomoName
+import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
 import com.infomaniak.drive.databinding.FragmentBottomSheetSyncMediaBinding
 import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.SyncFilesOption
 import com.infomaniak.drive.utils.DrivePermissions
@@ -63,7 +63,7 @@ class SyncMediaBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun onSelectOption(syncPermissions: DrivePermissions, option: SyncFilesOption) {
         val isOnlyWifiSyncOffline = option == SyncFilesOption.ONLY_WIFI
-        trackSettingsEvent(MatomoDrive.MatomoName.SyncMediaWifiOnly, isOnlyWifiSyncOffline)
+        trackPhotoSyncEvent(name = if (isOnlyWifiSyncOffline) MatomoName.SyncOnlyWifi else MatomoName.SyncWifiAndData)
         syncSettingsViewModel.onlyWifiSyncMedia.value = isOnlyWifiSyncOffline
         requireContext().launchAllUpload(syncPermissions)
         dismiss()
