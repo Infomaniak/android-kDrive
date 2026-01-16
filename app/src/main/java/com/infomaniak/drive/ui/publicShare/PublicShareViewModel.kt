@@ -183,7 +183,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             destinationFolderId = destinationFolderId,
             fileIds = fileIds,
             exceptedFileIds = exceptedFileIds,
-            authToken = submitPasswordResult.value
+            authToken = submitPasswordResult.value,
         )
         val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
         val destinationPath = "$SHARE_URL_V1/drive/$destinationDriveId/files/$destinationFolderId"
@@ -200,7 +200,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             driveId = driveId,
             linkUuid = publicShareUuid,
             archiveBody = archiveBody,
-            authToken = submitPasswordResult.value
+            authToken = submitPasswordResult.value,
         )
         val result = apiResponse.data?.let { archiveUuid -> null to archiveUuid } ?: (apiResponse.translateError() to null)
 
