@@ -28,10 +28,17 @@ class SyncSettingsViewModel : ViewModel() {
     val saveOldPictures = MutableLiveData<SavePicturesDate>()
     val syncIntervalType = MutableLiveData<IntervalType>()
     val syncFolderId = MutableLiveData<Int?>()
+    var onlyWifiSyncMedia = MutableLiveData<Boolean>()
 
-    fun init(intervalTypeValue: IntervalType, syncFolderId: Int?, savePicturesDate: SavePicturesDate) {
+    fun init(
+        intervalTypeValue: IntervalType,
+        syncFolderId: Int?,
+        savePicturesDate: SavePicturesDate,
+        onlyWifiSyncMedia: Boolean
+    ) {
         this.syncFolderId.value = syncFolderId
         syncIntervalType.value = intervalTypeValue
         saveOldPictures.value = savePicturesDate
+        this.onlyWifiSyncMedia.value = onlyWifiSyncMedia
     }
 }
