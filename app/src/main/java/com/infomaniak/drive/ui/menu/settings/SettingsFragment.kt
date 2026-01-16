@@ -102,15 +102,28 @@ class SettingsFragment : Fragment() {
                 isGone = true
             }
         }
-
-        fileSync.setOnClickListener { safelyNavigate(R.id.syncFilesBottomSheetDialog) }
-        registerFileSyncSettingResultListener()
+        initFileSync()
         about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
         feedback.setOnClickListener { navigateToFeedback() }
         setDeleteAccountClickListener()
         binding.root.enableEdgeToEdge()
 
         showCrossAppDeviceIdIfStaff(binding.crossAppDeviceId)
+    }
+
+    fun initFileSync() {
+        binding.fileSync.setOnClickListener { safelyNavigate(R.id.syncFilesBottomSheetDialog) }
+        updateSyncOffline(AppSettings.onlyWifiSyncOffline)
+        registerFileSyncSettingResultListener()
+    }
+
+    private fun registerFileSyncSettingResultListener() {
+        getBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, ::updateSyncOffline)
+    }
+
+    private fun updateSyncOffline(isOnlyWifiSyncOffline: Boolean) {
+        val description = if (isOnlyWifiSyncOffline) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle
+        binding.fileSync.description = getString(description)
     }
 
     private fun showCrossAppDeviceIdIfStaff(targetView: ItemSettingView) {
@@ -232,16 +245,6 @@ class SettingsFragment : Fragment() {
         } else {
             trackSettingsEvent(MatomoName.Feedback)
             context?.openUrl(requireContext().getString(R.string.urlUserReportAndroid))
-        }
-    }
-
-    private fun registerFileSyncSettingResultListener() {
-        getBackNavigationResult<Boolean>(KEY_BACK_ACTION_BOTTOM_SHEET) { isOnlyWifiSyncOffline ->
-            val (title, description) =
-                if (isOnlyWifiSyncOffline) R.string.syncOnlyWifiTitle to R.string.syncOnlyWifiDescription
-                else R.string.syncWifiAndMobileDataTitle to R.string.syncWifiAndMobileDataDescription
-            binding.fileSync.title = getString(title)
-            binding.fileSync.description = getString(description)
         }
     }
 
