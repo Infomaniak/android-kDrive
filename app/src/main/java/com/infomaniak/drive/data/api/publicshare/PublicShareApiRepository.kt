@@ -61,7 +61,7 @@ object PublicShareApiRepository {
         driveId: Int,
         linkUuid: String,
         fileId: FileId,
-        authToken: String? = null
+        authToken: String? = null,
     ): ApiResponse<File> {
         return callPublicShareApi(
             url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId),
@@ -101,7 +101,7 @@ object PublicShareApiRepository {
         driveId: Int,
         linkUuid: String,
         archiveBody: ArchiveBody,
-        authToken: String? = null
+        authToken: String? = null,
     ): ApiResponse<ArchiveUUID> {
         return callPublicShareApi(
             url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid),

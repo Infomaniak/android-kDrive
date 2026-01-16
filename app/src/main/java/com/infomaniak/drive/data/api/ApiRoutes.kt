@@ -354,7 +354,7 @@ object ApiRoutes {
 
     private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
         val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
-        return "$SHARE_URL_V1/share/$driveId/$linkUuid/preview/text/$fileId$authParam" // TODO CHeck
+        return "$SHARE_URL_V1/share/$driveId/$linkUuid/preview/text/$fileId$authParam"
     }
 
     fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
@@ -367,7 +367,7 @@ object ApiRoutes {
         driveId: Int,
         publicShareUuid: String,
         archiveUuid: String,
-        authToken: String? = null
+        authToken: String? = null,
     ): String {
         val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
         return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download$authParam"
