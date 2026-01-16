@@ -119,11 +119,13 @@ class SyncSettingsActivity : BaseActivity() {
         val oldCreateDatedSubFoldersValue = oldSyncSettings?.createDatedSubFolders == true
         val oldDeleteAfterSyncValue = oldSyncSettings?.deleteAfterSync == true
         val oldSaveOldPicturesValue = SavePicturesDate.SINCE_NOW
+        val oldOnlyWifiSyncMedia = oldSyncSettings?.onlyWifiSyncMedia == true
 
         syncSettingsViewModel.init(
             intervalTypeValue = oldIntervalTypeValue,
             syncFolderId = oldSyncSettings?.syncFolder,
             savePicturesDate = uiSettings.syncSettingsDate,
+            onlyWifiSyncMedia = oldOnlyWifiSyncMedia,
         )
 
         setupListeners(oldSyncVideoValue, oldCreateDatedSubFoldersValue, oldDeleteAfterSyncValue)
@@ -140,6 +142,7 @@ class SyncSettingsActivity : BaseActivity() {
         observeSaveOldPictures(oldSaveOldPicturesValue)
 
         observeSyncIntervalType(oldIntervalTypeValue)
+        initOnlyWifiSyncMedia(oldOnlyWifiSyncMedia)
 
         binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
             binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
@@ -219,6 +222,10 @@ class SyncSettingsActivity : BaseActivity() {
 
         syncPeriodicity.setOnClickListener {
             SelectIntervalTypeBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectIntervalTypeBottomSheetDialog")
+        }
+
+        syncOnlyWifi.setOnClickListener {
+            SyncMediaBottomSheetDialog().show(supportFragmentManager, SyncMediaBottomSheetDialog::class.simpleName)
         }
 
         saveButton.initProgress(this@SyncSettingsActivity)
@@ -333,6 +340,15 @@ class SyncSettingsActivity : BaseActivity() {
             if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
             changeSaveButtonStatus()
             syncPeriodicity.endText = getString(it.title).lowercase()
+        }
+    }
+
+    private fun initOnlyWifiSyncMedia(oldOnlyWifiSyncMedia: Boolean) {
+        syncSettingsViewModel.onlyWifiSyncMedia.observe(this) {
+            if (it != oldOnlyWifiSyncMedia) editNumber++ else editNumber--
+            changeSaveButtonStatus()
+            binding.syncOnlyWifi.description =
+                getString(if (it) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle)
         }
     }
 

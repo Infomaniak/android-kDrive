@@ -160,6 +160,7 @@ object MatomoDrive : Matomo {
         SyncAll("syncAll"),
         SyncFromDate("syncFromDate"),
         SyncNew("syncNew"),
+        SyncMediaWifiOnly("syncMediaWifiOnly"),
         ToggleFullScreen("toggleFullScreen"),
         TrashStorageLimit("trashStorageLimit"),
         TryAddingFileWithDriveFull("tryAddingFileWithDriveFull"),
