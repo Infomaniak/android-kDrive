@@ -102,7 +102,12 @@ class PublicShareListFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         folderName = navigationArgs.fileName
         folderId = navigationArgs.fileId
-        if (publicShareViewModel.rootFileId == PUBLIC_SHARE_DEFAULT_ID) publicShareViewModel.rootFileId = navigationArgs.fileId
+        if (publicShareViewModel.rootFileId == PUBLIC_SHARE_DEFAULT_ID) {
+            // This means we're coming from the PublicSharePasswordFragment, and the rootFolderId hasn't been set yet
+            // because we couldn't access the init call before opening the PublicShareActivity
+            // If the rootFileId is already set, we should not update it again as navigation.fileId change at each folder.
+            publicShareViewModel.rootFileId = navigationArgs.fileId
+        }
 
         publicShareViewModel.cancelDownload()
         downloadFiles = DownloadFiles()
