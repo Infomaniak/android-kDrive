@@ -683,6 +683,7 @@
     <string name="syncConfigureTitle">Sauvegardez vos souvenirs en lieu sûr</string>
     <string name="syncOnlyWifiDescription">Les fichiers hors ligne ne seront synchronisés uniquement via le Wi-Fi</string>
     <string name="syncOnlyWifiTitle">Via Wi-Fi uniquement</string>
+    <string name="syncPhotosOnlyWifiDescription">Les photos et les vidéos seront synchronisées uniquement via le Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Activer la sauvegarde automatique</string>
     <string name="syncSettingsButtonSaveDate">Enregistrer</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisation</string>

@@ -256,7 +256,7 @@
         android:id="@+id/syncFilesBottomSheetDialog"
         android:name="com.infomaniak.drive.views.SyncFilesBottomSheetDialog"
         android:label="SyncFilesBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_select" />
+        tools:layout="@layout/fragment_bottom_sheet_sync_files" />
 
     <fragment
         android:id="@+id/activityFilesFragment"
@@ -777,6 +777,12 @@
         android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SyncConfigureBottomSheetDialog"
         android:label="SyncConfigureBottomSheetDialog"
         tools:layout="@layout/fragment_bottom_sheet_information" />
+
+    <dialog
+        android:id="@+id/syncMediaBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.menu.settings.SyncMediaBottomSheetDialog"
+        android:label="SyncMediaBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_sync_media" />
 
     <dialog
         android:id="@+id/updateAvailableBottomSheetDialog"

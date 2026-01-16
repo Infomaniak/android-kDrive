@@ -683,6 +683,7 @@
     <string name="syncConfigureTitle">Haz copia de seguridad de tus recuerdos en un lugar seguro</string>
     <string name="syncOnlyWifiDescription">Los archivos sin conexión sólo se sincronizarán con Wi-Fi</string>
     <string name="syncOnlyWifiTitle">Sólo con Wi-Fi</string>
+    <string name="syncPhotosOnlyWifiDescription">Las fotos y los vídeos sólo se sincronizarán con Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Activar la copia de seguridad automática</string>
     <string name="syncSettingsButtonSaveDate">Guardar</string>
     <string name="syncSettingsButtonSyncPeriodicity">Sincronización</string>

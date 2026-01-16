@@ -298,6 +298,14 @@
                                 app:itemAction="text"
                                 app:title="@string/syncSettingsButtonSyncPeriodicity" />
 
+                            <com.infomaniak.drive.ui.menu.settings.ItemSettingView
+                                android:id="@+id/syncOnlyWifi"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                app:description="@null"
+                                app:itemAction="chevron"
+                                app:title="@string/syncWifiPicturesTitle" />
+
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
