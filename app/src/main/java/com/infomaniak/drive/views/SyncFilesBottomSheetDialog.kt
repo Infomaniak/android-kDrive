@@ -63,7 +63,7 @@ class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun onSelectOption(syncPermissions: DrivePermissions, option: SyncFilesOption) {
         val isOnlyWifiSyncOffline = option == SyncFilesOption.ONLY_WIFI
-        trackSettingsEvent(MatomoName.OnlyWifiTransfer, isOnlyWifiSyncOffline)
+        trackSettingsEvent(if (isOnlyWifiSyncOffline) MatomoName.SyncOnlyWifi else MatomoName.SyncWifiAndData)
         AppSettings.onlyWifiSyncOffline = isOnlyWifiSyncOffline
         requireContext().launchAllUpload(syncPermissions)
         setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, isOnlyWifiSyncOffline)
