@@ -42,6 +42,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.databinding.FragmentFileShareDetailsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
@@ -196,11 +197,11 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
                     val permission = getParcelable<Permission>(PERMISSION_BUNDLE_KEY)
                     val shareable = getParcelable<Shareable>(SHAREABLE_BUNDLE_KEY)
                     shareable?.let { shareableItem ->
-                        if (permission == Shareable.ShareablePermission.DELETE) {
+                        if (permission in sequenceOf(ShareablePermission.DELETE, ShareablePermission.REMOVE_DRIVE_ACCESS)) {
                             sharedItemsAdapter.removeItem(shareableItem)
                             availableShareableItemsAdapter.removeFromNotShareables(shareableItem)
                         } else {
-                            sharedItemsAdapter.updateItemPermission(shareableItem, permission as Shareable.ShareablePermission)
+                            sharedItemsAdapter.updateItemPermission(shareableItem, permission as ShareablePermission)
                         }
                     }
                 }
