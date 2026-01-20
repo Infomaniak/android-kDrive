@@ -21,7 +21,6 @@ import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
 import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.auth.networking.HttpClient.okHttpClientLongTimeoutWithTokenInterceptor as okHttpClientLongTimeout
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.api.ApiController.ApiMethod.DELETE
@@ -65,6 +64,7 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
 import okhttp3.OkHttpClient
+import com.infomaniak.core.auth.networking.HttpClient.okHttpClientLongTimeoutWithTokenInterceptor as okHttpClientLongTimeout
 import com.infomaniak.core.ksuite.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
@@ -360,6 +360,13 @@ object ApiRepository : ApiRepositoryCore() {
                 is Invitation -> ApiRoutes.fileInvitationAccess(file, shareableItem.id)
                 else -> ApiRoutes.userAccess(file, shareableItem.id)
             }, DELETE
+        )
+    }
+
+    fun deleteDriveUser(file: File, shareableItem: Shareable): ApiResponse<Boolean> {
+        return callApi(
+            url = ApiRoutes.driveUser(driveId = file.driveId, driveUserId = shareableItem.id),
+            method = DELETE
         )
     }
 

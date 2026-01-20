@@ -23,7 +23,6 @@ import android.view.View
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
-import com.infomaniak.core.legacy.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.legacy.utils.hideKeyboard
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.safeNavigate

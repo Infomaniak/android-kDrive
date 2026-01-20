@@ -61,7 +61,7 @@ class NotEnoughStorageView @JvmOverloads constructor(
     }
 
     private fun setupDescription(drive: Drive) = with(binding) {
-        description.setText(if (drive.isAdmin) R.string.notEnoughStorageDescription1 else R.string.notEnoughStorageDescription2)
+        description.setText(if (drive.isOrganisationAdmin) R.string.notEnoughStorageDescription1 else R.string.notEnoughStorageDescription2)
     }
 
     private fun setupUpgradeButton(drive: Drive, showKSuiteAd: () -> Unit) = with(binding) {

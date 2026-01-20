@@ -164,7 +164,9 @@
     <string name="buttonPlayerPrev">Previous</string>
     <string name="buttonPlayerRew">Back a few seconds</string>
     <string name="buttonRefresh">Update</string>
+    <string name="buttonRemoveDriveAccess">Remove access to the drive</string>
     <string name="buttonRemoveFavorites">Delete from favorites</string>
+    <string name="buttonRemoveUserFromShare">Delete sharing</string>
     <string name="buttonRename">Rename</string>
     <string name="buttonRenew">Renew</string>
     <string name="buttonRetry">Try again</string>
@@ -767,8 +769,9 @@
     <string name="userPermissionManageDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete the file\nShare with other users</string>
     <string name="userPermissionNotAvailable">Not available to external kDrive users</string>
     <string name="userPermissionRead">Can view</string>
-    <string name="userPermissionReadDescription">View only\nDownload\nAdd comments</string>
+    <string name="userPermissionReadDescription">View only\nDownload</string>
     <string name="userPermissionRemove">User will no longer have access to this file.</string>
     <string name="userPermissionWrite">Can change</string>
-    <string name="userPermissionWriteDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDeleting the file</string>
+    <string name="userPermissionWriteDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete files/folders</string>
+    <string name="userPermissionWriteExternalDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete its own files / folders</string>
 </resources>

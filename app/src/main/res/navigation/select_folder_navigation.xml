@@ -319,7 +319,7 @@
 
     <dialog
         android:id="@+id/selectPermissionBottomSheetDialog"
-        android:name="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog"
+        android:name="com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog"
         android:label="SelectPermissionBottomSheetDialog"
         tools:layout="@layout/fragment_select_permission">
         <argument
@@ -336,6 +336,6 @@
             app:argType="com.infomaniak.drive.data.models.Permission" />
         <argument
             android:name="permissionsGroup"
-            app:argType="com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog$PermissionsGroup" />
+            app:argType="com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog$PermissionsGroup" />
     </dialog>
 </navigation>

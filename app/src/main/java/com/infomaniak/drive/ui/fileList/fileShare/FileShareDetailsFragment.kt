@@ -30,31 +30,31 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
 import com.infomaniak.core.legacy.utils.hideKeyboard
-import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.models.DriveUser
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.Invitation
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.data.models.Team
 import com.infomaniak.drive.databinding.FragmentFileShareDetailsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.Companion.SHAREABLE_BUNDLE_KEY
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog.PermissionsGroup
 import com.infomaniak.drive.ui.fileList.ShareLinkManageable
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
 import com.infomaniak.drive.ui.fileList.fileDetails.FileDetailsInfoFragment
 import com.infomaniak.drive.ui.fileList.fileShare.FileShareAddUserDialog.Companion.SHARE_SELECTION_KEY
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog.Companion.PERMISSION_BUNDLE_KEY
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog.Companion.SHAREABLE_BUNDLE_KEY
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog.PermissionsGroup
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.getDriveUsers
@@ -197,11 +197,11 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
                     val permission = getParcelable<Permission>(PERMISSION_BUNDLE_KEY)
                     val shareable = getParcelable<Shareable>(SHAREABLE_BUNDLE_KEY)
                     shareable?.let { shareableItem ->
-                        if (permission == Shareable.ShareablePermission.DELETE) {
+                        if (permission in sequenceOf(ShareablePermission.DELETE, ShareablePermission.REMOVE_DRIVE_ACCESS)) {
                             sharedItemsAdapter.removeItem(shareableItem)
                             availableShareableItemsAdapter.removeFromNotShareables(shareableItem)
                         } else {
-                            sharedItemsAdapter.updateItemPermission(shareableItem, permission as Shareable.ShareablePermission)
+                            sharedItemsAdapter.updateItemPermission(shareableItem, permission as ShareablePermission)
                         }
                     }
                 }
@@ -258,7 +258,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
             isOnlyOffice = file.hasOnlyoffice,
             shareLinkExist = shareLink != null,
         )
-        safeNavigate(
+        safelyNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                 currentFileId = file.id,
                 currentPermission = currentPermission,
@@ -269,7 +269,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
 
     private fun handleOnShareLinkSettingsClicked(newShareLink: ShareLink) {
         shareLink = newShareLink
-        safeNavigate(
+        safelyNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareLinkSettings(
                 fileId = file.id,
                 driveId = file.driveId,
@@ -291,11 +291,11 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
     private fun openSelectPermissionDialog(shareable: Shareable) {
 
         val permissionsGroup = when {
-            shareable is Invitation || (shareable is DriveUser && shareable.isExternalUser) -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
+            shareable.isExternalUser -> PermissionsGroup.EXTERNAL_USERS_RIGHTS
             else -> PermissionsGroup.USERS_RIGHTS
         }
 
-        safeNavigate(
+        safelyNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToSelectPermissionBottomSheetDialog(
                 currentShareable = shareable,
                 currentFileId = file.id,
@@ -306,7 +306,7 @@ class FileShareDetailsFragment : Fragment(), ShareLinkManageable {
     }
 
     private fun openAddUserDialog(element: Shareable) = with(availableShareableItemsAdapter) {
-        safeNavigate(
+        safelyNavigate(
             FileShareDetailsFragmentDirections.actionFileShareDetailsFragmentToFileShareAddUserDialog(
                 sharedItem = element,
                 notShareableIds = notShareableIds.toIntArray(),

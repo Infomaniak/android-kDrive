@@ -33,8 +33,8 @@ import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.toPx
 import com.infomaniak.drive.data.models.File.FolderPermission
 import com.infomaniak.drive.data.models.Permission
-import com.infomaniak.drive.data.models.Share.UserFileAccess
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
+import com.infomaniak.drive.data.models.UserFileAccess
 import com.infomaniak.drive.databinding.CardviewPermissionBinding
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter.PermissionsViewHolder
 import com.infomaniak.drive.utils.AccountUtils
@@ -48,24 +48,19 @@ class PermissionsAdapter(
     private val onPermissionChanged: (newPermission: Permission) -> Unit,
 ) : Adapter<PermissionsViewHolder>() {
 
-    var permissionList: ArrayList<Permission> = ArrayList()
+    var permissionList: List<Permission> = ArrayList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionsViewHolder {
         return PermissionsViewHolder(CardviewPermissionBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    fun setAll(newPermissions: ArrayList<Permission>) {
+    fun setAll(newPermissions: List<Permission>) {
         permissionList = newPermissions
         notifyItemRangeInserted(0, newPermissions.size)
     }
 
     fun setUsers(users: ArrayList<UserFileAccess>) {
         sharedUsers = users
-    }
-
-    fun addItem(permission: Permission) {
-        permissionList.add(permission)
-        notifyItemInserted(permissionList.size)
     }
 
     override fun onBindViewHolder(holder: PermissionsViewHolder, position: Int) = with(holder.binding) {
@@ -94,7 +89,15 @@ class PermissionsAdapter(
 
     private fun CardviewPermissionBinding.setupTexts(permission: Permission) {
         permissionTitle.setText(permission.translation)
-        permissionDescription.text = context.getString(permission.description, AccountUtils.getCurrentDrive()?.name)
+        setupDescription(permission.description)
+    }
+
+    private fun CardviewPermissionBinding.setupDescription(description: Int?) {
+        if (description != null) {
+            permissionDescription.text = context.getString(description, AccountUtils.getCurrentDrive()?.name)
+        } else {
+            permissionDescription.isGone = true
+        }
     }
 
     private fun CardviewPermissionBinding.setupMainIcon() {

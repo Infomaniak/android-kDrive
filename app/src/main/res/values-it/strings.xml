@@ -153,7 +153,9 @@
     <string name="buttonPlayerPrev">Precedente</string>
     <string name="buttonPlayerRew">Torna indietro di alcuni secondi</string>
     <string name="buttonRefresh">Aggiorna</string>
+    <string name="buttonRemoveDriveAccess">Ritira l’accesso al drive</string>
     <string name="buttonRemoveFavorites">Elimina i preferiti</string>
+    <string name="buttonRemoveUserFromShare">Elimina la condivisione</string>
     <string name="buttonRename">Rinomina</string>
     <string name="buttonRenew">Rinnovare</string>
     <string name="buttonRetry">Riprova</string>
@@ -472,7 +474,7 @@
     <string name="kDrivePdfViewer">Visualizzatore di PDF kDrive</string>
     <string name="lastEditsTitle">Ultime modifiche</string>
     <string name="localizedFilenamePrivateTeamSpace">La mia cartella</string>
-    <string name="localizedFilenameTeamSpace">Cartelle comuni</string>
+    <string name="localizedFilenameTeamSpace">Cartelle dell’organizzazione</string>
     <string name="locateButton">Localizzare</string>
     <string name="maintenanceAsleepDescription">Per ridurre l’impatto sull’ambiente, il tuo kDrive entra in modalità stand-by in caso di inattività prolungata.\nRiavvialo per riottenere l’accesso ai tuoi file!</string>
     <string name="maintenanceAsleepTitle">Il tuo kDrive %s ha fatto un riposino!</string>
@@ -756,8 +758,9 @@
     <string name="userPermissionManageDescription">Modifica dei file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione dei file\nCondivisione con altri utenti</string>
     <string name="userPermissionNotAvailable">Non disponibile per gli utenti esterni del kDrive</string>
     <string name="userPermissionRead">Può consultare</string>
-    <string name="userPermissionReadDescription">Solo consultazione\nDownload\nAggiunta di commenti</string>
+    <string name="userPermissionReadDescription">Solo consultazione\nDownload</string>
     <string name="userPermissionRemove">L’utente non avrà più accesso a questo file.</string>
     <string name="userPermissionWrite">Può modificare</string>
-    <string name="userPermissionWriteDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file</string>
+    <string name="userPermissionWriteDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione di file / cartelle</string>
+    <string name="userPermissionWriteExternalDescription">Modifica di file\nDownload\nAggiunta di commenti\nAggiunta e creazione di file / cartelle\nEliminazione dei propri file / cartelle</string>
 </resources>

@@ -136,6 +136,7 @@ object MatomoDrive : Matomo {
         PublicShareWithPassword("publicShareWithPassword"),
         PutInTrash("putInTrash"),
         Remove("remove"),
+        RemoveDriveUser("removeDriveUser"),
         Rename("rename"),
         RestoreGivenFolder("restoreGivenFolder"),
         RestoreOriginFolder("restoreOriginFolder"),

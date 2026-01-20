@@ -18,13 +18,14 @@
 package com.infomaniak.drive.data.models
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
 import com.infomaniak.drive.R
 import kotlinx.parcelize.Parcelize
 
 interface Shareable : Parcelable {
     var id: Int
     var right: String
+    val isExternalUser: Boolean
+        get() = false
 
     fun getFilterValue(): String {
         return when (this) {
@@ -35,53 +36,61 @@ interface Shareable : Parcelable {
         }
     }
 
-    fun getFilePermission(): ShareablePermission {
-        return when {
-            right.equals(ShareablePermission.READ.toString(), true) -> ShareablePermission.READ
-            right.equals(ShareablePermission.WRITE.toString(), true) -> ShareablePermission.WRITE
-            right.equals(ShareablePermission.MANAGE.toString(), true) -> ShareablePermission.MANAGE
-            else -> ShareablePermission.READ
-        }
+    fun getFilePermission(): ShareablePermission = when (right) {
+        ShareablePermission.READ.apiValue -> ShareablePermission.READ
+        ShareablePermission.WRITE.apiValue -> if (isExternalUser) ShareablePermission.WRITE_EXTERNAL else ShareablePermission.WRITE
+        ShareablePermission.MANAGE.apiValue -> ShareablePermission.MANAGE
+        else -> ShareablePermission.READ
     }
 
     @Parcelize
     enum class ShareablePermission(
         override val icon: Int,
         override val translation: Int,
-        override val description: Int,
+        override val description: Int?,
         val apiValue: String
     ) : Permission {
 
-        @SerializedName("read")
         READ(
-            R.drawable.ic_view,
-            R.string.userPermissionRead,
-            R.string.userPermissionReadDescription,
-            "read"
+            icon = R.drawable.ic_view,
+            translation = R.string.userPermissionRead,
+            description = R.string.userPermissionReadDescription,
+            apiValue = "read"
         ),
 
-        @SerializedName("write")
         WRITE(
-            R.drawable.ic_edit,
-            R.string.userPermissionWrite,
-            R.string.userPermissionWriteDescription,
-            "write"
+            icon = R.drawable.ic_edit,
+            translation = R.string.userPermissionWrite,
+            description = R.string.userPermissionWriteDescription,
+            apiValue = "write"
         ),
 
-        @SerializedName("manage")
+        WRITE_EXTERNAL(
+            icon = R.drawable.ic_edit,
+            translation = R.string.userPermissionWrite,
+            description = R.string.userPermissionWriteExternalDescription,
+            apiValue = "write"
+        ),
+
         MANAGE(
-            R.drawable.ic_crown,
-            R.string.userPermissionManage,
-            R.string.userPermissionManageDescription,
-            "manage"
+            icon = R.drawable.ic_crown,
+            translation = R.string.userPermissionManage,
+            description = R.string.userPermissionManageDescription,
+            apiValue = "manage"
         ),
 
-        @SerializedName("delete")
         DELETE(
-            R.drawable.ic_bin,
-            R.string.buttonDelete,
-            R.string.userPermissionRemove,
-            "delete"
+            icon = R.drawable.ic_bin,
+            translation = R.string.buttonDelete,
+            description = R.string.userPermissionRemove,
+            apiValue = "delete"
+        ),
+
+        REMOVE_DRIVE_ACCESS(
+            icon = R.drawable.ic_bin,
+            translation = R.string.buttonRemoveDriveAccess,
+            description = null,
+            apiValue = "remove_from_drive"
         )
     }
 }

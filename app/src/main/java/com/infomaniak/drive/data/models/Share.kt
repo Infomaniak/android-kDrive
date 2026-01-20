@@ -17,10 +17,6 @@
  */
 package com.infomaniak.drive.data.models
 
-import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
-import kotlinx.parcelize.Parcelize
-
 data class Share(
     val teams: ArrayList<Team> = arrayListOf(),
     val users: ArrayList<UserFileAccess> = arrayListOf(),
@@ -33,44 +29,4 @@ data class Share(
 
     inline val members get() = invitations + teams + users
 
-    @Parcelize
-    data class UserFileAccess(
-        override var id: Int = -1,
-        var name: String = "",
-        override var right: String = "",
-        var color: Int? = null,
-        var status: UserFileAccessStatus,
-        var email: String = "",
-        var user: DriveUser? = null,
-        var role: DriveUser.Role,
-    ) : Parcelable, Shareable {
-
-        inline val isExternalUser get() = role == DriveUser.Role.EXTERNAL
-
-        enum class UserFileAccessStatus {
-            /** User has access to the Drive */
-            @SerializedName("active")
-            ACTIVE,
-
-            /** User has been removed but his data remain in the drive */
-            @SerializedName("deleted_kept")
-            DELETED_KEPT,
-
-            /** User has been removed */
-            @SerializedName("deleted_removed")
-            DELETED_REMOVED,
-
-            /** User has been removed and his data has been transferred to another user */
-            @SerializedName("deleted_transferred")
-            DELETED_TRANSFERRED,
-
-            /** User has been locked, user can no longer access to the drive */
-            @SerializedName("locked")
-            LOCKED,
-
-            /** User has not accepted the invitation request */
-            @SerializedName("pending")
-            PENDING
-        }
-    }
 }

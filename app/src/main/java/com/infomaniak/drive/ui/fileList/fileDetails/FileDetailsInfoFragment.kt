@@ -44,9 +44,9 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.drive.Category
 import com.infomaniak.drive.databinding.FragmentFileDetailsInfosBinding
 import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
-import com.infomaniak.drive.ui.bottomSheetDialogs.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.ShareLinkManageable
 import com.infomaniak.drive.ui.fileList.ShareLinkViewModel
+import com.infomaniak.drive.ui.selectPermission.SelectPermissionBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.isPositive
 import com.infomaniak.drive.utils.loadAvatar

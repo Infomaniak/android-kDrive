@@ -22,5 +22,5 @@ import android.os.Parcelable
 interface Permission : Parcelable {
     val icon: Int
     val translation: Int
-    val description: Int
+    val description: Int?
 }
