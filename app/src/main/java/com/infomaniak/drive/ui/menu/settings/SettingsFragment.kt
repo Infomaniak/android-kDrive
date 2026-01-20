@@ -24,6 +24,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.collection.arrayMapOf
 import androidx.core.view.isGone
@@ -253,7 +254,7 @@ class SettingsFragment : Fragment() {
         private val TERMINATE_ACCOUNT_FULL_URL = "$AUTOLOG_URL/?url=$TERMINATE_ACCOUNT_URL"
         const val KEY_BACK_ACTION_BOTTOM_SHEET = "syncFilesBottomSheetDialog"
 
-        enum class SyncFilesOption(@StringRes val title: Int) {
+        enum class SyncFilesOption(@field:StringRes val title: Int) {
             ONLY_WIFI(title = R.string.syncOnlyWifiTitle), ALL_DATA(title = R.string.syncWifiAndMobileDataTitle),
         }
     }
