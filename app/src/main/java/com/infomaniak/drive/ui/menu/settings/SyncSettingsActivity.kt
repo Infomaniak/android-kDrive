@@ -492,7 +492,8 @@ class SyncSettingsActivity : BaseActivity() {
             syncFolder = syncSettingsViewModel.syncFolderId.value!!,
             syncVideo = syncVideo.isChecked,
             createDatedSubFolders = createDatedSubFolders.isChecked,
-            deleteAfterSync = deletePicturesAfterSync.isChecked
+            deleteAfterSync = deletePicturesAfterSync.isChecked,
+            onlyWifiSyncMedia = syncSettingsViewModel.onlyWifiSyncMedia.value ?: false,
         )
     }
 
