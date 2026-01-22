@@ -616,7 +616,7 @@ class CloudStorageProvider : DocumentsProvider() {
                         type = UploadFile.Type.CLOUD_STORAGE.name,
                         userId = userDrive.userId,
                     ).store()
-                    context.syncImmediately()
+                    context.syncImmediately(isAutomaticTrigger = false)
                     cacheFile.delete() // Delete old cache
                 }
             } else {
