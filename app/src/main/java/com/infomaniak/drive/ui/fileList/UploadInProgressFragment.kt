@@ -182,7 +182,7 @@ class UploadInProgressFragment : FileListFragment() {
         val title = getString(R.string.uploadInProgressRestartUploadTitle)
         val context = requireContext()
         cancellationConfirmationDialog = createCancellationConfirmationDialog(context, title) {
-            if (fileAdapter.getFiles().isNotEmpty()) context.syncImmediately()
+            if (fileAdapter.getFiles().isNotEmpty()) context.syncImmediately(isAutomaticTrigger = false)
         }.also(AlertDialog::show)
     }
 
@@ -219,7 +219,7 @@ class UploadInProgressFragment : FileListFragment() {
                 cancellationProgressDialog.dismiss()
                 if (isResumed && needPopBackStack) {
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
-                    requireContext().syncImmediately(data = data)
+                    requireContext().syncImmediately(data = data, isAutomaticTrigger = false)
                     popBackStack()
                 }
             }

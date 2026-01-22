@@ -37,6 +37,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
+import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.legacy.applock.LockActivity
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.getFileName
@@ -46,8 +48,6 @@ import com.infomaniak.core.legacy.utils.parcelableArrayListExtra
 import com.infomaniak.core.legacy.utils.parcelableExtra
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.whenResultIsOk
-import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
-import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.MatomoDrive.trackUserId
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
@@ -320,7 +320,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
                     lifecycleScope.launch(Dispatchers.IO) {
                         if (storeFiles(userId, driveIdSharedWithMe ?: driveId, folderId)) {
-                            syncImmediately()
+                            syncImmediately(isAutomaticTrigger = false)
                             finish()
                         } else {
                             withContext(Dispatchers.Main) {

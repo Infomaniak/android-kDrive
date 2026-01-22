@@ -57,7 +57,9 @@ class SyncMediaBottomSheetDialog : BottomSheetDialogFragment() {
 
     private fun registerDrivePermission(): DrivePermissions {
         return DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).apply {
-            registerPermissions(this@SyncMediaBottomSheetDialog) { authorized -> if (authorized) requireActivity().syncImmediately() }
+            registerPermissions(this@SyncMediaBottomSheetDialog) { authorized ->
+                if (authorized) requireActivity().syncImmediately(isAutomaticTrigger = false)
+            }
         }
     }
 

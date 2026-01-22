@@ -243,7 +243,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
                 type = UploadFile.Type.UPLOAD.name,
                 userId = currentUserId,
             ).store()
-            applicationContext?.syncImmediately()
+            applicationContext?.syncImmediately(isAutomaticTrigger = false)
             file.delete()
         } catch (exception: Exception) {
             exception.printStackTrace()

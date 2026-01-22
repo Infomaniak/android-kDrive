@@ -31,7 +31,7 @@ class PeriodicUploadWorker(appContext: Context, params: WorkerParameters) : Coro
 
     override suspend fun doWork(): Result {
         if (!applicationContext.isSyncActive()) {
-            applicationContext.syncImmediately()
+            applicationContext.syncImmediately(isAutomaticTrigger = true)
         }
         return Result.success()
     }
@@ -41,7 +41,7 @@ class PeriodicUploadWorker(appContext: Context, params: WorkerParameters) : Coro
 
         fun scheduleWork(context: Context, syncInterval: Long) {
             val request = PeriodicWorkRequestBuilder<PeriodicUploadWorker>(syncInterval, TimeUnit.SECONDS)
-                .setConstraints(UploadWorker.workConstraints())
+                .setConstraints(UploadWorker.workConstraints(isAutomaticUpload = true))
                 .build()
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.UPDATE, request)
