@@ -110,8 +110,8 @@ object SyncUtils {
         }
     }
 
-    fun Context.syncImmediately(data: Data = Data.EMPTY, force: Boolean = false) {
-        if (!isSyncActive() || force) {
+    fun Context.syncImmediately(data: Data = Data.EMPTY) {
+        if (!isSyncActive() || data != Data.EMPTY) {
             val request = OneTimeWorkRequestBuilder<UploadWorker>()
                 .setConstraints(UploadWorker.workConstraints())
                 .setExpeditedIfAvailable()

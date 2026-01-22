@@ -219,7 +219,7 @@ class UploadInProgressFragment : FileListFragment() {
                 cancellationProgressDialog.dismiss()
                 if (isResumed && needPopBackStack) {
                     val data = Data.Builder().putBoolean(UploadWorker.CANCELLED_BY_USER, true).build()
-                    requireContext().syncImmediately(data, true)
+                    requireContext().syncImmediately(data = data)
                     popBackStack()
                 }
             }
