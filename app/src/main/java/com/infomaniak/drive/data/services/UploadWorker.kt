@@ -77,6 +77,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import splitties.systemservices.connectivityManager
 import java.util.Date
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
@@ -197,10 +198,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         for ((index, fileToUpload) in uploadFiles.withIndex()) {
             val isLastFile = index == uploadFiles.lastIndex
-            uploadFile(fileToUpload, isLastFile)
-
+            if (fileToUpload.canUpload()) {
+                uploadFile(fileToUpload, isLastFile)
+            }
             pendingCount--
-
             // Stop recursion if all files have been processed and there are only errors.
             if (isLastFile && failedNamesMap.count() == UploadFile.getAllPendingUploadsCount()) break
             // If there is a new file during the sync and it has priority (ex: Manual uploads),
@@ -220,6 +221,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             failedNames = failedNamesMap.values,
         )
         if (uploadedCount > 0) Result.success() else Result.failure()
+    }
+
+    private fun UploadFile.canUpload() = when {
+        !isMeteredNetwork() -> true
+        isSync() -> UploadFile.getAppSyncSettings()?.onlyWifiSyncMedia == false
+        isSyncOffline() -> !AppSettings.onlyWifiSyncOffline
+        else -> true
     }
 
     private suspend fun uploadFile(uploadFile: UploadFile, isLastFile: Boolean) {
@@ -545,6 +553,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return uri.calculateFileSize(contentResolver) ?: null.also {
             SentryLog.i(TAG, "Cannot calculate the file size from uri")
         }
+    }
+
+    private fun isMeteredNetwork() = try {
+        connectivityManager.isActiveNetworkMetered
+    } catch (_: Exception) {
+        true
     }
 
     companion object {
