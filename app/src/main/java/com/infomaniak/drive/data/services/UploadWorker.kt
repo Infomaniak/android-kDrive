@@ -195,15 +195,17 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         SentryLog.d(TAG, "uploadPendingFiles> upload for ${uploadFiles.count()}")
-
+        val notSyncFiles = mutableListOf<UploadFile>()
         for ((index, fileToUpload) in uploadFiles.withIndex()) {
             val isLastFile = index == uploadFiles.lastIndex
             if (fileToUpload.canUpload()) {
                 uploadFile(fileToUpload, isLastFile)
+            } else {
+                notSyncFiles += fileToUpload
             }
             pendingCount--
             // Stop recursion if all files have been processed and there are only errors.
-            if (isLastFile && failedNamesMap.count() == UploadFile.getAllPendingUploadsCount()) break
+            if (isLastFile && (failedNamesMap.count() + notSyncFiles.count()) == UploadFile.getAllPendingUploadsCount()) break
             // If there is a new file during the sync and it has priority (ex: Manual uploads),
             // then we start again in order to process the priority files first.
             if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext uploadPendingFiles()
