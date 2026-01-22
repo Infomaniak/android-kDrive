@@ -106,14 +106,14 @@ object SyncUtils {
             syncPermissions.hasNeededPermissions() &&
             UploadFile.getAllPendingUploads().isNotEmpty()
         ) {
-            syncImmediately()
+            syncImmediately(isAutomaticTrigger = true)
         }
     }
 
-    fun Context.syncImmediately(data: Data = Data.EMPTY) {
+    fun Context.syncImmediately(data: Data = Data.EMPTY, isAutomaticTrigger: Boolean) {
         if (!isSyncActive() || data != Data.EMPTY) {
             val request = OneTimeWorkRequestBuilder<UploadWorker>()
-                .setConstraints(UploadWorker.workConstraints())
+                .setConstraints(UploadWorker.workConstraints(isAutomaticUpload = isAutomaticTrigger))
                 .setExpeditedIfAvailable()
                 .setInputData(data)
                 .build()
