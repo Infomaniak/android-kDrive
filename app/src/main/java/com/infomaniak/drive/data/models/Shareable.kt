@@ -81,7 +81,7 @@ interface Shareable : Parcelable {
 
         DELETE(
             icon = R.drawable.ic_bin,
-            translation = R.string.buttonDelete,
+            translation = R.string.buttonRemoveUserFromShare,
             description = R.string.userPermissionRemove,
             apiValue = "delete"
         ),

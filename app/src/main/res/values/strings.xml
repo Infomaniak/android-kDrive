@@ -166,7 +166,7 @@
     <string name="buttonRefresh">Update</string>
     <string name="buttonRemoveDriveAccess">Remove access to the drive</string>
     <string name="buttonRemoveFavorites">Delete from favorites</string>
-    <string name="buttonRemoveUserFromShare">Delete sharing</string>
+    <string name="buttonRemoveUserFromShare">Cancel sharing</string>
     <string name="buttonRename">Rename</string>
     <string name="buttonRenew">Renew</string>
     <string name="buttonRetry">Try again</string>

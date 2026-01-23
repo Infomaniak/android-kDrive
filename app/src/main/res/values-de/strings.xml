@@ -155,7 +155,7 @@
     <string name="buttonRefresh">Aktualisieren</string>
     <string name="buttonRemoveDriveAccess">Zugang zum Drive entfernen</string>
     <string name="buttonRemoveFavorites">Von den Favoriten entfernen</string>
-    <string name="buttonRemoveUserFromShare">Freigabe entfernen</string>
+    <string name="buttonRemoveUserFromShare">Freigabe löschen</string>
     <string name="buttonRename">Umbenennen</string>
     <string name="buttonRenew">Erneuern</string>
     <string name="buttonRetry">Erneut versuchen</string>
