@@ -33,7 +33,6 @@ import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
@@ -155,7 +154,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private fun handleNotificationDestinationIntent() {
+    private suspend fun handleNotificationDestinationIntent() {
         val navArgs = navigationArgs ?: return
 
         if (navArgs.destinationUserId != 0 && navArgs.destinationDriveId != 0) {
@@ -165,28 +164,26 @@ class LaunchActivity : EdgeToEdgeActivity() {
                 level = SentryLevel.INFO
             })
 
-            lifecycleScope.launch {
-                val allUserIds = UserDatabase.getDatabase()
-                    .userDao()
-                    .getAll()
-                    .asFlow()
-                    .first()
-                    .map(User::id)
+            val allUserIds = UserDatabase.getDatabase()
+                .userDao()
+                .getAll()
+                .asFlow()
+                .first()
+                .map(User::id)
 
-                if (navArgs.destinationUserId in allUserIds) {
-                    Dispatchers.IO {
-                        DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
-                    }?.also { drive ->
-                        setOpenSpecificFile(
-                            userId = drive.userId,
-                            driveId = drive.id,
-                            fileId = navArgs.destinationRemoteFolderId,
-                            isSharedWithMe = drive.sharedWithMe,
-                        )
-                    }
-                } else {
-                    mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+            if (navArgs.destinationUserId in allUserIds) {
+                Dispatchers.IO {
+                    DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
+                }?.also { drive ->
+                    setOpenSpecificFile(
+                        userId = drive.userId,
+                        driveId = drive.id,
+                        fileId = navArgs.destinationRemoteFolderId,
+                        isSharedWithMe = drive.sharedWithMe,
+                    )
                 }
+            } else {
+                mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
             }
         }
     }
