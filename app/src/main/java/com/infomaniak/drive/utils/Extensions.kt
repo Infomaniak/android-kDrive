@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.coil.loadAvatar
+import com.infomaniak.core.common.utils.isEmailRfc5321Compliant
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
@@ -84,7 +85,6 @@ import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.LOGIN_ENDPOINT_URL
 import com.infomaniak.core.network.SUPPORT_URL
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.common.utils.isEmailRfc5321Compliant
 import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackShareRightsEvent
@@ -378,7 +378,11 @@ fun Context.getInfomaniakLogin() = InfomaniakLogin(
     appUID = BuildConfig.APPLICATION_ID,
     clientID = BuildConfig.CLIENT_ID,
     accessType = null,
-    sentryCallback = { error -> SentryLog.e(tag = "WebViewLogin", error) }
+    sentryCallback = { error, extras ->
+        SentryLog.e(tag = "WebViewLogin", error) { scope ->
+            extras.forEach(scope::setExtra)
+        }
+    }
 )
 
 //region Worker
