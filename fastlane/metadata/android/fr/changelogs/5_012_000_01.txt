@@ -1,0 +1,3 @@
+- Mise à jour de la traduction espagnole
+- Ajout d'un bouton pour supprimer un utilisateur externe d'un disque partagé
+- Ajout de journaux en cas d'échec inattendu de la connexion

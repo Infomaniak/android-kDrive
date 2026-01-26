@@ -1,0 +1,3 @@
+- Update spanish translation
+- Add button to remove an external user from a shared drive
+- Add logs when login fails unexpectedly
