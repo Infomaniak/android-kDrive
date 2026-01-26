@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,6 +84,8 @@ import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import splitties.coroutines.repeatWhileActive
 import splitties.experimental.ExperimentalSplittiesApi
+import kotlin.collections.forEachIndexed
+import kotlin.collections.lastIndex
 
 class LoginActivity : ComponentActivity() {
 
@@ -107,7 +109,12 @@ class LoginActivity : ComponentActivity() {
                 when {
                     translatedError?.isNotBlank() == true -> showError(translatedError)
                     authCode?.isNotBlank() == true -> authenticateUser(authCode)
-                    else -> showError(getString(R.string.anErrorHasOccurred))
+                    else -> {
+                        SentryLog.e(TAG, "WebViewLoginResult returned null data") { scope ->
+                            scope.setExtra("errorCode", data?.extras?.getString(InfomaniakLogin.ERROR_CODE_TAG))
+                        }
+                        showError(getString(R.string.anErrorHasOccurred))
+                    }
                 }
             } else {
                 isLoginButtonLoading = false
@@ -268,6 +275,9 @@ class LoginActivity : ComponentActivity() {
                 when (tokenResult) {
                     is InfomaniakLogin.TokenResult.Success -> onGetTokenSuccess(tokenResult.apiToken)
                     is InfomaniakLogin.TokenResult.Error -> {
+                        SentryLog.e(TAG, "GetToken failed") { scope ->
+                            scope.setExtra("Error status", tokenResult.errorStatus.name)
+                        }
                         showError(getLoginErrorDescription(this@LoginActivity, tokenResult.errorStatus))
                     }
                 }
@@ -360,7 +370,13 @@ class LoginActivity : ComponentActivity() {
             val user = userProfileResponse.data?.apply {
                 this.apiToken = apiToken
                 this.organizations = ArrayList()
-            } ?: return Xor.Second(getErrorResponse(R.string.anErrorHasOccurred))
+            } ?: run {
+                SentryLog.e(TAG, "GetUserProfile returned null data") { scope ->
+                    scope.setExtra("userId", apiToken.userId.toString())
+                    scope.setExtra("apiResponse", userProfileResponse.toString())
+                }
+                return Xor.Second(getErrorResponse(R.string.anErrorHasOccurred))
+            }
 
             val allDrivesDataResponse = Dispatchers.IO { ApiRepository.getAllDrivesData(okhttpClient) }
 
