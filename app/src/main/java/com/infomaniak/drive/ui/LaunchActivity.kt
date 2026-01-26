@@ -23,9 +23,7 @@ import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.core.legacy.utils.showToast
@@ -60,7 +58,6 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -164,14 +161,9 @@ class LaunchActivity : EdgeToEdgeActivity() {
                 level = SentryLevel.INFO
             })
 
-            val allUserIds = UserDatabase.getDatabase()
-                .userDao()
-                .getAll()
-                .asFlow()
-                .first()
-                .map(User::id)
+            val user = UserDatabase().userDao().findById(navArgs.destinationUserId)
 
-            if (navArgs.destinationUserId in allUserIds) {
+            if (user != null) {
                 Dispatchers.IO {
                     DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
                 }?.also { drive ->
