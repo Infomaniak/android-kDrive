@@ -772,8 +772,7 @@ object FileController {
         }
 
         val folderProxy = localFolderProxy ?: newLocalFolderProxy
-        val remoteFilesIds = remoteFiles.map(File::id)
-        val outDatedFiles = folderProxy?.children?.filter { it.id in remoteFilesIds }
+        val remoteFilesIds = remoteFiles.mapTo(mutableSetOf(), File::id)
 
         realm.executeTransaction {
             // Restore same children data
@@ -781,7 +780,8 @@ object FileController {
             // Save to realm
             folderProxy?.apply {
                 // Remove old children
-                outDatedFiles?.let(children::removeAll)
+                val outDatedFiles = children.filterTo(mutableSetOf()) { it.id in remoteFilesIds }
+                children.removeAll(outDatedFiles)
                 // Add children
                 children.addAll(remoteFiles)
                 // Update folder properties
