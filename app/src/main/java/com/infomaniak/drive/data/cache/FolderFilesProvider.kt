@@ -131,7 +131,8 @@ object FolderFilesProvider {
             localFolderProxy = folderProxy,
             remoteFolder = if (folderFilesProviderArgs.folderId == ROOT_ID) rootFolder else folderProxy,
             apiResponse = apiResponse,
-            isCompleteFolder = !apiResponse.hasMore
+            isCompleteFolder = !apiResponse.hasMore,
+            shouldClearLocalFiles = cursor == null, // Clear existing files: sharedWithMe doesn't have file activities
         )
 
         when {
@@ -245,7 +246,14 @@ object FolderFilesProvider {
 
         ensureActive()
 
-        handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy, okHttpClient)
+        handleRemoteFiles(
+            realm = realm,
+            apiResponse = apiResponse,
+            folderFilesProviderArgs = folderFilesProviderArgs,
+            folderProxy = folderProxy,
+            isSupportingFileActivities = true,
+            okHttpClient = okHttpClient,
+        )
     }
 
     private fun loadCloudStorageFromRemote(
@@ -277,7 +285,7 @@ object FolderFilesProvider {
 
         ensureActive()
 
-        handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy)
+        handleRemoteFiles(realm, apiResponse, folderFilesProviderArgs, folderProxy, isSupportingFileActivities = false)
     }
 
     private fun handleRemoteFiles(
@@ -285,6 +293,7 @@ object FolderFilesProvider {
         apiResponse: CursorApiResponse<List<File>>,
         folderFilesProviderArgs: FolderFilesProviderArgs,
         folderProxy: File?,
+        isSupportingFileActivities: Boolean,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): FolderFilesProviderResult? {
         val userDrive = folderFilesProviderArgs.userDrive
@@ -306,7 +315,8 @@ object FolderFilesProvider {
                     localFolderProxy = folderProxy,
                     remoteFolder = localFolder,
                     apiResponse = apiResponse,
-                    isCompleteFolder = isCompleteFolder
+                    isCompleteFolder = isCompleteFolder,
+                    shouldClearLocalFiles = folderFilesProviderArgs.isFirstPage && !isSupportingFileActivities
                 )
                 val folderFiles = if (folderWithChildren) ArrayList(apiResponseData) else arrayListOf()
                 FolderFilesProviderResult(folder = localFolder, folderFiles = folderFiles, isComplete = isCompleteFolder)

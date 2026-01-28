@@ -754,6 +754,7 @@ object FileController {
         remoteFolder: File?,
         apiResponse: CursorApiResponse<List<File>>,
         isCompleteFolder: Boolean,
+        shouldClearLocalFiles: Boolean,
     ) {
         val remoteFiles = apiResponse.data ?: return
 
@@ -780,8 +781,13 @@ object FileController {
             // Save to realm
             folderProxy?.apply {
                 // Remove old children
-                val outDatedFiles = children.filterTo(mutableSetOf()) { it.id in remoteFilesIds }
-                children.removeAll(outDatedFiles)
+                if (shouldClearLocalFiles) {
+                    children.clear()
+                } else {
+                    val outDatedFiles = children.filterTo(mutableSetOf()) { it.id in remoteFilesIds }
+                    children.removeAll(outDatedFiles)
+                }
+
                 // Add children
                 children.addAll(remoteFiles)
                 // Update folder properties
