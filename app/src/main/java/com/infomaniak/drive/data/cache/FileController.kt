@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -753,7 +753,6 @@ object FileController {
         localFolderProxy: File?,
         remoteFolder: File?,
         apiResponse: CursorApiResponse<List<File>>,
-        isFirstPage: Boolean,
         isCompleteFolder: Boolean,
     ) {
         val remoteFiles = apiResponse.data ?: return
@@ -771,20 +770,25 @@ object FileController {
                 }
             }
         }
+
+        val folderProxy = localFolderProxy ?: newLocalFolderProxy
+        val remoteFilesIds = remoteFiles.map(File::id)
+        val outDatedFiles = folderProxy?.children?.filter { it.id in remoteFilesIds }
+
         realm.executeTransaction {
             // Restore same children data
             keepSubFolderChildren(realm, localFolderProxy?.children, remoteFiles)
             // Save to realm
-            (localFolderProxy ?: newLocalFolderProxy)?.let { folderProxy ->
+            folderProxy?.apply {
                 // Remove old children
-                if (isFirstPage) folderProxy.children.clear()
+                outDatedFiles?.let(children::removeAll)
                 // Add children
-                folderProxy.children.addAll(remoteFiles)
+                children.addAll(remoteFiles)
                 // Update folder properties
-                folderProxy.isComplete = isCompleteFolder
-                folderProxy.responseAt = apiResponse.responseAt
-                folderProxy.cursor = apiResponse.cursor
-                folderProxy.versionCode = BuildConfig.VERSION_CODE
+                isComplete = isCompleteFolder
+                responseAt = apiResponse.responseAt
+                cursor = apiResponse.cursor
+                versionCode = BuildConfig.VERSION_CODE
             }
         }
     }
@@ -889,13 +893,17 @@ object FileController {
     }
 
     suspend fun createFolder(name: String, parentId: Int, onlyForMe: Boolean, userDrive: UserDrive?): ApiResponse<File> {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient = userDrive?.userId?.let {
+            AccountUtils.getHttpClient(it)
+        } ?: HttpClient.okHttpClientWithTokenInterceptor
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         return ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe)
     }
 
     suspend fun createCommonFolder(name: String, forAllUsers: Boolean, userDrive: UserDrive?): ApiResponse<File> {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient = userDrive?.userId?.let {
+            AccountUtils.getHttpClient(it)
+        } ?: HttpClient.okHttpClientWithTokenInterceptor
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }

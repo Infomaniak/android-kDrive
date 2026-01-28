@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2023-2025 Infomaniak Network SA
+ * Copyright (C) 2023-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,7 +131,6 @@ object FolderFilesProvider {
             localFolderProxy = folderProxy,
             remoteFolder = if (folderFilesProviderArgs.folderId == ROOT_ID) rootFolder else folderProxy,
             apiResponse = apiResponse,
-            isFirstPage = cursor == null,
             isCompleteFolder = !apiResponse.hasMore
         )
 
@@ -223,7 +222,6 @@ object FolderFilesProvider {
                     cursor = if (folderFilesProviderArgs.isFirstPage) null else folderProxy?.cursor,
                     order = folderFilesProviderArgs.order,
                 )
-
             }
             else -> {
                 ApiRepository.getListingFiles(
@@ -308,7 +306,6 @@ object FolderFilesProvider {
                     localFolderProxy = folderProxy,
                     remoteFolder = localFolder,
                     apiResponse = apiResponse,
-                    isFirstPage = folderFilesProviderArgs.isFirstPage,
                     isCompleteFolder = isCompleteFolder
                 )
                 val folderFiles = if (folderWithChildren) ArrayList(apiResponseData) else arrayListOf()
