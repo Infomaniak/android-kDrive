@@ -84,6 +84,9 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.File
@@ -112,6 +115,7 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.openOnlyOfficeActivity
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -288,9 +292,22 @@ class MainActivity : BaseActivity() {
 
 
     private fun handleOnlyOfficeDeeplink(link: DeeplinkAction.Office) {
-        TODO("Not yet implemented")
+        lifecycleScope.launch(context = Dispatchers.IO) {
+            DriveInfosController.getDrive(driveId = link.driveId, maintenance = false)
+                ?.ensureRightUser()
+                ?.run { UserDrive(userId = userId, driveId = link.driveId) }
+                ?.let { FileController.getFileById(fileId = link.fileId, userDrive = it) }
+                ?.let(::openOnlyOfficeActivity)
+        }
     }
 
+    private suspend fun Drive.ensureRightUser(): Drive = also {
+        if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
+        if (!sharedWithMe && id != AccountUtils.currentDriveId) {
+            AccountUtils.currentDriveId = id
+            AccountUtils.requestCurrentUser()
+        }
+    }
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
             if (it.deepLinkFileNotFound) {
