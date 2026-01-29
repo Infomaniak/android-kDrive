@@ -17,25 +17,25 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
-internal enum class ActionType(val type: String, val pattern: String) {
-    Collaborate(type = "collaborate", pattern = "$DRIVE_ID/$UUID"),
-    Drive(type = "drive", pattern = "$DRIVE_ID/$ROLE_FOLDER/$FOLDER_ALL_PROPERTIES"),
-    Office(type = "office", pattern = "$DRIVE_ID/$UUID");
+internal enum class ActionType(val type: String, val actionPattern: String) {
+    Collaborate(type = "collaborate", actionPattern = "$DRIVE_ID/$UUID"),
+    Drive(type = "drive", actionPattern = "$DRIVE_ID/$ROLE_FOLDER/$FOLDER_ALL_PROPERTIES"),
+    Office(type = "office", actionPattern = "$DRIVE_ID/$UUID");
 
-    fun build(action: String): DeeplinkAction = action.toItems(pattern).let { items ->
-        when (this) {
-            Collaborate -> DeeplinkAction.Collaborate(driveId = items[1], uuid = items[2])
+    fun build(action: String): DeeplinkAction = action.find(actionPattern).run {
+        when (this@ActionType) {
+            Collaborate -> DeeplinkAction.Collaborate(driveId = parseId(1), uuid = groupValues[2])
             Drive -> DeeplinkAction.Drive(
-                driveId = items[1],
-                roleFolder = RoleFolder.from(folderType = items[2], folderProperties = items[3])
+                driveId = parseId(1),
+                roleFolder = RoleFolder.from(folderType = groupValues[2], folderProperties = groupValues[3])
             )
-            Office -> DeeplinkAction.Office(driveId = items[1], uuid = items[2])
+            Office -> DeeplinkAction.Office(driveId = parseId(1), uuid = groupValues[2])
         }
     }
 
     companion object {
         fun from(value: String): ActionType = entries.find { it.type == value } ?: throw InvalidValue()
-        fun String.toItems(actionPattern: String): List<String> =
-            Regex(actionPattern).find(this)?.groupValues ?: throw InvalidValue()
+        fun String.find(actionPattern: String): MatchResult =
+            Regex(actionPattern).find(this) ?: throw InvalidValue()
     }
 }
