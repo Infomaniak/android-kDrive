@@ -20,7 +20,7 @@ package com.infomaniak.drive.data.models.deeplink
 internal enum class ActionType(val type: String, val actionPattern: String) {
     Collaborate(type = "collaborate", actionPattern = "$DRIVE_ID/$UUID"),
     Drive(type = "drive", actionPattern = "$DRIVE_ID/$ROLE_FOLDER/$FOLDER_ALL_PROPERTIES"),
-    Office(type = "office", actionPattern = "$DRIVE_ID/$UUID");
+    Office(type = "office", actionPattern = "$DRIVE_ID/$FILE_ID");
 
     fun build(action: String): DeeplinkAction = action.find(actionPattern).run {
         when (this@ActionType) {
@@ -29,7 +29,7 @@ internal enum class ActionType(val type: String, val actionPattern: String) {
                 driveId = parseId(1),
                 roleFolder = RoleFolder.from(folderType = groupValues[2], folderProperties = groupValues[3])
             )
-            Office -> DeeplinkAction.Office(driveId = parseId(1), uuid = groupValues[2])
+            Office -> DeeplinkAction.Office(driveId = parseId(1), fileId = parseId(2))
         }
     }
 
