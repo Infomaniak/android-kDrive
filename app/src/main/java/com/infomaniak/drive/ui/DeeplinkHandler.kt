@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import android.net.Uri
 import android.os.Bundle
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
@@ -31,22 +32,24 @@ class DeeplinkHandler {
 
     private val actionRegex by lazy { Regex("app/$ACTION_TYPE/$ACTION") }
 
-    fun handle(deeplinkPath: String) {
+    fun handle(uri: Uri, deeplink: String) {
         deeplinkType = try {
-            actionRegex.find(deeplinkPath)?.run {
+            actionRegex.find(deeplink)?.run {
                 val (actionType, action) = destructured
-                DeeplinkAction.from(actionType, action)
+                DeeplinkAction.from(originalUri = uri, actionType = actionType, action = action)
             }
         } catch (_: InvalidValue) {
-            DeeplinkType.Invalid
+            DeeplinkType.Invalid(originalUri = uri)
         }
         trackDeepLink(MatomoName.Internal)
     }
 
     fun forceFail() {
-        deeplinkType = DeeplinkType.Invalid
+        deeplinkType = DeeplinkType.Invalid(originalUri = Uri.EMPTY)
     }
 
     val extras: Bundle?
         get() = deeplinkType?.let { MainActivityArgs(deeplinkType = deeplinkType).toBundle() }
+
+    fun notHandledUri() = deeplinkType?.takeUnless { it.isHandled }?.originalUri
 }
