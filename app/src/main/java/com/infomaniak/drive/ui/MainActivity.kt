@@ -92,6 +92,9 @@ import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.SpecialFolder
+import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -193,6 +196,7 @@ class MainActivity : BaseActivity() {
         setupFabs()
         setupDrivePermissions()
         handleShortcuts()
+        handleDeeplink()
         handleNavigateToDestinationFileId()
 
         initAppUpdateManager()
@@ -259,6 +263,32 @@ class MainActivity : BaseActivity() {
                 navController.popBackStack(item.itemId, false)
             }
         }
+    }
+
+    private fun handleDeeplink() {
+        navigationArgs?.deeplinkType?.let {
+            when (it) {
+                is DeeplinkAction.Collaborate -> handleCollaborateDeeplink(it)
+                is DeeplinkAction.Drive -> handleDriveDeeplink(it)
+                is DeeplinkAction.Office -> handleOnlyOfficeDeeplink(it)
+                DeeplinkType.Invalid -> binding.mainFab.apply {
+                    post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
+                }
+            }
+        }
+    }
+
+    private fun handleCollaborateDeeplink(link: DeeplinkAction.Collaborate) {
+        TODO("Not yet implemented")
+    }
+
+    private fun handleDriveDeeplink(link: DeeplinkAction.Drive) {
+        TODO("Not yet implemented")
+    }
+
+
+    private fun handleOnlyOfficeDeeplink(link: DeeplinkAction.Office) {
+        TODO("Not yet implemented")
     }
 
     private fun handleNavigateToDestinationFileId() {
