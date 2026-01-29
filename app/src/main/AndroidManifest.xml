@@ -180,11 +180,13 @@
                 <data android:host="kdrive.infomaniak.com" />
                 <data android:host="ksuite.infomaniak.com" />
 
+                <data android:pathPattern="/app/collaborate/.*" />
                 <data android:pathPattern="/app/drive" />
                 <data android:pathPattern="/app/drive/.*" />
                 <data android:pathPattern="/app/office/.*" />
                 <data android:pathPattern="/app/share/.*" />
 
+                <data android:pathPattern="/.*/kdrive/app/collaborate/.*" />
                 <data android:pathPattern="/.*/kdrive/app/drive" />
                 <data android:pathPattern="/.*/kdrive/app/drive/.*" />
                 <data android:pathPattern="/.*/kdrive/app/office/.*" />

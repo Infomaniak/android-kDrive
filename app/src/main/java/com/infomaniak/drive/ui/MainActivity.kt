@@ -275,7 +275,7 @@ class MainActivity : BaseActivity() {
                 is DeeplinkAction.Collaborate -> handleCollaborateDeeplink(it)
                 is DeeplinkAction.Drive -> handleDriveDeeplink(it)
                 is DeeplinkAction.Office -> handleOnlyOfficeDeeplink(it)
-                DeeplinkType.Invalid -> binding.mainFab.apply {
+                is DeeplinkType.Invalid -> binding.mainFab.apply {
                     post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
                 }
             }
@@ -283,7 +283,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleCollaborateDeeplink(link: DeeplinkAction.Collaborate) {
-        TODO("Not yet implemented")
+        if (link.isHandled) TODO("Need to implement here when Collaborate deeplink will be supported")
     }
 
     private fun handleDriveDeeplink(link: DeeplinkAction.Drive) {
