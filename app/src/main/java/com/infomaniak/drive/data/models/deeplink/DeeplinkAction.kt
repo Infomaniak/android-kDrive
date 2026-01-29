@@ -27,7 +27,7 @@ sealed interface DeeplinkAction : DeeplinkType {
 
     data class Drive(val driveId: Int, val roleFolder: RoleFolder) : DeeplinkAction
 
-    data class Office(val driveId: Int, val uuid: String) : DeeplinkAction
+    data class Office(val driveId: Int, val fileId: Int) : DeeplinkAction
 
     companion object {
         @Throws(InvalidValue::class)
