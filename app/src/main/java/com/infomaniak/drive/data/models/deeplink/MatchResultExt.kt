@@ -17,21 +17,8 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
-import kotlinx.parcelize.Parcelize
-
-
-@Parcelize
-sealed interface DeeplinkAction : DeeplinkType {
-
-    data class Collaborate(val driveId: Int, val uuid: String) : DeeplinkAction
-
-    data class Drive(val driveId: Int, val roleFolder: RoleFolder) : DeeplinkAction
-
-    data class Office(val driveId: Int, val uuid: String) : DeeplinkAction
-
-    companion object {
-        @Throws(InvalidValue::class)
-        fun from(actionType: String, action: String): DeeplinkAction =
-            ActionType.from(actionType).build(action)
-    }
+internal fun MatchResult.parseId(index: Int) = try {
+    groupValues[index].toInt()
+} catch (_: Exception) {
+    throw InvalidValue()
 }

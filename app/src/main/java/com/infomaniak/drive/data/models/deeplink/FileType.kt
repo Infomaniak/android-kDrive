@@ -67,12 +67,4 @@ sealed class FileType(open val fileId: Int) : Parcelable {
             fileId = match.parseId(9),
         )
     }
-
-    companion object {
-        private fun MatchResult.parseId(index: Int) = try {
-            groupValues[index].toInt()
-        } catch (_: Exception) {
-            throw InvalidValue()
-        }
-    }
 }
