@@ -71,6 +71,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
     private var publicShareActivityExtras: Bundle? = null
     private var isHelpShortcutPressed = false
     private var shouldStartApp = true
+    private val deeplinkHandler = DeeplinkHandler()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +111,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         Intent(this, destinationClass).apply {
             when (destinationClass) {
-                MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
+                MainActivity::class.java -> (mainActivityExtras ?: deeplinkHandler.extras)?.let(::putExtras)
                 LoginActivity::class.java -> {
                     putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
                     putExtras(LoginActivityArgs(displayOnlyLastPage = false).toBundle())
@@ -154,14 +155,14 @@ class LaunchActivity : EdgeToEdgeActivity() {
     private suspend fun handleNotificationDestinationIntent() {
         val navArgs = navigationArgs ?: return
         if (navArgs.destinationUserId == 0 || navArgs.destinationDriveId == 0) return
-        
+
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = UploadWorker.BREADCRUMB_TAG
             message = "Upload notification has been clicked"
             level = SentryLevel.INFO
         })
         if (UserDatabase().userDao().findById(navArgs.destinationUserId) == null) {
-            mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+            deeplinkHandler.forceFail()
         } else {
             Dispatchers.IO {
                 DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
@@ -182,7 +183,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
             // external instead of internal if you already have access to the files. So we set it here
             if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
 
-            if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else processInternalLink(deeplink)
+            if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else deeplinkHandler.handle(deeplink)
             SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
         }
     }
@@ -197,7 +198,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
                     val shareLink = apiResponse.data!!
                     setPublicShareActivityArgs(driveId, publicShareUuid, shareLink)
                 }
-                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
+                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(deeplinkHandler::handle)
                 else -> handlePublicShareError(apiResponse.error, driveId, publicShareUuid)
             }
         }
