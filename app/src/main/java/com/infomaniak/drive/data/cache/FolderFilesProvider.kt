@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2023-2025 Infomaniak Network SA
+ * Copyright (C) 2023-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.cache
 
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
+import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
@@ -27,6 +28,7 @@ import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.cache.FileController.saveRemoteFiles
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
+import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileAction
 import com.infomaniak.drive.data.models.FileActivityType
 import com.infomaniak.drive.data.models.UserDrive
@@ -41,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import java.util.Calendar
 
@@ -75,6 +78,24 @@ object FolderFilesProvider {
             return files
         } finally {
             if (folderFilesProviderArgs.realm == null) realm.close()
+        }
+    }
+
+    suspend fun loadRootFiles(userDrive: UserDrive, hasNetwork: Boolean) = withContext(Dispatchers.IO) {
+        if (hasNetwork) {
+            runCatching {
+                getFiles(
+                    FolderFilesProviderArgs(
+                        folderId = ROOT_ID,
+                        isFirstPage = true,
+                        order = SortType.NAME_AZ,
+                        sourceRestrictionType = ONLY_FROM_REMOTE,
+                        userDrive = userDrive,
+                    )
+                )
+            }.cancellable().onFailure { throwable ->
+                SentryLog.e(TAG, "recursiveDownload failed", throwable)
+            }.getOrNull()
         }
     }
 
@@ -157,7 +178,7 @@ object FolderFilesProvider {
         realm: Realm,
         folderId: Int,
         userDrive: UserDrive,
-        sortType: File.SortType,
+        sortType: SortType,
         isFirstPage: Boolean = true,
         transaction: (files: ArrayList<File>) -> Unit,
         okHttpClient: OkHttpClient? = null,
@@ -327,7 +348,7 @@ object FolderFilesProvider {
         realm: Realm,
         folderProxy: File?,
         withChildren: Boolean,
-        order: File.SortType
+        order: SortType
     ): FolderFilesProviderResult? {
         val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) } ?: return null
         val sortedFolderFiles = if (withChildren) FileController.getLocalSortedFolderFiles(folderProxy, order) else arrayListOf()
@@ -361,7 +382,7 @@ object FolderFilesProvider {
             driveId = userDrive.driveId,
             parentId = folderProxy.id,
             cursor = cursor,
-            order = File.SortType.NAME_AZ,
+            order = SortType.NAME_AZ,
         )
 
         if (!apiResponse.isSuccess()) return returnResponse
@@ -457,7 +478,7 @@ object FolderFilesProvider {
     data class FolderFilesProviderArgs(
         val folderId: FileId,
         val isFirstPage: Boolean = true,
-        val order: File.SortType = File.SortType.NAME_AZ,
+        val order: SortType = SortType.NAME_AZ,
         val realm: Realm? = null,
         val sourceRestrictionType: SourceRestrictionType = SourceRestrictionType.UNRESTRICTED,
         val userDrive: UserDrive = UserDrive(),
