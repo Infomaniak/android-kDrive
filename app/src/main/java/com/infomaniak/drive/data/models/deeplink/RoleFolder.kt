@@ -23,6 +23,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 sealed class RoleFolder(open val fileType: FileType) : Parcelable {
+    open val isHandled: Boolean
+        get() = true
 
     class Collaboratives(override val fileType: FileType) : RoleFolder(fileType)
     class File(override val fileType: FileType) : RoleFolder(fileType)
