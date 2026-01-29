@@ -109,6 +109,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         sourceRestrictionType: FolderFilesProvider.SourceRestrictionType,
         userDrive: UserDrive? = null,
         isNewSort: Boolean,
+        isSupportingFileActivities: Boolean,
     ): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()
         getFolderActivitiesJob.cancel()
@@ -124,7 +125,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                         order = order,
                         sourceRestrictionType = sourceRestrictionType,
                         userDrive = userDrive ?: UserDrive(),
-                        isSupportingFileActivities = true, // TODO check
+                        isSupportingFileActivities = isSupportingFileActivities,
                     )
                 )
 

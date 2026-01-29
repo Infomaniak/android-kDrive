@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -764,6 +764,10 @@ open class FileListFragment : MultiSelectFragment(
             sourceRestrictionType = if (!mainViewModel.hasNetwork) ONLY_FROM_LOCAL else sourceRestrictionType,
             userDrive = userDrive,
             isNewSort = isNewSort,
+            // Only the real FileListFragment supports activities, children do not. This allows child like SelectFolderFragment
+            // that doesn't override `DownloadFiles` to still clear the whole list to remove outdated data, which are
+            // otherwise returned by the activities.
+            isSupportingFileActivities = this::class == FileListFragment::class
         ).observe(viewLifecycleOwner) {
             onFinish?.invoke(it)
         }
