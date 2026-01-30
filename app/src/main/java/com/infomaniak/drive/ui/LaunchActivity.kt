@@ -153,29 +153,24 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     private suspend fun handleNotificationDestinationIntent() {
         val navArgs = navigationArgs ?: return
-
-        if (navArgs.destinationUserId != 0 && navArgs.destinationDriveId != 0) {
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = UploadWorker.BREADCRUMB_TAG
-                message = "Upload notification has been clicked"
-                level = SentryLevel.INFO
-            })
-
-            val user = UserDatabase().userDao().findById(navArgs.destinationUserId)
-
-            if (user != null) {
-                Dispatchers.IO {
-                    DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
-                }?.also { drive ->
-                    setOpenSpecificFile(
-                        userId = drive.userId,
-                        driveId = drive.id,
-                        fileId = navArgs.destinationRemoteFolderId,
-                        isSharedWithMe = drive.sharedWithMe,
-                    )
-                }
-            } else {
-                mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+        if (navArgs.destinationUserId == 0 || navArgs.destinationDriveId == 0) return
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = UploadWorker.BREADCRUMB_TAG
+            message = "Upload notification has been clicked"
+            level = SentryLevel.INFO
+        })
+        if (UserDatabase().userDao().findById(navArgs.destinationUserId) == null) {
+            mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+        } else {
+            Dispatchers.IO {
+                DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
+            }?.also { drive ->
+                setOpenSpecificFile(
+                    userId = drive.userId,
+                    driveId = drive.id,
+                    fileId = navArgs.destinationRemoteFolderId,
+                    isSharedWithMe = drive.sharedWithMe,
+                )
             }
         }
     }
