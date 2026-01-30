@@ -36,7 +36,7 @@ enum class FolderType(val type: String, val propertiesPattern: String) {
             Collaboratives -> RoleFolder.Collaboratives()
             Favorites -> RoleFolder.Favorites(fileId = parseOptionalId(3))
             File -> RoleFolder.File(fileType = extractFileType())
-            MyShares -> RoleFolder.MyShare(fileId = parseOptionalId(3))
+            MyShares -> RoleFolder.MyShares(fileId = parseOptionalId(3))
             SharedWithMe -> RoleFolder.SharedWithMe(fileType = extractExternalFileType())
             SharedLinks -> RoleFolder.SharedLinks(fileId = parseOptionalId(3))
             Recent -> RoleFolder.Recent(fileId = parseOptionalId(3))

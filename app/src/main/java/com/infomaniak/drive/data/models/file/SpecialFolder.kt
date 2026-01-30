@@ -17,19 +17,22 @@
  */
 package com.infomaniak.drive.data.models.file
 
+import android.os.Parcelable
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Type
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
-sealed class SpecialFolder(id: Int, name: String, onFileInit: (File.() -> Unit)? = null) {
+@Parcelize
+sealed class SpecialFolder(val id: Int, val name: String, val onFileInit: (File.() -> Unit)? = null) : Parcelable {
 
+    @IgnoredOnParcel
     val file by lazy {
         File(id = id, name = name).apply {
             initUid()
             onFileInit?.invoke(this)
         }
     }
-    val id: Int
-        get() = file.id
 
     data object Favorites : SpecialFolder(id = FAVORITES_FILE_ID, name = "Favorites")
     data object MyShares : SpecialFolder(id = MY_SHARES_FILE_ID, name = "My Shares")
