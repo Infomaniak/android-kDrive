@@ -86,7 +86,6 @@ import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.File
@@ -99,6 +98,8 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
 import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.data.models.drive.Drive
+import com.infomaniak.drive.data.models.file.SpecialFolder
+import com.infomaniak.drive.data.models.file.SpecialFolder.MyShares
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -303,7 +304,7 @@ class MainActivity : BaseActivity() {
                         is RoleFolder.SharedLinks -> TODO()
                         is RoleFolder.SharedWithMe -> TODO()
                         is RoleFolder.Trash -> navigateToDestinationFileId(
-                            destinationFileId = TRASH_FILE_ID,
+                            destinationFileId = SpecialFolder.Trash.id,
                             destinationUserDrive = UserDrive(driveId = link.driveId),
                             subfolderId = link.roleFolder.folderId
                         )
