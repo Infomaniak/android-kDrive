@@ -21,7 +21,7 @@ import android.net.Uri
 
 internal enum class ActionType(val type: String, val actionPattern: String) {
     Collaborate(type = "collaborate", actionPattern = "$DRIVE_ID/$UUID"),
-    Drive(type = "drive", actionPattern = "$DRIVE_ID/$ROLE_FOLDER/$FOLDER_ALL_PROPERTIES"),
+    Drive(type = "drive", actionPattern = "$DRIVE_ID/$ROLE_FOLDER(?:/$FOLDER_ALL_PROPERTIES)?"),
     Office(type = "office", actionPattern = "$DRIVE_ID/$FILE_ID");
 
     fun build(originalUri: Uri, action: String): DeeplinkAction = action.find(actionPattern).run {
