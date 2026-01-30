@@ -39,14 +39,14 @@ open class AppSettings(
     var _appSecurityEnabled: Boolean = false,
     var _currentDriveId: Int = -1,
     var _currentUserId: Int = -1,
-    var _onlyWifiSync: Boolean = false,
+    var _onlyWifiSyncOffline: Boolean = false,
 ) : RealmObject() {
 
     fun update(appSettings: AppSettings) {
         this._appSecurityEnabled = appSettings._appSecurityEnabled
         this._currentDriveId = appSettings._currentDriveId
         this._currentUserId = appSettings._currentUserId
-        this._onlyWifiSync = appSettings._onlyWifiSync
+        this._onlyWifiSyncOffline = appSettings._onlyWifiSyncOffline
     }
 
     companion object {
@@ -86,76 +86,53 @@ open class AppSettings(
             replay = 1,
         )
 
-        fun updateAppSettings(onUpdate: (appSettings: AppSettings) -> Unit) {
-            return getRealmInstance().use { realm ->
-                var appSettings = getAppSettingsQuery(realm)
-
-                realm.executeTransaction {
-                    if (appSettings == null) {
-                        appSettings = it.copyToRealm(AppSettings())
+        fun updateAppSettings(scope: CoroutineScope = Companion.scope, onUpdate: AppSettings.() -> Unit) {
+            scope.launch(Dispatchers.IO) {
+                getRealmInstance().use { realm ->
+                    realm.executeTransaction {
+                        onUpdate(getAppSettingsQuery(realm) ?: it.copyToRealm(AppSettings()))
                     }
-                    onUpdate(appSettings!!)
                 }
             }
         }
 
         fun resetAppSettings() {
-            updateAppSettings { appSettings ->
-                appSettings.update(AppSettings())
-            }
-        }
-
-        fun removeAppSettings() {
-            getRealmInstance().use { realm ->
-                realm.executeTransaction {
-                    it.where(AppSettings::class.java).findFirst()?.deleteFromRealm()
-                }
-            }
+            updateAppSettings { update(AppSettings()) }
         }
 
         var appSecurityLock: Boolean = getAppSettings()._appSecurityEnabled
             set(value) {
                 field = value
-                scope.launch(Dispatchers.IO) {
-                    updateAppSettings { appSettings -> appSettings._appSecurityEnabled = value }
-                }
+                updateAppSettings { _appSecurityEnabled = value }
             }
 
-        var onlyWifiSync: Boolean = getAppSettings()._onlyWifiSync
+        var onlyWifiSyncOffline: Boolean = getAppSettings()._onlyWifiSyncOffline
             set(value) {
                 field = value
-                scope.launch(Dispatchers.IO) {
-                    updateAppSettings { appSettings -> appSettings._onlyWifiSync = value }
-                }
+                updateAppSettings { _onlyWifiSyncOffline = value }
             }
     }
 
     class AppSettingsMigration : RealmMigration {
 
         override fun migrate(realm: DynamicRealm, oldVersion: Long, newVersion: Long) {
-            var oldVersionTemp = oldVersion
-
-            // DynamicRealm exposes an editable schema
-            val schema = realm.schema
-
-            //region Migrate to version 1: Remove migrated
-            if (oldVersionTemp == 0L) {
-                // Remove some fields in SyncSettings
-                schema.get(AppSettings::class.java.simpleName)?.removeField("_migrated")
-
-                oldVersionTemp++
+            if (oldVersion < newVersion) {
+                realm.schema?.get(AppSettings::class.java.simpleName)?.run {
+                    if (oldVersion < 1L) {
+                        removeField("_migrated")
+                    }
+                    if (oldVersion < 2L) {
+                        removeField("_appLaunchesCount")
+                    }
+                    if (oldVersion < 3L) {
+                        renameField("_onlyWifiSync", "_onlyWifiSyncOffline")
+                    }
+                }
             }
-
-            if (oldVersionTemp == 1L) {
-                schema.get(AppSettings::class.java.simpleName)?.removeField("_appLaunchesCount")
-
-                oldVersionTemp++
-            }
-            //endregion
         }
 
         companion object {
-            const val DB_VERSION = 2L // Must be bumped when the schema changes
+            const val DB_VERSION = 3L // Must be bumped when the schema changes
         }
     }
 }

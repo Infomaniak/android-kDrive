@@ -46,7 +46,7 @@ class MediaObserverWorker(appContext: Context, params: WorkerParameters) : Corou
 
         if (!applicationContext.isSyncActive()) {
             when {
-                MediaFolder.getAllSyncedFoldersCount() > 0 -> applicationContext.syncImmediately()
+                MediaFolder.getAllSyncedFoldersCount() > 0 -> applicationContext.syncImmediately(isAutomaticTrigger = true)
                 else -> applicationContext.showSyncConfigNotification()
             }
         }

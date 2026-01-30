@@ -47,6 +47,13 @@ class ItemSettingView @JvmOverloads constructor(
         }
 
     var title: CharSequence by binding.title::text
+
+    var description: CharSequence
+        get() = binding.description.text
+        set(value) = with(binding.description) {
+            text = value
+            isGone = value.isBlank()
+        }
     var endText: CharSequence by binding.endText::text
 
     init {
@@ -54,7 +61,7 @@ class ItemSettingView @JvmOverloads constructor(
             setAction(Action.entries[getInteger(R.styleable.ItemSettingView_itemAction, 0)])
             title = getString(R.styleable.ItemSettingView_title) ?: ""
             endText = getString(R.styleable.ItemSettingView_endText) ?: ""
-            setDescription(getString(R.styleable.ItemSettingView_description) ?: "")
+            description = getString(R.styleable.ItemSettingView_description) ?: ""
 
             getDrawable(R.styleable.ItemSettingView_icon).let {
                 binding.icon.setImageDrawable(it)
@@ -65,13 +72,6 @@ class ItemSettingView @JvmOverloads constructor(
 
     override fun setOnClickListener(listener: OnClickListener?) = with(binding) {
         root.setOnClickListener { listener?.onClick(root) }
-    }
-
-    fun setDescription(description: String) {
-        binding.description.apply {
-            text = description
-            isGone = description.isBlank()
-        }
     }
 
     fun setOnCheckedChangeListener(listener: CompoundButton.OnCheckedChangeListener) {

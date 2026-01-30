@@ -34,6 +34,9 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
+import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.common.utils.startOfTheDay
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.hideProgressCatching
@@ -43,9 +46,6 @@ import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.startAppSettingsConfig
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
-import com.infomaniak.core.common.utils.format
-import com.infomaniak.core.common.utils.startOfTheDay
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
 import com.infomaniak.drive.R
@@ -119,11 +119,13 @@ class SyncSettingsActivity : BaseActivity() {
         val oldCreateDatedSubFoldersValue = oldSyncSettings?.createDatedSubFolders == true
         val oldDeleteAfterSyncValue = oldSyncSettings?.deleteAfterSync == true
         val oldSaveOldPicturesValue = SavePicturesDate.SINCE_NOW
+        val oldOnlyWifiSyncMedia = oldSyncSettings?.onlyWifiSyncMedia == true
 
         syncSettingsViewModel.init(
             intervalTypeValue = oldIntervalTypeValue,
             syncFolderId = oldSyncSettings?.syncFolder,
             savePicturesDate = uiSettings.syncSettingsDate,
+            onlyWifiSyncMedia = oldOnlyWifiSyncMedia,
         )
 
         setupListeners(oldSyncVideoValue, oldCreateDatedSubFoldersValue, oldDeleteAfterSyncValue)
@@ -140,6 +142,7 @@ class SyncSettingsActivity : BaseActivity() {
         observeSaveOldPictures(oldSaveOldPicturesValue)
 
         observeSyncIntervalType(oldIntervalTypeValue)
+        initOnlyWifiSyncMedia(oldOnlyWifiSyncMedia)
 
         binding.root.enableEdgeToEdge(shouldConsumeInsets = true, withBottom = false) {
             binding.saveButton.setMargins(bottom = resources.getDimension(R.dimen.marginStandard).toInt() + it.bottom)
@@ -219,6 +222,10 @@ class SyncSettingsActivity : BaseActivity() {
 
         syncPeriodicity.setOnClickListener {
             SelectIntervalTypeBottomSheetDialog().show(supportFragmentManager, "SyncSettingsSelectIntervalTypeBottomSheetDialog")
+        }
+
+        syncOnlyWifi.setOnClickListener {
+            SyncMediaBottomSheetDialog().show(supportFragmentManager, SyncMediaBottomSheetDialog::class.simpleName)
         }
 
         saveButton.initProgress(this@SyncSettingsActivity)
@@ -333,6 +340,15 @@ class SyncSettingsActivity : BaseActivity() {
             if (syncSettingsViewModel.syncIntervalType.value != oldIntervalTypeValue) editNumber++
             changeSaveButtonStatus()
             syncPeriodicity.endText = getString(it.title).lowercase()
+        }
+    }
+
+    private fun initOnlyWifiSyncMedia(oldOnlyWifiSyncMedia: Boolean) {
+        syncSettingsViewModel.onlyWifiSyncMedia.observe(this) {
+            if (it != oldOnlyWifiSyncMedia) editNumber++ else editNumber--
+            changeSaveButtonStatus()
+            binding.syncOnlyWifi.description =
+                getString(if (it) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle)
         }
     }
 
@@ -476,7 +492,8 @@ class SyncSettingsActivity : BaseActivity() {
             syncFolder = syncSettingsViewModel.syncFolderId.value!!,
             syncVideo = syncVideo.isChecked,
             createDatedSubFolders = createDatedSubFolders.isChecked,
-            deleteAfterSync = deletePicturesAfterSync.isChecked
+            deleteAfterSync = deletePicturesAfterSync.isChecked,
+            onlyWifiSyncMedia = syncSettingsViewModel.onlyWifiSyncMedia.value ?: false,
         )
     }
 

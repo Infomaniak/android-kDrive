@@ -42,7 +42,9 @@ class RebootReceiver : BroadcastReceiver() {
             activateSyncIfNeeded()
 
             startContentObserverService()
-            if (intent?.action == Intent.ACTION_BOOT_COMPLETED && AccountUtils.isEnableAppSync()) syncImmediately()
+            if (intent?.action == Intent.ACTION_BOOT_COMPLETED && AccountUtils.isEnableAppSync()) syncImmediately(
+                isAutomaticTrigger = true
+            )
             syncMediaJob.join()
             pendingResult.finish()
         }

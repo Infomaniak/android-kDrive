@@ -256,7 +256,8 @@ class MainViewModel(
     }
 
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient =
+            userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         val apiResponse = ApiRepository.getFileShare(okHttpClient, File(id = fileId, driveId = driveId))
         emit(apiResponse)
@@ -444,7 +445,7 @@ class MainViewModel(
     fun restartUploadWorkerIfNeeded() {
         viewModelScope.launch {
             if (UploadFile.getAllPendingUploadsCount() > 0 && !getContext().isSyncScheduled()) {
-                getContext().syncImmediately()
+                getContext().syncImmediately(isAutomaticTrigger = true)
             }
         }
     }
