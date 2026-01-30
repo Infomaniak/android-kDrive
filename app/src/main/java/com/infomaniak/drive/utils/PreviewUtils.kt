@@ -185,7 +185,7 @@ suspend fun downloadFile(
 ) {
     Dispatchers.IO { if (externalOutputFile.exists()) externalOutputFile.delete() }
     val baseDownloadUrl = ApiRoutes.getDownloadFileUrl(file)
-    val downloadUrl = if (file.isOnlyOfficePreview()) baseDownloadUrl.appendQuery("as=pdf") else ""
+    val downloadUrl = if (file.isOnlyOfficePreview()) baseDownloadUrl.appendQuery("as=pdf") else baseDownloadUrl
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
     val okHttpClient = when {
         isPublicShared -> unauthenticatedHttpClient
