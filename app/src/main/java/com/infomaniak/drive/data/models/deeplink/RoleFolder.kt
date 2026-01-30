@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models.deeplink
 
 import android.os.Parcelable
+import com.infomaniak.drive.data.models.file.SpecialFolder
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -25,15 +26,17 @@ sealed interface RoleFolder : Parcelable {
     val isHandled: Boolean
         get() = true
 
+    open class Special(val specialFolder: SpecialFolder) : RoleFolder
+
     class Category(val id: Int, val fileId: Int?) : RoleFolder
     class Collaboratives : RoleFolder
     class File(val fileType: FileType) : RoleFolder
-    class Recent(val fileId: Int?) : RoleFolder
-    class SharedWithMe(val fileType: ExternalFileType?) : RoleFolder
+    class Recent(val fileId: Int?) : Special(SpecialFolder.RecentChanges)
+    class SharedWithMe(val fileType: ExternalFileType?) : Special(SpecialFolder.SharedWithMe)
     class SharedLinks(val fileId: Int?) : RoleFolder
-    class Favorites(val fileId: Int?) : RoleFolder
-    class MyShare(val fileId: Int?) : RoleFolder
-    class Trash(val folderId: Int?) : RoleFolder
+    class Favorites(val fileId: Int?) : Special(SpecialFolder.Favorites)
+    class MyShares(val fileId: Int?) : Special(SpecialFolder.MyShares)
+    class Trash(val folderId: Int?) : Special(SpecialFolder.Trash)
 
     companion object {
         @Throws(InvalidValue::class)
