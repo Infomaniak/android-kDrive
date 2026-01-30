@@ -22,3 +22,5 @@ internal fun MatchResult.parseId(index: Int) = try {
 } catch (_: Exception) {
     throw InvalidValue()
 }
+
+internal fun MatchResult?.parseOptionalId(index: Int) = this?.parseId(index)
