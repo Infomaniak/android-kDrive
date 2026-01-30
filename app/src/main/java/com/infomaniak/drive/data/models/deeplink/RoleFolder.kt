@@ -26,7 +26,8 @@ sealed interface RoleFolder : Parcelable {
     val isHandled: Boolean
         get() = true
 
-    open class Special(val specialFolder: SpecialFolder) : RoleFolder
+    @Parcelize
+    sealed class Special(val specialFolder: SpecialFolder) : RoleFolder
 
     class Category(val id: Int, val fileId: Int?) : RoleFolder
     class Collaboratives : RoleFolder
