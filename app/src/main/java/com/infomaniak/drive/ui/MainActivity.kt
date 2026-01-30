@@ -97,6 +97,7 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.SpecialFolder
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
@@ -287,7 +288,28 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleDriveDeeplink(link: DeeplinkAction.Drive) {
-        TODO("Not yet implemented")
+        lifecycleScope.launch(context = Dispatchers.IO) {
+            DriveInfosController.getDrive(driveId = link.driveId, maintenance = false)
+                ?.ensureRightUser()
+                ?.run { UserDrive(userId = userId, driveId = link.driveId) }
+                ?.let {
+                    when (link.roleFolder) {
+                        is RoleFolder.Category -> TODO()
+                        is RoleFolder.Collaboratives -> TODO()
+                        is RoleFolder.Favorites -> TODO()
+                        is RoleFolder.File -> TODO()
+                        is RoleFolder.MyShare -> TODO()
+                        is RoleFolder.Recent -> TODO()
+                        is RoleFolder.SharedLinks -> TODO()
+                        is RoleFolder.SharedWithMe -> TODO()
+                        is RoleFolder.Trash -> navigateToDestinationFileId(
+                            destinationFileId = TRASH_FILE_ID,
+                            destinationUserDrive = UserDrive(driveId = link.driveId),
+                            subfolderId = link.roleFolder.folderId
+                        )
+                    }
+                }
+        }
     }
 
 
