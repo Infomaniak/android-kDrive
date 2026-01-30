@@ -27,6 +27,10 @@ sealed class FileType(open val fileId: Int) : Parcelable {
             folderId = match.parseId(2),
             fileId = match.parseId(3),
         )
+
+        companion object {
+            const val PATTERN = "$FOLDER_ID/$FILE_ID"
+        }
     }
 
     class FilePreview(val fileType: String, override val fileId: Int) : FileType(fileId = fileId) {
@@ -34,6 +38,10 @@ sealed class FileType(open val fileId: Int) : Parcelable {
             fileType = match.groupValues[5],
             fileId = match.parseId(6),
         )
+
+        companion object {
+            const val PATTERN = "$KEY_PREVIEW/$FILE_TYPE/$FILE_ID"
+        }
     }
 
     class FilePreviewInFolder(val folderId: Int, val fileType: String, override val fileId: Int) :
@@ -43,28 +51,36 @@ sealed class FileType(open val fileId: Int) : Parcelable {
             fileType = match.groupValues[9],
             fileId = match.parseId(10),
         )
+
+        companion object {
+            const val PATTERN = "$FOLDER_ID/$KEY_PREVIEW/$FILE_TYPE/$FILE_ID"
+        }
     }
 
-    class ExternalFile(val sourceDriveId: Int, val folderId: Int, override val fileId: Int) : FileType(fileId = fileId) {
-        constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(2),
-            folderId = match.parseId(3),
-            fileId = match.parseId(4),
-        )
-    }
+    companion object {
+        const val GROUP_FILE = "file"
+        const val GROUP_PREVIEW = "preview"
+        const val GROUP_PREVIEW_IN_FOLDER = "previewFolder"
 
-    class ExternalFilePreviewInFolder(
-        val sourceDriveId: Int,
-        val folderId: Int,
-        val fileType: String,
-        override val fileId: Int
-    ) :
-        FileType(fileId = fileId) {
-        constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(6),
-            folderId = match.parseId(7),
-            fileType = match.groupValues[8],
-            fileId = match.parseId(9),
-        )
+        /**
+         * FOLDER_PROPERTIES filters this kind of paths :
+         *      <folderId>/<fileId>
+         *      preview/<type:string>/<fileId>
+         *      <folderId>/preview/<type:string>/<fileId>
+         *  It find one of them and assign it to a named group
+         *
+         *  Order in this Regex implies index for each parsing in ExternalFileType constructors
+         */
+        const val FOLDER_PROPERTIES =
+            """(?<$GROUP_FILE>${File.PATTERN})
+                |(?<$GROUP_PREVIEW>${FilePreview.PATTERN})
+                |(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})"""
+
+        fun MatchResult?.extractFileType(): FileType =
+            this?.let {
+                groups[GROUP_FILE]?.let { File(this) }
+                    ?: groups[GROUP_PREVIEW]?.let { FilePreview(this) }
+                    ?: groups[GROUP_PREVIEW_IN_FOLDER]?.let { FilePreviewInFolder(this) }
+            } ?: throw InvalidValue()
     }
 }
