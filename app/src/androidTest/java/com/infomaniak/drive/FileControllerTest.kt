@@ -23,7 +23,6 @@ import com.infomaniak.drive.data.api.ApiRepository.addMultiAccess
 import com.infomaniak.drive.data.api.ApiRepository.getFolderFiles
 import com.infomaniak.drive.data.api.ApiRepository.renameFile
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.cache.FileController.FAVORITES_FILE_ID
 import com.infomaniak.drive.data.cache.FileController.getGalleryDrive
 import com.infomaniak.drive.data.cache.FileController.getMySharedFiles
 import com.infomaniak.drive.data.cache.FileController.getOfflineFiles
@@ -35,6 +34,7 @@ import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.ApiTestUtils.assertApiResponseData
 import com.infomaniak.drive.utils.ApiTestUtils.createFileForTest
@@ -137,12 +137,12 @@ class FileControllerTest : KDriveTest() {
         saveFavoritesFiles(remoteFavoriteFiles, realm = realm)
 
         // Get saved favorite files
-        val localFavoriteFiles = FileController.getFilesFromCache(FAVORITES_FILE_ID)
+        val localFavoriteFiles = FileController.getFilesFromCache(Favorites.id)
         assertNotNull(localFavoriteFiles, "local favorite files cannot be null")
         assertFalse(localFavoriteFiles.isEmpty(), "local favorite files cannot be empty")
 
         // Compare remote files and local files
-        assertTrue(localFavoriteFiles.firstOrNull()?.parentId == FAVORITES_FILE_ID)
+        assertTrue(localFavoriteFiles.firstOrNull()?.parentId == Favorites.id)
         assertTrue(localFavoriteFiles.size == remoteFavoriteFiles.size, "local files and remote files cannot be different")
 
         // Delete Test file

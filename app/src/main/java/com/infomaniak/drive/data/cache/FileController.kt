@@ -36,6 +36,11 @@ import com.infomaniak.drive.data.models.MqttAction
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.FileExternalImport
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
+import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
+import com.infomaniak.drive.data.models.file.SpecialFolder.Gallery
+import com.infomaniak.drive.data.models.file.SpecialFolder.MyShares
+import com.infomaniak.drive.data.models.file.SpecialFolder.RecentChanges
+import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.RealmModules
@@ -60,20 +65,6 @@ object FileController {
 
     private const val REALM_DB_FILE = "kDrive-%d-%d.realm"
     private const val REALM_DB_SHARES_WITH_ME = "kDrive-%d-shares.realm"
-
-    const val FAVORITES_FILE_ID = -1
-    const val MY_SHARES_FILE_ID = -2
-    const val RECENT_CHANGES_FILE_ID = -4
-    private const val GALLERY_FILE_ID = -3
-    const val SHARED_WITH_ME_FILE_ID = -5
-    const val TRASH_FILE_ID = -6
-
-    private val FAVORITES_FILE = File(id = FAVORITES_FILE_ID, name = "Favorites").apply { initUid() }
-    private val MY_SHARES_FILE = File(id = MY_SHARES_FILE_ID, name = "My Shares").apply { initUid() }
-    private val GALLERY_FILE = File(id = GALLERY_FILE_ID, name = "Gallery").apply { initUid() }
-    private val RECENT_CHANGES_FILE = File(id = RECENT_CHANGES_FILE_ID, name = "Recent changes").apply { initUid() }
-    private val SHARED_WITH_ME_FILE = File(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me").apply { initUid() }
-    val TRASH_FILE = File(id = TRASH_FILE_ID, name = "Trash", status = "trash", type = "dir").apply { initUid() }
 
     private val minDateToIgnoreCache = Calendar.getInstance().apply { add(Calendar.MONTH, -2) }.timeInMillis / 1000 // 3 month
 
@@ -425,12 +416,12 @@ object FileController {
 
     fun createSharedWithMeFolderIfNeeded(userDrive: UserDrive?) {
         getRealmInstance(userDrive ?: UserDrive(sharedWithMe = true)).use {
-            getFileById(realm = it, SHARED_WITH_ME_FILE_ID) ?: saveFiles(SHARED_WITH_ME_FILE, emptyList(), realm = it)
+            getFileById(realm = it, SharedWithMe.id) ?: saveFiles(SharedWithMe.file, emptyList(), realm = it)
         }
     }
 
     fun saveFavoritesFiles(files: List<File>, replaceOldData: Boolean = false, realm: Realm? = null) {
-        saveFiles(FAVORITES_FILE, files, replaceOldData, realm)
+        saveFiles(Favorites.file, files, replaceOldData, realm)
     }
 
     private fun saveMySharesFiles(userDrive: UserDrive, files: ArrayList<File>, replaceOldData: Boolean) {
@@ -453,8 +444,8 @@ object FileController {
                 } else offlineFile?.delete()
             }
 
-            if (replaceOldData) removeFile(MY_SHARES_FILE_ID, keepCaches, keepFiles, realm)
-            saveFiles(MY_SHARES_FILE, files, replaceOldData, realm)
+            if (replaceOldData) removeFile(MyShares.id, keepCaches, keepFiles, realm)
+            saveFiles(MyShares.file, files, replaceOldData, realm)
         }
     }
 
@@ -564,7 +555,7 @@ object FileController {
         isFirstPage: Boolean = true,
     ) {
         if (onlyLocal) {
-            transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
+            transaction(getFilesFromCache(MyShares.id, userDrive, sortType), true)
         } else {
             val apiResponse = ApiRepository.getMySharedFiles(
                 AccountUtils.getHttpClient(userDrive.userId), userDrive.driveId, sortType, cursor
@@ -583,7 +574,7 @@ object FileController {
                         transaction(apiResponseData, true)
                     }
                 }
-            } else if (isFirstPage) transaction(getFilesFromCache(MY_SHARES_FILE_ID, userDrive, sortType), true)
+            } else if (isFirstPage) transaction(getFilesFromCache(MyShares.id, userDrive, sortType), true)
         }
     }
 
@@ -637,7 +628,7 @@ object FileController {
 
     fun getGalleryDrive(customRealm: Realm? = null): ArrayList<File> {
         val operation: (Realm) -> ArrayList<File> = { realm ->
-            realm.where(File::class.java).equalTo(File::id.name, GALLERY_FILE_ID).findFirst()?.let { galleryFolder ->
+            realm.where(File::class.java).equalTo(File::id.name, Gallery.id).findFirst()?.let { galleryFolder ->
                 realm.copyFromRealm(galleryFolder.children, 1) as ArrayList<File>
             } ?: arrayListOf()
         }
@@ -646,7 +637,7 @@ object FileController {
 
     fun getRecentChanges(): ArrayList<File> {
         return getRealmInstance().use { realm ->
-            realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()?.let { folder ->
+            realm.where(File::class.java).equalTo(File::id.name, RecentChanges.id).findFirst()?.let { folder ->
                 ArrayList(realm.copyFromRealm(folder.children, 0))
             } ?: arrayListOf()
         }
@@ -655,8 +646,8 @@ object FileController {
     fun storeRecentChanges(files: ArrayList<File>, isFirstPage: Boolean = false) {
         getRealmInstance().use {
             it.executeTransaction { realm ->
-                val folder = realm.where(File::class.java).equalTo(File::id.name, RECENT_CHANGES_FILE_ID).findFirst()
-                    ?: realm.copyToRealm(RECENT_CHANGES_FILE)
+                val folder = realm.where(File::class.java).equalTo(File::id.name, RecentChanges.id).findFirst()
+                    ?: realm.copyToRealm(RecentChanges.file)
                 if (isFirstPage) {
                     folder.children = RealmList()
                 }
@@ -689,8 +680,8 @@ object FileController {
     fun storeGalleryDrive(mediaList: List<File>, isFirstPage: Boolean = false, customRealm: Realm? = null) {
         val block: (Realm) -> Unit = {
             it.executeTransaction { realm ->
-                val galleryFolder = realm.where(File::class.java).equalTo(File::id.name, GALLERY_FILE_ID).findFirst()
-                    ?: realm.copyToRealm(GALLERY_FILE)
+                val galleryFolder = realm.where(File::class.java).equalTo(File::id.name, Gallery.id).findFirst()
+                    ?: realm.copyToRealm(Gallery.file)
                 if (isFirstPage) galleryFolder.children = RealmList()
                 galleryFolder.children.addAll(realm, mediaList)
             }
@@ -889,13 +880,15 @@ object FileController {
     }
 
     suspend fun createFolder(name: String, parentId: Int, onlyForMe: Boolean, userDrive: UserDrive?): ApiResponse<File> {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient =
+            userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         return ApiRepository.createFolder(okHttpClient, driveId, parentId, name, onlyForMe)
     }
 
     suspend fun createCommonFolder(name: String, forAllUsers: Boolean, userDrive: UserDrive?): ApiResponse<File> {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient =
+            userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         return ApiRepository.createTeamFolder(okHttpClient, driveId, name, forAllUsers)
     }

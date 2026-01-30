@@ -40,6 +40,7 @@ import com.infomaniak.drive.data.models.FileCount
 import com.infomaniak.drive.data.models.MqttNotification
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.file.SpecialFolder.Favorites
 import com.infomaniak.drive.ui.fileList.FileListFragment.FolderFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
@@ -203,7 +204,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                     }
                 } else emit(
                     FolderFilesResult(
-                        files = FileController.getFilesFromCache(FileController.FAVORITES_FILE_ID, userDrive = userDrive),
+                        files = FileController.getFilesFromCache(folderId = Favorites.id, userDrive = userDrive),
                         isComplete = true,
                         isFirstPage = true,
                         isNewSort = isNewSort,
