@@ -24,11 +24,11 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.network.models.ApiError
@@ -109,9 +109,10 @@ class PublicSharePasswordFragment : Fragment() {
     private fun onInitSuccess(shareLink: ShareLink?) {
         binding.passwordValidateButton.hideProgressCatching(R.string.buttonValid)
         publicShareViewModel.canDownloadFiles = shareLink?.capabilities?.canDownload == true
-        safeNavigate(
+        val fileId = shareLink?.fileId ?: PUBLIC_SHARE_DEFAULT_ID
+        safelyNavigate(
             PublicSharePasswordFragmentDirections.actionPublicSharePasswordFragmentToPublicShareListFragment(
-                fileId = shareLink?.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
+                fileId = fileId,
             )
         )
     }
