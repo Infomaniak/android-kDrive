@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,6 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.infomaniak.core.auth.networking.HttpClient
-import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.core.network.models.ApiResponse
@@ -52,10 +51,8 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FileController.TRASH_FILE
 import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.cache.FolderFilesProvider
-import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileCategory
 import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
@@ -192,20 +189,8 @@ class MainViewModel(
 
     fun loadRootFiles() {
         rootFilesJob.cancel()
-        rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
-            if (hasNetwork) runCatching {
-                FolderFilesProvider.getFiles(
-                    FolderFilesProvider.FolderFilesProviderArgs(
-                        folderId = Utils.ROOT_ID,
-                        isFirstPage = true,
-                        order = SortType.NAME_AZ,
-                        sourceRestrictionType = ONLY_FROM_REMOTE,
-                        userDrive = UserDrive(),
-                    )
-                )
-            }.cancellable().onFailure { t ->
-                SentryLog.e(TAG, "recursiveDownload failed", t)
-            }.getOrNull()
+        rootFilesJob = viewModelScope.launch {
+            FolderFilesProvider.loadRootFiles(UserDrive(), hasNetwork)
         }
     }
 
@@ -256,7 +241,10 @@ class MainViewModel(
     }
 
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        val okHttpClient = userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient = userDrive?.userId?.let {
+            AccountUtils.getHttpClient(it)
+        } ?: HttpClient.okHttpClientWithTokenInterceptor
+
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         val apiResponse = ApiRepository.getFileShare(okHttpClient, File(id = fileId, driveId = driveId))
         emit(apiResponse)

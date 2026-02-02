@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,11 @@ package com.infomaniak.drive.ui.fileList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.cache.FolderFilesProvider
-import com.infomaniak.drive.data.cache.FolderFilesProvider.SourceRestrictionType.ONLY_FROM_REMOTE
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.utils.Utils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -44,7 +41,17 @@ class SelectRootFolderViewModel : ViewModel() {
     private var userDrive: UserDrive? = null
     private val realm by lazy { FileController.getRealmInstance(userDrive) }
 
+    val isNetworkAvailable = NetworkAvailability().isNetworkAvailable.distinctUntilChanged()
+    var hasNetwork: Boolean = true
+        private set
+
     private var rootFilesJob: Job = Job()
+
+    init {
+        viewModelScope.launch {
+            isNetworkAvailable.collect { hasNetwork = it }
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val recentFiles: StateFlow<List<File>> = recentFilesToLoadLimit.distinctUntilChanged().flatMapLatest { limit ->
@@ -60,16 +67,8 @@ class SelectRootFolderViewModel : ViewModel() {
 
     fun loadRootFiles(userDrive: UserDrive) {
         rootFilesJob.cancel()
-        rootFilesJob = viewModelScope.launch(Dispatchers.IO) {
-            FolderFilesProvider.getFiles(
-                FolderFilesProvider.FolderFilesProviderArgs(
-                    folderId = Utils.ROOT_ID,
-                    isFirstPage = true,
-                    order = SortType.NAME_AZ,
-                    sourceRestrictionType = ONLY_FROM_REMOTE,
-                    userDrive = userDrive,
-                )
-            )
+        rootFilesJob = viewModelScope.launch {
+            FolderFilesProvider.loadRootFiles(userDrive, hasNetwork = true)
         }
     }
 
