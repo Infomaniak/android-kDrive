@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -308,7 +308,7 @@ class CloudStorageProvider : DocumentsProvider() {
             if (isWrite) {
                 writeDataFile(context, updatedFile, userDrive, accessMode)
             } else {
-                getDataFile(context, updatedFile, userDrive, signal)
+                getDataFile(context, updatedFile, userDrive, accessMode)
             }
         }
     }
@@ -630,58 +630,44 @@ class CloudStorageProvider : DocumentsProvider() {
         context: Context,
         file: File,
         userDrive: UserDrive,
-        signal: CancellationSignal?,
+        accessMode: Int,
     ): ParcelFileDescriptor? {
         val cacheFile = file.getCacheFile(context, userDrive)
         val offlineFile = file.getOfflineFile(context, userDrive.userId)
 
-        val (readPipe, writePipe) = ParcelFileDescriptor.createReliablePipe()
-
-        val job = cloudScope.launch {
-            ParcelFileDescriptor.AutoCloseOutputStream(writePipe).use { writeStream ->
-                runCatching {
-                    // Get offline file if it's intact
-                    if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
-                        offlineFile.inputStream().use { it.copyToCancellable(writeStream) }
-                        return@runCatching
-                    }
-
-                    // Get cache file if it's exists and if the file is updated
-                    if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
-                        cacheFile.inputStream().use { it.copyToCancellable(writeStream) }
-                        return@runCatching
-                    }
-
-                    // Download data file
-                    val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
-                    val response = DownloadOfflineFileManager.downloadFileResponseAsync(
-                        fileUrl = ApiRoutes.downloadFile(file),
-                        okHttpClient = okHttpClient,
-                        downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
-                            SentryLog.i(TAG, "open currentProgress: $progress")
-                        })
-                    )
-
-                    if (response.isSuccessful) {
-                        val remoteDataHasBeenSaved = DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
-                        writeStream.loadCachedData(remoteDataHasBeenSaved, cacheFile, file, writePipe)
-                    } else {
-                        writePipe.closeWithError("No data available")
-                    }
-
-                }.cancellable().onFailure { exception ->
-                    val event = SentryEvent(exception).apply {
-                        message = Message().apply { message = "An error has occurred on getDataFile" }
-                    }
-                    Sentry.captureEvent(event)
-                    writePipe.closeWithError(exception.message)
-                }
+        try {
+            // Get offline file if it's intact
+            if (offlineFile != null && file.isOfflineAndIntact(offlineFile)) {
+                return ParcelFileDescriptor.open(offlineFile, accessMode)
             }
+
+            // Get cache file if it's exists and if the file is updated
+            if (!file.isObsolete(cacheFile) && file.size == cacheFile.length()) {
+                return ParcelFileDescriptor.open(cacheFile, accessMode)
+            }
+
+            // Download data file
+            val okHttpClient = runBlocking { AccountUtils.getHttpClient(userDrive.userId) }
+            val response = DownloadOfflineFileManager.downloadFileResponse(
+                fileUrl = ApiRoutes.downloadFile(file),
+                okHttpClient = okHttpClient,
+                downloadInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = { progress ->
+                    SentryLog.i(TAG, "open currentProgress: $progress")
+                })
+            )
+
+            if (response.isSuccessful) {
+                runBlocking {
+                    DownloadOfflineFileManager.saveRemoteData(TAG, response, cacheFile)
+                }
+                cacheFile.setLastModified(file.getLastModifiedInMilliSecond())
+                return ParcelFileDescriptor.open(cacheFile, accessMode)
+            }
+        } catch (exception: Exception) {
+            SentryLog.e(TAG, "An error has occurred on getDataFile", exception)
         }
 
-        signal?.setOnCancelListener { job.cancel() }
-
-        return readPipe
+        return null
     }
 
     private suspend fun ParcelFileDescriptor.AutoCloseOutputStream.loadCachedData(
