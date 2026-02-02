@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ class SearchFragment : FileListFragment() {
         configureClearButtonListener()
         configureSearchView()
         configureFileRecyclerPagination()
-        configureFileAdapterListener()
+        configureFileAdapter()
         configureRecentSearches()
         configureToolbar()
         observeSearchResults()
@@ -182,21 +182,24 @@ class SearchFragment : FileListFragment() {
         })
     }
 
-    private fun configureFileAdapterListener() {
-        fileAdapter.onFileClicked = { file ->
-            if (file.isFolder()) {
-                searchViewModel.cancelDownloadFiles()
-                safeNavigate(
-                    SearchFragmentDirections.actionSearchFragmentToFileListFragment(
-                        folderId = file.id,
-                        folderName = file.name,
-                        shouldHideBottomNavigation = true,
-                        shouldShowSmallFab = true,
+    private fun configureFileAdapter() {
+        fileAdapter.apply {
+            initAsyncListDiffer()
+            onFileClicked = { file ->
+                if (file.isFolder()) {
+                    searchViewModel.cancelDownloadFiles()
+                    safeNavigate(
+                        SearchFragmentDirections.actionSearchFragmentToFileListFragment(
+                            folderId = file.id,
+                            folderName = file.name,
+                            shouldHideBottomNavigation = true,
+                            shouldShowSmallFab = true,
+                        )
                     )
-                )
-            } else {
-                val fileList = fileAdapter.getFileObjectsList(null)
-                Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+                } else {
+                    val fileList = getFileObjectsList(null)
+                    Utils.displayFile(mainViewModel, findNavController(), file, fileList)
+                }
             }
         }
     }
