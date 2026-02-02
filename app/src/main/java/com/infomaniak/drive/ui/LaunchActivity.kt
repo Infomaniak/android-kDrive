@@ -154,6 +154,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
     private suspend fun handleNotificationDestinationIntent() {
         val navArgs = navigationArgs ?: return
         if (navArgs.destinationUserId == 0 || navArgs.destinationDriveId == 0) return
+        
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = UploadWorker.BREADCRUMB_TAG
             message = "Upload notification has been clicked"
