@@ -31,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.whenResultIsOk
@@ -59,6 +60,7 @@ import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PublicShareUtils
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
@@ -85,11 +87,11 @@ class PublicShareListFragment : FileListFragment() {
         super.onCreate(savedInstanceState)
 
         if (publicShareViewModel.isPasswordNeeded && !publicShareViewModel.hasBeenAuthenticated) {
-            safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicSharePasswordFragment())
+            safelyNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicSharePasswordFragment())
         }
 
         if (publicShareViewModel.isExpired) {
-            safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicShareOutdatedFragment())
+            safelyNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicShareOutdatedFragment())
         }
     }
 
@@ -344,7 +346,7 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     companion object {
-        const val PUBLIC_SHARE_DEFAULT_ID = -1
+        const val PUBLIC_SHARE_DEFAULT_ID = Utils.OTHER_ROOT_ID
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
