@@ -97,10 +97,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.SpecialFolder
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
-import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.models.file.SpecialFolder
-import com.infomaniak.drive.data.models.file.SpecialFolder.MyShares
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -124,6 +122,7 @@ import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -204,7 +203,7 @@ class MainActivity : BaseActivity() {
         setupDrivePermissions()
         handleShortcuts()
         handleDeeplink()
-        handleNavigateToDestinationFileId()
+//        handleNavigateToDestinationFileId()
 
         initAppUpdateManager()
         initAppReviewManager()
@@ -296,25 +295,11 @@ class MainActivity : BaseActivity() {
                 ?.ensureRightUser()
                 ?.run { UserDrive(userId = userId, driveId = link.driveId) }
                 ?.let {
-                    when (link.roleFolder) {
-                        is RoleFolder.Category -> TODO()
-                        is RoleFolder.Collaboratives -> TODO()
-                        is RoleFolder.Favorites -> TODO()
-                        is RoleFolder.File -> TODO()
-                        is RoleFolder.MyShare -> TODO()
-                        is RoleFolder.Recent -> TODO()
-                        is RoleFolder.SharedLinks -> TODO()
-                        is RoleFolder.SharedWithMe -> TODO()
-                        is RoleFolder.Trash -> navigateToDestinationFileId(
-                            destinationFileId = SpecialFolder.Trash.id,
-                            destinationUserDrive = UserDrive(driveId = link.driveId),
-                            subfolderId = link.roleFolder.folderId
-                        )
-                    }
+                    Dispatchers.Main { clickOnBottomBarFolders() }
+                    mainViewModel.navigateDeeplink.emit(link)
                 }
         }
     }
-
 
     private fun handleOnlyOfficeDeeplink(link: DeeplinkAction.Office) {
         lifecycleScope.launch(context = Dispatchers.IO) {
@@ -333,6 +318,7 @@ class MainActivity : BaseActivity() {
             AccountUtils.requestCurrentUser()
         }
     }
+
     private fun handleNavigateToDestinationFileId() {
         navigationArgs?.let {
             if (it.deepLinkFileNotFound) {
