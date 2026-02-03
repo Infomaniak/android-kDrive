@@ -22,34 +22,21 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 sealed class FileType(open val fileId: Int) : Parcelable {
-    class File(val folderId: Int, override val fileId: Int) : FileType(fileId = fileId) {
+    data class File(override val fileId: Int) : FileType(fileId = fileId) {
         constructor(match: MatchResult) : this(
-            folderId = match.parseId(2),
-            fileId = match.parseId(3),
+            fileId = match.parseId(2),
         )
 
         companion object {
-            const val PATTERN = "$FOLDER_ID/$FILE_ID"
+            const val PATTERN = "$FILE_ID$END_OF_REGEX"
         }
     }
 
-    class FilePreview(val fileType: String, override val fileId: Int) : FileType(fileId = fileId) {
-        constructor(match: MatchResult) : this(
-            fileType = match.groupValues[5],
-            fileId = match.parseId(6),
-        )
-
-        companion object {
-            const val PATTERN = "$KEY_PREVIEW/$FILE_TYPE/$FILE_ID"
-        }
-    }
-
-    class FilePreviewInFolder(val folderId: Int, val fileType: String, override val fileId: Int) :
+    data class FilePreviewInFolder(val folderId: Int, override val fileId: Int) :
         FileType(fileId = fileId) {
         constructor(match: MatchResult) : this(
-            folderId = match.parseId(8),
-            fileType = match.groupValues[9],
-            fileId = match.parseId(10),
+            folderId = match.parseId(4),
+            fileId = match.parseId(5),
         )
 
         companion object {
@@ -59,7 +46,6 @@ sealed class FileType(open val fileId: Int) : Parcelable {
 
     companion object {
         const val GROUP_FILE = "file"
-        const val GROUP_PREVIEW = "preview"
         const val GROUP_PREVIEW_IN_FOLDER = "previewFolder"
 
         /**
@@ -73,14 +59,12 @@ sealed class FileType(open val fileId: Int) : Parcelable {
          */
         val FOLDER_PROPERTIES = listOf(
             "(?<$GROUP_FILE>${File.PATTERN})",
-            "(?<$GROUP_PREVIEW>${FilePreview.PATTERN})",
             "(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})"
         ).joinToString(separator = "|")
 
         fun MatchResult?.extractFileType(): FileType =
             this?.let {
                 groups[GROUP_FILE]?.let { File(this) }
-                    ?: groups[GROUP_PREVIEW]?.let { FilePreview(this) }
                     ?: groups[GROUP_PREVIEW_IN_FOLDER]?.let { FilePreviewInFolder(this) }
             } ?: throw InvalidValue()
     }

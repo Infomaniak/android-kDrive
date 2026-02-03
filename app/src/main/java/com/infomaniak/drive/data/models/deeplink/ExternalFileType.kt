@@ -24,10 +24,10 @@ import kotlinx.parcelize.Parcelize
 sealed interface ExternalFileType : Parcelable {
     val sourceDriveId: Int
 
-    class FilePreview(override val sourceDriveId: Int, val fileId: Int) : ExternalFileType {
+    data class FilePreview(override val sourceDriveId: Int, val fileId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
             sourceDriveId = match.parseId(2),
-            fileId = match.parseId(4),
+            fileId = match.parseId(3),
         )
 
         companion object {
@@ -35,10 +35,10 @@ sealed interface ExternalFileType : Parcelable {
         }
     }
 
-    class Folder(override val sourceDriveId: Int, val folderId: Int) : ExternalFileType {
+    data class Folder(override val sourceDriveId: Int, val folderId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(6),
-            folderId = match.parseId(7),
+            sourceDriveId = match.parseId(5),
+            folderId = match.parseId(6),
         )
 
         companion object {
@@ -46,11 +46,11 @@ sealed interface ExternalFileType : Parcelable {
         }
     }
 
-    class FilePreviewInFolder(override val sourceDriveId: Int, val folderId: Int, val fileId: Int) : ExternalFileType {
+    data class FilePreviewInFolder(override val sourceDriveId: Int, val folderId: Int, val fileId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(9),
-            folderId = match.parseId(10),
-            fileId = match.parseId(12),
+            sourceDriveId = match.parseId(8),
+            folderId = match.parseId(9),
+            fileId = match.parseId(10),
         )
 
         companion object {
