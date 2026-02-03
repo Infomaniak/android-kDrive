@@ -113,7 +113,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         Intent(this, destinationClass).apply {
             when (destinationClass) {
-                MainActivity::class.java -> (mainActivityExtras ?: deeplinkHandler.extras)?.let(::putExtras)
+                MainActivity::class.java -> mainActivityExtras?.let(::putExtras) ?: deeplinkHandler.attemptConfigure(this)
                 LoginActivity::class.java -> {
                     putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
                     putExtras(LoginActivityArgs(displayOnlyLastPage = false).toBundle())

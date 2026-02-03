@@ -17,8 +17,10 @@
  */
 package com.infomaniak.drive.ui
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import com.infomaniak.core.common.extensions.clearStack
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.data.models.deeplink.ACTION
@@ -52,4 +54,10 @@ class DeeplinkHandler {
         get() = deeplinkType?.let { MainActivityArgs(deeplinkType = deeplinkType).toBundle() }
 
     fun notHandledUri() = deeplinkType?.takeUnless { it.isHandled }?.originalUri
+
+    fun attemptConfigure(intent: Intent) {
+        extras?.let {
+            intent.putExtras(it).clearStack()
+        }
+    }
 }
