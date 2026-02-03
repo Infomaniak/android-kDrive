@@ -41,7 +41,6 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
-import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.services.UploadWorker
@@ -54,7 +53,6 @@ import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUB
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.Utils.ROOT_ID
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -221,44 +219,6 @@ class LaunchActivity : EdgeToEdgeActivity() {
                 setPublicShareActivityArgs(driveId, publicShareUuid, isExpired = true)
             }
             else -> SentryLog.e(PUBLIC_SHARE_TAG, "Error during getPublicShareFile: ${error?.code} / ${error?.description}")
-        }
-    }
-
-    private fun processInternalLink(path: String) {
-        Regex("/app/[a-z]+/(\\d+)/([a-z-]*)/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
-            val (pathDriveId, roleFolderId, pathFolderId, pathFileId) = match.destructured
-
-            val driveId = pathDriveId.toInt()
-            val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
-
-            when (roleFolderId) {
-                SHARED_WITH_ME_FOLDER_ROLE -> {
-                    // In case of SharedWithMe deeplinks, we open the link in the web as we cannot support them in-app for now
-                    PublicShareUtils.openDeepLinkInBrowser(activity = this, path)
-                    shouldStartApp = false
-                    return
-                }
-                TRASH -> {
-                    mainActivityExtras = MainActivityArgs(
-                        deepLinkType = DeepLinkType.Trash(
-                            organizationId = null,
-                            userDriveId = driveId,
-                            folderId = pathFolderId.takeIf { it.isNotEmpty() }
-                        )
-                    ).toBundle()
-                    return
-                }
-            }
-
-            lifecycleScope.launch {
-                Dispatchers.IO { DriveInfosController.getDrive(driveId = driveId, maintenance = false) }?.also {
-                    setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
-                } ?: run {
-                    mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
-                }
-            }
-
-            trackDeepLink(MatomoName.Internal)
         }
     }
 
