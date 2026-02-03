@@ -367,15 +367,6 @@
             android:defaultValue=""
             app:argType="string" />
         <argument
-            android:name="deepLinkFileNotFound"
-            android:defaultValue="false"
-            app:argType="boolean" />
-        <argument
-            android:name="deepLinkType"
-            android:defaultValue="@null"
-            app:argType="com.infomaniak.drive.data.models.DeepLinkType"
-            app:nullable="true" />
-        <argument
             android:name="deeplinkType"
             android:defaultValue="@null"
             app:argType="com.infomaniak.drive.data.models.deeplink.DeeplinkType"
