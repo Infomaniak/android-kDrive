@@ -46,7 +46,7 @@ class DeeplinkHandler {
         trackDeepLink(MatomoName.Internal)
     }
 
-    fun forceFail() {
+    fun forceInvalid() {
         deeplinkType = DeeplinkType.Invalid(originalUri = Uri.EMPTY)
     }
 
