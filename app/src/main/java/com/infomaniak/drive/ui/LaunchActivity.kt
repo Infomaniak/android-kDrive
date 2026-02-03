@@ -23,9 +23,7 @@ import android.content.Intent
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.core.auth.models.user.User
 import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.core.legacy.utils.showToast
@@ -33,7 +31,6 @@ import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeActivity
-import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.MatomoDrive.trackScreen
@@ -61,7 +58,6 @@ import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -155,38 +151,27 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private fun handleNotificationDestinationIntent() {
+    private suspend fun handleNotificationDestinationIntent() {
         val navArgs = navigationArgs ?: return
-
-        if (navArgs.destinationUserId != 0 && navArgs.destinationDriveId != 0) {
-            Sentry.addBreadcrumb(Breadcrumb().apply {
-                category = UploadWorker.BREADCRUMB_TAG
-                message = "Upload notification has been clicked"
-                level = SentryLevel.INFO
-            })
-
-            lifecycleScope.launch {
-                val allUserIds = UserDatabase.getDatabase()
-                    .userDao()
-                    .getAll()
-                    .asFlow()
-                    .first()
-                    .map(User::id)
-
-                if (navArgs.destinationUserId in allUserIds) {
-                    Dispatchers.IO {
-                        DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
-                    }?.also { drive ->
-                        setOpenSpecificFile(
-                            userId = drive.userId,
-                            driveId = drive.id,
-                            fileId = navArgs.destinationRemoteFolderId,
-                            isSharedWithMe = drive.sharedWithMe,
-                        )
-                    }
-                } else {
-                    mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
-                }
+        if (navArgs.destinationUserId == 0 || navArgs.destinationDriveId == 0) return
+        
+        Sentry.addBreadcrumb(Breadcrumb().apply {
+            category = UploadWorker.BREADCRUMB_TAG
+            message = "Upload notification has been clicked"
+            level = SentryLevel.INFO
+        })
+        if (UserDatabase().userDao().findById(navArgs.destinationUserId) == null) {
+            mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+        } else {
+            Dispatchers.IO {
+                DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
+            }?.also { drive ->
+                setOpenSpecificFile(
+                    userId = drive.userId,
+                    driveId = drive.id,
+                    fileId = navArgs.destinationRemoteFolderId,
+                    isSharedWithMe = drive.sharedWithMe,
+                )
             }
         }
     }
