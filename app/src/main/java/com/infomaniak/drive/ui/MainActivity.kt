@@ -90,7 +90,6 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
@@ -100,7 +99,6 @@ import com.infomaniak.drive.data.models.file.SpecialFolder
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
 import com.infomaniak.drive.data.models.drive.Drive
-import com.infomaniak.drive.data.models.file.SpecialFolder
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -205,7 +203,6 @@ class MainActivity : BaseActivity() {
         setupDrivePermissions()
         handleShortcuts()
         handleDeeplink()
-//        handleNavigateToDestinationFileId()
 
         initAppUpdateManager()
         initAppReviewManager()
@@ -319,42 +316,6 @@ class MainActivity : BaseActivity() {
             AccountUtils.currentDriveId = id
             AccountUtils.requestCurrentUser()
         }
-    }
-
-    private fun handleNavigateToDestinationFileId() {
-        navigationArgs?.let {
-            if (it.deepLinkFileNotFound) {
-                binding.mainFab.apply {
-                    post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
-                }
-            } else {
-                if (it.destinationFileId > 0) {
-                    navigateToDestinationFileId(it.destinationFileId, it.destinationUserDrive, subfolderId = null)
-                } else {
-                    when (val deepLinkType = it.deepLinkType) {
-                        is DeepLinkType.SharedWithMe -> null//TODO()
-                        is DeepLinkType.Trash -> {
-                            navigateToDestinationFileId(
-                                destinationFileId = SpecialFolder.Trash.id,
-                                destinationUserDrive = UserDrive(driveId = deepLinkType.userDriveId),
-                                deepLinkType.folderId?.toInt()
-                            )
-                        }
-                        null -> null//TODO()
-                    }
-                }
-            }
-        }
-    }
-
-    private fun navigateToDestinationFileId(destinationFileId: Int, destinationUserDrive: UserDrive?, subfolderId: Int?) {
-        clickOnBottomBarFolders()
-        mainViewModel.navigateFileListTo(
-            navController,
-            destinationFileId,
-            destinationUserDrive ?: UserDrive(),
-            subfolderId
-        )
     }
 
     private fun setupFabs() = with(binding) {
