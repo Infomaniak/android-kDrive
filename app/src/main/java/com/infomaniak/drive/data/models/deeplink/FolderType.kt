@@ -21,25 +21,25 @@ import com.infomaniak.drive.data.models.deeplink.ExternalFileType.Companion.extr
 import com.infomaniak.drive.data.models.deeplink.FileType.Companion.extractFileType
 
 
-enum class FolderType(val type: String, val propertiesPattern: String) {
-    Collaboratives(type = "collaboratives", propertiesPattern = FileType.FOLDER_PROPERTIES),
+enum class FolderType(val type: String, val propertiesPattern: String = "") {
+    Collaboratives(type = "collaboratives"),
     Favorites(type = "favorites", propertiesPattern = PREVIEW),
-    File(type = "file", propertiesPattern = ""),
+    Files(type = "files", propertiesPattern = FileType.FOLDER_PROPERTIES),
     MyShares(type = "my-shares", propertiesPattern = PREVIEW),
     SharedWithMe(type = "shared-with-me", propertiesPattern = ExternalFileType.SHARED_WITH_ME_FOLDER_PROPERTIES),
     SharedLinks(type = "shared-links", propertiesPattern = PREVIEW),
-    Recent(type = "recent", propertiesPattern = PREVIEW),
+    Recents(type = "recents", propertiesPattern = PREVIEW),
     Trash(type = "trash", propertiesPattern = FOLDER_ID);
 
     fun build(folderProperties: String): RoleFolder = folderProperties.optionalFind(propertiesPattern).run {
         when (this@FolderType) {
             Collaboratives -> RoleFolder.Collaboratives()
             Favorites -> RoleFolder.Favorites(fileId = parseOptionalId(2))
-            File -> RoleFolder.File(fileType = extractFileType())
+            Files -> RoleFolder.Files(fileType = extractFileType())
             MyShares -> RoleFolder.MyShares(fileId = parseOptionalId(2))
             SharedWithMe -> RoleFolder.SharedWithMe(fileType = extractExternalFileType())
             SharedLinks -> RoleFolder.SharedLinks(fileId = parseOptionalId(2))
-            Recent -> RoleFolder.Recent(fileId = parseOptionalId(2))
+            Recents -> RoleFolder.Recents(fileId = parseOptionalId(2))
             Trash -> RoleFolder.Trash(folderId = parseOptionalId(1))
         }
     }
