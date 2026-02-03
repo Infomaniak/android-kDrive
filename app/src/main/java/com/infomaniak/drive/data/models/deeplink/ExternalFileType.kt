@@ -27,7 +27,7 @@ sealed interface ExternalFileType : Parcelable {
     class FilePreview(override val sourceDriveId: Int, val fileId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
             sourceDriveId = match.parseId(2),
-            fileId = match.parseId(5),
+            fileId = match.parseId(4),
         )
 
         companion object {
@@ -37,8 +37,8 @@ sealed interface ExternalFileType : Parcelable {
 
     class Folder(override val sourceDriveId: Int, val folderId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(7),
-            folderId = match.parseId(8),
+            sourceDriveId = match.parseId(6),
+            folderId = match.parseId(7),
         )
 
         companion object {
@@ -48,9 +48,9 @@ sealed interface ExternalFileType : Parcelable {
 
     class FilePreviewInFolder(override val sourceDriveId: Int, val folderId: Int, val fileId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(10),
-            folderId = match.parseId(11),
-            fileId = match.parseId(14),
+            sourceDriveId = match.parseId(9),
+            folderId = match.parseId(10),
+            fileId = match.parseId(12),
         )
 
         companion object {
@@ -72,10 +72,11 @@ sealed interface ExternalFileType : Parcelable {
          *
          *  Order in this Regex implies index for each parsing in ExternalFileType constructors
          */
-        const val SHARED_WITH_ME_FOLDER_PROPERTIES =
-            """(?<$GROUP_PREVIEW_FILE>${FilePreview.PATTERN})
-                |(?<$GROUP_FOLDER>${Folder.PATTERN})
-                |(?<$GROUP_PREVIEW_FILE_IN_FOLDER>${FilePreviewInFolder.PATTERN})"""
+        val SHARED_WITH_ME_FOLDER_PROPERTIES = listOf(
+            "(?<$GROUP_PREVIEW_FILE>${FilePreview.PATTERN})",
+            "(?<$GROUP_FOLDER>${Folder.PATTERN})",
+            "(?<$GROUP_PREVIEW_FILE_IN_FOLDER>${FilePreviewInFolder.PATTERN})"
+        ).joinToString(separator = "|")
 
         fun MatchResult?.extractExternalFileType(): ExternalFileType? = this?.run {
             groups[GROUP_PREVIEW_FILE]?.let { FilePreview(this) }
