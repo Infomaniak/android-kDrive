@@ -886,7 +886,7 @@
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <argument
-            android:name="fileType"
+            android:name="externalFileType"
             android:defaultValue="@null"
             app:argType="com.infomaniak.drive.data.models.deeplink.ExternalFileType"
             app:nullable="true" />

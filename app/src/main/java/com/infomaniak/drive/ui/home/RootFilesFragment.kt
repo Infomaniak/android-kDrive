@@ -149,7 +149,7 @@ class RootFilesFragment : BaseRootFolderFragment() {
                 is RoleFolder.SharedWithMe -> actionFilesFragmentToSharedWithMeFragment(
                     userDrive = UserDrive(),
                     driveId = fileType?.sourceDriveId ?: 0,
-                    fileType = fileType
+                    externalFileType = fileType
                 )
                 is RoleFolder.Trash -> actionFilesFragmentToTrashFragment(subfolderId = folderId ?: -1)
                 is RoleFolder.Files -> actionFilesFragmentToFileListFragment(fileType = fileType)
