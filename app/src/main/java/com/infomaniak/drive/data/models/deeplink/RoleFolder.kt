@@ -29,11 +29,17 @@ sealed interface RoleFolder : Parcelable {
         override val isHandled: Boolean get() = false
     }
 
-    class Collaboratives : RoleFolder
+    class Collaboratives : RoleFolder {
+        override val isHandled: Boolean get() = false
+    }
+
     class Files(val fileType: FileType) : RoleFolder
     class Recents(val fileId: Int?) : RoleFolder
     class SharedWithMe(val fileType: ExternalFileType?) : RoleFolder
-    class SharedLinks(val fileId: Int?) : RoleFolder
+    class SharedLinks(val fileId: Int?) : RoleFolder {
+        override val isHandled: Boolean get() = false
+    }
+
     class Favorites(val fileId: Int?) : RoleFolder
     class MyShares(val fileId: Int?) : RoleFolder
     class Trash(val folderId: Int?) : RoleFolder
