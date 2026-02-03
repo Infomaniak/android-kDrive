@@ -164,7 +164,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
             level = SentryLevel.INFO
         })
         if (UserDatabase().userDao().findById(navArgs.destinationUserId) == null) {
-            deeplinkHandler.forceFail()
+            deeplinkHandler.forceInvalid()
         } else {
             Dispatchers.IO {
                 DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
