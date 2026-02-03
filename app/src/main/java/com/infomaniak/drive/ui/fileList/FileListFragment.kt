@@ -135,6 +135,9 @@ open class FileListFragment : MultiSelectFragment(
     private var isUploading = false
     private var retryLoadingActivities = false
 
+    open val fileIdToPreview: Int
+        get() = navigationArgs.fileType?.fileId ?: 0
+    open var previewManaged: Boolean = false
     protected val showLoadingTimer: CountDownTimer by lazy {
         createRefreshTimer { _binding?.let { it.swipeRefreshLayout.isRefreshing = true } }
     }
@@ -316,6 +319,7 @@ open class FileListFragment : MultiSelectFragment(
         }
 
         observeNavigateFileListTo(mainViewModel, fileListViewModel)
+        fileIdToPreview.takeUnless { it == 0 || previewManaged }?.let { previewFile(it) }
     }
 
     private fun setupToolbars() {
@@ -947,6 +951,15 @@ open class FileListFragment : MultiSelectFragment(
                 )
             }
         }
+    }
+
+    private fun previewFile(fileId: Int) {
+        FileController.getRealmInstance().let { realm ->
+            FileController.getFileById(realm = realm, fileId = fileId)?.let {
+                Utils.displayFile(mainViewModel, findNavController(), it, listOf(it))
+            }
+        }
+        previewManaged = true
     }
 
     open fun onRestartItemsClicked() = Unit

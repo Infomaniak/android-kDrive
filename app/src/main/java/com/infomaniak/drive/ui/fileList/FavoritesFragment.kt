@@ -44,6 +44,8 @@ class FavoritesFragment : FileListFragment() {
     override val noItemsRootTitle = R.string.favoritesNoFile
 
     private val navigationArgs: FavoritesFragmentArgs by navArgs()
+    override val fileIdToPreview: Int
+        get() = navigationArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
