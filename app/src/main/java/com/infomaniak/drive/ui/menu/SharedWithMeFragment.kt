@@ -118,7 +118,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     }
 
     private fun manageDeeplink() {
-        navigationArgs.fileType?.takeUnless { previewManaged }?.run {
+        navigationArgs.externalFileType?.takeUnless { previewManaged }?.run {
             when (this) {
                 is ExternalFileType.FilePreview -> fileId
                 is ExternalFileType.FilePreviewInFolder -> fileId
@@ -198,10 +198,4 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             )
         }
     }
-}
-
-private fun SharedWithMeFragmentArgs.retrieveFileId() = when (fileType) {
-    is ExternalFileType.FilePreview -> fileType.fileId
-    is ExternalFileType.FilePreviewInFolder -> fileType.fileId
-    is ExternalFileType.Folder, null -> 0
 }
