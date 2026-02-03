@@ -26,12 +26,15 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
+import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
@@ -46,11 +49,18 @@ import com.infomaniak.drive.ui.home.RootFileTreeCategory.PersonalFolder
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.RecentChanges
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.SharedWithMe
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.Trash
+import com.infomaniak.drive.ui.home.RootFilesFragmentDirections.Companion.actionFilesFragmentToFavoritesFragment
+import com.infomaniak.drive.ui.home.RootFilesFragmentDirections.Companion.actionFilesFragmentToFileListFragment
+import com.infomaniak.drive.ui.home.RootFilesFragmentDirections.Companion.actionFilesFragmentToMySharesFragment
+import com.infomaniak.drive.ui.home.RootFilesFragmentDirections.Companion.actionFilesFragmentToRecentChangesFragment
+import com.infomaniak.drive.ui.home.RootFilesFragmentDirections.Companion.actionFilesFragmentToSharedWithMeFragment
+import com.infomaniak.drive.ui.home.RootFilesFragmentDirections.Companion.actionFilesFragmentToTrashFragment
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.observeNavigateFileListTo
 import com.infomaniak.drive.utils.setupDriveToolbar
 import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class RootFilesFragment : BaseRootFolderFragment() {
@@ -87,12 +97,12 @@ class RootFilesFragment : BaseRootFolderFragment() {
 
         setupItems(
             folderLayout = binding.rootFolderLayout,
-            sharedWithMeNav = RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(UserDrive()),
-            favoritesNav = RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(UserDrive()),
-            mySharesNav = RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(UserDrive()),
-            recentChangesNav = RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment(),
+            sharedWithMeNav = actionFilesFragmentToSharedWithMeFragment(UserDrive()),
+            favoritesNav = actionFilesFragmentToFavoritesFragment(UserDrive()),
+            mySharesNav = actionFilesFragmentToMySharesFragment(UserDrive()),
+            recentChangesNav = actionFilesFragmentToRecentChangesFragment(),
             offlineNav = RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment(),
-            trashNav = RootFilesFragmentDirections.actionFilesFragmentToTrashFragment()
+            trashNav = actionFilesFragmentToTrashFragment()
         )
 
         observeFiles(haveBin = true)
@@ -112,6 +122,44 @@ class RootFilesFragment : BaseRootFolderFragment() {
                 bottom = resources.getDimension(R.dimen.recyclerViewPaddingBottom).toInt() + windowInsets.bottom
             )
         }
+        observeDeeplink()
+    }
+
+    private fun observeDeeplink() {
+        lifecycleScope.launch {
+            mainViewModel.navigateDeeplink.filterNotNull().collect {
+                retrieveDeeplinkAction(it)?.let(::safelyNavigate)
+                mainViewModel.navigateDeeplink.emit(null)
+            }
+        }
+    }
+
+    private fun retrieveDeeplinkAction(deeplinkAction: DeeplinkAction.Drive): NavDirections? {
+        return with(deeplinkAction.roleFolder) {
+            when (this) {
+                is RoleFolder.Favorites -> actionFilesFragmentToFavoritesFragment(
+                    userDrive = UserDrive(),
+                    previewFileId = fileId ?: 0
+                )
+                is RoleFolder.MyShares -> actionFilesFragmentToMySharesFragment(
+                    userDrive = UserDrive(),
+                    previewFileId = fileId ?: 0
+                )
+                is RoleFolder.Recents -> actionFilesFragmentToRecentChangesFragment(previewFileId = fileId ?: 0)
+                is RoleFolder.SharedWithMe -> actionFilesFragmentToSharedWithMeFragment(
+                    userDrive = UserDrive(),
+                    driveId = fileType?.sourceDriveId ?: 0,
+                    fileType = fileType
+                )
+                is RoleFolder.Trash -> actionFilesFragmentToTrashFragment(subfolderId = folderId ?: -1)
+                is RoleFolder.Files -> actionFilesFragmentToFileListFragment(fileType = fileType)
+                is RoleFolder.Category, is RoleFolder.Collaboratives, is RoleFolder.SharedLinks -> notHandled(deeplinkAction)
+            }
+        }
+    }
+
+    private fun notHandled(deeplinkAction: DeeplinkAction): Nothing? {
+        return if (deeplinkAction.isHandled) TODO("Need to implement here when ${deeplinkAction::class.simpleName} deeplink will be supported") else null
     }
 
     data class FolderToOpen(val id: Int, val name: String)
@@ -133,19 +181,19 @@ class RootFilesFragment : BaseRootFolderFragment() {
                     hasFolderToOpenBeenSet.join()
                     personalFolderToOpen?.let { safeNavigate(fileListDirections(it)) }
                 }
-                Favorites -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToFavoritesFragment(UserDrive()))
-                RecentChanges -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToRecentChangesFragment())
-                SharedWithMe -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToSharedWithMeFragment(UserDrive()))
-                MyShares -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToMySharesFragment(UserDrive()))
+                Favorites -> safeNavigate(actionFilesFragmentToFavoritesFragment(UserDrive()))
+                RecentChanges -> safeNavigate(actionFilesFragmentToRecentChangesFragment())
+                SharedWithMe -> safeNavigate(actionFilesFragmentToSharedWithMeFragment(UserDrive()))
+                MyShares -> safeNavigate(actionFilesFragmentToMySharesFragment(UserDrive()))
                 Offline -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToOfflineFileFragment())
-                Trash -> safeNavigate(RootFilesFragmentDirections.actionFilesFragmentToTrashFragment())
+                Trash -> safeNavigate(actionFilesFragmentToTrashFragment())
             }
         }
     }
 
     override fun fileListDirections(
         folderToOpen: FolderToOpen,
-    ): NavDirections = RootFilesFragmentDirections.actionFilesFragmentToFileListFragment(
+    ): NavDirections = actionFilesFragmentToFileListFragment(
         folderId = folderToOpen.id,
         folderName = folderToOpen.name
     )
