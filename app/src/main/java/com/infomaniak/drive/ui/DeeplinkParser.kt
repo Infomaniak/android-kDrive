@@ -17,47 +17,25 @@
  */
 package com.infomaniak.drive.ui
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
-import com.infomaniak.core.common.extensions.clearStack
-import com.infomaniak.drive.MatomoDrive.MatomoName
-import com.infomaniak.drive.MatomoDrive.trackDeepLink
 import com.infomaniak.drive.data.models.deeplink.ACTION
 import com.infomaniak.drive.data.models.deeplink.ACTION_TYPE
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
 import com.infomaniak.drive.data.models.deeplink.InvalidValue
 
-class DeeplinkHandler {
-    private var deeplinkType: DeeplinkType? = null
+object DeeplinkParser {
 
     private val actionRegex by lazy { Regex("app/$ACTION_TYPE/$ACTION") }
 
-    fun handle(uri: Uri, deeplink: String) {
-        deeplinkType = try {
+    fun parse(deeplink: String): DeeplinkType? {
+        return try {
             actionRegex.find(deeplink)?.run {
                 val (actionType, action) = destructured
-                DeeplinkAction.from(originalUri = uri, actionType = actionType, action = action)
+                DeeplinkAction.from(actionType = actionType, action = action)
             }
         } catch (_: InvalidValue) {
-            DeeplinkType.Invalid(originalUri = uri)
-        }
-        trackDeepLink(MatomoName.Internal)
-    }
-
-    fun forceInvalid() {
-        deeplinkType = DeeplinkType.Invalid(originalUri = Uri.EMPTY)
-    }
-
-    val extras: Bundle?
-        get() = deeplinkType?.let { MainActivityArgs(deeplinkType = deeplinkType).toBundle() }
-
-    fun notHandledUri() = deeplinkType?.takeUnless { it.isHandled }?.originalUri
-
-    fun attemptConfigure(intent: Intent) {
-        extras?.let {
-            intent.putExtras(it).clearStack()
+            DeeplinkType.Invalid
         }
     }
+
 }
