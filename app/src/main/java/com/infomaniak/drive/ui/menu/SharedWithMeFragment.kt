@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.deeplink.ExternalFileType
 import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
@@ -99,19 +100,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             initAsyncListDiffer()
             onFileClicked = { file ->
                 fileListViewModel.cancelDownloadFiles()
-                when {
-                    // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
-                    // maintenance check on the folder type but we don't know if this is necessary
-                    file.isFolder() -> {
-                        DriveInfosController.getDrive(navigationArgs.userDrive.userId, file.driveId)?.let { currentDrive ->
-                            if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else file.openSharedWithMeFolder()
-                        }
-                    }
-                    else -> {
-                        val fileList = fileAdapter.getFileObjectsList(sharedWithMeViewModel.sharedWithMeRealm)
-                        Utils.displayFile(mainViewModel, findNavController(), file, fileList, isSharedWithMe = true)
-                    }
-                }
+                file.openFileOrFolder()
             }
         }
 
@@ -124,6 +113,37 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         }
 
         setupBasicMultiSelectLayout()
+        manageDeeplink()
+
+    }
+
+    private fun manageDeeplink() {
+        navigationArgs.fileType?.takeUnless { previewManaged }?.run {
+            when (this) {
+                is ExternalFileType.FilePreview -> fileId
+                is ExternalFileType.FilePreviewInFolder -> fileId
+                is ExternalFileType.Folder -> folderId
+            }
+        }?.let { fileId ->
+            FileController.getFileById(fileId, userDrive)?.openFileOrFolder()
+            previewManaged = true
+        }
+    }
+
+    private fun File.openFileOrFolder() {
+        when {
+            // Before APIv3, we could have a File with a type drive. Now, a File cannot have a type drive. We moved the
+            // maintenance check on the folder type but we don't know if this is necessary
+            isFolder() -> {
+                DriveInfosController.getDrive(navigationArgs.userDrive.userId, driveId)?.let { currentDrive ->
+                    if (currentDrive.maintenance) openMaintenanceDialog(currentDrive.name) else openSharedWithMeFolder()
+                }
+            }
+            else -> {
+                val fileList = fileAdapter.getFileObjectsList(sharedWithMeViewModel.sharedWithMeRealm).ifEmpty { listOf(this) }
+                Utils.displayFile(mainViewModel, findNavController(), this, fileList, isSharedWithMe = true)
+            }
+        }
     }
 
     private fun canShowButton(): Boolean {
@@ -178,4 +198,10 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             )
         }
     }
+}
+
+private fun SharedWithMeFragmentArgs.retrieveFileId() = when (fileType) {
+    is ExternalFileType.FilePreview -> fileType.fileId
+    is ExternalFileType.FilePreviewInFolder -> fileType.fileId
+    is ExternalFileType.Folder, null -> 0
 }
