@@ -91,6 +91,11 @@
         <action
             android:id="@+id/action_fileListFragment_to_dropBoxResultBottomSheetDialog"
             app:destination="@id/dropBoxResultBottomSheetDialog" />
+        <argument
+            android:name="fileType"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.deeplink.FileType"
+            app:nullable="true" />
     </fragment>
 
     <fragment
@@ -299,6 +304,10 @@
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="previewFileId"
+            android:defaultValue="0"
+            app:argType="integer" />
         <action
             android:id="@+id/action_favoritesFragment_self"
             app:destination="@id/favoritesFragment" />
@@ -894,6 +903,11 @@
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="fileType"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.deeplink.ExternalFileType"
+            app:nullable="true" />
         <action
             android:id="@+id/action_sharedWithMeFragment_to_sortFilesBottomSheetDialog"
             app:destination="@id/sortFilesBottomSheetDialog" />
@@ -918,6 +932,10 @@
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="previewFileId"
+            android:defaultValue="0"
+            app:argType="integer" />
         <action
             android:id="@+id/action_mySharesFragment_self"
             app:destination="@id/mySharesFragment" />
@@ -927,7 +945,12 @@
         android:id="@+id/recentChangesFragment"
         android:name="com.infomaniak.drive.ui.menu.RecentChangesFragment"
         android:label="RecentChangesFragment"
-        tools:layout="@layout/fragment_file_list" />
+        tools:layout="@layout/fragment_file_list">
+        <argument
+            android:name="previewFileId"
+            android:defaultValue="0"
+            app:argType="integer" />
+    </fragment>
 
     <dialog
         android:id="@+id/selectPermissionBottomSheetDialog"
