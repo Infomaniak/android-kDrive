@@ -25,24 +25,24 @@ sealed interface RoleFolder : Parcelable {
     val isHandled: Boolean
         get() = true
 
-    class Category(val id: Int, val fileId: Int?) : RoleFolder {
+    data class Category(val id: Int, val fileId: Int?) : RoleFolder {
         override val isHandled: Boolean get() = false
     }
 
-    class Collaboratives : RoleFolder {
+    data object Collaboratives : RoleFolder {
         override val isHandled: Boolean get() = false
     }
 
-    class Files(val fileType: FileType) : RoleFolder
-    class Recents(val fileId: Int?) : RoleFolder
-    class SharedWithMe(val fileType: ExternalFileType?) : RoleFolder
-    class SharedLinks(val fileId: Int?) : RoleFolder {
+    data class Files(val fileType: FileType) : RoleFolder
+    data class Recents(val fileId: Int?) : RoleFolder
+    data class SharedWithMe(val fileType: ExternalFileType?) : RoleFolder
+    data class SharedLinks(val fileId: Int?) : RoleFolder {
         override val isHandled: Boolean get() = false
     }
 
-    class Favorites(val fileId: Int?) : RoleFolder
-    class MyShares(val fileId: Int?) : RoleFolder
-    class Trash(val folderId: Int?) : RoleFolder
+    data class Favorites(val fileId: Int?) : RoleFolder
+    data class MyShares(val fileId: Int?) : RoleFolder
+    data class Trash(val folderId: Int?) : RoleFolder
 
     companion object {
         @Throws(InvalidValue::class)

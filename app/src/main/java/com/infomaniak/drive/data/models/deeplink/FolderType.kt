@@ -33,13 +33,13 @@ enum class FolderType(val type: String, val propertiesPattern: String = "") {
 
     fun build(folderProperties: String): RoleFolder = folderProperties.optionalFind(propertiesPattern).run {
         when (this@FolderType) {
-            Collaboratives -> RoleFolder.Collaboratives()
-            Favorites -> RoleFolder.Favorites(fileId = parseOptionalId(2))
+            Collaboratives -> RoleFolder.Collaboratives
+            Favorites -> RoleFolder.Favorites(fileId = parseOptionalId(1))
             Files -> RoleFolder.Files(fileType = extractFileType())
-            MyShares -> RoleFolder.MyShares(fileId = parseOptionalId(2))
+            MyShares -> RoleFolder.MyShares(fileId = parseOptionalId(1))
             SharedWithMe -> RoleFolder.SharedWithMe(fileType = extractExternalFileType())
-            SharedLinks -> RoleFolder.SharedLinks(fileId = parseOptionalId(2))
-            Recents -> RoleFolder.Recents(fileId = parseOptionalId(2))
+            SharedLinks -> RoleFolder.SharedLinks(fileId = parseOptionalId(1))
+            Recents -> RoleFolder.Recents(fileId = parseOptionalId(1))
             Trash -> RoleFolder.Trash(folderId = parseOptionalId(1))
         }
     }
