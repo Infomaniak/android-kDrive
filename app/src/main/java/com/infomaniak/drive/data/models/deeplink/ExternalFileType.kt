@@ -42,7 +42,7 @@ sealed interface ExternalFileType : Parcelable {
         )
 
         companion object {
-            const val PATTERN = "$DRIVE_ID/$FOLDER_ID$"
+            const val PATTERN = "$DRIVE_ID/$FOLDER_ID$END_OF_REGEX"
         }
     }
 
