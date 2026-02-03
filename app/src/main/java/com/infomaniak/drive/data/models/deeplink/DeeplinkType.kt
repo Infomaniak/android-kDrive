@@ -17,15 +17,23 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
-import android.net.Uri
+import android.content.Intent
 import android.os.Parcelable
+import com.infomaniak.core.legacy.utils.clearStack
+import com.infomaniak.drive.ui.MainActivityArgs
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 sealed interface DeeplinkType : Parcelable {
     val isHandled: Boolean
         get() = true
-    val originalUri: Uri
 
-    data class Invalid(override val originalUri: Uri) : DeeplinkType
+    data object Invalid : DeeplinkType
+    companion object {
+        fun DeeplinkType.addTo(intent: Intent) =
+            intent
+                .putExtras(MainActivityArgs(deeplinkType = this).toBundle())
+                .clearStack()
+
+    }
 }
