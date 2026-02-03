@@ -17,27 +17,26 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
-import android.net.Uri
 import kotlinx.parcelize.Parcelize
 
 
 @Parcelize
 sealed interface DeeplinkAction : DeeplinkType {
-    data class Collaborate(override val originalUri: Uri, val driveId: Int, val uuid: String) : DeeplinkAction {
+    data class Collaborate(val driveId: Int, val uuid: String) : DeeplinkAction {
         override val isHandled: Boolean
             get() = false
     }
 
-    data class Drive(override val originalUri: Uri, val driveId: Int, val roleFolder: RoleFolder) : DeeplinkAction {
+    data class Drive(val driveId: Int, val roleFolder: RoleFolder) : DeeplinkAction {
         override val isHandled: Boolean
             get() = roleFolder.isHandled
     }
 
-    data class Office(override val originalUri: Uri, val driveId: Int, val fileId: Int) : DeeplinkAction
+    data class Office(val driveId: Int, val fileId: Int) : DeeplinkAction
 
     companion object {
         @Throws(InvalidValue::class)
-        fun from(originalUri: Uri, actionType: String, action: String): DeeplinkAction =
-            ActionType.from(actionType).build(originalUri, action)
+        fun from(actionType: String, action: String): DeeplinkAction =
+            ActionType.from(actionType).build(action)
     }
 }

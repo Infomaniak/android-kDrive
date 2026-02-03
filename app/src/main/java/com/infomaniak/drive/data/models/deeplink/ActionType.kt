@@ -17,27 +17,22 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
-import android.net.Uri
-
 internal enum class ActionType(val type: String, val actionPattern: String) {
     Collaborate(type = "collaborate", actionPattern = "$DRIVE_ID/$UUID"),
     Drive(type = "drive", actionPattern = "$DRIVE_ID/$ROLE_FOLDER(?:/$FOLDER_ALL_PROPERTIES)?"),
     Office(type = "office", actionPattern = "$DRIVE_ID/$FILE_ID");
 
-    fun build(originalUri: Uri, action: String): DeeplinkAction = action.find(actionPattern).run {
+    fun build(action: String): DeeplinkAction = action.find(actionPattern).run {
         when (this@ActionType) {
             Collaborate -> DeeplinkAction.Collaborate(
-                originalUri = originalUri,
                 driveId = parseId(1),
                 uuid = groupValues[2],
             )
             Drive -> DeeplinkAction.Drive(
-                originalUri = originalUri,
                 driveId = parseId(1),
                 roleFolder = RoleFolder.from(folderType = groupValues[2], folderProperties = groupValues[3])
             )
             Office -> DeeplinkAction.Office(
-                originalUri = originalUri,
                 driveId = parseId(1),
                 fileId = parseId(2),
             )

@@ -20,7 +20,6 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +42,8 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.addTo
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.LoginActivityArgs
@@ -69,8 +70,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
     private var mainActivityExtras: Bundle? = null
     private var publicShareActivityExtras: Bundle? = null
     private var isHelpShortcutPressed = false
-    private var shouldStartApp = true
-    private val deeplinkHandler = DeeplinkHandler()
+    private var deeplinkType: DeeplinkType? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,9 +85,11 @@ class LaunchActivity : EdgeToEdgeActivity() {
             handleNotificationDestinationIntent()
             handleShortcuts()
             handleDeeplink()
-            deeplinkHandler.notHandledUri()?.let {
-                PublicShareUtils.openDeepLinkInBrowser(activity = this@LaunchActivity, it.toString())
-            } ?: startApp()
+            if (deeplinkType?.isHandled != true) {
+                PublicShareUtils.openDeepLinkInBrowser(activity = this@LaunchActivity, intent.data.toString())
+            } else {
+                startApp()
+            }
 
             // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
             // so that even when we return, the activity will still be closed.
@@ -111,7 +113,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         Intent(this, destinationClass).apply {
             when (destinationClass) {
-                MainActivity::class.java -> mainActivityExtras?.let(::putExtras) ?: deeplinkHandler.attemptConfigure(this)
+                MainActivity::class.java -> mainActivityExtras?.let(::putExtras) ?: deeplinkType?.addTo(this)
                 LoginActivity::class.java -> {
                     putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
                     putExtras(LoginActivityArgs(displayOnlyLastPage = false).toBundle())
@@ -162,7 +164,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
             level = SentryLevel.INFO
         })
         if (UserDatabase().userDao().findById(navArgs.destinationUserId) == null) {
-            deeplinkHandler.forceInvalid()
+            deeplinkType = DeeplinkType.Invalid
         } else {
             Dispatchers.IO {
                 DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
@@ -178,19 +180,17 @@ class LaunchActivity : EdgeToEdgeActivity() {
     }
 
     private suspend fun handleDeeplink() = Dispatchers.IO {
-        intent.data?.let { uri ->
-            uri.path?.let { deeplink ->
-                // If the app is closed, the currentUser will be null. We don't want that otherwise the link will always be opened as
-                // external instead of internal if you already have access to the files. So we set it here
-                if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
+        intent.data?.path?.let { deeplink ->
+            // If the app is closed, the currentUser will be null. We don't want that otherwise the link will always be opened as
+            // external instead of internal if you already have access to the files. So we set it here
+            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
 
-                if (deeplink.contains("/app/share/")) processPublicShare(uri, deeplink) else deeplinkHandler.handle(uri, deeplink)
-                SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
-            }
+            if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else handleDeeplink(deeplink = deeplink)
+            SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
         }
     }
 
-    private suspend fun processPublicShare(originalUri: Uri, path: String) {
+    private suspend fun processPublicShare(path: String) {
         Regex("/app/share/(\\d+)/([a-z0-9-]+)").find(path)?.let { match ->
             val (driveId, publicShareUuid) = match.destructured
 
@@ -200,10 +200,16 @@ class LaunchActivity : EdgeToEdgeActivity() {
                     val shareLink = apiResponse.data!!
                     setPublicShareActivityArgs(driveId, publicShareUuid, shareLink)
                 }
-                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let { deeplinkHandler.handle(originalUri, it) }
+                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let { handleDeeplink(it) }
                 else -> handlePublicShareError(apiResponse.error, driveId, publicShareUuid)
             }
         }
+    }
+
+    private fun handleDeeplink(deeplink: String) {
+        deeplinkType = DeeplinkParser.parse(deeplink)
+        if (deeplinkType !is DeeplinkType.Invalid)
+            trackDeepLink(MatomoName.Internal)
     }
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
