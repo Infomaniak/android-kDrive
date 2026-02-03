@@ -71,10 +71,11 @@ sealed class FileType(open val fileId: Int) : Parcelable {
          *
          *  Order in this Regex implies index for each parsing in ExternalFileType constructors
          */
-        const val FOLDER_PROPERTIES =
-            """(?<$GROUP_FILE>${File.PATTERN})
-                |(?<$GROUP_PREVIEW>${FilePreview.PATTERN})
-                |(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})"""
+        val FOLDER_PROPERTIES = listOf(
+            "(?<$GROUP_FILE>${File.PATTERN})",
+            "(?<$GROUP_PREVIEW>${FilePreview.PATTERN})",
+            "(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})"
+        ).joinToString(separator = "|")
 
         fun MatchResult?.extractFileType(): FileType =
             this?.let {
