@@ -18,14 +18,15 @@
 package com.infomaniak.drive.data.models.deeplink
 
 
+private const val SELECT_DIGITS = "(\\d+)"
 const val ACTION_TYPE = "([a-z]+)"
 const val ACTION = "(.*)"
-const val DRIVE_ID = "(\\d+)"
+const val DRIVE_ID = SELECT_DIGITS
 const val ROLE_FOLDER = "([a-z-]+)"
 const val UUID = "([a-z0-9-]+)"
 const val FOLDER_ALL_PROPERTIES = "(.*)"
-const val FILE_ID = "(\\d+)"
-const val FOLDER_ID = "(\\d+)"
+const val FILE_ID = SELECT_DIGITS
+const val FOLDER_ID = SELECT_DIGITS
 const val FILE_TYPE = "[a-z]+"
 const val END_OF_REGEX = "$"
 const val KEY_PREVIEW = "preview"
