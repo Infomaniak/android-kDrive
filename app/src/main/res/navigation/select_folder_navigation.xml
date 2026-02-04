@@ -65,6 +65,10 @@
             android:defaultValue="/"
             app:argType="string" />
         <argument
+            android:name="previewFileId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
@@ -94,6 +98,11 @@
             android:defaultValue="false"
             app:argType="boolean" />
         <argument
+            android:name="externalFileType"
+            android:defaultValue="@null"
+            app:argType="com.infomaniak.drive.data.models.deeplink.ExternalFileType"
+            app:nullable="true" />
+        <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
         <action
@@ -120,6 +129,10 @@
         <argument
             android:name="userDrive"
             app:argType="com.infomaniak.drive.data.models.UserDrive" />
+        <argument
+            android:name="previewFileId"
+            android:defaultValue="0"
+            app:argType="integer" />
         <action
             android:id="@+id/action_favoritesFragment_self"
             app:destination="@id/favoritesFragment" />
