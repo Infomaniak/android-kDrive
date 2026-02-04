@@ -51,7 +51,6 @@ sealed class FileType(open val fileId: Int) : Parcelable {
         /**
          * FOLDER_PROPERTIES filters this kind of paths :
          *      <folderId>/<fileId>
-         *      preview/<type:string>/<fileId>
          *      <folderId>/preview/<type:string>/<fileId>
          *  It find one of them and assign it to a named group
          *
