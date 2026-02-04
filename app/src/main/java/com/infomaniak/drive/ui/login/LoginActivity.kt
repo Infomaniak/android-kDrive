@@ -47,10 +47,12 @@ import com.infomaniak.core.common.observe
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
+import com.infomaniak.core.network.api.InternalTranslatedErrorCode
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.core.network.utils.ApiErrorCode.Companion.formatError
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
@@ -84,8 +86,6 @@ import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import splitties.coroutines.repeatWhileActive
 import splitties.experimental.ExperimentalSplittiesApi
-import kotlin.collections.forEachIndexed
-import kotlin.collections.lastIndex
 
 class LoginActivity : ComponentActivity() {
 
@@ -117,6 +117,7 @@ class LoginActivity : ComponentActivity() {
                     }
                 }
             } else {
+                SentryLog.i(TAG, "Webview returned with result code : $resultCode")
                 isLoginButtonLoading = false
                 isSignUpButtonLoading = false
             }
@@ -163,14 +164,14 @@ class LoginActivity : ComponentActivity() {
 
     private suspend fun handleLogin(loginRequest: CallableState<List<ExternalAccount>>): Nothing = repeatWhileActive {
         val accountsToLogin = loginRequest.awaitOneCall()
-        if (accountsToLogin.isEmpty()) openLoginWebView()
-        else connectAccounts(selectedAccounts = accountsToLogin)
+        if (accountsToLogin.isEmpty()) openLoginWebView() else connectAccounts(selectedAccounts = accountsToLogin)
     }
 
     private suspend fun connectAccounts(selectedAccounts: List<ExternalAccount>) {
         val loginResult = crossAppLoginViewModel.attemptLogin(selectedAccounts)
 
         with(loginResult) {
+            SentryLog.i(TAG, "Number of tokens found : ${tokens.count()}")
             tokens.forEachIndexed { index, token ->
                 authenticateUser(token, infomaniakLogin, withRedirection = index == tokens.lastIndex)
             }
@@ -365,7 +366,10 @@ class LoginActivity : ComponentActivity() {
                 .build()
             val userProfileResponse = ApiRepository.getUserProfile(okhttpClient)
 
-            if (userProfileResponse.result == ApiResponseStatus.ERROR) return Xor.Second(userProfileResponse)
+            if (userProfileResponse.result == ApiResponseStatus.ERROR) {
+                userProfileResponse.addSentryLogForApiError("getUserProfile")
+                return Xor.Second(userProfileResponse)
+            }
 
             val user = userProfileResponse.data?.apply {
                 this.apiToken = apiToken
@@ -381,7 +385,10 @@ class LoginActivity : ComponentActivity() {
             val allDrivesDataResponse = Dispatchers.IO { ApiRepository.getAllDrivesData(okhttpClient) }
 
             return when {
-                allDrivesDataResponse.result == ApiResponseStatus.ERROR -> Xor.Second(allDrivesDataResponse)
+                allDrivesDataResponse.result == ApiResponseStatus.ERROR -> {
+                    allDrivesDataResponse.addSentryLogForApiError("getAllDriveData")
+                    Xor.Second(allDrivesDataResponse)
+                }
                 allDrivesDataResponse.data?.drives?.any { it.isDriveUser() } == false -> Xor.Second(
                     ApiResponse<DriveInfo>(
                         result = ApiResponseStatus.ERROR,
@@ -400,10 +407,6 @@ class LoginActivity : ComponentActivity() {
             }
         }
 
-        private fun getErrorResponse(@StringRes text: Int): ApiResponse<Any> {
-            return ApiResponse(result = ApiResponseStatus.ERROR, translatedError = text)
-        }
-
         fun getLoginErrorDescription(context: Context, error: InfomaniakLogin.ErrorStatus): String {
             return context.getString(
                 when (error) {
@@ -412,6 +415,21 @@ class LoginActivity : ComponentActivity() {
                     else -> R.string.anErrorHasOccurred
                 }
             )
+        }
+
+        private fun ApiResponse<*>.addSentryLogForApiError(apiCallName: String) {
+            if (formatError() == InternalTranslatedErrorCode.UnknownError) {
+                SentryLog.e(TAG, "Unknown error in $apiCallName") { scope ->
+                    scope.setExtra("Error code", error?.code)
+                    scope.setExtra("Error description", error?.description)
+                    scope.setExtra("Error exception", error?.exception.toString())
+                    scope.setExtra("Api Error", error?.errors?.joinToString())
+                }
+            }
+        }
+
+        private fun getErrorResponse(@StringRes text: Int): ApiResponse<Any> {
+            return ApiResponse(result = ApiResponseStatus.ERROR, translatedError = text)
         }
     }
 }
