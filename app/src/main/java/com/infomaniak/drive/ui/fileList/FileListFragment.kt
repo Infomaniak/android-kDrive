@@ -73,6 +73,7 @@ import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.coil.ImageLoaderType
+import com.infomaniak.drive.data.models.deeplink.FileType
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.data.services.UploadWorker
@@ -136,7 +137,7 @@ open class FileListFragment : MultiSelectFragment(
     private var retryLoadingActivities = false
 
     open val fileIdToPreview: Int
-        get() = navigationArgs.fileType?.fileId ?: 0
+        get() = (navigationArgs.fileType as? FileType.FilePreviewInFolder)?.fileId ?: 0
     open var previewManaged: Boolean = false
     protected val showLoadingTimer: CountDownTimer by lazy {
         createRefreshTimer { _binding?.let { it.swipeRefreshLayout.isRefreshing = true } }
@@ -189,11 +190,20 @@ open class FileListFragment : MultiSelectFragment(
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        folderId = navigationArgs.folderId
-        folderName = navigationArgs.folderName
+        initFolder()
         _binding = FragmentFileListBinding.inflate(inflater, container, false)
 
         return binding.root
+    }
+
+    private fun initFolder() {
+        val fileType = navigationArgs.fileType
+        folderId = when (fileType) {
+            is FileType.File -> fileType.fileId
+            is FileType.FilePreviewInFolder -> fileType.folderId
+            else -> navigationArgs.folderId
+        }
+        folderName = fileType?.let { FileController.getFileById(folderId, userDrive)?.name } ?: navigationArgs.folderName
     }
 
     override fun initMultiSelectLayout(): MultiSelectLayoutBinding? = binding.multiSelectLayout
