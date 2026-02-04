@@ -1,0 +1,3 @@
+- Correction de la fonction d'ouverture de documents dans des applications tierces
+- Correction de la navigation depuis les notifications de téléchargement
+- Correction d'un plantage dans la recherche
