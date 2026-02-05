@@ -35,10 +35,9 @@ import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.FolderPermission
+import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
+import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share
-import com.infomaniak.drive.data.models.Team
-import com.infomaniak.drive.data.models.UserFileAccess
 import com.infomaniak.drive.databinding.FragmentCreateFolderBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
@@ -56,8 +55,8 @@ abstract class CreateFolderFragment : Fragment() {
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     protected val mainViewModel: MainViewModel by activityViewModels()
 
-    protected lateinit var adapter: PermissionsAdapter
-
+    val adapter: PermissionsAdapter
+        get() = binding.permissionsRecyclerView.adapter as PermissionsAdapter
     private var folderNameTextWatcher: TextWatcher? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {

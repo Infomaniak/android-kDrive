@@ -37,7 +37,6 @@ import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.MatomoDrive
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink
@@ -51,11 +50,11 @@ import kotlinx.parcelize.Parcelize
 class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private var binding: FragmentSelectPermissionBinding by safeBinding()
-
-    private lateinit var adapter: PermissionsAdapter
     private lateinit var permissionsGroup: PermissionsGroup
     private val navigationArgs: SelectPermissionBottomSheetDialogArgs by navArgs()
     private val selectPermissionViewModel: SelectPermissionViewModel by viewModels()
+    private val adapter: PermissionsAdapter
+        get() = binding.permissionsRecyclerView.adapter as PermissionsAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSelectPermissionBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -144,8 +143,8 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                         } else {
                             SHARE_LINK_ACCESS_NAV_KEY
                         }
-                        setBackNavigationResult(key, bundleOf(PERMISSION_BUNDLE_KEY to currentPermission))
                     }
+                        setBackNavigationResult(key, bundleOf(PERMISSION_BUNDLE_KEY to permission))
                 }
             }
         }
