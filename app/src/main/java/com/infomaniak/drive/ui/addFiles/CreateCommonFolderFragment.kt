@@ -36,6 +36,7 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.FolderPermission.ALL_DRIVE_USERS
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.showSnackbar
 
@@ -54,14 +55,9 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
             pathDriveIcon.imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
         }
 
-        adapter.apply {
-            val permissions: ArrayList<Permission> = arrayListOf(ALL_DRIVE_USERS, SPECIFIC_USERS)
-            selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
-            setAll(permissions)
-        }
+    }
 
         createFolderButton.setOnClickListener { createCommonFolder() }
-    }
 
     private fun createCommonFolder() = with(binding) {
         folderNameValueInput.hideKeyboard()
