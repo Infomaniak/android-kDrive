@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ object ApiRoutes {
     //region File url
     fun getDownloadFileUrl(file: File): String = with(file) {
         val downloadUrl = if (isPublicShared()) {
-            downloadPublicShareFile(driveId, publicShareUuid, id)
+            downloadPublicShareFile(driveId, publicShareUuid, id, publicShareAuthToken)
         } else {
             downloadFile(file)
         }
@@ -124,7 +124,7 @@ object ApiRoutes {
 
     fun getThumbnailUrl(file: File) = with(file) {
         when {
-            isPublicShared() -> getPublicShareFileThumbnail(driveId, publicShareUuid, id)
+            isPublicShared() -> getPublicShareFileThumbnail(driveId, publicShareUuid, id, publicShareAuthToken)
             isTrashed() -> thumbnailTrashFile(file)
             else -> thumbnailFile(file)
         }
@@ -132,17 +132,17 @@ object ApiRoutes {
 
     fun getImagePreviewUrl(file: File): String = with(file) {
         val url = if (isPublicShared()) {
-            getPublicShareFilePreview(driveId, publicShareUuid, id)
+            getPublicShareFilePreview(driveId, publicShareUuid, id, publicShareAuthToken)
         } else {
             imagePreviewFile(file)
         }
 
-        return "$url?width=2500&height=1500&quality=80"
+        return url.appendQuery("width=2500&height=1500&quality=80")
     }
 
     fun getOnlyOfficeUrl(file: File) = with(file) {
         if (isPublicShared()) {
-            showPublicShareOfficeFile(driveId, publicShareUuid, id)
+            showPublicShareOfficeFile(driveId, publicShareUuid, id, publicShareAuthToken)
         } else {
             "$AUTOLOG_URL?url=${showOffice(file)}"
         }
@@ -313,7 +313,7 @@ object ApiRoutes {
 
     /** Public Share */
     //region Public share
-    fun getPublicShareInfo(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/init"
+    fun getPublicShareInfo(driveId: Int, linkUuid: String): String = "${getPublicShareUrlV2(driveId, linkUuid)}/init"
 
     fun submitPublicSharePassword(driveId: Int, linkUuid: String) = "${getPublicShareUrlV2(driveId, linkUuid)}/auth"
 
@@ -321,30 +321,40 @@ object ApiRoutes {
         return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId?$sharedFileWithQuery"
     }
 
-    fun getPublicShareChildrenFiles(driveId: Int, linkUuid: String, fileId: Int, sortType: SortType): String {
+    fun getPublicShareChildrenFiles(
+        driveId: Int,
+        linkUuid: String,
+        fileId: Int,
+        sortType: SortType,
+        authToken: String?,
+    ): String {
         val orderQuery = "order_by=${sortType.orderBy}&order=${sortType.order}"
-        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery"
+        val authParam = authToken?.let { "&sharelink_token=$it" } ?: ""
+        return "$SHARE_URL_V3/$driveId/share/$linkUuid/files/$fileId/files?$sharedFileWithQuery&$orderQuery$authParam"
     }
 
     fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): String {
         return "${publicShareFile(driveId, linkUuid, fileId)}/count"
     }
 
-    private fun getPublicShareFileThumbnail(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "${publicShareFile(driveId, linkUuid, fileId)}/thumbnail"
+    private fun getPublicShareFileThumbnail(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${publicShareFile(driveId, linkUuid, fileId)}/thumbnail$authParam"
     }
 
-    private fun getPublicShareFilePreview(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "${publicShareFile(driveId, linkUuid, fileId)}/preview"
+    private fun getPublicShareFilePreview(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${publicShareFile(driveId, linkUuid, fileId)}/preview$authParam"
     }
 
-    private fun downloadPublicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
-        return "${publicShareFile(driveId, linkUuid, fileId)}/download"
+    private fun downloadPublicShareFile(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${publicShareFile(driveId, linkUuid, fileId)}/download$authParam"
     }
 
-    private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int): String {
-        // For now, this call fails because the back hasn't dev the conversion of office files to pdf for mobile
-        return "$SHARE_URL_V1/share/$driveId/$linkUuid/preview/text/$fileId"
+    private fun showPublicShareOfficeFile(driveId: Int, linkUuid: String, fileId: Int, authToken: String? = null): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "$SHARE_URL_V1/share/$driveId/$linkUuid/preview/text/$fileId$authParam"
     }
 
     fun importPublicShareFiles(driveId: Int) = "${driveURLV2(driveId)}/imports/sharelink"
@@ -353,8 +363,14 @@ object ApiRoutes {
         return "${getPublicShareUrlV2(driveId, linkUuid)}/archive"
     }
 
-    fun downloadPublicShareArchive(driveId: Int, publicShareUuid: String, archiveUuid: String): String {
-        return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download"
+    fun downloadPublicShareArchive(
+        driveId: Int,
+        publicShareUuid: String,
+        archiveUuid: String,
+        authToken: String? = null,
+    ): String {
+        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download$authParam"
     }
 
     private fun publicShareFile(driveId: Int, linkUuid: String, fileId: Int): String {
@@ -446,4 +462,9 @@ object ApiRoutes {
 
     private fun showOffice(file: File) = "${OFFICE_URL}/${file.driveId}/${file.id}"
     //endregion
+
+    fun String.appendQuery(query: String): String {
+        val querySeparator = if (contains("?")) "&" else "?"
+        return this + querySeparator + query
+    }
 }

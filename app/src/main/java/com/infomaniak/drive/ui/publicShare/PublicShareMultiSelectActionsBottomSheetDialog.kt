@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,12 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
     private fun observeArchiveUuid() = with(publicShareViewModel) {
         buildArchiveResult.observe(viewLifecycleOwner) { (error, archiveUuid) ->
             archiveUuid?.let {
-                val downloadURL = ApiRoutes.downloadPublicShareArchive(driveId, publicShareUuid, it.uuid)
+                val downloadURL = ApiRoutes.downloadPublicShareArchive(
+                    driveId = driveId,
+                    publicShareUuid = publicShareUuid,
+                    archiveUuid = it.uuid,
+                    authToken = submitPasswordResult.value,
+                )
                 val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
                 DownloadManagerUtils.scheduleDownload(
                     context = requireContext(),

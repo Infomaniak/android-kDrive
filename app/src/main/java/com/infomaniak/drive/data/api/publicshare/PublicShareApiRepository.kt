@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRoutes
+import com.infomaniak.drive.data.api.ApiRoutes.appendQuery
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -39,26 +40,33 @@ import okhttp3.OkHttpClient
 
 object PublicShareApiRepository {
 
-    suspend fun getPublicShareInfo(driveId: Int, linkUuid: String): ApiResponse<ShareLink> {
-        return callApi(
+    suspend fun getPublicShareInfo(driveId: Int, linkUuid: String, authToken: String? = null): ApiResponse<ShareLink> {
+        return callPublicShareApi(
             url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
             method = GET,
+            authToken = authToken,
             okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
         )
     }
 
-    suspend fun submitPublicSharePassword(driveId: Int, linkUuid: String, password: String): ApiResponse<Boolean> {
-        return callApi(
+    suspend fun submitPublicSharePassword(driveId: Int, linkUuid: String, password: String): ApiResponse<PublicShareToken> {
+        return callPublicShareApi(
             url = ApiRoutes.submitPublicSharePassword(driveId, linkUuid),
             method = POST,
             body = mapOf("password" to password),
         )
     }
 
-    suspend fun getPublicShareRootFile(driveId: Int, linkUuid: String, fileId: FileId): ApiResponse<File> {
-        return callApi(
+    suspend fun getPublicShareRootFile(
+        driveId: Int,
+        linkUuid: String,
+        fileId: FileId,
+        authToken: String? = null,
+    ): ApiResponse<File> {
+        return callPublicShareApi(
             url = ApiRoutes.getPublicShareRootFile(driveId, linkUuid, fileId),
             method = GET,
+            authToken = authToken,
         )
     }
 
@@ -68,23 +76,38 @@ object PublicShareApiRepository {
         folderId: FileId,
         sortType: SortType,
         cursor: String?,
+        authToken: String? = null,
     ): CursorApiResponse<List<File>> {
-        val url = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType) + "&${loadCursor(cursor)}"
+        val baseUrl = ApiRoutes.getPublicShareChildrenFiles(driveId, linkUuid, folderId, sortType, authToken)
+        val url = baseUrl + "&${loadCursor(cursor)}"
+
         return callApiWithCursor(url, GET)
     }
 
-    suspend fun getPublicShareFileCount(driveId: Int, linkUuid: String, fileId: Int): ApiResponse<FileCount> {
-        return callApi(
+    suspend fun getPublicShareFileCount(
+        driveId: Int,
+        linkUuid: String,
+        fileId: Int,
+        authToken: String? = null,
+    ): ApiResponse<FileCount> {
+        return callPublicShareApi(
             url = ApiRoutes.getPublicShareFileCount(driveId, linkUuid, fileId),
             method = GET,
+            authToken = authToken,
         )
     }
 
-    suspend fun buildPublicShareArchive(driveId: Int, linkUuid: String, archiveBody: ArchiveBody): ApiResponse<ArchiveUUID> {
-        return callApi(
+    suspend fun buildPublicShareArchive(
+        driveId: Int,
+        linkUuid: String,
+        archiveBody: ArchiveBody,
+        authToken: String? = null,
+    ): ApiResponse<ArchiveUUID> {
+        return callPublicShareApi(
             url = ApiRoutes.buildPublicShareArchive(driveId, linkUuid),
             method = POST,
             body = archiveBody,
+            authToken = authToken,
         )
     }
 
@@ -97,6 +120,7 @@ object PublicShareApiRepository {
         fileIds: List<Int>,
         exceptedFileIds: List<Int>,
         password: String = "",
+        authToken: String? = null,
     ): ApiResponse<List<FileExternalImport>> {
 
         val body: MutableMap<String, Any> = mutableMapOf(
@@ -109,9 +133,10 @@ object PublicShareApiRepository {
         if (fileIds.isNotEmpty()) body["file_ids"] = fileIds.toTypedArray()
         if (exceptedFileIds.isNotEmpty()) body["except_file_ids"] = exceptedFileIds.toTypedArray()
 
-        return callApi(
+        return callPublicShareApi(
             url = ApiRoutes.importPublicShareFiles(destinationDriveId),
             method = POST,
+            authToken = authToken,
             body = body,
             okHttpClient = AccountUtils.getHttpClient(
                 userId = destinationUserId,
@@ -121,13 +146,15 @@ object PublicShareApiRepository {
         )
     }
 
-    private suspend inline fun <reified T> callApi(
+    private suspend inline fun <reified T> callPublicShareApi(
         url: String,
         method: ApiController.ApiMethod,
+        authToken: String? = null,
         body: Any? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): T {
-        return ApiController.callApi(url, method, body, okHttpClient)
+        val authentifiedUrl = authToken?.let { token -> url.appendQuery("sharelink_token=$token") } ?: url
+        return ApiController.callApi(authentifiedUrl, method, body, okHttpClient)
     }
 
     private suspend inline fun <reified T> callApiWithCursor(
