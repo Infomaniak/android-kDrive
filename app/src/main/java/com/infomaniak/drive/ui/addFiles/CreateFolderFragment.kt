@@ -48,7 +48,7 @@ import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
-open class CreateFolderFragment : Fragment() {
+abstract class CreateFolderFragment : Fragment() {
 
     private var _binding: FragmentCreateFolderBinding? = null
     protected val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -88,8 +88,8 @@ open class CreateFolderFragment : Fragment() {
         _binding = null
     }
 
-    protected fun canInherit(userList: ArrayList<UserFileAccess>, teamList: ArrayList<Team>): Boolean {
-        return userList.size > 1 || teamList.isNotEmpty()
+    protected fun canInherit(share: Share?): Boolean {
+        return share?.run { users.size > 1 || teams.isNotEmpty() } ?: false
     }
 
     protected fun saveNewFolder(newFolder: File) {
@@ -102,15 +102,23 @@ open class CreateFolderFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        adapter = PermissionsAdapter(
-            currentUser = AccountUtils.currentUser,
-            onPermissionChanged = {
-                newFolderViewModel.currentPermission = it
-                toggleCreateFolderButton()
-            },
-        )
-        binding.permissionsRecyclerView.adapter = adapter
+        if (permissionDependOnShare()) {
+            getShare { binding.permissionsRecyclerView.adapter = buildPermissionAdapter(it) }
+        } else {
+            binding.permissionsRecyclerView.adapter = buildPermissionAdapter(null)
+        }
     }
+
+    private fun buildPermissionAdapter(share: Share?) = PermissionsAdapter(
+        currentUser = AccountUtils.currentUser,
+        onPermissionChanged = { toggleCreateFolderButton() },
+        permissionList = buildPermissionList(share),
+        sharedUsers = share?.users.orEmpty()
+    )
+
+
+    abstract fun buildPermissionList(share: Share?): List<Permission>
+    open fun permissionDependOnShare(): Boolean = true
 
     protected open fun toggleCreateFolderButton() = with(binding) {
         createFolderButton.isEnabled = newFolderViewModel.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()

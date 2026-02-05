@@ -67,7 +67,6 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
         selectPermissionViewModel.apply {
-            currentPermission = currentPermission ?: navigationArgs.currentPermission
             currentFile = currentFile ?: FileController.getFileById(navigationArgs.currentFileId)
         }
 
@@ -78,14 +77,11 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun configurePermissionsAdapter() {
-        adapter = PermissionsAdapter(
-            isExternalUser = permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
-            onPermissionChanged = { selectPermissionViewModel.currentPermission = it },
-        ).apply {
-            setAll(getPermissions())
-            selectionPosition = permissionList.indexOf(selectPermissionViewModel.currentPermission)
-        }
-        binding.permissionsRecyclerView.adapter = adapter
+        binding.permissionsRecyclerView.adapter = PermissionsAdapter(
+            isExternalUser = navigationArgs.permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
+            permissionList = getPermissions(),
+            initialSelectedPermission = navigationArgs.currentPermission,
+        )
     }
 
     private fun getPermissions(): List<Permission> {

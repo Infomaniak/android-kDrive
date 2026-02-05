@@ -34,6 +34,7 @@ import com.infomaniak.drive.data.models.File.FolderPermission.INHERIT
 import com.infomaniak.drive.data.models.File.FolderPermission.ONLY_ME
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.ui.dropbox.DropboxViewModel
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.animateRotation
@@ -57,24 +58,14 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
         folderCreateIcon.icon.setImageResource(R.drawable.ic_folder_dropbox)
         folderNameValueLayout.hint = getString(R.string.createDropBoxHint)
         setupAdvancedSettings()
-
-        adapter.apply {
-            getShare {
-                setUsers(it.users)
-                val permissions: ArrayList<Permission> = arrayListOf(
-                    ONLY_ME,
-                    if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS,
-                )
-                selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
-                setAll(permissions)
-            }
-        }
-
         advancedSettingsCardView.isVisible = true
         advancedSettings.setOnClickListener { toggleShowAdvancedSettings() }
 
         createFolderButton.setOnClickListener { createDropBoxFolder() }
     }
+
+    override fun buildPermissionList(share: Share?): List<Permission> =
+        listOf(ONLY_ME, if (canInherit(share)) INHERIT else SPECIFIC_USERS)
 
     private fun createDropBoxFolder() {
         createDropBox(onDropBoxCreated = { file ->
