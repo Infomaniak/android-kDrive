@@ -23,9 +23,9 @@ import android.view.View
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.hideKeyboard
 import com.infomaniak.core.legacy.utils.hideProgressCatching
-import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.MatomoDrive.MatomoName
@@ -88,7 +88,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
         showSnackbar(R.string.createCommonFolderSucces)
 
         if (adapter.currentPermission == SPECIFIC_USERS) {
-            safeNavigate(
+            safelyNavigate(
                 CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
                     fileId = file.id,
                     ignoreCreateFolderStack = true,

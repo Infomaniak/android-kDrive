@@ -22,7 +22,7 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
@@ -68,7 +68,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
                 saveNewFolder(file)
                 showSnackbar(R.string.createPrivateFolderSucces, true)
                 if (redirectToShareDetails) {
-                    safeNavigate(
+                    safelyNavigate(
                         CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
                             fileId = file.id,
                             ignoreCreateFolderStack = true,
