@@ -30,6 +30,7 @@ import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setMargins
+import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
@@ -159,7 +160,12 @@ class RootFilesFragment : BaseRootFolderFragment() {
     }
 
     private fun notHandled(deeplinkAction: DeeplinkAction): Nothing? {
-        return if (deeplinkAction.isHandled) TODO("Need to implement here when ${deeplinkAction::class.simpleName} deeplink will be supported") else null
+        return if (DEBUG && deeplinkAction.isHandled) {
+            val deeplinkName = deeplinkAction::class.simpleName
+            TODO("Need to implement on call site when $deeplinkName deeplink will be supported")
+        } else {
+            null
+        }
     }
 
     data class FolderToOpen(val id: Int, val name: String)
