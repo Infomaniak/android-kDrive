@@ -268,6 +268,7 @@ class LoginActivity : ComponentActivity() {
     private fun authenticateUser(authCode: String) {
         lifecycleScope.launch {
             runCatching {
+                SentryLog.i(TAG, "Getting the user token")
                 val tokenResult = infomaniakLogin.getToken(
                     okHttpClient = HttpClient.okHttpClient,
                     code = authCode,
@@ -276,14 +277,17 @@ class LoginActivity : ComponentActivity() {
                 when (tokenResult) {
                     is InfomaniakLogin.TokenResult.Success -> onGetTokenSuccess(tokenResult.apiToken)
                     is InfomaniakLogin.TokenResult.Error -> {
+                        showError(getLoginErrorDescription(this@LoginActivity, tokenResult.errorStatus))
                         SentryLog.e(TAG, "GetToken failed") { scope ->
                             scope.setExtra("Error status", tokenResult.errorStatus.name)
                         }
-                        showError(getLoginErrorDescription(this@LoginActivity, tokenResult.errorStatus))
                     }
                 }
             }.onFailure { exception ->
-                if (exception is CancellationException) throw exception
+                if (exception is CancellationException) {
+                    SentryLog.i(TAG, "Throwing cancellation exception in AuthenticateUser")
+                    throw exception
+                }
                 SentryLog.e(TAG, "Failure on getToken", exception)
             }
         }
@@ -327,6 +331,7 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun showError(error: String) {
+        SentryLog.i(TAG, "Showing error ($error) after login attempt")
         showSnackbar(error)
         isLoginButtonLoading = false
         isSignUpButtonLoading = false
