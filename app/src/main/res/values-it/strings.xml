@@ -511,9 +511,10 @@
         <item quantity="other">Spostare %d elementi nel cestino?</item>
     </plurals>
     <string name="modalMoveTrashTitle">Sposta nel cestino</string>
+    <string name="modalRemoveUserDriveAccessDescription">Vuoi davvero rimuovere l’accesso dell’utente %1$s al kDrive %2$s?</string>
     <string name="modalTrashFileDescription">Spostare veramente %s nel cestino?</string>
     <string name="modalTrashFilesDescription">Spostare nel cestino i file selezionati?</string>
-    <string name="modalUserPermissionRemoveDescription">Eliminare l’accesso dell’utente %s?</string>
+    <string name="modalUserPermissionRemoveDescription">Vuoi davvero rimuovere l’accesso dell’utente %s a questo file?</string>
     <string name="modificationDateFilterTitle">Data di modifica</string>
     <string name="mySharesNoFile">Non ci sono file condivisi</string>
     <string name="mySharesTitle">Le mie condivisioni</string>

@@ -43,6 +43,15 @@ interface Shareable : Parcelable {
         else -> ShareablePermission.READ
     }
 
+    companion object {
+        fun Shareable?.getAccessName(): String = when (this) {
+            is DriveUser -> displayName
+            is Invitation -> email
+            is Team -> name
+            is UserFileAccess -> name
+            else -> ""
+        }
+    }
     @Parcelize
     enum class ShareablePermission(
         override val icon: Int,
