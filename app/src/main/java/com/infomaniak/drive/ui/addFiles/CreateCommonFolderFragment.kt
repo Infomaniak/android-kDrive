@@ -55,9 +55,11 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
             pathDriveIcon.imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
         }
 
+        createFolderButton.setOnClickListener { adapter.currentPermission?.let(::createCommonFolder) }
     }
 
-        createFolderButton.setOnClickListener { createCommonFolder() }
+    override fun buildPermissionList(share: Share?): List<Permission> = listOf(ALL_DRIVE_USERS, SPECIFIC_USERS)
+    override fun permissionDependOnShare(): Boolean = false
 
     private fun createCommonFolder() = with(binding) {
         folderNameValueInput.hideKeyboard()

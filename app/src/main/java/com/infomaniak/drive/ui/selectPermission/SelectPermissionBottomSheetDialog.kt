@@ -66,11 +66,6 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        selectPermissionViewModel.apply {
-            currentFile = currentFile ?: FileController.getFileById(navigationArgs.currentFileId)
-        }
-
-        permissionsGroup = navigationArgs.permissionsGroup
 
         configurePermissionsAdapter()
         configureSaveButton()
