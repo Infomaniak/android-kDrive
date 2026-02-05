@@ -31,15 +31,39 @@ sealed class SpecialFolder(id: Int, name: String, onFileInit: (File.() -> Unit)?
     val id: Int
         get() = file.id
 
-    data object Favorites : SpecialFolder(id = FAVORITES_FILE_ID, name = "Favorites")
-    data object MyShares : SpecialFolder(id = MY_SHARES_FILE_ID, name = "My Shares")
-    data object Gallery : SpecialFolder(id = GALLERY_FILE_ID, name = "Gallery")
-    data object RecentChanges : SpecialFolder(id = RECENT_CHANGES_FILE_ID, name = "Recent changes")
-    data object SharedWithMe : SpecialFolder(id = SHARED_WITH_ME_FILE_ID, name = "Shared with me")
-    data object Trash : SpecialFolder(id = TRASH_FILE_ID, name = "Trash", onFileInit = {
-        status = "trash"
-        type = Type.DIRECTORY.value
-    })
+    data object Favorites : SpecialFolder(
+        id = FAVORITES_FILE_ID,
+        name = "Favorites"
+    )
+
+    data object MyShares : SpecialFolder(
+        id = MY_SHARES_FILE_ID,
+        name = "My Shares"
+    )
+
+    data object Gallery : SpecialFolder(
+        id = GALLERY_FILE_ID,
+        name = "Gallery"
+    )
+
+    data object RecentChanges : SpecialFolder(
+        id = RECENT_CHANGES_FILE_ID,
+        name = "Recent changes"
+    )
+
+    data object SharedWithMe : SpecialFolder(
+        id = SHARED_WITH_ME_FILE_ID,
+        name = "Shared with me"
+    )
+
+    data object Trash : SpecialFolder(
+        id = TRASH_FILE_ID,
+        name = "Trash",
+        onFileInit = {
+            status = "trash"
+            type = Type.DIRECTORY.value
+        }
+    )
 
     companion object {
         private const val FAVORITES_FILE_ID = -1
