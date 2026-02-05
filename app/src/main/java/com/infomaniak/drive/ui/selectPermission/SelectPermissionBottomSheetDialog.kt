@@ -41,10 +41,12 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Shareable.Companion.getAccessName
 import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.databinding.FragmentSelectPermissionBinding
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils.createConfirmation
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.parcelize.Parcelize
 
@@ -75,6 +77,39 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             isExternalUser = navigationArgs.permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
             permissionList = getPermissions(),
             initialSelectedPermission = navigationArgs.currentPermission,
+            canSelect = { newPermission ->
+                when (newPermission) {
+                    ShareablePermission.DELETE, ShareablePermission.REMOVE_DRIVE_ACCESS -> {
+                        showDeleteConfirmationPopup(newPermission)
+                        false
+                    }
+                    else -> true
+                }
+            }
+        )
+    }
+
+    private fun showDeleteConfirmationPopup(newPermission: Permission) {
+        val userName = navigationArgs.currentShareable.getAccessName()
+        val message = if (newPermission == ShareablePermission.DELETE)
+            getString(R.string.modalUserPermissionRemoveDescription, userName)
+        else
+            getString(R.string.modalRemoveUserDriveAccessDescription, userName, AccountUtils.getCurrentDrive()?.name)
+        createConfirmation(
+            context = requireContext(),
+            title = getString(R.string.buttonDelete),
+            message = message,
+            buttonText = getString(R.string.buttonDelete),
+            isDeletion = true,
+            onConfirmation = {
+                selectPermissionViewModel.currentFile?.let { file ->
+                    updatePermission(
+                        file = file,
+                        shareableItem = navigationArgs.currentShareable,
+                        permission = newPermission as ShareablePermission?
+                    )
+                }
+            },
         )
     }
 

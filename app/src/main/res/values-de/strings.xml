@@ -511,9 +511,10 @@
         <item quantity="other">Wollen Sie %d Elemente in den Papierkorb verschieben?</item>
     </plurals>
     <string name="modalMoveTrashTitle">In den Papierkorb verschieben</string>
+    <string name="modalRemoveUserDriveAccessDescription">Möchten Sie wirklich den Zugriff von Benutzer %1$s auf das kDrive %2$s entfernen?</string>
     <string name="modalTrashFileDescription">Wollen Sie %s wirklich in den Papierkorb verschieben?</string>
     <string name="modalTrashFilesDescription">Wollen Sie die ausgewählten Dateien wirklich in den Papierkorb verschieben?</string>
-    <string name="modalUserPermissionRemoveDescription">Wollen Sie den Zugang des Benutzers %s wirklich löschen?</string>
+    <string name="modalUserPermissionRemoveDescription">Möchten Sie dem Benutzer %s wirklich den Zugriff auf diese Datei entziehen?</string>
     <string name="modificationDateFilterTitle">Zuletzt geändert am</string>
     <string name="mySharesNoFile">Keine Datei freigegeben</string>
     <string name="mySharesTitle">Meine Freigaben</string>

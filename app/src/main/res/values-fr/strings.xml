@@ -511,9 +511,10 @@
         <item quantity="other">Souhaitez-vous déplacer %d éléments dans la corbeille ?</item>
     </plurals>
     <string name="modalMoveTrashTitle">Déplacer dans la corbeille</string>
+    <string name="modalRemoveUserDriveAccessDescription">Voulez-vous vraiment supprimer l’accès de l’utilisateur %1$s au kDrive %2$s ?</string>
     <string name="modalTrashFileDescription">Souhaitez-vous vraiment déplacer %s dans la corbeille ?</string>
     <string name="modalTrashFilesDescription">Souhaitez-vous vraiment déplacer dans la corbeille les fichiers sélectionnés ?</string>
-    <string name="modalUserPermissionRemoveDescription">Souhaitez-vous vraiment supprimer l’accès de l’utilisateur %s ?</string>
+    <string name="modalUserPermissionRemoveDescription">Voulez-vous vraiment supprimer l’accès de l’utilisateur %s à ce fichier ?</string>
     <string name="modificationDateFilterTitle">Date de modification</string>
     <string name="mySharesNoFile">Aucun fichier partagé</string>
     <string name="mySharesTitle">Mes partages</string>

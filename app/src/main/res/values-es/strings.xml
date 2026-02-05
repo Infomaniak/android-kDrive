@@ -511,9 +511,10 @@
         <item quantity="other">¿Deseas enviar %d elementos a la papelera?</item>
     </plurals>
     <string name="modalMoveTrashTitle">Enviar a la papelera</string>
+    <string name="modalRemoveUserDriveAccessDescription">¿Deseas realmente eliminar el acceso del usuario %1$s a la unidad kDrive %2$s?</string>
     <string name="modalTrashFileDescription">¿Estás seguro de que deseas enviar %s a la papelera?</string>
     <string name="modalTrashFilesDescription">¿Estás seguro de que deseas enviar a la papelera los archivos seleccionados?</string>
-    <string name="modalUserPermissionRemoveDescription">¿Estás seguro de que deseas eliminar el acceso del usuario %s?</string>
+    <string name="modalUserPermissionRemoveDescription">¿Deseas realmente eliminar el acceso del usuario %s a este archivo?</string>
     <string name="modificationDateFilterTitle">Fecha de modificación</string>
     <string name="mySharesNoFile">No hay archivos compartidos</string>
     <string name="mySharesTitle">Mis usos compartidos</string>
