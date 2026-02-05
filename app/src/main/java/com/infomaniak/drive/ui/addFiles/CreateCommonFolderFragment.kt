@@ -61,13 +61,14 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     override fun buildPermissionList(share: Share?): List<Permission> = listOf(ALL_DRIVE_USERS, SPECIFIC_USERS)
     override fun permissionDependOnShare(): Boolean = false
 
-    private fun createCommonFolder() = with(binding) {
+    private fun createCommonFolder(permission: Permission) = with(binding) {
         folderNameValueInput.hideKeyboard()
         createFolderButton.showProgressCatching()
         trackNewElementEvent(MatomoName.CreateCommonFolder)
 
         newFolderViewModel.createCommonFolder(
             name = folderNameValueInput.text.toString(),
+            currentPermission = permission
         ).observe(viewLifecycleOwner) { apiResponse ->
 
             if (apiResponse.isSuccess()) {
@@ -86,7 +87,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     private fun whenFolderCreated(file: File) {
         showSnackbar(R.string.createCommonFolderSucces)
 
-        if (newFolderViewModel.currentPermission == SPECIFIC_USERS) {
+        if (adapter.currentPermission == SPECIFIC_USERS) {
             safeNavigate(
                 CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
                     fileId = file.id,
