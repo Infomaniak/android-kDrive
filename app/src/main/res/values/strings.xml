@@ -764,6 +764,7 @@
     <string name="uploadPausedTitle">Upload suspended</string>
     <string name="uploadPermissionError">Additional permissions requested</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/1d484922-97e1-4a43-a4c9-4d19bc1b5494/</string>
+    <string name="userDriveRemoveDescription">User will no longer have access to this kDrive.</string>
     <string name="userInviteByEmail">Invite via email</string>
     <string name="userPermissionManage">Can manage</string>
     <string name="userPermissionManageDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete the file\nShare with other users</string>

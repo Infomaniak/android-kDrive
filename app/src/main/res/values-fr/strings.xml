@@ -753,6 +753,7 @@
     <string name="uploadPausedTitle">Importation en pause</string>
     <string name="uploadPermissionError">Autorisations supplémentaires demandées</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/62305caf-7dd2-4573-9422-bb0d255fe834/</string>
+    <string name="userDriveRemoveDescription">L’utilisateur n’aura plus accès à ce kDrive.</string>
     <string name="userInviteByEmail">Inviter par e-mail</string>
     <string name="userPermissionManage">Peut gérer</string>
     <string name="userPermissionManageDescription">Modification du fichier\nTéléchargement\nAjout de commentaire\nAjout et création de fichier / dossier\nSuppression du fichier\nPartage avec d’autres utilisateurs</string>

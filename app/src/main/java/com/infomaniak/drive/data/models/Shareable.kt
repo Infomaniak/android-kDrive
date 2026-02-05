@@ -47,7 +47,7 @@ interface Shareable : Parcelable {
     enum class ShareablePermission(
         override val icon: Int,
         override val translation: Int,
-        override val description: Int?,
+        override val description: Int,
         val apiValue: String
     ) : Permission {
 
@@ -89,7 +89,7 @@ interface Shareable : Parcelable {
         REMOVE_DRIVE_ACCESS(
             icon = R.drawable.ic_bin,
             translation = R.string.buttonRemoveDriveAccess,
-            description = null,
+            description = R.string.userDriveRemoveDescription,
             apiValue = "remove_from_drive"
         )
     }
