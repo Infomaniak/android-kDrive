@@ -29,7 +29,9 @@ import kotlinx.coroutines.Dispatchers
 
 internal class SelectPermissionViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    var currentFile: File? = null
+    private val args = SelectPermissionBottomSheetDialogArgs.fromSavedStateHandle(savedStateHandle)
+
+    val currentFile: File? = FileController.getFileById(args.currentFileId)
 
     fun editFileShareLinkOfficePermission(file: File, canEdit: Boolean) = liveData(Dispatchers.IO) {
         val body = JsonObject().apply { addProperty("can_edit", canEdit) }

@@ -124,8 +124,8 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     private fun configureSaveButton() {
         binding.saveButton.setOnClickListener {
             with(selectPermissionViewModel) {
-                when (permissionsGroup) {
                 val permission = adapter.currentPermission
+                when (navigationArgs.permissionsGroup) {
                     PermissionsGroup.EXTERNAL_USERS_RIGHTS, PermissionsGroup.USERS_RIGHTS -> {
                         currentFile?.let { file ->
                             updatePermission(
