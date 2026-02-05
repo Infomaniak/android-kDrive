@@ -47,6 +47,7 @@ class PermissionsAdapter(
     private var isExternalUser: Boolean = false,
     private var sharedUsers: List<UserFileAccess> = emptyList(),
     private val onPermissionChanged: ((newPermission: Permission) -> Unit)? = null,
+    private val canSelect: (newPermission: Permission) -> Boolean = { true }
 ) : Adapter<PermissionsViewHolder>() {
 
     var currentPermission = initialSelectedPermission
@@ -69,7 +70,7 @@ class PermissionsAdapter(
         permissionCard.apply {
             setupSelection(itemPosition == currentSelection)
             setOnClickListener {
-                if (currentSelection != itemPosition) {
+                if (currentSelection != itemPosition && canSelect(permission)) {
                     currentPermission = permission
                     onPermissionChanged?.invoke(permission)
                     notifyItemRangeChanged(0, itemCount)
