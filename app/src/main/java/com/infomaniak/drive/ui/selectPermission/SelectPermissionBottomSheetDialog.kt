@@ -50,7 +50,6 @@ import kotlinx.parcelize.Parcelize
 class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
     private var binding: FragmentSelectPermissionBinding by safeBinding()
-    private lateinit var permissionsGroup: PermissionsGroup
     private val navigationArgs: SelectPermissionBottomSheetDialogArgs by navArgs()
     private val selectPermissionViewModel: SelectPermissionViewModel by viewModels()
     private val adapter: PermissionsAdapter
@@ -79,7 +78,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun getPermissions(): List<Permission> {
-        return when (permissionsGroup) {
+        return when (navigationArgs.permissionsGroup) {
             PermissionsGroup.SHARE_LINK_FILE_SETTINGS -> listOf(
                 ShareLink.ShareLinkFilePermission.RESTRICTED,
                 ShareLink.ShareLinkFilePermission.PUBLIC
@@ -137,14 +136,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                     PermissionsGroup.SHARE_LINK_FILE_OFFICE, PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> {
                         currentFile?.let { file -> updateShareLinkOfficePermission(file) }
                     }
-                    else -> {
-                        val key = if (permissionsGroup == PermissionsGroup.FILE_SHARE_UPDATE) {
-                            ADD_USERS_RIGHTS_NAV_KEY
-                        } else {
-                            SHARE_LINK_ACCESS_NAV_KEY
-                        }
-                    }
-                        setBackNavigationResult(key, bundleOf(PERMISSION_BUNDLE_KEY to permission))
+                    PermissionsGroup.FILE_SHARE_UPDATE ->
+                        setBackNavigationResult(ADD_USERS_RIGHTS_NAV_KEY, bundleOf(PERMISSION_BUNDLE_KEY to permission))
+                    else ->
+                        setBackNavigationResult(SHARE_LINK_ACCESS_NAV_KEY, bundleOf(PERMISSION_BUNDLE_KEY to permission))
                 }
             }
         }
