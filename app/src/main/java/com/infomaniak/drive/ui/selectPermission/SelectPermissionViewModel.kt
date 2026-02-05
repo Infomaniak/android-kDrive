@@ -17,20 +17,19 @@
  */
 package com.infomaniak.drive.ui.selectPermission
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import com.google.gson.JsonObject
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Shareable
 import kotlinx.coroutines.Dispatchers
 
-internal class SelectPermissionViewModel : ViewModel() {
+internal class SelectPermissionViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     var currentFile: File? = null
-    var currentPermission: Permission? = null
 
     fun editFileShareLinkOfficePermission(file: File, canEdit: Boolean) = liveData(Dispatchers.IO) {
         val body = JsonObject().apply { addProperty("can_edit", canEdit) }

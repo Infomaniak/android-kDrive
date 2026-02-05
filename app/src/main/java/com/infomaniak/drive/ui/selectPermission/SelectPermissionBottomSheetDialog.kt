@@ -125,17 +125,18 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         binding.saveButton.setOnClickListener {
             with(selectPermissionViewModel) {
                 when (permissionsGroup) {
+                val permission = adapter.currentPermission
                     PermissionsGroup.EXTERNAL_USERS_RIGHTS, PermissionsGroup.USERS_RIGHTS -> {
                         currentFile?.let { file ->
                             updatePermission(
                                 file,
                                 navigationArgs.currentShareable,
-                                currentPermission as Shareable.ShareablePermission?
+                                permission as Shareable.ShareablePermission?
                             )
                         }
                     }
                     PermissionsGroup.SHARE_LINK_FILE_OFFICE, PermissionsGroup.SHARE_LINK_FOLDER_OFFICE -> {
-                        currentFile?.let { file -> updateShareLinkOfficePermission(file, currentPermission) }
+                        currentFile?.let { file -> updateShareLinkOfficePermission(file) }
                     }
                     else -> {
                         val key = if (permissionsGroup == PermissionsGroup.FILE_SHARE_UPDATE) {
@@ -150,7 +151,8 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun updateShareLinkOfficePermission(file: File, permission: Permission?) = with(binding) {
+    private fun updateShareLinkOfficePermission(file: File) = with(binding) {
+        val permission = adapter.currentPermission
         saveButton.initProgress(viewLifecycleOwner)
         saveButton.showProgressCatching()
         selectPermissionViewModel.editFileShareLinkOfficePermission(

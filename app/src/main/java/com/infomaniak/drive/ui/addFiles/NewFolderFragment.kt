@@ -53,7 +53,6 @@ class NewFolderFragment : Fragment() {
         newFolderViewModel.apply {
             currentFolderId.value = arguments.parentFolderId
             userDrive = arguments.userDrive
-            currentPermission = null
         }
 
         binding.toolbar.setNavigationOnClickListener {
