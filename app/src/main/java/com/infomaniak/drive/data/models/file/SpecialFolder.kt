@@ -19,7 +19,6 @@ package com.infomaniak.drive.data.models.file
 
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.Type
-import kotlin.reflect.KProperty
 
 sealed class SpecialFolder(id: Int, name: String, onFileInit: (File.() -> Unit)? = null) {
 
@@ -31,8 +30,6 @@ sealed class SpecialFolder(id: Int, name: String, onFileInit: (File.() -> Unit)?
     }
     val id: Int
         get() = file.id
-
-    operator fun getValue(thisRef: SpecialFolder, property: KProperty<*>): File = file
 
     data object Favorites : SpecialFolder(id = FAVORITES_FILE_ID, name = "Favorites")
     data object MyShares : SpecialFolder(id = MY_SHARES_FILE_ID, name = "My Shares")
