@@ -1,0 +1,3 @@
+- Ajouter davantage de traces pour comprendre un bug de connexion
+- Corriger le téléchargement d'un fichier daté d'avant le 1er janvier 1970
+- Harmoniser certaines traductions avec le site web
