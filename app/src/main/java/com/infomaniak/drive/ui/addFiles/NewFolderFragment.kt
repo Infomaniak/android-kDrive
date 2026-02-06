@@ -27,8 +27,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.drive.Drive
@@ -53,7 +53,6 @@ class NewFolderFragment : Fragment() {
         newFolderViewModel.apply {
             currentFolderId.value = arguments.parentFolderId
             userDrive = arguments.userDrive
-            currentPermission = null
         }
 
         binding.toolbar.setNavigationOnClickListener {
@@ -71,7 +70,7 @@ class NewFolderFragment : Fragment() {
 
     private fun initPrivateFolder(isSharedWithMe: Boolean) {
         binding.privateFolder.setOnClickListener {
-            safeNavigate(NewFolderFragmentDirections.actionNewFolderFragmentToCreatePrivateFolderFragment(isSharedWithMe))
+            safelyNavigate(NewFolderFragmentDirections.actionNewFolderFragmentToCreatePrivateFolderFragment(isSharedWithMe))
         }
     }
 
@@ -79,7 +78,7 @@ class NewFolderFragment : Fragment() {
         if (drive?.capabilities?.useTeamSpace == true) {
             commonFolderDescription.text = getString(R.string.commonFolderDescription, drive.name)
             commonFolder.setOnClickListener {
-                safeNavigate(R.id.createCommonFolderFragment)
+                safelyNavigate(R.id.createCommonFolderFragment)
             }
         } else {
             commonFolder.isGone = true
@@ -94,7 +93,7 @@ class NewFolderFragment : Fragment() {
             isVisible = drive?.sharedWithMe != true
             setOnClickListener {
                 if (canCreateDropbox) {
-                    safeNavigate(R.id.createDropBoxFolderFragment)
+                    safelyNavigate(R.id.createDropBoxFolderFragment)
                 } else {
                     openKSuiteUpgradeBottomSheet(MatomoName.DropboxQuotaExceeded.value, drive)
                 }
