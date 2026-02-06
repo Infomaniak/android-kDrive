@@ -34,6 +34,9 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
+import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.common.utils.startOfTheDay
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.hideProgressCatching
@@ -43,9 +46,6 @@ import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.legacy.utils.startAppSettingsConfig
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.common.utils.FORMAT_DATE_CLEAR_MONTH
-import com.infomaniak.core.common.utils.format
-import com.infomaniak.core.common.utils.startOfTheDay
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
 import com.infomaniak.drive.R
@@ -466,7 +466,7 @@ class SyncSettingsActivity : BaseActivity() {
     private fun generateSyncSettings(): SyncSettings = with(binding) {
         val date = when (syncSettingsViewModel.saveOldPictures.value!!) {
             SavePicturesDate.SINCE_NOW -> Date()
-            SavePicturesDate.SINCE_FOREVER -> Date(0)
+            SavePicturesDate.SINCE_FOREVER -> Date(-62_135_597_361L)
             SavePicturesDate.SINCE_DATE -> syncSettingsViewModel.customDate.value ?: Date()
         }
         return SyncSettings(
