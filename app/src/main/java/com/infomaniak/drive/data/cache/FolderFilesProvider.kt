@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.models.File.SortType
 import com.infomaniak.drive.data.models.FileAction
 import com.infomaniak.drive.data.models.FileActivityType
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.data.services.MqttClientWrapper
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.FileId
@@ -104,7 +105,7 @@ object FolderFilesProvider {
         onRecursionStart: (() -> Unit)? = null,
     ) {
         with(folderFilesProviderArgs) {
-            val rootFolder = File(id = FileController.SHARED_WITH_ME_FILE_ID, name = "/")
+            val rootFolder = File(id = SharedWithMe.id, name = "/")
             val okHttpClient = AccountUtils.getHttpClient(userDrive.userId)
 
             FileController.getRealmInstance(userDrive).use { realm ->
@@ -129,7 +130,7 @@ object FolderFilesProvider {
         rootFolder: File? = null,
         onRecursionStart: (() -> Unit)? = null,
     ) {
-        val folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderFilesProviderArgs.folderId
+        val folderId = if (isRoot) SharedWithMe.id else folderFilesProviderArgs.folderId
         val apiResponse = if (isRoot) {
             ApiRepository.getSharedWithMeFiles(
                 okHttpClient = okHttpClient,

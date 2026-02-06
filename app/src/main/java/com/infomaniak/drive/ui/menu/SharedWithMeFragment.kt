@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Rights
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.file.SpecialFolder.SharedWithMe
 import com.infomaniak.drive.ui.bottomSheetDialogs.DriveMaintenanceBottomSheetDialogArgs
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity
 import com.infomaniak.drive.ui.fileList.SelectFolderActivity.SelectFolderViewModel
@@ -66,7 +67,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
             sharedWithMe = true
         ).also {
             mainViewModel.loadCurrentFolder(
-                folderId = if (isRoot) FileController.SHARED_WITH_ME_FILE_ID else folderId,
+                folderId = if (isRoot) SharedWithMe.id else folderId,
                 userDrive = it,
             )
         }

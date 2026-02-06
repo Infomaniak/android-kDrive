@@ -48,8 +48,6 @@ import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.cache.FileController.TRASH_FILE
-import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.cache.FolderFilesProvider
 import com.infomaniak.drive.data.models.CreateFile
 import com.infomaniak.drive.data.models.File
@@ -59,6 +57,7 @@ import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
+import com.infomaniak.drive.data.models.file.SpecialFolder.Trash
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.ui.addFiles.UploadFilesHelper
 import com.infomaniak.drive.utils.AccountUtils
@@ -199,11 +198,11 @@ class MainViewModel(
         navController.popBackStack(R.id.rootFilesFragment, false)
 
         if (fileId <= Utils.ROOT_ID) {
-            if (fileId == TRASH_FILE_ID) {
+            if (fileId == Trash.id) {
                 subfolderId?.let {
-                    navigateFileListTo.postValue(FileListNavigationType.Subfolder(TRASH_FILE, it))
+                    navigateFileListTo.postValue(FileListNavigationType.Subfolder(Trash.file, it))
                 } ?: run {
-                    navigateFileListTo.postValue(FileListNavigationType.Folder(TRASH_FILE))
+                    navigateFileListTo.postValue(FileListNavigationType.Folder(Trash.file))
                 }
             }
             return // Deeplinks could lead us to navigating to the true root

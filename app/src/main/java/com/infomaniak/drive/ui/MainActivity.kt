@@ -61,6 +61,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
+import com.infomaniak.core.common.observe
 import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
@@ -73,7 +74,6 @@ import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
-import com.infomaniak.core.common.observe
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
@@ -84,7 +84,6 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController.TRASH_FILE_ID
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.File
@@ -92,6 +91,7 @@ import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.file.SpecialFolder
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -275,7 +275,7 @@ class MainActivity : BaseActivity() {
                         is DeepLinkType.SharedWithMe -> null//TODO()
                         is DeepLinkType.Trash -> {
                             navigateToDestinationFileId(
-                                destinationFileId = TRASH_FILE_ID,
+                                destinationFileId = SpecialFolder.Trash.id,
                                 destinationUserDrive = UserDrive(driveId = deepLinkType.userDriveId),
                                 deepLinkType.folderId?.toInt()
                             )

@@ -24,7 +24,7 @@ import androidx.fragment.app.viewModels
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.core.legacy.utils.setPagination
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.file.SpecialFolder.RecentChanges
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.multiSelect.RecentChangesMultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.utils.Utils
@@ -85,7 +85,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
         recentChangesViewModel.recentChangesResults.observe(viewLifecycleOwner) { result ->
             populateFileList(
                 files = result?.files ?: arrayListOf(),
-                folderId = FileController.RECENT_CHANGES_FILE_ID,
+                folderId = RecentChanges.id,
                 ignoreOffline = true,
                 isComplete = result?.isComplete ?: true,
                 realm = mainViewModel.realm,
