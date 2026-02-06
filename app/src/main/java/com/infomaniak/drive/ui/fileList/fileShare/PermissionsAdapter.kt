@@ -47,6 +47,7 @@ class PermissionsAdapter(
     private val onPermissionChanged: ((newPermission: Permission) -> Unit)? = null,
     private val permissionList: List<Permission>,
     initialSelectedPermission: Permission? = null,
+    private val canSelect: (newPermission: Permission) -> Boolean = { true }
 ) : Adapter<PermissionsViewHolder>() {
 
     var currentSelection = initialSelectedPermission?.let(permissionList::indexOf)
@@ -72,7 +73,7 @@ class PermissionsAdapter(
         permissionCard.apply {
             setupSelection(itemPosition == currentSelection)
             setOnClickListener {
-                if (currentSelection != itemPosition) {
+                if (currentSelection != itemPosition && canSelect(permission)) {
                     currentSelection = itemPosition
                     currentPermission = permission
                     onPermissionChanged?.invoke(permission)

@@ -41,9 +41,12 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.Shareable
+import com.infomaniak.drive.data.models.Shareable.Companion.getAccessName
+import com.infomaniak.drive.data.models.Shareable.ShareablePermission
 import com.infomaniak.drive.databinding.FragmentSelectPermissionBinding
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils.createConfirmation
 import com.infomaniak.drive.views.FullScreenBottomSheetDialog
 import kotlinx.parcelize.Parcelize
 
@@ -74,6 +77,39 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             isExternalUser = navigationArgs.permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
             permissionList = getPermissions(),
             initialSelectedPermission = navigationArgs.currentPermission,
+            canSelect = { newPermission ->
+                when (newPermission) {
+                    ShareablePermission.DELETE, ShareablePermission.REMOVE_DRIVE_ACCESS -> {
+                        showDeleteConfirmationPopup(newPermission)
+                        false
+                    }
+                    else -> true
+                }
+            }
+        )
+    }
+
+    private fun showDeleteConfirmationPopup(newPermission: Permission) {
+        val userName = navigationArgs.currentShareable.getAccessName()
+        val message = if (newPermission == ShareablePermission.DELETE)
+            getString(R.string.modalUserPermissionRemoveDescription, userName)
+        else
+            getString(R.string.modalRemoveUserDriveAccessDescription, userName, AccountUtils.getCurrentDrive()?.name)
+        createConfirmation(
+            context = requireContext(),
+            title = getString(R.string.buttonDelete),
+            message = message,
+            buttonText = getString(R.string.buttonDelete),
+            isDeletion = true,
+            onConfirmation = {
+                selectPermissionViewModel.currentFile?.let { file ->
+                    updatePermission(
+                        file = file,
+                        shareableItem = navigationArgs.currentShareable,
+                        permission = newPermission as ShareablePermission?
+                    )
+                }
+            },
         )
     }
 
@@ -92,21 +128,21 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 ShareLink.ShareLinkDocumentPermission.PUBLIC
             )
             PermissionsGroup.FILE_SHARE_UPDATE -> listOfNotNull(
-                Shareable.ShareablePermission.READ,
-                Shareable.ShareablePermission.WRITE,
-                Shareable.ShareablePermission.MANAGE.takeIf { selectPermissionViewModel.currentFile?.isChildOfCommonDirectory() == true }
+                ShareablePermission.READ,
+                ShareablePermission.WRITE,
+                ShareablePermission.MANAGE.takeIf { selectPermissionViewModel.currentFile?.isChildOfCommonDirectory() == true }
             )
             PermissionsGroup.EXTERNAL_USERS_RIGHTS -> listOfNotNull(
-                Shareable.ShareablePermission.READ,
-                Shareable.ShareablePermission.WRITE_EXTERNAL,
-                Shareable.ShareablePermission.DELETE,
-                Shareable.ShareablePermission.REMOVE_DRIVE_ACCESS.takeIf { AccountUtils.getCurrentDrive()?.isOrganisationAdmin == true }
+                ShareablePermission.READ,
+                ShareablePermission.WRITE_EXTERNAL,
+                ShareablePermission.DELETE,
+                ShareablePermission.REMOVE_DRIVE_ACCESS.takeIf { AccountUtils.getCurrentDrive()?.isOrganisationAdmin == true }
             )
             PermissionsGroup.USERS_RIGHTS -> listOfNotNull(
-                Shareable.ShareablePermission.READ,
-                Shareable.ShareablePermission.WRITE,
-                Shareable.ShareablePermission.MANAGE.takeIf { selectPermissionViewModel.currentFile?.isChildOfCommonDirectory() == true },
-                Shareable.ShareablePermission.DELETE
+                ShareablePermission.READ,
+                ShareablePermission.WRITE,
+                ShareablePermission.MANAGE.takeIf { selectPermissionViewModel.currentFile?.isChildOfCommonDirectory() == true },
+                ShareablePermission.DELETE
             )
             PermissionsGroup.SHARE_LINK_FILE_OFFICE -> listOf(
                 ShareLink.OfficeFilePermission.READ,
@@ -129,7 +165,7 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                             updatePermission(
                                 file,
                                 navigationArgs.currentShareable,
-                                permission as Shareable.ShareablePermission?
+                                permission as ShareablePermission?
                             )
                         }
                     }
@@ -157,17 +193,17 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
         }
     }
 
-    private fun updatePermission(file: File, shareableItem: Shareable?, permission: Shareable.ShareablePermission? = null) =
+    private fun updatePermission(file: File, shareableItem: Shareable?, permission: ShareablePermission? = null) =
         with(binding) {
             shareableItem?.let { shareable ->
                 saveButton.initProgress(viewLifecycleOwner)
                 saveButton.showProgressCatching()
                 when (permission) {
-                    Shareable.ShareablePermission.DELETE, null -> {
+                    ShareablePermission.DELETE, null -> {
                         MatomoDrive.trackShareRightsEvent(MatomoDrive.MatomoName.DeleteUser)
                         deleteShare(file, shareable, permission)
                     }
-                    Shareable.ShareablePermission.REMOVE_DRIVE_ACCESS -> {
+                    ShareablePermission.REMOVE_DRIVE_ACCESS -> {
                         MatomoDrive.trackShareRightsEvent(MatomoDrive.MatomoName.RemoveDriveUser)
                         removeDriveUser(file, shareable, permission)
                     }
@@ -179,21 +215,21 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             }
         }
 
-    private fun deleteShare(file: File, shareable: Shareable, permission: Shareable.ShareablePermission?) {
+    private fun deleteShare(file: File, shareable: Shareable, permission: ShareablePermission?) {
         selectPermissionViewModel.deleteFileShare(file, shareable).observe(viewLifecycleOwner) { apiResponse ->
             val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
             handleFileShareApiResponse(apiResponse, UPDATE_USERS_RIGHTS_NAV_KEY, bundle, R.string.errorDelete)
         }
     }
 
-    private fun removeDriveUser(file: File, shareable: Shareable, permission: Shareable.ShareablePermission?) {
+    private fun removeDriveUser(file: File, shareable: Shareable, permission: ShareablePermission?) {
         selectPermissionViewModel.removeDriveUser(file, shareable).observe(viewLifecycleOwner) { apiResponse ->
             val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
             handleFileShareApiResponse(apiResponse, UPDATE_USERS_RIGHTS_NAV_KEY, bundle, R.string.errorRightModification)
         }
     }
 
-    private fun editShare(file: File, shareable: Shareable, permission: Shareable.ShareablePermission) {
+    private fun editShare(file: File, shareable: Shareable, permission: ShareablePermission) {
         selectPermissionViewModel.editFileShare(file, shareable, permission).observe(viewLifecycleOwner) { apiResponse ->
             val bundle = bundleOf(PERMISSION_BUNDLE_KEY to permission, SHAREABLE_BUNDLE_KEY to shareable)
             handleFileShareApiResponse(apiResponse, UPDATE_USERS_RIGHTS_NAV_KEY, bundle, R.string.errorRightModification)

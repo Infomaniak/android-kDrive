@@ -522,9 +522,10 @@
         <item quantity="other">Move %d items to the trash?</item>
     </plurals>
     <string name="modalMoveTrashTitle">Move to trash</string>
+    <string name="modalRemoveUserDriveAccessDescription">Do you really want to remove user %1$s’s access to the kDrive %2$s?</string>
     <string name="modalTrashFileDescription">Do you really want to move %s to the trash?</string>
     <string name="modalTrashFilesDescription">Do you really want to move the selected files to the trash?</string>
-    <string name="modalUserPermissionRemoveDescription">Do you really want to delete the access of user %s?</string>
+    <string name="modalUserPermissionRemoveDescription">Do you really want to remove user %s’s access to this file?</string>
     <string name="modificationDateFilterTitle">Modification date</string>
     <string name="mySharesNoFile">No file shared</string>
     <string name="mySharesTitle">My shares</string>
@@ -764,6 +765,7 @@
     <string name="uploadPausedTitle">Upload suspended</string>
     <string name="uploadPermissionError">Additional permissions requested</string>
     <string name="urlUserReportAndroid">https://feedback.userreport.com/1d484922-97e1-4a43-a4c9-4d19bc1b5494/</string>
+    <string name="userDriveRemoveDescription">User will no longer have access to this kDrive.</string>
     <string name="userInviteByEmail">Invite via email</string>
     <string name="userPermissionManage">Can manage</string>
     <string name="userPermissionManageDescription">Edit the file\nDownload\nAdd comments\nAdd and create files/folders\nDelete the file\nShare with other users</string>
