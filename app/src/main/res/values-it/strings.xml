@@ -198,14 +198,14 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Impossibile effettuare la ricerca, non è stato selezionato nessun drive</string>
     <string name="commonDocumentsDescription">Questo spazio appartiene a %s e centralizza i file comuni della vostra organizzazione.</string>
     <string name="commonFolderDescription">Condividi questa cartella con utenti del kDrive %s</string>
-    <string name="commonFolderTitle">Cartella comune</string>
+    <string name="commonFolderTitle">Cartella dell’organizzazione</string>
     <string name="contentDescriptionIsSelected">È selezionata</string>
     <string name="convertToDropboxTitle">Converti in deposito file %s</string>
     <string name="createCategoryTitle">Crea una categoria</string>
     <string name="createCommonFolderAllUsersDescription">Tutti gli utenti del kDrive %s avranno automaticamente accesso a questa cartella.</string>
     <string name="createCommonFolderDescription">Con chi vuoi condividere questa cartella comune?</string>
-    <string name="createCommonFolderSucces">Cartella condivisa creata con successo</string>
-    <string name="createCommonFolderTitle">Crea una cartella condivisa</string>
+    <string name="createCommonFolderSucces">Cartella organizzativa creata con successo</string>
+    <string name="createCommonFolderTitle">Crea una cartella dell’organizzazione</string>
     <string name="createDatedSubFoldersDescription">Crea automaticamente sottocartelle con il mese e l’anno della foto</string>
     <string name="createDatedSubFoldersTitle">Creare una cartella al mese</string>
     <string name="createDropBoxHint">Nome del deposito file</string>

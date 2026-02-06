@@ -198,14 +198,14 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">Suche nicht möglich, es wurde kein Drive ausgewählt</string>
     <string name="commonDocumentsDescription">Dieser Bereich gehört %s und zentralisiert die gemeinsamen Dateien Ihrer Organisation.</string>
     <string name="commonFolderDescription">Teilen Sie diesen Ordner mit den Benutzern des kDrive %s</string>
-    <string name="commonFolderTitle">Gemeinsamer Ordner</string>
+    <string name="commonFolderTitle">Organisationsordner</string>
     <string name="contentDescriptionIsSelected">Wurde ausgewählt</string>
     <string name="convertToDropboxTitle">In Briefkasten umwandeln %s</string>
     <string name="createCategoryTitle">Kategorie erstellen</string>
     <string name="createCommonFolderAllUsersDescription">Alle Benutzer des kDrive %s erhalten automatisch Zugang zu diesem Ordner.</string>
     <string name="createCommonFolderDescription">Mit wem möchten Sie diesen gemeinsamen Ordner teilen?</string>
-    <string name="createCommonFolderSucces">Gemeinsamer Ordner erfolgreich angelegt</string>
-    <string name="createCommonFolderTitle">Gemeinsamen Ordner erstellen</string>
+    <string name="createCommonFolderSucces">Organisationsordner erfolgreich erstellt</string>
+    <string name="createCommonFolderTitle">Organisationsordner erstellen</string>
     <string name="createDatedSubFoldersDescription">Automatisches Erstellen von Unterordnern mit dem Monat und Jahr des Fotos</string>
     <string name="createDatedSubFoldersTitle">Einen Ordner pro Monat erstellen</string>
     <string name="createDropBoxHint">Name des Briefkastens</string>

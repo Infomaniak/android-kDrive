@@ -44,7 +44,6 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        accessPermissionTitle.setText(R.string.createCommonFolderDescription)
         createFolderCollapsing.title = getString(R.string.createCommonFolderTitle)
         folderCreateIcon.icon.setImageResource(R.drawable.ic_folder_common_documents)
         pathCard.isVisible = true
