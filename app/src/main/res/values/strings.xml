@@ -209,14 +209,14 @@
     <string name="cloudStorageQuerySearchImpossibleSelectDrive">No search possible: no drive selected</string>
     <string name="commonDocumentsDescription">This space belongs to %s and centralizes your organization’s common files.</string>
     <string name="commonFolderDescription">Share this folder with users of kDrive %s</string>
-    <string name="commonFolderTitle">Common folder</string>
+    <string name="commonFolderTitle">Organization folder</string>
     <string name="contentDescriptionIsSelected">Is selected</string>
     <string name="convertToDropboxTitle">Convert to drop box %s</string>
     <string name="createCategoryTitle">Create a category</string>
     <string name="createCommonFolderAllUsersDescription">All kDrive %s users will automatically have access to this folder.</string>
     <string name="createCommonFolderDescription">Who would you like to share this common folder with?</string>
-    <string name="createCommonFolderSucces">Common folder created successfully</string>
-    <string name="createCommonFolderTitle">Create a common folder</string>
+    <string name="createCommonFolderSucces">Organization folder created successfully</string>
+    <string name="createCommonFolderTitle">Create an organization folder</string>
     <string name="createDatedSubFoldersDescription">Automatically create subfolders with the month and year of the photo</string>
     <string name="createDatedSubFoldersTitle">Create one folder per month</string>
     <string name="createDropBoxHint">Name of drop box</string>
