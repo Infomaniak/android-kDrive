@@ -56,6 +56,7 @@ import com.infomaniak.drive.data.models.FileListNavigationType
 import com.infomaniak.drive.data.models.ShareableItems.FeedbackAccessResource
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.file.FileExternalImport.FileExternalImportStatus
 import com.infomaniak.drive.data.models.file.SpecialFolder.Trash
 import com.infomaniak.drive.data.services.DownloadWorker
@@ -80,6 +81,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
@@ -109,6 +111,7 @@ class MainViewModel(
     private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
     val navigateFileListTo = SingleLiveEvent<FileListNavigationType>()
+    val navigateDeeplink = MutableStateFlow<DeeplinkAction.Drive?>(null)
 
     val deleteFileFromHome = SingleLiveEvent<Boolean>()
     val refreshActivities = SingleLiveEvent<Boolean>()
