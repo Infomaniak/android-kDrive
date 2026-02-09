@@ -28,9 +28,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.work.WorkInfo
@@ -72,17 +70,13 @@ import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.find
 import io.realm.Realm
-import io.realm.kotlin.toFlow
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Date
@@ -105,8 +99,6 @@ class MainViewModel(
 
     val currentFolderOpenAddFileBottom = MutableLiveData<File>()
     var currentPreviewFileList = LinkedHashMap<Int, File>()
-
-    private val _pendingUploadsCount = MutableLiveData<Int?>(null)
 
     val navigateFileListTo = SingleLiveEvent<FileListNavigationType>()
 
@@ -409,16 +401,6 @@ class MainViewModel(
         }
 
         emit(apiResponse)
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val pendingUploadsCount: LiveData<Int> = _pendingUploadsCount.switchMap { folderId ->
-        UploadFile.getCurrentUserPendingUploadFile(folderId)
-            .toFlow()
-            .mapLatest { list -> list.count() }
-            .distinctUntilChanged()
-            .cancellable()
-            .asLiveData()
     }
 
     fun observeDownloadOffline(context: Context) = WorkManager.getInstance(context).getWorkInfosLiveData(
