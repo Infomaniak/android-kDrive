@@ -105,13 +105,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
             buttonText = getString(R.string.buttonDelete),
             isDeletion = true,
             onConfirmation = {
-                selectPermissionViewModel.currentFile?.let { file ->
-                    updatePermission(
-                        file = file,
-                        shareableItem = navigationArgs.currentShareable,
-                        permission = newPermission as ShareablePermission?
-                    )
-                }
+                updatePermission(
+                    shareableItem = navigationArgs.currentShareable,
+                    permission = newPermission as ShareablePermission?
+                )
             },
         )
     }
