@@ -25,11 +25,27 @@ import androidx.core.content.res.getStringOrThrow
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.core.legacy.utils.getAttributes
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.CardviewFileListBinding
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.navigateToUploadView
+import io.realm.RealmResults
+import io.realm.kotlin.toFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.launch
 
 class PendingFilesView @JvmOverloads constructor(
     context: Context,
@@ -39,8 +55,9 @@ class PendingFilesView @JvmOverloads constructor(
 
     private val binding by lazy { CardviewFileListBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    private var folderId: Int? = null
-    private var fragment: Fragment? = null
+    private var folderObserverJob: Job? = null
+    private val _folderId = MutableStateFlow<Int?>(null)
+    private val folderId: Flow<Int> = _folderId.filterNotNull()
 
     init {
         with(binding) {
@@ -76,12 +93,34 @@ class PendingFilesView @JvmOverloads constructor(
         }
     }
 
-    fun setUploadFileInProgress(fragment: Fragment, folderId: Int) {
-        this.fragment = fragment
-        this.folderId = folderId
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        observeFolderId()
     }
 
-    fun updateUploadFileInProgress(pendingFilesCount: Int) {
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        folderObserverJob?.cancel()
+        folderObserverJob = null
+    }
+
+    fun setFolderId(folderId: Int) {
+        _folderId.tryEmit(folderId)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeFolderId() {
+        folderObserverJob = findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+            folderId.map { it.takeUnless { it == OTHER_ROOT_ID } }
+                .mapLatest(UploadFile::getCurrentUserPendingUploadFile)
+                .flatMapConcat(RealmResults<UploadFile>::toFlow)
+                .map(Collection<*>::count)
+                .distinctUntilChanged()
+                .collect { updateUploadFileInProgress(it) }
+        }
+    }
+
+    private fun updateUploadFileInProgress(pendingFilesCount: Int) {
         if (pendingFilesCount > 0) {
             binding.itemViewFile.fileSize.text = context.resources.getQuantityString(
                 R.plurals.uploadInProgressNumberFile,
