@@ -52,6 +52,7 @@ interface Shareable : Parcelable {
             else -> ""
         }
     }
+
     @Parcelize
     enum class ShareablePermission(
         override val icon: Int,
