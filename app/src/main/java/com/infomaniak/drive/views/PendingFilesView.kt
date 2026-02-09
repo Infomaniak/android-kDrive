@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.navigateToUploadView
-import io.realm.RealmResults
 import io.realm.kotlin.toFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -43,9 +42,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 
 class PendingFilesView @JvmOverloads constructor(
@@ -110,8 +108,7 @@ class PendingFilesView @JvmOverloads constructor(
     private fun observeFolderId() {
         folderObserverJob = findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
             folderId.map { it.takeUnless { it == OTHER_ROOT_ID } }
-                .mapLatest(UploadFile::getCurrentUserPendingUploadFile)
-                .flatMapConcat(RealmResults<UploadFile>::toFlow)
+                .flatMapLatest { folderId -> UploadFile.getCurrentUserPendingUploadFile(folderId).toFlow() }
                 .map(Collection<*>::count)
                 .distinctUntilChanged()
                 .collect { updateUploadFileInProgress(it) }
