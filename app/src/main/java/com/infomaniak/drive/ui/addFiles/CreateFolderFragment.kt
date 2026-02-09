@@ -58,6 +58,9 @@ abstract class CreateFolderFragment : Fragment() {
     val adapter: PermissionsAdapter
         get() = binding.permissionsRecyclerView.adapter as PermissionsAdapter
     private var folderNameTextWatcher: TextWatcher? = null
+    open val permissionDependOnShare: Boolean = true
+
+    abstract fun buildPermissionList(share: Share?): List<Permission>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentCreateFolderBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -101,7 +104,7 @@ abstract class CreateFolderFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        if (permissionDependOnShare()) {
+        if (permissionDependOnShare) {
             getShare { binding.permissionsRecyclerView.adapter = buildPermissionAdapter(it) }
         } else {
             binding.permissionsRecyclerView.adapter = buildPermissionAdapter(null)
@@ -109,15 +112,12 @@ abstract class CreateFolderFragment : Fragment() {
     }
 
     private fun buildPermissionAdapter(share: Share?) = PermissionsAdapter(
-        currentUser = AccountUtils.currentUser,
-        onPermissionChanged = { toggleCreateFolderButton() },
         permissionList = buildPermissionList(share),
-        sharedUsers = share?.users.orEmpty()
+        currentUser = AccountUtils.currentUser,
+        sharedUsers = share?.users.orEmpty(),
+        onPermissionChanged = { toggleCreateFolderButton() },
     )
 
-
-    abstract fun buildPermissionList(share: Share?): List<Permission>
-    open fun permissionDependOnShare(): Boolean = true
 
     protected open fun toggleCreateFolderButton() = with(binding) {
         createFolderButton.isEnabled = adapter.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()

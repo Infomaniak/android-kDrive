@@ -42,6 +42,10 @@ import com.infomaniak.drive.utils.showSnackbar
 
 class CreateCommonFolderFragment : CreateFolderFragment() {
 
+    override val permissionDependOnShare: Boolean = false
+
+    override fun buildPermissionList(share: Share?): List<Permission> = listOf(ALL_DRIVE_USERS, SPECIFIC_USERS)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -57,9 +61,6 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
 
         createFolderButton.setOnClickListener { adapter.currentPermission?.let(::createCommonFolder) }
     }
-
-    override fun buildPermissionList(share: Share?): List<Permission> = listOf(ALL_DRIVE_USERS, SPECIFIC_USERS)
-    override fun permissionDependOnShare(): Boolean = false
 
     private fun createCommonFolder(permission: Permission) = with(binding) {
         folderNameValueInput.hideKeyboard()

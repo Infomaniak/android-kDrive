@@ -49,6 +49,9 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
     var showAdvancedSettings = false
 
+    override fun buildPermissionList(share: Share?): List<Permission> =
+        listOf(ONLY_ME, if (canInherit(share)) INHERIT else SPECIFIC_USERS)
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -63,9 +66,6 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
 
         createFolderButton.setOnClickListener { createDropBoxFolder() }
     }
-
-    override fun buildPermissionList(share: Share?): List<Permission> =
-        listOf(ONLY_ME, if (canInherit(share)) INHERIT else SPECIFIC_USERS)
 
     private fun createDropBoxFolder() {
         createDropBox(onDropBoxCreated = { file ->

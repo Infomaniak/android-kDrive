@@ -64,16 +64,15 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-
         configurePermissionsAdapter()
         configureSaveButton()
     }
 
     private fun configurePermissionsAdapter() {
         binding.permissionsRecyclerView.adapter = PermissionsAdapter(
-            isExternalUser = navigationArgs.permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
-            permissionList = getPermissions(),
             initialSelectedPermission = navigationArgs.currentPermission,
+            permissionList = getPermissions(),
+            isExternalUser = navigationArgs.permissionsGroup == PermissionsGroup.EXTERNAL_USERS_RIGHTS,
         )
     }
 

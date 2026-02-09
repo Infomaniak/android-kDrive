@@ -37,12 +37,16 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
 
     private val createFolderFragmentArgs by navArgs<CreatePrivateFolderFragmentArgs>()
 
-    override fun buildPermissionList(share: Share?): List<Permission> =
-        if (createFolderFragmentArgs.isSharedWithMe) emptyList()
-        else listOf(ONLY_ME, if (canInherit(share)) INHERIT else SPECIFIC_USERS)
+    override val permissionDependOnShare: Boolean = !createFolderFragmentArgs.isSharedWithMe
 
-    override fun permissionDependOnShare(): Boolean =
-        !createFolderFragmentArgs.isSharedWithMe
+    override fun buildPermissionList(share: Share?): List<Permission> {
+        return if (createFolderFragmentArgs.isSharedWithMe) {
+            emptyList()
+        } else {
+            listOf(ONLY_ME, if (canInherit(share)) INHERIT else SPECIFIC_USERS)
+        }
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

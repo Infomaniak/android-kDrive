@@ -41,24 +41,21 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
 
 class PermissionsAdapter(
+    initialSelectedPermission: Permission? = null,
+    private val permissionList: List<Permission>,
     private val currentUser: User? = null,
     private var isExternalUser: Boolean = false,
     private var sharedUsers: List<UserFileAccess> = emptyList(),
     private val onPermissionChanged: ((newPermission: Permission) -> Unit)? = null,
-    private val permissionList: List<Permission>,
-    initialSelectedPermission: Permission? = null,
 ) : Adapter<PermissionsViewHolder>() {
-
-    var currentSelection = initialSelectedPermission?.let(permissionList::indexOf)
-        private set
 
     var currentPermission = initialSelectedPermission
         private set
+    val currentSelection
+        get() = currentPermission.let(permissionList::indexOf)
 
     init {
-        permissionList.size.takeIf { it > 0 }?.let {
-            notifyItemRangeInserted(0, it)
-        }
+        permissionList.size.takeIf { it > 0 }?.let { size -> notifyItemRangeInserted(0, size) }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionsViewHolder {
@@ -73,7 +70,6 @@ class PermissionsAdapter(
             setupSelection(itemPosition == currentSelection)
             setOnClickListener {
                 if (currentSelection != itemPosition) {
-                    currentSelection = itemPosition
                     currentPermission = permission
                     onPermissionChanged?.invoke(permission)
                     notifyItemRangeChanged(0, itemCount)
