@@ -23,34 +23,46 @@ import androidx.lifecycle.liveData
 import com.google.gson.JsonObject
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.FileController
-import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.Shareable
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 
 internal class SelectPermissionViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private val args = SelectPermissionBottomSheetDialogArgs.fromSavedStateHandle(savedStateHandle)
 
-    val currentFile: File? = FileController.getFileById(args.currentFileId)
-
-    fun editFileShareLinkOfficePermission(file: File, canEdit: Boolean) = liveData(Dispatchers.IO) {
-        val body = JsonObject().apply { addProperty("can_edit", canEdit) }
-        val apiResponse = ApiRepository.updateShareLink(file, body)
-        if (apiResponse.data == true) FileController.updateShareLinkWithRemote(file.id)
-        emit(apiResponse)
-
+    val currentFileFlow = flow {
+        emit(FileController.getFileById(args.currentFileId))
     }
 
-    fun deleteFileShare(file: File, shareable: Shareable) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.deleteFileShare(file, shareable))
+    fun editFileShareLinkOfficePermission(canEdit: Boolean) = liveData(Dispatchers.IO) {
+        currentFileFlow.first()?.let { file ->
+            val body = JsonObject().apply { addProperty("can_edit", canEdit) }
+            val apiResponse = ApiRepository.updateShareLink(file, body)
+            if (apiResponse.data == true) FileController.updateShareLinkWithRemote(file.id)
+            emit(apiResponse)
+        }
     }
 
-    fun editFileShare(file: File, shareableItem: Shareable, permission: Shareable.ShareablePermission) =
+    fun deleteFileShare(shareable: Shareable) = liveData(Dispatchers.IO) {
+        currentFileFlow.first()?.let { file -> emit(ApiRepository.deleteFileShare(file, shareable)) }
+    }
+
+    fun editFileShare(shareableItem: Shareable, permission: Shareable.ShareablePermission) =
         liveData(Dispatchers.IO) {
-            emit(ApiRepository.putFileShare(file, shareableItem, mapOf("right" to permission.apiValue)))
+            currentFileFlow.first()?.let { file ->
+                emit(
+                    ApiRepository.putFileShare(
+                        file = file,
+                        shareableItem = shareableItem,
+                        body = mapOf("right" to permission.apiValue)
+                    )
+                )
+            }
         }
 
-    fun removeDriveUser(file: File, shareable: Shareable) = liveData(Dispatchers.IO) {
-        emit(ApiRepository.deleteDriveUser(file = file, shareableItem = shareable))
+    fun removeDriveUser(shareable: Shareable) = liveData(Dispatchers.IO) {
+        currentFileFlow.first()?.let { file -> emit(ApiRepository.deleteDriveUser(file = file, shareableItem = shareable)) }
     }
 }
