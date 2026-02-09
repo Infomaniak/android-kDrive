@@ -33,8 +33,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.common.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.coil.loadAvatar
+import com.infomaniak.core.common.FormatterFileSize.formatShortFileSize
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.legacy.utils.safeBinding
@@ -45,9 +45,9 @@ import com.infomaniak.drive.databinding.FragmentMenuBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.ui.MenuViewModel
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.openKSuiteUpgradeBottomSheet
 import com.infomaniak.drive.utils.openSupport
-import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 
 class MenuFragment : Fragment() {
 
@@ -64,7 +64,7 @@ class MenuFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, menuUploadFileInProgressView)
+        menuUploadFileInProgressView.setFolderId(folderId = OTHER_ROOT_ID)
 
         val user = AccountUtils.currentUser ?: return@with
 
