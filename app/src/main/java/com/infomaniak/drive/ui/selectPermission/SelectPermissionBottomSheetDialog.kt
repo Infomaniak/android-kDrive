@@ -93,15 +93,10 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
     }
 
     private fun showDeleteConfirmationPopup(newPermission: Permission) {
-        val userName = navigationArgs.currentShareable.getAccessName()
-        val message = if (newPermission == ShareablePermission.DELETE)
-            getString(R.string.modalUserPermissionRemoveDescription, userName)
-        else
-            getString(R.string.modalRemoveUserDriveAccessDescription, userName, AccountUtils.getCurrentDrive()?.name)
         createConfirmation(
             context = requireContext(),
             title = getString(R.string.buttonDelete),
-            message = message,
+            message = buildDeleteConfirmationPopupMessage(newPermission),
             buttonText = getString(R.string.buttonDelete),
             isDeletion = true,
             onConfirmation = {
@@ -111,6 +106,14 @@ class SelectPermissionBottomSheetDialog : FullScreenBottomSheetDialog() {
                 )
             },
         )
+    }
+
+    private fun buildDeleteConfirmationPopupMessage(newPermission: Permission): String {
+        val userName = navigationArgs.currentShareable.getAccessName()
+        return if (newPermission == ShareablePermission.DELETE)
+            getString(R.string.modalUserPermissionRemoveDescription, userName)
+        else
+            getString(R.string.modalRemoveUserDriveAccessDescription, userName, AccountUtils.getCurrentDrive()?.name)
     }
 
     private suspend fun getPermissions(): List<Permission> {
