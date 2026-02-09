@@ -25,6 +25,7 @@ import androidx.core.content.res.getStringOrThrow
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.findFragment
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.shape.CornerFamily
@@ -67,10 +68,7 @@ class PendingFilesView @JvmOverloads constructor(
 
             val radius = context.resources.getDimension(R.dimen.cardViewRadius)
             root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
-                .setTopLeftCorner(CornerFamily.ROUNDED, radius)
-                .setTopRightCorner(CornerFamily.ROUNDED, radius)
-                .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-                .setBottomRightCorner(CornerFamily.ROUNDED, radius)
+                .setAllCorners(CornerFamily.ROUNDED, radius)
                 .build()
 
             binding.itemViewFile.apply {
@@ -78,7 +76,7 @@ class PendingFilesView @JvmOverloads constructor(
                 fileProgression.isVisible = true
             }
 
-            root.setOnClickListener { folderId?.let { id -> fragment?.navigateToUploadView(id) } }
+            setOnClickListener { findFragment<Fragment>().navigateToUploadView(OTHER_ROOT_ID) }
 
             if (isInEditMode) {
                 itemViewFile.apply {
