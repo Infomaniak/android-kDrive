@@ -143,7 +143,8 @@ open class FileListFragment : MultiSelectFragment(
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
-    protected open var showPendingFiles = true
+    protected open val showPendingFiles
+        get() = folderId != ROOT_ID || findNavController().currentDestination?.id == R.id.fileListFragment
     protected open var allowCancellation = true
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
