@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -161,7 +161,7 @@ object MqttClientWrapper : MqttCallback, LiveData<MqttNotification>() {
         with(gson.fromJson(message.toString(), MqttNotification::class.java)) {
             if (action == null) {
                 val unknownAction = message.toString().substringAfter("\"action\":")
-                SentryLog.e(TAG, "Unknown MQTT action : $unknownAction")
+                SentryLog.e(TAG, "Unknown MQTT action") { scope -> scope.setTag("actionName", unknownAction) }
             }
 
             if (isImportTerminated()) runningExternalImportIds.remove(importId)
