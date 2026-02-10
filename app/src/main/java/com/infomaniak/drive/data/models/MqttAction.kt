@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,11 +35,17 @@ enum class MqttAction {
     @SerializedName("file_trash")
     FILE_TRASH,
 
+    @SerializedName("file_trash_inherited")
+    FILE_TRASH_INHERITED,
+
     @SerializedName("file_delete")
     FILE_DELETE,
 
     @SerializedName("file_create")
     FILE_CREATE,
+
+    @SerializedName("file_update_mime_type")
+    FILE_UPDATE_MIME_TYPE,
 
     @SerializedName("bulk_file_move")
     BULK_FILE_MOVE,
