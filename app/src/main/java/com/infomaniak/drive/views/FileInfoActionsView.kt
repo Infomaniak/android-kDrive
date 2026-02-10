@@ -35,13 +35,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.work.WorkInfo
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.core.ui.showToast
-import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -152,7 +152,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
         addFavorites.isVisible = rights.canUseFavorite == true && !isSharedWithMe
         availableOffline.isGone = isSharedWithMe // Is it still needed to add `|| currentFile.getOfflineFile(context) == null`
-        deleteFile.isVisible = rights.canDelete == true && !file.isImporting() && !isSharedWithMe
+        deleteFile.isVisible =
+            rights.canDelete == true && !file.isImporting() && (!isSharedWithMe || currentFile.createdByCurrentUser())
         downloadFile.isVisible = rights.canRead == true
         duplicateFile.isGone = rights.canRead == false
                 || isSharedWithMe
