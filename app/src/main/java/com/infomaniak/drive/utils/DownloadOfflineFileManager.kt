@@ -36,6 +36,7 @@ import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.network.utils.await
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -50,7 +51,6 @@ import com.infomaniak.drive.data.services.BulkDownloadWorker
 import com.infomaniak.drive.data.services.DownloadWorker
 import com.infomaniak.drive.utils.MediaUtils.isMedia
 import com.infomaniak.drive.utils.NotificationUtils.downloadProgressNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.invoke
@@ -280,7 +280,7 @@ class DownloadOfflineFileManager(
             setContentTitle(contentTitle)
             setContentText(contentText)
             setProgress(100, progressPercent, false)
-            notificationManagerCompat.notifyCompat(context, downloadNotification.id, build())
+            notificationManagerCompat.notifyCompat(downloadNotification.id, this)
         }
     }
 
