@@ -43,11 +43,21 @@ interface Shareable : Parcelable {
         else -> ShareablePermission.READ
     }
 
+    companion object {
+        fun Shareable?.getAccessName(): String = when (this) {
+            is DriveUser -> displayName
+            is Invitation -> email
+            is Team -> name
+            is UserFileAccess -> name
+            else -> ""
+        }
+    }
+
     @Parcelize
     enum class ShareablePermission(
         override val icon: Int,
         override val translation: Int,
-        override val description: Int?,
+        override val description: Int,
         val apiValue: String
     ) : Permission {
 
@@ -89,7 +99,7 @@ interface Shareable : Parcelable {
         REMOVE_DRIVE_ACCESS(
             icon = R.drawable.ic_bin,
             translation = R.string.buttonRemoveDriveAccess,
-            description = null,
+            description = R.string.userDriveRemoveDescription,
             apiValue = "remove_from_drive"
         )
     }
