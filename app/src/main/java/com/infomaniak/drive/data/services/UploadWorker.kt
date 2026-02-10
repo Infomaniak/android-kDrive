@@ -41,6 +41,7 @@ import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.getFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
 import com.infomaniak.core.network.api.ApiController.gson
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
@@ -59,9 +60,10 @@ import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils
+import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
+import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.uri
@@ -93,6 +95,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private var pendingCount = 0
 
     private val readMediaPermissions = DrivePermissions.permissionsFor(DrivePermissions.Type.ReadingMediaForSync).toTypedArray()
+    private val notificationManagerCompat by lazy { NotificationManagerCompat.from(applicationContext) }
+    private val uploadNotificationBuilder by lazy { applicationContext.uploadProgressNotification() }
 
     override suspend fun doWork(): Result {
 
@@ -151,6 +155,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             SentryLog.d(TAG, workFinishedMessage)
 
             result
+        }.also {
+            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         }
     }
 
@@ -270,7 +276,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val uri = getUriObject()
 
         currentUploadFile = this@upload
-        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
         updateUploadCountNotification()
 
         try {
@@ -335,7 +340,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         SentryLog.d(TAG, "startUploadFile (size: $fileSize)")
 
-        return UploadTask(context = applicationContext, uploadFile = this, setProgress = ::setProgress).run {
+        return UploadTask(
+            context = applicationContext,
+            uploadFile = this,
+            setProgress = ::setProgress,
+            notificationManagerCompat = notificationManagerCompat,
+            uploadNotificationBuilder = uploadNotificationBuilder
+        ).run {
             currentUploadTask = this
             start().also { isUploaded ->
                 if (isUploaded) {

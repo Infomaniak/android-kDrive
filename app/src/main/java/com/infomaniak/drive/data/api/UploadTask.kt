@@ -48,7 +48,6 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
-import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.onUpload
@@ -93,6 +92,8 @@ class UploadTask(
     private val context: Context,
     private val uploadFile: UploadFile,
     private val setProgress: KSuspendFunction1<Data, Unit>,
+    private val notificationManagerCompat: NotificationManagerCompat,
+    private val uploadNotificationBuilder: NotificationCompat.Builder,
 ) {
 
     private val fileChunkSizeManager = FileChunkSizeManager()
@@ -104,16 +105,11 @@ class UploadTask(
         it.tryEmit(Unit)
     }
 
-    private lateinit var notificationManagerCompat: NotificationManagerCompat
-    private lateinit var uploadNotification: NotificationCompat.Builder
     private var uploadNotificationElapsedTime = ELAPSED_TIME
     private var uploadNotificationStartTime = 0L
 
     suspend fun start(): Boolean {
-        notificationManagerCompat = NotificationManagerCompat.from(context)
-
-        uploadNotification = context.uploadProgressNotification()
-        uploadNotification.apply {
+        uploadNotificationBuilder.apply {
             setContentTitle(uploadFile.fileName)
             notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
         }
@@ -146,7 +142,6 @@ class UploadTask(
             Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
         } catch (exception: UploadNotTerminated) {
             SentryLog.w(TAG, "upload not terminated", exception)
-            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
         } catch (exception: QuotaExceededException) {
             if (UploadFile.getAppSyncSettings()?.driveId == uploadFile.driveId) {
@@ -156,8 +151,6 @@ class UploadTask(
         } catch (exception: Exception) {
             exception.printStackTrace()
             throw exception
-        } finally {
-            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
         }
         return false
     }
@@ -286,7 +279,7 @@ class UploadTask(
     }
 
     private suspend fun finishUpload(uri: Uri) {
-        uploadNotification.apply {
+        uploadNotificationBuilder.apply {
             setOngoing(false)
             setContentText("100%")
             setSmallIcon(android.R.drawable.stat_sys_upload_done)
@@ -295,7 +288,6 @@ class UploadTask(
         }
         shareProgress(100, true)
         UploadFile.uploadFinished(uri)
-        notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
     }
 
     private suspend fun uploadChunk(
@@ -409,7 +401,6 @@ class UploadTask(
                 }
             }
             val bodyResponse = String(bytes)
-            notificationManagerCompat.cancel(CURRENT_UPLOAD_ID)
             val apiResponse = try {
                 gson.fromJson(bodyResponse, ApiResponse::class.java)!! // Might be empty when http 502 Bad gateway happens
             } catch (_: Exception) {
@@ -432,8 +423,8 @@ class UploadTask(
         currentCoroutineContext().ensureActive()
 
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
-            uploadNotification.apply {
-                setContentIntent(uploadFile.progressPendingIntent(context))
+            uploadNotificationBuilder.apply {
+                setContentIntent(uploadFile.progressPendingIntent())
                 setContentText("${progress}%")
                 setProgress(100, progress, false)
                 notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
