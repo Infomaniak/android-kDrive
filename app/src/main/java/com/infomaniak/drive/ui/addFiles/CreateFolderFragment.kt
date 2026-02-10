@@ -35,10 +35,9 @@ import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.models.File
-import com.infomaniak.drive.data.models.File.FolderPermission
+import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
+import com.infomaniak.drive.data.models.Permission
 import com.infomaniak.drive.data.models.Share
-import com.infomaniak.drive.data.models.Team
-import com.infomaniak.drive.data.models.UserFileAccess
 import com.infomaniak.drive.databinding.FragmentCreateFolderBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.MainViewModel
@@ -48,7 +47,7 @@ import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
-open class CreateFolderFragment : Fragment() {
+abstract class CreateFolderFragment : Fragment() {
 
     private var _binding: FragmentCreateFolderBinding? = null
     protected val binding get() = _binding!! // This property is only valid between onCreateView and onDestroyView
@@ -56,9 +55,12 @@ open class CreateFolderFragment : Fragment() {
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     protected val mainViewModel: MainViewModel by activityViewModels()
 
-    protected lateinit var adapter: PermissionsAdapter
-
+    val adapter: PermissionsAdapter
+        get() = binding.permissionsRecyclerView.adapter as PermissionsAdapter
     private var folderNameTextWatcher: TextWatcher? = null
+    open val permissionDependOnShare: Boolean = true
+
+    abstract fun buildPermissionList(share: Share?): List<Permission>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentCreateFolderBinding.inflate(inflater, container, false).also { _binding = it }.root
@@ -88,8 +90,8 @@ open class CreateFolderFragment : Fragment() {
         _binding = null
     }
 
-    protected fun canInherit(userList: ArrayList<UserFileAccess>, teamList: ArrayList<Team>): Boolean {
-        return userList.size > 1 || teamList.isNotEmpty()
+    protected fun canInherit(share: Share?): Boolean {
+        return share?.run { users.size > 1 || teams.isNotEmpty() } ?: false
     }
 
     protected fun saveNewFolder(newFolder: File) {
@@ -102,18 +104,23 @@ open class CreateFolderFragment : Fragment() {
     }
 
     private fun setupAdapter() {
-        adapter = PermissionsAdapter(
-            currentUser = AccountUtils.currentUser,
-            onPermissionChanged = {
-                newFolderViewModel.currentPermission = it
-                toggleCreateFolderButton()
-            },
-        )
-        binding.permissionsRecyclerView.adapter = adapter
+        if (permissionDependOnShare) {
+            getShare { binding.permissionsRecyclerView.adapter = buildPermissionAdapter(it) }
+        } else {
+            binding.permissionsRecyclerView.adapter = buildPermissionAdapter(null)
+        }
     }
 
+    private fun buildPermissionAdapter(share: Share?) = PermissionsAdapter(
+        permissionList = buildPermissionList(share),
+        currentUser = AccountUtils.currentUser,
+        sharedUsers = share?.users.orEmpty(),
+        onPermissionChanged = { toggleCreateFolderButton() },
+    )
+
+
     protected open fun toggleCreateFolderButton() = with(binding) {
-        createFolderButton.isEnabled = newFolderViewModel.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
+        createFolderButton.isEnabled = adapter.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
     }
 
     protected fun getShare(onSuccess: (share: Share) -> Unit) {
@@ -140,7 +147,7 @@ open class CreateFolderFragment : Fragment() {
                 onlyForMe = onlyForMe
             ).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
-                    val redirectToShareDetails = newFolderViewModel.currentPermission == FolderPermission.SPECIFIC_USERS
+                    val redirectToShareDetails = adapter.currentPermission == SPECIFIC_USERS
                     onFolderCreated(apiResponse.data, redirectToShareDetails)
                 } else {
                     if (apiResponse.error?.code == ErrorCode.DESTINATION_ALREADY_EXISTS) {

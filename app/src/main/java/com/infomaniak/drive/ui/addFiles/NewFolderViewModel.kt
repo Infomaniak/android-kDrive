@@ -35,7 +35,6 @@ class NewFolderViewModel : ViewModel() {
 
     val currentFolderId = MutableLiveData<Int>()
     var userDrive: UserDrive? = null
-    var currentPermission: Permission? = null
 
     fun currentDriveLiveData() = liveData<Drive?> {
         val drive = DriveInfosController.getDrive(
@@ -51,7 +50,7 @@ class NewFolderViewModel : ViewModel() {
         emit(FileController.createFolder(name, parentId, onlyForMe, userDrive))
     }
 
-    fun createCommonFolder(name: String) = liveData(Dispatchers.IO) {
+    fun createCommonFolder(name: String, currentPermission: Permission) = liveData(Dispatchers.IO) {
         val forAllUsers = currentPermission == File.FolderPermission.ALL_DRIVE_USERS
         emit(FileController.createCommonFolder(name, forAllUsers, userDrive))
     }

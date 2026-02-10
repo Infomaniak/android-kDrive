@@ -22,7 +22,7 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.infomaniak.core.legacy.utils.safeNavigate
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackNewElementEvent
 import com.infomaniak.drive.R
@@ -30,31 +30,29 @@ import com.infomaniak.drive.data.models.File.FolderPermission.INHERIT
 import com.infomaniak.drive.data.models.File.FolderPermission.ONLY_ME
 import com.infomaniak.drive.data.models.File.FolderPermission.SPECIFIC_USERS
 import com.infomaniak.drive.data.models.Permission
+import com.infomaniak.drive.data.models.Share
 import com.infomaniak.drive.utils.showSnackbar
 
 class CreatePrivateFolderFragment : CreateFolderFragment() {
 
     private val createFolderFragmentArgs by navArgs<CreatePrivateFolderFragmentArgs>()
 
+    override val permissionDependOnShare: Boolean = !createFolderFragmentArgs.isSharedWithMe
+
+    override fun buildPermissionList(share: Share?): List<Permission> {
+        return if (createFolderFragmentArgs.isSharedWithMe) {
+            emptyList()
+        } else {
+            listOf(ONLY_ME, if (canInherit(share)) INHERIT else SPECIFIC_USERS)
+        }
+    }
+
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        adapter.apply {
-            if (createFolderFragmentArgs.isSharedWithMe) {
-                binding.accessPermissionTitle.isGone = true
-            } else {
-                getShare {
-                    setUsers(it.users)
-                    val permissions: ArrayList<Permission> = arrayListOf(
-                        ONLY_ME,
-                        if (canInherit(it.users, it.teams)) INHERIT else SPECIFIC_USERS,
-                    )
-                    selectionPosition = permissions.indexOf(newFolderViewModel.currentPermission)
-                    setAll(permissions)
-                }
-            }
+        if (createFolderFragmentArgs.isSharedWithMe) {
+            binding.accessPermissionTitle.isGone = true
         }
-
         binding.createFolderButton.setOnClickListener { createPrivateFolder() }
     }
 
@@ -68,13 +66,13 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
 
     private fun createPrivateFolder() {
         trackNewElementEvent(MatomoName.CreatePrivateFolder)
-        val onlyForMe = !createFolderFragmentArgs.isSharedWithMe && newFolderViewModel.currentPermission == ONLY_ME
+        val onlyForMe = !createFolderFragmentArgs.isSharedWithMe && adapter.currentPermission == ONLY_ME
         createFolder(onlyForMe) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)
                 showSnackbar(R.string.createPrivateFolderSucces, true)
                 if (redirectToShareDetails) {
-                    safeNavigate(
+                    safelyNavigate(
                         CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(
                             fileId = file.id,
                             ignoreCreateFolderStack = true,

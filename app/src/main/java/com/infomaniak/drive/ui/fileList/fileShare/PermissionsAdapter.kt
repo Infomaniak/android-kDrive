@@ -41,37 +41,37 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
 
 class PermissionsAdapter(
-    var selectionPosition: Int? = null,
-    private var currentUser: User? = null,
+    initialSelectedPermission: Permission? = null,
+    private val permissionList: List<Permission>,
+    private val currentUser: User? = null,
     private var isExternalUser: Boolean = false,
-    private var sharedUsers: ArrayList<UserFileAccess> = ArrayList(),
-    private val onPermissionChanged: (newPermission: Permission) -> Unit,
+    private var sharedUsers: List<UserFileAccess> = emptyList(),
+    private val onPermissionChanged: ((newPermission: Permission) -> Unit)? = null,
 ) : Adapter<PermissionsViewHolder>() {
 
-    var permissionList: List<Permission> = ArrayList()
+    var currentPermission = initialSelectedPermission
+        private set
+    val currentSelection
+        get() = currentPermission.let(permissionList::indexOf)
+
+    init {
+        permissionList.size.takeIf { it > 0 }?.let { size -> notifyItemRangeInserted(0, size) }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionsViewHolder {
         return PermissionsViewHolder(CardviewPermissionBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
-    fun setAll(newPermissions: List<Permission>) {
-        permissionList = newPermissions
-        notifyItemRangeInserted(0, newPermissions.size)
-    }
-
-    fun setUsers(users: ArrayList<UserFileAccess>) {
-        sharedUsers = users
-    }
-
     override fun onBindViewHolder(holder: PermissionsViewHolder, position: Int) = with(holder.binding) {
-        val permission = permissionList[position]
+        val itemPosition = holder.bindingAdapterPosition
+        val permission = permissionList[itemPosition]
 
         permissionCard.apply {
-            setupSelection(position == selectionPosition)
+            setupSelection(itemPosition == currentSelection)
             setOnClickListener {
-                if (selectionPosition != position) {
-                    onPermissionChanged(permission)
-                    selectionPosition = position
+                if (currentSelection != itemPosition) {
+                    currentPermission = permission
+                    onPermissionChanged?.invoke(permission)
                     notifyItemRangeChanged(0, itemCount)
                 }
             }
