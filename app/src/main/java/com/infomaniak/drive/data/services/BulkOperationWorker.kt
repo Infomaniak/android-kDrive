@@ -31,10 +31,10 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.google.common.util.concurrent.ListenableFuture
 import com.infomaniak.core.legacy.utils.Utils.createRefreshTimer
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.drive.data.models.ActionProgress
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.MqttNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import java.util.Date
 import java.util.UUID
 
@@ -99,9 +99,8 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
                     onOperationFinished()
                 } else {
                     notificationManagerCompat.notifyCompat(
-                        context = applicationContext,
                         notificationId = notificationId,
-                        build = createNotificationBuilder(notification.progress).build()
+                        builder = createNotificationBuilder(notification.progress)
                     )
                 }
             }

@@ -25,6 +25,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_INTENT_FLAGS
 import com.infomaniak.core.legacy.utils.clearStack
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -35,7 +36,6 @@ import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.menu.settings.SyncSettingsActivity
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_SERVICE_ID
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadNotification
 import java.util.UUID
 
@@ -231,7 +231,7 @@ object UploadNotifications {
     ) {
         val notificationManagerCompat = NotificationManagerCompat.from(context)
         val notificationBuilder = getNotificationBuilder(context, title, description, contentIntent, locateButton)
-        notificationManagerCompat.notifyCompat(context, notificationId, notificationBuilder.build())
+        notificationManagerCompat.notifyCompat(notificationId, notificationBuilder)
     }
 
     private fun getNotificationBuilder(
