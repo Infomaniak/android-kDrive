@@ -361,7 +361,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private fun progressForegroundInfo(pendingCount: Int): ForegroundInfo {
-        val notification = UploadNotifications.getCurrentUploadNotification(applicationContext, pendingCount).build()
+        val notification = UploadNotifications.getCurrentUploadNotification(pendingCount).build()
         val foregroundInfo = when {
             SDK_INT >= 29 -> {
                 ForegroundInfo(
