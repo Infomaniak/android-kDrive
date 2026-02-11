@@ -371,21 +371,21 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun progressForegroundInfo(pendingCount: Int): ForegroundInfo {
-        val notification = UploadNotifications.getCurrentUploadNotification(pendingCount).build()
-        val foregroundInfo = when {
-            SDK_INT >= 29 -> {
-                ForegroundInfo(
-                    /* notificationId = */ NotificationUtils.UPLOAD_SERVICE_ID,
-                    /* notification = */ notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
-                )
-            }
-            else -> {
-                ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, notification)
-            }
+    private fun progressForegroundInfo(count: Int): ForegroundInfo {
+        val notification = currentUploadsNotificationBuilder.appendPendingCount(count).build()
+        return ForegroundInfoExt.build(notificationId = UPLOAD_SERVICE_ID, notification = notification) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         }
-        return foregroundInfo
+    }
+
+    private fun NotificationCompat.Builder.appendPendingCount(pendingCount: Int): NotificationCompat.Builder {
+        return appendBigDescription(
+            appCtx.resources.getQuantityString(
+                R.plurals.uploadInProgressNumberFile,
+                pendingCount,
+                pendingCount
+            )
+        )
     }
 
     private fun UploadFile.handleException(exception: Exception) {
