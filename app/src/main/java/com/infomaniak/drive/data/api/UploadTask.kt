@@ -111,6 +111,9 @@ class UploadTask(
     suspend fun start(): Boolean {
         uploadNotificationBuilder.apply {
             setContentTitle(uploadFile.fileName)
+            setOngoing(true)
+            setContentText(null)
+            setProgress(0, 0, false)
             setSmallIcon(android.R.drawable.stat_sys_upload)
             notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
         }
