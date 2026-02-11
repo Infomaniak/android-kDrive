@@ -44,15 +44,9 @@ object UploadNotifications {
 
     const val NOTIFICATION_FILES_LIMIT = 5
 
-    fun getCurrentUploadNotification(pendingCount: Int): NotificationCompat.Builder {
-        val pendingDescription = appCtx.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingCount,
-            pendingCount
-        )
-        return getNotificationBuilder(
+    fun prepareCurrentUploadNotification(): NotificationCompat.Builder {
+        return prepareNotificationBuilder(
             title = appCtx.getString(R.string.uploadInProgressTitle),
-            description = pendingDescription,
             contentIntent = buildLaunchActivityPendingIntent(UPLOAD_SERVICE_ID)
         )
     }
@@ -213,28 +207,33 @@ object UploadNotifications {
         locateButton: Boolean = false
     ) {
         val notificationManagerCompat = NotificationManagerCompat.from(appCtx)
-        val notificationBuilder = getNotificationBuilder(title, description, contentIntent, locateButton)
-        notificationManagerCompat.notifyCompat(notificationId, notificationBuilder)
-    }
-
-    private fun getNotificationBuilder(
-        title: String,
-        description: String,
-        contentIntent: PendingIntent? = null,
-        locateButton: Boolean = false
-    ): NotificationCompat.Builder {
-        return appCtx.uploadNotification().apply {
-            setTicker(title)
-            setAutoCancel(true)
-            setContentTitle(title)
-            setStyle(NotificationCompat.BigTextStyle().bigText(description))
-            setContentIntent(contentIntent)
+        val notificationBuilder = prepareNotificationBuilder(title, contentIntent) {
+            appendBigDescription(description)
             if (locateButton) {
                 addAction(
                     NotificationCompat.Action(R.drawable.ic_export, appCtx.getString(R.string.locateButton), contentIntent)
                 )
             }
         }
+        notificationManagerCompat.notifyCompat(notificationId, notificationBuilder)
+    }
+
+    fun prepareNotificationBuilder(
+        title: String,
+        contentIntent: PendingIntent? = null,
+        block: NotificationCompat.Builder.() -> Unit = {}
+    ): NotificationCompat.Builder {
+        return appCtx.uploadNotification().apply {
+            setTicker(title)
+            setAutoCancel(true)
+            setContentTitle(title)
+            setContentIntent(contentIntent)
+            block()
+        }
+    }
+
+    fun NotificationCompat.Builder.appendBigDescription(description: String): NotificationCompat.Builder {
+        return setStyle(NotificationCompat.BigTextStyle().bigText(description))
     }
 
     private fun UploadFile.uploadInterruptedNotification(
