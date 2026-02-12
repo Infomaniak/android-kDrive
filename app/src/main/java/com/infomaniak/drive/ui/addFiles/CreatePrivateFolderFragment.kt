@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,8 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
 
     private val createFolderFragmentArgs by navArgs<CreatePrivateFolderFragmentArgs>()
 
-    override val permissionDependOnShare: Boolean = !createFolderFragmentArgs.isSharedWithMe
+    override val permissionDependOnShare: Boolean
+        get() = !createFolderFragmentArgs.isSharedWithMe
 
     override fun buildPermissionList(share: Share?): List<Permission> {
         return if (createFolderFragmentArgs.isSharedWithMe) {
