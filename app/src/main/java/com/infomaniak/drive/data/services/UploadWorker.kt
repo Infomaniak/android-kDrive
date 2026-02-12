@@ -188,18 +188,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private suspend fun uploadPendingFiles(): Result = withContext(Dispatchers.IO) {
-        var uploadFiles: List<UploadFile>
 
-        getRealmInstance().use { realm ->
-            uploadFiles = UploadFile.getAllPendingUploads(realm)
             pendingCount = uploadFiles.size
+        val uploadFiles: List<UploadFile> = retrievePendingFiles()
 
-            if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
-
-            checkUploadCountReliability(realm)
-        }
-
-        SentryLog.d(TAG, "uploadPendingFiles> upload for ${uploadFiles.count()}")
+        initUploadPendingCounter(uploadFiles.size)
 
         for ((index, fileToUpload) in uploadFiles.withIndex()) {
             val isLastFile = index == uploadFiles.lastIndex
@@ -226,6 +219,19 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             failedNames = failedNamesMap.values,
         )
         if (uploadedCount > 0) Result.success() else Result.failure()
+    }
+
+    private fun retrievePendingFiles(): List<UploadFile> {
+        return getRealmInstance().use { realm ->
+            UploadFile.getAllPendingUploads(realm).also {
+                checkUploadCountReliability(realm, it.size)
+            }
+        }
+    }
+
+    private fun CoroutineScope.initUploadPendingCounter(size: Int) {
+        if (size > 0) notificationManagerCompat.cancel(NotificationUtils.UPLOAD_STATUS_ID)
+        SentryLog.d(TAG, "uploadPendingFiles> upload for $size")
     }
 
     private suspend fun uploadFile(uploadFile: UploadFile, isLastFile: Boolean) {
@@ -255,7 +261,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun checkUploadCountReliability(realm: Realm) {
+    private fun checkUploadCountReliability(realm: Realm, pendingCount: Int) {
         val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount(realm)
         if (allPendingUploadsCount != pendingCount) {
             val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriorityCount(realm)
