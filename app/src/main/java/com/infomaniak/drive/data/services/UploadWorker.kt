@@ -55,6 +55,7 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UploadFile.Companion.getRealmInstance
 import com.infomaniak.drive.data.services.UploadWorkerErrorHandling.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.sync.UploadNotifications.appendBigDescription
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.utils.DrivePermissions
@@ -382,14 +383,26 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun progressForegroundInfo(pendingCount: Int): ForegroundInfo {
-        val notification = UploadNotifications.getCurrentUploadNotification(pendingCount).build()
                 )
             }
         }
+    }
+
+    private fun progressForegroundInfo(count: Int): ForegroundInfo {
+        val notification = currentUploadsNotificationBuilder.appendPendingCount(count).build()
         return ForegroundInfoExt.build(notificationId = UPLOAD_SERVICE_ID, notification = notification) {
             ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         }
+    }
+
+    private fun NotificationCompat.Builder.appendPendingCount(pendingCount: Int): NotificationCompat.Builder {
+        return appendBigDescription(
+            appCtx.resources.getQuantityString(
+                R.plurals.uploadInProgressNumberFile,
+                pendingCount,
+                pendingCount
+            )
+        )
     }
 
     private fun UploadFile.handleException(exception: Exception) {
