@@ -478,9 +478,7 @@ open class FileListFragment : MultiSelectFragment(
         setupToggleDisplayButton()
         setupListMode()
         setupSortButton()
-        if (showPendingFiles) {
-            binding.uploadFileInProgressView.setFolderId(folderId)
-        }
+        if (showPendingFiles) binding.uploadFileInProgressView.setFolderId(folderId)
     }
 
     private fun setupToggleDisplayButton() {

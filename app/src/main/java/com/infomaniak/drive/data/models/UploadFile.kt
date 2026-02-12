@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.core.net.toFile
 import androidx.core.net.toUri
-import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.core.common.utils.SECONDS_IN_A_DAY
 import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.network.models.exceptions.NetworkException
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
@@ -44,8 +44,11 @@ import io.realm.RealmResults
 import io.realm.annotations.Ignore
 import io.realm.annotations.PrimaryKey
 import io.realm.kotlin.oneOf
+import io.realm.kotlin.toFlow
 import io.sentry.Sentry
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.util.Date
@@ -281,6 +284,10 @@ open class UploadFile(
                 onlyCurrentUser = true,
                 driveIds = currentDriveAndSharedWithMeIds()
             ).findAllAsync()
+        }
+
+        fun getCurrentUserPendingUploadFilesCount(folderId: Int?): Flow<Int> {
+            return getCurrentUserPendingUploadFile(folderId).toFlow().map(Collection<*>::count)
         }
 
         fun getAllUploadedFiles(type: String = Type.SYNC.name): List<UploadFile>? = getRealmInstance().use { realm ->

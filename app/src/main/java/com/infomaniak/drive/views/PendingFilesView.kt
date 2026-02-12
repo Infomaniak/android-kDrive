@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.CardviewFileListBinding
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.navigateToUploadView
-import io.realm.kotlin.toFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -95,9 +94,9 @@ class PendingFilesView @JvmOverloads constructor(
     }
 
     override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
         folderObserverJob?.cancel()
         folderObserverJob = null
+        super.onDetachedFromWindow()
     }
 
     fun setFolderId(folderId: Int) {
@@ -107,13 +106,14 @@ class PendingFilesView @JvmOverloads constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeFolderId() {
         folderObserverJob = findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
-            folderId.map { it.takeUnless { it == OTHER_ROOT_ID } }
-                .flatMapLatest { folderId -> UploadFile.getCurrentUserPendingUploadFile(folderId).toFlow() }
-                .map(Collection<*>::count)
+            folderId.map(::transformOtherRootToNull)
+                .flatMapLatest(UploadFile::getCurrentUserPendingUploadFilesCount)
                 .distinctUntilChanged()
-                .collect { updateUploadFileInProgress(it) }
+                .collect(::updateUploadFileInProgress)
         }
     }
+
+    private fun transformOtherRootToNull(folderId: Int): Int? = folderId.takeUnless { it == OTHER_ROOT_ID }
 
     private fun updateUploadFileInProgress(pendingFilesCount: Int) {
         if (pendingFilesCount > 0) {
