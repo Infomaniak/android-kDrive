@@ -398,6 +398,8 @@ open class File(
 
     fun hasCreationRight() = isFolder() && rights?.canCreateFile == true
 
+    fun createdByCurrentUser() = createdBy == AccountUtils.currentUserId
+
     // For applyFileActivity in FileController
     override fun equals(other: Any?): Boolean {
         if (other is File) {
