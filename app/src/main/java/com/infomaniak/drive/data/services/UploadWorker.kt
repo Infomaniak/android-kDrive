@@ -25,6 +25,7 @@ import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
@@ -57,6 +58,7 @@ import com.infomaniak.drive.data.sync.UploadNotifications
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.ForegroundInfoExt
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
@@ -382,19 +384,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private fun progressForegroundInfo(pendingCount: Int): ForegroundInfo {
         val notification = UploadNotifications.getCurrentUploadNotification(pendingCount).build()
-        val foregroundInfo = when {
-            SDK_INT >= 29 -> {
-                ForegroundInfo(
-                    /* notificationId = */ NotificationUtils.UPLOAD_SERVICE_ID,
-                    /* notification = */ notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
                 )
             }
-            else -> {
-                ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, notification)
-            }
         }
-        return foregroundInfo
+        return ForegroundInfoExt.build(notificationId = UPLOAD_SERVICE_ID, notification = notification) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        }
     }
 
     private fun UploadFile.handleException(exception: Exception) {
