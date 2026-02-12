@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,8 +62,6 @@ class DrivePermissions(private val type: Type) {
 
     private val requiredPermissionsAlreadyGranted: Boolean = appCtx.hasPermissions(requiredPermissions)
 
-    private val backgroundSyncPermissionsBottomSheetDialog by lazy { BackgroundSyncPermissionsBottomSheetDialog() }
-
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
@@ -107,7 +105,7 @@ class DrivePermissions(private val type: Type) {
     private fun tryShowBatteryDialogIfNeeded() {
         val mustDisplayIt = UiSettings(activity).mustDisplayBatteryDialog
         if (mustDisplayIt || powerManager.isIgnoringBatteryOptimizations(BuildConfig.APPLICATION_ID).not()) {
-            with(backgroundSyncPermissionsBottomSheetDialog) {
+            BackgroundSyncPermissionsBottomSheetDialog().apply {
                 if (dialog?.isShowing != true && !isResumed) {
                     show(this@DrivePermissions.activity.supportFragmentManager, "syncPermissionsDialog")
                 }
