@@ -143,7 +143,8 @@ open class FileListFragment : MultiSelectFragment(
     protected open var sortFiles: () -> Unit = SortFiles()
     protected open var enabledMultiSelectMode = true
     protected open var hideBackButtonWhenRoot: Boolean = true
-    protected open var showPendingFiles = true
+    protected open val showPendingFiles
+        get() = folderId != ROOT_ID || findNavController().currentDestination?.id == R.id.fileListFragment
     protected open var allowCancellation = true
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
@@ -290,7 +291,6 @@ open class FileListFragment : MultiSelectFragment(
         }
 
         mainViewModel.refreshActivities.observe(viewLifecycleOwner) {
-            showPendingFiles()
             when (findNavController().currentDestination?.id) {
                 R.id.searchFragment, R.id.sharedWithMeFragment -> Unit
                 else -> refreshActivities()
@@ -386,7 +386,6 @@ open class FileListFragment : MultiSelectFragment(
     override fun onResume() {
         super.onResume()
         if (!isDownloading) refreshActivities()
-        showPendingFiles()
         updateVisibleProgresses()
     }
 
@@ -479,7 +478,7 @@ open class FileListFragment : MultiSelectFragment(
         setupToggleDisplayButton()
         setupListMode()
         setupSortButton()
-        binding.uploadFileInProgressView.setUploadFileInProgress(this, folderId)
+        if (showPendingFiles) binding.uploadFileInProgressView.setFolderId(folderId)
     }
 
     private fun setupToggleDisplayButton() {
@@ -683,14 +682,6 @@ open class FileListFragment : MultiSelectFragment(
         downloadFiles(true, false)
     }
 
-    private fun showPendingFiles() {
-        val isNotCurrentDriveRoot = folderId == ROOT_ID && findNavController().currentDestination?.id != R.id.fileListFragment
-        if (!showPendingFiles || isNotCurrentDriveRoot) return
-        fileListViewModel.getPendingFilesCount(folderId).observe(viewLifecycleOwner) { pendingFilesCount ->
-            binding.uploadFileInProgressView.updateUploadFileInProgress(pendingFilesCount)
-        }
-    }
-
     private fun setupDisplayMode(isListMode: Boolean) = with(binding) {
         fileRecyclerView.layoutManager = createLayoutManager(isListMode)
 
@@ -757,7 +748,6 @@ open class FileListFragment : MultiSelectFragment(
         isNewSort: Boolean,
         onFinish: ((FolderFilesResult?) -> Unit)? = null,
     ) {
-        showPendingFiles()
         fileListViewModel.getFiles(
             folderId,
             order = fileListViewModel.sortType,

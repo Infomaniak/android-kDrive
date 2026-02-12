@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,25 @@ import androidx.core.content.res.getStringOrThrow
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.findFragment
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.shape.CornerFamily
 import com.infomaniak.core.legacy.utils.getAttributes
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.databinding.CardviewFileListBinding
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.navigateToUploadView
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class PendingFilesView @JvmOverloads constructor(
     context: Context,
@@ -39,8 +53,9 @@ class PendingFilesView @JvmOverloads constructor(
 
     private val binding by lazy { CardviewFileListBinding.inflate(LayoutInflater.from(context), this, true) }
 
-    private var folderId: Int? = null
-    private var fragment: Fragment? = null
+    private var folderObserverJob: Job? = null
+    private val _folderId = MutableStateFlow<Int?>(null)
+    private val folderId: Flow<Int> = _folderId.filterNotNull()
 
     init {
         with(binding) {
@@ -50,10 +65,7 @@ class PendingFilesView @JvmOverloads constructor(
 
             val radius = context.resources.getDimension(R.dimen.cardViewRadius)
             root.shapeAppearanceModel = root.shapeAppearanceModel.toBuilder()
-                .setTopLeftCorner(CornerFamily.ROUNDED, radius)
-                .setTopRightCorner(CornerFamily.ROUNDED, radius)
-                .setBottomLeftCorner(CornerFamily.ROUNDED, radius)
-                .setBottomRightCorner(CornerFamily.ROUNDED, radius)
+                .setAllCorners(CornerFamily.ROUNDED, radius)
                 .build()
 
             binding.itemViewFile.apply {
@@ -61,7 +73,7 @@ class PendingFilesView @JvmOverloads constructor(
                 fileProgression.isVisible = true
             }
 
-            root.setOnClickListener { folderId?.let { id -> fragment?.navigateToUploadView(id) } }
+            setOnClickListener { findFragment<Fragment>().navigateToUploadView(OTHER_ROOT_ID) }
 
             if (isInEditMode) {
                 itemViewFile.apply {
@@ -76,12 +88,34 @@ class PendingFilesView @JvmOverloads constructor(
         }
     }
 
-    fun setUploadFileInProgress(fragment: Fragment, folderId: Int) {
-        this.fragment = fragment
-        this.folderId = folderId
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        observeFolderId()
     }
 
-    fun updateUploadFileInProgress(pendingFilesCount: Int) {
+    override fun onDetachedFromWindow() {
+        folderObserverJob?.cancel()
+        folderObserverJob = null
+        super.onDetachedFromWindow()
+    }
+
+    fun setFolderId(folderId: Int) {
+        _folderId.tryEmit(folderId)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeFolderId() {
+        folderObserverJob = findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+            folderId.map(::transformOtherRootToNull)
+                .flatMapLatest(UploadFile::getCurrentUserPendingUploadFilesCount)
+                .distinctUntilChanged()
+                .collect(::updateUploadFileInProgress)
+        }
+    }
+
+    private fun transformOtherRootToNull(folderId: Int): Int? = folderId.takeUnless { it == OTHER_ROOT_ID }
+
+    private fun updateUploadFileInProgress(pendingFilesCount: Int) {
         if (pendingFilesCount > 0) {
             binding.itemViewFile.fileSize.text = context.resources.getQuantityString(
                 R.plurals.uploadInProgressNumberFile,

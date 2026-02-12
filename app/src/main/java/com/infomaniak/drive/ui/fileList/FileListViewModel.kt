@@ -225,10 +225,6 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun getPendingFilesCount(folderId: Int) = liveData(Dispatchers.IO) {
-        emit(UploadFile.getCurrentUserPendingUploadsCount(folderId))
-    }
-
     fun getFileCount(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
         lastItemCount?.let { emit(it) }
         val apiResponse = if (folder.isPublicShared()) {

@@ -53,7 +53,7 @@ class UploadInProgressFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
-    override var showPendingFiles = false
+    override val showPendingFiles = false
 
     override val noItemsIcon = R.drawable.ic_upload
     override val noItemsTitle = R.string.uploadInProgressNoFile

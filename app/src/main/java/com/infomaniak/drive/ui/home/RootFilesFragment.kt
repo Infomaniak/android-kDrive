@@ -46,11 +46,11 @@ import com.infomaniak.drive.ui.home.RootFileTreeCategory.PersonalFolder
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.RecentChanges
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.SharedWithMe
 import com.infomaniak.drive.ui.home.RootFileTreeCategory.Trash
+import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
 import com.infomaniak.drive.utils.observeAndDisplayNetworkAvailability
 import com.infomaniak.drive.utils.observeNavigateFileListTo
 import com.infomaniak.drive.utils.setupDriveToolbar
-import com.infomaniak.drive.utils.setupRootPendingFilesIndicator
 import kotlinx.coroutines.launch
 
 class RootFilesFragment : BaseRootFolderFragment() {
@@ -103,7 +103,7 @@ class RootFilesFragment : BaseRootFolderFragment() {
             noNetworkBindingDirectParent = contentLinearLayout,
         )
 
-        setupRootPendingFilesIndicator(mainViewModel.pendingUploadsCount, rootFilesUploadFileInProgressView)
+        rootFilesUploadFileInProgressView.setFolderId(folderId = OTHER_ROOT_ID)
 
         navigateToLastVisitedFileTreeCategory()
 

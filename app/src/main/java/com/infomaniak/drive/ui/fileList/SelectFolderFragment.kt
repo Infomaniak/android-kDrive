@@ -42,7 +42,7 @@ class SelectFolderFragment : FileListFragment() {
 
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
-    override var showPendingFiles: Boolean = false
+    override val showPendingFiles: Boolean = false
 
     override val noItemsTitle = R.string.noFilesDescription
 

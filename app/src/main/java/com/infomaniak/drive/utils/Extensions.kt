@@ -55,7 +55,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle.Event
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
@@ -111,9 +110,7 @@ import com.infomaniak.drive.ui.fileList.FileListViewModel
 import com.infomaniak.drive.ui.fileList.fileShare.AvailableShareableItemsAdapter
 import com.infomaniak.drive.utils.FilePresenter.displayFile
 import com.infomaniak.drive.utils.FilePresenter.openFolder
-import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.drive.views.PendingFilesView
 import com.infomaniak.lib.login.InfomaniakLogin
 import handleActionDone
 import io.realm.RealmList
@@ -512,11 +509,6 @@ fun Fragment.observeAndDisplayNetworkAvailability(
             additionalChanges?.invoke(isNetworkAvailable)
         }
     }
-}
-
-fun Fragment.setupRootPendingFilesIndicator(countLiveData: LiveData<Int>, pendingFilesView: PendingFilesView) {
-    pendingFilesView.setUploadFileInProgress(this, OTHER_ROOT_ID)
-    countLiveData.observe(viewLifecycleOwner, pendingFilesView::updateUploadFileInProgress)
 }
 
 fun MainActivity.showQuotasExceededSnackbar(navController: NavController, drive: Drive?) {
