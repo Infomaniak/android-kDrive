@@ -19,6 +19,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <include layout="@layout/view_bottom_sheet_separator" />
@@ -29,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/marginStandardMedium"
-        android:text="@string/syncWifiPicturesTitle" />
+        tools:text="@string/syncWifiPicturesTitle" />
 
     <View
         android:layout_width="match_parent"
@@ -40,7 +41,7 @@
         android:id="@+id/syncOnlyWifi"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:descText="@string/syncPhotosOnlyWifiDescription"
+        tools:descText="@string/syncPhotosOnlyWifiDescription"
         app:text="@string/syncOnlyWifiTitle" />
 
     <com.infomaniak.drive.views.ItemSyncFilesBottomSheetView
