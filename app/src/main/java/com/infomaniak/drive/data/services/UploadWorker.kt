@@ -42,7 +42,6 @@ import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.getFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
 import com.infomaniak.core.network.api.ApiController.gson
-import com.infomaniak.core.notifications.cancelNotification
 import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
@@ -64,6 +63,7 @@ import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils
+import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_SERVICE_ID
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.SyncUtils
@@ -76,9 +76,9 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.systemservices.connectivityManager
@@ -95,8 +95,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
-    private var pendingCount = 0
-
+    private val pendingUploadCounter: MutableStateFlow<Int> = MutableStateFlow(0)
     private val readMediaPermissions = DrivePermissions.permissionsFor(DrivePermissions.Type.ReadingMediaForSync).toTypedArray()
     private val notificationManagerCompat by lazy { NotificationManagerCompat.from(applicationContext) }
     private val uploadNotificationBuilder by lazy { applicationContext.uploadProgressNotification() }
@@ -162,7 +161,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val pendingCount = if (this.pendingCount > 0) this.pendingCount else UploadFile.getAllPendingUploadsCount()
+        val pendingCount = pendingUploadCounter.value.takeIf { it > 0 } ?: UploadFile.getAllPendingUploadsCount()
         return progressForegroundInfo(pendingCount)
     }
 
@@ -202,8 +201,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             } else {
                 notSyncFiles += fileToUpload
             }
-            pendingCount--
-
+            pendingUploadCounter.dec()
             // Stop recursion if all files have been processed and there are only errors.
             val allNotUploadedCount = failedNamesMap.count() + notSyncFiles.count()
             if (isLastFile && allNotUploadedCount == UploadFile.getAllPendingUploadsCount()) break
@@ -582,6 +580,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private fun isMeteredNetwork() = runCatching { connectivityManager.isActiveNetworkMetered }.getOrDefault(true)
+
+    private fun MutableStateFlow<Int>.dec() = update { it.dec() }
 
     companion object {
         const val TAG = "upload_worker"
