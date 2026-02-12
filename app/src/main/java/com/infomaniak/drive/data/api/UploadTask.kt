@@ -48,7 +48,6 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
-import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.onUpload
@@ -112,6 +111,10 @@ class UploadTask(
     suspend fun start(): Boolean {
         uploadNotificationBuilder.apply {
             setContentTitle(uploadFile.fileName)
+            setOngoing(true)
+            setContentText(null)
+            setProgress(0, 0, false)
+            setSmallIcon(android.R.drawable.stat_sys_upload)
             notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
         }
 
@@ -282,7 +285,6 @@ class UploadTask(
     private suspend fun finishUpload(uri: Uri) {
         uploadNotificationBuilder.apply {
             setOngoing(false)
-            setContentText("100%")
             setSmallIcon(android.R.drawable.stat_sys_upload_done)
             setProgress(0, 0, false)
             notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
