@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.data.models
+package com.infomaniak.drive.data.models.deeplink
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 
-sealed interface DeepLinkType : Parcelable {
-    val organizationId: Int?
-
-    @Parcelize
-    data class Trash(override val organizationId: Int?, val userDriveId: Int, val folderId: String?) : DeepLinkType
-    @Parcelize
-    data class SharedWithMe(override val organizationId: Int?, val path: String?) : DeepLinkType
-}
+private const val SELECT_DIGITS = "(\\d+)"
+const val ACTION_TYPE = "([a-z]+)"
+const val ACTION = "(.*)"
+const val DRIVE_ID = SELECT_DIGITS
+const val ROLE_FOLDER = "([a-z-]+)"
+const val UUID = "([a-z0-9-]+)"
+const val FOLDER_ALL_PROPERTIES = "(.*)"
+const val FILE_ID = SELECT_DIGITS
+const val FOLDER_ID = SELECT_DIGITS
+const val FILE_TYPE = "[a-z]+"
+const val END_OF_REGEX = "$"
+const val KEY_PREVIEW = "preview"
+const val PREVIEW = "$KEY_PREVIEW/$FILE_TYPE/$FILE_ID"

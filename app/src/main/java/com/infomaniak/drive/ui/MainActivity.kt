@@ -74,6 +74,7 @@ import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
@@ -84,14 +85,17 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.AppSettings
-import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.file.SpecialFolder
+import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -109,11 +113,13 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
+import com.infomaniak.drive.utils.openOnlyOfficeActivity
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -193,7 +199,7 @@ class MainActivity : BaseActivity() {
         setupFabs()
         setupDrivePermissions()
         handleShortcuts()
-        handleNavigateToDestinationFileId()
+        handleDeeplink()
 
         initAppUpdateManager()
         initAppReviewManager()
@@ -261,40 +267,51 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun handleNavigateToDestinationFileId() {
-        navigationArgs?.let {
-            if (it.deepLinkFileNotFound) {
-                binding.mainFab.apply {
+    private fun handleDeeplink() {
+        navigationArgs?.deeplinkType?.let {
+            when (it) {
+                is DeeplinkAction.Collaborate -> handleCollaborateDeeplink(it)
+                is DeeplinkAction.Drive -> handleDriveDeeplink(it)
+                is DeeplinkAction.Office -> handleOnlyOfficeDeeplink(it)
+                is DeeplinkType.Invalid -> binding.mainFab.apply {
                     post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
-                }
-            } else {
-                if (it.destinationFileId > 0) {
-                    navigateToDestinationFileId(it.destinationFileId, it.destinationUserDrive, subfolderId = null)
-                } else {
-                    when (val deepLinkType = it.deepLinkType) {
-                        is DeepLinkType.SharedWithMe -> null//TODO()
-                        is DeepLinkType.Trash -> {
-                            navigateToDestinationFileId(
-                                destinationFileId = SpecialFolder.Trash.id,
-                                destinationUserDrive = UserDrive(driveId = deepLinkType.userDriveId),
-                                deepLinkType.folderId?.toInt()
-                            )
-                        }
-                        null -> null//TODO()
-                    }
                 }
             }
         }
     }
 
-    private fun navigateToDestinationFileId(destinationFileId: Int, destinationUserDrive: UserDrive?, subfolderId: Int?) {
-        clickOnBottomBarFolders()
-        mainViewModel.navigateFileListTo(
-            navController,
-            destinationFileId,
-            destinationUserDrive ?: UserDrive(),
-            subfolderId
-        )
+    private fun handleCollaborateDeeplink(link: DeeplinkAction.Collaborate) {
+        if (DEBUG && link.isHandled) TODO("Need to implement here when Collaborate deeplink will be supported")
+    }
+
+    private fun handleDriveDeeplink(link: DeeplinkAction.Drive) {
+        lifecycleScope.launch(context = Dispatchers.IO) {
+            DriveInfosController.getDrive(driveId = link.driveId, maintenance = false)
+                ?.ensureRightUser()
+                ?.run { UserDrive(userId = userId, driveId = link.driveId) }
+                ?.let {
+                    Dispatchers.Main { clickOnBottomBarFolders() }
+                    mainViewModel.navigateDeeplink.emit(link)
+                }
+        }
+    }
+
+    private fun handleOnlyOfficeDeeplink(link: DeeplinkAction.Office) {
+        lifecycleScope.launch(context = Dispatchers.IO) {
+            DriveInfosController.getDrive(driveId = link.driveId, maintenance = false)
+                ?.ensureRightUser()
+                ?.run { UserDrive(userId = userId, driveId = link.driveId) }
+                ?.let { FileController.getFileById(fileId = link.fileId, userDrive = it) }
+                ?.let(::openOnlyOfficeActivity)
+        }
+    }
+
+    private suspend fun Drive.ensureRightUser(): Drive = also {
+        if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
+        if (!sharedWithMe && id != AccountUtils.currentDriveId) {
+            AccountUtils.currentDriveId = id
+            AccountUtils.requestCurrentUser()
+        }
     }
 
     private fun setupFabs() = with(binding) {

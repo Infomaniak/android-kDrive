@@ -178,30 +178,19 @@
 
                 <data android:scheme="https" />
                 <data android:host="kdrive.infomaniak.com" />
-
-                <data android:pathPattern="/app/drive" />
-                <data android:pathPattern="/app/drive/" />
-                <data android:pathPattern="/app/drive/.*/files" />
-                <data android:pathPattern="/app/drive/.*/files/.*" />
-                <data android:pathPattern="/app/drive/.*/files/.*/preview/./..*" />
-                <data android:pathPattern="/app/drive/.*/redirect/..*" />
-                <data android:pathPattern="/app/drive/.*/trash" />
-                <data android:pathPattern="/app/drive/.*/trash/..*" />
-                <data android:pathPattern="/app/office/.*/..*" />
-                <data android:pathPattern="/app/share/.*/..*" />
-
                 <data android:host="ksuite.infomaniak.com" />
 
+                <data android:pathPattern="/app/collaborate/.*" />
+                <data android:pathPattern="/app/drive" />
+                <data android:pathPattern="/app/drive/.*" />
+                <data android:pathPattern="/app/office/.*" />
+                <data android:pathPattern="/app/share/.*" />
+
+                <data android:pathPattern="/.*/kdrive/app/collaborate/.*" />
                 <data android:pathPattern="/.*/kdrive/app/drive" />
-                <data android:pathPattern="/.*/kdrive/app/drive/" />
-                <data android:pathPattern="/.*/kdrive/app/drive/.*/files" />
-                <data android:pathPattern="/.*/kdrive/app/drive/.*/files/.*" />
-                <data android:pathPattern="/.*/kdrive/app/drive/.*/files/.*/preview/./..*" />
-                <data android:pathPattern="/.*/kdrive/app/drive/.*/redirect/..*" />
-                <data android:pathPattern="/.*/kdrive/app/drive/.*/trash" />
-                <data android:pathPattern="/.*/kdrive/app/drive/.*/trash/..*" />
-                <data android:pathPattern="/.*/kdrive/app/office/.*/..*" />
-                <data android:pathPattern="/.*/kdrive/app/share/.*/..*" />
+                <data android:pathPattern="/.*/kdrive/app/drive/.*" />
+                <data android:pathPattern="/.*/kdrive/app/office/.*" />
+                <data android:pathPattern="/.*/kdrive/app/share/.*" />
             </intent-filter>
 
             <meta-data
@@ -235,7 +224,7 @@
         <activity
             android:name="com.infomaniak.core.inappupdate.ui.UpdateRequiredActivity"
             android:exported="false"
-            android:theme="@style/AppTheme.RequiredUpdate"/>
+            android:theme="@style/AppTheme.RequiredUpdate" />
 
         <activity
             android:name="com.infomaniak.core.legacy.bugtracker.BugTrackerActivity"

@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.infomaniak.core.legacy.utils.setPagination
 import com.infomaniak.drive.R
@@ -39,6 +40,11 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     override val noItemsRootTitle = R.string.homeNoActivities
 
     private var isDownloadingChanges = false
+    private val navArgs by navArgs<RecentChangesFragmentArgs>()
+
+    override val fileIdToPreview: Int
+        get() = navArgs.previewFileId
+
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
