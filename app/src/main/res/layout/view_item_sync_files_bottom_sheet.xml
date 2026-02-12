@@ -19,6 +19,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="?selectableItemBackground"
     android:gravity="center_vertical"
     android:orientation="horizontal"
@@ -35,14 +36,14 @@
             style="@style/Subtitle2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sortNameAZ" />
+            tools:text="@string/sortNameAZ" />
 
         <TextView
             android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/marginStandardSmall"
-            android:text="@string/sortNameAZ"
+            tools:text="@string/sortNameAZ"
             android:textColor="?android:textColorSecondary" />
     </LinearLayout>
 
