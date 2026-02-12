@@ -26,7 +26,6 @@ import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Observer
-import androidx.work.ForegroundInfo
 import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import com.google.common.util.concurrent.ListenableFuture
@@ -35,6 +34,7 @@ import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.drive.data.models.ActionProgress
 import com.infomaniak.drive.data.models.BulkOperationType
 import com.infomaniak.drive.data.models.MqttNotification
+import com.infomaniak.drive.utils.ForegroundInfoExt
 import java.util.Date
 import java.util.UUID
 
@@ -63,17 +63,14 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
             setContentTitle(applicationContext.getString(bulkOperationType.title, 0, totalFiles))
         }
 
-        if (SDK_INT >= 29) {
-            val notification = createNotificationBuilder().apply {
-                if (SDK_INT >= 31) {
-                    foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
-                }
-            }.build()
-            setForegroundAsync(ForegroundInfo(notificationId, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC))
-        } else {
-            setForegroundAsync(ForegroundInfo(notificationId, createNotificationBuilder().build()))
-        }
-
+        val notification = createNotificationBuilder().apply {
+            if (SDK_INT >= 31) {
+                foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
+            }
+        }.build()
+        val foregroundInfo =
+            ForegroundInfoExt.build(notificationId, notification) { ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC }
+        setForegroundAsync(foregroundInfo)
         lastReception = Date()
 
         return CallbackToFutureAdapter.getFuture { completer ->
