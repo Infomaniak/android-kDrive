@@ -49,6 +49,7 @@ import com.infomaniak.core.legacy.utils.NotificationUtilsCore.Companion.PENDING_
 import com.infomaniak.core.network.NetworkConfiguration
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.networking.HttpClientConfig
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryConfig.configureSentry
 import com.infomaniak.core.twofactorauth.back.TwoFactorAuthManager
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
@@ -67,7 +68,6 @@ import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.initNotificationChannel
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -239,7 +239,7 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
         val notificationManagerCompat = NotificationManagerCompat.from(this)
         buildGeneralNotification(getString(R.string.refreshTokenError)).apply {
             setContentIntent(pendingIntent)
-            notificationManagerCompat.notifyCompat(this@MainApplication, hashCode, build())
+            notificationManagerCompat.notifyCompat(hashCode, this)
         }
 
         applicationScope.launch {

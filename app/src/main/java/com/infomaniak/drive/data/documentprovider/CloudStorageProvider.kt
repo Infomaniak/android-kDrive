@@ -40,6 +40,7 @@ import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.legacy.utils.NotificationUtilsCore
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.models.ApiResponse
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.ApiRepository
@@ -57,7 +58,6 @@ import com.infomaniak.drive.utils.DownloadOfflineFileManager
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.copyToCancellable
@@ -722,7 +722,7 @@ class CloudStorageProvider : DocumentsProvider() {
                             NotificationUtilsCore.PENDING_INTENT_FLAGS,
                         ),
                     )
-                    NotificationManagerCompat.from(context).notifyCompat(context, syncPermissionNotifId, build())
+                    NotificationManagerCompat.from(context).notifyCompat(syncPermissionNotifId, this)
                 }
             }
         }

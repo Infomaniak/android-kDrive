@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
 import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
@@ -47,7 +48,6 @@ import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.data.sync.UploadNotifications.progressPendingIntent
 import com.infomaniak.drive.utils.NotificationUtils.CURRENT_UPLOAD_ID
 import com.infomaniak.drive.utils.NotificationUtils.ELAPSED_TIME
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -115,7 +115,7 @@ class UploadTask(
         uploadNotification = context.uploadProgressNotification()
         uploadNotification.apply {
             setContentTitle(uploadFile.fileName)
-            notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
+            notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
         }
 
         try {
@@ -291,7 +291,7 @@ class UploadTask(
             setContentText("100%")
             setSmallIcon(android.R.drawable.stat_sys_upload_done)
             setProgress(0, 0, false)
-            notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
+            notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
         }
         shareProgress(100, true)
         UploadFile.uploadFinished(uri)
@@ -433,10 +433,10 @@ class UploadTask(
 
         if (uploadNotificationElapsedTime >= ELAPSED_TIME) {
             uploadNotification.apply {
-                setContentIntent(uploadFile.progressPendingIntent(context))
+                setContentIntent(uploadFile.progressPendingIntent())
                 setContentText("${progress}%")
                 setProgress(100, progress, false)
-                notificationManagerCompat.notifyCompat(context, CURRENT_UPLOAD_ID, build())
+                notificationManagerCompat.notifyCompat(CURRENT_UPLOAD_ID, this)
                 uploadNotificationStartTime = System.currentTimeMillis()
                 uploadNotificationElapsedTime = 0L
             }
