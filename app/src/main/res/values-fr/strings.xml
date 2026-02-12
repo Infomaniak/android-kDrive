@@ -681,7 +681,7 @@
     <string name="switchUserDescription">Consulter les kDrives de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez.</string>
     <string name="syncConfigureDescription">Vos photos, vidéos et captures écran seront enregistrées automatiquement dans votre kDrive %s.</string>
     <string name="syncConfigureTitle">Sauvegardez vos souvenirs en lieu sûr</string>
-    <string name="syncOnlyWifiDescription">Les fichiers hors ligne ne seront synchronisés uniquement via le Wi-Fi</string>
+    <string name="syncOnlyWifiDescription">Les fichiers hors ligne seront synchronisés uniquement via le Wi-Fi</string>
     <string name="syncOnlyWifiTitle">Via Wi-Fi uniquement</string>
     <string name="syncPhotosOnlyWifiDescription">Les photos et les vidéos seront synchronisées uniquement via le Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Activer la sauvegarde automatique</string>

@@ -113,7 +113,7 @@ class UploadMigration : RealmMigration {
 
         if (oldVersionTemp < 8L) {
             schema.get(SyncSettings::class.java.simpleName)
-                ?.addField("_onlyWifiSyncMedia", Boolean::class.java, FieldAttribute.REQUIRED)
+                ?.addField("onlyWifiSyncMedia", Boolean::class.java, FieldAttribute.REQUIRED)
         }
 
     }

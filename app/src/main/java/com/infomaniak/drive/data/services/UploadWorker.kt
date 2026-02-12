@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -204,8 +204,10 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 notSyncFiles += fileToUpload
             }
             pendingCount--
+
             // Stop recursion if all files have been processed and there are only errors.
-            if (isLastFile && (failedNamesMap.count() + notSyncFiles.count()) == UploadFile.getAllPendingUploadsCount()) break
+            val allNotUploadedCount = failedNamesMap.count() + notSyncFiles.count()
+            if (isLastFile && allNotUploadedCount == UploadFile.getAllPendingUploadsCount()) break
             // If there is a new file during the sync and it has priority (ex: Manual uploads),
             // then we start again in order to process the priority files first.
             if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext uploadPendingFiles()
@@ -557,11 +559,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun isMeteredNetwork() = try {
-        connectivityManager.isActiveNetworkMetered
-    } catch (_: Exception) {
-        true
-    }
+    private fun isMeteredNetwork() = runCatching { connectivityManager.isActiveNetworkMetered }.getOrDefault(true)
 
     companion object {
         const val TAG = "upload_worker"
@@ -579,8 +577,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10_000L // 10s (in ms)
 
         fun workConstraints(isAutomaticUpload: Boolean): Constraints {
-            val networkType =
-                if (isAutomaticUpload && (AppSettings.onlyWifiSyncOffline || UploadFile.getAppSyncSettings()?.onlyWifiSyncMedia == true)) NetworkType.UNMETERED else NetworkType.CONNECTED
+            val networkType = if (isAutomaticUpload && UploadFile.getAppSyncSettings()?.onlyWifiSyncMedia == true) {
+                NetworkType.UNMETERED
+            } else {
+                NetworkType.CONNECTED
+            }
             return Constraints.Builder()
                 .setRequiredNetworkType(networkType)
                 .build()

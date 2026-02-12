@@ -79,6 +79,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import java.util.Date
 
 class MainViewModel(
@@ -232,11 +233,14 @@ class MainViewModel(
     }
 
     fun getFileShare(fileId: Int, userDrive: UserDrive? = null) = liveData(Dispatchers.IO) {
-        val okHttpClient =
-            userDrive?.userId?.let { AccountUtils.getHttpClient(it) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        val okHttpClient = getHttpClient(userDrive)
         val driveId = userDrive?.driveId ?: AccountUtils.currentDriveId
         val apiResponse = ApiRepository.getFileShare(okHttpClient, File(id = fileId, driveId = driveId))
         emit(apiResponse)
+    }
+
+    private suspend fun getHttpClient(userDrive: UserDrive?): OkHttpClient {
+        return userDrive?.let { AccountUtils.getHttpClient(userDrive.userId) } ?: HttpClient.okHttpClientWithTokenInterceptor
     }
 
     fun createOffice(driveId: Int, folderId: Int, createFile: CreateFile) = liveData(Dispatchers.IO) {

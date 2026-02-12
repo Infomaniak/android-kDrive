@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2025-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,17 +42,17 @@ class SyncMediaBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val syncPermissions = registerDrivePermission()
         val isOnlyWifiSyncMedia = syncSettingsViewModel.onlyWifiSyncMedia.value == true
         with(binding.syncOnlyWifi) {
             isInactive = !isOnlyWifiSyncMedia
-            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.ONLY_WIFI) }
+            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.OnlyWifi) }
         }
         with(binding.syncWithAll) {
             isInactive = isOnlyWifiSyncMedia
-            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.ALL_DATA) }
+            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.AllData) }
         }
-        super.onViewCreated(view, savedInstanceState)
     }
 
     private fun registerDrivePermission(): DrivePermissions {
@@ -64,9 +64,9 @@ class SyncMediaBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun onSelectOption(syncPermissions: DrivePermissions, option: SyncFilesOption) {
-        val isOnlyWifiSyncOffline = option == SyncFilesOption.ONLY_WIFI
-        trackPhotoSyncEvent(name = if (isOnlyWifiSyncOffline) MatomoName.SyncOnlyWifi else MatomoName.SyncWifiAndData)
-        syncSettingsViewModel.onlyWifiSyncMedia.value = isOnlyWifiSyncOffline
+        val isOnlyWifiSyncMedia = option == SyncFilesOption.OnlyWifi
+        trackPhotoSyncEvent(name = if (isOnlyWifiSyncMedia) MatomoName.SyncOnlyWifi else MatomoName.SyncWifiAndData)
+        syncSettingsViewModel.onlyWifiSyncMedia.value = isOnlyWifiSyncMedia
         requireContext().launchAllUpload(syncPermissions)
         dismiss()
     }

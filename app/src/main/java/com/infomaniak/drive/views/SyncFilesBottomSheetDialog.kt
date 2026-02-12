@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2025 Infomaniak Network SA
+ * Copyright (C) 2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,16 +43,16 @@ class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val syncPermissions = registerDrivePermission()
         with(binding.syncOnlyWifi) {
             isInactive = !AppSettings.onlyWifiSyncOffline
-            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.ONLY_WIFI) }
+            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.OnlyWifi) }
         }
         with(binding.syncWithAll) {
             isInactive = AppSettings.onlyWifiSyncOffline
-            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.ALL_DATA) }
+            setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.AllData) }
         }
-        super.onViewCreated(view, savedInstanceState)
     }
 
     private fun registerDrivePermission(): DrivePermissions {
@@ -64,7 +64,7 @@ class SyncFilesBottomSheetDialog : BottomSheetDialogFragment() {
     }
 
     private fun onSelectOption(syncPermissions: DrivePermissions, option: SyncFilesOption) {
-        val isOnlyWifiSyncOffline = option == SyncFilesOption.ONLY_WIFI
+        val isOnlyWifiSyncOffline = option == SyncFilesOption.OnlyWifi
         trackSettingsEvent(if (isOnlyWifiSyncOffline) MatomoName.SyncOnlyWifi else MatomoName.SyncWifiAndData)
         AppSettings.onlyWifiSyncOffline = isOnlyWifiSyncOffline
         requireContext().launchAllUpload(syncPermissions)
