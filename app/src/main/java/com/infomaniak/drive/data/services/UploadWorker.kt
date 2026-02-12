@@ -37,6 +37,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
+import com.infomaniak.core.common.autoCancelScope
 import com.infomaniak.core.legacy.utils.calculateFileSize
 import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.getFileSize
@@ -82,6 +83,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import splitties.systemservices.connectivityManager
+import splitties.init.appCtx
 import java.util.Date
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
@@ -99,6 +101,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     private val readMediaPermissions = DrivePermissions.permissionsFor(DrivePermissions.Type.ReadingMediaForSync).toTypedArray()
     private val notificationManagerCompat by lazy { NotificationManagerCompat.from(applicationContext) }
     private val uploadNotificationBuilder by lazy { applicationContext.uploadProgressNotification() }
+    private val currentUploadsNotificationBuilder by lazy { UploadNotifications.prepareCurrentUploadNotification() }
 
     override suspend fun doWork(): Result {
 
@@ -187,11 +190,9 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return null
     }
 
-    private suspend fun uploadPendingFiles(): Result = withContext(Dispatchers.IO) {
-
-
-        val uploadFiles: List<UploadFile> =  initUploadPendingCounter(uploadFiles.size)
-        pendingCount = uploadFiles.size
+    private suspend fun uploadPendingFiles(): Result = autoCancelScope {
+        val uploadFiles: List<UploadFile> = retrievePendingFiles()
+		initUploadPendingCounter(uploadFiles.size)
         initUploadPendingCounter(uploadFiles.size)
         val notSyncFiles = mutableListOf<UploadFile>()
         for ((index, fileToUpload) in uploadFiles.withIndex()) {
@@ -207,7 +208,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             if (isLastFile && allNotUploadedCount == UploadFile.getAllPendingUploadsCount()) break
             // If there is a new file during the sync and it has priority (ex: Manual uploads),
             // then we start again in order to process the priority files first.
-            if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext uploadPendingFiles()
+            if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@autoCancelScope uploadPendingFiles()
         }
 
         uploadedCount = successCount
@@ -241,6 +242,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private fun CoroutineScope.initUploadPendingCounter(size: Int) {
         if (size > 0) notificationManagerCompat.cancel(NotificationUtils.UPLOAD_STATUS_ID)
+        launch { updatePendingUploadCounterNotification(size) }
         SentryLog.d(TAG, "uploadPendingFiles> upload for $size")
     }
 
@@ -292,7 +294,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val uri = getUriObject()
 
         currentUploadFile = this@upload
-        updateUploadCountNotification()
 
         try {
             if (isSchemeFile()) {
@@ -376,17 +377,15 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private var uploadCountNotificationJob: Job? = null
-    private fun CoroutineScope.updateUploadCountNotification() {
-        uploadCountNotificationJob?.cancel()
-        uploadCountNotificationJob = launch {
-            // We wait a little otherwise it is too fast and the notification may not be updated
-            delay(NotificationUtils.ELAPSED_TIME)
-            val foregroundInfo = progressForegroundInfo(pendingCount)
-            setForegroundAsync(foregroundInfo)
-        }
-    }
+    private suspend fun updatePendingUploadCounterNotification(numberPendingUpload: Int) {
+        if (numberPendingUpload > 0) {
+            pendingUploadCounter.emit(numberPendingUpload)
+            setForeground(progressForegroundInfo(numberPendingUpload))
 
+            pendingUploadCounter.collect { pendingCount ->
+                notificationManagerCompat.notifyCompat(
+                    notificationId = UPLOAD_SERVICE_ID,
+                    builder = currentUploadsNotificationBuilder.appendPendingCount(pendingCount)
                 )
             }
         }
