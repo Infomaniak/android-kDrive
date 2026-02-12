@@ -64,7 +64,6 @@ object NotificationUtils : NotificationUtilsCore() {
             setTicker(ticker)
             setSmallIcon(icon)
             setAutoCancel(true)
-            setContentText("0%")
             setOnlyAlertOnce(true)
             setProgress(100, 0, true)
         }
