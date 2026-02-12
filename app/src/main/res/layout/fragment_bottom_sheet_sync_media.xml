@@ -40,7 +40,7 @@
         android:id="@+id/syncOnlyWifi"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:descText="@string/syncOnlyWifiDescription"
+        app:descText="@string/syncPhotosOnlyWifiDescription"
         app:text="@string/syncOnlyWifiTitle" />
 
     <com.infomaniak.drive.views.ItemSyncFilesBottomSheetView
