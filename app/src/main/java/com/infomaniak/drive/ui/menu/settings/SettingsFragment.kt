@@ -60,7 +60,7 @@ import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.databinding.FragmentSettingsBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
-import com.infomaniak.drive.ui.menu.settings.SettingsFragmentDirections.Companion.actionSettingsFragmentToSyncSelectBottomSheetDialog
+import com.infomaniak.drive.ui.menu.settings.SettingsFragmentDirections.Companion.actionSettingsFragmentToSyncOfflineSelectBottomSheetDialog
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.MyKSuiteDataUtils
 import com.infomaniak.drive.utils.getDashboardData
@@ -115,7 +115,7 @@ class SettingsFragment : Fragment() {
     }
 
     fun initFileSync() {
-        binding.fileSync.setOnClickListener { safelyNavigate(actionSettingsFragmentToSyncSelectBottomSheetDialog()) }
+        binding.fileSync.setOnClickListener { safelyNavigate(actionSettingsFragmentToSyncOfflineSelectBottomSheetDialog()) }
         updateSyncOffline(AppSettings.onlyWifiSyncOffline)
         registerFileSyncSettingResultListener()
     }

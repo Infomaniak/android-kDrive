@@ -253,15 +253,10 @@
         tools:layout="@layout/fragment_bottom_sheet_select" />
 
     <dialog
-        android:id="@+id/syncSelectBottomSheetDialog"
-        android:name="com.infomaniak.drive.views.SyncSelectBottomSheetDialog"
-        android:label="SyncSelectBottomSheetDialog"
-        tools:layout="@layout/fragment_bottom_sheet_sync_select">
-        <argument
-            android:name="isOfflineFilesSetting"
-            android:defaultValue="true"
-            app:argType="boolean" />
-    </dialog>
+        android:id="@+id/syncOfflineSelectBottomSheetDialog"
+        android:name="com.infomaniak.drive.views.SyncOfflineSelectBottomSheetDialog"
+        android:label="SyncOfflineSelectBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_sync_select" />
 
     <fragment
         android:id="@+id/activityFilesFragment"
@@ -557,8 +552,8 @@
             app:enterAnim="@anim/fragment_open_enter"
             app:exitAnim="@anim/fragment_open_exit" />
         <action
-            android:id="@+id/action_settingsFragment_to_syncSelectBottomSheetDialog"
-            app:destination="@id/syncSelectBottomSheetDialog" />
+            android:id="@+id/action_settingsFragment_to_syncOfflineSelectBottomSheetDialog"
+            app:destination="@id/syncOfflineSelectBottomSheetDialog" />
     </fragment>
 
     <activity

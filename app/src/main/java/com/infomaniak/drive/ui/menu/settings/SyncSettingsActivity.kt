@@ -69,8 +69,7 @@ import com.infomaniak.drive.utils.SyncUtils.activateAutoSync
 import com.infomaniak.drive.utils.SyncUtils.cancelPeriodicSync
 import com.infomaniak.drive.utils.SyncUtils.disableAutoSync
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.views.SyncSelectBottomSheetDialog
-import com.infomaniak.drive.views.SyncSelectBottomSheetDialogArgs
+import com.infomaniak.drive.views.SyncMediaSelectBottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
@@ -227,9 +226,7 @@ class SyncSettingsActivity : BaseActivity() {
         }
 
         syncOnlyWifi.setOnClickListener {
-            SyncSelectBottomSheetDialog()
-                .apply { arguments = SyncSelectBottomSheetDialogArgs(isOfflineFilesSetting = false).toBundle() }
-                .show(supportFragmentManager, SyncSelectBottomSheetDialog::class.simpleName)
+            SyncMediaSelectBottomSheetDialog().show(supportFragmentManager, SyncMediaSelectBottomSheetDialog::class.simpleName)
         }
 
         saveButton.initProgress(this@SyncSettingsActivity)
