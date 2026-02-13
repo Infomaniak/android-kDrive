@@ -21,28 +21,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.navArgs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.legacy.utils.setBackNavigationResult
 import com.infomaniak.drive.MatomoDrive.MatomoName
-import com.infomaniak.drive.MatomoDrive.trackPhotoSyncEvent
-import com.infomaniak.drive.MatomoDrive.trackSettingsEvent
-import com.infomaniak.drive.R
-import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.FragmentBottomSheetSyncSelectBinding
-import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.KEY_BACK_ACTION_BOTTOM_SHEET
 import com.infomaniak.drive.ui.menu.settings.SettingsFragment.Companion.SyncFilesOption
-import com.infomaniak.drive.ui.menu.settings.SyncSettingsViewModel
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 
-class SyncSelectBottomSheetDialog : BottomSheetDialogFragment() {
+abstract class SyncSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
+    abstract val dialogTitle: Int
+    abstract val onlyWifiDescription: Int
+    abstract var isOnlyWifiSync: Boolean
     private var binding: FragmentBottomSheetSyncSelectBinding by safeBinding()
-    private val navArgs by navArgs<SyncSelectBottomSheetDialogArgs>()
-    private val syncSettingsViewModel: SyncSettingsViewModel by activityViewModels()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentBottomSheetSyncSelectBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -50,61 +42,32 @@ class SyncSelectBottomSheetDialog : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
-        val isWifiSyncOnly = getOnlyWifiSync()
         val syncPermissions = DrivePermissions(DrivePermissions.Type.ReadingMediaForSync).apply {
             registerPermissions(this@SyncSelectBottomSheetDialog)
         }
-        with(binding.syncOnlyWifi) {
-            isInactive = !isWifiSyncOnly
+        binding.initViews(syncPermissions)
+    }
+
+    private fun FragmentBottomSheetSyncSelectBinding.initViews(syncPermissions: DrivePermissions) {
+        selectTitle.setText(dialogTitle)
+        with(syncOnlyWifi) {
+            textDescription = getString(onlyWifiDescription)
+            isInactive = !isOnlyWifiSync
             setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.OnlyWifi) }
         }
-        with(binding.syncWithAll) {
-            isInactive = isWifiSyncOnly
+        with(syncWithAll) {
+            isInactive = isOnlyWifiSync
             setOnClickListener { onSelectOption(syncPermissions, SyncFilesOption.AllData) }
         }
     }
 
-    private fun initView() {
-        if (navArgs.isOfflineFilesSetting) {
-            binding.selectTitle.setText(R.string.syncWifiSettingsTitle)
-            binding.syncOnlyWifi.textDescription = getString(R.string.syncOnlyWifiDescription)
-        } else {
-            binding.selectTitle.setText(R.string.syncWifiPicturesTitle)
-            binding.syncOnlyWifi.textDescription = getString(R.string.syncPhotosOnlyWifiDescription)
-        }
-    }
-
     private fun onSelectOption(syncPermissions: DrivePermissions, option: SyncFilesOption) {
-        val isOnlyWifiSyncOffline = option == SyncFilesOption.OnlyWifi
-        trackEvent(if (isOnlyWifiSyncOffline) MatomoName.SyncOnlyWifi else MatomoName.SyncWifiAndData)
-        setOnlyWifiSetting(isOnlyWifiSyncOffline)
+        isOnlyWifiSync = option == SyncFilesOption.OnlyWifi
+        trackEvent(if (isOnlyWifiSync) MatomoName.SyncOnlyWifi else MatomoName.SyncWifiAndData)
         requireContext().launchAllUpload(syncPermissions)
-        if (navArgs.isOfflineFilesSetting) setBackNavigationResult(KEY_BACK_ACTION_BOTTOM_SHEET, isOnlyWifiSyncOffline)
         dismiss()
     }
 
-    private fun getOnlyWifiSync(): Boolean {
-        return if (navArgs.isOfflineFilesSetting) {
-            AppSettings.onlyWifiSyncOffline
-        } else {
-            syncSettingsViewModel.onlyWifiSyncMedia.value == true
-        }
-    }
+    abstract fun trackEvent(name: MatomoName)
 
-    private fun trackEvent(name: MatomoName) {
-        if (navArgs.isOfflineFilesSetting) {
-            trackSettingsEvent(name)
-        } else {
-            trackPhotoSyncEvent(name)
-        }
-    }
-
-    private fun setOnlyWifiSetting(isOnlyWifiSyncOffline: Boolean) {
-        if (navArgs.isOfflineFilesSetting) {
-            AppSettings.onlyWifiSyncOffline = isOnlyWifiSyncOffline
-        } else {
-            syncSettingsViewModel.onlyWifiSyncMedia.value = isOnlyWifiSyncOffline
-        }
-    }
 }
