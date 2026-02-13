@@ -75,6 +75,7 @@
         <attr name="icon" />
         <attr name="iconTint" format="color" />
         <attr name="text" format="string" />
+        <attr name="descText" format="string" />
     </declare-styleable>
 
     <declare-styleable name="ItemSettingView">

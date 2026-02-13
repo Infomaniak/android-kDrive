@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,6 +77,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import splitties.systemservices.connectivityManager
 import java.util.Date
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
@@ -194,15 +195,19 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
 
         SentryLog.d(TAG, "uploadPendingFiles> upload for ${uploadFiles.count()}")
-
+        val notSyncFiles = mutableListOf<UploadFile>()
         for ((index, fileToUpload) in uploadFiles.withIndex()) {
             val isLastFile = index == uploadFiles.lastIndex
-            uploadFile(fileToUpload, isLastFile)
-
+            if (fileToUpload.canUpload()) {
+                uploadFile(fileToUpload, isLastFile)
+            } else {
+                notSyncFiles += fileToUpload
+            }
             pendingCount--
 
             // Stop recursion if all files have been processed and there are only errors.
-            if (isLastFile && failedNamesMap.count() == UploadFile.getAllPendingUploadsCount()) break
+            val allNotUploadedCount = failedNamesMap.count() + notSyncFiles.count()
+            if (isLastFile && allNotUploadedCount == UploadFile.getAllPendingUploadsCount()) break
             // If there is a new file during the sync and it has priority (ex: Manual uploads),
             // then we start again in order to process the priority files first.
             if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext uploadPendingFiles()
@@ -220,6 +225,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             failedNames = failedNamesMap.values,
         )
         if (uploadedCount > 0) Result.success() else Result.failure()
+    }
+
+    private fun UploadFile.canUpload() = when {
+        !isMeteredNetwork() -> true
+        isSync() -> UploadFile.getAppSyncSettings()?.onlyWifiSyncMedia == false
+        isSyncOffline() -> !AppSettings.onlyWifiSyncOffline
+        else -> true
     }
 
     private suspend fun uploadFile(uploadFile: UploadFile, isLastFile: Boolean) {
@@ -547,6 +559,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
+    private fun isMeteredNetwork() = runCatching { connectivityManager.isActiveNetworkMetered }.getOrDefault(true)
+
     companion object {
         const val TAG = "upload_worker"
         const val PERIODIC_TAG = "upload_worker_periodic"
@@ -562,8 +576,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         private const val MAX_RETRY_COUNT = 3
         private const val CHECK_LOCAL_LAST_MEDIAS_DELAY = 10_000L // 10s (in ms)
 
-        fun workConstraints(): Constraints {
-            val networkType = if (AppSettings.onlyWifiSync) NetworkType.UNMETERED else NetworkType.CONNECTED
+        fun workConstraints(isAutomaticUpload: Boolean): Constraints {
+            val networkType = if (isAutomaticUpload && UploadFile.getAppSyncSettings()?.onlyWifiSyncMedia == true) {
+                NetworkType.UNMETERED
+            } else {
+                NetworkType.CONNECTED
+            }
             return Constraints.Builder()
                 .setRequiredNetworkType(networkType)
                 .build()

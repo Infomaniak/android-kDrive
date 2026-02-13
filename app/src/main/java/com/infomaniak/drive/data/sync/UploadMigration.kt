@@ -111,9 +111,14 @@ class UploadMigration : RealmMigration {
         }
         //endregion
 
+        if (oldVersionTemp < 8L) {
+            schema.get(SyncSettings::class.java.simpleName)
+                ?.addField("onlyWifiSyncMedia", Boolean::class.java, FieldAttribute.REQUIRED)
+        }
+
     }
 
     companion object {
-        const val DB_VERSION = 7L // Must be bumped when the schema changes
+        const val DB_VERSION = 8L // Must be bumped when the schema changes
     }
 }

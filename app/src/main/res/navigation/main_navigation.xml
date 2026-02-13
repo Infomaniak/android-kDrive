@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2025 Infomaniak Network SA
+  ~ Copyright (C) 2022-2026 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -251,6 +251,12 @@
         android:name="com.infomaniak.drive.ui.SwitchDriveDialog"
         android:label="SwitchDriveDialog"
         tools:layout="@layout/fragment_bottom_sheet_select" />
+
+    <dialog
+        android:id="@+id/syncOfflineSelectBottomSheetDialog"
+        android:name="com.infomaniak.drive.views.SyncOfflineSelectBottomSheetDialog"
+        android:label="SyncOfflineSelectBottomSheetDialog"
+        tools:layout="@layout/fragment_bottom_sheet_sync_select" />
 
     <fragment
         android:id="@+id/activityFilesFragment"
@@ -545,6 +551,9 @@
             app:destination="@+id/myKSuiteDashboardFragment"
             app:enterAnim="@anim/fragment_open_enter"
             app:exitAnim="@anim/fragment_open_exit" />
+        <action
+            android:id="@+id/action_settingsFragment_to_syncOfflineSelectBottomSheetDialog"
+            app:destination="@id/syncOfflineSelectBottomSheetDialog" />
     </fragment>
 
     <activity
