@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
@@ -102,22 +103,25 @@ class BackgroundSyncPermissionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog()
 
     @SuppressLint("BatteryLife")
     private fun requestBatteryOptimizationPermission(): Job = viewLifecycleOwner.lifecycleScope.launch {
-        viewLifecycleOwner.lifecycle.currentStateFlow.first { it == Lifecycle.State.RESUMED }
         // Ensure this Fragment is in the resumed state (and that the Fragment is attached) before
         // launch is called on the permissionResultLauncher, to avoid undocumented IllegalStateException.
+        viewLifecycleOwner.lifecycle.currentStateFlow.first { it == Lifecycle.State.RESUMED }
+
         val packageName = appCtx.packageName
-        try {
+        runCatching {
             Intent(
                 Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
                 "package:$packageName".toUri()
             ).apply { permissionResultLauncher.launch(this) }
-        } catch (_: ActivityNotFoundException) {
-            runCatching {
-                permissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
-            }.onFailure { exception ->
-                Sentry.captureException(exception) { scope -> scope.level = SentryLevel.WARNING }
-            }
         }
+            .cancellable()
+            .recoverCatching { exception ->
+                if (exception is ActivityNotFoundException) {
+                    permissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                    Sentry.captureException(exception) { scope -> scope.level = SentryLevel.INFO }
+                }
+            }
+            .onFailure(Sentry::captureException)
     }
 
     private fun onHasBatteryPermission(hasBatteryPermission: Boolean) {
