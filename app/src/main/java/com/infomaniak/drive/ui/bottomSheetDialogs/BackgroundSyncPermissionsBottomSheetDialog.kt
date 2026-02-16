@@ -124,6 +124,20 @@ class BackgroundSyncPermissionsBottomSheetDialog : EdgeToEdgeBottomSheetDialog()
                 Sentry.captureException(exception)
             }
         }
+        runCatching {
+            Intent(
+                Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                "package:$packageName".toUri()
+            ).apply { permissionResultLauncher.launch(this) }
+        }
+            .cancellable()
+            .recoverCatching { exception ->
+                if (exception is ActivityNotFoundException) {
+                    permissionResultLauncher.launch(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                    Sentry.captureException(exception) { scope -> scope.level = SentryLevel.INFO }
+                }
+            }
+            .onFailure(Sentry::captureException)
     }
 
     private fun onHasBatteryPermission(hasBatteryPermission: Boolean) {
