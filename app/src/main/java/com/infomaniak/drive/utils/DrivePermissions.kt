@@ -65,7 +65,7 @@ class DrivePermissions(private val type: Type) {
     fun registerPermissions(activity: FragmentActivity, onPermissionResult: ((authorized: Boolean) -> Unit)? = null) {
         this.activity = activity
         registerForActivityResult = activity.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
-            if (requiredPermissionsAlreadyGranted.not()) {
+            if (!requiredPermissionsAlreadyGranted) {
                 val authorized = authorizedPermissions.filterKeys { it in requiredPermissions }.values.all { it }
                 onPermissionResult?.invoke(authorized)
                 activity.resultPermissions(authorized, requiredPermissions)
@@ -77,7 +77,7 @@ class DrivePermissions(private val type: Type) {
         activity = fragment.requireActivity()
         registerForActivityResult =
             fragment.registerForActivityResult(RequestMultiplePermissions()) { authorizedPermissions ->
-                if (requiredPermissionsAlreadyGranted.not()) {
+                if (!requiredPermissionsAlreadyGranted) {
                     val authorized = authorizedPermissions.filterKeys { it in requiredPermissions }.values.all { it }
                     onPermissionResult?.invoke(authorized)
                     activity.resultPermissions(authorized, requiredPermissions)
@@ -105,11 +105,7 @@ class DrivePermissions(private val type: Type) {
     private fun tryShowBatteryDialogIfNeeded() {
         val mustDisplayIt = UiSettings(activity).mustDisplayBatteryDialog
         if (mustDisplayIt || powerManager.isIgnoringBatteryOptimizations(BuildConfig.APPLICATION_ID).not()) {
-            BackgroundSyncPermissionsBottomSheetDialog().apply {
-                if (dialog?.isShowing != true && !isResumed) {
-                    show(this@DrivePermissions.activity.supportFragmentManager, "syncPermissionsDialog")
-                }
-            }
+            BackgroundSyncPermissionsBottomSheetDialog().show(activity.supportFragmentManager, "syncPermissionsDialog")
         }
     }
 
