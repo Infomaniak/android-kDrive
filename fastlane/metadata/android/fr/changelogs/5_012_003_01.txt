@@ -1,0 +1,3 @@
+- Amélioration de l'affichage des téléchargements en attente
+- Correction d'un plantage lors de l'ouverture du deuxième bottomsheet des autorisations d'arrière-plan
+- Correction de l'impossibilité de supprimer vos propres fichiers lorsque vous vous trouvez dans un dossier partagé

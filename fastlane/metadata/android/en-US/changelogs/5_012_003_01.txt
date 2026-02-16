@@ -1,0 +1,3 @@
+- Improve pending uploads view
+- Fix crash on second background permissions bottomsheet's opening
+- Fix impossibility of deleting your own files when in a shared folder
