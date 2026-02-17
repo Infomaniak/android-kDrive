@@ -41,6 +41,7 @@
     <string name="allDateCustom">Personnalisé</string>
     <string name="allDeletedFilePattern">\'Supprimé le \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Désactivé</string>
+    <string name="allDriveBlockedDescription">Tous vos produits ont expiré. Veuillez les renouveler pour les gérer et accéder à leurs données.</string>
     <string name="allEmail">E-mail</string>
     <string name="allEmptyInputError">Ce champ ne peut pas être vide</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Fonctionnalité indisponible depuis F-Droid</string>
@@ -261,6 +262,7 @@
     <string name="errorConflict">Un élément du même nom existe déjà à cet emplacement</string>
     <string name="errorDelete">Erreur lors de la suppression</string>
     <string name="errorDeviceStorage">Stockage de l’appareil insuffisant</string>
+    <string name="errorDownloadPermission">Vous devez ajouter au moins un fichier que vous avez la permission de télécharger</string>
     <string name="errorDropboxLimitExceeded">Vous avez atteint la limite de boite de dépôt.</string>
     <string name="errorDuplicate">Erreur lors de la duplication</string>
     <string name="errorExternalImportInProgress">Impossible d’effectuer l’action sur le dossier, une importation externe est en cours</string>
@@ -284,6 +286,7 @@
     <string name="errorSave">Erreur lors de l’enregistrement</string>
     <string name="errorShareAddUser">Ce fichier est déjà partagé avec cet utilisateur.</string>
     <string name="errorShareLink">Erreur lors de la création du lien</string>
+    <string name="errorStillUploading">L’élément est toujours en cours d’importation</string>
     <string name="errorWrongPassword">Mot de passe incorrect</string>
     <string name="favoritesNoFile">Aucun favori pour le moment</string>
     <string name="favoritesTitle">Favoris</string>
@@ -561,6 +564,8 @@
     <string name="onBoardingTitle2">Travaillez ensemble au même endroit et gagnez en efficacité</string>
     <string name="onBoardingTitle3">Sauvegardez vos souvenirs en sécurité</string>
     <string name="pdfIsLocked">Votre PDF est verrouillé</string>
+    <string name="photoSyncSuspended">Se connecter à un réseau Wi-Fi ou autoriser l’utilisation de données mobiles</string>
+    <string name="photoSyncSuspendedTitle">Sauvegarde des photos suspendue</string>
     <string name="picturesNoFile">Aucune photo pour le moment</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Préparation de l’importation de 1 fichier</item>
@@ -676,6 +681,9 @@
     <string name="switchUserDescription">Consulter les kDrives de vos autres profils Infomaniak. Vous pouvez ajouter autant de profil d’utilisateurs que vous souhaitez.</string>
     <string name="syncConfigureDescription">Vos photos, vidéos et captures écran seront enregistrées automatiquement dans votre kDrive %s.</string>
     <string name="syncConfigureTitle">Sauvegardez vos souvenirs en lieu sûr</string>
+    <string name="syncOnlyWifiDescription">Les fichiers hors ligne seront synchronisés uniquement via le Wi-Fi</string>
+    <string name="syncOnlyWifiTitle">Via Wi-Fi uniquement</string>
+    <string name="syncPhotosOnlyWifiDescription">Les photos et les vidéos seront synchronisées uniquement via le Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Activer la sauvegarde automatique</string>
     <string name="syncSettingsButtonSaveDate">Enregistrer</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisation</string>
@@ -696,6 +704,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Toutes les heures</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Toutes les 15 minutes</string>
     <string name="syncSettingsTitle">Sauvegarde des photos</string>
+    <string name="syncWifiAndMobileDataDescription">Des frais d’utilisation de données mobiles peuvent s’appliquer</string>
+    <string name="syncWifiAndMobileDataTitle">Via Wi-Fi et données mobiles</string>
+    <string name="syncWifiPicturesTitle">Synchroniser les photos et vidéos</string>
+    <string name="syncWifiSettingsTitle">Synchroniser les fichiers hors ligne</string>
     <string name="themeSettingsDarkLabel">Sombre</string>
     <string name="themeSettingsLightLabel">Clair</string>
     <string name="themeSettingsSystemDefaultLabel">Valeur par défaut du système</string>
