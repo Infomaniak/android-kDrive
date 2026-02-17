@@ -168,8 +168,8 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
             appId = BuildConfig.APPLICATION_ID,
             appVersionCode = BuildConfig.VERSION_CODE,
             appVersionName = BuildConfig.VERSION_NAME,
-//            apiEnvironment = ApiEnvironment.PreProd,
             apiErrorCodes = ErrorCode.apiErrorCodes,
+//            apiEnvironment = ApiEnvironment.PreProd
         )
 
         AuthConfiguration.init(
