@@ -41,6 +41,7 @@
     <string name="allDateCustom">Kundenspezifisch</string>
     <string name="allDeletedFilePattern">\'Gelöscht am \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Deaktiviert</string>
+    <string name="allDriveBlockedDescription">Alle Ihre Produkte sind abgelaufen. Bitte erneuern Sie diese, um sie zu verwalten und auf ihre Daten zuzugreifen.</string>
     <string name="allEmail">E-Mail</string>
     <string name="allEmptyInputError">Dieses Feld darf nicht leer sein</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Funktion nicht verfügbar seit F-Droid</string>
@@ -261,6 +262,7 @@
     <string name="errorConflict">An dieser Stelle existiert bereits ein Element mit demselben Namen</string>
     <string name="errorDelete">Fehler beim Löschen</string>
     <string name="errorDeviceStorage">Unzureichender Gerätespeicher</string>
+    <string name="errorDownloadPermission">Sie müssen mindestens eine Datei hinzufügen, die Sie herunterladen dürfen</string>
     <string name="errorDropboxLimitExceeded">Sie haben das Dropbox-Limit erreicht.</string>
     <string name="errorDuplicate">Fehler beim Duplizieren</string>
     <string name="errorExternalImportInProgress">Der Ordner kann nicht bearbeitet werden, da ein externer Import im Gange ist</string>
@@ -284,6 +286,7 @@
     <string name="errorSave">Fehler bei der Speicherung</string>
     <string name="errorShareAddUser">Diese Datei ist bereits für diesen Benutzer freigegeben.</string>
     <string name="errorShareLink">Fehler bei der Erstellung des Links</string>
+    <string name="errorStillUploading">Der Artikel wird noch importiert</string>
     <string name="errorWrongPassword">Falsches Passwort</string>
     <string name="favoritesNoFile">Derzeit keine Favoriten</string>
     <string name="favoritesTitle">Favoriten</string>
@@ -561,6 +564,8 @@
     <string name="onBoardingTitle2">Arbeiten Sie am selben Ort zusammen und werden Sie effizienter</string>
     <string name="onBoardingTitle3">Speichern Sie Ihre Erinnerungen völlig sicher</string>
     <string name="pdfIsLocked">Ihr PDF ist gesperrt</string>
+    <string name="photoSyncSuspended">Verbinden Sie sich mit einem Wi-Fi-Netzwerk oder erlauben Sie die mobile Datennutzung</string>
+    <string name="photoSyncSuspendedTitle">Fotosicherung ausgesetzt</string>
     <string name="picturesNoFile">Derzeit kein Foto</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Vorbereitung auf den Import von 1 Datei</item>
@@ -676,6 +681,9 @@
     <string name="switchUserDescription">Sehen Sie die kDrives Ihrer anderen Infomaniak-Profile. Sie können so viele Benutzerprofile hinzufügen wie Sie möchten.</string>
     <string name="syncConfigureDescription">Ihre Fotos, Videos und Screenshots werden automatisch in Ihrem kDrive %s gespeichert.</string>
     <string name="syncConfigureTitle">Speichern Sie Ihre Erinnerungen an einem sicheren Ort</string>
+    <string name="syncOnlyWifiDescription">Offline-Dateien werden nur mit Wi-Fi synchronisiert</string>
+    <string name="syncOnlyWifiTitle">Nur mit Wi-Fi</string>
+    <string name="syncPhotosOnlyWifiDescription">Fotos und Videos werden nur mit Wi-Fi synchronisiert</string>
     <string name="syncSettingsButtonActiveSync">Automatische Sicherung aktivieren</string>
     <string name="syncSettingsButtonSaveDate">Speichern</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisierung</string>
@@ -696,6 +704,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Stündlich</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Alle 15 Minuten</string>
     <string name="syncSettingsTitle">Sicherung der Fotos</string>
+    <string name="syncWifiAndMobileDataDescription">Für die mobile Datennutzung können Gebühren anfallen</string>
+    <string name="syncWifiAndMobileDataTitle">Mit Wi-Fi und mobilen Daten</string>
+    <string name="syncWifiPicturesTitle">Fotos und Videos synchronisieren</string>
+    <string name="syncWifiSettingsTitle">Offline-Dateien synchronisieren</string>
     <string name="themeSettingsDarkLabel">Dunkel</string>
     <string name="themeSettingsLightLabel">Hell</string>
     <string name="themeSettingsSystemDefaultLabel">Systemstandard</string>

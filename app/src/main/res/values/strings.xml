@@ -52,6 +52,7 @@
     <string name="allDateCustom">Custom</string>
     <string name="allDeletedFilePattern">\'Deleted on \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Disabled</string>
+    <string name="allDriveBlockedDescription">All your products have expired. Please renew them to manage them and access their data.</string>
     <string name="allEmail">Email</string>
     <string name="allEmptyInputError">This field cannot be empty</string>
     <string name="allErrorFeatureNotAvailableInFdroid">Feature not available since F-Droid</string>
@@ -272,6 +273,7 @@
     <string name="errorConflict">An element with the same name already exists in this location</string>
     <string name="errorDelete">Deletion error</string>
     <string name="errorDeviceStorage">Insufficient device storage</string>
+    <string name="errorDownloadPermission">You must add at least one file that you have permission to download</string>
     <string name="errorDropboxLimitExceeded">You have reached the drop box limit.</string>
     <string name="errorDuplicate">Duplication error</string>
     <string name="errorExternalImportInProgress">Cannot perform action on the folder because an external import is in progress</string>
@@ -295,6 +297,7 @@
     <string name="errorSave">Save error</string>
     <string name="errorShareAddUser">This file is already shared with this user.</string>
     <string name="errorShareLink">Error when creating link</string>
+    <string name="errorStillUploading">The item is still being imported</string>
     <string name="errorWrongPassword">Wrong password</string>
     <string name="favoritesNoFile">No favorites at this time</string>
     <string name="favoritesTitle">Favorites</string>
@@ -572,6 +575,8 @@
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
     <string name="pdfIsLocked">Your PDF is locked</string>
+    <string name="photoSyncSuspended">Connect to a Wi-Fi network or allow mobile data usage</string>
+    <string name="photoSyncSuspendedTitle">Photo backup suspended</string>
     <string name="picturesNoFile">No photo at this time</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparing to upload 1 file</item>
@@ -687,6 +692,9 @@
     <string name="switchUserDescription">View the kDrives of your other Infomaniak profiles. You can add as many user profiles as you like.</string>
     <string name="syncConfigureDescription">Your photos, videos and screenshots will be automatically saved in your kDrive %s.</string>
     <string name="syncConfigureTitle">Save your memories in a safe place</string>
+    <string name="syncOnlyWifiDescription">Offline files will be only synchronized with Wi-Fi</string>
+    <string name="syncOnlyWifiTitle">With Wi-Fi only</string>
+    <string name="syncPhotosOnlyWifiDescription">Photos and video will be only synchronized with Wi-Fi</string>
     <string name="syncSettingsButtonActiveSync">Enable automatic backup</string>
     <string name="syncSettingsButtonSaveDate">Save</string>
     <string name="syncSettingsButtonSyncPeriodicity">Synchronisation</string>
@@ -707,6 +715,10 @@
     <string name="syncSettingsSyncPeriodicityOneHourValue">Every hour</string>
     <string name="syncSettingsSyncPeriodicityOneQuarterValue">Every 15 minutes</string>
     <string name="syncSettingsTitle">Photo backup</string>
+    <string name="syncWifiAndMobileDataDescription">Mobile data usage charges may apply</string>
+    <string name="syncWifiAndMobileDataTitle">With Wi-Fi and mobile data</string>
+    <string name="syncWifiPicturesTitle">Synchronize photos and videos</string>
+    <string name="syncWifiSettingsTitle">Synchronize offline files</string>
     <string name="themeSettingsDarkLabel">Dark</string>
     <string name="themeSettingsLightLabel">Light</string>
     <string name="themeSettingsSystemDefaultLabel">System default</string>
