@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,7 +160,6 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
                 appVersionName = BuildConfig.VERSION_NAME,
                 clientId = BuildConfig.CLIENT_ID,
             )
-            apiErrorCodes = ErrorCode.apiErrorCodes
             accessType = null
         }
 
@@ -169,7 +168,8 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
             appId = BuildConfig.APPLICATION_ID,
             appVersionCode = BuildConfig.VERSION_CODE,
             appVersionName = BuildConfig.VERSION_NAME,
-//            apiEnvironment = ApiEnvironment.PreProd
+//            apiEnvironment = ApiEnvironment.PreProd,
+            apiErrorCodes = ErrorCode.apiErrorCodes,
         )
 
         AuthConfiguration.init(
