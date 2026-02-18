@@ -133,7 +133,6 @@ open class File(
      */
     var children: @WriteWith<FileRealmListParceler> RealmList<File> = RealmList(),
     var isComplete: Boolean = false,
-    var isFromSearch: Boolean = false,
     var isFromUploads: Boolean = false,
     var isMarkedAsOffline: Boolean = false,
     var isOffline: Boolean = false,
