@@ -284,7 +284,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         } catch (exception: AllowedFileSizeExceededException) {
             SentryLog.e(TAG, "total chunks exceeded", exception) { scope ->
                 scope.setExtra("half heap", "${Runtime.getRuntime().maxMemory() / 2}")
-                scope.setExtra("available ram memory", "${applicationContext.getAvailableMemory().availMem}")
+                scope.setExtra("available memory", "${applicationContext.getAvailableMemory().availMem}")
                 scope.setExtra("available service memory", "${applicationContext.getAvailableMemory().threshold}")
             }
             if (isLastFile) throw exception

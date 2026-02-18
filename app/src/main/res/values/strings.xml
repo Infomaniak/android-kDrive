@@ -772,7 +772,7 @@
     <string name="uploadNetworkErrorDescription">Awaiting a network</string>
     <string name="uploadNetworkErrorTitle">Upload suspended</string>
     <string name="uploadNetworkErrorWifiRequired">Waiting for WiFi network</string>
-    <string name="uploadOutOfMemoryError">Insufficient available ram memory</string>
+    <string name="uploadOutOfMemoryError">Insufficient available memory</string>
     <string name="uploadPausedDescription">Some uploads are still in progress in kDrive. Open the app and keep the device connected to speed up the upload.</string>
     <string name="uploadPausedTitle">Upload suspended</string>
     <string name="uploadPermissionError">Additional permissions requested</string>
