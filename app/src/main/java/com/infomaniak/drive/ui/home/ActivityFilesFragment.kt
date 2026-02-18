@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,6 @@ import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.loadAvatar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class ActivityFilesFragment : FileListFragment() {
 
@@ -62,22 +59,13 @@ class ActivityFilesFragment : FileListFragment() {
                 realm = mainViewModel.realm,
                 idList = fileIdList.toTypedArray(),
                 order = fileListViewModel.sortType
-            )?.apply {
-                map { file ->
-                    val fileId = file.id
-                    CoroutineScope(Dispatchers.IO).launch {
-                        FileController.updateFile(fileId) { it.isFromActivities = true }
-                    }
-                }
-            }
+            )
 
             fileList?.let { files ->
                 fileAdapter.apply {
                     updateFileList(files)
                     isComplete = true
-                    onFileClicked = {
-                        openFile(it)
-                    }
+                    onFileClicked = ::openFile
                 }
             }
         }
