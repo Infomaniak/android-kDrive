@@ -540,6 +540,7 @@ open class FileListFragment : MultiSelectFragment(
                 val bundle = FileInfoActionsBottomSheetDialogArgs(
                     fileId = fileObject.id,
                     userDrive = UserDrive(driveId = file.driveId, sharedWithMe = fileListViewModel.isSharedWithMe),
+                    hideActions = this.isActionMenuHidden,
                     shouldShowSmallFab = navigationArgs.shouldShowSmallFab,
                 ).toBundle()
                 safeNavigate(R.id.fileInfoActionsBottomSheetDialog, bundle, currentClassName = homeClassName())

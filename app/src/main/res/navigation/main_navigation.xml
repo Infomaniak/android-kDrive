@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
   ~ Infomaniak kDrive - Android
-  ~ Copyright (C) 2022-2025 Infomaniak Network SA
+  ~ Copyright (C) 2022-2026 Infomaniak Network SA
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -188,6 +188,9 @@
         <argument
             android:name="shouldShowSmallFab"
             android:defaultValue="false"
+            app:argType="boolean" />
+        <argument
+            android:name="hideActions"
             app:argType="boolean" />
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_fileShareDetailsFragment"
@@ -789,8 +792,8 @@
             app:argType="integer" />
         <argument
             android:name="isSharedWithMe"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <fragment
