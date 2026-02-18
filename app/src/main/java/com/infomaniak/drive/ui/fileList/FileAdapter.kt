@@ -64,6 +64,7 @@ open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
     var fileList: OrderedRealmCollection<File> = RealmList(),
     override val lifecycle: Lifecycle,
+    val isActionMenuHidden: Boolean,
 ) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true), LifecycleOwner {
 
     private var fileAsyncListDiffer: AsyncListDiffer<File>? = null
@@ -379,7 +380,7 @@ open class FileAdapter(
     private fun hideMenu(file: File): Boolean {
         return uploadInProgress
                 || isSelectingFolder
-                || file.isFromActivities
+                || isActionMenuHidden
                 || file.isFromSearch
                 || (offlineMode && !file.isOffline)
                 || !publicShareCanDownload
