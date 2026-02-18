@@ -38,6 +38,7 @@ class ActivityFilesFragment : FileListFragment() {
     val navigationArgs: ActivityFilesFragmentArgs by navArgs()
     override var enabledMultiSelectMode: Boolean = false
     override var hideBackButtonWhenRoot: Boolean = false
+    override val isActionMenuHidden: Boolean = true
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = with(binding) {
         downloadFiles = DownloadFiles(navigationArgs.fileIdList)
