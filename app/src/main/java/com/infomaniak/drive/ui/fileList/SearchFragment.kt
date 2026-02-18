@@ -249,43 +249,24 @@ class SearchFragment : FileListFragment() {
             searchViewModel.visibilityMode.value = if (searchList.isEmpty()) VisibilityMode.NO_RESULTS else VisibilityMode.RESULTS
         }
 
-        fun handleNoResult() {
-            fileAdapter.apply {
-                hideLoading()
-                isComplete = true
-            }
-        }
-
-        fun handleLastPage(searchList: ArrayList<File>) {
-            fileAdapter.apply {
-                addFileList(searchList)
-                isComplete = true
-            }
-        }
-
-        fun handleNewPage(searchList: ArrayList<File>) {
-            fileAdapter.addFileList(searchList)
-        }
-
         searchViewModel.searchResults.observe(viewLifecycleOwner) {
 
             if (!binding.swipeRefreshLayout.isRefreshing) return@observe
 
-            it?.let { folderFilesResult ->
+            it?.run {
 
-                if (folderFilesResult.errorRes == null) {
+                if (errorRes == null) {
                     updateMostRecentSearches()
 
-                    fileAdapter.isComplete = folderFilesResult.isComplete
+                    fileAdapter.isComplete = isComplete
 
                     when {
-                        folderFilesResult.isFirstPage -> handleFirstResult(folderFilesResult.files)
-                        folderFilesResult.files.isEmpty() -> handleNoResult()
-                        folderFilesResult.isComplete -> handleLastPage(folderFilesResult.files)
-                        else -> handleNewPage(folderFilesResult.files)
+                        isFirstPage -> handleFirstResult(files)
+                        files.isEmpty() -> fileAdapter.hideLoading()
+                        else -> fileAdapter.addFileList(files)
                     }
                 } else {
-                    handleApiCallFailure(folderFilesResult.errorRes)
+                    handleApiCallFailure(errorRes)
                 }
 
             } ?: handleLiveDataTriggerWhenInitialized()
