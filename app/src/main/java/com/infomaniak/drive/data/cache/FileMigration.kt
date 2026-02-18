@@ -56,8 +56,8 @@ class FileMigration : RealmMigration {
                 if (hasField("canUseTag")) removeField("canUseTag")
                 if (hasField("tags")) removeField("tags")
                 if (hasField("isWaitingOffline")) removeField("isWaitingOffline")
-                if (!hasField(File::isFromSearch.name)) {
-                    addField(File::isFromSearch.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                if (!hasField("isFromSearch")) {
+                    addField("isFromSearch", Boolean::class.java, FieldAttribute.REQUIRED)
                 }
                 if (!hasField(File::isFromUploads.name)) {
                     addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
@@ -383,6 +383,10 @@ class FileMigration : RealmMigration {
             schema[File::class.java.simpleName]?.removeField("isFromActivities")
             oldVersionTemp++
         }
+        if (oldVersionTemp == 11L) {
+            schema[File::class.java.simpleName]?.removeField("isFromSearch")
+            oldVersionTemp++
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -410,7 +414,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val DB_VERSION = 11L // Must be bumped when the schema changes
+        const val DB_VERSION = 12L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }
