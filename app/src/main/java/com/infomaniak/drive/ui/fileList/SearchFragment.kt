@@ -51,6 +51,7 @@ class SearchFragment : FileListFragment() {
     override val noItemsIcon = R.drawable.ic_search_grey
     override val noItemsTitle = R.string.searchNoFile
     override val sortTypeUsage = SortTypeUsage.SEARCH
+    override val isActionMenuHidden: Boolean = true
 
     private lateinit var filtersAdapter: SearchFiltersAdapter
     private lateinit var recentSearchesAdapter: RecentSearchesAdapter
@@ -242,12 +243,6 @@ class SearchFragment : FileListFragment() {
             showSnackbar(errorRes)
         }
 
-        fun getSearchResults(data: ArrayList<File>?): ArrayList<File> {
-            return (data ?: arrayListOf()).apply {
-                map { file -> file.isFromSearch = true }
-            }
-        }
-
         fun handleFirstResult(searchList: ArrayList<File>) {
             fileAdapter.setFiles(searchList)
             binding.fileRecyclerView.scrollTo(0, 0)
@@ -280,15 +275,14 @@ class SearchFragment : FileListFragment() {
 
                 if (folderFilesResult.errorRes == null) {
                     updateMostRecentSearches()
-                    val searchList = getSearchResults(folderFilesResult.files)
 
                     fileAdapter.isComplete = folderFilesResult.isComplete
 
                     when {
-                        folderFilesResult.isFirstPage -> handleFirstResult(searchList)
-                        searchList.isEmpty() -> handleNoResult()
-                        folderFilesResult.isComplete -> handleLastPage(searchList)
-                        else -> handleNewPage(searchList)
+                        folderFilesResult.isFirstPage -> handleFirstResult(folderFilesResult.files)
+                        folderFilesResult.files.isEmpty() -> handleNoResult()
+                        folderFilesResult.isComplete -> handleLastPage(folderFilesResult.files)
+                        else -> handleNewPage(folderFilesResult.files)
                     }
                 } else {
                     handleApiCallFailure(folderFilesResult.errorRes)
