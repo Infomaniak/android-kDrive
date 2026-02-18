@@ -148,6 +148,7 @@ open class FileListFragment : MultiSelectFragment(
     protected open var allowCancellation = true
     protected open val sortTypeUsage = SortTypeUsage.FILE_LIST
 
+    protected open val isActionMenuHidden = false
     var sizeOfOffline: Int = 0
 
     private val noItemsFoldersTitle: Int by lazy {
@@ -523,6 +524,7 @@ open class FileListFragment : MultiSelectFragment(
             multiSelectManager = multiSelectManager,
             fileList = FileController.emptyList(mainViewModel.realm),
             lifecycle = viewLifecycleOwner.lifecycle,
+            isActionMenuHidden = isActionMenuHidden,
         ).apply {
             stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
             setHasStableIds(this@FileListFragment !is SearchFragment)
