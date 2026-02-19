@@ -504,7 +504,7 @@
     <string name="menuTitle">Menu</string>
     <string name="modalCommentAddTitle">Edit a comment</string>
     <string name="modalCommentDeleteDescription">Do you really want to delete your comment?</string>
-    <string name="modalCreateFileSucces">%s created successfully</string>
+    <string name="modalCreateFileSuccess">%s created successfully</string>
     <string name="modalCreateFileTitle">Create a file</string>
     <string name="modalDeleteCategoryDescription">Do you want to delete the category %s permanently for all kDrive users?</string>
     <plurals name="modalDeleteDescription">

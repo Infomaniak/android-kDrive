@@ -205,7 +205,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
             mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
-                        showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name), showAboveFab = true)
+                        showSnackbar(getString(R.string.modalCreateFileSuccess, createFile.name), showAboveFab = true)
                         apiResponse.data?.let { file -> requireContext().openOnlyOfficeActivity(file) }
                     } else {
                         val error = apiResponse.translateError()

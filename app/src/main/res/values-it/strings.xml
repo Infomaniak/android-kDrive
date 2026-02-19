@@ -493,7 +493,7 @@
     <string name="menuTitle">Menu</string>
     <string name="modalCommentAddTitle">Modifica un commento</string>
     <string name="modalCommentDeleteDescription">Rimuovere veramente questo commento?</string>
-    <string name="modalCreateFileSucces">%s creato con successo</string>
+    <string name="modalCreateFileSuccess">%s creato con successo</string>
     <string name="modalCreateFileTitle">Crea un file</string>
     <string name="modalDeleteCategoryDescription">Vuoi eliminare definitivamente la categoria %s per tutti gli utenti del kDrive?</string>
     <plurals name="modalDeleteDescription">
