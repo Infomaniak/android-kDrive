@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,6 +64,7 @@ open class FileAdapter(
     private val multiSelectManager: MultiSelectManager,
     var fileList: OrderedRealmCollection<File> = RealmList(),
     override val lifecycle: Lifecycle,
+    val isActionMenuHidden: Boolean,
 ) : RealmRecyclerViewAdapter<File, FileViewHolder>(fileList, true, true), LifecycleOwner {
 
     private var fileAsyncListDiffer: AsyncListDiffer<File>? = null
@@ -368,15 +369,21 @@ open class FileAdapter(
         filePreview.isInvisible = file.isImporting() || (isSelectedFile(file) && !isGrid)
     }
 
-    private fun FileItemViewHolder.setupMenuButton(file: File) = menuButton.apply {
-        isGone = uploadInProgress
+    private fun FileItemViewHolder.setupMenuButton(file: File) {
+        onMenuClicked?.takeUnless { hideMenu(file) }
+            ?.let { onMenuClicked ->
+                menuButton.isVisible = true
+                menuButton.setOnClickListener { onMenuClicked(file) }
+            }
+    }
+
+    private fun hideMenu(file: File): Boolean {
+        return uploadInProgress
                 || isSelectingFolder
-                || file.isFromActivities
+                || isActionMenuHidden
                 || file.isFromSearch
                 || (offlineMode && !file.isOffline)
                 || !publicShareCanDownload
-
-        setOnClickListener { onMenuClicked?.invoke(file) }
     }
 
     private fun FileItemViewHolder.setupCardClicksListeners(file: File, position: Int) = with(multiSelectManager) {

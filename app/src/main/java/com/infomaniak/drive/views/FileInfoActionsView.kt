@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,6 +106,8 @@ class FileInfoActionsView @JvmOverloads constructor(
 
     val openWith get() = binding.openWith
 
+    private var hideActions: Boolean = false
+
     fun init(
         ownerFragment: Fragment,
         mainViewModel: MainViewModel,
@@ -113,6 +115,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         onItemClickListener: OnItemClickListener,
         selectFolderResultLauncher: ActivityResultLauncher<Intent>,
         isSharedWithMe: Boolean = false,
+        hideActions: Boolean,
     ) {
         this.isSharedWithMe = isSharedWithMe
         this.mainViewModel = mainViewModel
@@ -120,6 +123,7 @@ class FileInfoActionsView @JvmOverloads constructor(
         this.onItemClickListener = onItemClickListener
         this.ownerFragment = ownerFragment
         this.selectFolderResultLauncher = selectFolderResultLauncher
+        this.hideActions = hideActions
         initOnClickListeners()
     }
 
@@ -175,7 +179,7 @@ class FileInfoActionsView @JvmOverloads constructor(
                 && !file.isDisabled()
                 && !isSharedWithMe
 
-        if (currentFile.isFromActivities) {
+        if (hideActions) {
             quickActionsLayout.isGone = true
             actionListLayout.isGone = true
 
