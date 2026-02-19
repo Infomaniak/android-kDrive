@@ -348,8 +348,8 @@ class SyncSettingsActivity : BaseActivity() {
         syncSettingsViewModel.onlyWifiSyncMedia.observe(this) {
             if (it != oldOnlyWifiSyncMedia) editNumber++ else editNumber--
             changeSaveButtonStatus()
-            binding.syncOnlyWifi.description =
-                getString(if (it) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle)
+            val descriptionResId = if (it) R.string.syncOnlyWifiTitle else R.string.syncWifiAndMobileDataTitle
+            binding.syncOnlyWifi.description = getString(descriptionResId)
         }
     }
 
