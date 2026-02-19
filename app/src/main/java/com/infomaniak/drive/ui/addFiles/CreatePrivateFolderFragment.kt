@@ -71,7 +71,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
         createFolder(onlyForMe) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)
-                showSnackbar(R.string.createPrivateFolderSucces, true)
+                showSnackbar(R.string.createPrivateFolderSuccess, true)
                 if (redirectToShareDetails) {
                     safelyNavigate(
                         CreatePrivateFolderFragmentDirections.actionCreatePrivateFolderFragmentToFileShareDetailsFragment(

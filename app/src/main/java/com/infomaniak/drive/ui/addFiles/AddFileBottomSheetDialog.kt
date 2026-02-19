@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,14 +32,14 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
-import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
-import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MainApplication
@@ -205,7 +205,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
             mainViewModel.createOffice(currentFolderFile.driveId, currentFolderFile.id, createFile)
                 .observe(viewLifecycleOwner) { apiResponse ->
                     if (apiResponse.isSuccess()) {
-                        showSnackbar(getString(R.string.modalCreateFileSucces, createFile.name), showAboveFab = true)
+                        showSnackbar(getString(R.string.modalCreateFileSuccess, createFile.name), showAboveFab = true)
                         apiResponse.data?.let { file -> requireContext().openOnlyOfficeActivity(file) }
                     } else {
                         val error = apiResponse.translateError()
