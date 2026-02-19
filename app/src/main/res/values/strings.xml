@@ -216,7 +216,7 @@
     <string name="createCategoryTitle">Create a category</string>
     <string name="createCommonFolderAllUsersDescription">All kDrive %s users will automatically have access to this folder.</string>
     <string name="createCommonFolderDescription">Who would you like to share this common folder with?</string>
-    <string name="createCommonFolderSucces">Organization folder created successfully</string>
+    <string name="createCommonFolderSuccess">Organization folder created successfully</string>
     <string name="createCommonFolderTitle">Create an organization folder</string>
     <string name="createDatedSubFoldersDescription">Automatically create subfolders with the month and year of the photo</string>
     <string name="createDatedSubFoldersTitle">Create one folder per month</string>
@@ -239,7 +239,7 @@
     <string name="createFolderSomeUsersTitle">Some users</string>
     <string name="createFolderTitle">Create folder</string>
     <string name="createFolderValidUntilDescription">Once the date has passed, users will no longer be able to transfer files.</string>
-    <string name="createPrivateFolderSucces">Folder created successfully</string>
+    <string name="createPrivateFolderSuccess">Folder created successfully</string>
     <string name="deleteMyAccount">Delete my account</string>
     <string name="deletePicturesDescription">The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion\n</string>
     <string name="deletePicturesTitle">Delete photos</string>
@@ -504,7 +504,7 @@
     <string name="menuTitle">Menu</string>
     <string name="modalCommentAddTitle">Edit a comment</string>
     <string name="modalCommentDeleteDescription">Do you really want to delete your comment?</string>
-    <string name="modalCreateFileSucces">%s created successfully</string>
+    <string name="modalCreateFileSuccess">%s created successfully</string>
     <string name="modalCreateFileTitle">Create a file</string>
     <string name="modalDeleteCategoryDescription">Do you want to delete the category %s permanently for all kDrive users?</string>
     <plurals name="modalDeleteDescription">
