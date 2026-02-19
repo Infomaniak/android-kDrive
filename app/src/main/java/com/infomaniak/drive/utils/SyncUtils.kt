@@ -22,7 +22,6 @@ import android.database.Cursor
 import android.os.Build.VERSION.SDK_INT
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import androidx.fragment.app.FragmentActivity
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -102,19 +101,19 @@ object SyncUtils {
 
     private fun Long?.isValidDate() = this != null && this > 0
 
-    fun FragmentActivity.launchAllUpload(syncPermissions: DrivePermissions) {
+    fun Context.launchAllUpload(syncPermissions: DrivePermissions) {
         if (AccountUtils.isEnableAppSync() &&
             syncPermissions.hasNeededPermissions() &&
             UploadFile.getAllPendingUploads().isNotEmpty()
         ) {
-            syncImmediately()
+            syncImmediately(isAutomaticTrigger = true)
         }
     }
 
-    fun Context.syncImmediately(data: Data = Data.EMPTY, force: Boolean = false) {
-        if (!isSyncActive() || force) {
+    fun Context.syncImmediately(data: Data = Data.EMPTY, isAutomaticTrigger: Boolean) {
+        if (!isSyncActive() || data != Data.EMPTY) {
             val request = OneTimeWorkRequestBuilder<UploadWorker>()
-                .setConstraints(UploadWorker.workConstraints())
+                .setConstraints(UploadWorker.workConstraints(isAutomaticUpload = isAutomaticTrigger))
                 .setExpeditedIfAvailable()
                 .setInputData(data)
                 .build()

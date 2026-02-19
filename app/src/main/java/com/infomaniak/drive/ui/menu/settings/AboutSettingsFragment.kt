@@ -62,7 +62,7 @@ class AboutSettingsFragment : Fragment() {
             requireContext().openUrl(GPL_LICENSE_URL)
         }
 
-        appVersionLayout.setDescription("v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}")
+        appVersionLayout.description = "v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}"
 
         binding.root.enableEdgeToEdge()
     }

@@ -127,7 +127,7 @@ class ImportFilesDialog : DialogFragment() {
             }
         }
 
-        if (successCount > 0) appCtx.syncImmediately()
+        if (successCount > 0) appCtx.syncImmediately(isAutomaticTrigger = false)
         currentCoroutineContext().ensureActive()
         dismissAllowingStateLoss()
     }
