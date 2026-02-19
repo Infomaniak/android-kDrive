@@ -41,6 +41,7 @@ import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
+import handleActionDone
 import com.infomaniak.core.network.models.exceptions.NetworkException as ApiControllerNetworkException
 
 class PublicSharePasswordFragment : Fragment() {
@@ -56,7 +57,7 @@ class PublicSharePasswordFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupValidationButton()
-
+        publicSharePasswordEditText.handleActionDone(::attemptPasswordValidation)
         publicSharePasswordEditText.addTextChangedListener { publicSharePasswordLayout.error = null }
         observeSubmitPasswordResult()
         observeInitResult()
@@ -70,14 +71,16 @@ class PublicSharePasswordFragment : Fragment() {
 
     private fun setupValidationButton() = with(binding.passwordValidateButton) {
         initProgress(viewLifecycleOwner)
-        setOnClickListener {
-            if (isFieldBlank()) return@setOnClickListener
+        setOnClickListener { attemptPasswordValidation() }
+    }
 
-            showProgressCatching()
-            trackPublicShareActionEvent(MatomoName.ValidatePassword)
-            val password = binding.publicSharePasswordEditText.text?.trim().toString()
-            publicShareViewModel.submitPublicSharePassword(password)
-        }
+    private fun attemptPasswordValidation() {
+        if (isFieldBlank()) return
+
+        binding.passwordValidateButton.showProgressCatching()
+        trackPublicShareActionEvent(MatomoName.ValidatePassword)
+        val password = binding.publicSharePasswordEditText.text?.trim().toString()
+        publicShareViewModel.submitPublicSharePassword(password)
     }
 
     private fun observeSubmitPasswordResult() = with(binding) {
