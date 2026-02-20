@@ -194,26 +194,25 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val notSyncFiles = mutableListOf<UploadFile>()
         val uploadFiles: List<UploadFile> = retrievePendingFiles()
 
-        if (uploadFiles.isEmpty()) return@autoCancelScope Result.success()
+        if (uploadFiles.isNotEmpty()) {
+            initUploadPendingCounter(uploadFiles.size)
 
-        initUploadPendingCounter(uploadFiles.size)
-
-        for ((index, fileToUpload) in uploadFiles.withIndex()) {
-            val isLastFile = index == uploadFiles.lastIndex
-            if (fileToUpload.canUpload()) {
-                uploadFile(fileToUpload, isLastFile)
-            } else {
-                notSyncFiles += fileToUpload
+            for ((index, fileToUpload) in uploadFiles.withIndex()) {
+                val isLastFile = index == uploadFiles.lastIndex
+                if (fileToUpload.canUpload()) {
+                    uploadFile(fileToUpload, isLastFile)
+                } else {
+                    notSyncFiles += fileToUpload
+                }
+                pendingUploadCounter.dec()
+                // Stop recursion if all files have been processed and there are only errors.
+                val allNotUploadedCount = failedNamesMap.count() + notSyncFiles.count()
+                if (isLastFile && allNotUploadedCount == UploadFile.getAllPendingUploadsCount()) break
+                // If there is a new file during the sync and it has priority (ex: Manual uploads),
+                // then we start again in order to process the priority files first.
+                if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@autoCancelScope uploadPendingFiles()
             }
-            pendingUploadCounter.dec()
-            // Stop recursion if all files have been processed and there are only errors.
-            val allNotUploadedCount = failedNamesMap.count() + notSyncFiles.count()
-            if (isLastFile && allNotUploadedCount == UploadFile.getAllPendingUploadsCount()) break
-            // If there is a new file during the sync and it has priority (ex: Manual uploads),
-            // then we start again in order to process the priority files first.
-            if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@autoCancelScope uploadPendingFiles()
         }
-
         uploadedCount = successCount
 
         SentryLog.d(TAG, "uploadPendingFiles: finish with $uploadedCount uploaded")
