@@ -41,6 +41,7 @@ import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.getFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
 import com.infomaniak.core.network.api.ApiController.gson
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
@@ -61,7 +62,6 @@ import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.uri
@@ -373,7 +373,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     private fun progressForegroundInfo(pendingCount: Int): ForegroundInfo {
-        val notification = UploadNotifications.getCurrentUploadNotification(applicationContext, pendingCount).build()
+        val notification = UploadNotifications.getCurrentUploadNotification(pendingCount).build()
         val foregroundInfo = when {
             SDK_INT >= 29 -> {
                 ForegroundInfo(
@@ -599,7 +599,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             buildGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
                 setContentText(getString(R.string.noSyncFolderNotificationDescription))
                 setContentIntent(pendingIntent)
-                notificationManagerCompat.notifyCompat(applicationContext, NotificationUtils.SYNC_CONFIG_ID, this.build())
+                notificationManagerCompat.notifyCompat(NotificationUtils.SYNC_CONFIG_ID, this)
             }
         }
 
