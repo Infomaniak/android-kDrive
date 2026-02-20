@@ -109,6 +109,7 @@ class PublicSharePasswordFragment : Fragment() {
         safelyNavigate(
             PublicSharePasswordFragmentDirections.actionPublicSharePasswordFragmentToPublicShareListFragment(
                 fileId = fileId,
+                fileName = getString(R.string.sharedWithMeTitle)
             )
         )
     }
