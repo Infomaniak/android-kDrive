@@ -360,7 +360,7 @@ class PublicShareListFragment : FileListFragment() {
                 childrenLiveData.value = emptyFilesResult
                 cancelDownload()
 
-                if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
+                if (folderId == ROOT_SHARED_FILE_ID || rootIsNotInitOrAFile()) {
                     downloadPublicShareRootFile()
                 } else {
                     getFiles(folderId, fileListViewModel.sortType, isNewSort)
