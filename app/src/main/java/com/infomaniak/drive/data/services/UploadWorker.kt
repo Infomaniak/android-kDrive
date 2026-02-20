@@ -82,8 +82,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import splitties.systemservices.connectivityManager
 import splitties.init.appCtx
+import splitties.systemservices.connectivityManager
 import java.util.Date
 
 class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWorker(appContext, params) {
@@ -192,8 +192,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private suspend fun uploadPendingFiles(): Result = autoCancelScope {
         val uploadFiles: List<UploadFile> = retrievePendingFiles()
-		initUploadPendingCounter(uploadFiles.size)
         initUploadPendingCounter(uploadFiles.size)
+
         val notSyncFiles = mutableListOf<UploadFile>()
         for ((index, fileToUpload) in uploadFiles.withIndex()) {
             val isLastFile = index == uploadFiles.lastIndex
@@ -230,7 +230,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         isSync() -> UploadFile.getAppSyncSettings()?.onlyWifiSyncMedia == false
         isSyncOffline() -> !AppSettings.onlyWifiSyncOffline
         else -> true
-	}
+    }
 
     private fun retrievePendingFiles(): List<UploadFile> {
         return getRealmInstance().use { realm ->
