@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,15 +44,9 @@ object UploadNotifications {
 
     const val NOTIFICATION_FILES_LIMIT = 5
 
-    fun getCurrentUploadNotification(pendingCount: Int): NotificationCompat.Builder {
-        val pendingDescription = appCtx.resources.getQuantityString(
-            R.plurals.uploadInProgressNumberFile,
-            pendingCount,
-            pendingCount
-        )
+    fun prepareCurrentUploadNotification(): NotificationCompat.Builder {
         return getNotificationBuilder(
             title = appCtx.getString(R.string.uploadInProgressTitle),
-            description = pendingDescription,
             contentIntent = buildLaunchActivityPendingIntent(UPLOAD_SERVICE_ID)
         )
     }
@@ -213,13 +207,12 @@ object UploadNotifications {
         locateButton: Boolean = false
     ) {
         val notificationManagerCompat = NotificationManagerCompat.from(appCtx)
-        val notificationBuilder = getNotificationBuilder(title, description, contentIntent, locateButton)
+        val notificationBuilder = getNotificationBuilder(title, contentIntent, locateButton).appendBigDescription(description)
         notificationManagerCompat.notifyCompat(notificationId, notificationBuilder)
     }
 
     private fun getNotificationBuilder(
         title: String,
-        description: String,
         contentIntent: PendingIntent? = null,
         locateButton: Boolean = false
     ): NotificationCompat.Builder {
@@ -227,7 +220,6 @@ object UploadNotifications {
             setTicker(title)
             setAutoCancel(true)
             setContentTitle(title)
-            setStyle(NotificationCompat.BigTextStyle().bigText(description))
             setContentIntent(contentIntent)
             if (locateButton) {
                 addAction(
@@ -235,6 +227,10 @@ object UploadNotifications {
                 )
             }
         }
+    }
+
+    fun NotificationCompat.Builder.appendBigDescription(description: String): NotificationCompat.Builder {
+        return setStyle(NotificationCompat.BigTextStyle().bigText(description))
     }
 
     private fun UploadFile.uploadInterruptedNotification(
