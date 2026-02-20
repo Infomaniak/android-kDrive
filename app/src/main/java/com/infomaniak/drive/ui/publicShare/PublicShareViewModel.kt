@@ -280,6 +280,8 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         }
     }
 
+    fun isFolder(): Boolean = rootSharedFile.value?.isFolder() == true
+
     data class PublicShareFilesResult(
         val files: List<File>,
         val shouldUpdate: Boolean,
