@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,8 +68,10 @@ class BulkOperationWorker(context: Context, workerParams: WorkerParameters) : Li
                 foregroundServiceBehavior = Notification.FOREGROUND_SERVICE_IMMEDIATE
             }
         }.build()
-        val foregroundInfo =
-            ForegroundInfoExt.build(notificationId, notification) { ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC }
+
+        val foregroundInfo = ForegroundInfoExt.build(notificationId, notification) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+        }
         setForegroundAsync(foregroundInfo)
         lastReception = Date()
 
