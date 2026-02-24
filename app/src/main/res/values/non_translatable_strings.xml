@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Infomaniak kDrive - Android
+  ~ Copyright (C) 2026 Infomaniak Network SA
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<resources>
+    <string name="app_name" translatable="false">kDrive</string>
+    <string name="allCommonDocuments" translatable="false">Common Documents</string>
+
+    <string name="notification_channel_id_comment" translatable="false">comment_channel_id</string>
+    <string name="notification_channel_id_general" translatable="false">general_channel_id</string>
+    <string name="notification_channel_id_shared" translatable="false">shared_channel_id</string>
+    <string name="notification_channel_id_upload_download" translatable="false">upload_download_channel_id</string>
+    <string name="notification_channel_id_upload_service" translatable="false">sync_service_channel_id</string>
+
+    <string name="fileDetailsInfoFolderContentTemplate" translatable="false">%1s &amp; %2s</string>
+</resources>
