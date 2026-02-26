@@ -158,6 +158,7 @@ dependencies {
     implementation(libs.infomaniak.core)
     implementation(libs.infomaniak.core.auth)
     implementation(libs.infomaniak.core.avatar)
+    implementation(libs.infomaniak.core.bugtracker)
     implementation(libs.infomaniak.core.coil)
     implementation(libs.infomaniak.core.crossapplogin)
     implementation(libs.infomaniak.core.fragmentnavigation)
@@ -182,7 +183,6 @@ dependencies {
 
     implementation(project(":Core:Legacy"))
     implementation(project(":Core:Legacy:AppLock"))
-    implementation(project(":Core:Legacy:BugTracker"))
 
     // Compose
     implementation(platform(core.compose.bom))

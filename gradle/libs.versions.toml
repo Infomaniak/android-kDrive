@@ -43,6 +43,7 @@ gs-sdk = { module = "com.geniusscansdk:gssdk", version.ref = "gsSdk" }
 infomaniak-core = { module = "com.infomaniak.core:Common" }
 infomaniak-core-auth = { module = "com.infomaniak.core:Auth" }
 infomaniak-core-avatar = { module = "com.infomaniak.core:Avatar" }
+infomaniak-core-bugtracker = { module = "com.infomaniak.core:BugTracker" }
 infomaniak-core-coil = { module = "com.infomaniak.core:Coil" }
 infomaniak-core-crossapplogin = { module = "com.infomaniak.core:CrossAppLogin.Front" }
 infomaniak-core-fragmentnavigation = { module = "com.infomaniak.core:FragmentNavigation" }
