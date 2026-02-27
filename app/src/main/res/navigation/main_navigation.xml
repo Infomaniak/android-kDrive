@@ -189,6 +189,9 @@
             android:name="shouldShowSmallFab"
             android:defaultValue="false"
             app:argType="boolean" />
+        <argument
+            android:name="hideActions"
+            app:argType="boolean" />
         <action
             android:id="@+id/action_fileInfoActionsBottomSheetDialog_to_fileShareDetailsFragment"
             app:destination="@id/fileShareDetailsFragment" />
@@ -798,8 +801,8 @@
             app:argType="integer" />
         <argument
             android:name="isSharedWithMe"
-            app:argType="boolean"
-            android:defaultValue="false" />
+            android:defaultValue="false"
+            app:argType="boolean" />
     </dialog>
 
     <fragment
