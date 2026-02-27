@@ -25,6 +25,7 @@ import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toFile
 import androidx.lifecycle.LiveData
@@ -36,11 +37,13 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
+import com.infomaniak.core.common.autoCancelScope
 import com.infomaniak.core.legacy.utils.calculateFileSize
 import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.getFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
 import com.infomaniak.core.network.api.ApiController.gson
+import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.api.FileChunkSizeManager.AllowedFileSizeExceededException
@@ -52,16 +55,18 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UploadFile.Companion.getRealmInstance
 import com.infomaniak.drive.data.services.UploadWorkerErrorHandling.runUploadCatching
 import com.infomaniak.drive.data.sync.UploadNotifications
+import com.infomaniak.drive.data.sync.UploadNotifications.appendBigDescription
 import com.infomaniak.drive.data.sync.UploadNotifications.showUploadedFilesNotification
 import com.infomaniak.drive.data.sync.UploadNotifications.syncSettingsActivityPendingIntent
 import com.infomaniak.drive.utils.DrivePermissions
+import com.infomaniak.drive.utils.ForegroundInfoExt
 import com.infomaniak.drive.utils.MediaFoldersProvider
 import com.infomaniak.drive.utils.MediaFoldersProvider.IMAGES_BUCKET_ID
 import com.infomaniak.drive.utils.MediaFoldersProvider.VIDEO_BUCKET_ID
 import com.infomaniak.drive.utils.NotificationUtils
+import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_SERVICE_ID
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
-import com.infomaniak.drive.utils.NotificationUtils.cancelNotification
-import com.infomaniak.drive.utils.NotificationUtils.notifyCompat
+import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
 import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.uri
@@ -72,11 +77,12 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import splitties.init.appCtx
 import splitties.systemservices.connectivityManager
 import java.util.Date
 
@@ -91,9 +97,11 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     var currentUploadFile: UploadFile? = null
     var currentUploadTask: UploadTask? = null
     var uploadedCount = 0
-    private var pendingCount = 0
-
+    private val pendingUploadCounter: MutableStateFlow<Int> = MutableStateFlow(0)
     private val readMediaPermissions = DrivePermissions.permissionsFor(DrivePermissions.Type.ReadingMediaForSync).toTypedArray()
+    private val notificationManagerCompat by lazy { NotificationManagerCompat.from(applicationContext) }
+    private val uploadNotificationBuilder by lazy { applicationContext.uploadProgressNotification() }
+    private val currentUploadsNotificationBuilder by lazy { UploadNotifications.prepareCurrentUploadNotification() }
 
     override suspend fun doWork(): Result {
 
@@ -156,7 +164,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
-        val pendingCount = if (this.pendingCount > 0) this.pendingCount else UploadFile.getAllPendingUploadsCount()
+        val pendingCount = pendingUploadCounter.value.takeIf { it > 0 } ?: UploadFile.getAllPendingUploadsCount()
         return progressForegroundInfo(pendingCount)
     }
 
@@ -182,37 +190,29 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         return null
     }
 
-    private suspend fun uploadPendingFiles(): Result = withContext(Dispatchers.IO) {
-        var uploadFiles: List<UploadFile>
-
-        getRealmInstance().use { realm ->
-            uploadFiles = UploadFile.getAllPendingUploads(realm)
-            pendingCount = uploadFiles.size
-
-            if (pendingCount > 0) applicationContext.cancelNotification(NotificationUtils.UPLOAD_STATUS_ID)
-
-            checkUploadCountReliability(realm)
-        }
-
-        SentryLog.d(TAG, "uploadPendingFiles> upload for ${uploadFiles.count()}")
+    private suspend fun uploadPendingFiles(): Result = autoCancelScope {
         val notSyncFiles = mutableListOf<UploadFile>()
-        for ((index, fileToUpload) in uploadFiles.withIndex()) {
-            val isLastFile = index == uploadFiles.lastIndex
-            if (fileToUpload.canUpload()) {
-                uploadFile(fileToUpload, isLastFile)
-            } else {
-                notSyncFiles += fileToUpload
+        val uploadFiles: List<UploadFile> = retrievePendingFiles()
+
+        if (uploadFiles.isNotEmpty()) {
+            initUploadPendingCounter(uploadFiles.size)
+
+            for ((index, fileToUpload) in uploadFiles.withIndex()) {
+                val isLastFile = index == uploadFiles.lastIndex
+                if (fileToUpload.canUpload()) {
+                    uploadFile(fileToUpload, isLastFile)
+                } else {
+                    notSyncFiles += fileToUpload
+                }
+                pendingUploadCounter.dec()
+                // Stop recursion if all files have been processed and there are only errors.
+                val allNotUploadedCount = failedNamesMap.count() + notSyncFiles.count()
+                if (isLastFile && allNotUploadedCount == UploadFile.getAllPendingUploadsCount()) break
+                // If there is a new file during the sync and it has priority (ex: Manual uploads),
+                // then we start again in order to process the priority files first.
+                if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@autoCancelScope uploadPendingFiles()
             }
-            pendingCount--
-
-            // Stop recursion if all files have been processed and there are only errors.
-            val allNotUploadedCount = failedNamesMap.count() + notSyncFiles.count()
-            if (isLastFile && allNotUploadedCount == UploadFile.getAllPendingUploadsCount()) break
-            // If there is a new file during the sync and it has priority (ex: Manual uploads),
-            // then we start again in order to process the priority files first.
-            if (fileToUpload.isSync() && UploadFile.getAllPendingPriorityFilesCount() > 0) return@withContext uploadPendingFiles()
         }
-
         uploadedCount = successCount
 
         SentryLog.d(TAG, "uploadPendingFiles: finish with $uploadedCount uploaded")
@@ -232,6 +232,24 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         isSync() -> UploadFile.getAppSyncSettings()?.onlyWifiSyncMedia == false
         isSyncOffline() -> !AppSettings.onlyWifiSyncOffline
         else -> true
+    }
+
+    private fun retrievePendingFiles(): List<UploadFile> {
+        return getRealmInstance().use { realm ->
+            UploadFile.getAllPendingUploads(realm).also {
+                checkUploadCountReliability(realm, it.size)
+            }
+        }
+    }
+
+    private fun CoroutineScope.initUploadPendingCounter(size: Int) {
+        removePreviousStatusNotification()
+        launch { updatePendingUploadCounterNotification(size) }
+        SentryLog.d(TAG, "uploadPendingFiles> upload for $size")
+    }
+
+    private fun removePreviousStatusNotification() {
+        notificationManagerCompat.cancel(NotificationUtils.UPLOAD_STATUS_ID)
     }
 
     private suspend fun uploadFile(uploadFile: UploadFile, isLastFile: Boolean) {
@@ -261,7 +279,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun checkUploadCountReliability(realm: Realm) {
+    private fun checkUploadCountReliability(realm: Realm, pendingCount: Int) {
         val allPendingUploadsCount = UploadFile.getAllPendingUploadsCount(realm)
         if (allPendingUploadsCount != pendingCount) {
             val allPendingUploadsWithoutPriorityCount = UploadFile.getAllPendingUploadsWithoutPriorityCount(realm)
@@ -282,8 +300,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         val uri = getUriObject()
 
         currentUploadFile = this@upload
-        applicationContext.cancelNotification(NotificationUtils.CURRENT_UPLOAD_ID)
-        updateUploadCountNotification()
 
         try {
             if (isSchemeFile()) {
@@ -347,7 +363,13 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         SentryLog.d(TAG, "startUploadFile (size: $fileSize)")
 
-        return UploadTask(context = applicationContext, uploadFile = this, setProgress = ::setProgress).run {
+        return UploadTask(
+            context = applicationContext,
+            uploadFile = this,
+            setProgress = ::setProgress,
+            notificationManagerCompat = notificationManagerCompat,
+            uploadNotificationBuilder = uploadNotificationBuilder
+        ).run {
             currentUploadTask = this
             start().also { isUploaded ->
                 if (isUploaded) {
@@ -361,32 +383,33 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private var uploadCountNotificationJob: Job? = null
-    private fun CoroutineScope.updateUploadCountNotification() {
-        uploadCountNotificationJob?.cancel()
-        uploadCountNotificationJob = launch {
-            // We wait a little otherwise it is too fast and the notification may not be updated
-            delay(NotificationUtils.ELAPSED_TIME)
-            val foregroundInfo = progressForegroundInfo(pendingCount)
-            setForegroundAsync(foregroundInfo)
+    private suspend fun updatePendingUploadCounterNotification(numberPendingUpload: Int) {
+        pendingUploadCounter.emit(numberPendingUpload)
+        setForeground(progressForegroundInfo(numberPendingUpload))
+
+        pendingUploadCounter.collect { pendingCount ->
+            notificationManagerCompat.notifyCompat(
+                notificationId = UPLOAD_SERVICE_ID,
+                builder = currentUploadsNotificationBuilder.appendPendingCount(pendingCount)
+            )
         }
     }
 
-    private fun progressForegroundInfo(pendingCount: Int): ForegroundInfo {
-        val notification = UploadNotifications.getCurrentUploadNotification(applicationContext, pendingCount).build()
-        val foregroundInfo = when {
-            SDK_INT >= 29 -> {
-                ForegroundInfo(
-                    /* notificationId = */ NotificationUtils.UPLOAD_SERVICE_ID,
-                    /* notification = */ notification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC,
-                )
-            }
-            else -> {
-                ForegroundInfo(NotificationUtils.UPLOAD_SERVICE_ID, notification)
-            }
+    private fun progressForegroundInfo(count: Int): ForegroundInfo {
+        val notification = currentUploadsNotificationBuilder.appendPendingCount(count).build()
+        return ForegroundInfoExt.build(notificationId = UPLOAD_SERVICE_ID, notification = notification) {
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         }
-        return foregroundInfo
+    }
+
+    private fun NotificationCompat.Builder.appendPendingCount(pendingCount: Int): NotificationCompat.Builder {
+        return appendBigDescription(
+            appCtx.resources.getQuantityString(
+                R.plurals.uploadInProgressNumberFile,
+                pendingCount,
+                pendingCount
+            )
+        )
     }
 
     private fun UploadFile.handleException(exception: Exception) {
@@ -561,6 +584,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
     private fun isMeteredNetwork() = runCatching { connectivityManager.isActiveNetworkMetered }.getOrDefault(true)
 
+    private fun MutableStateFlow<Int>.dec() = update { it.dec() }
+
     companion object {
         const val TAG = "upload_worker"
         const val PERIODIC_TAG = "upload_worker_periodic"
@@ -599,7 +624,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             buildGeneralNotification(getString(R.string.noSyncFolderNotificationTitle)).apply {
                 setContentText(getString(R.string.noSyncFolderNotificationDescription))
                 setContentIntent(pendingIntent)
-                notificationManagerCompat.notifyCompat(applicationContext, NotificationUtils.SYNC_CONFIG_ID, this.build())
+                notificationManagerCompat.notifyCompat(NotificationUtils.SYNC_CONFIG_ID, this)
             }
         }
 

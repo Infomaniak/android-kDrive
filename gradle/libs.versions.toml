@@ -40,31 +40,6 @@ firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx"
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
 gravity-snap-helper = { module = "com.github.rubensousa:gravitysnaphelper", version.ref = "gravitySnapHelper" }
 gs-sdk = { module = "com.geniusscansdk:gssdk", version.ref = "gsSdk" }
-infomaniak-core = { module = "com.infomaniak.core:Common" }
-infomaniak-core-auth = { module = "com.infomaniak.core:Auth" }
-infomaniak-core-avatar = { module = "com.infomaniak.core:Avatar" }
-infomaniak-core-bugtracker = { module = "com.infomaniak.core:BugTracker" }
-infomaniak-core-coil = { module = "com.infomaniak.core:Coil" }
-infomaniak-core-crossapplogin = { module = "com.infomaniak.core:CrossAppLogin.Front" }
-infomaniak-core-fragmentnavigation = { module = "com.infomaniak.core:FragmentNavigation" }
-infomaniak-core-inappreview = { module = "com.infomaniak.core:InAppReview" }
-infomaniak-core-inappupdate = { module = "com.infomaniak.core:InAppUpdate" }
-infomaniak-core-ksuite = { module = "com.infomaniak.core:KSuite" }
-infomaniak-core-ksuite-pro = { module = "com.infomaniak.core:KSuite.KSuitePro" }
-infomaniak-core-ksuite-myksuite = { module = "com.infomaniak.core:KSuite.MyKSuite" }
-infomaniak-core-ktor = { module = "com.infomaniak.core:Ktor" }
-infomaniak-core-matomo = { module = "com.infomaniak.core:Matomo" }
-infomaniak-core-network = { module = "com.infomaniak.core:Network" }
-infomaniak-core-recyclerview = { module = "com.infomaniak.core:RecyclerView" }
-infomaniak-core-sentry = { module = "com.infomaniak.core:Sentry" }
-infomaniak-core-thumbnails = { module = "com.infomaniak.core:Thumbnails" }
-infomaniak-core-twofactorauth-back = { module = "com.infomaniak.core:TwoFactorAuth.Back.WithUserDb" }
-infomaniak-core-twofactorauth-front = { module = "com.infomaniak.core:TwoFactorAuth.Front" }
-infomaniak-core-ui = { module = "com.infomaniak.core:Ui" }
-infomaniak-core-ui-compose-basics = { module = "com.infomaniak.core:Ui.Compose.Basics" }
-infomaniak-core-ui-compose-margin = { module = "com.infomaniak.core:Ui.Compose.Margin" }
-infomaniak-core-ui-compose-materialthemefromxml = { module = "com.infomaniak.core:Ui.Compose.MaterialThemeFromXml" }
-infomaniak-core-ui-view-edgetoedge = { module = "com.infomaniak.core:Ui.View.EdgeToEdge" }
 kotlin-faker = { module = "io.github.serpro69:kotlin-faker", version.ref = "kotlinFaker" }
 material-date-time-picker = { module = "com.wdullaer:materialdatetimepicker", version.ref = "materialDateTimePicker" }
 mock-web-server = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockWebServer" }
