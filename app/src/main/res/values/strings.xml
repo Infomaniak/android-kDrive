@@ -583,7 +583,6 @@
     <string name="publicShareOutdatedLinkTitle">The files are no longer available</string>
     <string name="publicSharePasswordNeededDescription">Please enter the password provided to access the content.</string>
     <string name="publicSharePasswordNeededTitle">Protected content</string>
-    <string name="publicSharePasswordNotSupportedDescription">Password-protected links are not yet available on the mobile application.</string>
     <string name="publicSharedLinkTitle">Public sharing link</string>
     <string name="recentActivityMeTitle">By me</string>
     <string name="recentActivityMyTeam">By my team</string>

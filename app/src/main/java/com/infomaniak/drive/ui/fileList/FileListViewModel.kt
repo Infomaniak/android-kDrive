@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -228,7 +228,12 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
     fun getFileCount(folder: File): LiveData<FileCount> = liveData(Dispatchers.IO) {
         lastItemCount?.let { emit(it) }
         val apiResponse = if (folder.isPublicShared()) {
-            PublicShareApiRepository.getPublicShareFileCount(folder.driveId, folder.publicShareUuid, folder.id)
+            PublicShareApiRepository.getPublicShareFileCount(
+                driveId = folder.driveId,
+                linkUuid = folder.publicShareUuid,
+                fileId = folder.id,
+                authToken = folder.publicShareAuthToken,
+            )
         } else {
             ApiRepository.getFileCount(folder)
         }
