@@ -30,5 +30,4 @@ include(
     ":app",
     ":Core:Legacy",
     ":Core:Legacy:AppLock",
-    ":Core:Legacy:BugTracker",
 )
