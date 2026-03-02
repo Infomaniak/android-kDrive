@@ -1,0 +1,3 @@
+- Ajout d'un paramètre pour choisir quelles synchronisations doivent être effectuées uniquement en Wi-Fi
+- Correction du clignotement des notifications d'envoi
+- Correction du nombre d'envois en attente dans l'indicateur
