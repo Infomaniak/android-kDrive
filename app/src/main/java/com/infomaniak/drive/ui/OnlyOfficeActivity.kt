@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,13 @@ import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.addCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
+import androidx.lifecycle.lifecycleScope
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebSettingsCompat.FORCE_DARK_OFF
 import androidx.webkit.WebSettingsCompat.FORCE_DARK_ON
@@ -68,46 +70,58 @@ import java.net.URL
 class OnlyOfficeActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivityOnlyOfficeBinding.inflate(layoutInflater) }
-
     private var filePathCallback: ValueCallback<Array<out Uri?>?>? = null
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
         filePathCallback?.onReceiveValue(uris.toTypedArray())
         filePathCallback = null
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?): Unit = with(binding) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         addComposeOverlay { TwoFactorAuthApprovalAutoManagedBottomSheet(twoFactorAuthManager) }
 
-        val url = intent.getStringExtra(ONLYOFFICE_URL_TAG)!!
-        val filename = intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)!!
-        val headers = mapOf("Authorization" to "Bearer ${AccountUtils.currentUser?.apiToken?.accessToken}")
-
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 
         setDarkMode()
 
-        webView.apply {
-            settings.javaScriptEnabled = true
-            settings.domStorageEnabled = true
-            loadUrl(url, headers)
-
-            webViewClient = object : WebViewClientCompat() {
-                override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                    popBackIfNeeded(request.url.toString())
-                    view.loadUrl(request.url.toString(), headers)
-                    return true
-                }
+        intent.getStringExtra(ONLYOFFICE_URL_TAG)?.let { url ->
+            intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)?.let { fileName ->
+                initWebview(url, fileName)
             }
+        } ?: finish()
+    }
 
-            webChromeClient = OnlyOfficeWebChromeClient()
+    @SuppressLint("SetJavaScriptEnabled")
+    fun initWebview(url: String, fileName: String) {
+        lifecycleScope.launch {
+            val headers = retrieveAuthorizationHeader()
 
-            setDownloadListener { url, _, _, _, _ ->
-                if (url.endsWith(".pdf")) sendToPrintPDF(url, filename) else openUrl(url)
+            with(binding.webView) {
+                settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                webViewClient = buildWebViewClient(headers)
+                webChromeClient = OnlyOfficeWebChromeClient()
+
+                setDownloadListener { url, _, _, _, _ ->
+                    if (url.endsWith(".pdf")) sendToPrintPDF(url, fileName) else openUrl(url)
+                }
+
+                loadUrl(url, headers)
             }
         }
+    }
+
+    fun buildWebViewClient(headers: Map<String, String>): WebViewClient = object : WebViewClientCompat() {
+        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+            popBackIfNeeded(request.url.toString())
+            view.loadUrl(request.url.toString(), headers)
+            return true
+        }
+    }
+
+    private suspend fun retrieveAuthorizationHeader(): Map<String, String> {
+        return mapOf("Authorization" to "Bearer ${AccountUtils.requestCurrentUser()?.apiToken?.accessToken}")
     }
 
     override fun onDestroy() {
