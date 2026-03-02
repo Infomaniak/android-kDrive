@@ -154,7 +154,7 @@ sentry {
 }
 
 dependencies {
-
+    implementation(core.infomaniak.core.applock)
     implementation(core.infomaniak.core.auth)
     implementation(core.infomaniak.core.avatar)
     implementation(core.infomaniak.core.bugtracker)
@@ -183,7 +183,6 @@ dependencies {
     implementation(core.infomaniak.core.ui.view.edgetoedge)
 
     implementation(project(":Core:Legacy"))
-    implementation(project(":Core:Legacy:AppLock"))
 
     // Compose
     implementation(platform(core.compose.bom))

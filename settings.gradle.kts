@@ -29,5 +29,4 @@ rootProject.name = "kDrive"
 include(
     ":app",
     ":Core:Legacy",
-    ":Core:Legacy:AppLock",
 )
