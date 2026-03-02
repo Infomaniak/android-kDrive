@@ -55,7 +55,10 @@ android {
         resValue("string", "EXPOSED_OFFLINE_DIR", "offline_storage")
         resValue("string", "EXPOSED_PUBLIC_SHARE_DIR", "public_share")
 
-        androidResources.localeFilters += arrayOf("en", "de", "es", "fr", "it")
+        androidResources {
+            localeFilters += listOf("en", "de", "es", "fr", "it")
+            generateLocaleConfig = true
+        }
     }
 
     compileOptions {
