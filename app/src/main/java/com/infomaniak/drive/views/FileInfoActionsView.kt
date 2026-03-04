@@ -673,12 +673,11 @@ class FileInfoActionsView @JvmOverloads constructor(
                 if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                     val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
-                    DownloadManagerUtils.scheduleDownload(
-                        context = this,
+                    DownloadManagerUtils.launchDownload(
                         url = ApiRoutes.getDownloadFileUrl(file),
                         name = fileName,
+                        userAgent = HttpUtils.getUserAgent,
                         userBearerToken = userBearerToken,
-                        extraHeaders = HttpUtils.getHeaders(),
                         onError = { showToast(title = it) }
                     )
                     onSuccess?.invoke()

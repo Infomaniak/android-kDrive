@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.liveData
 import androidx.navigation.fragment.navArgs
+import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.ui.view.edgetoedge.EdgeToEdgeBottomSheetDialog
-import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackEvent
@@ -200,12 +200,11 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
                 apiResponse.data?.let { archiveUUID ->
                     val downloadURL = ApiRoutes.downloadArchiveFiles(AccountUtils.currentDriveId, archiveUUID.uuid)
                     val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
-                    DownloadManagerUtils.scheduleDownload(
-                        context = requireContext(),
+                    DownloadManagerUtils.launchDownload(
                         url = downloadURL,
                         name = ARCHIVE_FILE_NAME,
+                        userAgent = HttpUtils.getUserAgent,
                         userBearerToken = userBearerToken,
-                        extraHeaders = HttpUtils.getHeaders(),
                         onError = { showSnackbar(titleId = it) }
                     )
                 }
@@ -227,12 +226,11 @@ abstract class MultiSelectActionsBottomSheetDialog(private val matomoCategory: M
             FileController.getFileProxyById(fileId, navigationArgs.userDrive, customRealm)?.let { file ->
                 val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                 val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
-                DownloadManagerUtils.scheduleDownload(
-                    context = requireContext(),
+                DownloadManagerUtils.launchDownload(
                     url = ApiRoutes.downloadFile(file),
                     name = fileName,
+                    userAgent = HttpUtils.getUserAgent,
                     userBearerToken = userBearerToken,
-                    extraHeaders = HttpUtils.getHeaders(),
                     onError = { showSnackbar(titleId = it) }
                 )
             }
