@@ -21,8 +21,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import com.infomaniak.core.applock.LockActivity
-import com.infomaniak.core.applock.Utils.silentlyReverseSwitch
+import com.infomaniak.core.applock.AppLockHelper.silentlyReverseSwitch
+import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
@@ -54,7 +54,7 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
                 // Reverse switch (before official parameter changed) by silent click
                 silentlyReverseSwitch(this) { shouldLock ->
                     AppSettings.appSecurityLock = shouldLock
-                    if (shouldLock) LockActivity.unlock()
+                    if (shouldLock) AppLockManager.unlock()
                 }
             }
         }

@@ -37,9 +37,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navArgs
 import com.google.android.material.textfield.TextInputEditText
+import com.infomaniak.core.applock.AppLockManager
+import com.infomaniak.core.applock.view.AppLockViewActivity
 import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.common.utils.format
-import com.infomaniak.core.applock.LockActivity
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.hideProgressCatching
@@ -132,8 +133,9 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         fileNameEdit.selectAllButFileExtension()
 
-        LockActivity.scheduleLockIfNeeded(
+        AppLockManager.scheduleLockIfNeeded(
             targetActivity = this@SaveExternalFilesActivity,
+            lockActivityCls = AppLockViewActivity::class.java,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
     }

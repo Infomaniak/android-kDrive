@@ -61,12 +61,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
+import com.infomaniak.core.applock.AppLockManager
+import com.infomaniak.core.applock.view.AppLockViewActivity
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
-import com.infomaniak.core.applock.LockActivity
 import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
@@ -119,6 +120,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.resume
+import kotlin.jvm.java
 import com.infomaniak.core.legacy.R as RCore
 
 @AndroidEntryPoint
@@ -202,8 +204,9 @@ class MainActivity : BaseActivity() {
         observeDownloadCancellation()
         observeFailureDownloadWorkerOffline()
 
-        LockActivity.scheduleLockIfNeeded(
+        AppLockManager.scheduleLockIfNeeded(
             targetActivity = this,
+            lockActivityCls = AppLockViewActivity::class.java,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
 
