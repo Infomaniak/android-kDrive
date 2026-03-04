@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -669,12 +669,11 @@ class FileInfoActionsView @JvmOverloads constructor(
                 if (downloadPermissions.hasNeededPermissions(requestIfNotGranted = true)) {
                     val fileName = if (file.isFolder()) "${file.name}.zip" else file.name
                     val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
-                    DownloadManagerUtils.scheduleDownload(
-                        context = this,
+                    DownloadManagerUtils.launchDownload(
                         url = ApiRoutes.getDownloadFileUrl(file),
                         name = fileName,
+                        userAgent = HttpUtils.getUserAgent,
                         userBearerToken = userBearerToken,
-                        extraHeaders = HttpUtils.getHeaders(),
                         onError = { showToast(title = it) }
                     )
                     onSuccess?.invoke()
