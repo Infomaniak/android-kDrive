@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.whenResultIsOk
@@ -59,6 +60,7 @@ import com.infomaniak.drive.utils.FilePresenter.openBookmarkIntent
 import com.infomaniak.drive.utils.FilePresenter.openFolder
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.PublicShareUtils
+import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener.Companion.downloadFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
@@ -85,11 +87,11 @@ class PublicShareListFragment : FileListFragment() {
         super.onCreate(savedInstanceState)
 
         if (publicShareViewModel.isPasswordNeeded && !publicShareViewModel.hasBeenAuthenticated) {
-            safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicSharePasswordFragment())
+            safelyNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicSharePasswordFragment())
         }
 
         if (publicShareViewModel.isExpired) {
-            safeNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicShareOutdatedFragment())
+            safelyNavigate(PublicShareListFragmentDirections.actionPublicShareListFragmentToPublicShareOutdatedFragment())
         }
     }
 
@@ -102,6 +104,13 @@ class PublicShareListFragment : FileListFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         folderName = navigationArgs.fileName
         folderId = navigationArgs.fileId
+        if (publicShareViewModel.rootFileId == PUBLIC_SHARE_DEFAULT_ID) {
+            // This means we're coming from the PublicSharePasswordFragment, and the rootFolderId hasn't been set yet
+            // because we couldn't access the init call before opening the PublicShareActivity
+            // If the rootFileId is already set, we should not update it again as navigation.fileId change at each folder.
+            publicShareViewModel.rootFileId = navigationArgs.fileId
+        }
+
         publicShareViewModel.cancelDownload()
         downloadFiles = DownloadFiles()
 
@@ -298,7 +307,7 @@ class PublicShareListFragment : FileListFragment() {
         } else {
             val rootSharedFileId = publicShareViewModel.rootSharedFile.value?.id
             val fileIds = multiSelectManager.selectedItemsIds.toList().ifEmpty {
-                if (folderId == rootSharedFileId || publicShareViewModel.fileId == rootSharedFileId) {
+                if (folderId == rootSharedFileId || publicShareViewModel.rootFileId == rootSharedFileId) {
                     emptyList()
                 } else {
                     listOf(folderId)
@@ -337,7 +346,7 @@ class PublicShareListFragment : FileListFragment() {
     }
 
     companion object {
-        const val PUBLIC_SHARE_DEFAULT_ID = -1
+        const val PUBLIC_SHARE_DEFAULT_ID = Utils.OTHER_ROOT_ID
     }
 
     private inner class DownloadFiles : (Boolean, Boolean) -> Unit {
@@ -351,7 +360,7 @@ class PublicShareListFragment : FileListFragment() {
                 childrenLiveData.value = emptyFilesResult
                 cancelDownload()
 
-                if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value == null) {
+                if (folderId == ROOT_SHARED_FILE_ID || !isFolder()) {
                     downloadPublicShareRootFile()
                 } else {
                     getFiles(folderId, fileListViewModel.sortType, isNewSort)

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.safeBinding
-import com.infomaniak.core.legacy.utils.safeNavigate
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.showProgressCatching
 import com.infomaniak.core.network.models.ApiError
@@ -36,13 +36,12 @@ import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackPublicShareActionEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.SHARE_URL_V1
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
-import com.infomaniak.drive.utils.PublicShareUtils
+import handleActionDone
 import com.infomaniak.core.network.models.exceptions.NetworkException as ApiControllerNetworkException
 
 class PublicSharePasswordFragment : Fragment() {
@@ -57,13 +56,8 @@ class PublicSharePasswordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?): Unit = with(binding) {
         super.onViewCreated(view, savedInstanceState)
 
-        // TODO: Remove this and call setupValidationButton instead
-        //  Also change the layout (description, button's title, input visibility)
-        passwordValidateButton.setOnClickListener {
-            trackPublicShareActionEvent(MatomoName.OpenInBrowser)
-            PublicShareUtils.openDeepLinkInBrowser(requireActivity(), getPublicShareUrl())
-        }
-
+        setupValidationButton()
+        publicSharePasswordEditText.handleActionDone(::attemptPasswordValidation)
         publicSharePasswordEditText.addTextChangedListener { publicSharePasswordLayout.error = null }
         observeSubmitPasswordResult()
         observeInitResult()
@@ -75,28 +69,25 @@ class PublicSharePasswordFragment : Fragment() {
         }
     }
 
-    //region Hack TODO: Remove this when the back will support bearer token
-    private fun getPublicShareUrl(): String {
-        return "${SHARE_URL_V1}/share/${publicShareViewModel.driveId}/${publicShareViewModel.publicShareUuid}"
-    }
-    //endregion
-
     private fun setupValidationButton() = with(binding.passwordValidateButton) {
         initProgress(viewLifecycleOwner)
-        setOnClickListener {
-            if (isFieldBlank()) return@setOnClickListener
+        setOnClickListener { attemptPasswordValidation() }
+    }
 
-            showProgressCatching()
-            val password = binding.publicSharePasswordEditText.text?.trim().toString()
-            publicShareViewModel.submitPublicSharePassword(password)
-        }
+    private fun attemptPasswordValidation() {
+        if (isFieldBlank()) return
+
+        binding.passwordValidateButton.showProgressCatching()
+        trackPublicShareActionEvent(MatomoName.ValidatePassword)
+        val password = binding.publicSharePasswordEditText.text?.trim().toString()
+        publicShareViewModel.submitPublicSharePassword(password)
     }
 
     private fun observeSubmitPasswordResult() = with(binding) {
-        publicShareViewModel.submitPasswordResult.observe(viewLifecycleOwner) { isAuthorized ->
-            if (isAuthorized == true) {
+        publicShareViewModel.submitPasswordResult.observe(viewLifecycleOwner) { authToken ->
+            if (authToken.isNotEmpty()) {
                 publicShareViewModel.hasBeenAuthenticated = true
-                publicShareViewModel.initPublicShare()
+                publicShareViewModel.initPublicShare(authToken)
             } else {
                 passwordValidateButton.hideProgressCatching(R.string.buttonValid)
                 publicSharePasswordEditText.text = null
@@ -114,9 +105,11 @@ class PublicSharePasswordFragment : Fragment() {
     private fun onInitSuccess(shareLink: ShareLink?) {
         binding.passwordValidateButton.hideProgressCatching(R.string.buttonValid)
         publicShareViewModel.canDownloadFiles = shareLink?.capabilities?.canDownload == true
-        safeNavigate(
+        val fileId = shareLink?.fileId ?: PUBLIC_SHARE_DEFAULT_ID
+        safelyNavigate(
             PublicSharePasswordFragmentDirections.actionPublicSharePasswordFragmentToPublicShareListFragment(
-                fileId = shareLink?.fileId ?: PUBLIC_SHARE_DEFAULT_ID,
+                fileId = fileId,
+                fileName = getString(R.string.sharedWithMeTitle)
             )
         )
     }
