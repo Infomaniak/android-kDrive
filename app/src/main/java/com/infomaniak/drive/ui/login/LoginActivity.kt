@@ -309,7 +309,7 @@ class LoginActivity : ComponentActivity() {
                     return@launch
                 }
                 is Xor.Second -> Dispatchers.Main {
-                    if (result.value.error?.description == ErrorCode.NO_DRIVE) {
+                    if (result.value.error?.code == ErrorCode.NO_DRIVE) {
                         launchNoDriveActivity()
                     } else {
                         showError(getString(result.value.translateError()))
