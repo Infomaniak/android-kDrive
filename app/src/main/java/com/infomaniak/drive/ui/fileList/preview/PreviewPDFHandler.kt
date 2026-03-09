@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024-2025 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,11 @@ import android.content.Context
 import android.net.Uri
 import android.print.PrintAttributes
 import android.print.PrintManager
-import com.infomaniak.core.legacy.utils.getFileNameAndSize
+import com.infomaniak.core.file.getFileNameAndSize
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
+import kotlinx.coroutines.runBlocking
 
 class PreviewPDFHandler(
     context: Context,
@@ -38,7 +39,7 @@ class PreviewPDFHandler(
     var isPasswordProtected = false
 
     private val fileNameAndSize: Pair<String, Long>? by lazy {
-        externalFileUri?.let(context::getFileNameAndSize)
+        externalFileUri?.let { runBlocking { getFileNameAndSize(it) } }
     }
 
     var fileName: String = fileNameAndSize?.first ?: ""
