@@ -97,7 +97,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
             webViewClient = object : WebViewClientCompat() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                     popBackIfNeeded(request.url.toString())
-                    view.loadUrl(request.url.toString(), headers)
+                    view.loadUrl(request.url.toString())
                     return true
                 }
             }
