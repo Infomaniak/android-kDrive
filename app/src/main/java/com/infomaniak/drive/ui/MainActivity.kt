@@ -272,11 +272,11 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleDeeplink() {
-        navigationArgs?.deeplinkType?.let {
-            when (it) {
-                is DeeplinkAction.Collaborate -> handleCollaborateDeeplink(it)
-                is DeeplinkAction.Drive -> handleDriveDeeplink(it)
-                is DeeplinkAction.Office -> handleOnlyOfficeDeeplink(it)
+        navigationArgs?.deeplinkType?.let { type ->
+            when (type) {
+                is DeeplinkAction.Collaborate -> handleCollaborateDeeplink(type)
+                is DeeplinkAction.Drive -> handleDriveDeeplink(type)
+                is DeeplinkAction.Office -> handleOnlyOfficeDeeplink(type)
                 is DeeplinkType.Invalid -> binding.mainFab.apply {
                     post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
                 }

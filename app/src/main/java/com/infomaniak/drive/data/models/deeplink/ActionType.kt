@@ -41,7 +41,7 @@ internal enum class ActionType(val type: String, val actionPattern: String) {
 
     companion object {
         fun from(value: String): ActionType = entries.find { it.type == value } ?: throw InvalidValue()
-        fun String.find(actionPattern: String): MatchResult =
-            Regex(actionPattern).find(this) ?: throw InvalidValue()
+
+        fun String.find(actionPattern: String): MatchResult = Regex(actionPattern).find(this) ?: throw InvalidValue()
     }
 }
