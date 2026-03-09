@@ -26,8 +26,10 @@ sealed interface LaunchArgsType {
     value class Shortcut(val tag: String) : LaunchArgsType
     @JvmInline
     value class Deeplink(val uriPath: String) : LaunchArgsType
+
     companion object {
         private const val SHORTCUTS_TAG = "shortcuts_tag"
+
         fun from(navigationArgs: LaunchActivityArgs?, intent: Intent): LaunchArgsType? {
             val navArgs = navigationArgs?.takeUnless { it.destinationUserId == 0 || it.destinationDriveId == 0 }
             if (navArgs != null) return Notification(navArgs)
@@ -41,5 +43,4 @@ sealed interface LaunchArgsType {
             return null
         }
     }
-
 }

@@ -34,14 +34,19 @@ sealed interface RoleFolder : Parcelable {
     }
 
     data class Files(val fileType: FileType) : RoleFolder
+
     data class Recents(val fileId: Int?) : RoleFolder
+
     data class SharedWithMe(val fileType: ExternalFileType?) : RoleFolder
+
     data class SharedLinks(val fileId: Int?) : RoleFolder {
         override val isHandled: Boolean get() = false
     }
 
     data class Favorites(val fileId: Int?) : RoleFolder
+
     data class MyShares(val fileId: Int?) : RoleFolder
+
     data class Trash(val folderId: Int?) : RoleFolder
 
     companion object {

@@ -36,7 +36,6 @@ sealed interface DeeplinkAction : DeeplinkType {
 
     companion object {
         @Throws(InvalidValue::class)
-        fun from(actionType: String, action: String): DeeplinkAction =
-            ActionType.from(actionType).build(action)
+        fun from(actionType: String, action: String): DeeplinkAction = ActionType.from(actionType).build(action)
     }
 }
