@@ -210,8 +210,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     private fun retrieveDeeplink(deeplink: String) {
         deeplinkType = DeeplinkParser.parse(deeplink)
-        if (deeplinkType !is DeeplinkType.Invalid)
-            trackDeepLink(MatomoName.Internal)
+        if (deeplinkType !is DeeplinkType.Invalid) trackDeepLink(MatomoName.Internal)
     }
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
