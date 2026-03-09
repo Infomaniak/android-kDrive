@@ -38,8 +38,8 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
 import com.infomaniak.core.common.autoCancelScope
+import com.infomaniak.core.file.getFileName
 import com.infomaniak.core.legacy.utils.calculateFileSize
-import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.getFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
 import com.infomaniak.core.network.api.ApiController.gson
