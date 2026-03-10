@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import com.infomaniak.core.legacy.utils.getFileSize
+import com.infomaniak.core.file.getApproximativeFileSize
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -104,7 +104,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
         return files
     }
 
-    private fun generateUploadFiles(uploadFiles: ArrayList<UploadFile>): ArrayList<File> {
+    private suspend fun generateUploadFiles(uploadFiles: ArrayList<UploadFile>): ArrayList<File> {
         val files = arrayListOf<File>()
 
         uploadFiles.forEach { uploadFile ->
@@ -114,7 +114,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                 try {
                     context.contentResolver?.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
-                            val size = cursor.getFileSize()
+                            val size = cursor.getApproximativeFileSize(uri)
                             files.add(
                                 File(
                                     id = uploadFile.uri.hashCode(),
