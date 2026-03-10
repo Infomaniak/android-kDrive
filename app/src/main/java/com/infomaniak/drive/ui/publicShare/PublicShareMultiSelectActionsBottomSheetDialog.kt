@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2024 Infomaniak Network SA
+ * Copyright (C) 2024-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
-import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
@@ -65,12 +65,11 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
             archiveUuid?.let {
                 val downloadURL = ApiRoutes.downloadPublicShareArchive(driveId, publicShareUuid, it.uuid)
                 val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
-                DownloadManagerUtils.scheduleDownload(
-                    context = requireContext(),
+                DownloadManagerUtils.launchDownload(
                     url = downloadURL,
                     name = ARCHIVE_FILE_NAME,
+                    userAgent = HttpUtils.getUserAgent,
                     userBearerToken = userBearerToken,
-                    extraHeaders = HttpUtils.getHeaders(),
                     onError = { messageResId -> showSnackbar(title = messageResId) }
                 )
             }
