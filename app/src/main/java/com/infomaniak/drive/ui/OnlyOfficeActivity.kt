@@ -93,7 +93,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    fun initWebview(url: String, fileName: String) {
+    private fun initWebview(url: String, fileName: String) {
         lifecycleScope.launch {
             val headers = retrieveAuthorizationHeader()
 
@@ -112,7 +112,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
         }
     }
 
-    fun buildWebViewClient(): WebViewClient = object : WebViewClientCompat() {
+    private fun buildWebViewClient(): WebViewClient = object : WebViewClientCompat() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             popBackIfNeeded(request.url.toString())
             view.loadUrl(request.url.toString())
@@ -121,7 +121,9 @@ class OnlyOfficeActivity : AppCompatActivity() {
     }
 
     private suspend fun retrieveAuthorizationHeader(): Map<String, String> {
-        return mapOf("Authorization" to "Bearer ${AccountUtils.requestCurrentUser()?.apiToken?.accessToken}")
+        return AccountUtils.requestCurrentUser()
+            ?.run { mapOf("Authorization" to "Bearer ${apiToken.accessToken}") }
+            ?: emptyMap()
     }
 
     override fun onDestroy() {
