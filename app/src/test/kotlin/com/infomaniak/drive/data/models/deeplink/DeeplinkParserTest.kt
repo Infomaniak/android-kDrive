@@ -15,12 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.infomaniak.drive.com.infomaniak.drive.data.models.deeplink
+package com.infomaniak.drive.data.models.deeplink
 
-import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
-import com.infomaniak.drive.data.models.deeplink.ExternalFileType
-import com.infomaniak.drive.data.models.deeplink.FileType
-import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.ui.DeeplinkParser
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
