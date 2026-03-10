@@ -22,10 +22,10 @@ import android.view.View
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
+import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.network.networking.HttpUtils
 import com.infomaniak.core.network.networking.ManualAuthorizationRequired
-import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog

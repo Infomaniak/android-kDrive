@@ -369,7 +369,7 @@ object ApiRoutes {
         archiveUuid: String,
         authToken: String? = null,
     ): String {
-        val authParam = authToken?.let { "?sharelink_token=$it" } ?: ""
+        val authParam = if (authToken?.isNotBlank() == true) "?sharelink_token=$authToken" else ""
         return "${buildPublicShareArchive(driveId, publicShareUuid)}/$archiveUuid/download$authParam"
     }
 
