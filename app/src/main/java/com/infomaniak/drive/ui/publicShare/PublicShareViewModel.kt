@@ -132,9 +132,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     fun getFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
-        getPublicShareFilesJob = Job()
-
-        viewModelScope.launch(getPublicShareFilesJob) {
+        getPublicShareFilesJob = viewModelScope.launch {
 
             tailrec suspend fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
 
