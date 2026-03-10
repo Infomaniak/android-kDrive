@@ -39,8 +39,7 @@ import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
 import com.infomaniak.core.common.autoCancelScope
 import com.infomaniak.core.file.getFileName
-import com.infomaniak.core.legacy.utils.calculateFileSize
-import com.infomaniak.core.legacy.utils.getFileSize
+import com.infomaniak.core.file.getPreciseFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
 import com.infomaniak.core.network.api.ApiController.gson
 import com.infomaniak.core.notifications.notifyCompat
@@ -348,7 +347,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
                 if (!columns.contains(OpenableColumns.SIZE)) {
                     SentryLog.e(TAG, "uploadSchemeContent: size column doesn't exist ($columns)")
                 }
-                startUploadFile(uri.getFileSize(cursor))
+                startUploadFile(cursor.getPreciseFileSize(uri))
             } else {
                 val sentryMessage = "$fileName moveToFirst failed - count(${cursor.count}), columns($columns)"
                 SentryLog.w(TAG, "uploadSchemeContent: $sentryMessage")
@@ -358,8 +357,8 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         } ?: false
     }
 
-    private suspend fun UploadFile.startUploadFile(size: Long): Boolean {
-        if (fileSize != size) updateFileSize(size)
+    private suspend fun UploadFile.startUploadFile(size: Long?): Boolean {
+        size?.takeIf { fileSize != size }?.let(::updateFileSize)
 
         SentryLog.d(TAG, "startUploadFile (size: $fileSize)")
 
@@ -493,7 +492,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         else -> ""
     }
 
-    private fun fetchRecentLocalMediasToSync(
+    private suspend fun fetchRecentLocalMediasToSync(
         coroutineScope: CoroutineScope,
         realm: Realm,
         syncSettings: SyncSettings,
@@ -530,7 +529,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         }
     }
 
-    private fun processFoundLocalMedia(
+    private suspend fun processFoundLocalMedia(
         realm: Realm,
         cursor: Cursor,
         contentUri: Uri,
@@ -541,12 +540,12 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
         val fileName = cursor.getFileName(contentUri)
-        val fileSize = uri.getFileSize(cursor)
+        val fileSize = cursor.getPreciseFileSize(uri)
 
         val messageLog = "localMediaFound > $fileName found in folder ${mediaFolder.name}"
         SentryLog.d(TAG, messageLog)
 
-        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize > 0) {
+        if (UploadFile.canUpload(uri, fileModifiedAt, realm) && fileSize != null && fileSize > 0) {
             UploadFile(
                 uri = uri.toString(),
                 driveId = syncSettings.driveId,
@@ -571,14 +570,6 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
             )
         } else {
             SentryLog.w(TAG, "localMediaFound> Cannot upload $fileName, size=$fileSize")
-        }
-    }
-
-    private fun Uri.getFileSize(cursor: Cursor) = calculateFileSize(this) ?: cursor.getFileSize()
-
-    private fun calculateFileSize(uri: Uri): Long? {
-        return uri.calculateFileSize(contentResolver) ?: null.also {
-            SentryLog.i(TAG, "Cannot calculate the file size from uri")
         }
     }
 
