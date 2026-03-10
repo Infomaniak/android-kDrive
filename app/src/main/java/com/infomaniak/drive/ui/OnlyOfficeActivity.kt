@@ -100,7 +100,7 @@ class OnlyOfficeActivity : AppCompatActivity() {
             with(binding.webView) {
                 settings.javaScriptEnabled = true
                 settings.domStorageEnabled = true
-                webViewClient = buildWebViewClient(headers)
+                webViewClient = buildWebViewClient()
                 webChromeClient = OnlyOfficeWebChromeClient()
 
                 setDownloadListener { url, _, _, _, _ ->
