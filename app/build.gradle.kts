@@ -240,6 +240,7 @@ dependencies {
 
     testImplementation(libs.kotlin.faker)
     testImplementation(libs.mock.web.server)
+    testImplementation(core.mockk.android)
     androidTestImplementation(libs.androidx.ui.automator)
 
     androidTestImplementation(libs.androidx.espresso.contrib) {
