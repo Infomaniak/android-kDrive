@@ -20,9 +20,11 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
@@ -102,7 +104,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
     private suspend fun handleLaunchArgs() {
         when (val type = LaunchArgsType.from(navigationArgs, intent)) {
-            is Deeplink -> handleDeeplink(type.uriPath)
+            is Deeplink -> handleDeeplink(type)
             is Notification -> handleNotificationDestinationIntent(type.navArgs)
             is Shortcut -> handleShortcuts(type.tag)
             null -> Unit
@@ -179,17 +181,17 @@ class LaunchActivity : EdgeToEdgeActivity() {
                 RoleFolder.Files(FileType.File(navArgs.destinationRemoteFolderId))
             )
         } else {
-            DeeplinkType.Invalid
+            DeeplinkType.Unmanaged.NotAccessible
         }
     }
 
-    private suspend fun handleDeeplink(uriPath: String) = Dispatchers.IO {
+    private suspend fun handleDeeplink(deeplink: Deeplink) = Dispatchers.IO {
         // If the app is closed, the currentUser will be null. We don't want that otherwise the link will always be opened as
         // external instead of internal if you already have access to the files. So we set it here
         if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
 
-        if (uriPath.contains("/app/share/")) processPublicShare(uriPath) else retrieveDeeplink(deeplink = uriPath)
-        SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $uriPath")
+        if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
+        SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: ${deeplink.path}")
     }
 
     private suspend fun processPublicShare(path: String) {
@@ -202,15 +204,15 @@ class LaunchActivity : EdgeToEdgeActivity() {
                     val shareLink = apiResponse.data!!
                     setPublicShareActivityArgs(driveId, publicShareUuid, shareLink)
                 }
-                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let { retrieveDeeplink(it) }
+                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let { retrieveDeeplink(it.toUri()) }
                 else -> handlePublicShareError(apiResponse.error, driveId, publicShareUuid)
             }
         }
     }
 
-    private fun retrieveDeeplink(deeplink: String) {
-        deeplinkType = DeeplinkParser.parse(deeplink)
-        if (deeplinkType !is DeeplinkType.Invalid) trackDeepLink(MatomoName.Internal)
+    private fun retrieveDeeplink(uri: Uri) {
+        deeplinkType = DeeplinkParser.parse(uri)
+        if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
     }
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
