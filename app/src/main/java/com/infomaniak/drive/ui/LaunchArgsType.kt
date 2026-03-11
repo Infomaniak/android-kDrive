@@ -18,14 +18,14 @@
 package com.infomaniak.drive.ui
 
 import android.content.Intent
+import android.net.Uri
 
 sealed interface LaunchArgsType {
     @JvmInline
     value class Notification(val navArgs: LaunchActivityArgs) : LaunchArgsType
     @JvmInline
     value class Shortcut(val tag: String) : LaunchArgsType
-    @JvmInline
-    value class Deeplink(val uriPath: String) : LaunchArgsType
+    data class Deeplink(val uri: Uri, val path: String) : LaunchArgsType
 
     companion object {
         private const val SHORTCUTS_TAG = "shortcuts_tag"
@@ -37,8 +37,10 @@ sealed interface LaunchArgsType {
             val shortcut = intent.getStringExtra(SHORTCUTS_TAG)
             if (shortcut != null) return Shortcut(shortcut)
 
-            val uriPath = intent.data?.path
-            if (uriPath != null) return Deeplink(uriPath)
+            intent.data?.let { uri ->
+                val uriPath = uri.path
+                if (uriPath != null) return Deeplink(uri, uriPath)
+            }
 
             return null
         }

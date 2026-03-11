@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui
 
+import android.net.Uri
 import com.infomaniak.drive.data.models.deeplink.ACTION
 import com.infomaniak.drive.data.models.deeplink.ACTION_TYPE
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
@@ -27,15 +28,19 @@ object DeeplinkParser {
 
     private val actionRegex by lazy { Regex("app/$ACTION_TYPE/$ACTION") }
 
-    fun parse(deeplink: String): DeeplinkType? {
+    fun parse(uri: Uri): DeeplinkType {
+        return uri.path?.let { uriPath -> parse(uri, uriPath) }
+            ?: DeeplinkType.Unmanaged.BrowserLaunch.Unknown(uri)
+    }
+
+    private fun parse(uri: Uri, uriPath: String): DeeplinkType? {
         return try {
-            actionRegex.find(deeplink)?.run {
+            actionRegex.find(uriPath)?.run {
                 val (actionType, action) = destructured
                 DeeplinkAction.from(actionType = actionType, action = action)
             }
-            DeeplinkType.Invalid
+        } catch (_: InvalidFormatting) {
+            DeeplinkType.Unmanaged.BrowserLaunch.BadFormatting(uri)
         }
     }
-        } catch (_: InvalidFormatting) {
-
 }
