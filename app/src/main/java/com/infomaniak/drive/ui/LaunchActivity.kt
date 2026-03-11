@@ -43,7 +43,7 @@ import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
-import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.addTo
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
 import com.infomaniak.drive.data.models.deeplink.FileType
 import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.data.services.UploadWorker
@@ -126,7 +126,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         Intent(this, destinationClass).apply {
             when (destinationClass) {
-                MainActivity::class.java -> mainActivityExtras?.let(::putExtras) ?: deeplinkType?.addTo(this)
+                MainActivity::class.java -> mainActivityExtras?.let(::putExtras) ?: putIfNeeded(deeplinkType)
                 LoginActivity::class.java -> {
                     putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
                     putExtras(LoginActivityArgs(displayOnlyLastPage = false).toBundle())

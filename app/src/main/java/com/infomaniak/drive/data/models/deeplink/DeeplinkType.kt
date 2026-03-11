@@ -30,10 +30,8 @@ sealed interface DeeplinkType : Parcelable {
 
     data object Invalid : DeeplinkType
     companion object {
-        fun DeeplinkType.addTo(intent: Intent) =
-            intent
-                .putExtras(MainActivityArgs(deeplinkType = this).toBundle())
-                .clearStack()
+        fun Intent.putIfNeeded(deeplinkType: DeeplinkType?) = deeplinkType?.toArgsBundle()?.let { putExtras(it).clearStack() }
 
+        private fun DeeplinkType.toArgsBundle() = MainActivityArgs(deeplinkType = this).toBundle()
     }
 }
