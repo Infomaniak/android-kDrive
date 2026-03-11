@@ -35,7 +35,7 @@ sealed interface DeeplinkAction : DeeplinkType {
     data class Office(val driveId: Int, val fileId: Int) : DeeplinkAction
 
     companion object {
-        @Throws(InvalidValue::class)
+        @Throws(InvalidFormatting::class)
         fun from(actionType: String, action: String): DeeplinkAction = ActionType.from(actionType).build(action)
     }
 }
