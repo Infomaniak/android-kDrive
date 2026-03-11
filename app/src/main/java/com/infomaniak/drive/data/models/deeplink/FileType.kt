@@ -65,6 +65,6 @@ sealed class FileType(open val fileId: Int) : Parcelable {
             this?.let {
                 groups[GROUP_FILE]?.let { File(this) }
                     ?: groups[GROUP_PREVIEW_IN_FOLDER]?.let { FilePreviewInFolder(this) }
-            } ?: throw InvalidValue()
+            } ?: throw InvalidFormatting()
     }
 }

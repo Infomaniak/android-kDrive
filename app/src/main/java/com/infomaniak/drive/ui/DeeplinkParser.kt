@@ -21,7 +21,7 @@ import com.infomaniak.drive.data.models.deeplink.ACTION
 import com.infomaniak.drive.data.models.deeplink.ACTION_TYPE
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
-import com.infomaniak.drive.data.models.deeplink.InvalidValue
+import com.infomaniak.drive.data.models.deeplink.InvalidFormatting
 
 object DeeplinkParser {
 
@@ -33,9 +33,9 @@ object DeeplinkParser {
                 val (actionType, action) = destructured
                 DeeplinkAction.from(actionType = actionType, action = action)
             }
-        } catch (_: InvalidValue) {
             DeeplinkType.Invalid
         }
     }
+        } catch (_: InvalidFormatting) {
 
 }

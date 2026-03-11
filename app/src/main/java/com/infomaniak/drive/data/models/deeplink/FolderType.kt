@@ -45,8 +45,8 @@ enum class FolderType(val type: String, val propertiesPattern: String = "") {
     }
 
     companion object {
-        @Throws(InvalidValue::class)
-        fun from(value: String): FolderType = entries.find { it.type == value } ?: throw InvalidValue()
+        @Throws(InvalidFormatting::class)
+        fun from(value: String): FolderType = entries.find { it.type == value } ?: throw InvalidFormatting()
 
         fun String.optionalFind(propertiesPattern: String): MatchResult? = Regex(propertiesPattern).find(this)
     }
