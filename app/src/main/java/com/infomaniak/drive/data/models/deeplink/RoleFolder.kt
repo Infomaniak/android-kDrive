@@ -50,7 +50,7 @@ sealed interface RoleFolder : Parcelable {
     data class Trash(val folderId: Int?) : RoleFolder
 
     companion object {
-        @Throws(InvalidValue::class)
+        @Throws(InvalidFormatting::class)
         fun from(folderType: String, folderProperties: String): RoleFolder =
             FolderType.from(folderType).build(folderProperties)
     }
