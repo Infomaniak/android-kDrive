@@ -20,7 +20,7 @@ package com.infomaniak.drive.data.models.deeplink
 internal fun MatchResult.parseId(index: Int) = try {
     groupValues[index].toInt()
 } catch (_: Exception) {
-    throw InvalidValue()
+    throw InvalidFormatting()
 }
 
 internal fun MatchResult?.parseOptionalId(index: Int) = this?.parseId(index)
