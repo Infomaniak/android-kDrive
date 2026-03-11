@@ -17,4 +17,4 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
-internal class InvalidValue : Exception()
+internal class InvalidFormatting : Exception()
