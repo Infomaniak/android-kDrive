@@ -957,7 +957,7 @@ open class FileListFragment : MultiSelectFragment(
     }
 
     private fun previewFile(fileId: Int) {
-        FileController.getRealmInstance().let { realm ->
+        FileController.getRealmInstance().use { realm ->
             FileController.getFileById(realm = realm, fileId = fileId)?.let {
                 Utils.displayFile(mainViewModel, findNavController(), it, listOf(it))
             }
