@@ -69,6 +69,8 @@ import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
+import com.infomaniak.core.applock.LockActivity
+import com.infomaniak.core.legacy.ui.WebViewActivity
 import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
@@ -98,6 +100,8 @@ import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged.BrowserLaunch
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged.NotAccessible
 import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
@@ -277,9 +281,7 @@ class MainActivity : BaseActivity() {
                 is DeeplinkAction.Collaborate -> handleCollaborateDeeplink(type)
                 is DeeplinkAction.Drive -> handleDriveDeeplink(type)
                 is DeeplinkAction.Office -> handleOnlyOfficeDeeplink(type)
-                is DeeplinkType.Invalid -> binding.mainFab.apply {
-                    post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
-                }
+                is DeeplinkType.Unmanaged -> handleUnmanagedDeeplink(type)
             }
         }
     }
@@ -307,6 +309,19 @@ class MainActivity : BaseActivity() {
                 ?.run { UserDrive(userId = userId, driveId = link.driveId) }
                 ?.let { FileController.getFileById(fileId = link.fileId, userDrive = it) }
                 ?.let(::openOnlyOfficeActivity)
+        }
+    }
+
+    private fun handleUnmanagedDeeplink(type: DeeplinkType.Unmanaged) {
+        when (type) {
+            is BrowserLaunch -> WebViewActivity.startActivity(
+                context = this,
+                url = type.url,
+                headers = AccountUtils.currentUser?.run { mapOf("Authorization" to "Bearer ${apiToken.accessToken}") },
+            )
+            NotAccessible -> binding.mainFab.apply {
+                post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
+            }
         }
     }
 

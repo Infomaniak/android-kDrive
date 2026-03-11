@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models.deeplink
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Parcelable
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.drive.ui.MainActivityArgs
@@ -28,7 +29,18 @@ sealed interface DeeplinkType : Parcelable {
     val isHandled: Boolean
         get() = true
 
-    data object Invalid : DeeplinkType
+    @Parcelize
+    sealed interface Unmanaged : DeeplinkType {
+
+        data object NotAccessible : Unmanaged
+
+        @Parcelize
+        sealed class BrowserLaunch(val url: String) : Unmanaged {
+            class BadFormatting(val uri: Uri) : BrowserLaunch(url = uri.toString())
+            class Unknown(val uri: Uri) : BrowserLaunch(url = uri.toString())
+        }
+    }
+
     companion object {
         fun Intent.putIfNeeded(deeplinkType: DeeplinkType?) = deeplinkType?.toArgsBundle()?.let { putExtras(it).clearStack() }
 
