@@ -78,6 +78,13 @@ object ApiRepository : ApiRepositoryCore() {
         return callApiBlocking(url, method, body, okHttpClient)
     }
 
+    private suspend inline fun <reified T> callApiSuspend(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+    ): T = ApiController.callApi(url, method, body, okHttpClient)
+
     private inline fun <reified T> callApiWithCursor(
         url: String,
         method: ApiController.ApiMethod,
@@ -93,6 +100,23 @@ object ApiRepository : ApiRepositoryCore() {
             } as T
         })
     }
+
+    private suspend inline fun <reified T> callApiWithCursorSuspend(
+        url: String,
+        method: ApiController.ApiMethod,
+        body: Any? = null,
+        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+    ): T {
+        return ApiController.callApi(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
+            CursorApiResponse<Any>(
+                result = ApiResponseStatus.ERROR,
+                error = apiError
+            ).apply {
+                translatedError = translatedErrorRes
+            } as T
+        })
+    }
+
 
     fun getAllDrivesData(
         okHttpClient: OkHttpClient
