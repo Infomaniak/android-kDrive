@@ -24,7 +24,7 @@ import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
 import com.infomaniak.core.network.networking.HttpClient
 import com.infomaniak.drive.data.api.ApiRoutes
-import com.infomaniak.drive.data.api.ApiRoutes.appendQuery
+import com.infomaniak.drive.data.api.ApiRoutes.appendQueryParams
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -153,7 +153,7 @@ object PublicShareApiRepository {
         body: Any? = null,
         okHttpClient: OkHttpClient = HttpClient.okHttpClient,
     ): T {
-        val authentifiedUrl = authToken?.let { token -> url.appendQuery("sharelink_token=$token") } ?: url
+        val authentifiedUrl = authToken?.let { token -> url.appendQueryParams(mapOf("sharelink_token" to token)) } ?: url
         return ApiController.callApi(authentifiedUrl, method, body, okHttpClient)
     }
 

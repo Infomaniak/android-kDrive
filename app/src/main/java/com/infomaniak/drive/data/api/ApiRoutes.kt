@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api
 
+import androidx.core.net.toUri
 import com.infomaniak.core.network.AUTOLOG_URL
 import com.infomaniak.core.network.MANAGER_URL
 import com.infomaniak.core.network.SHOP_URL
@@ -137,7 +138,7 @@ object ApiRoutes {
             imagePreviewFile(file)
         }
 
-        return url.appendQuery("width=2500&height=1500&quality=80")
+        return url.appendQueryParams(mapOf("width" to "2500", "height" to "1500", "quality" to "80"))
     }
 
     fun getOnlyOfficeUrl(file: File) = with(file) {
@@ -463,8 +464,9 @@ object ApiRoutes {
     private fun showOffice(file: File) = "${OFFICE_URL}/${file.driveId}/${file.id}"
     //endregion
 
-    fun String.appendQuery(query: String): String {
-        val querySeparator = if (contains("?")) "&" else "?"
-        return this + querySeparator + query
+    fun String.appendQueryParams(queries: Map<String, String>): String {
+        return toUri().buildUpon().apply {
+            queries.onEach { (name, value) -> appendQueryParameter(name, value) }
+        }.toString()
     }
 }
