@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -469,16 +469,16 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.convertFile(file), POST)
     }
 
-    fun getDriveTrash(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
-        return callApiWithCursor("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
+    suspend fun getDriveTrash(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+        return callApiWithCursorSuspend("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
     }
 
     fun getTrashedFile(file: File): ApiResponse<File> {
         return callApi(ApiRoutes.trashedFile(file), GET)
     }
 
-    fun getTrashedFolderFiles(file: File, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
-        return callApiWithCursor("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
+    suspend fun getTrashedFolderFiles(file: File, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+        return callApiWithCursorSuspend("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
     }
 
     fun postRestoreTrashFile(file: File, body: Map<String, Int>?): ApiResponse<Any> =
