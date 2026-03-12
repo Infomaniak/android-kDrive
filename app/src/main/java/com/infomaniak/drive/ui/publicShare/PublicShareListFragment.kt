@@ -52,7 +52,6 @@ import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.fileList.multiSelect.MultiSelectActionsBottomSheetDialog
 import com.infomaniak.drive.ui.fileList.preview.PreviewDownloadProgressDialogArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.Companion.ROOT_SHARED_FILE_ID
-import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.PublicShareFilesResult
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.FilePresenter.displayFile
@@ -355,17 +354,7 @@ class PublicShareListFragment : FileListFragment() {
             showLoadingTimer.start()
             fileAdapter.isComplete = false
 
-            with(publicShareViewModel) {
-                val emptyFilesResult = PublicShareFilesResult(files = emptyList(), shouldUpdate = false, isNewSort = false)
-                childrenLiveData.value = emptyFilesResult
-                cancelDownload()
-
-                if (folderId == ROOT_SHARED_FILE_ID || !isFolder()) {
-                    downloadPublicShareRootFile()
-                } else {
-                    getFiles(folderId, fileListViewModel.sortType, isNewSort)
-                }
-            }
+            publicShareViewModel.downloadPublicShareFiles(folderId, fileListViewModel.sortType, isNewSort)
         }
     }
 }

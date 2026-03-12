@@ -119,55 +119,6 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         submitPasswordResult.postValue(result)
     }
 
-    fun downloadPublicShareRootFile() = viewModelScope.launch {
-        val file = if (rootFileId == ROOT_SHARED_FILE_ID) {
-            rootSharedFile.value
-        } else {
-            val apiResponse = PublicShareApiRepository.getPublicShareRootFile(
-                driveId = driveId,
-                linkUuid = publicShareUuid,
-                fileId = rootFileId,
-                authToken = submitPasswordResult.value?.takeToken(),
-            )
-            if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
-            apiResponse.data
-        }
-
-        val publicShareFile = file?.apply {
-            publicShareUuid = this@PublicShareViewModel.publicShareUuid
-            publicShareAuthToken = submitPasswordResult.value?.takeToken()
-        }
-        rootSharedFile.postValue(publicShareFile)
-    }
-
-    fun getFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
-        getPublicShareFilesJob = viewModelScope.launch {
-
-            tailrec suspend fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
-
-                val folderFilesProviderResult = loadFromRemote(
-                    FolderFilesProviderArgs(folderId = folderId, isFirstPage = isFirstPage, order = sortType),
-                )
-
-                if (folderFilesProviderResult == null) return
-
-                ensureActive()
-
-                val newFiles = mutableListOf<File>().apply {
-                    childrenLiveData.value?.files?.let(::addAll)
-                    addAll(folderFilesProviderResult.folderFiles.addPublicShareInfo())
-                    if (any(File::isFolder)) sortByDescending(File::isFolder)
-                }
-
-                childrenLiveData.postValue(PublicShareFilesResult(files = newFiles, shouldUpdate = true, isNewSort = isNewSort))
-                currentCursor = folderFilesProviderResult.cursor
-                if (!folderFilesProviderResult.isComplete) recursiveDownload(folderId, isFirstPage = false)
-            }
-
-            recursiveDownload(folderId, isFirstPage = true)
-        }
-    }
-
     fun cancelDownload() {
         getPublicShareFilesJob.cancel()
         getPublicShareFilesJob.cancelChildren()
@@ -239,6 +190,67 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         }
     }
 
+    fun downloadPublicShareFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
+        val emptyFilesResult = PublicShareFilesResult(files = emptyList(), shouldUpdate = false, isNewSort = false)
+        childrenLiveData.value = emptyFilesResult
+        cancelDownload()
+
+        if (folderId == ROOT_SHARED_FILE_ID || rootSharedFile.value?.isFolder() != true) {
+            downloadPublicShareRootFile()
+        } else {
+            getFiles(folderId, sortType, isNewSort)
+        }
+    }
+
+    private fun getFiles(folderId: Int, sortType: SortType, isNewSort: Boolean) {
+        getPublicShareFilesJob = viewModelScope.launch {
+
+            tailrec suspend fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
+
+                val folderFilesProviderResult = loadFromRemote(
+                    FolderFilesProviderArgs(folderId = folderId, isFirstPage = isFirstPage, order = sortType),
+                )
+
+                if (folderFilesProviderResult == null) return
+
+                ensureActive()
+
+                val newFiles = mutableListOf<File>().apply {
+                    childrenLiveData.value?.files?.let(::addAll)
+                    addAll(folderFilesProviderResult.folderFiles.addPublicShareInfo())
+                    if (any(File::isFolder)) sortByDescending(File::isFolder)
+                }
+
+                childrenLiveData.postValue(PublicShareFilesResult(files = newFiles, shouldUpdate = true, isNewSort = isNewSort))
+                currentCursor = folderFilesProviderResult.cursor
+                if (!folderFilesProviderResult.isComplete) recursiveDownload(folderId, isFirstPage = false)
+            }
+
+            recursiveDownload(folderId, isFirstPage = true)
+        }
+    }
+
+    private fun downloadPublicShareRootFile() = viewModelScope.launch {
+        val file = if (rootFileId == ROOT_SHARED_FILE_ID) {
+            rootSharedFile.value
+        } else {
+            val apiResponse = PublicShareApiRepository.getPublicShareRootFile(
+                driveId = driveId,
+                linkUuid = publicShareUuid,
+                fileId = rootFileId,
+                authToken = submitPasswordResult.value?.takeToken(),
+            )
+            if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
+            apiResponse.data
+        }
+
+        val publicShareFile = file?.apply {
+            publicShareUuid = this@PublicShareViewModel.publicShareUuid
+            publicShareAuthToken = submitPasswordResult.value?.takeToken()
+        }
+        rootSharedFile.postValue(publicShareFile)
+    }
+
     private suspend fun loadFromRemote(folderFilesProviderArgs: FolderFilesProviderArgs): FolderFilesProviderResult? {
         val apiResponse = PublicShareApiRepository.getPublicShareChildrenFiles(
             driveId = driveId,
@@ -286,8 +298,6 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             publicShareAuthToken = submitPasswordResult.value?.takeToken()
         }
     }
-
-    fun isFolder(): Boolean = rootSharedFile.value?.isFolder() == true
 
     data class PublicShareFilesResult(
         val files: List<File>,
