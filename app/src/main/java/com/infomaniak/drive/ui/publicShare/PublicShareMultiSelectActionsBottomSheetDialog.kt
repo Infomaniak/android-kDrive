@@ -67,7 +67,7 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
                     driveId = driveId,
                     publicShareUuid = publicShareUuid,
                     archiveUuid = it.uuid,
-                    authToken = submitPasswordResult.value,
+                    authToken = submitPasswordResult.value?.takeToken(),
                 )
                 val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
                 DownloadManagerUtils.scheduleDownload(

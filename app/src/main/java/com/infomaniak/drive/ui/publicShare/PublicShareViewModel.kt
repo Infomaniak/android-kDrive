@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.publicShare
 
 import android.app.Application
+import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
@@ -27,9 +28,11 @@ import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
+import com.infomaniak.drive.R
 import com.infomaniak.drive.SHARE_URL_V1
 import com.infomaniak.drive.data.api.CursorApiResponse
 import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
+import com.infomaniak.drive.data.api.publicshare.PublicShareToken
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderArgs
 import com.infomaniak.drive.data.cache.FolderFilesProvider.FolderFilesProviderResult
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -59,7 +62,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     val buildArchiveResult = SingleLiveEvent<Pair<Int?, ArchiveUUID?>>()
     val initPublicShareResult = SingleLiveEvent<Pair<ApiError?, ShareLink?>>()
     val importPublicShareResult = SingleLiveEvent<PublicShareImportResult>()
-    val submitPasswordResult = SingleLiveEvent<String>()
+    val submitPasswordResult = SingleLiveEvent<PublicShareSubmitPasswordResult>()
     var hasBeenAuthenticated = false
     var canDownloadFiles = canDownload
     var rootFileId = PUBLIC_SHARE_DEFAULT_ID
@@ -101,13 +104,19 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     }
 
     fun submitPublicSharePassword(password: String) = viewModelScope.launch {
-        val token = PublicShareApiRepository.submitPublicSharePassword(
+        val apiResponse = PublicShareApiRepository.submitPublicSharePassword(
             driveId = driveId,
             linkUuid = publicShareUuid,
             password = password,
-        ).data?.token ?: ""
+        )
 
-        submitPasswordResult.postValue(token)
+        val result = when {
+            !apiResponse.isSuccess() -> PublicShareSubmitPasswordResult.Error.ApiError(apiResponse.translateError())
+            apiResponse.data?.token.isNullOrBlank() -> PublicShareSubmitPasswordResult.Error.Unknown
+            else -> PublicShareSubmitPasswordResult.ValidPassword(authToken = (apiResponse.data as PublicShareToken).token)
+        }
+
+        submitPasswordResult.postValue(result)
     }
 
     fun downloadPublicShareRootFile() = viewModelScope.launch {
@@ -118,7 +127,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
                 driveId = driveId,
                 linkUuid = publicShareUuid,
                 fileId = rootFileId,
-                authToken = submitPasswordResult.value,
+                authToken = submitPasswordResult.value?.takeToken(),
             )
             if (!apiResponse.isSuccess()) SentryLog.w(TAG, "downloadSharedFile: ${apiResponse.error?.code}")
             apiResponse.data
@@ -126,7 +135,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
 
         val publicShareFile = file?.apply {
             publicShareUuid = this@PublicShareViewModel.publicShareUuid
-            publicShareAuthToken = submitPasswordResult.value
+            publicShareAuthToken = submitPasswordResult.value?.takeToken()
         }
         rootSharedFile.postValue(publicShareFile)
     }
@@ -181,7 +190,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             destinationFolderId = destinationFolderId,
             fileIds = fileIds,
             exceptedFileIds = exceptedFileIds,
-            authToken = submitPasswordResult.value,
+            authToken = submitPasswordResult.value?.takeToken(),
         )
         val error = if (apiResponse.isSuccess()) null else apiResponse.translateError()
         val destinationPath = "$SHARE_URL_V1/drive/$destinationDriveId/files/$destinationFolderId"
@@ -198,7 +207,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             driveId = driveId,
             linkUuid = publicShareUuid,
             archiveBody = archiveBody,
-            authToken = submitPasswordResult.value,
+            authToken = submitPasswordResult.value?.takeToken(),
         )
         val result = apiResponse.data?.let { archiveUuid -> null to archiveUuid } ?: (apiResponse.translateError() to null)
 
@@ -237,7 +246,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
             folderId = folderFilesProviderArgs.folderId,
             sortType = folderFilesProviderArgs.order,
             cursor = currentCursor,
-            authToken = submitPasswordResult.value,
+            authToken = submitPasswordResult.value?.takeToken(),
         ).let {
             CursorApiResponse(
                 result = it.result,
@@ -274,7 +283,7 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
     private fun List<File>.addPublicShareInfo() = map {
         it.apply {
             publicShareUuid = this@PublicShareViewModel.publicShareUuid
-            publicShareAuthToken = submitPasswordResult.value
+            publicShareAuthToken = submitPasswordResult.value?.takeToken()
         }
     }
 
@@ -291,6 +300,18 @@ class PublicShareViewModel(application: Application, val savedStateHandle: Saved
         val destinationPath: String,
         val errorRes: Int?,
     )
+
+    sealed interface PublicShareSubmitPasswordResult {
+
+        fun takeToken() = (this as? ValidPassword)?.authToken?.takeIf(String::isNotBlank)
+
+        data class ValidPassword(val authToken: String) : PublicShareSubmitPasswordResult
+
+        sealed class Error(@StringRes open val errorRes: Int) : PublicShareSubmitPasswordResult {
+            data class ApiError(override val errorRes: Int) : Error(errorRes)
+            data object Unknown : Error(R.string.anErrorHasOccurred)
+        }
+    }
 
     companion object {
         const val TAG = "publicShareViewModel"

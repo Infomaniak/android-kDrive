@@ -56,6 +56,7 @@ object ErrorCode {
         ApiErrorCode(NETWORK_ERROR, R.string.errorNetwork),
         ApiErrorCode(NO_DRIVE, R.string.noDriveTitle),
         ApiErrorCode(OBJECT_NOT_FOUND, R.string.uploadFolderNotFoundError),
+        ApiErrorCode(PASSWORD_NOT_VALID, R.string.errorWrongPassword),
         ApiErrorCode(PRODUCT_BLOCKED, R.string.allDriveBlockedDescription),
         ApiErrorCode(PRODUCT_MAINTENANCE, R.string.driveMaintenanceDescription),
         ApiErrorCode(QUOTA_EXCEEDED_ERROR, R.string.errorQuotaExceeded),

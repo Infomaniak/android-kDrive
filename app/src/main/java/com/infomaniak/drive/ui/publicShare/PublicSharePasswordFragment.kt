@@ -41,6 +41,7 @@ import com.infomaniak.drive.databinding.FragmentPublicSharePasswordBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity.Companion.PUBLIC_SHARE_TAG
 import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUBLIC_SHARE_DEFAULT_ID
+import com.infomaniak.drive.ui.publicShare.PublicShareViewModel.PublicShareSubmitPasswordResult
 import handleActionDone
 import com.infomaniak.core.network.models.exceptions.NetworkException as ApiControllerNetworkException
 
@@ -84,14 +85,21 @@ class PublicSharePasswordFragment : Fragment() {
     }
 
     private fun observeSubmitPasswordResult() = with(binding) {
-        publicShareViewModel.submitPasswordResult.observe(viewLifecycleOwner) { authToken ->
-            if (authToken.isNotEmpty()) {
-                publicShareViewModel.hasBeenAuthenticated = true
-                publicShareViewModel.initPublicShare(authToken)
-            } else {
-                passwordValidateButton.hideProgressCatching(R.string.buttonValid)
-                publicSharePasswordEditText.text = null
-                publicSharePasswordLayout.error = getString(R.string.errorWrongPassword)
+        publicShareViewModel.submitPasswordResult.observe(viewLifecycleOwner) { submitPasswordResult ->
+            when (submitPasswordResult) {
+                is PublicShareSubmitPasswordResult.ValidPassword -> {
+                    publicShareViewModel.hasBeenAuthenticated = true
+                    publicShareViewModel.initPublicShare(submitPasswordResult.authToken)
+                }
+                is PublicShareSubmitPasswordResult.Error -> {
+                    passwordValidateButton.hideProgressCatching(R.string.buttonValid)
+                    publicSharePasswordEditText.text = null
+                    publicSharePasswordLayout.error = getString(submitPasswordResult.errorRes)
+
+                    if (submitPasswordResult is PublicShareSubmitPasswordResult.Error.Unknown) {
+                        SentryLog.e(PUBLIC_SHARE_TAG, "Api returned invalid public share auth token")
+                    }
+                }
             }
         }
     }
