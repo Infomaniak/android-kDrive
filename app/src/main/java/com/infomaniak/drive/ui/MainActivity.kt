@@ -206,7 +206,7 @@ class MainActivity : BaseActivity() {
 
         AppLockManager.scheduleLockIfNeeded(
             targetActivity = this,
-            lockActivityCls = AppLockViewActivity::class.java,
+            lockActivityCls = AppLockViewActivity::class,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
 

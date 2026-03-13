@@ -135,7 +135,7 @@ class SaveExternalFilesActivity : BaseActivity() {
 
         AppLockManager.scheduleLockIfNeeded(
             targetActivity = this@SaveExternalFilesActivity,
-            lockActivityCls = AppLockViewActivity::class.java,
+            lockActivityCls = AppLockViewActivity::class,
             isAppLockEnabled = { AppSettings.appSecurityLock }
         )
     }
