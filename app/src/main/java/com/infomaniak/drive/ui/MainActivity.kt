@@ -120,7 +120,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.resume
-import kotlin.jvm.java
 import com.infomaniak.core.legacy.R as RCore
 
 @AndroidEntryPoint
