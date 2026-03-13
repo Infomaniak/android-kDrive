@@ -34,6 +34,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.bugtracker.BugTrackerActivity
 import com.infomaniak.core.bugtracker.BugTrackerActivityArgs
@@ -41,7 +42,6 @@ import com.infomaniak.core.crossapplogin.back.CrossAppLogin
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.ui.utils.MatomoKSuite
-import com.infomaniak.core.applock.LockActivity
 import com.infomaniak.core.legacy.ui.WebViewActivity
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
 import com.infomaniak.core.legacy.utils.getBackNavigationResult
@@ -94,7 +94,7 @@ class SettingsFragment : Fragment() {
         themeSettings.setOnClickListener { openThemeSettings() }
         notifications.setOnClickListener { requireContext().openAppNotificationSettings() }
         appSecurity.apply {
-            if (LockActivity.hasBiometrics()) {
+            if (AppLockManager.hasBiometrics()) {
                 isVisible = true
                 setOnClickListener {
                     trackSettingsEvent(MatomoName.LockApp)
