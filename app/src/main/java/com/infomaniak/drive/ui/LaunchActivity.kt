@@ -46,8 +46,11 @@ import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
-import com.infomaniak.drive.data.models.deeplink.FileType
+import com.infomaniak.drive.data.models.deeplink.ExternalFileType.Folder
+import com.infomaniak.drive.data.models.deeplink.FileType.File
 import com.infomaniak.drive.data.models.deeplink.RoleFolder
+import com.infomaniak.drive.data.models.deeplink.RoleFolder.Files
+import com.infomaniak.drive.data.models.deeplink.RoleFolder.SharedWithMe
 import com.infomaniak.drive.data.services.UploadWorker
 import com.infomaniak.drive.ui.LaunchArgsType.Deeplink
 import com.infomaniak.drive.ui.LaunchArgsType.Notification
@@ -177,11 +180,23 @@ class LaunchActivity : EdgeToEdgeActivity() {
         })
         deeplinkType = if (UserDatabase().userDao().findById(navArgs.destinationUserId) != null) {
             DeeplinkAction.Drive(
-                navArgs.destinationDriveId,
-                RoleFolder.Files(FileType.File(navArgs.destinationRemoteFolderId))
+                userId = navArgs.destinationUserId,
+                driveId = navArgs.destinationDriveId,
+                roleFolder = navArgs.getRoleFolder()
             )
         } else {
             DeeplinkType.Unmanaged.NotAccessible
+        }
+    }
+
+    private suspend fun LaunchActivityArgs.getRoleFolder(): RoleFolder {
+        val isSharedWithMe = Dispatchers.IO {
+            DriveInfosController.getDrive(userId = destinationUserId, driveId = destinationDriveId, maintenance = false)
+        }?.sharedWithMe == true
+        return if (isSharedWithMe) {
+            SharedWithMe(fileType = Folder(sourceDriveId = destinationDriveId, folderId = destinationRemoteFolderId))
+        } else {
+            Files(fileType = File(fileId = destinationRemoteFolderId))
         }
     }
 
