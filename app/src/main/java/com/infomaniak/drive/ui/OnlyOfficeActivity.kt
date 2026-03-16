@@ -83,6 +83,12 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
         val url = intent.getStringExtra(ONLYOFFICE_URL_TAG)!!
         val filename = intent.getStringExtra(ONLYOFFICE_FILENAME_TAG)!!
+
+        if (!isUrlFromTrustedDomain(url)) {
+            finish()
+            return@with
+        }
+
         val headers = mapOf("Authorization" to "Bearer ${AccountUtils.currentUser?.apiToken?.accessToken}")
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
@@ -96,8 +102,9 @@ class OnlyOfficeActivity : AppCompatActivity() {
 
             webViewClient = object : WebViewClientCompat() {
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                    popBackIfNeeded(request.url.toString())
-                    view.loadUrl(request.url.toString())
+                    val redirectUrl = request.url.toString()
+                    popBackIfNeeded(redirectUrl)
+                    if (!isFinishing) view.loadUrl(redirectUrl)
                     return true
                 }
             }
@@ -209,6 +216,16 @@ class OnlyOfficeActivity : AppCompatActivity() {
     private fun popBackIfNeeded(url: String) {
         val popBackNeeded = !url.contains(Regex("^https.*/app/(office/\\d+|share/\\d+/[a-z0-9\\-]+/preview/text)/\\d+"))
         if (popBackNeeded) finish()
+    }
+
+    private fun isUrlFromTrustedDomain(url: String): Boolean {
+        return try {
+            val uri = Uri.parse(url)
+            val host = uri.host ?: return false
+            uri.scheme == "https" && (host.endsWith(".infomaniak.com") || host == "infomaniak.com")
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private inner class OnlyOfficeWebChromeClient : WebChromeClient() {
