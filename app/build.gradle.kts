@@ -184,6 +184,7 @@ dependencies {
     implementation(core.infomaniak.core.ui.compose.margin)
     implementation(core.infomaniak.core.ui.compose.materialthemefromxml)
     implementation(core.infomaniak.core.ui.view.edgetoedge)
+    implementation(core.infomaniak.core.webview)
 
     implementation(project(":Core:Legacy"))
 
