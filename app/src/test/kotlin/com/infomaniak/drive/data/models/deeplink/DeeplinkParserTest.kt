@@ -21,7 +21,6 @@ import android.net.Uri
 import com.infomaniak.drive.ui.DeeplinkParser
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -33,15 +32,8 @@ class DeeplinkParserTest {
         return uri
     }
 
-    private fun mockDefaultUserId(block: () -> Unit) {
-        mockkObject(DeeplinkAction.Companion) {
-            every { DeeplinkAction.getDefaultUserId() } returns 42
-            block()
-        }
-    }
-
     @Test
-    fun `parse deeplink Collaborate`() = mockDefaultUserId {
+    fun `parse deeplink Collaborate`() {
         val uri = "https://kdrive.infomaniak.com/app/collaborate/140946/a3f48925-8626-479c-b9fb-9453dc286745".mockUri()
         val expected = DeeplinkAction.Collaborate(driveId = 140946, uuid = "a3f48925-8626-479c-b9fb-9453dc286745")
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -49,7 +41,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Office`() = mockDefaultUserId {
+    fun `parse deeplink Office`() {
         val uri = "https://kdrive.infomaniak.com/app/office/140946/4818798".mockUri()
         val expected = DeeplinkAction.Office(driveId = 140946, fileId = 4818798)
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -57,7 +49,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive Favorites`() = mockDefaultUserId {
+    fun `parse deeplink Drive Favorites`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/favorites".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Favorites(fileId = null))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -65,7 +57,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive Favorites preview`() = mockDefaultUserId {
+    fun `parse deeplink Drive Favorites preview`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/favorites/preview/image/4818859".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Favorites(fileId = 4818859))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -73,7 +65,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive File`() = mockDefaultUserId {
+    fun `parse deeplink Drive File`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/files/4818791".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Files(FileType.File(fileId = 4818791)))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -81,7 +73,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive File preview in folder`() = mockDefaultUserId {
+    fun `parse deeplink Drive File preview in folder`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/files/4818791/preview/video/4819045".mockUri()
         val expected = DeeplinkAction.Drive(
             driveId = 140946,
@@ -92,7 +84,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive MyShare`() = mockDefaultUserId {
+    fun `parse deeplink Drive MyShare`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/my-shares".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.MyShares(fileId = null))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -100,7 +92,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive MyShare preview`() = mockDefaultUserId {
+    fun `parse deeplink Drive MyShare preview`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/my-shares/preview/text/4818798".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.MyShares(fileId = 4818798))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -108,7 +100,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive Recents`() = mockDefaultUserId {
+    fun `parse deeplink Drive Recents`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/recents".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Recents(fileId = null))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -116,7 +108,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive Recents preview`() = mockDefaultUserId {
+    fun `parse deeplink Drive Recents preview`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/recents/preview/text/4819050".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Recents(fileId = 4819050))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -124,7 +116,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive SharedWithMe`() = mockDefaultUserId {
+    fun `parse deeplink Drive SharedWithMe`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/shared-with-me".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.SharedWithMe(fileType = null))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -132,7 +124,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive SharedWithMe folder`() = mockDefaultUserId {
+    fun `parse deeplink Drive SharedWithMe folder`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/shared-with-me/140946/4623400".mockUri()
         val expected = DeeplinkAction.Drive(
             driveId = 140946,
@@ -143,7 +135,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive SharedWithMe preview in folder`() = mockDefaultUserId {
+    fun `parse deeplink Drive SharedWithMe preview in folder`() {
         val uri =
             "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/shared-with-me/140946/4623400/preview/code/4624401".mockUri()
         val expected = DeeplinkAction.Drive(
@@ -157,7 +149,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive SharedWithMe preview `() = mockDefaultUserId {
+    fun `parse deeplink Drive SharedWithMe preview `() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/shared-with-me/1840145/preview/pdf/8".mockUri()
         val expected = DeeplinkAction.Drive(
             driveId = 140946,
@@ -168,7 +160,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive Trash`() = mockDefaultUserId {
+    fun `parse deeplink Drive Trash`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/trash".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Trash(folderId = null))
         val deeplinkType = DeeplinkParser.parse(uri)
@@ -176,7 +168,7 @@ class DeeplinkParserTest {
     }
 
     @Test
-    fun `parse deeplink Drive Trash folder`() = mockDefaultUserId {
+    fun `parse deeplink Drive Trash folder`() {
         val uri = "https://ksuite.infomaniak.com/all/kdrive/app/drive/140946/trash/4819046".mockUri()
         val expected = DeeplinkAction.Drive(driveId = 140946, roleFolder = RoleFolder.Trash(folderId = 4819046))
         val deeplinkType = DeeplinkParser.parse(uri)
