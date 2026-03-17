@@ -321,6 +321,7 @@ class MainActivity : BaseActivity() {
             context = this@MainActivity,
             url = url,
             headers = AccountUtils.currentUser?.run { mapOf("Authorization" to "Bearer ${apiToken.accessToken}") },
+            hostWhiteList = arrayListOf("ksuite.infomaniak.com", "kdrive.infomaniak.com"),
         )
     }
 
