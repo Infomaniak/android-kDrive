@@ -226,8 +226,18 @@ class LaunchActivity : EdgeToEdgeActivity() {
     }
 
     private fun retrieveDeeplink(uri: Uri) {
-        deeplinkType = DeeplinkParser.parse(uri)
+        deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
+    }
+
+    private fun DeeplinkType.ensureHasAccess(): DeeplinkType {
+        return takeUnless {
+            this is DeeplinkAction && DriveInfosController.getDrive(
+                driveId = driveId,
+                maintenance = false
+            ) == null
+        }
+            ?: DeeplinkType.Unmanaged.NotAccessible
     }
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
