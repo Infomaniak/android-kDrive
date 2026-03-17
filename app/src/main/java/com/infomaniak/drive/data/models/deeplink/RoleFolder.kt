@@ -25,7 +25,7 @@ sealed interface RoleFolder : Parcelable {
     val isHandled: Boolean
         get() = true
 
-    data class Category(val id: Int, val fileId: Int?) : RoleFolder {
+    data class Category(val id: Int, val fileId: Int? = null) : RoleFolder {
         override val isHandled: Boolean get() = false
     }
 
