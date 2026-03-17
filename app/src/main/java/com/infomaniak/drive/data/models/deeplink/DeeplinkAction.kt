@@ -17,32 +17,32 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
-import com.infomaniak.drive.utils.AccountUtils
 import kotlinx.parcelize.Parcelize
 
 
 @Parcelize
 sealed interface DeeplinkAction : DeeplinkType {
-    data class Collaborate(val driveId: Int, val uuid: String) : DeeplinkAction {
+    val driveId: Int
+
+    data class Collaborate(override val driveId: Int, val uuid: String) : DeeplinkAction {
         override val isHandled: Boolean
             get() = false
     }
 
     data class Drive(
-        val userId: Int = getDefaultUserId(),
-        val driveId: Int,
+        val userId: Int? = null,
+        override val driveId: Int,
         val roleFolder: RoleFolder
     ) : DeeplinkAction {
         override val isHandled: Boolean
             get() = roleFolder.isHandled
     }
 
-    data class Office(val driveId: Int, val fileId: Int) : DeeplinkAction
+    data class Office(override val driveId: Int, val fileId: Int) : DeeplinkAction
 
     companion object {
         @Throws(InvalidFormatting::class)
         fun from(actionType: String, action: String): DeeplinkAction = ActionType.from(actionType).build(action)
 
-        fun getDefaultUserId(): Int = AccountUtils.currentUserId
     }
 }
