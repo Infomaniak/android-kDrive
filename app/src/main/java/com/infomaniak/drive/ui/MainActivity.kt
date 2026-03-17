@@ -275,53 +275,55 @@ class MainActivity : BaseActivity() {
     }
 
     private fun handleDeeplink() {
-        navigationArgs?.deeplinkType?.let { type ->
-            when (type) {
-                is DeeplinkAction.Collaborate -> handleCollaborateDeeplink(type)
-                is DeeplinkAction.Drive -> handleDriveDeeplink(type)
-                is DeeplinkAction.Office -> handleOnlyOfficeDeeplink(type)
-                is DeeplinkType.Unmanaged -> handleUnmanagedDeeplink(type)
+        navigationArgs?.deeplinkType?.run {
+            when (this) {
+                is DeeplinkAction.Collaborate -> handleCollaborateDeeplink()
+                is DeeplinkAction.Drive -> handleDriveDeeplink()
+                is DeeplinkAction.Office -> handleOnlyOfficeDeeplink()
+                is DeeplinkType.Unmanaged -> handleUnmanagedDeeplink()
             }
         }
     }
 
-    private fun handleCollaborateDeeplink(link: DeeplinkAction.Collaborate) {
-        if (DEBUG && link.isHandled) TODO("Need to implement here when Collaborate deeplink will be supported")
+    private fun DeeplinkAction.Collaborate.handleCollaborateDeeplink() {
+        if (DEBUG && isHandled) TODO("Need to implement here when Collaborate deeplink will be supported")
     }
 
-    private fun handleDriveDeeplink(link: DeeplinkAction.Drive) {
+    private fun DeeplinkAction.Drive.handleDriveDeeplink() {
         lifecycleScope.launch(context = Dispatchers.IO) {
-            DriveInfosController.getDrive(userId = link.userId, driveId = link.driveId, maintenance = false)
+            DriveInfosController.getDrive(userId = userId, driveId = driveId, maintenance = false)
                 ?.ensureRightUser()
-                ?.run { UserDrive(userId = userId, driveId = link.driveId) }
                 ?.let {
                     Dispatchers.Main { clickOnBottomBarFolders() }
-                    mainViewModel.navigateDeeplink.emit(link)
+                    mainViewModel.navigateDeeplink.emit(this@handleDriveDeeplink)
                 }
         }
     }
 
-    private fun handleOnlyOfficeDeeplink(link: DeeplinkAction.Office) {
+    private fun DeeplinkAction.Office.handleOnlyOfficeDeeplink() {
         lifecycleScope.launch(context = Dispatchers.IO) {
-            DriveInfosController.getDrive(driveId = link.driveId, maintenance = false)
+            DriveInfosController.getDrive(driveId = driveId, maintenance = false)
                 ?.ensureRightUser()
-                ?.run { UserDrive(userId = userId, driveId = link.driveId) }
-                ?.let { FileController.getFileById(fileId = link.fileId, userDrive = it) }
+                ?.run { FileController.getFileById(fileId = fileId, userDrive = UserDrive(userId = userId, driveId = id)) }
                 ?.let(::openOnlyOfficeActivity)
         }
     }
 
-    private fun handleUnmanagedDeeplink(type: DeeplinkType.Unmanaged) {
-        when (type) {
-            is BrowserLaunch -> WebViewActivity.startActivity(
-                context = this,
-                url = type.url,
-                headers = AccountUtils.currentUser?.run { mapOf("Authorization" to "Bearer ${apiToken.accessToken}") },
-            )
+    private fun DeeplinkType.Unmanaged.handleUnmanagedDeeplink() {
+        when (this) {
+            is BrowserLaunch -> startWebViewActivity(url)
             NotAccessible -> binding.mainFab.apply {
                 post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
             }
         }
+    }
+
+    private fun startWebViewActivity(url: String) {
+        WebViewActivity.startActivity(
+            context = this@MainActivity,
+            url = url,
+            headers = AccountUtils.currentUser?.run { mapOf("Authorization" to "Bearer ${apiToken.accessToken}") },
+        )
     }
 
     private suspend fun Drive.ensureRightUser(): Drive = also {
