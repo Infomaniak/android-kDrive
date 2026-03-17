@@ -28,8 +28,11 @@ sealed interface DeeplinkAction : DeeplinkType {
             get() = false
     }
 
-    data class Drive(val userId: Int = AccountUtils.currentUserId, val driveId: Int, val roleFolder: RoleFolder) :
-        DeeplinkAction {
+    data class Drive(
+        val userId: Int = getDefaultUserId(),
+        val driveId: Int,
+        val roleFolder: RoleFolder
+    ) : DeeplinkAction {
         override val isHandled: Boolean
             get() = roleFolder.isHandled
     }
@@ -39,5 +42,7 @@ sealed interface DeeplinkAction : DeeplinkType {
     companion object {
         @Throws(InvalidFormatting::class)
         fun from(actionType: String, action: String): DeeplinkAction = ActionType.from(actionType).build(action)
+
+        fun getDefaultUserId(): Int = AccountUtils.currentUserId
     }
 }
