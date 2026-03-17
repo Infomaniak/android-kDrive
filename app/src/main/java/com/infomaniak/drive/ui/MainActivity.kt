@@ -68,7 +68,6 @@ import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
 import com.infomaniak.core.inappreview.view.ReviewAlertDialog
 import com.infomaniak.core.inappreview.view.ReviewAlertDialogData
-import com.infomaniak.core.legacy.ui.WebViewActivity
 import com.infomaniak.core.legacy.utils.CoilUtils.simpleImageLoader
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showIndefiniteSnackbar
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
@@ -76,6 +75,7 @@ import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.webview.ui.WebViewActivity
 import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
