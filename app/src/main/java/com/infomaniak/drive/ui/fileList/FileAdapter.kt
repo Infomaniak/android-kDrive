@@ -370,20 +370,20 @@ open class FileAdapter(
     }
 
     private fun FileItemViewHolder.setupMenuButton(file: File) {
-        onMenuClicked?.takeUnless { hideMenu(file) }
-            ?.let { onMenuClicked ->
-                menuButton.isVisible = true
-                menuButton.setOnClickListener { onMenuClicked(file) }
-            }
+        if (!shouldHideMenu(file)) {
+            menuButton.isVisible = true
+            menuButton.setOnClickListener { onMenuClicked?.invoke(file) }
+        }
     }
 
-    private fun hideMenu(file: File): Boolean {
+    private fun shouldHideMenu(file: File): Boolean {
         return uploadInProgress
                 || isSelectingFolder
                 || isActionMenuHidden
                 || file.isFromSearch
                 || (offlineMode && !file.isOffline)
                 || !publicShareCanDownload
+                || onMenuClicked == null
     }
 
     private fun FileItemViewHolder.setupCardClicksListeners(file: File, position: Int) = with(multiSelectManager) {
