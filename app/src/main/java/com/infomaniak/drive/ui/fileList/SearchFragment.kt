@@ -249,12 +249,11 @@ class SearchFragment : FileListFragment() {
             searchViewModel.visibilityMode.value = if (searchList.isEmpty()) VisibilityMode.NO_RESULTS else VisibilityMode.RESULTS
         }
 
-        searchViewModel.searchResults.observe(viewLifecycleOwner) {
+        searchViewModel.searchResults.observe(viewLifecycleOwner) { folderFilesResult ->
 
             if (!binding.swipeRefreshLayout.isRefreshing) return@observe
 
-            it?.run {
-
+            folderFilesResult?.run {
                 if (errorRes == null) {
                     updateMostRecentSearches()
 
