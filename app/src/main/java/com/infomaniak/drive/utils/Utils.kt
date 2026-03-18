@@ -44,7 +44,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.legacy.utils.DownloadManagerUtils
+import com.infomaniak.core.common.utils.DownloadManagerUtils
 import com.infomaniak.core.legacy.utils.showKeyboard
 import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.drive.R
