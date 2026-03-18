@@ -381,9 +381,6 @@ class FileMigration : RealmMigration {
 
         if (oldVersionTemp == 10L) {
             schema[File::class.java.simpleName]?.removeField("isFromActivities")
-            oldVersionTemp++
-        }
-        if (oldVersionTemp == 11L) {
             schema[File::class.java.simpleName]?.removeField("isFromSearch")
             oldVersionTemp++
         }
@@ -414,7 +411,7 @@ class FileMigration : RealmMigration {
     }
 
     companion object {
-        const val DB_VERSION = 12L // Must be bumped when the schema changes
+        const val DB_VERSION = 11L // Must be bumped when the schema changes
         const val LOGOUT_CURRENT_USER_TAG = "logout_current_user_tag"
     }
 }
