@@ -1,0 +1,2 @@
+- Ajouter la prise en charge dans l'application du partage public protégé par mot de passe
+- Corriger la navigation sur l'écran « Pas de drive » lorsqu'un utilisateur ne dispose d'aucun kDrive.
