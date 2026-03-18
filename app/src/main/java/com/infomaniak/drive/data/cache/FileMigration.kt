@@ -56,8 +56,8 @@ class FileMigration : RealmMigration {
                 if (hasField("canUseTag")) removeField("canUseTag")
                 if (hasField("tags")) removeField("tags")
                 if (hasField("isWaitingOffline")) removeField("isWaitingOffline")
-                if (!hasField(File::isFromSearch.name)) {
-                    addField(File::isFromSearch.name, Boolean::class.java, FieldAttribute.REQUIRED)
+                if (!hasField("isFromSearch")) {
+                    addField("isFromSearch", Boolean::class.java, FieldAttribute.REQUIRED)
                 }
                 if (!hasField(File::isFromUploads.name)) {
                     addField(File::isFromUploads.name, Boolean::class.java, FieldAttribute.REQUIRED)
@@ -381,6 +381,7 @@ class FileMigration : RealmMigration {
 
         if (oldVersionTemp == 10L) {
             schema[File::class.java.simpleName]?.removeField("isFromActivities")
+            schema[File::class.java.simpleName]?.removeField("isFromSearch")
             oldVersionTemp++
         }
     }

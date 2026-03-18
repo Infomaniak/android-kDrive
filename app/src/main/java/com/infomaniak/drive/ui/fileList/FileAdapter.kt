@@ -380,7 +380,6 @@ open class FileAdapter(
         return uploadInProgress
                 || isSelectingFolder
                 || isActionMenuHidden
-                || file.isFromSearch
                 || (offlineMode && !file.isOffline)
                 || !publicShareCanDownload
                 || onMenuClicked == null
