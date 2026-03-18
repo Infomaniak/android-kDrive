@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,9 +111,8 @@ class MenuFragment : Fragment() {
         val isDriveEmpty = drive.size == 0L
         driveStorageProgress.isInvisible = isDriveEmpty
         if (!isDriveEmpty) {
-            val progress = (drive.usedSize.toDouble() / drive.size.toDouble()) * 1_000.toDouble()
+            val progress = (drive.usedSize.toDouble() / drive.size) * progressDriveQuota.max
             progressDriveQuota.progress = progress.toInt()
-            progressDriveQuota.max = 1_000
 
             val usedSize = requireContext().formatShortFileSize(drive.usedSize)
             val totalSize = requireContext().formatShortFileSize(drive.size)
