@@ -566,13 +566,15 @@ class CloudStorageProvider : DocumentsProvider() {
         val parentFolderId = getFileIdFromDocumentId(parentDocumentId)
         val userDrive = createUserDrive(parentDocumentId)
 
+        val newDate = Date()
         val uploadUrl = uploadFileDirectlyUrl(
             driveId = driveId,
             directoryId = parentFolderId,
             fileName = displayName,
             fileSize = 0L,
             conflictOption = ConflictOption.RENAME,
-            lastModifiedAt = Date(),
+            createdAt = newDate,
+            lastModifiedAt = newDate,
         )
 
         val apiResponse = ApiController.callApiBlocking<ApiResponse<File>>(

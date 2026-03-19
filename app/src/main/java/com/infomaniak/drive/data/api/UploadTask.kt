@@ -168,7 +168,9 @@ class UploadTask(
                 directoryPath = uploadFile.remoteSubFolder,
                 fileName = uploadFile.fileName,
                 fileSize = uploadFile.fileSize,
-                conflictOption = uploadFile.uploadConflictOption()
+                conflictOption = uploadFile.uploadConflictOption(),
+                createdAt = uploadFile.fileCreatedAt,
+                lastModifiedAt = uploadFile.fileModifiedAt,
             )
             uploadChunkUnchecked(inputStream, httpClient, url = url, length = uploadFile.fileSize)
         }
