@@ -114,7 +114,6 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-
     @Suppress("DEPRECATION")
     override fun onPause() {
         super.onPause()
