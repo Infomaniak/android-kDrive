@@ -26,8 +26,8 @@ sealed interface ExternalFileType : Parcelable {
 
     data class FilePreview(override val sourceDriveId: Int, val fileId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(2),
-            fileId = match.parseId(3),
+            sourceDriveId = match.parseId(GROUP_DRIVE_ID),
+            fileId = match.parseId(GROUP_FILE_ID),
         )
 
         companion object {
@@ -37,20 +37,20 @@ sealed interface ExternalFileType : Parcelable {
 
     data class Folder(override val sourceDriveId: Int, val folderId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(5),
-            folderId = match.parseId(6),
+            sourceDriveId = match.parseId(GROUP_DRIVE_ID),
+            folderId = match.parseId(GROUP_FOLDER_ID),
         )
 
         companion object {
-            const val PATTERN = "$DRIVE_ID/$FOLDER_ID$END_OF_REGEX"
+            const val PATTERN = "$DRIVE_ID/$FOLDER_ID"
         }
     }
 
     data class FilePreviewInFolder(override val sourceDriveId: Int, val folderId: Int, val fileId: Int) : ExternalFileType {
         constructor(match: MatchResult) : this(
-            sourceDriveId = match.parseId(8),
-            folderId = match.parseId(9),
-            fileId = match.parseId(10),
+            sourceDriveId = match.parseId(GROUP_DRIVE_ID),
+            folderId = match.parseId(GROUP_FOLDER_ID),
+            fileId = match.parseId(GROUP_FILE_ID),
         )
 
         companion object {
@@ -72,16 +72,16 @@ sealed interface ExternalFileType : Parcelable {
          *
          *  Order in this Regex implies index for each parsing in ExternalFileType constructors
          */
-        val SHARED_WITH_ME_FOLDER_PROPERTIES = listOf(
-            "(?<$GROUP_PREVIEW_FILE>${FilePreview.PATTERN})",
-            "(?<$GROUP_FOLDER>${Folder.PATTERN})",
-            "(?<$GROUP_PREVIEW_FILE_IN_FOLDER>${FilePreviewInFolder.PATTERN})"
-        ).joinToString(separator = "|")
+        val SHARED_WITH_ME_FOLDER_PROPERTIES = arrayOf(
+            "$START_OF_REGEX(?<$GROUP_PREVIEW_FILE>${FilePreview.PATTERN})$END_OF_REGEX",
+            "$START_OF_REGEX(?<$GROUP_FOLDER>${Folder.PATTERN})$END_OF_REGEX",
+            "$START_OF_REGEX(?<$GROUP_PREVIEW_FILE_IN_FOLDER>${FilePreviewInFolder.PATTERN})$END_OF_REGEX",
+        )
 
         fun MatchResult?.extractExternalFileType(): ExternalFileType? = this?.run {
-            groups[GROUP_PREVIEW_FILE]?.let { FilePreview(this) }
-                ?: groups[GROUP_FOLDER]?.let { Folder(this) }
-                ?: groups[GROUP_PREVIEW_FILE_IN_FOLDER]?.let { FilePreviewInFolder(this) }
+            tryMatchFor(GROUP_PREVIEW_FILE, ::FilePreview)
+                ?: tryMatchFor(GROUP_FOLDER, ::Folder)
+                ?: tryMatchFor(GROUP_PREVIEW_FILE_IN_FOLDER, ::FilePreviewInFolder)
         }
     }
 }

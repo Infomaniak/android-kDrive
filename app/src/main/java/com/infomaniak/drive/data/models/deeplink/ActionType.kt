@@ -25,16 +25,19 @@ internal enum class ActionType(val type: String, val actionPattern: String) {
     fun build(action: String): DeeplinkAction = action.find(actionPattern).run {
         when (this@ActionType) {
             Collaborate -> DeeplinkAction.Collaborate(
-                driveId = parseId(1),
-                uuid = groupValues[2],
+                driveId = parseId(GROUP_DRIVE_ID),
+                uuid = parseString(GROUP_UUID),
             )
             Drive -> DeeplinkAction.Drive(
-                driveId = parseId(1),
-                roleFolder = RoleFolder.from(folderType = groupValues[2], folderProperties = groupValues[3])
+                driveId = parseId(GROUP_DRIVE_ID),
+                roleFolder = RoleFolder.from(
+                    folderType = parseString(GROUP_ROLE),
+                    folderProperties = parseOptionalString(GROUP_FOLDER_PROPERTIES) ?: "",
+                )
             )
             Office -> DeeplinkAction.Office(
-                driveId = parseId(1),
-                fileId = parseId(2),
+                driveId = parseId(GROUP_DRIVE_ID),
+                fileId = parseId(GROUP_FILE_ID),
             )
         }
     }

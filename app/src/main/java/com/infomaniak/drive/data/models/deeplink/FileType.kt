@@ -24,19 +24,19 @@ import kotlinx.parcelize.Parcelize
 sealed class FileType(open val fileId: Int) : Parcelable {
     data class File(override val fileId: Int) : FileType(fileId = fileId) {
         constructor(match: MatchResult) : this(
-            fileId = match.parseId(2),
+            fileId = match.parseId(GROUP_FILE_ID),
         )
 
         companion object {
-            const val PATTERN = "$FILE_ID$END_OF_REGEX"
+            const val PATTERN = FILE_ID
         }
     }
 
     data class FilePreviewInFolder(val folderId: Int, override val fileId: Int) :
         FileType(fileId = fileId) {
         constructor(match: MatchResult) : this(
-            folderId = match.parseId(4),
-            fileId = match.parseId(5),
+            folderId = match.parseId(GROUP_FOLDER_ID),
+            fileId = match.parseId(GROUP_FILE_ID),
         )
 
         companion object {
@@ -56,15 +56,15 @@ sealed class FileType(open val fileId: Int) : Parcelable {
          *
          *  Order in this Regex implies index for each parsing in ExternalFileType constructors
          */
-        val FOLDER_PROPERTIES = listOf(
-            "(?<$GROUP_FILE>${File.PATTERN})",
-            "(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})"
-        ).joinToString(separator = "|")
+        val FOLDER_PROPERTIES = arrayOf(
+            "$START_OF_REGEX(?<$GROUP_FILE>${File.PATTERN})$END_OF_REGEX",
+            "$START_OF_REGEX(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})$END_OF_REGEX",
+        )
 
         fun MatchResult?.extractFileType(): FileType =
             this?.let {
-                groups[GROUP_FILE]?.let { File(this) }
-                    ?: groups[GROUP_PREVIEW_IN_FOLDER]?.let { FilePreviewInFolder(this) }
+                tryMatchFor(GROUP_FILE, ::File)
+                    ?: tryMatchFor(GROUP_PREVIEW_IN_FOLDER, ::FilePreviewInFolder)
             } ?: throw InvalidFormatting()
     }
 }
