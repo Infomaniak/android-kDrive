@@ -78,8 +78,8 @@ sealed interface ExternalFileType : Parcelable {
             "$START_OF_REGEX(?<$GROUP_PREVIEW_FILE_IN_FOLDER>${FilePreviewInFolder.PATTERN})$END_OF_REGEX",
         )
 
-        fun MatchResult?.extractExternalFileType(): ExternalFileType? = this?.run {
-            tryMatchFor(GROUP_PREVIEW_FILE, ::FilePreview)
+        fun MatchResult?.extractExternalFileType(): ExternalFileType? {
+            return tryMatchFor(GROUP_PREVIEW_FILE, ::FilePreview)
                 ?: tryMatchFor(GROUP_FOLDER, ::Folder)
                 ?: tryMatchFor(GROUP_PREVIEW_FILE_IN_FOLDER, ::FilePreviewInFolder)
         }
