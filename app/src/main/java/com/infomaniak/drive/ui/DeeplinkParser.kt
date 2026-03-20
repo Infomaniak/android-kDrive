@@ -20,8 +20,8 @@ package com.infomaniak.drive.ui
 import android.net.Uri
 import com.infomaniak.drive.data.models.deeplink.ACTION
 import com.infomaniak.drive.data.models.deeplink.ACTION_TYPE
-import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged
 
 object DeeplinkParser {

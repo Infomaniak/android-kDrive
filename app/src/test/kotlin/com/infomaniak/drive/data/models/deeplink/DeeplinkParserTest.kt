@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models.deeplink
 
 import android.net.Uri
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.ui.DeeplinkParser
 import io.mockk.every
 import io.mockk.mockk

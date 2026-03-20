@@ -34,7 +34,7 @@ import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.R
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.databinding.FragmentRootFilesBinding
 import com.infomaniak.drive.databinding.RootFolderLayoutBinding

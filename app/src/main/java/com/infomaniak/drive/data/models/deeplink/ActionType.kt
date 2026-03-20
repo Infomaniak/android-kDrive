@@ -17,6 +17,8 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
+
 internal enum class ActionType(val type: String, val actionPattern: String) {
     Collaborate(type = "collaborate", actionPattern = "$DRIVE_ID/$UUID"),
     Drive(type = "drive", actionPattern = "$DRIVE_ID/$ROLE_FOLDER(?:/$FOLDER_ALL_PROPERTIES)?"),

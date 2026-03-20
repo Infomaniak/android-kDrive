@@ -43,9 +43,9 @@ import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.ShareLink
-import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.ExternalFileType.Folder
 import com.infomaniak.drive.data.models.deeplink.FileType.File
 import com.infomaniak.drive.data.models.deeplink.RoleFolder

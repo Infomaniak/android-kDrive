@@ -40,6 +40,32 @@ sealed interface DeeplinkType : Parcelable {
             class Unknown(val uri: Uri) : BrowserLaunch(url = uri.toString())
         }
     }
+    @Parcelize
+    sealed interface DeeplinkAction : DeeplinkType {
+        val driveId: Int
+
+        data class Collaborate(override val driveId: Int, val uuid: String) : DeeplinkAction {
+            override val isHandled: Boolean
+                get() = false
+        }
+
+        data class Drive(
+            val userId: Int? = null,
+            override val driveId: Int,
+            val roleFolder: RoleFolder
+        ) : DeeplinkAction {
+            override val isHandled: Boolean
+                get() = roleFolder.isHandled
+        }
+
+        data class Office(override val driveId: Int, val fileId: Int) : DeeplinkAction
+
+        companion object {
+            @Throws(InvalidFormatting::class)
+            fun from(actionType: String, action: String): DeeplinkAction = ActionType.from(actionType).build(action)
+
+        }
+    }
 
     companion object {
         fun Intent.putIfNeeded(deeplinkType: DeeplinkType?) = deeplinkType?.toArgsBundle()?.let { putExtras(it).clearStack() }
@@ -47,3 +73,4 @@ sealed interface DeeplinkType : Parcelable {
         private fun DeeplinkType.toArgsBundle() = MainActivityArgs(deeplinkType = this).toBundle()
     }
 }
+
