@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,8 +42,7 @@ class MySharesFragment : FileSubTypeListFragment() {
     override val noItemsRootTitle = R.string.mySharesNoFile
 
     private val navigationArgs: MySharesFragmentArgs by navArgs()
-    override val fileIdToPreview: Int
-        get() = navigationArgs.previewFileId
+    override val fileIdToPreview: Int get() = navigationArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 

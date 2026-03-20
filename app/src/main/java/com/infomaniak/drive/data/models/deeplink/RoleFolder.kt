@@ -51,7 +51,8 @@ sealed interface RoleFolder : Parcelable {
 
     companion object {
         @Throws(InvalidFormatting::class)
-        fun from(folderType: String, folderProperties: String): RoleFolder =
-            FolderType.from(folderType).build(folderProperties)
+        fun from(folderType: String, folderProperties: String): RoleFolder {
+            return FolderType.from(folderType).build(folderProperties)
+        }
     }
 }
