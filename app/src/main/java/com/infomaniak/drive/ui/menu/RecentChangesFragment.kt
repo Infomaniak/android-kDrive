@@ -42,9 +42,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     private var isDownloadingChanges = false
     private val navArgs by navArgs<RecentChangesFragmentArgs>()
 
-    override val fileIdToPreview: Int
-        get() = navArgs.previewFileId
-
+    override val fileIdToPreview: Int get() = navArgs.previewFileId
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
 
