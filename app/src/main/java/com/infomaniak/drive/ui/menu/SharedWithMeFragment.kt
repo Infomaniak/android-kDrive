@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
     override val noItemsRootIcon = R.drawable.ic_share
     override val noItemsRootTitle = R.string.sharedWithMeNoFile
 
+    override val fileIdToPreview: Int get() = navigationArgs.externalFileType?.getFileOrFolderId() ?: 0
     private val selectFolderViewModel: SelectFolderViewModel by activityViewModels()
 
     override fun initSwipeRefreshLayout(): SwipeRefreshLayout = binding.swipeRefreshLayout
@@ -113,19 +114,19 @@ class SharedWithMeFragment : FileSubTypeListFragment() {
         }
 
         setupBasicMultiSelectLayout()
-        manageDeeplink()
-
     }
 
-    private fun manageDeeplink() {
-        navigationArgs.externalFileType?.takeUnless { previewManaged }?.run {
-            when (this) {
-                is ExternalFileType.FilePreview -> fileId
-                is ExternalFileType.FilePreviewInFolder -> fileId
-                is ExternalFileType.Folder -> folderId
-            }
-        }?.let { fileId ->
-            FileController.getFileById(fileId, userDrive)?.openFileOrFolder()
+    private fun ExternalFileType.getFileOrFolderId(): Int {
+        return when (this) {
+            is ExternalFileType.FilePreview -> fileId
+            is ExternalFileType.FilePreviewInFolder -> fileId
+            is ExternalFileType.Folder -> folderId
+        }
+    }
+
+    override fun previewFile(fileId: Int) {
+        FileController.getFileById(fileId, userDrive)?.run {
+            openFileOrFolder()
             previewManaged = true
         }
     }
