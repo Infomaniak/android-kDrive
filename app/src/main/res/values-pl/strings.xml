@@ -39,7 +39,7 @@
     <string name="allCancellationInProgress">Anulowanie w trakcie…</string>
     <string name="allCode">Kod</string>
     <string name="allDateCustom">Niestandardowe</string>
-    <string name="allDeletedFilePattern">Usunięto\u0020</string>
+    <string name="allDeletedFilePattern">\'Usunięto \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Wyłączone</string>
     <string name="allDriveBlockedDescription">Wszystkie Twoje produkty wygasły. Odnow je, aby nimi zarządzać i uzyskać dostęp do ich danych.</string>
     <string name="allEmail">E-mail</string>
@@ -57,7 +57,7 @@
     <string name="allFont">Czcionka</string>
     <string name="allJustNow">Przed chwilą</string>
     <string name="allLast7Days">Ostatnie 7 dni</string>
-    <string name="allLastModifiedFilePattern">Zmieniono\u0020</string>
+    <string name="allLastModifiedFilePattern">\'Zmieniono \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allMinutesShort">%d min</string>
     <string name="allNoNetwork">Brak połączenia z siecią</string>
     <string name="allOfficeDocs">Dokument</string>
