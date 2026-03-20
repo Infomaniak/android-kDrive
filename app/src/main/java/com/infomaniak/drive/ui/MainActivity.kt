@@ -97,8 +97,8 @@ import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.deeplink.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged.BrowserLaunch
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged.NotAccessible
 import com.infomaniak.drive.data.models.drive.Drive
