@@ -17,15 +17,18 @@
  */
 package com.infomaniak.drive.data.models.deeplink
 
-
+@Throws(InvalidFormatting::class)
 internal fun MatchResult?.parseOptionalString(groupName: String): String? = this?.groups[groupName]?.value
 
+@Throws(InvalidFormatting::class)
 internal fun MatchResult.parseString(groupName: String): String = parseOptionalString(groupName) ?: throw InvalidFormatting()
 
+@Throws(InvalidFormatting::class)
 internal fun MatchResult?.parseOptionalId(groupName: String): Int? {
     return runCatching { parseOptionalString(groupName)?.toInt() }.getOrElse { throw InvalidFormatting() }
 }
 
+@Throws(InvalidFormatting::class)
 internal fun MatchResult.parseId(groupName: String): Int = parseOptionalId(groupName) ?: throw InvalidFormatting()
 
 internal fun <T> MatchResult?.tryMatchFor(groupName: String, block: (MatchResult) -> T): T? {
