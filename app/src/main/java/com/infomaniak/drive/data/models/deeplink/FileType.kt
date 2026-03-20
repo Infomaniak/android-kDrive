@@ -61,10 +61,10 @@ sealed class FileType(open val fileId: Int) : Parcelable {
             "$START_OF_REGEX(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})$END_OF_REGEX",
         )
 
-        fun MatchResult?.extractFileType(): FileType =
-            this?.let {
-                tryMatchFor(GROUP_FILE, ::File)
-                    ?: tryMatchFor(GROUP_PREVIEW_IN_FOLDER, ::FilePreviewInFolder)
-            } ?: throw InvalidFormatting()
+        fun MatchResult?.extractFileType(): FileType {
+            return tryMatchFor(GROUP_FILE, ::File)
+                ?: tryMatchFor(GROUP_PREVIEW_IN_FOLDER, ::FilePreviewInFolder)
+                ?: throw InvalidFormatting()
+        }
     }
 }
