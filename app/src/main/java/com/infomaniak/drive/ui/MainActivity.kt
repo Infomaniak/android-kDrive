@@ -303,7 +303,7 @@ class MainActivity : BaseActivity() {
             DriveInfosController.getDrive(driveId = driveId, maintenance = false)
                 ?.ensureRightUser()
                 ?.run { FileController.getFileById(fileId = fileId, userDrive = UserDrive(userId = userId, driveId = id)) }
-                ?.let(::openOnlyOfficeActivity)
+                ?.let { Dispatchers.Main { openOnlyOfficeActivity(it) } }
         }
     }
 
