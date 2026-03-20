@@ -328,11 +328,11 @@ class MainActivity : BaseActivity() {
     }
 
     private suspend fun Drive.ensureRightUser(): Drive = also {
-        if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
-        if (!sharedWithMe && id != AccountUtils.currentDriveId) {
-            AccountUtils.currentDriveId = id
+        if (userId != AccountUtils.currentUserId) {
+            AccountUtils.currentUserId = userId
             AccountUtils.requestCurrentUser()
         }
+        if (!sharedWithMe && id != AccountUtils.currentDriveId) AccountUtils.currentDriveId = id
     }
 
     private fun setupFabs() = with(binding) {
