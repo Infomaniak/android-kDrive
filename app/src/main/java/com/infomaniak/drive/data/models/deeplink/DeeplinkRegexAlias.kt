@@ -18,7 +18,7 @@
 package com.infomaniak.drive.data.models.deeplink
 
 const val ACTION_TYPE = "([a-z]+)"
-const val ACTION = "(.*)"
+const val ACTION = "([\\w\\-/]+)"
 const val GROUP_DRIVE_ID = "driveId"
 const val DRIVE_ID = "(?<$GROUP_DRIVE_ID>\\d+)"
 const val GROUP_ROLE = "role"
