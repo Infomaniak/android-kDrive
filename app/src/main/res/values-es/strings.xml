@@ -15,7 +15,7 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity">
     <string name="aboutAppVersionTitle">Aplicación kDrive</string>
     <string name="aboutLicenseDescription">Licencia pública general GNU GPL, versión 3</string>
     <string name="aboutLicenseTitle">Licencia</string>
@@ -204,7 +204,6 @@
     <string name="convertToDropboxTitle">Convertir en buzón de depósito %s</string>
     <string name="createCategoryTitle">Crear una categoría</string>
     <string name="createCommonFolderAllUsersDescription">Todos los usuarios del kDrive %s tendrán acceso automáticamente a esta carpeta.</string>
-    <string name="createCommonFolderDescription">¿Con quién deseas compartir esta carpeta común?</string>
     <string name="createCommonFolderSuccess">Carpeta de organización creada con éxito</string>
     <string name="createCommonFolderTitle">Crear una carpeta de organización</string>
     <string name="createDatedSubFoldersDescription">Crear automáticamente subcarpetas con el mes y el año de la foto</string>
@@ -425,7 +424,7 @@
         <item quantity="other">%d archivos duplicados correctamente</item>
     </plurals>
     <string name="fileListMoveDoneSnackbar">Desplazamientos finalizados correctamente</string>
-    <plurals name="fileListMoveFileConfirmationSnackbar">
+    <plurals name="fileListMoveFileConfirmationSnackbarAndroid">
         <item quantity="one">Se ha movido correctamente un archivo a %2$s</item>
         <item quantity="other">%1$d archivos movidos correctamente a %2$s</item>
     </plurals>
@@ -564,8 +563,6 @@
     <string name="onBoardingTitle2">Trabaja en grupo en un mismo lugar y gana en eficacia</string>
     <string name="onBoardingTitle3">Haz copia de seguridad de tus recuerdos</string>
     <string name="pdfIsLocked">Tu PDF está bloqueado</string>
-    <string name="photoSyncSuspended">Conectarse a una red Wi-Fi o permitir el uso de datos móviles</string>
-    <string name="photoSyncSuspendedTitle">Suspendida la copia de seguridad de fotos</string>
     <string name="picturesNoFile">Todavía no hay fotos</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparando la importación de 1 archivo</item>

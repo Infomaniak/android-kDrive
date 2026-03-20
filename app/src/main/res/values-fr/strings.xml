@@ -15,7 +15,7 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity,ImpliedQuantity">
     <string name="aboutAppVersionTitle">Application kDrive</string>
     <string name="aboutLicenseDescription">Licence publique générale GNU GPL, version 3</string>
     <string name="aboutLicenseTitle">Licence</string>
@@ -204,7 +204,6 @@
     <string name="convertToDropboxTitle">Convertir en boîte de dépôt %s</string>
     <string name="createCategoryTitle">Créer une catégorie</string>
     <string name="createCommonFolderAllUsersDescription">Tous les utilisateurs du kDrive %s auront automatiquement accès à ce dossier.</string>
-    <string name="createCommonFolderDescription">Avec qui souhaitez-vous partager ce dossier commun ?</string>
     <string name="createCommonFolderSuccess">Dossier d’organisation créé avec succès</string>
     <string name="createCommonFolderTitle">Créer un dossier d’organisation</string>
     <string name="createDatedSubFoldersDescription">Créer automatiquement des sous dossiers avec le mois et l’année de la photo</string>
@@ -425,7 +424,7 @@
         <item quantity="other">%d fichiers dupliqués avec succès</item>
     </plurals>
     <string name="fileListMoveDoneSnackbar">Déplacements terminés avec succès</string>
-    <plurals name="fileListMoveFileConfirmationSnackbar">
+    <plurals name="fileListMoveFileConfirmationSnackbarAndroid">
         <item quantity="one">Un fichier a bien été déplacé dans %2$s</item>
         <item quantity="other">%1$d fichiers ont bien été déplacés dans %2$s</item>
     </plurals>
@@ -564,8 +563,6 @@
     <string name="onBoardingTitle2">Travaillez ensemble au même endroit et gagnez en efficacité</string>
     <string name="onBoardingTitle3">Sauvegardez vos souvenirs en sécurité</string>
     <string name="pdfIsLocked">Votre PDF est verrouillé</string>
-    <string name="photoSyncSuspended">Se connecter à un réseau Wi-Fi ou autoriser l’utilisation de données mobiles</string>
-    <string name="photoSyncSuspendedTitle">Sauvegarde des photos suspendue</string>
     <string name="picturesNoFile">Aucune photo pour le moment</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Préparation de l’importation de 1 fichier</item>

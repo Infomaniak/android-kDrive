@@ -204,7 +204,6 @@
     <string name="convertToDropboxTitle">Convert to drop box %s</string>
     <string name="createCategoryTitle">Create a category</string>
     <string name="createCommonFolderAllUsersDescription">All kDrive %s users will automatically have access to this folder.</string>
-    <string name="createCommonFolderDescription">Who would you like to share this common folder with?</string>
     <string name="createCommonFolderSuccess">Organization folder created successfully</string>
     <string name="createCommonFolderTitle">Create an organization folder</string>
     <string name="createDatedSubFoldersDescription">Automatically create subfolders with the month and year of the photo</string>
@@ -425,7 +424,7 @@
         <item quantity="other">%d files duplicated successfully</item>
     </plurals>
     <string name="fileListMoveDoneSnackbar">Moves completed successfully</string>
-    <plurals name="fileListMoveFileConfirmationSnackbar">
+    <plurals name="fileListMoveFileConfirmationSnackbarAndroid">
         <item quantity="one">One file was moved to %2$s</item>
         <item quantity="other">%1$d files were moved to %2$s</item>
     </plurals>
@@ -477,7 +476,7 @@
     <string name="kDrivePdfViewer">kDrive PDF Viewer</string>
     <string name="lastEditsTitle">Most recent changes</string>
     <string name="localizedFilenamePrivateTeamSpace">My folder</string>
-    <string name="localizedFilenameTeamSpace">Common folders</string>
+    <string name="localizedFilenameTeamSpace">Organization folders</string>
     <string name="locateButton">Locate</string>
     <string name="maintenanceAsleepDescription">To reduce the impact on the environment, your kDrive has gone into standby mode following prolonged inactivity.\nRestart it to regain access to your files!</string>
     <string name="maintenanceAsleepTitle">Your kDrive %s has taken a little nap!</string>
@@ -564,8 +563,6 @@
     <string name="onBoardingTitle2">Work together in one place and become more efficient</string>
     <string name="onBoardingTitle3">Save your memories securely</string>
     <string name="pdfIsLocked">Your PDF is locked</string>
-    <string name="photoSyncSuspended">Connect to a Wi-Fi network or allow mobile data usage</string>
-    <string name="photoSyncSuspendedTitle">Photo backup suspended</string>
     <string name="picturesNoFile">No photo at this time</string>
     <plurals name="preparingToUpload">
         <item quantity="one">Preparing to upload 1 file</item>
