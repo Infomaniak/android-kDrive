@@ -57,7 +57,7 @@
     <string name="allFont">Γραμματοσειρά</string>
     <string name="allJustNow">Μόλις τώρα</string>
     <string name="allLast7Days">Τελευταίες 7 ημέρες</string>
-    <string name="allLastModifiedFilePattern">\'Τροποποιήθηκε στις \'dd MMM yyyy \'-\' HH:mm</string>
+    <string name="allLastModifiedFilePattern">\'Τροποποιήθηκε \'dd MMM yyyy \'-\' HH:mm</string>
     <string name="allMinutesShort">%d λεπ</string>
     <string name="allNoNetwork">Δεν υπάρχει σύνδεση στο δίκτυο</string>
     <string name="allOfficeDocs">Έγγραφο</string>
