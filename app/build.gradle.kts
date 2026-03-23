@@ -56,7 +56,7 @@ android {
         resValue("string", "EXPOSED_PUBLIC_SHARE_DIR", "public_share")
 
         androidResources {
-            localeFilters += listOf("en", "de", "es", "fr", "it", "da", "el", "fi", "nb", "nl", "pl", "pt", "sv")
+            localeFilters += listOf("da", "de", "el", "en", "es", "fi", "fr", "it", "nb", "nl", "pl", "pt", "sv")
             generateLocaleConfig = true
         }
     }
