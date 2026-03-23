@@ -19,6 +19,7 @@
     <string name="aboutAppVersionTitle">kDrive application</string>
     <string name="aboutLicenseDescription">GNU General Public Licence, version 3</string>
     <string name="aboutLicenseTitle">Licence</string>
+    <string name="aboutLibrariesTitle">Libraries</string>
     <string name="aboutPrivacyTitle">Privacy</string>
     <string name="aboutSourceCodeTitle">Get the source code</string>
     <string name="aboutTitle">About</string>
