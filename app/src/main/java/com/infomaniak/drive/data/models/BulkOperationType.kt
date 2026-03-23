@@ -31,7 +31,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 enum class BulkOperationType(@StringRes val title: Int, @PluralsRes val successMessage: Int) : Parcelable {
     TRASH(R.string.fileListDeletionInProgressSnackbar, R.plurals.fileListMoveTrashConfirmationSnackbar),
-    MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbar),
+    MOVE(R.string.fileListMoveInProgressSnackbar, R.plurals.fileListMoveFileConfirmationSnackbarAndroid),
     COPY(R.string.fileListCopyInProgressSnackbar, R.plurals.fileListDuplicationConfirmationSnackbar),
     COLOR_FOLDER(0, R.plurals.fileListColorFolderConfirmationSnackbar),
     MANAGE_CATEGORIES(0, 0),

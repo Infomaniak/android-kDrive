@@ -39,7 +39,7 @@
     <string name="allCancellationInProgress">Annullierung im Gange…</string>
     <string name="allCode">Code</string>
     <string name="allDateCustom">Kundenspezifisch</string>
-    <string name="allDeletedFilePattern">\'Gelöscht am \'dd MMM yyyy \'-\' HH:mm</string>
+    <string name="allDeletedFilePattern">\'Gelöscht am \'dd. MMM yyyy \'-\' HH:mm</string>
     <string name="allDisabled">Deaktiviert</string>
     <string name="allDriveBlockedDescription">Alle Ihre Produkte sind abgelaufen. Bitte erneuern Sie diese, um sie zu verwalten und auf ihre Daten zuzugreifen.</string>
     <string name="allEmail">E-Mail</string>
@@ -57,7 +57,7 @@
     <string name="allFont">Schriftart</string>
     <string name="allJustNow">Jetzt</string>
     <string name="allLast7Days">Letzte 7 Tage</string>
-    <string name="allLastModifiedFilePattern">\'Geändert am \'dd MMM yyyy \'-\' HH:mm</string>
+    <string name="allLastModifiedFilePattern">\'Geändert am \'dd. MMM yyyy \'-\' HH:mm</string>
     <string name="allMinutesShort">%d min</string>
     <string name="allNoNetwork">Keine Netzwerkverbindung</string>
     <string name="allOfficeDocs">Dokument</string>
@@ -204,7 +204,6 @@
     <string name="convertToDropboxTitle">In Briefkasten umwandeln %s</string>
     <string name="createCategoryTitle">Kategorie erstellen</string>
     <string name="createCommonFolderAllUsersDescription">Alle Benutzer des kDrive %s erhalten automatisch Zugang zu diesem Ordner.</string>
-    <string name="createCommonFolderDescription">Mit wem möchten Sie diesen gemeinsamen Ordner teilen?</string>
     <string name="createCommonFolderSuccess">Organisationsordner erfolgreich erstellt</string>
     <string name="createCommonFolderTitle">Organisationsordner erstellen</string>
     <string name="createDatedSubFoldersDescription">Automatisches Erstellen von Unterordnern mit dem Monat und Jahr des Fotos</string>
@@ -386,11 +385,11 @@
     <string name="fileDetailsInfoContent">Inhalt</string>
     <string name="fileDetailsInfoEmptyFolder">Leerer Ordner</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 Datei</item>
+        <item quantity="one">%d Datei</item>
         <item quantity="other">%d Dateien</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 Ordner</item>
+        <item quantity="one">%d Ordner</item>
         <item quantity="other">%d Ordner</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Hinzufügung zum Drive</string>
@@ -425,7 +424,7 @@
         <item quantity="other">%d Dateien erfolgreich dupliziert</item>
     </plurals>
     <string name="fileListMoveDoneSnackbar">Verschiebungen erfolgreich abgeschlossen</string>
-    <plurals name="fileListMoveFileConfirmationSnackbar">
+    <plurals name="fileListMoveFileConfirmationSnackbarAndroid">
         <item quantity="one">Datei in %2$s verschoben</item>
         <item quantity="other">%1$d Dateien verschoben in %2$s</item>
     </plurals>
@@ -564,11 +563,9 @@
     <string name="onBoardingTitle2">Arbeiten Sie am selben Ort zusammen und werden Sie effizienter</string>
     <string name="onBoardingTitle3">Speichern Sie Ihre Erinnerungen völlig sicher</string>
     <string name="pdfIsLocked">Ihr PDF ist gesperrt</string>
-    <string name="photoSyncSuspended">Verbinden Sie sich mit einem Wi-Fi-Netzwerk oder erlauben Sie die mobile Datennutzung</string>
-    <string name="photoSyncSuspendedTitle">Fotosicherung ausgesetzt</string>
     <string name="picturesNoFile">Derzeit kein Foto</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Vorbereitung auf den Import von 1 Datei</item>
+        <item quantity="one">Vorbereitung auf den Import von %d Datei</item>
         <item quantity="other">Vorbereitung auf den Import von %d Dateien</item>
     </plurals>
     <string name="previewDownloadIndication">Wird geladen, bitte warten…</string>
@@ -742,7 +739,7 @@
         <item quantity="other">%2$d Importe von insgesamt %1$d sind fehlgeschlagen</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 andere Datei</item>
+        <item quantity="one">+%d andere Datei</item>
         <item quantity="other">%d andere Dateien</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Importe abbrechen</string>
