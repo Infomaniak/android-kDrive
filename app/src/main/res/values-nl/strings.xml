@@ -385,11 +385,11 @@
     <string name="fileDetailsInfoContent">Inhoud</string>
     <string name="fileDetailsInfoEmptyFolder">Lege map</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 bestand</item>
+        <item quantity="one">%d bestand</item>
         <item quantity="other">%d bestanden</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 map</item>
+        <item quantity="one">%d map</item>
         <item quantity="other">%d mappen</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Toegevoegd aan drive</string>
@@ -565,7 +565,7 @@
     <string name="pdfIsLocked">Je PDF is vergrendeld</string>
     <string name="picturesNoFile">Geen foto op dit moment</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Voorbereiden op uploaden van 1 bestand</item>
+        <item quantity="one">Voorbereiden op uploaden van %d bestand</item>
         <item quantity="other">Voorbereiden op uploaden van %d bestanden</item>
     </plurals>
     <string name="previewDownloadIndication">Bezig met laden, even geduld…</string>
@@ -739,7 +739,7 @@
         <item quantity="other">%2$d uploaden mislukt van totaal %1$d</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 ander bestand</item>
+        <item quantity="one">+%d ander bestand</item>
         <item quantity="other">+%d andere bestanden</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Uploads annuleren</string>

@@ -385,11 +385,11 @@
     <string name="fileDetailsInfoContent">Sisältö</string>
     <string name="fileDetailsInfoEmptyFolder">Tyhjä kansio</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 tiedosto</item>
+        <item quantity="one">%d tiedosto</item>
         <item quantity="other">%d tiedostoa</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 kansio</item>
+        <item quantity="one">%d kansio</item>
         <item quantity="other">%d kansiota</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Lisätty driveen</string>
@@ -565,7 +565,7 @@
     <string name="pdfIsLocked">PDF:si on lukittu</string>
     <string name="picturesNoFile">Ei valokuvia tällä hetkellä</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Valmistellaan 1 tiedoston lähettämistä</item>
+        <item quantity="one">Valmistellaan %d tiedoston lähettämistä</item>
         <item quantity="other">Valmistellaan %d tiedoston lähettämistä</item>
     </plurals>
     <string name="previewDownloadIndication">Lataus käynnissä, odota hetki…</string>
@@ -739,7 +739,7 @@
         <item quantity="other">%2$d lähetystä epäonnistui %1$d lähetyksestä</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 muu tiedosto</item>
+        <item quantity="one">+%d muu tiedosto</item>
         <item quantity="other">+%d muuta tiedostoa</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Peruuta lähetykset</string>

@@ -385,11 +385,11 @@
     <string name="fileDetailsInfoContent">Indhold</string>
     <string name="fileDetailsInfoEmptyFolder">Tom mappe</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 fil</item>
+        <item quantity="one">%d fil</item>
         <item quantity="other">%d filer</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 mappe</item>
+        <item quantity="one">%d mappe</item>
         <item quantity="other">%d mapper</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Tilføjet til drev</string>
@@ -565,7 +565,7 @@
     <string name="pdfIsLocked">Din PDF er låst</string>
     <string name="picturesNoFile">Ingen fotos i øjeblikket</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Forbereder upload af 1 fil</item>
+        <item quantity="one">Forbereder upload af %d fil</item>
         <item quantity="other">Forbereder upload af %d filer</item>
     </plurals>
     <string name="previewDownloadIndication">Indlæsning i gang, vent venligst …</string>
@@ -739,7 +739,7 @@
         <item quantity="other">%2$d import fejlede ud af i alt %1$d</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 anden fil</item>
+        <item quantity="one">+%d anden fil</item>
         <item quantity="other">+%d andre filer</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Annuller uploads</string>

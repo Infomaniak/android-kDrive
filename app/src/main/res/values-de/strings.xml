@@ -385,11 +385,11 @@
     <string name="fileDetailsInfoContent">Inhalt</string>
     <string name="fileDetailsInfoEmptyFolder">Leerer Ordner</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 Datei</item>
+        <item quantity="one">%d Datei</item>
         <item quantity="other">%d Dateien</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 Ordner</item>
+        <item quantity="one">%d Ordner</item>
         <item quantity="other">%d Ordner</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Hinzufügung zum Drive</string>
@@ -565,7 +565,7 @@
     <string name="pdfIsLocked">Ihr PDF ist gesperrt</string>
     <string name="picturesNoFile">Derzeit kein Foto</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Vorbereitung auf den Import von 1 Datei</item>
+        <item quantity="one">Vorbereitung auf den Import von %d Datei</item>
         <item quantity="other">Vorbereitung auf den Import von %d Dateien</item>
     </plurals>
     <string name="previewDownloadIndication">Wird geladen, bitte warten…</string>
@@ -739,7 +739,7 @@
         <item quantity="other">%2$d Importe von insgesamt %1$d sind fehlgeschlagen</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 andere Datei</item>
+        <item quantity="one">+%d andere Datei</item>
         <item quantity="other">%d andere Dateien</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Importe abbrechen</string>

@@ -385,11 +385,11 @@
     <string name="fileDetailsInfoContent">Innehåll</string>
     <string name="fileDetailsInfoEmptyFolder">Tom mapp</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 fil</item>
+        <item quantity="one">%d fil</item>
         <item quantity="other">%d filer</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 mapp</item>
+        <item quantity="one">%d mapp</item>
         <item quantity="other">%d mappar</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Tillagd i kDrive</string>
@@ -565,7 +565,7 @@
     <string name="pdfIsLocked">Din PDF är låst</string>
     <string name="picturesNoFile">Inga foton just nu</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Förbereder uppladdning av 1 fil</item>
+        <item quantity="one">Förbereder uppladdning av %d fil</item>
         <item quantity="other">Förbereder uppladdning av %d filer</item>
     </plurals>
     <string name="previewDownloadIndication">Laddning pågår, vänligen vänta…</string>
@@ -739,7 +739,7 @@
         <item quantity="other">%2$d uppladdningar misslyckades av totalt %1$d</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 annan fil</item>
+        <item quantity="one">+%d annan fil</item>
         <item quantity="other">+%d andra filer</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Avbryt uppladdningar</string>

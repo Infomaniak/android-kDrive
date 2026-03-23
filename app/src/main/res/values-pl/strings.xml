@@ -413,13 +413,13 @@
     <string name="fileDetailsInfoContent">Zawartość</string>
     <string name="fileDetailsInfoEmptyFolder">Pusty folder</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 plik</item>
+        <item quantity="one">%d plik</item>
         <item quantity="few">%d pliki</item>
         <item quantity="many">%d plików</item>
         <item quantity="other">%d plików</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 folder</item>
+        <item quantity="one">%d folder</item>
         <item quantity="few">%d foldery</item>
         <item quantity="many">%d folderów</item>
         <item quantity="other">%d folderów</item>
@@ -621,7 +621,7 @@
     <string name="pdfIsLocked">Twój PDF jest zablokowany</string>
     <string name="picturesNoFile">Brak zdjęć w tym momencie</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Przygotowanie do przesłania 1 pliku</item>
+        <item quantity="one">Przygotowanie do przesłania %d pliku</item>
         <item quantity="few">Przygotowanie do przesłania %d plików</item>
         <item quantity="many">Przygotowanie do przesłania %d plików</item>
         <item quantity="other">Przygotowanie do przesłania %d plików</item>
@@ -809,7 +809,7 @@
         <item quantity="other">Nie udało się zaimportować %2$d elementów z %1$d</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 inny plik</item>
+        <item quantity="one">+%d inny plik</item>
         <item quantity="few">+%d inne pliki</item>
         <item quantity="many">+%d innych plików</item>
         <item quantity="other">+%d innych plików</item>

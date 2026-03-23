@@ -385,11 +385,11 @@
     <string name="fileDetailsInfoContent">Περιεχόμενο</string>
     <string name="fileDetailsInfoEmptyFolder">Άδειος φάκελος</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 αρχείο</item>
+        <item quantity="one">%d αρχείο</item>
         <item quantity="other">%d αρχεία</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 φάκελος</item>
+        <item quantity="one">%d φάκελος</item>
         <item quantity="other">%d φάκελοι</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Προσθήκη στο drive</string>
@@ -565,7 +565,7 @@
     <string name="pdfIsLocked">Το PDF σας είναι κλειδωμένο</string>
     <string name="picturesNoFile">Δεν υπάρχουν φωτογραφίες αυτήν την περίοδο</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Προετοιμασία της μεταφόρτωσης 1 αρχείου</item>
+        <item quantity="one">Προετοιμασία της μεταφόρτωσης %d αρχείου</item>
         <item quantity="other">Προετοιμασία της μεταφόρτωσης %d αρχείων</item>
     </plurals>
     <string name="previewDownloadIndication">Φόρτωση σε εξέλιξη, παρακαλώ περιμένετε…</string>
@@ -739,7 +739,7 @@
         <item quantity="other">%2$d μεταφορτώσεις απέτυχαν από σύνολο %1$d</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 άλλο αρχείο</item>
+        <item quantity="one">+%d άλλο αρχείο</item>
         <item quantity="other">+%d άλλα αρχεία</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Ακύρωση μεταφορτώσεων</string>

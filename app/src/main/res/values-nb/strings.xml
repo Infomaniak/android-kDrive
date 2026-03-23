@@ -385,11 +385,11 @@
     <string name="fileDetailsInfoContent">Innhold</string>
     <string name="fileDetailsInfoEmptyFolder">Tom mappe</string>
     <plurals name="fileDetailsInfoFile">
-        <item quantity="one">1 fil</item>
+        <item quantity="one">%d fil</item>
         <item quantity="other">%d filer</item>
     </plurals>
     <plurals name="fileDetailsInfoFolder">
-        <item quantity="one">1 mappe</item>
+        <item quantity="one">%d mappe</item>
         <item quantity="other">%d mapper</item>
     </plurals>
     <string name="fileDetailsInfosAddedDateTitle">Lagt til i drive</string>
@@ -565,7 +565,7 @@
     <string name="pdfIsLocked">PDF-en din er låst</string>
     <string name="picturesNoFile">Ingen bilder for øyeblikket</string>
     <plurals name="preparingToUpload">
-        <item quantity="one">Forbereder å laste opp 1 fil</item>
+        <item quantity="one">Forbereder å laste opp %d fil</item>
         <item quantity="other">Forbereder å laste opp %d filer</item>
     </plurals>
     <string name="previewDownloadIndication">Laster inn, vennligst vent…</string>
@@ -739,7 +739,7 @@
         <item quantity="other">%2$d opplastinger mislyktes av totalt %1$d</item>
     </plurals>
     <plurals name="uploadImportedOtherAmount">
-        <item quantity="one">+1 annen fil</item>
+        <item quantity="one">+%d annen fil</item>
         <item quantity="other">+%d andre filer</item>
     </plurals>
     <string name="uploadInProgressCancelAllUploadTitle">Avbryt opplastinger</string>
