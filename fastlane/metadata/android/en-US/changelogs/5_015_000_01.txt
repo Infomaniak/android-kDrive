@@ -1,0 +1,2 @@
+- Added support for 8 new languages (Danish, Greek, Finnish, Norwegian, Dutch, Polish, Portuguese, and Swedish)
+- Fixed minor bugs

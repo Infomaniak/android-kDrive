@@ -1,0 +1,2 @@
+- Ajout de la prise en charge de 8 nouvelles langues (danois, grec, finnois, norvégien, néerlandais, polonais, portugais et suédois)
+- Correction de bugs mineurs
