@@ -244,7 +244,9 @@
 
         <activity
             android:name=".ui.publicShare.PublicShareActivity"
-            android:configChanges="orientation|screenSize|layoutDirection" />
+            android:configChanges="orientation|screenSize|layoutDirection"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.infomaniak.drive.publicshare" />
 
         <receiver
             android:name=".utils.RebootReceiver"
