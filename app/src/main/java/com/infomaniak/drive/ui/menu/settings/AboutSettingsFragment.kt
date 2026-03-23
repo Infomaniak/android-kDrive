@@ -58,12 +58,12 @@ class AboutSettingsFragment : Fragment() {
             requireContext().openUrl(GITHUB_URL)
         }
 
-        licenseLayout.setOnClickListener {
-            requireContext().openUrl(GPL_LICENSE_URL)
-        }
-
         librariesLayout.setOnClickListener {
             requireContext().openUrl(LICENSES_URL)
+        }
+
+        licenseLayout.setOnClickListener {
+            requireContext().openUrl(GPL_LICENSE_URL)
         }
 
         appVersionLayout.description = "v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}"

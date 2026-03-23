@@ -83,19 +83,19 @@
                     app:title="@string/aboutSourceCodeTitle" />
 
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
+                    android:id="@+id/librariesLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:itemAction="chevron"
+                    app:title="@string/aboutLibrariesTitle" />
+
+                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/licenseLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:description="@string/aboutLicenseDescription"
                     app:itemAction="chevron"
                     app:title="@string/aboutLicenseTitle" />
-
-                <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                    android:id="@+id/librariesLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:itemAction="chevron"
-                    app:title="@string/aboutLibrariesTitle" />
 
                 <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                     android:id="@+id/appVersionLayout"

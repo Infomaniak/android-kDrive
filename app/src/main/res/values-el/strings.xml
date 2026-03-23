@@ -17,6 +17,7 @@
   -->
 <resources>
     <string name="aboutAppVersionTitle">Εφαρμογή kDrive</string>
+    <string name="aboutLibrariesTitle">Βιβλιοθήκες</string>
     <string name="aboutLicenseDescription">Γενική Δημόσια Άδεια GNU, έκδοση 3</string>
     <string name="aboutLicenseTitle">Άδεια χρήσης</string>
     <string name="aboutPrivacyTitle">Απόρρητο</string>

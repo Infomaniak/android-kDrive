@@ -17,6 +17,7 @@
   -->
 <resources>
     <string name="aboutAppVersionTitle">Aplikacja kDrive</string>
+    <string name="aboutLibrariesTitle">Biblioteki</string>
     <string name="aboutLicenseDescription">Powszechna Licencja Publiczna GNU, wersja 3</string>
     <string name="aboutLicenseTitle">Licencja</string>
     <string name="aboutPrivacyTitle">Prywatność</string>
