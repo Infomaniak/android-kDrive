@@ -15,7 +15,7 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity,ImpliedQuantity">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity">
     <string name="aboutAppVersionTitle">Application kDrive</string>
     <string name="aboutLicenseDescription">Licence publique générale GNU GPL, version 3</string>
     <string name="aboutLicenseTitle">Licence</string>
@@ -296,40 +296,40 @@
     <string name="fileActivityCollaborativeUserAccess">a déposé des fichiers dans la boite de dépôt</string>
     <string name="fileActivityCollaborativeUserCreate">a créé un dossier dans la boite de dépôt pour pouvoir déposer des fichiers</string>
     <string name="fileActivityCollaborativeUserDelete">a supprimé un dossier de la boite de dépôt dans lequel un user a déposé des fichiers</string>
-    <plurals name="fileActivityCommentCreate">
+    <plurals name="fileActivityCommentCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">a commenté le fichier suivant</item>
         <item quantity="other">a commenté %d fichiers</item>
     </plurals>
-    <plurals name="fileActivityFileCreate">
+    <plurals name="fileActivityFileCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">a importé le fichier suivant</item>
         <item quantity="other">a importé %d nouveaux fichiers</item>
     </plurals>
-    <plurals name="fileActivityFileRestore">
+    <plurals name="fileActivityFileRestore" tools:ignore="ImpliedQuantity">
         <item quantity="one">a restauré le fichier suivant</item>
         <item quantity="other">a restauré %d fichiers</item>
     </plurals>
-    <plurals name="fileActivityFileTrash">
+    <plurals name="fileActivityFileTrash" tools:ignore="ImpliedQuantity">
         <item quantity="one">a déplacé le fichier suivant dans la corbeille</item>
         <item quantity="other">a déplacé %d fichiers dans la corbeille</item>
     </plurals>
-    <plurals name="fileActivityFileUpdate">
+    <plurals name="fileActivityFileUpdate" tools:ignore="ImpliedQuantity">
         <item quantity="one">a modifié le fichier suivant</item>
         <item quantity="other">a modifié %d fichiers</item>
     </plurals>
-    <plurals name="fileActivityFolderCreate">
+    <plurals name="fileActivityFolderCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">a créé le dossier suivant</item>
         <item quantity="other">a créé %d nouveaux dossiers</item>
     </plurals>
-    <plurals name="fileActivityFolderRestore">
+    <plurals name="fileActivityFolderRestore" tools:ignore="ImpliedQuantity">
         <item quantity="one">a restauré le dossier suivant</item>
         <item quantity="other">a restauré %d dossiers</item>
     </plurals>
-    <plurals name="fileActivityFolderTrash">
+    <plurals name="fileActivityFolderTrash" tools:ignore="ImpliedQuantity">
         <item quantity="one">a déplacé le dossier suivant dans la corbeille</item>
         <item quantity="other">a déplacé %d dossiers dans la corbeille</item>
     </plurals>
     <string name="fileActivityOtherFiles">%d autres fichiers</string>
-    <plurals name="fileActivityUnknown">
+    <plurals name="fileActivityUnknown" tools:ignore="ImpliedQuantity">
         <item quantity="one">a effectué une action sur le fichier suivant</item>
         <item quantity="other">a effectué une action sur %d fichiers</item>
     </plurals>
@@ -401,15 +401,15 @@
     <string name="fileDetailsInfosTotalSizeTitle">Taille (avec les versions)</string>
     <string name="fileDetailsNoComments">Aucun commentaire pour le moment</string>
     <string name="fileInfoInputDuplicateFile">Nom de la copie</string>
-    <plurals name="fileListAddFavoritesConfirmationSnackbar">
+    <plurals name="fileListAddFavoritesConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier ajouté aux favoris avec succès</item>
         <item quantity="other">%d fichiers ajoutés aux favoris avec succès</item>
     </plurals>
-    <plurals name="fileListAddOfflineConfirmationSnackbar">
+    <plurals name="fileListAddOfflineConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier disponible hors ligne</item>
         <item quantity="other">%d fichiers disponibles hors ligne</item>
     </plurals>
-    <plurals name="fileListColorFolderConfirmationSnackbar">
+    <plurals name="fileListColorFolderConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un dossier coloré avec succès</item>
         <item quantity="other">%d dossiers colorés avec succès</item>
     </plurals>
@@ -419,7 +419,7 @@
     <string name="fileListDeletionDoneSnackbar">Suppressions terminées avec succès</string>
     <string name="fileListDeletionInProgressSnackbar">Suppressions en cours : %1$d/%2$d</string>
     <string name="fileListDeletionStartedSnackbar">Début des suppressions</string>
-    <plurals name="fileListDuplicationConfirmationSnackbar">
+    <plurals name="fileListDuplicationConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier dupliqué avec succès</item>
         <item quantity="other">%d fichiers dupliqués avec succès</item>
     </plurals>
@@ -430,7 +430,7 @@
     </plurals>
     <string name="fileListMoveInProgressSnackbar">Déplacements en cours : %1$d/%2$d</string>
     <string name="fileListMoveStartedSnackbar">Début des déplacements</string>
-    <plurals name="fileListMoveTrashConfirmationSnackbar">
+    <plurals name="fileListMoveTrashConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un élément déplacé dans la corbeille</item>
         <item quantity="other">%d éléments déplacés dans la corbeille</item>
     </plurals>
@@ -438,11 +438,11 @@
         <item quantity="one">%d sélectionné</item>
         <item quantity="other">%d sélectionnés</item>
     </plurals>
-    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier retiré des favoris avec succès</item>
         <item quantity="other">%d fichiers retirés des favoris avec succès</item>
     </plurals>
-    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier retiré de la disponibilité hors ligne</item>
         <item quantity="other">%d fichiers retirés de la disponibilité hors ligne</item>
     </plurals>
@@ -485,7 +485,7 @@
     <string name="manageCategoriesNoCategory">Aucune catégorie</string>
     <string name="manageCategoriesTitle">Gérer les catégories</string>
     <string name="manageDropboxTitle">Gérer la boîte de dépôt %s</string>
-    <plurals name="mediaFoldersSelected">
+    <plurals name="mediaFoldersSelected" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un dossier sélectionné</item>
         <item quantity="other">%d dossiers sélectionnés</item>
     </plurals>
@@ -647,7 +647,7 @@
     <string name="shortcutUploadShortDescription">Importer</string>
     <string name="snackBarCategoryDeleted">Catégorie supprimée avec succès</string>
     <string name="snackBarInvalidFileNameError">Le caractère \"%1$s\" du fichier %2$s n’est pas pris en charge pour la mise hors ligne</string>
-    <plurals name="snackBarUploadError">
+    <plurals name="snackBarUploadError" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier n’a pas pu être importé</item>
         <item quantity="other">%d fichiers n’ont pas pu être importés</item>
     </plurals>
@@ -715,7 +715,7 @@
     <string name="trashAutoClearDescription">La corbeille est nettoyée automatiquement tous les 30 jours.\nSouhaitez-vous augmenter ce délai ?</string>
     <string name="trashNoFile">Aucun fichier supprimé</string>
     <string name="trashTitle">Corbeille</string>
-    <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
+    <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un élément supprimé définitivement</item>
         <item quantity="other">%d éléments supprimés définitivement</item>
     </plurals>
@@ -745,7 +745,7 @@
     <string name="uploadInProgressCancelAllUploadTitle">Annuler les imports</string>
     <string name="uploadInProgressCancelFileUploadTitle">Annuler %s ?</string>
     <string name="uploadInProgressNoFile">Aucune importation en cours</string>
-    <plurals name="uploadInProgressNumberFile">
+    <plurals name="uploadInProgressNumberFile" tools:ignore="ImpliedQuantity">
         <item quantity="one">Un fichier restant</item>
         <item quantity="other">%d fichiers restants</item>
     </plurals>

@@ -15,7 +15,7 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity,ImpliedQuantity">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity">
     <string name="aboutAppVersionTitle">Aplicação kDrive</string>
     <string name="aboutLicenseDescription">Licença Pública Geral GNU, versão 3</string>
     <string name="aboutLicenseTitle">Licença</string>
@@ -296,40 +296,40 @@
     <string name="fileActivityCollaborativeUserAccess">enviou ficheiros na caixa de depósito</string>
     <string name="fileActivityCollaborativeUserCreate">criou uma pasta dentro da caixa de depósito para enviar ficheiros</string>
     <string name="fileActivityCollaborativeUserDelete">eliminou uma pasta da caixa de depósito</string>
-    <plurals name="fileActivityCommentCreate">
+    <plurals name="fileActivityCommentCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">comentou o seguinte ficheiro</item>
         <item quantity="other">comentou %d ficheiros</item>
     </plurals>
-    <plurals name="fileActivityFileCreate">
+    <plurals name="fileActivityFileCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">carregou o seguinte ficheiro</item>
         <item quantity="other">carregou %d ficheiros novos</item>
     </plurals>
-    <plurals name="fileActivityFileRestore">
+    <plurals name="fileActivityFileRestore" tools:ignore="ImpliedQuantity">
         <item quantity="one">recuperou o seguinte ficheiro</item>
         <item quantity="other">recuperou %d ficheiros</item>
     </plurals>
-    <plurals name="fileActivityFileTrash">
+    <plurals name="fileActivityFileTrash" tools:ignore="ImpliedQuantity">
         <item quantity="one">moveu o seguinte ficheiro para o lixo</item>
         <item quantity="other">moveu %d ficheiros para o lixo</item>
     </plurals>
-    <plurals name="fileActivityFileUpdate">
+    <plurals name="fileActivityFileUpdate" tools:ignore="ImpliedQuantity">
         <item quantity="one">alterou o seguinte ficheiro</item>
         <item quantity="other">alterou %d ficheiros</item>
     </plurals>
-    <plurals name="fileActivityFolderCreate">
+    <plurals name="fileActivityFolderCreate" tools:ignore="ImpliedQuantity">
         <item quantity="one">criou a seguinte pasta</item>
         <item quantity="other">criou %d pastas novas</item>
     </plurals>
-    <plurals name="fileActivityFolderRestore">
+    <plurals name="fileActivityFolderRestore" tools:ignore="ImpliedQuantity">
         <item quantity="one">recuperou a seguinte pasta</item>
         <item quantity="other">recuperou %d pastas</item>
     </plurals>
-    <plurals name="fileActivityFolderTrash">
+    <plurals name="fileActivityFolderTrash" tools:ignore="ImpliedQuantity">
         <item quantity="one">moveu a seguinte pasta para o lixo</item>
         <item quantity="other">moveu %d pastas para o lixo</item>
     </plurals>
     <string name="fileActivityOtherFiles">%d outros ficheiros</string>
-    <plurals name="fileActivityUnknown">
+    <plurals name="fileActivityUnknown" tools:ignore="ImpliedQuantity">
         <item quantity="one">realizou uma ação no seguinte ficheiro</item>
         <item quantity="other">realizou uma ação em %d ficheiros</item>
     </plurals>
@@ -401,15 +401,15 @@
     <string name="fileDetailsInfosTotalSizeTitle">Tamanho (com as versões)</string>
     <string name="fileDetailsNoComments">Sem comentários de momento</string>
     <string name="fileInfoInputDuplicateFile">Nome da cópia</string>
-    <plurals name="fileListAddFavoritesConfirmationSnackbar">
+    <plurals name="fileListAddFavoritesConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Um ficheiro adicionado aos favoritos com sucesso</item>
         <item quantity="other">%d ficheiros adicionados aos favoritos com sucesso</item>
     </plurals>
-    <plurals name="fileListAddOfflineConfirmationSnackbar">
+    <plurals name="fileListAddOfflineConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Um ficheiro disponível offline</item>
         <item quantity="other">%d ficheiros disponíveis offline</item>
     </plurals>
-    <plurals name="fileListColorFolderConfirmationSnackbar">
+    <plurals name="fileListColorFolderConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Uma pasta colorida com sucesso</item>
         <item quantity="other">%d pastas coloridas com sucesso</item>
     </plurals>
@@ -419,7 +419,7 @@
     <string name="fileListDeletionDoneSnackbar">Eliminações concluídas com sucesso</string>
     <string name="fileListDeletionInProgressSnackbar">Eliminações em andamento: %1$d/%2$d</string>
     <string name="fileListDeletionStartedSnackbar">Eliminações iniciadas</string>
-    <plurals name="fileListDuplicationConfirmationSnackbar">
+    <plurals name="fileListDuplicationConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Um ficheiro duplicado com sucesso</item>
         <item quantity="other">%d ficheiros duplicados com sucesso</item>
     </plurals>
@@ -430,7 +430,7 @@
     </plurals>
     <string name="fileListMoveInProgressSnackbar">Movimentações em andamento: %1$d/%2$d</string>
     <string name="fileListMoveStartedSnackbar">Movimentações iniciadas</string>
-    <plurals name="fileListMoveTrashConfirmationSnackbar">
+    <plurals name="fileListMoveTrashConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Um item movido para o lixo</item>
         <item quantity="other">%d itens movidos para o lixo</item>
     </plurals>
@@ -438,11 +438,11 @@
         <item quantity="one">%d selecionado</item>
         <item quantity="other">%d selecionados</item>
     </plurals>
-    <plurals name="fileListRemoveFavoritesConfirmationSnackbar">
+    <plurals name="fileListRemoveFavoritesConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Um ficheiro removido dos favoritos com sucesso</item>
         <item quantity="other">%d ficheiros removidos dos favoritos com sucesso</item>
     </plurals>
-    <plurals name="fileListRemoveOfflineConfirmationSnackbar">
+    <plurals name="fileListRemoveOfflineConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Um ficheiro removido da disponibilidade offline</item>
         <item quantity="other">%d ficheiros removidos da disponibilidade offline</item>
     </plurals>
@@ -485,7 +485,7 @@
     <string name="manageCategoriesNoCategory">Sem categoria</string>
     <string name="manageCategoriesTitle">Gerir categorias</string>
     <string name="manageDropboxTitle">Gerir a caixa de depósito %s</string>
-    <plurals name="mediaFoldersSelected">
+    <plurals name="mediaFoldersSelected" tools:ignore="ImpliedQuantity">
         <item quantity="one">Uma pasta selecionada</item>
         <item quantity="other">%d pastas selecionadas</item>
     </plurals>
@@ -647,7 +647,7 @@
     <string name="shortcutUploadShortDescription">Carregar</string>
     <string name="snackBarCategoryDeleted">Categoria eliminada com sucesso</string>
     <string name="snackBarInvalidFileNameError">O caractere \"%1$s\" do ficheiro %2$s não é suportado para disponibilidade offline</string>
-    <plurals name="snackBarUploadError">
+    <plurals name="snackBarUploadError" tools:ignore="ImpliedQuantity">
         <item quantity="one">Não foi possível importar um ficheiro</item>
         <item quantity="other">Não foi possível importar %d ficheiros</item>
     </plurals>
@@ -715,7 +715,7 @@
     <string name="trashAutoClearDescription">O lixo é limpo automaticamente a cada 30 dias.\nQuer aumentar este período?</string>
     <string name="trashNoFile">Sem ficheiros eliminados</string>
     <string name="trashTitle">Lixo</string>
-    <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar">
+    <plurals name="trashedFileDeletedPermanentlyConfirmationSnackbar" tools:ignore="ImpliedQuantity">
         <item quantity="one">Um item eliminado permanentemente</item>
         <item quantity="other">%d itens eliminados permanentemente</item>
     </plurals>
@@ -745,7 +745,7 @@
     <string name="uploadInProgressCancelAllUploadTitle">Cancelar carregamentos</string>
     <string name="uploadInProgressCancelFileUploadTitle">Cancelar %s?</string>
     <string name="uploadInProgressNoFile">Nenhum carregamento em curso</string>
-    <plurals name="uploadInProgressNumberFile">
+    <plurals name="uploadInProgressNumberFile" tools:ignore="ImpliedQuantity">
         <item quantity="one">Um ficheiro restante</item>
         <item quantity="other">%d ficheiros restantes</item>
     </plurals>
