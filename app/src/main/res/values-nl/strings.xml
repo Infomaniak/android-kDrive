@@ -351,13 +351,13 @@
     <string name="fileDetailsActivityFileRename">heeft het bestand hernoemd</string>
     <string name="fileDetailsActivityFileRestore">heeft het bestand hersteld</string>
     <string name="fileDetailsActivityFileShareCreate">heeft het bestand gedeeld</string>
-    <string name="fileDetailsActivityFileShareDelete">heeht het delen van het bestand verwijderd</string>
+    <string name="fileDetailsActivityFileShareDelete">heeft het delen van het bestand verwijderd</string>
     <string name="fileDetailsActivityFileShareLinkCreate">heeft de deellink voor het bestand aangemaakt</string>
     <string name="fileDetailsActivityFileShareLinkDelete">heeft de deellink voor het bestand verwijderd</string>
     <string name="fileDetailsActivityFileShareLinkShow">heeft de deellink voor het bestand weergegeven</string>
     <string name="fileDetailsActivityFileShareLinkUpdate">heeft de deellink voor het bestand gewijzigd</string>
     <string name="fileDetailsActivityFileShareUpdate">heeft het delen van het bestand gewijzigd</string>
-    <string name="fileDetailsActivityFileTrash">heeht het bestand naar de prullenbak verplaatst</string>
+    <string name="fileDetailsActivityFileTrash">heeft het bestand naar de prullenbak verplaatst</string>
     <string name="fileDetailsActivityFileUncategorize">heeft een categorie van het element verwijderd</string>
     <string name="fileDetailsActivityFileUpdate">heeft het bestand gewijzigd</string>
     <string name="fileDetailsActivityFolderAccess">heeft de map geopend</string>
