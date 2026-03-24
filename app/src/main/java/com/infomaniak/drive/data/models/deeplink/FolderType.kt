@@ -29,6 +29,7 @@ enum class FolderType(val type: String, vararg val propertiesPattern: String) {
     SharedWithMe(type = "shared-with-me", *ExternalFileType.SHARED_WITH_ME_FOLDER_PROPERTIES),
     SharedLinks(type = "shared-links", PREVIEW),
     Recents(type = "recents", PREVIEW),
+    Redirect(type = "redirect", FILE_ID),
     Trash(type = "trash", FOLDER_ID);
 
     fun build(folderProperties: String): RoleFolder = folderProperties.optionalFind(*propertiesPattern).run {
@@ -40,6 +41,7 @@ enum class FolderType(val type: String, vararg val propertiesPattern: String) {
             SharedWithMe -> RoleFolder.SharedWithMe(fileType = extractExternalFileType())
             SharedLinks -> RoleFolder.SharedLinks(fileId = parseOptionalId(GROUP_FILE_ID))
             Recents -> RoleFolder.Recents(fileId = parseOptionalId(GROUP_FILE_ID))
+            Redirect -> RoleFolder.Redirect(fileId = parseId(GROUP_FILE_ID))
             Trash -> RoleFolder.Trash(folderId = parseOptionalId(GROUP_FOLDER_ID))
         }
     }
