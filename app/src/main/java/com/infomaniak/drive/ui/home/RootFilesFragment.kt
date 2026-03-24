@@ -154,7 +154,10 @@ class RootFilesFragment : BaseRootFolderFragment() {
                 )
                 is RoleFolder.Trash -> actionFilesFragmentToTrashFragment(subfolderId = folderId ?: -1)
                 is RoleFolder.Files -> actionFilesFragmentToFileListFragment(fileType = fileType)
-                is RoleFolder.Category, is RoleFolder.Collaboratives, is RoleFolder.SharedLinks -> notHandled(deeplinkAction)
+                is RoleFolder.Category,
+                is RoleFolder.Collaboratives,
+                is RoleFolder.Redirect,
+                is RoleFolder.SharedLinks -> notHandled(deeplinkAction)
             }
         }
     }
