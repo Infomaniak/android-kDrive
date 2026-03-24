@@ -26,7 +26,7 @@ import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import com.infomaniak.core.file.getApproximativeFileSize
+import com.infomaniak.core.file.getEstimatedFileSize
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileController
@@ -114,7 +114,7 @@ class UploadInProgressViewModel(application: Application) : AndroidViewModel(app
                 try {
                     context.contentResolver?.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)?.use { cursor ->
                         if (cursor.moveToFirst()) {
-                            val size = cursor.getApproximativeFileSize(uri)
+                            val size = cursor.getEstimatedFileSize(uri)
                             files.add(
                                 File(
                                     id = uploadFile.uri.hashCode(),
