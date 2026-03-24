@@ -52,6 +52,7 @@ import com.infomaniak.drive.data.models.deeplink.RoleFolder
 import com.infomaniak.drive.data.models.deeplink.RoleFolder.Files
 import com.infomaniak.drive.data.models.deeplink.RoleFolder.SharedWithMe
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.ui.DeeplinkParser.attemptResolveRedirect
 import com.infomaniak.drive.ui.LaunchArgsType.Deeplink
 import com.infomaniak.drive.ui.LaunchArgsType.Notification
 import com.infomaniak.drive.ui.LaunchArgsType.Shortcut
@@ -224,8 +225,8 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private fun retrieveDeeplink(uri: Uri) {
-        deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
+    private suspend fun retrieveDeeplink(uri: Uri) {
+        deeplinkType = DeeplinkParser.parse(uri).attemptResolveRedirect().ensureHasAccess()
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
     }
 

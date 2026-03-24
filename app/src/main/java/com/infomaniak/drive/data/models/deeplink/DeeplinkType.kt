@@ -22,6 +22,7 @@ import android.net.Uri
 import android.os.Parcelable
 import com.infomaniak.core.legacy.utils.clearStack
 import com.infomaniak.drive.ui.MainActivityArgs
+import com.infomaniak.drive.utils.instanceOf
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -56,6 +57,12 @@ sealed interface DeeplinkType : Parcelable {
         ) : DeeplinkAction {
             override val isHandled: Boolean
                 get() = roleFolder.isHandled
+
+            suspend fun attemptConvertToResolveRedirect(): Drive? {
+                return roleFolder.instanceOf<RoleFolder.Redirect>()
+                    ?.attemptConvertToInternalRoleFolder(driveId = driveId)
+                    ?.let { Drive(userId = userId, driveId = driveId, roleFolder = it) }
+            }
         }
 
         data class Office(override val driveId: Int, val fileId: Int) : DeeplinkAction
