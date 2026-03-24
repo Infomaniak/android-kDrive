@@ -116,7 +116,7 @@ object ApiRepository : ApiRepositoryCore() {
             } as T
         })
     }
-    
+
     fun getAllDrivesData(
         okHttpClient: OkHttpClient
     ): ApiResponse<DriveInfo> {
@@ -469,7 +469,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.convertFile(file), POST)
     }
 
-    suspend fun getDriveTrash(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+    suspend fun getDriveTrash(driveId: Int, order: SortType, cursor: String?): CursorApiResponse<List<File>> {
         return callApiWithCursorSuspend("${ApiRoutes.driveTrash(driveId, order)}&${loadCursor(cursor)}", GET)
     }
 
@@ -477,7 +477,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.trashedFile(file), GET)
     }
 
-    suspend fun getTrashedFolderFiles(file: File, order: SortType, cursor: String?): CursorApiResponse<ArrayList<File>> {
+    suspend fun getTrashedFolderFiles(file: File, order: SortType, cursor: String?): CursorApiResponse<List<File>> {
         return callApiWithCursorSuspend("${ApiRoutes.trashedFolderFiles(file, order)}&${loadCursor(cursor)}", GET)
     }
 

@@ -54,7 +54,7 @@ class TrashViewModel : ViewModel() {
     private fun startLoadTrashContent(
         parentFolder: File? = null,
         isNewSort: Boolean,
-        retrieveMethod: suspend (cursor: String?) -> CursorApiResponse<ArrayList<File>>,
+        retrieveMethod: suspend (cursor: String?) -> CursorApiResponse<List<File>>,
     ) {
         getDeletedFilesJob?.cancel()
         getDeletedFilesJob = viewModelScope.launch(Dispatchers.IO) {
@@ -72,7 +72,7 @@ class TrashViewModel : ViewModel() {
         isNewSort: Boolean,
         cursor: String? = null,
         parentFolder: File?,
-        retrieveMethod: suspend (cursor: String?) -> CursorApiResponse<ArrayList<File>>,
+        retrieveMethod: suspend (cursor: String?) -> CursorApiResponse<List<File>>,
     ) {
         val apiResponse = retrieveMethod(cursor)
         val hasMoreElements = apiResponse.hasMoreAndCursorExists
@@ -80,7 +80,7 @@ class TrashViewModel : ViewModel() {
         trashResults.postValue(
             FolderFilesResult(
                 parentFolder = parentFolder,
-                files = apiResponse.data ?: arrayListOf(),
+                files = apiResponse.data ?: listOf(),
                 isComplete = !hasMoreElements,
                 isFirstPage = isFirstPage,
                 isNewSort = isNewSort,

@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ class RecentChangesFragment : FileSubTypeListFragment() {
     private fun observeRecentChanges() {
         recentChangesViewModel.recentChangesResults.observe(viewLifecycleOwner) { result ->
             populateFileList(
-                files = result?.files ?: arrayListOf(),
+                files = result?.files ?: listOf(),
                 folderId = RecentChanges.id,
                 ignoreOffline = true,
                 isComplete = result?.isComplete ?: true,

@@ -900,7 +900,7 @@ open class FileListFragment : MultiSelectFragment(
 
     data class FolderFilesResult(
         val parentFolder: File? = null,
-        val files: ArrayList<File>,
+        val files: List<File>,
         val isComplete: Boolean,
         val isFirstPage: Boolean,
         val isNewSort: Boolean,

@@ -243,7 +243,7 @@ class SearchFragment : FileListFragment() {
             showSnackbar(errorRes)
         }
 
-        fun handleFirstResult(searchList: ArrayList<File>) {
+        fun handleFirstResult(searchList: List<File>) {
             fileAdapter.setFiles(searchList)
             binding.fileRecyclerView.scrollTo(0, 0)
             searchViewModel.visibilityMode.value = if (searchList.isEmpty()) VisibilityMode.NO_RESULTS else VisibilityMode.RESULTS
