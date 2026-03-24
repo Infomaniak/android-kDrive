@@ -17,6 +17,7 @@
   -->
 <resources>
     <string name="aboutAppVersionTitle">kDrive-sovellus</string>
+    <string name="aboutLibrariesTitle">Kirjastot</string>
     <string name="aboutLicenseDescription">GNU General Public Licence, versio 3</string>
     <string name="aboutLicenseTitle">Lisenssi</string>
     <string name="aboutPrivacyTitle">Tietosuoja</string>

@@ -17,6 +17,7 @@
   -->
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity">
     <string name="aboutAppVersionTitle">Aplicación kDrive</string>
+    <string name="aboutLibrariesTitle">Bibliotecas</string>
     <string name="aboutLicenseDescription">Licencia pública general GNU GPL, versión 3</string>
     <string name="aboutLicenseTitle">Licencia</string>
     <string name="aboutPrivacyTitle">Privacidad</string>

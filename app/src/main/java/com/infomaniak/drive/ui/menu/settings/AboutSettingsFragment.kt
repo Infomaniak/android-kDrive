@@ -58,6 +58,10 @@ class AboutSettingsFragment : Fragment() {
             requireContext().openUrl(GITHUB_URL)
         }
 
+        librariesLayout.setOnClickListener {
+            requireContext().openUrl(LICENSES_URL)
+        }
+
         licenseLayout.setOnClickListener {
             requireContext().openUrl(GPL_LICENSE_URL)
         }
@@ -71,5 +75,6 @@ class AboutSettingsFragment : Fragment() {
         const val GDPR_URL = "https://infomaniak.com/gtl/rgpd"
         const val GITHUB_URL = "https://github.com/Infomaniak/android-kDrive"
         const val GPL_LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
+        const val LICENSES_URL = "https://github.com/Infomaniak/android-kDrive/blob/main/LICENSES.md"
     }
 }
