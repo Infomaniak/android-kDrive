@@ -52,6 +52,7 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.ensureHa
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.ui.DeeplinkParser.attemptResolveRedirect
 import com.infomaniak.drive.ui.LaunchArgsType.Deeplink
 import com.infomaniak.drive.ui.LaunchArgsType.Notification
 import com.infomaniak.drive.ui.LaunchArgsType.Shortcut
@@ -230,7 +231,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
     }
 
     private suspend fun retrieveDeeplink(uri: Uri) {
-        deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
+        deeplinkType = DeeplinkParser.parse(uri).attemptResolveRedirect().ensureHasAccess()
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
     }
 

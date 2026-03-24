@@ -18,6 +18,7 @@
 package com.infomaniak.drive.data.models.deeplink
 
 import android.os.Parcelable
+import com.infomaniak.drive.data.models.File
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -83,6 +84,16 @@ sealed interface DeeplinkExternalFilePath : Parcelable {
             return tryMatchFor(GROUP_PREVIEW_FILE, ::FilePreview)
                 ?: tryMatchFor(GROUP_FOLDER, ::Folder)
                 ?: tryMatchFor(GROUP_PREVIEW_FILE_IN_FOLDER, ::FilePreviewInFolder)
+        }
+
+        fun fromFile(file: File): ExternalFileType {
+            return with(file) {
+                when {
+                    isFolder() -> Folder(sourceDriveId = driveId, folderId = id)
+                    parentId != 0 -> FilePreviewInFolder(driveId, parentId, id)
+                    else -> FilePreview(sourceDriveId = driveId, fileId = id)
+                }
+            }
         }
     }
 }
