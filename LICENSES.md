@@ -1,6 +1,6 @@
 # Third-Party Licenses
 
-kDrive for Android makes use of the following third-party libraries:
+kDrive for Android includes the following third-party libraries in the distributed application (runtime dependencies; test-only dependencies are excluded):
 
 | Library | License |
 |---------|---------|
