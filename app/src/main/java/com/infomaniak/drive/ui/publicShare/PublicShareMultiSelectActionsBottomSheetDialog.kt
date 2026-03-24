@@ -70,12 +70,11 @@ class PublicShareMultiSelectActionsBottomSheetDialog : MultiSelectActionsBottomS
                     authToken = submitPasswordResult.value?.takeToken(),
                 )
                 val userBearerToken = AccountUtils.currentUser?.apiToken?.accessToken
-                DownloadManagerUtils.scheduleDownload(
-                    context = requireContext(),
+                DownloadManagerUtils.launchDownload(
                     url = downloadURL,
                     name = ARCHIVE_FILE_NAME,
+                    userAgent = HttpUtils.getUserAgent,
                     userBearerToken = userBearerToken,
-                    extraHeaders = HttpUtils.getHeaders(),
                     onError = { messageResId -> showSnackbar(title = messageResId) }
                 )
             }
