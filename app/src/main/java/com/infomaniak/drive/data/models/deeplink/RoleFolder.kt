@@ -18,6 +18,8 @@
 package com.infomaniak.drive.data.models.deeplink
 
 import android.os.Parcelable
+import com.infomaniak.drive.data.cache.FileController
+import com.infomaniak.drive.data.models.UserDrive
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -40,6 +42,22 @@ sealed interface RoleFolder : Parcelable {
     data class Redirect(val fileId: Int) : RoleFolder {
         override val isHandled: Boolean get() = false
 
+        internal suspend fun attemptConvertToInternalRoleFolder(driveId: Int): RoleFolder? {
+            val drive = UserDrive(driveId)
+            return attemptConvertToFile(drive) ?: attemptConvertToSharedWithMe(drive)
+        }
+
+        internal suspend fun attemptConvertToFile(drive: UserDrive): Files? {
+            return FileController.getFileById(fileId = fileId, userDrive = drive)
+                ?.let(FileType::fromFile)
+                ?.let(::Files)
+        }
+
+        internal suspend fun attemptConvertToSharedWithMe(drive: UserDrive): SharedWithMe? {
+            return FileController.getFileById(fileId = fileId, userDrive = drive.copy(sharedWithMe = true))
+                ?.let(ExternalFileType::fromFile)
+                ?.let(::SharedWithMe)
+        }
     }
 
     data class SharedWithMe(val fileType: ExternalFileType?) : RoleFolder

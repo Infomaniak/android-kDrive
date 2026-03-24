@@ -29,6 +29,7 @@ import com.infomaniak.drive.data.models.deeplink.ExternalFileType.FilePreviewInF
 import com.infomaniak.drive.data.models.deeplink.ExternalFileType.Folder
 import com.infomaniak.drive.ui.MainActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
+import com.infomaniak.drive.utils.instanceOf
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -85,6 +86,12 @@ sealed interface DeeplinkType : Parcelable {
                 is FilePreviewInFolder -> ensureHasAccess(fileId, sharedWithMe = true)
                 is Folder -> ensureHasAccess(fileId = folderId, sharedWithMe = true)
                 null -> this@Drive
+            }
+
+            suspend fun attemptConvertToResolveRedirect(): Drive? {
+                return roleFolder.instanceOf<RoleFolder.Redirect>()
+                    ?.attemptConvertToInternalRoleFolder(driveId = driveId)
+                    ?.let { Drive(userId = userId, driveId = driveId, roleFolder = it) }
             }
         }
 
