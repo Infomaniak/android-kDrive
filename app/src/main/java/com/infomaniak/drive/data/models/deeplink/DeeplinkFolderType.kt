@@ -26,9 +26,10 @@ enum class DeeplinkFolderType(val type: String, vararg val propertiesPattern: St
     Favorites(type = "favorites", PREVIEW_PATTERN),
     Files(type = "files", *DeeplinkFilePath.PATH_IDS_PATTERN),
     MyShares(type = "my-shares", PREVIEW_PATTERN),
+    Recents(type = "recents", PREVIEW_PATTERN),
+    Redirect(type = "redirect", FILE_ID),
     SharedWithMe(type = "shared-with-me", *DeeplinkExternalFilePath.PATH_IDS_PATTERN),
     SharedLinks(type = "shared-links", PREVIEW_PATTERN),
-    Recents(type = "recents", PREVIEW_PATTERN),
     Trash(type = "trash", FOLDER_ID);
 
     fun build(folderProperties: String): DeeplinkFolderRole = folderProperties.optionalFind(*propertiesPattern).run {
@@ -37,9 +38,10 @@ enum class DeeplinkFolderType(val type: String, vararg val propertiesPattern: St
             Favorites -> DeeplinkFolderRole.Favorites(fileId = parseOptionalId(GROUP_FILE_ID))
             Files -> DeeplinkFolderRole.Files(filePath = extractFileType())
             MyShares -> DeeplinkFolderRole.MyShares(fileId = parseOptionalId(GROUP_FILE_ID))
+            Recents -> DeeplinkFolderRole.Recents(fileId = parseOptionalId(GROUP_FILE_ID))
+            Redirect -> DeeplinkFolderRole.Redirect(fileId = parseId(GROUP_FILE_ID))
             SharedWithMe -> DeeplinkFolderRole.SharedWithMe(externalFilePath = extractExternalFileType())
             SharedLinks -> DeeplinkFolderRole.SharedLinks(fileId = parseOptionalId(GROUP_FILE_ID))
-            Recents -> DeeplinkFolderRole.Recents(fileId = parseOptionalId(GROUP_FILE_ID))
             Trash -> DeeplinkFolderRole.Trash(folderId = parseOptionalId(GROUP_FOLDER_ID))
         }
     }
