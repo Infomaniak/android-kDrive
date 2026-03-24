@@ -41,7 +41,7 @@ import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
 import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.common.utils.format
-import com.infomaniak.core.file.getFileName
+import com.infomaniak.core.file.fileNameFor
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress
@@ -79,8 +79,8 @@ import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.net.URLDecoder
 import java.util.Date
 
 @AndroidEntryPoint
@@ -546,9 +546,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private fun Uri.fileName(): String {
-        return contentResolver.query(this, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) cursor.getFileName(this) else null
-        } ?: URLDecoder.decode(toString(), "UTF-8").substringAfterLast("/")
+        return runBlocking { fileNameFor(this@fileName) } ?: toString()
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
