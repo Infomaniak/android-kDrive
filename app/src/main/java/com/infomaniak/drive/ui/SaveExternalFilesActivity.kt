@@ -42,6 +42,7 @@ import com.infomaniak.core.applock.view.AppLockViewActivity
 import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.file.fileNameFor
+import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress
@@ -68,7 +69,6 @@ import com.infomaniak.drive.ui.menu.settings.SelectDriveViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DrivePermissions
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.Utils.OTHER_ROOT_ID
 import com.infomaniak.drive.utils.isUrlFile
@@ -512,7 +512,7 @@ class SaveExternalFilesActivity : BaseActivity() {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
                 val lastModifiedDateFromUri = intent.getLongExtra(FileColumns.DATE_MODIFIED, -1L)
-                val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor, lastModifiedDateFromUri)
+                val (fileCreatedAt, fileModifiedAt) = cursor.getFileDatesWithFallback(Date(lastModifiedDateFromUri))
 
                 try {
                     if (fileName == null) return false
