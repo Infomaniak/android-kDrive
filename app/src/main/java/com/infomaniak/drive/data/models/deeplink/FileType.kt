@@ -19,6 +19,7 @@ package com.infomaniak.drive.data.models.deeplink
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import com.infomaniak.drive.data.models.File as DriveFile
 
 @Parcelize
 sealed class FileType(open val fileId: Int) : Parcelable {
@@ -65,6 +66,13 @@ sealed class FileType(open val fileId: Int) : Parcelable {
             return tryMatchFor(GROUP_FILE, ::File)
                 ?: tryMatchFor(GROUP_PREVIEW_IN_FOLDER, ::FilePreviewInFolder)
                 ?: throw InvalidFormatting()
+        }
+
+        fun fromFile(file: DriveFile): FileType {
+            return when {
+                file.isFolder() -> File(fileId = file.id)
+                else -> FilePreviewInFolder(folderId = file.parentId, fileId = file.id)
+            }
         }
     }
 }
