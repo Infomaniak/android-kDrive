@@ -47,6 +47,13 @@
         app:text="@string/buttonDocumentScanning" />
 
     <com.infomaniak.drive.views.BottomSheetItemView
+        android:id="@+id/documentScanningGoogle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:icon="@drawable/ic_scan"
+        app:text="Scan google" />
+
+    <com.infomaniak.drive.views.BottomSheetItemView
         android:id="@+id/openCamera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

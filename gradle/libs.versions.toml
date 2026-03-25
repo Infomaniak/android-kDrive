@@ -23,6 +23,7 @@ uiAndroid = "1.10.0"
 uiAutomator = "2.3.0"
 viewpager2 = "1.1.0"
 webkit = "1.14.0"
+playServicesMlkitDocumentScanner = "16.0.0"
 
 [libraries]
 android-junit5 = { module = "de.mannodermaus.gradle.plugins:android-junit5", version.ref = "androidJunit5" }
@@ -57,6 +58,7 @@ androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", vers
 androidx-ui-automator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiAutomator" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
+play-services-mlkit-document-scanner = { group = "com.google.android.gms", name = "play-services-mlkit-document-scanner", version.ref = "playServicesMlkitDocumentScanner" }
 
 [plugins]
 junit5 = { id = "de.mannodermaus.android-junit5" }

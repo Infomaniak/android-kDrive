@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.addFiles
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
@@ -26,14 +27,23 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
+import androidx.core.net.toFile
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_PDF
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_FULL
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.context
 import com.infomaniak.core.legacy.utils.safeBinding
 import com.infomaniak.core.legacy.utils.safeNavigate
@@ -54,6 +64,8 @@ import com.infomaniak.drive.data.models.UserDrive
 import com.infomaniak.drive.databinding.FragmentBottomSheetAddFileBinding
 import com.infomaniak.drive.ui.MainActivity
 import com.infomaniak.drive.ui.MainViewModel
+import com.infomaniak.drive.ui.SaveExternalFilesActivity
+import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
 import com.infomaniak.drive.ui.fileList.FileListFragment
 import com.infomaniak.drive.ui.menu.SharedWithMeFragment
 import com.infomaniak.drive.utils.AccountUtils
@@ -67,6 +79,7 @@ import com.infomaniak.drive.utils.openOnlyOfficeActivity
 import com.infomaniak.drive.utils.setFileItem
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import com.infomaniak.drive.utils.showSnackbar
+import io.sentry.Sentry
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -90,7 +103,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
 
     private val captureMediaResultLauncher = registerForActivityResult(StartActivityForResult()) {
         backgroundUploadPermissions.hasNeededPermissions(requestIfNotGranted = true)
-        if (it.resultCode == Activity.RESULT_OK) onCaptureMediaResult() else dismiss()
+        if (it.resultCode == RESULT_OK) onCaptureMediaResult() else dismiss()
     }
 
     private val scanFlowResultLauncher = registerForActivityResult(StartActivityForResult()) { activityResult ->
@@ -106,6 +119,54 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
             }
         }
         dismiss()
+    }
+
+    private val gmsDocumentScanner = GmsDocumentScanning.getClient(
+        GmsDocumentScannerOptions.Builder()
+            .setGalleryImportAllowed(true)
+            .setResultFormats(RESULT_FORMAT_PDF)
+            .setScannerMode(SCANNER_MODE_FULL)
+            .build()
+    )
+    private val gmsScannerLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val result = GmsDocumentScanningResult.fromActivityResultIntent(result.data)
+            result?.pdf?.let { pdf ->
+                requireActivity().scanResultProcessing(pdf.uri)
+            }
+        }
+
+    }
+
+
+    private fun Activity.scanResultProcessing(pdfUri: Uri) {
+
+        val folder = when (parentFragment?.childFragmentManager?.fragments?.getOrNull(0)?.javaClass) {
+            FileListFragment::class.java, SharedWithMeFragment::class.java -> currentFolderFile
+            else -> null
+        }
+
+        try {
+            val uri = FileProvider.getUriForFile(this, getString(R.string.FILE_AUTHORITY), pdfUri.toFile())
+
+            Intent(this, SaveExternalFilesActivity::class.java).apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtras(
+                    SaveExternalFilesActivityArgs(
+                        userId = currentUserId,
+                        driveId = folder?.driveId ?: AccountUtils.currentDriveId,
+                        folderId = folder?.id ?: -1
+                    ).toBundle()
+                )
+                type = "/pdf"
+                startActivity(this)
+            }
+        } catch (exception: Exception) {
+            exception.printStackTrace()
+            Sentry.captureException(exception)
+            showSnackbar(R.string.anErrorHasOccurred)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -137,6 +198,7 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
             dismiss()
         }
         documentScanning.setOnClickListener { scanDocuments() }
+        documentScanningGoogle.setOnClickListener { scanGoogleDocuments() }
         folderCreate.setOnClickListener { createFolder() }
         docsCreate.setOnClickListener { createFile(Office.DOCS) }
         pointsCreate.setOnClickListener { createFile(Office.POINTS) }
@@ -170,6 +232,17 @@ class AddFileBottomSheetDialog : EdgeToEdgeBottomSheetDialog() {
     private fun scanDocuments() {
         trackNewElement("scan")
         activity?.startScanFlow(scanFlowResultLauncher)
+    }
+
+    private fun scanGoogleDocuments() {
+        trackNewElement("scan")
+        activity?.let { gmsDocumentScanner.getStartScanIntent(it) }
+            ?.addOnSuccessListener { intentSender ->
+                gmsScannerLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+            }
+            ?.addOnFailureListener { exception ->
+                exception.printStackTrace()
+            }
     }
 
     private fun createFolder() {

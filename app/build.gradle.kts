@@ -201,6 +201,7 @@ dependencies {
     implementation(core.ktor.client.content.negociation)
 
     implementation(core.androidx.work.runtime)
+    implementation(libs.play.services.mlkit.document.scanner)
     androidTestImplementation(core.androidx.work.testing)
 
     implementation(core.androidx.datastore.preferences)
