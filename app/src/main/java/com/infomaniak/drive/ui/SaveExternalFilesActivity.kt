@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,8 +41,8 @@ import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
 import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
 import com.infomaniak.core.common.utils.format
+import com.infomaniak.core.file.fileNameFor
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
-import com.infomaniak.core.legacy.utils.getFileName
 import com.infomaniak.core.legacy.utils.hideProgressCatching
 import com.infomaniak.core.legacy.utils.initProgress
 import com.infomaniak.core.legacy.utils.parcelableArrayListExtra
@@ -80,7 +80,6 @@ import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLDecoder
 import java.util.Date
 
 @AndroidEntryPoint
@@ -367,7 +366,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             return name
         }
 
-        fun getExtraStreamFileName(): String? {
+        suspend fun getExtraStreamFileName(): String? {
             return (intent.parcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
                 currentUri = uri
                 uri.fileName()
@@ -392,29 +391,34 @@ class SaveExternalFilesActivity : BaseActivity() {
             },
             *fileNameEdit.filters
         )
-
-        val fileName = when {
-            intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return
-            intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
-            else -> return
+        lifecycleScope.launch {
+            val fileName = when {
+                intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return@launch
+                intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
+                else -> return@launch
+            }
+            withContext(Dispatchers.Main) {
+                fileNameEdit.setText(fileName)
+                fileNameEditLayout.isVisible = true
+            }
         }
 
-        fileNameEdit.setText(fileName)
-        fileNameEditLayout.isVisible = true
     }
 
     private fun handleSendMultiple() = with(binding) {
-        val uris = intent.parcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
-            ?.filterIsInstance<Uri>()
-            ?.map { it to it.fileName() }
-            ?: emptyList()
+        lifecycleScope.launch {
+            val uris = intent.parcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
+                ?.filterIsInstance<Uri>()
+                ?.map { it to it.fileName() }
+                ?: emptyList()
 
-        saveExternalUriAdapter = SaveExternalUriAdapter(uris.toMutableList())
+            saveExternalUriAdapter = SaveExternalUriAdapter(uris.toMutableList())
 
-        fileNames.adapter = saveExternalUriAdapter
-        fileNames.isVisible = true
-        isMultiple = true
-        checkEnabledSaveButton()
+            fileNames.adapter = saveExternalUriAdapter
+            fileNames.isVisible = true
+            isMultiple = true
+            checkEnabledSaveButton()
+        }
     }
 
     private fun checkEnabledSaveButton() {
@@ -545,10 +549,8 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
-    private fun Uri.fileName(): String {
-        return contentResolver.query(this, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) cursor.getFileName(this) else null
-        } ?: URLDecoder.decode(toString(), "UTF-8").substringAfterLast("/")
+    private suspend fun Uri.fileName(): String {
+        return fileNameFor(uri = this) ?: toString()
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
