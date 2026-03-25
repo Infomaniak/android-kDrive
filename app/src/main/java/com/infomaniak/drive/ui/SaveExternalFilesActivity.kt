@@ -79,7 +79,6 @@ import io.sentry.Sentry
 import io.sentry.SentryLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.Date
 
@@ -367,7 +366,7 @@ class SaveExternalFilesActivity : BaseActivity() {
             return name
         }
 
-        fun getExtraStreamFileName(): String? {
+        suspend fun getExtraStreamFileName(): String? {
             return (intent.parcelableExtra<Parcelable>(Intent.EXTRA_STREAM) as? Uri)?.let { uri ->
                 currentUri = uri
                 uri.fileName()
@@ -392,29 +391,32 @@ class SaveExternalFilesActivity : BaseActivity() {
             },
             *fileNameEdit.filters
         )
-
-        val fileName = when {
-            intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return
-            intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
-            else -> return
+        lifecycleScope.launch {
+            val fileName = when {
+                intent.hasExtra(Intent.EXTRA_STREAM) -> getExtraStreamFileName() ?: return@launch
+                intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
+                else -> return@launch
+            }
+            fileNameEdit.setText(fileName)
+            fileNameEditLayout.isVisible = true
         }
 
-        fileNameEdit.setText(fileName)
-        fileNameEditLayout.isVisible = true
     }
 
     private fun handleSendMultiple() = with(binding) {
-        val uris = intent.parcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
-            ?.filterIsInstance<Uri>()
-            ?.map { it to it.fileName() }
-            ?: emptyList()
+        lifecycleScope.launch {
+            val uris = intent.parcelableArrayListExtra<Parcelable>(Intent.EXTRA_STREAM)
+                ?.filterIsInstance<Uri>()
+                ?.map { it to it.fileName() }
+                ?: emptyList()
 
-        saveExternalUriAdapter = SaveExternalUriAdapter(uris.toMutableList())
+            saveExternalUriAdapter = SaveExternalUriAdapter(uris.toMutableList())
 
-        fileNames.adapter = saveExternalUriAdapter
-        fileNames.isVisible = true
-        isMultiple = true
-        checkEnabledSaveButton()
+            fileNames.adapter = saveExternalUriAdapter
+            fileNames.isVisible = true
+            isMultiple = true
+            checkEnabledSaveButton()
+        }
     }
 
     private fun checkEnabledSaveButton() {
@@ -545,8 +547,8 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
-    private fun Uri.fileName(): String {
-        return runBlocking { fileNameFor(this@fileName) } ?: toString()
+    private suspend fun Uri.fileName(): String {
+        return fileNameFor(this@fileName) ?: toString()
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
