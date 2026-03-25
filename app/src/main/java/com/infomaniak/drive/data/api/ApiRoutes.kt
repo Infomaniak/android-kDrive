@@ -429,6 +429,7 @@ object ApiRoutes {
         fileSize: Long,
         conflictOption: ConflictOption,
         directoryPath: String? = null,
+        createdAt: Date? = null,
         lastModifiedAt: Date? = null,
     ): String {
         var params = "?directory_id=$directoryId" +
@@ -437,6 +438,7 @@ object ApiRoutes {
                 "&conflict=" + conflictOption.toString()
 
         directoryPath?.let { params += "&directory_path=$it" }
+        createdAt?.let { params += "&created_at=${it.time / 1_000L}" }
         lastModifiedAt?.let { params += "&last_modified_at=${it.time / 1_000L}" }
 
         return uploadFileUrl(driveId) + params

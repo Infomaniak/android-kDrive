@@ -238,6 +238,8 @@ object ApiRepository : ApiRepositoryCore() {
             fileSize = 0L,
             conflictOption = ConflictOption.RENAME,
             directoryPath = remoteSubFolder,
+            createdAt = uploadFile.fileCreatedAt,
+            lastModifiedAt = uploadFile.fileModifiedAt,
         )
 
         ApiController.callApi<ApiResponse<File>>(uploadUrl, POST)

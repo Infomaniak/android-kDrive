@@ -164,7 +164,7 @@ class ImportFilesDialog : DialogFragment() {
             uploadFile = UploadFile(
                 uri = outputFile.toUri().toString(),
                 driveId = navArgs.driveId,
-                fileCreatedAt = fileCreatedAt,
+                fileCreatedAt = fileCreatedAt ?: fileModifiedAt,
                 fileModifiedAt = fileModifiedAt,
                 fileName = fileName,
                 fileSize = outputFile.length(),
