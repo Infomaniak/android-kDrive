@@ -29,6 +29,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.file.getFileName
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.R
@@ -38,7 +39,6 @@ import com.infomaniak.drive.databinding.DialogImportFilesBinding
 import com.infomaniak.drive.ui.MainViewModel
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.drive.utils.SyncUtils.getFileDates
 import com.infomaniak.drive.utils.SyncUtils.syncImmediately
 import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import com.infomaniak.drive.utils.getAvailableMemory
@@ -157,7 +157,7 @@ class ImportFilesDialog : DialogFragment() {
         runCatching {
             SentryLog.i(TAG, "processCursorData: uri=$uri")
             val fileName = cursor.getFileName(uri)
-            val (fileCreatedAt, fileModifiedAt) = getFileDates(cursor)
+            val (fileCreatedAt, fileModifiedAt) = cursor.getFileDatesWithFallback()
 
             outputFile = getOutputFile(uri, fileModifiedAt)
             ensureActive()

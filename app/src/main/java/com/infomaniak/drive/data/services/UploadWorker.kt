@@ -38,6 +38,8 @@ import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import androidx.work.WorkerParameters
 import com.infomaniak.core.common.autoCancelScope
+import com.infomaniak.core.file.DATE_TAKEN
+import com.infomaniak.core.file.getFileDatesWithFallback
 import com.infomaniak.core.file.getFileName
 import com.infomaniak.core.file.getPreciseFileSize
 import com.infomaniak.core.legacy.utils.hasPermissions
@@ -66,7 +68,6 @@ import com.infomaniak.drive.utils.NotificationUtils
 import com.infomaniak.drive.utils.NotificationUtils.UPLOAD_SERVICE_ID
 import com.infomaniak.drive.utils.NotificationUtils.buildGeneralNotification
 import com.infomaniak.drive.utils.NotificationUtils.uploadProgressNotification
-import com.infomaniak.drive.utils.SyncUtils
 import com.infomaniak.drive.utils.getAvailableMemory
 import com.infomaniak.drive.utils.uri
 import io.realm.Realm
@@ -436,7 +437,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
 
         val lastUploadDate = UploadFile.getLastDate(applicationContext)
         val args = initArgs(lastUploadDate)
-        val selection = "( ${SyncUtils.DATE_TAKEN} >= ? " +
+        val selection = "( $DATE_TAKEN >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_ADDED} >= ? " +
                 "OR ${MediaStore.MediaColumns.DATE_MODIFIED} >= ? )"
         var customSelection: String
@@ -502,7 +503,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
         mediaFolder: MediaFolder,
     ) {
 
-        val sortOrder = SyncUtils.DATE_TAKEN + " ASC, " +
+        val sortOrder = DATE_TAKEN + " ASC, " +
                 MediaStore.MediaColumns.DATE_ADDED + " ASC, " +
                 MediaStore.MediaColumns.DATE_MODIFIED + " ASC"
 
@@ -538,7 +539,7 @@ class UploadWorker(appContext: Context, params: WorkerParameters) : CoroutineWor
     ) {
         val uri = cursor.uri(contentUri)
 
-        val (fileCreatedAt, fileModifiedAt) = SyncUtils.getFileDates(cursor)
+        val (fileCreatedAt, fileModifiedAt) = cursor.getFileDatesWithFallback()
         val fileName = cursor.getFileName(contentUri)
         val fileSize = cursor.getPreciseFileSize(uri)
 
