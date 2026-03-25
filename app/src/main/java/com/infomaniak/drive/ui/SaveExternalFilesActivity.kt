@@ -397,8 +397,10 @@ class SaveExternalFilesActivity : BaseActivity() {
                 intent.hasExtra(Intent.EXTRA_TEXT) -> getExtraTextFileName()
                 else -> return@launch
             }
-            fileNameEdit.setText(fileName)
-            fileNameEditLayout.isVisible = true
+            withContext(Dispatchers.Main) {
+                fileNameEdit.setText(fileName)
+                fileNameEditLayout.isVisible = true
+            }
         }
 
     }
@@ -548,7 +550,7 @@ class SaveExternalFilesActivity : BaseActivity() {
     }
 
     private suspend fun Uri.fileName(): String {
-        return fileNameFor(this@fileName) ?: toString()
+        return fileNameFor(uri = this) ?: toString()
     }
 
     class SaveExternalFilesViewModel : ViewModel() {
