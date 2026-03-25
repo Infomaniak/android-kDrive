@@ -511,8 +511,8 @@ class SaveExternalFilesActivity : BaseActivity() {
     private fun store(uri: Uri, fileName: String?, userId: Int, driveId: Int, folderId: Int): Boolean {
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val lastModifiedDateFromUri = intent.getLongExtra(FileColumns.DATE_MODIFIED, -1L)
-                val (fileCreatedAt, fileModifiedAt) = cursor.getFileDatesWithFallback(Date(lastModifiedDateFromUri))
+                val fallbackDate = getLastModifiedDateFromIntent()
+                val (fileCreatedAt, fileModifiedAt) = cursor.getFileDatesWithFallback(fallbackDate)
 
                 try {
                     if (fileName == null) return false
@@ -549,6 +549,10 @@ class SaveExternalFilesActivity : BaseActivity() {
         return false
     }
 
+    private fun getLastModifiedDateFromIntent(): Date? {
+        return intent.getLongExtra(FileColumns.DATE_MODIFIED, -1L).takeUnless { it == -1L }?.let(::Date)
+    }
+
     private suspend fun Uri.fileName(): String {
         return fileNameFor(uri = this) ?: toString()
     }
@@ -560,7 +564,6 @@ class SaveExternalFilesActivity : BaseActivity() {
 
     companion object {
         const val SHARED_FILE_FOLDER = "shared_files"
-        const val LAST_MODIFIED_URI_KEY = "last_modified"
         const val DESTINATION_DRIVE_ID_KEY = "destination_drive_id"
         const val DESTINATION_FOLDER_ID_KEY = "destination_folder_id"
         const val DESTINATION_USER_ID_KEY = "destination_user_id"
