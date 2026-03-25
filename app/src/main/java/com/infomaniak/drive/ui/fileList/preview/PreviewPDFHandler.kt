@@ -28,7 +28,6 @@ import com.infomaniak.drive.utils.SyncUtils.uploadFolder
 import kotlinx.coroutines.runBlocking
 
 class PreviewPDFHandler(
-    context: Context,
     val externalFileUri: Uri? = null,
     private val setPrintVisibility: (isGone: Boolean) -> Unit,
 ) {
