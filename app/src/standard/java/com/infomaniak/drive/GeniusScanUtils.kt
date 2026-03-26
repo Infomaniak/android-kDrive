@@ -31,11 +31,11 @@ import com.geniusscansdk.scanflow.ScanConfiguration
 import com.geniusscansdk.scanflow.ScanConfiguration.OcrConfiguration
 import com.geniusscansdk.scanflow.ScanConfiguration.OcrOutputFormat
 import com.geniusscansdk.scanflow.ScanResult
+import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
+import com.infomaniak.core.common.utils.format
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.Utils
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.common.utils.FORMAT_NEW_FILE
-import com.infomaniak.core.common.utils.format
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.ui.SaveExternalFilesActivity
 import com.infomaniak.drive.ui.SaveExternalFilesActivityArgs
@@ -53,6 +53,10 @@ object GeniusScanUtils : IGeniusScanUtils {
     private const val SCAN_RESULT_KEY = "SCAN_RESULT_KEY"
     private const val ERROR_KEY = "ERROR_KEY"
 
+    /**
+     * To keep the OCR process from taking too long, we always include the three languages most commonly used by Infomaniak.
+     * Additional languages are only included if their language appears in the device preferred locales.
+     */
     private val supportedLanguages by lazy {
         mutableListOf(
             "fr-FR",
@@ -61,8 +65,15 @@ object GeniusScanUtils : IGeniusScanUtils {
         ).apply {
             Utils.getPreferredLocaleList().forEach {
                 when (it.language) {
-                    "it" -> add("it-IT")
+                    "da" -> add("da")
+                    "el" -> add("el")
                     "es" -> add("es-ES")
+                    "fi" -> add("fi")
+                    "it" -> add("it-IT")
+                    "nl" -> add("nl")
+                    "pl" -> add("pl")
+                    "pt" -> add("pt-BR")
+                    "sv" -> add("sv")
                 }
             }
         }
