@@ -32,13 +32,14 @@ object DeeplinkParser {
         return uri.path?.let { uriPath -> parse(uri, uriPath) } ?: Unmanaged.BrowserLaunch.Unknown(uri)
     }
 
-    private fun parse(uri: Uri, uriPath: String): DeeplinkType? {
-        return runCatching { actionRegex.find(uriPath)?.toDeeplinkAction() }
-            .getOrElse { Unmanaged.BrowserLaunch.BadFormatting(uri) }
+    private fun parse(uri: Uri, uriPath: String): DeeplinkType? = runCatching {
+        actionRegex.find(uriPath)?.toDeeplinkAction()
+    }.getOrElse {
+        Unmanaged.BrowserLaunch.BadFormatting(uri)
     }
 
-    private fun MatchResult.toDeeplinkAction(): DeeplinkAction = run {
+    private fun MatchResult.toDeeplinkAction(): DeeplinkAction {
         val (actionType, action) = destructured
-        DeeplinkAction.from(actionType = actionType, action = action)
+        return DeeplinkAction.from(actionType = actionType, action = action)
     }
 }

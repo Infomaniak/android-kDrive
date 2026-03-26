@@ -40,6 +40,7 @@ sealed interface DeeplinkType : Parcelable {
             class Unknown(val uri: Uri) : BrowserLaunch(url = uri.toString())
         }
     }
+
     @Parcelize
     sealed interface DeeplinkAction : DeeplinkType {
         val driveId: Int
@@ -49,11 +50,7 @@ sealed interface DeeplinkType : Parcelable {
                 get() = false
         }
 
-        data class Drive(
-            val userId: Int? = null,
-            override val driveId: Int,
-            val roleFolder: RoleFolder
-        ) : DeeplinkAction {
+        data class Drive(val userId: Int? = null, override val driveId: Int, val roleFolder: RoleFolder) : DeeplinkAction {
             override val isHandled: Boolean
                 get() = roleFolder.isHandled
         }
@@ -63,7 +60,6 @@ sealed interface DeeplinkType : Parcelable {
         companion object {
             @Throws(InvalidFormatting::class)
             fun from(actionType: String, action: String): DeeplinkAction = ActionType.from(actionType).build(action)
-
         }
     }
 
