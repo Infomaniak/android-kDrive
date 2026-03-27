@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.ui.fileList.preview
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.infomaniak.core.common.utils.inWholeSeconds
+import com.infomaniak.core.file.getFileDatesWithFallback
+import com.infomaniak.core.file.retrieveAndUse
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
@@ -46,7 +50,10 @@ import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import java.util.Date
 
 class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
 
@@ -116,15 +123,22 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
     }
 
     // This is necessary to be able to use the same view details we have in kDrive (file name, file type and size)
-    private fun getFakeFile(): File = with(previewPDFHandler) {
+    private suspend fun getFakeFile(): File = with(previewPDFHandler) {
+        val (createdAt, updatedAt) = externalFileUri.getDates()
         return File(
             name = fileName,
             size = fileSize,
             id = ROOT_ID,
             extensionType = ExtensionType.PDF.value,
             type = "",
+            createdAt = createdAt.inWholeSeconds(),
+            lastModifiedAt = updatedAt.inWholeSeconds,
         )
     }
+
+    private suspend fun Uri?.getDates(): Pair<Date?, Date> = Dispatchers.IO {
+        this@getDates?.retrieveAndUse { getFileDatesWithFallback() }
+    } ?: Pair(Date(), Date())
 
     private fun setupNavController(): NavController {
         return navHostFragment.navController.apply {
