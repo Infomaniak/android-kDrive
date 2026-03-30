@@ -17,11 +17,10 @@
  */
 package com.infomaniak.drive.data.api
 
-import android.util.Log
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
-import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.api.ApiController.ApiMethod.DELETE
@@ -67,7 +66,6 @@ import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
 import okhttp3.OkHttpClient
 import java.util.Date
-import com.infomaniak.core.auth.networking.HttpClient.okHttpClientLongTimeoutWithTokenInterceptor as okHttpClientLongTimeout
 import com.infomaniak.core.ksuite.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
 object ApiRepository : ApiRepositoryCore() {
@@ -76,7 +74,7 @@ object ApiRepository : ApiRepositoryCore() {
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
     ): T {
         return callApiBlocking(url, method, body, okHttpClient)
     }
@@ -92,7 +90,7 @@ object ApiRepository : ApiRepositoryCore() {
         url: String,
         method: ApiController.ApiMethod,
         body: Any? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
     ): T {
         return callApiBlocking(url, method, body, okHttpClient, buildErrorResult = { apiError, translatedErrorRes ->
             CursorApiResponse<Any>(
@@ -131,7 +129,7 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         order: SortType,
         cursor: String?,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient
     ): CursorApiResponse<ArrayList<File>> {
         val url = ApiRoutes.getFavoriteFiles(driveId, order) + "&${loadCursor(cursor)}"
         return callApiWithCursor(
@@ -184,7 +182,7 @@ object ApiRepository : ApiRepositoryCore() {
         file: File,
         cursor: String?,
         forFileList: Boolean,
-        okHttpClient: OkHttpClient = okHttpClientLongTimeout,
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClientLongTimeout,
     ): CursorApiResponse<ArrayList<FileActivity>> {
         val url = ApiRoutes.getFileActivities(file, forFileList, loadCursor(cursor))
         return callApiWithCursor(url, GET, okHttpClient = okHttpClient)
@@ -200,7 +198,7 @@ object ApiRepository : ApiRepositoryCore() {
         driveId: Int,
         fileIds: List<Int>,
         fromDate: Long,
-        okHttpClient: OkHttpClient = okHttpClientLongTimeout,
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClientLongTimeout,
     ): ApiResponse<ArrayList<FileActivity>> {
         val formattedFileIds = fileIds.joinToString(",") { it.toString() }
         return callApi(ApiRoutes.getFileActivities(driveId, formattedFileIds, fromDate), GET, okHttpClient = okHttpClient)
@@ -246,7 +244,7 @@ object ApiRepository : ApiRepositoryCore() {
             lastModifiedAt = Date(uploadFile.getLastModified()),
         )
 
-        ApiController.callApi<ApiResponse<File>>(uploadUrl, POST)
+        ApiController.callApi<ApiResponse<File>>(uploadUrl, POST, okHttpClient = AuthHttpClientProvider.authOkHttpClient)
     }
 
     fun createFolder(
@@ -286,7 +284,7 @@ object ApiRepository : ApiRepositoryCore() {
         date: Pair<String, String>? = null,
         type: String? = null,
         categories: String? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient
     ): CursorApiResponse<ArrayList<File>> {
         var url = "${ApiRoutes.searchFiles(driveId, sortType)}&${loadCursor(cursor)}"
         if (!query.isNullOrBlank()) url += "&query=$query"
@@ -321,7 +319,7 @@ object ApiRepository : ApiRepositoryCore() {
         return callApi(ApiRoutes.getFileShare(file), GET, okHttpClient = okHttpClient)
     }
 
-    fun getFileDetails(file: File, okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor): ApiResponse<File> {
+    fun getFileDetails(file: File, okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient): ApiResponse<File> {
         return callApi(ApiRoutes.getFileDetails(file), GET, okHttpClient = okHttpClient)
     }
 
@@ -491,7 +489,11 @@ object ApiRepository : ApiRepositoryCore() {
         callApi(ApiRoutes.restoreTrashFile(file), POST, body)
 
     fun emptyTrash(driveId: Int): ApiResponse<Boolean> =
-        callApi(ApiRoutes.emptyTrash(driveId), method = DELETE, okHttpClient = okHttpClientLongTimeout)
+        callApi(
+            url = ApiRoutes.emptyTrash(driveId),
+            method = DELETE,
+            okHttpClient = AuthHttpClientProvider.authOkHttpClientLongTimeout,
+        )
 
     fun deleteTrashFile(file: File): ApiResponse<Boolean> = callApi(ApiRoutes.trashURLV2(file), DELETE)
 

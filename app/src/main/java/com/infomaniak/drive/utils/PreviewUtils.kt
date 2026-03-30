@@ -29,7 +29,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.JsonParser
-import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.common.extensions.isNightModeEnabled
 import com.infomaniak.core.common.extensions.lightStatusBar
 import com.infomaniak.core.network.utils.bodyAsStringOrNull
@@ -54,7 +54,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.invoke
 import okhttp3.Response
 import java.io.BufferedInputStream
-import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
+import com.infomaniak.core.network.networking.DefaultHttpClientProvider.okHttpClient as unauthenticatedHttpClient
 
 private const val BUFFER_SIZE = 8192
 
@@ -193,7 +193,7 @@ suspend fun downloadFile(
     val downloadProgressInterceptor = DownloadOfflineFileManager.downloadProgressInterceptor(onProgress = onProgress)
     val okHttpClient = when {
         isPublicShared -> unauthenticatedHttpClient
-        else -> HttpClient.okHttpClientWithTokenInterceptor
+        else -> AuthHttpClientProvider.authOkHttpClient
     }
 
     DownloadOfflineFileManager.downloadFileResponseAsync(

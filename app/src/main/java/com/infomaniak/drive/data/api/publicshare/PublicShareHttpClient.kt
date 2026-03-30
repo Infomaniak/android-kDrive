@@ -17,15 +17,24 @@
  */
 package com.infomaniak.drive.data.api.publicshare
 
-import com.infomaniak.core.auth.networking.BaseHttpClient
+import com.infomaniak.core.auth.TokenInterceptorListener
+import com.infomaniak.core.auth.networking.BaseHttpClientProvider
+import com.infomaniak.drive.TokenInterceptorListenerProvider.publicShareTokenInterceptorListener
 import com.infomaniak.drive.utils.AccountUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 
-object PublicShareHttpClient : BaseHttpClient() {
+object PublicShareHttpClient : BaseHttpClientProvider() {
+    private val scope = CoroutineScope(Dispatchers.Default)
+    override var tokenInterceptorListener: TokenInterceptorListener? = publicShareTokenInterceptorListener(scope)
 
-    override fun OkHttpClient.Builder.addTokenInterceptor() {
+    override fun addTokenInterceptor(builder: OkHttpClient.Builder, tokenInterceptorListener: TokenInterceptorListener?) {
+        super.addTokenInterceptor(builder, tokenInterceptorListener)
         if (AccountUtils.currentUser == null) return
 
-        tokenInterceptorListener?.let { listener -> addInterceptor(PublicShareTokenInterceptor(listener)) }
+        tokenInterceptorListener?.let { listener ->
+            builder.addInterceptor(PublicShareTokenInterceptor(listener))
+        }
     }
 }
