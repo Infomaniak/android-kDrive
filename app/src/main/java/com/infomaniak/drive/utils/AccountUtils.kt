@@ -23,11 +23,12 @@ import androidx.core.os.bundleOf
 import com.infomaniak.core.auth.CredentialManager
 import com.infomaniak.core.auth.TokenAuthenticator
 import com.infomaniak.core.auth.models.user.User
-import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.inappreview.AppReviewSettingsRepository
 import com.infomaniak.core.inappupdate.AppUpdateSettingsRepository
 import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.network.networking.DefaultHttpClientProvider
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.MainApplication
 import com.infomaniak.drive.data.api.ApiRepository
@@ -53,7 +54,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 
 object AccountUtils : CredentialManager() {
 
@@ -114,7 +114,7 @@ object AccountUtils : CredentialManager() {
         context: Context,
         fromMaintenance: Boolean = false,
         fromCloudStorage: Boolean = false,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+        okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
     ) = withContext(Dispatchers.IO) {
 
         val (userResult, user) = with(ApiRepository.getUserProfile(okHttpClient)) {
@@ -197,7 +197,7 @@ object AccountUtils : CredentialManager() {
         launch {
             runCatching {
                 context.getInfomaniakLogin().deleteToken(
-                    unauthenticatedHttpClient,
+                    DefaultHttpClientProvider.okHttpClient,
                     user.apiToken,
                 )?.let { errorStatus ->
                     val loginErrorDescription = LoginActivity.getLoginErrorDescription(context, errorStatus)

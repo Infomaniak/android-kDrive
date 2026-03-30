@@ -278,7 +278,7 @@ open class FileListFragment : MultiSelectFragment(
             val isUploaded = workInfo.progress.getBoolean(UploadWorker.IS_UPLOADED, false)
             val remoteFolderId = workInfo.progress.getInt(UploadWorker.REMOTE_FOLDER_ID, 0)
 
-            isUploading = if (remoteFolderId == folderId && isUploaded) {
+            is = if (remoteFolderId == folderId && isUploaded) {
                 showUploadedFiles()
                 false
             } else {

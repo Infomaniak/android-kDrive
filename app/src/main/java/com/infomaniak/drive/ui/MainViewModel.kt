@@ -34,7 +34,7 @@ import androidx.navigation.NavController
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
-import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.legacy.utils.SingleLiveEvent
 import com.infomaniak.core.network.NetworkAvailability
 import com.infomaniak.core.network.models.ApiResponse
@@ -240,7 +240,7 @@ class MainViewModel(
     }
 
     private suspend fun getHttpClient(userDrive: UserDrive?): OkHttpClient {
-        return userDrive?.let { AccountUtils.getHttpClient(userDrive.userId) } ?: HttpClient.okHttpClientWithTokenInterceptor
+        return userDrive?.let { AccountUtils.getHttpClient(userDrive.userId) } ?: AuthHttpClientProvider.authOkHttpClient
     }
 
     fun createOffice(driveId: Int, folderId: Int, createFile: CreateFile) = liveData(Dispatchers.IO) {

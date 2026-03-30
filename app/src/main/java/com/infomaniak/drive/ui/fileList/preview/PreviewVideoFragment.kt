@@ -43,9 +43,10 @@ import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.FileDataSource
 import com.google.android.exoplayer2.util.EventLogger
 import com.google.android.exoplayer2.util.Util
-import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.legacy.networking.HttpUtils
 import com.infomaniak.core.legacy.networking.ManualAuthorizationRequired
+import com.infomaniak.core.network.networking.DefaultHttpClientProvider
 import com.infomaniak.drive.MatomoDrive.MatomoName
 import com.infomaniak.drive.MatomoDrive.trackMediaPlayerEvent
 import com.infomaniak.drive.R
@@ -54,7 +55,6 @@ import com.infomaniak.drive.databinding.FragmentPreviewVideoBinding
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.openWithClicked
 import com.infomaniak.drive.ui.BasePreviewSliderFragment.Companion.toggleFullscreen
 import com.infomaniak.drive.utils.IOFile
-import com.infomaniak.core.network.networking.HttpClient.okHttpClient as unauthenticatedHttpClient
 
 open class PreviewVideoFragment : PreviewFragment() {
 
@@ -211,8 +211,8 @@ open class PreviewVideoFragment : PreviewFragment() {
         val appContext = context.applicationContext
         val userAgent = Util.getUserAgent(appContext, context.getString(R.string.app_name))
         val okHttpClient = when (navigationArgs?.isPublicShared) {
-            true -> unauthenticatedHttpClient
-            else -> HttpClient.okHttpClientWithTokenInterceptor
+            true -> DefaultHttpClientProvider.okHttpClient
+            else -> AuthHttpClientProvider.authOkHttpClient
         }
         val okHttpDataSource = OkHttpDataSource.Factory(okHttpClient).apply {
             setUserAgent(userAgent)

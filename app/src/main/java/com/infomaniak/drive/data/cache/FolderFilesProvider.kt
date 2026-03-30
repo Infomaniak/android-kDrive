@@ -20,7 +20,7 @@ package com.infomaniak.drive.data.cache
 import androidx.collection.ArrayMap
 import androidx.collection.arrayMapOf
 import com.infomaniak.core.common.cancellable
-import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.core.network.networking.DefaultHttpClientProvider
 import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.ApiRoutes
@@ -309,7 +309,7 @@ object FolderFilesProvider {
         apiResponse: CursorApiResponse<List<File>>,
         folderFilesProviderArgs: FolderFilesProviderArgs,
         folderProxy: File?,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+        okHttpClient: OkHttpClient = DefaultHttpClientProvider.okHttpClient,
     ): FolderFilesProviderResult? {
         val userDrive = folderFilesProviderArgs.userDrive
         val apiResponseData = apiResponse.data

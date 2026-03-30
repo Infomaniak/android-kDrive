@@ -38,7 +38,6 @@ import com.facebook.stetho.Stetho
 import com.infomaniak.core.auth.AccessTokenUsageInterceptor
 import com.infomaniak.core.auth.AuthConfiguration
 import com.infomaniak.core.auth.models.user.User
-import com.infomaniak.core.auth.networking.HttpClient
 import com.infomaniak.core.coil.ImageLoaderProvider
 import com.infomaniak.core.common.AssociatedUserDataCleanable
 import com.infomaniak.core.common.extensions.clearStack
@@ -53,10 +52,8 @@ import com.infomaniak.core.notifications.notifyCompat
 import com.infomaniak.core.sentry.SentryConfig.configureSentry
 import com.infomaniak.core.twofactorauth.back.TwoFactorAuthManager
 import com.infomaniak.drive.GeniusScanUtils.initGeniusScanSdk
-import com.infomaniak.drive.TokenInterceptorListenerProvider.publicShareTokenInterceptorListener
 import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.FileDeserialization
-import com.infomaniak.drive.data.api.publicshare.PublicShareHttpClient
 import com.infomaniak.drive.data.documentprovider.CloudStorageProvider.Companion.initRealm
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.UiSettings
@@ -136,16 +133,12 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
 
         AccountUtils.onRefreshTokenError = refreshTokenError
         initNotificationChannel()
-        val tokenInterceptorListener =
-            TokenInterceptorListenerProvider.tokenInterceptorListener(refreshTokenError, applicationScope)
         HttpClientConfig.customInterceptors = listOf(
             AccessTokenUsageInterceptor(
                 previousApiCall = uiSettings.accessTokenApiCallRecord,
                 updateLastApiCall = { uiSettings.accessTokenApiCallRecord = it },
             ),
         )
-        HttpClient.init(tokenInterceptorListener)
-        PublicShareHttpClient.init(publicShareTokenInterceptorListener(applicationScope))
         MqttClientWrapper.init(applicationContext)
 
         MyKSuiteDataUtils.initDatabase(this)
@@ -172,11 +165,12 @@ open class MainApplication : Application(), SingletonImageLoader.Factory, Defaul
 //            apiEnvironment = ApiEnvironment.PreProd
         )
 
+        val tokenInterceptorListener =
+            TokenInterceptorListenerProvider.tokenInterceptorListener(refreshTokenError, applicationScope)
         AuthConfiguration.init(
-            appId = BuildConfig.APPLICATION_ID,
-            appVersionCode = BuildConfig.VERSION_CODE,
-            appVersionName = BuildConfig.VERSION_NAME,
             clientId = BuildConfig.CLIENT_ID,
+            accessType = null,
+            tokenInterceptorListener = tokenInterceptorListener,
         )
     }
 

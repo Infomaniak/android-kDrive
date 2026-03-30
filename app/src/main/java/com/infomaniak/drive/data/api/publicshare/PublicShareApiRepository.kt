@@ -22,7 +22,7 @@ import com.infomaniak.core.network.api.ApiController.ApiMethod.GET
 import com.infomaniak.core.network.api.ApiController.ApiMethod.POST
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
-import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.core.network.networking.DefaultHttpClientProvider
 import com.infomaniak.drive.data.api.ApiRoutes
 import com.infomaniak.drive.data.api.ApiRoutes.appendQueryParams
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
@@ -45,7 +45,7 @@ object PublicShareApiRepository {
             url = ApiRoutes.getPublicShareInfo(driveId, linkUuid),
             method = GET,
             authToken = authToken,
-            okHttpClient = PublicShareHttpClient.okHttpClientWithTokenInterceptor,
+            okHttpClient = PublicShareHttpClient.authOkHttpClient,
         )
     }
 
@@ -151,7 +151,7 @@ object PublicShareApiRepository {
         method: ApiController.ApiMethod,
         authToken: String? = null,
         body: Any? = null,
-        okHttpClient: OkHttpClient = HttpClient.okHttpClient,
+        okHttpClient: OkHttpClient = DefaultHttpClientProvider.okHttpClient,
     ): T {
         val authentifiedUrl = authToken?.let { token -> url.appendQueryParams(mapOf("sharelink_token" to token)) } ?: url
         return ApiController.callApi(authentifiedUrl, method, body, okHttpClient)
@@ -166,7 +166,7 @@ object PublicShareApiRepository {
             url = url,
             method = method,
             body = body,
-            okHttpClient = HttpClient.okHttpClient,
+            okHttpClient = DefaultHttpClientProvider.okHttpClient,
             buildErrorResult = { apiError, translatedErrorRes ->
                 CursorApiResponse<Any>(
                     result = ApiResponseStatus.ERROR,

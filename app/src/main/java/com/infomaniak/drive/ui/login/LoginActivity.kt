@@ -51,7 +51,7 @@ import com.infomaniak.core.network.api.InternalTranslatedErrorCode
 import com.infomaniak.core.network.models.ApiError
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
-import com.infomaniak.core.network.networking.HttpClient
+import com.infomaniak.core.network.networking.DefaultHttpClientProvider
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.formatError
 import com.infomaniak.core.network.utils.ApiErrorCode.Companion.translateError
 import com.infomaniak.core.sentry.SentryLog
@@ -255,7 +255,7 @@ class LoginActivity : ComponentActivity() {
 
         runCatching {
             infomaniakLogin.deleteToken(
-                okHttpClient = HttpClient.okHttpClient,
+                okHttpClient = DefaultHttpClientProvider.okHttpClient,
                 token = token,
             )?.let { errorStatus ->
                 SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
@@ -270,7 +270,7 @@ class LoginActivity : ComponentActivity() {
             runCatching {
                 SentryLog.i(TAG, "Getting the user token")
                 val tokenResult = infomaniakLogin.getToken(
-                    okHttpClient = HttpClient.okHttpClient,
+                    okHttpClient = DefaultHttpClientProvider.okHttpClient,
                     code = authCode,
                 )
 
@@ -319,7 +319,7 @@ class LoginActivity : ComponentActivity() {
 
             runCatching {
                 infomaniakLogin.deleteToken(
-                    okHttpClient = HttpClient.okHttpClient,
+                    okHttpClient = DefaultHttpClientProvider.okHttpClient,
                     token = apiToken,
                 )?.let { errorStatus ->
                     SentryLog.i("DeleteTokenError", "API response error: $errorStatus")
@@ -362,7 +362,7 @@ class LoginActivity : ComponentActivity() {
             val dbUser = AccountUtils.getUserById(apiToken.userId)
             if (dbUser != null) return Xor.Second(getErrorResponse(R.string.errorUserAlreadyPresent))
 
-            val okhttpClient = HttpClient.okHttpClient
+            val okhttpClient = DefaultHttpClientProvider.okHttpClient
                 .newBuilder()
                 .addInterceptor { chain ->
                     val newRequest = changeAccessToken(chain.request(), apiToken)
