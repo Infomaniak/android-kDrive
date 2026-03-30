@@ -50,8 +50,6 @@ import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.utils.toggleSystemBar
 import com.infomaniak.drive.views.FileInfoActionsView.OnItemClickListener
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -136,9 +134,9 @@ class PreviewPDFActivity : AppCompatActivity(), OnItemClickListener {
         )
     }
 
-    private suspend fun Uri?.getDates(): Pair<Date?, Date> = Dispatchers.IO {
-        this@getDates?.retrieveAndUse { getFileDatesWithFallback() }
-    } ?: Pair(Date(), Date())
+    private suspend fun Uri?.getDates(): Pair<Date?, Date> {
+        return this@getDates?.retrieveAndUse { getFileDatesWithFallback() } ?: Pair(Date(), Date())
+    }
 
     private fun setupNavController(): NavController {
         return navHostFragment.navController.apply {
