@@ -17,7 +17,7 @@
  */
 package com.infomaniak.drive.utils
 
-import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteData
 import com.infomaniak.core.ksuite.myksuite.ui.data.MyKSuiteDataManager
@@ -42,7 +42,7 @@ object MyKSuiteDataUtils : MyKSuiteDataManager() {
         val kSuite = AccountUtils.getCurrentDrive()?.kSuite
         if (kSuite !is KSuite.Perso) return@runCatching null
 
-        val apiResponse = ApiRepository.getMyKSuiteData(HttpClient.okHttpClientWithTokenInterceptor)
+        val apiResponse = ApiRepository.getMyKSuiteData(AuthHttpClientProvider.authOkHttpClient)
         if (apiResponse.data == null) {
             @OptIn(ExperimentalSerializationApi::class)
             apiResponse.error?.exception?.let {

@@ -27,7 +27,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
 import com.google.gson.reflect.TypeToken
-import com.infomaniak.core.auth.networking.HttpClient
+import com.infomaniak.core.auth.networking.AuthHttpClientProvider
 import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.network.api.ApiController
 import com.infomaniak.core.network.models.ApiResponse
@@ -321,7 +321,7 @@ class DownloadOfflineFileManager(
 
         fun downloadFileResponse(
             fileUrl: String,
-            okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+            okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
             downloadInterceptor: Interceptor? = null
         ): Response {
             @OptIn(ManualAuthorizationRequired::class)
@@ -334,7 +334,7 @@ class DownloadOfflineFileManager(
 
         suspend fun downloadFileResponseAsync(
             fileUrl: String,
-            okHttpClient: OkHttpClient = HttpClient.okHttpClientWithTokenInterceptor,
+            okHttpClient: OkHttpClient = AuthHttpClientProvider.authOkHttpClient,
             downloadInterceptor: Interceptor? = null
         ): Response {
             @OptIn(ManualAuthorizationRequired::class)
