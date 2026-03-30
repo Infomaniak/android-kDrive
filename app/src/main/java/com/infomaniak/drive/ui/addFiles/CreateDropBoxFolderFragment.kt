@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ class CreateDropBoxFolderFragment : CreateFolderFragment() {
     private fun createDropBoxFolder() {
         createDropBox(onDropBoxCreated = { file ->
             dropboxViewModel.createDropBoxSuccess.value = file.dropbox
-            if (adapter.currentPermission == ONLY_ME) {
+            if (adapter?.currentPermission == ONLY_ME) {
                 findNavController().popBackStack(R.id.newFolderFragment, true)
             } else {
                 navigateToFileShareDetails(file)

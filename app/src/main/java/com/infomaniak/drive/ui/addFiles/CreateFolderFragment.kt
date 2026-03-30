@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,8 +55,8 @@ abstract class CreateFolderFragment : Fragment() {
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     protected val mainViewModel: MainViewModel by activityViewModels()
 
-    val adapter: PermissionsAdapter
-        get() = binding.permissionsRecyclerView.adapter as PermissionsAdapter
+    val adapter: PermissionsAdapter?
+        get() = binding.permissionsRecyclerView.adapter as? PermissionsAdapter
     private var folderNameTextWatcher: TextWatcher? = null
     open val permissionDependOnShare: Boolean = true
 
@@ -120,7 +120,7 @@ abstract class CreateFolderFragment : Fragment() {
 
 
     protected open fun toggleCreateFolderButton() = with(binding) {
-        createFolderButton.isEnabled = adapter.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
+        createFolderButton.isEnabled = adapter?.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
     }
 
     protected fun getShare(onSuccess: (share: Share) -> Unit) {
@@ -147,7 +147,7 @@ abstract class CreateFolderFragment : Fragment() {
                 onlyForMe = onlyForMe
             ).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
-                    val redirectToShareDetails = adapter.currentPermission == SPECIFIC_USERS
+                    val redirectToShareDetails = adapter?.currentPermission == SPECIFIC_USERS
                     onFolderCreated(apiResponse.data, redirectToShareDetails)
                 } else {
                     if (apiResponse.error?.code == ErrorCode.DESTINATION_ALREADY_EXISTS) {
