@@ -162,6 +162,7 @@
         <activity
             android:name=".ui.LaunchActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:noHistory="true"
             android:theme="@style/AppTheme.Launcher">
             <intent-filter>
