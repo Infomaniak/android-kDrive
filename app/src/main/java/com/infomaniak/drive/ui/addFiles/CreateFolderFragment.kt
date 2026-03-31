@@ -127,8 +127,10 @@ abstract class CreateFolderFragment : Fragment() {
         newFolderViewModel.currentFolderId.value?.let { currentFolderId ->
             mainViewModel.getFileShare(currentFolderId, userDrive = newFolderViewModel.userDrive)
                 .observe(viewLifecycleOwner) { apiResponse ->
-                    apiResponse?.data?.let { share ->
-                        onSuccess(share)
+                    val share = apiResponse.data
+                    when {
+                        share != null -> onSuccess(share)
+                        else -> showSnackbar(apiResponse.translateError())
                     }
                 }
         }
