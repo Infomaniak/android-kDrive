@@ -55,8 +55,8 @@ abstract class CreateFolderFragment : Fragment() {
     protected val newFolderViewModel: NewFolderViewModel by navGraphViewModels(R.id.newFolderFragment)
     protected val mainViewModel: MainViewModel by activityViewModels()
 
-    val adapter: PermissionsAdapter?
-        get() = binding.permissionsRecyclerView.adapter as? PermissionsAdapter
+    val adapter: PermissionsAdapter
+        get() = binding.permissionsRecyclerView.adapter as PermissionsAdapter
     private var folderNameTextWatcher: TextWatcher? = null
     open val permissionDependOnShare: Boolean = true
 
@@ -104,23 +104,23 @@ abstract class CreateFolderFragment : Fragment() {
     }
 
     private fun setupAdapter() {
+        binding.permissionsRecyclerView.adapter = PermissionsAdapter(
+            currentUser = AccountUtils.currentUser,
+            onPermissionChanged = { toggleCreateFolderButton() },
+        )
         if (permissionDependOnShare) {
-            getShare { binding.permissionsRecyclerView.adapter = buildPermissionAdapter(it) }
+            getShare { share ->
+                adapter.updatePermissionList(buildPermissionList(share))
+                adapter.updateSharedUsers(share.users)
+            }
         } else {
-            binding.permissionsRecyclerView.adapter = buildPermissionAdapter(null)
+            adapter.updatePermissionList(buildPermissionList(null))
         }
     }
 
-    private fun buildPermissionAdapter(share: Share?) = PermissionsAdapter(
-        permissionList = buildPermissionList(share),
-        currentUser = AccountUtils.currentUser,
-        sharedUsers = share?.users.orEmpty(),
-        onPermissionChanged = { toggleCreateFolderButton() },
-    )
-
 
     protected open fun toggleCreateFolderButton() = with(binding) {
-        createFolderButton.isEnabled = adapter?.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
+        createFolderButton.isEnabled = adapter.currentPermission != null && !folderNameValueInput.text.isNullOrBlank()
     }
 
     protected fun getShare(onSuccess: (share: Share) -> Unit) {
@@ -149,7 +149,7 @@ abstract class CreateFolderFragment : Fragment() {
                 onlyForMe = onlyForMe
             ).observe(viewLifecycleOwner) { apiResponse ->
                 if (apiResponse.isSuccess()) {
-                    val redirectToShareDetails = adapter?.currentPermission == SPECIFIC_USERS
+                    val redirectToShareDetails = adapter.currentPermission == SPECIFIC_USERS
                     onFolderCreated(apiResponse.data, redirectToShareDetails)
                 } else {
                     if (apiResponse.error?.code == ErrorCode.DESTINATION_ALREADY_EXISTS) {

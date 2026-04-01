@@ -67,7 +67,7 @@ class CreatePrivateFolderFragment : CreateFolderFragment() {
 
     private fun createPrivateFolder() {
         trackNewElementEvent(MatomoName.CreatePrivateFolder)
-        val onlyForMe = !createFolderFragmentArgs.isSharedWithMe && adapter?.currentPermission == ONLY_ME
+        val onlyForMe = !createFolderFragmentArgs.isSharedWithMe && adapter.currentPermission == ONLY_ME
         createFolder(onlyForMe) { file, redirectToShareDetails ->
             file?.let {
                 saveNewFolder(file)

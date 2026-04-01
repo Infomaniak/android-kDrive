@@ -59,7 +59,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
             pathDriveIcon.imageTintList = ColorStateList.valueOf(drive.preferences.color.toColorInt())
         }
 
-        createFolderButton.setOnClickListener { adapter?.currentPermission?.let(::createCommonFolder) }
+        createFolderButton.setOnClickListener { adapter.currentPermission?.let(::createCommonFolder) }
     }
 
     private fun createCommonFolder(permission: Permission) = with(binding) {
@@ -88,7 +88,7 @@ class CreateCommonFolderFragment : CreateFolderFragment() {
     private fun whenFolderCreated(file: File) {
         showSnackbar(R.string.createCommonFolderSuccess)
 
-        if (adapter?.currentPermission == SPECIFIC_USERS) {
+        if (adapter.currentPermission == SPECIFIC_USERS) {
             safelyNavigate(
                 CreateCommonFolderFragmentDirections.actionCreateCommonFolderFragmentToFileShareDetailsFragment(
                     fileId = file.id,
