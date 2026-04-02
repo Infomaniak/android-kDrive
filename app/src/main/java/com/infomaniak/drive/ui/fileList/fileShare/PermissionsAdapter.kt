@@ -55,12 +55,8 @@ class PermissionsAdapter(
     val currentSelection
         get() = currentPermission.let(permissionList::indexOf)
 
-    private val permissionList: MutableList<Permission> = mutableListOf()
-    private var sharedUsers: MutableList<UserFileAccess> = mutableListOf()
-
-    init {
-        updatePermissionList(permissionList)
-    }
+    private var permissionList: List<Permission> = emptyList()
+    private var sharedUsers: List<UserFileAccess> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionsViewHolder {
         return PermissionsViewHolder(CardviewPermissionBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -91,17 +87,16 @@ class PermissionsAdapter(
         }
     }
 
-    fun updatePermissionList(newList: List<Permission>) {
-        notifyItemRangeRemoved(0, itemCount)
-        permissionList.clear()
-        permissionList.addAll(newList)
-        notifyItemRangeInserted(0, itemCount)
-    }
-
-    fun updateSharedUsers(users: ArrayList<UserFileAccess>) {
-        sharedUsers.clear()
-        sharedUsers.addAll(users)
-        notifyItemRangeChanged(0, itemCount)
+    fun updateData(
+        permissions: List<Permission>,
+        sharedUsers: List<UserFileAccess> = emptyList(),
+    ) {
+        this.sharedUsers = sharedUsers
+        val previousItemsCount = permissionList.size
+        permissionList = emptyList()
+        notifyItemRangeRemoved(0, previousItemsCount)
+        permissionList = permissions
+        notifyItemRangeInserted(0, permissions.size)
     }
 
     private fun CardviewPermissionBinding.setupTexts(permission: Permission) {

@@ -110,11 +110,10 @@ abstract class CreateFolderFragment : Fragment() {
         )
         if (permissionDependOnShare) {
             getShare { share ->
-                adapter.updatePermissionList(buildPermissionList(share))
-                adapter.updateSharedUsers(share.users)
+                adapter.updateData(buildPermissionList(share), share.users)
             }
         } else {
-            adapter.updatePermissionList(buildPermissionList(null))
+            adapter.updateData(buildPermissionList(null))
         }
     }
 
