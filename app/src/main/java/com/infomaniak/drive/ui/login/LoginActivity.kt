@@ -44,6 +44,7 @@ import com.infomaniak.core.common.Xor
 import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.common.extensions.clearStack
 import com.infomaniak.core.common.observe
+import com.infomaniak.core.crossapplogin.back.CrossAppLoginFacade
 import com.infomaniak.core.crossapplogin.back.ExternalAccount
 import com.infomaniak.core.legacy.utils.SnackbarUtils.showSnackbar
 import com.infomaniak.core.legacy.utils.Utils.lockOrientationForSmallScreens
@@ -193,6 +194,7 @@ class LoginActivity : ComponentActivity() {
     }
 
     private fun observeCrossLoginAccounts() {
+        @OptIn(CrossAppLoginFacade.UncheckedTokens::class)
         crossAppLoginViewModel.availableAccounts.observe(this) { accounts ->
             SentryLog.i(TAG, "Got ${accounts.count()} accounts from other apps")
         }
