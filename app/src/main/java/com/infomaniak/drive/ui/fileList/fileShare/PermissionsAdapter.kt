@@ -43,7 +43,7 @@ import java.util.Collections.emptyList
 
 class PermissionsAdapter(
     initialSelectedPermission: Permission? = null,
-    permissionList: List<Permission> = emptyList(),
+    private var permissionList: List<Permission> = emptyList(),
     private val currentUser: User? = null,
     private var isExternalUser: Boolean = false,
     private val onPermissionChanged: ((newPermission: Permission) -> Unit)? = null,
@@ -55,7 +55,6 @@ class PermissionsAdapter(
     val currentSelection
         get() = currentPermission.let(permissionList::indexOf)
 
-    private var permissionList: List<Permission> = emptyList()
     private var sharedUsers: List<UserFileAccess> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionsViewHolder {
