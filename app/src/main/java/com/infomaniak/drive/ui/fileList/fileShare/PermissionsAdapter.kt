@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,13 +39,13 @@ import com.infomaniak.drive.databinding.CardviewPermissionBinding
 import com.infomaniak.drive.ui.fileList.fileShare.PermissionsAdapter.PermissionsViewHolder
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.loadAvatar
+import java.util.Collections.emptyList
 
 class PermissionsAdapter(
     initialSelectedPermission: Permission? = null,
-    private val permissionList: List<Permission>,
+    private var permissionList: List<Permission> = emptyList(),
     private val currentUser: User? = null,
     private var isExternalUser: Boolean = false,
-    private var sharedUsers: List<UserFileAccess> = emptyList(),
     private val onPermissionChanged: ((newPermission: Permission) -> Unit)? = null,
     private val canSelect: (newPermission: Permission) -> Boolean = { true }
 ) : Adapter<PermissionsViewHolder>() {
@@ -55,9 +55,7 @@ class PermissionsAdapter(
     val currentSelection
         get() = currentPermission.let(permissionList::indexOf)
 
-    init {
-        permissionList.size.takeIf { it > 0 }?.let { size -> notifyItemRangeInserted(0, size) }
-    }
+    private var sharedUsers: List<UserFileAccess> = emptyList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PermissionsViewHolder {
         return PermissionsViewHolder(CardviewPermissionBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -86,6 +84,18 @@ class PermissionsAdapter(
             FolderPermission.INHERIT -> setupInheritPermissionUi()
             else -> setupOthersPermissionUi(permission)
         }
+    }
+
+    fun updateData(
+        permissions: List<Permission>,
+        sharedUsers: List<UserFileAccess> = emptyList(),
+    ) {
+        this.sharedUsers = sharedUsers
+        val previousItemsCount = permissionList.size
+        permissionList = emptyList()
+        notifyItemRangeRemoved(0, previousItemsCount)
+        permissionList = permissions
+        notifyItemRangeInserted(0, permissions.size)
     }
 
     private fun CardviewPermissionBinding.setupTexts(permission: Permission) {

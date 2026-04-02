@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,19 +104,18 @@ abstract class CreateFolderFragment : Fragment() {
     }
 
     private fun setupAdapter() {
+        binding.permissionsRecyclerView.adapter = PermissionsAdapter(
+            currentUser = AccountUtils.currentUser,
+            onPermissionChanged = { toggleCreateFolderButton() },
+        )
         if (permissionDependOnShare) {
-            getShare { binding.permissionsRecyclerView.adapter = buildPermissionAdapter(it) }
+            getShare { share ->
+                adapter.updateData(buildPermissionList(share), share.users)
+            }
         } else {
-            binding.permissionsRecyclerView.adapter = buildPermissionAdapter(null)
+            adapter.updateData(buildPermissionList(null))
         }
     }
-
-    private fun buildPermissionAdapter(share: Share?) = PermissionsAdapter(
-        permissionList = buildPermissionList(share),
-        currentUser = AccountUtils.currentUser,
-        sharedUsers = share?.users.orEmpty(),
-        onPermissionChanged = { toggleCreateFolderButton() },
-    )
 
 
     protected open fun toggleCreateFolderButton() = with(binding) {
@@ -127,8 +126,10 @@ abstract class CreateFolderFragment : Fragment() {
         newFolderViewModel.currentFolderId.value?.let { currentFolderId ->
             mainViewModel.getFileShare(currentFolderId, userDrive = newFolderViewModel.userDrive)
                 .observe(viewLifecycleOwner) { apiResponse ->
-                    apiResponse?.data?.let { share ->
-                        onSuccess(share)
+                    val share = apiResponse.data
+                    when {
+                        share != null -> onSuccess(share)
+                        else -> showSnackbar(apiResponse.translateError())
                     }
                 }
         }
