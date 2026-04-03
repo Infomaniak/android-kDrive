@@ -20,9 +20,11 @@ package com.infomaniak.drive.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
@@ -40,10 +42,19 @@ import com.infomaniak.drive.data.api.ErrorCode
 import com.infomaniak.drive.data.api.publicshare.PublicShareApiRepository
 import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
-import com.infomaniak.drive.data.models.DeepLinkType
 import com.infomaniak.drive.data.models.ShareLink
-import com.infomaniak.drive.data.models.UserDrive
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
+import com.infomaniak.drive.data.models.deeplink.ExternalFileType.Folder
+import com.infomaniak.drive.data.models.deeplink.FileType.File
+import com.infomaniak.drive.data.models.deeplink.RoleFolder
+import com.infomaniak.drive.data.models.deeplink.RoleFolder.Files
+import com.infomaniak.drive.data.models.deeplink.RoleFolder.SharedWithMe
 import com.infomaniak.drive.data.services.UploadWorker
+import com.infomaniak.drive.ui.LaunchArgsType.Deeplink
+import com.infomaniak.drive.ui.LaunchArgsType.Notification
+import com.infomaniak.drive.ui.LaunchArgsType.Shortcut
 import com.infomaniak.drive.ui.login.LoginActivity
 import com.infomaniak.drive.ui.login.LoginActivityArgs
 import com.infomaniak.drive.ui.publicShare.PublicShareActivity
@@ -53,7 +64,6 @@ import com.infomaniak.drive.ui.publicShare.PublicShareListFragment.Companion.PUB
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.PublicShareUtils
 import com.infomaniak.drive.utils.Utils
-import com.infomaniak.drive.utils.Utils.ROOT_ID
 import io.sentry.Breadcrumb
 import io.sentry.Sentry
 import io.sentry.SentryLevel
@@ -70,7 +80,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
     private var mainActivityExtras: Bundle? = null
     private var publicShareActivityExtras: Bundle? = null
     private var isHelpShortcutPressed = false
-    private var shouldStartApp = true
+    private var deeplinkType: DeeplinkType? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,15 +92,25 @@ class LaunchActivity : EdgeToEdgeActivity() {
         lifecycleScope.launch {
 
             logoutCurrentUserIfNeeded() // Rights v2 migration temporary fix
-            handleNotificationDestinationIntent()
-            handleShortcuts()
-            handleDeeplink()
-
-            if (shouldStartApp) startApp()
+            handleLaunchArgs()
+            if (deeplinkType?.isHandled == false) {
+                PublicShareUtils.openDeepLinkInBrowser(activity = this@LaunchActivity, intent.data.toString())
+            } else {
+                startApp()
+            }
 
             // After starting the destination activity, we run finish to make sure we close the LaunchScreen,
             // so that even when we return, the activity will still be closed.
             finish()
+        }
+    }
+
+    private suspend fun handleLaunchArgs() {
+        when (val type = LaunchArgsType.from(navigationArgs, intent)) {
+            is Deeplink -> handleDeeplink(type)
+            is Notification -> handleNotificationDestinationIntent(type.navArgs)
+            is Shortcut -> handleShortcuts(type.tag)
+            null -> Unit
         }
     }
 
@@ -110,7 +130,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
 
         Intent(this, destinationClass).apply {
             when (destinationClass) {
-                MainActivity::class.java -> mainActivityExtras?.let(::putExtras)
+                MainActivity::class.java -> mainActivityExtras?.let(::putExtras) ?: putIfNeeded(deeplinkType)
                 LoginActivity::class.java -> {
                     putExtra("isHelpShortcutPressed", isHelpShortcutPressed)
                     putExtras(LoginActivityArgs(displayOnlyLastPage = false).toBundle())
@@ -151,40 +171,41 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private suspend fun handleNotificationDestinationIntent() {
-        val navArgs = navigationArgs ?: return
-        if (navArgs.destinationUserId == 0 || navArgs.destinationDriveId == 0) return
-
+    private suspend fun handleNotificationDestinationIntent(navArgs: LaunchActivityArgs) {
         Sentry.addBreadcrumb(Breadcrumb().apply {
             category = UploadWorker.BREADCRUMB_TAG
             message = "Upload notification has been clicked"
             level = SentryLevel.INFO
         })
-        if (UserDatabase().userDao().findById(navArgs.destinationUserId) == null) {
-            mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
+        deeplinkType = if (UserDatabase().userDao().findById(navArgs.destinationUserId) != null) {
+            DeeplinkAction.Drive(
+                userId = navArgs.destinationUserId,
+                driveId = navArgs.destinationDriveId,
+                roleFolder = navArgs.getRoleFolder()
+            )
         } else {
-            Dispatchers.IO {
-                DriveInfosController.getDrive(driveId = navArgs.destinationDriveId, maintenance = false)
-            }?.also { drive ->
-                setOpenSpecificFile(
-                    userId = drive.userId,
-                    driveId = drive.id,
-                    fileId = navArgs.destinationRemoteFolderId,
-                    isSharedWithMe = drive.sharedWithMe,
-                )
-            }
+            DeeplinkType.Unmanaged.NotAccessible
         }
     }
 
-    private suspend fun handleDeeplink() = Dispatchers.IO {
-        intent.data?.path?.let { deeplink ->
-            // If the app is closed, the currentUser will be null. We don't want that otherwise the link will always be opened as
-            // external instead of internal if you already have access to the files. So we set it here
-            if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
-
-            if (deeplink.contains("/app/share/")) processPublicShare(deeplink) else processInternalLink(deeplink)
-            SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: $deeplink")
+    private suspend fun LaunchActivityArgs.getRoleFolder(): RoleFolder {
+        val isSharedWithMe = Dispatchers.IO {
+            DriveInfosController.getDrive(userId = destinationUserId, driveId = destinationDriveId, maintenance = false)
+        }?.sharedWithMe == true
+        return if (isSharedWithMe) {
+            SharedWithMe(fileType = Folder(sourceDriveId = destinationDriveId, folderId = destinationRemoteFolderId))
+        } else {
+            Files(fileType = File(fileId = destinationRemoteFolderId))
         }
+    }
+
+    private suspend fun handleDeeplink(deeplink: Deeplink) = Dispatchers.IO {
+        // If the app is closed, the currentUser will be null. We don't want that otherwise the link will always be opened as
+        // external instead of internal if you already have access to the files. So we set it here
+        if (AccountUtils.currentUser == null) AccountUtils.requestCurrentUser()
+
+        if (deeplink.path.contains("/app/share/")) processPublicShare(deeplink.path) else retrieveDeeplink(uri = deeplink.uri)
+        SentryLog.i(UploadWorker.BREADCRUMB_TAG, "DeepLink: ${deeplink.path}")
     }
 
     private suspend fun processPublicShare(path: String) {
@@ -197,10 +218,25 @@ class LaunchActivity : EdgeToEdgeActivity() {
                     val shareLink = apiResponse.data!!
                     setPublicShareActivityArgs(driveId, publicShareUuid, shareLink)
                 }
-                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let(::processInternalLink)
+                ApiResponseStatus.REDIRECT -> apiResponse.uri?.let { retrieveDeeplink(it.toUri()) }
                 else -> handlePublicShareError(apiResponse.error, driveId, publicShareUuid)
             }
         }
+    }
+
+    private fun retrieveDeeplink(uri: Uri) {
+        deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
+        if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
+    }
+
+    private fun DeeplinkType.ensureHasAccess(): DeeplinkType {
+        return takeUnless {
+            this is DeeplinkAction && DriveInfosController.getDrive(
+                driveId = driveId,
+                maintenance = false
+            ) == null
+        }
+            ?: DeeplinkType.Unmanaged.NotAccessible
     }
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
@@ -219,51 +255,6 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private fun processInternalLink(path: String) {
-        Regex("/app/[a-z]+/(\\d+)/([a-z-]*)/?[a-z]*/?[a-z]*/?(\\d*)/?[a-z]*/?[a-z]*/?(\\d*)").find(path)?.let { match ->
-            val (pathDriveId, roleFolderId, pathFolderId, pathFileId) = match.destructured
-
-            val driveId = pathDriveId.toInt()
-            val fileId = if (pathFileId.isEmpty()) pathFolderId.toIntOrNull() ?: ROOT_ID else pathFileId.toInt()
-
-            when (roleFolderId) {
-                SHARED_WITH_ME_FOLDER_ROLE -> {
-                    // In case of SharedWithMe deeplinks, we open the link in the web as we cannot support them in-app for now
-                    PublicShareUtils.openDeepLinkInBrowser(activity = this, path)
-                    shouldStartApp = false
-                    return
-                }
-                TRASH -> {
-                    mainActivityExtras = MainActivityArgs(
-                        deepLinkType = DeepLinkType.Trash(
-                            organizationId = null,
-                            userDriveId = driveId,
-                            folderId = pathFolderId.takeIf { it.isNotEmpty() }
-                        )
-                    ).toBundle()
-                    return
-                }
-            }
-
-            lifecycleScope.launch {
-                Dispatchers.IO { DriveInfosController.getDrive(driveId = driveId, maintenance = false) }?.also {
-                    setOpenSpecificFile(it.userId, driveId, fileId, it.sharedWithMe)
-                } ?: run {
-                    mainActivityExtras = MainActivityArgs(deepLinkFileNotFound = true).toBundle()
-                }
-            }
-
-            trackDeepLink(MatomoName.Internal)
-        }
-    }
-
-    private fun setOpenSpecificFile(userId: Int, driveId: Int, fileId: Int, isSharedWithMe: Boolean) {
-        if (userId != AccountUtils.currentUserId) AccountUtils.currentUserId = userId
-        if (!isSharedWithMe && driveId != AccountUtils.currentDriveId) AccountUtils.currentDriveId = driveId
-        val userDrive = UserDrive(sharedWithMe = isSharedWithMe, driveId = driveId)
-        mainActivityExtras = MainActivityArgs(destinationFileId = fileId, destinationUserDrive = userDrive).toBundle()
-    }
-
     private suspend fun logoutCurrentUserIfNeeded() = withContext(Dispatchers.IO) {
         intent.extras?.getBoolean(FileMigration.LOGOUT_CURRENT_USER_TAG)?.let { needLogoutCurrentUser ->
             if (needLogoutCurrentUser) {
@@ -273,11 +264,9 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private fun handleShortcuts() {
-        intent.extras?.getString(SHORTCUTS_TAG)?.let { shortcutTag ->
-            mainActivityExtras = MainActivityArgs(shortcutId = shortcutTag).toBundle()
-            if (shortcutTag == Utils.Shortcuts.FEEDBACK.id) isHelpShortcutPressed = true
-        }
+    private fun handleShortcuts(tag: String) {
+        mainActivityExtras = MainActivityArgs(shortcutId = tag).toBundle()
+        if (tag == Utils.Shortcuts.FEEDBACK.id) isHelpShortcutPressed = true
     }
 
     private fun setPublicShareActivityArgs(
@@ -303,11 +292,5 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
 
         trackDeepLink(trackerName)
-    }
-
-    companion object {
-        private const val SHORTCUTS_TAG = "shortcuts_tag"
-        private const val SHARED_WITH_ME_FOLDER_ROLE = "shared-with-me"
-        private const val TRASH = "trash"
     }
 }

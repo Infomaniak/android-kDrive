@@ -1,0 +1,45 @@
+/*
+ * Infomaniak kDrive - Android
+ * Copyright (C) 2026 Infomaniak Network SA
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.infomaniak.drive.ui
+
+import android.net.Uri
+import com.infomaniak.drive.data.models.deeplink.ACTION
+import com.infomaniak.drive.data.models.deeplink.ACTION_TYPE
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged
+
+object DeeplinkParser {
+
+    private val actionRegex by lazy { Regex("app/$ACTION_TYPE/$ACTION") }
+
+    fun parse(uri: Uri): DeeplinkType {
+        return uri.path?.let { uriPath -> parse(uri, uriPath) } ?: Unmanaged.BrowserLaunch.Unknown(uri)
+    }
+
+    private fun parse(uri: Uri, uriPath: String): DeeplinkType? = runCatching {
+        actionRegex.find(uriPath)?.toDeeplinkAction()
+    }.getOrElse {
+        Unmanaged.BrowserLaunch.BadFormatting(uri)
+    }
+
+    private fun MatchResult.toDeeplinkAction(): DeeplinkAction {
+        val (actionType, action) = destructured
+        return DeeplinkAction.from(actionType = actionType, action = action)
+    }
+}
