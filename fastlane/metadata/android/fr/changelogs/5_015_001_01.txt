@@ -1,0 +1,5 @@
+- Amélioration de la reconnaissance de la date du fichier source lors du téléchargement et de l'ouverture du PDF.
+- Tous les partages publics utilisent désormais la même tâche afin d'éviter que plusieurs partages ne soient ouverts simultanément.
+- Correction d'un plantage lors de la création d'un dossier avec une mauvaise connexion Internet.
+- Ajout des langues manquantes prises en charge par OCR GeniusScan.
+- Correction d'un chargement infini de dossier vide dans la corbeille.
