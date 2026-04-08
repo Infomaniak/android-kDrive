@@ -63,6 +63,7 @@ import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
+import com.infomaniak.core.common.doesFileExist
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
@@ -75,6 +76,7 @@ import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
@@ -452,6 +454,27 @@ class MainActivity : BaseActivity() {
 
     private fun handleDeletionOfUploadedPhotos() {
 
+        fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
+            val filesAlreadyDeleted = mutableListOf<Uri>()
+            val filesToDelete = mutableListOf<Uri>()
+            uploadFiles.forEach { file ->
+                val fileUri = file.getUriObject()
+                if (!fileUri.doesFileExist()) filesAlreadyDeleted.add(fileUri)
+                if (fileUri.scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this, fileUri)) {
+                    SentryLog.wtf(
+                        "MainActivity",
+                        "That should never happen and if that happens, you need to keep the if statement"
+                    )
+                } else {
+                    filesToDelete.add(fileUri)
+                }
+            }
+
+            UploadFile.deleteAllFromUris(filesAlreadyDeleted)
+
+            return filesToDelete
+        }
+
         fun onConfirmation(filesUriToDelete: List<Uri>) {
             if (SDK_INT >= 30) {
                 lifecycleScope.launch {
@@ -694,10 +717,17 @@ class MainActivity : BaseActivity() {
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
 
-        // Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
-        // When you exceed this value, the system may not propagate dialog to delete the images,
-        // and when you exceed 10_000 you receive a `NullPointerException`.
-        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5_000
+        /**
+         * Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
+         * When you exceed this value, the system may not propagate dialog to delete the images,
+         * and when you exceed 10_000 you receive a `NullPointerException`.
+         *
+         * Note: if your app targets Build.VERSION_CODES.BAKLAVA and above, you can send a maximum of 2000 uris in each request.
+         * Attempting to send more than 2000 uris will result in a IllegalArgumentException.
+         * https://developer.android.com/reference/android/provider/MediaStore#createDeleteRequest(android.content.ContentResolver,%20java.util.Collection%3Candroid.net.Uri%3E)
+         *
+         */
+        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 2_000
 
         private const val DEFAULT_APP_REVIEW_LAUNCHES = 20
         private const val MAX_APP_REVIEW_LAUNCHES = 100
