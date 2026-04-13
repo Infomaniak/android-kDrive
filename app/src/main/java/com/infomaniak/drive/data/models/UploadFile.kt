@@ -105,13 +105,9 @@ open class UploadFile(
     fun uploadConflictOption() = if (replaceOnConflict()) ConflictOption.VERSION else ConflictOption.RENAME
 
     fun resetUploadToken() {
-        getRealmInstance().use { realm ->
-            uploadFileByUriQuery(realm, uri).findFirst()?.apply {
-                realm.executeTransaction {
-                    uploadToken = null
-                    uploadHost = null
-                }
-            }
+        updateDbInstance {
+            it.uploadToken = null
+            it.uploadHost = null
         }
     }
 
@@ -127,24 +123,19 @@ open class UploadFile(
     }
 
     fun updateFileSize(newFileSize: Long) {
-        getRealmInstance().use { realm ->
-            uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                realm.executeTransaction { uploadFile.fileSize = newFileSize }
-            }
+        update {
+            it.fileSize = newFileSize
         }
-        fileSize = newFileSize
     }
 
     fun updateUploadToken(newUploadToken: String, uploadHost: String) {
-        getRealmInstance().use { realm ->
-            uploadFileByUriQuery(realm, uri).findFirst()?.let { uploadFile ->
-                realm.executeTransaction {
-                    uploadFile.uploadToken = newUploadToken
-                    uploadFile.uploadHost = uploadHost
-                }
-            }
+        updateDbInstance {
+            it.uploadToken = newUploadToken
+            it.uploadHost = uploadHost
         }
-        uploadToken = newUploadToken
+        updateCurrentInstance {
+            it.uploadToken = newUploadToken
+        }
     }
 
     fun deleteIfExists(keepFile: Boolean = false, customRealm: Realm? = null) {
