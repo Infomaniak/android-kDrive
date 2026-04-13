@@ -169,6 +169,23 @@ open class UploadFile(
         }
     }
 
+    private fun update(transaction: (UploadFile) -> Unit) {
+        updateDbInstance(transaction)
+        updateCurrentInstance(transaction)
+    }
+
+    private fun updateDbInstance(transactionBlock: (UploadFile) -> Unit) {
+        getRealmInstance().use { realm ->
+            uploadFileByUriQuery(realm, uri).findFirst()?.apply {
+                realm.executeTransaction { transactionBlock(this) }
+            }
+        }
+    }
+
+    private fun updateCurrentInstance(transactionBlock: (UploadFile) -> Unit) {
+        transactionBlock(this)
+    }
+
     enum class Type {
         SYNC, UPLOAD, SHARED_FILE, SYNC_OFFLINE, CLOUD_STORAGE
     }
