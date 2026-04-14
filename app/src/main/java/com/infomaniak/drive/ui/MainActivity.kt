@@ -472,7 +472,7 @@ class MainActivity : BaseActivity() {
     private fun Uri.ensureIsNotFileOrDocument(): Boolean {
         return (scheme != ContentResolver.SCHEME_FILE && !DocumentsContract.isDocumentUri(this@MainActivity, this))
             .also {
-                if (it) SentryLog.wtf(
+                if (!it) SentryLog.wtf(
                     tag = "MainActivity",
                     msg = "A file or document was marked as a media to upload $this," +
                             "So to dev, keep the test ensureIsNotFileOrDocument and remove the sentry," +
