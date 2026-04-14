@@ -488,7 +488,7 @@ class MainActivity : BaseActivity() {
 
     fun onDeleteFileConfirmation(filesUriToDelete: List<Uri>) {
         if (SDK_INT >= 30) {
-            lifecycleScope.launch {
+            lifecycleScope.launch(Dispatchers.Default) {
                 pendingFilesUrisQueue.clear()
                 pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
                 launchNextDeleteRequest()
