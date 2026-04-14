@@ -472,7 +472,7 @@ class MainActivity : BaseActivity() {
 
     private fun Uri.isFileOrDocument(): Boolean {
         return (scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this@MainActivity, this))
-            .also { if (it) SentryLog.wtf("MainActivity", "That should never happen and if that happens") }
+            .also { if (it) SentryLog.wtf("MainActivity", "A file or document was marked as a media to upload $this") }
     }
 
     private suspend fun showDeleteFileConfirmation(uris: List<Uri>) = withContext(Dispatchers.Main) {
