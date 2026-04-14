@@ -445,10 +445,11 @@ class MainActivity : BaseActivity() {
     }
 
     private fun launchNextDeleteRequest() {
-        val filesUris = pendingFilesUrisQueue.firstOrNull() ?: return
         if (SDK_INT >= 30) {
-            val deletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUris)
-            filesDeletionResult.launch(IntentSenderRequest.Builder(deletionRequest.intentSender).build())
+            pendingFilesUrisQueue.firstOrNull()
+                ?.let { runCatching { MediaStore.createDeleteRequest(contentResolver, it) }.getOrNull() }
+                ?.let { IntentSenderRequest.Builder(it.intentSender).build() }
+                ?.let(filesDeletionResult::launch)
         }
     }
 
