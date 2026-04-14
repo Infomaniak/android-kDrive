@@ -1,0 +1,1 @@
+- Correction d'un crash si suppression automatique de plus de 2000 photos sous android 16
