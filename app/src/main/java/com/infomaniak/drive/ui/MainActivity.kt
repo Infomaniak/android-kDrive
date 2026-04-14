@@ -444,12 +444,12 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
     }
 
-    private fun handleDeletionOfUploadedPhotos() = lifecycleScope.launch(Dispatchers.IO) {
+    private fun handleDeletionOfUploadedPhotos() = lifecycleScope.launch {
         retrieveFilesUriToDelete()?.let { uris -> showDeleteFileConfirmation(uris) }
     }
 
-    private suspend fun retrieveFilesUriToDelete(): List<Uri>? {
-        return takeIf { isDeleteEnable() && hasNoPendingUpload() }
+    private suspend fun retrieveFilesUriToDelete(): List<Uri>? = withContext(Dispatchers.IO) {
+        takeIf { isDeleteEnable() && hasNoPendingUpload() }
             ?.let { UploadFile.getAllUploadedFiles() }
             ?.takeUnless { it.size < SYNCED_FILES_DELETION_FILES_AMOUNT }
             ?.let { getFilesUriToDelete(it) }
