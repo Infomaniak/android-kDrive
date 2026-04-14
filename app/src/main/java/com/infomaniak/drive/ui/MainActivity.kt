@@ -481,7 +481,7 @@ class MainActivity : BaseActivity() {
             }
     }
 
-    private suspend fun showDeleteFileConfirmation(uris: List<Uri>) = withContext(Dispatchers.Main) {
+    private fun showDeleteFileConfirmation(uris: List<Uri>) {
         deleteLocalMediaRequestDialog = Utils.createConfirmation(
             context = this@MainActivity,
             title = getString(R.string.modalDeletePhotosTitle),
