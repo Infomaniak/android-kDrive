@@ -451,9 +451,8 @@ class MainActivity : BaseActivity() {
     private suspend fun retrieveFilesUriToDelete(): List<Uri>? = withContext(Dispatchers.IO) {
         takeIf { isDeleteEnable() && hasNoPendingUpload() }
             ?.let { UploadFile.getAllUploadedFiles() }
-            ?.takeUnless { it.size < SYNCED_FILES_DELETION_FILES_AMOUNT }
             ?.let { getFilesUriToDelete(it) }
-            ?.takeIf(Collection<*>::isNotEmpty)
+            ?.takeIf { it.size >= SYNCED_FILES_DELETION_FILES_AMOUNT }
     }
 
     private fun isDeleteEnable(): Boolean = UploadFile.getAppSyncSettings()?.deleteAfterSync ?: false
