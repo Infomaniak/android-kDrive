@@ -63,6 +63,7 @@ import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.snackbar.Snackbar
 import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.applock.view.AppLockViewActivity
+import com.infomaniak.core.common.doesFileExist
 import com.infomaniak.core.common.observe
 import com.infomaniak.core.inappreview.BaseInAppReviewManager
 import com.infomaniak.core.inappreview.reviewmanagers.InAppReviewManager
@@ -75,6 +76,7 @@ import com.infomaniak.core.legacy.utils.UtilsUi.generateInitialsAvatarDrawable
 import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
@@ -442,58 +444,72 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
     }
 
-    private fun launchNextDeleteRequest() {
-        val filesUris = pendingFilesUrisQueue.firstOrNull() ?: return
-        if (SDK_INT >= 30) {
-            val deletionRequest = MediaStore.createDeleteRequest(contentResolver, filesUris)
-            filesDeletionResult.launch(IntentSenderRequest.Builder(deletionRequest.intentSender).build())
-        }
+    private fun handleDeletionOfUploadedPhotos() = lifecycleScope.launch {
+        retrieveFilesUriToDelete()?.let { uris -> showDeleteFileConfirmation(uris) }
     }
 
-    private fun handleDeletionOfUploadedPhotos() {
-
-        fun onConfirmation(filesUriToDelete: List<Uri>) {
-            if (SDK_INT >= 30) {
-                lifecycleScope.launch {
-                    pendingFilesUrisQueue.clear()
-                    pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
-                    launchNextDeleteRequest()
-                }
-            } else {
-                mainViewModel.deleteSynchronizedFilesOnDevice(filesUriToDelete)
-            }
-        }
-        lifecycleScope.launch(Dispatchers.IO) {
-            retrieveFilesUriToDelete()?.let { uris ->
-                withContext(Dispatchers.Main) {
-                    deleteLocalMediaRequestDialog = Utils.createConfirmation(
-                        context = this@MainActivity,
-                        title = getString(R.string.modalDeletePhotosTitle),
-                        message = getString(R.string.modalDeletePhotosNumericDescription, uris.size),
-                        buttonText = getString(R.string.buttonDelete),
-                        isDeletion = true,
-                        onConfirmation = { onConfirmation(uris) }
-                    )
-                }
-            }
-        }
-    }
-
-    private suspend fun retrieveFilesUriToDelete(): List<Uri>? {
-        return takeIf { isDeleteEnable() && hasNoPendingUpload() }
+    private suspend fun retrieveFilesUriToDelete(): List<Uri>? = withContext(Dispatchers.IO) {
+        takeIf { isDeleteEnable() && hasNoPendingUpload() }
             ?.let { UploadFile.getAllUploadedFiles() }
-            ?.takeUnless { it.size < SYNCED_FILES_DELETION_FILES_AMOUNT }
             ?.let { getFilesUriToDelete(it) }
-            ?.takeIf(Collection<*>::isNotEmpty)
+            ?.takeIf { it.size >= SYNCED_FILES_DELETION_FILES_AMOUNT }
     }
 
     private fun isDeleteEnable(): Boolean = UploadFile.getAppSyncSettings()?.deleteAfterSync ?: false
 
     private fun hasNoPendingUpload(): Boolean = UploadFile.getCurrentUserPendingUploadsCount() == 0
 
-    private fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> = uploadFiles.mapNotNull { file ->
-        file.getUriObject().takeUnless { uri ->
-            uri.scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this, uri)
+    private fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
+        val (filesToDelete, filesAlreadyDeleted) = uploadFiles.map(UploadFile::getUriObject)
+            .filter { it.ensureIsNotFileOrDocument() }
+            .partition(Uri::doesFileExist)
+
+        UploadFile.deleteAllFromUris(filesAlreadyDeleted)
+
+        return filesToDelete
+    }
+
+    private fun Uri.ensureIsNotFileOrDocument(): Boolean {
+        return (scheme != ContentResolver.SCHEME_FILE && !DocumentsContract.isDocumentUri(this@MainActivity, this))
+            .also {
+                if (!it) SentryLog.wtf(
+                    tag = "MainActivity",
+                    msg = "A file or document was marked as a media to upload $this," +
+                            "So to dev, keep the test ensureIsNotFileOrDocument and remove the sentry," +
+                            "else if this sentry is never sent in some years, you can remove the test ensureIsNotFileOrDocument "
+                )
+            }
+    }
+
+    private fun showDeleteFileConfirmation(uris: List<Uri>) {
+        deleteLocalMediaRequestDialog = Utils.createConfirmation(
+            context = this@MainActivity,
+            title = getString(R.string.modalDeletePhotosTitle),
+            message = getString(R.string.modalDeletePhotosNumericDescription, uris.size),
+            buttonText = getString(R.string.buttonDelete),
+            isDeletion = true,
+            onConfirmation = { onDeleteFileConfirmation(uris) }
+        )
+    }
+
+    fun onDeleteFileConfirmation(filesUriToDelete: List<Uri>) {
+        if (SDK_INT >= 30) {
+            lifecycleScope.launch(Dispatchers.Default) {
+                pendingFilesUrisQueue.clear()
+                pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
+                launchNextDeleteRequest()
+            }
+        } else {
+            mainViewModel.deleteSynchronizedFilesOnDevice(filesUriToDelete)
+        }
+    }
+
+    private fun launchNextDeleteRequest() {
+        if (SDK_INT >= 30) {
+            pendingFilesUrisQueue.firstOrNull()
+                ?.let { runCatching { MediaStore.createDeleteRequest(contentResolver, it) }.getOrNull() }
+                ?.let { IntentSenderRequest.Builder(it.intentSender).build() }
+                ?.let(filesDeletionResult::launch)
         }
     }
 
@@ -694,10 +710,17 @@ class MainActivity : BaseActivity() {
     companion object {
         private const val SYNCED_FILES_DELETION_FILES_AMOUNT = 10
 
-        // Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
-        // When you exceed this value, the system may not propagate dialog to delete the images,
-        // and when you exceed 10_000 you receive a `NullPointerException`.
-        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 5_000
+        /**
+         * Maximum number of elements in the list supported by the mediastore when Uris are to be deleted.
+         * When you exceed this value, the system may not propagate dialog to delete the images,
+         * and when you exceed 10_000 you receive a `NullPointerException`.
+         *
+         * Note: if your app targets Build.VERSION_CODES.BAKLAVA and above, you can send a maximum of 2000 uris in each request.
+         * Attempting to send more than 2000 uris will result in a IllegalArgumentException.
+         * https://developer.android.com/reference/android/provider/MediaStore#createDeleteRequest(android.content.ContentResolver,%20java.util.Collection%3Candroid.net.Uri%3E)
+         *
+         */
+        private const val MEDIASTORE_DELETE_BATCH_LIMIT = 2_000
 
         private const val DEFAULT_APP_REVIEW_LAUNCHES = 20
         private const val MAX_APP_REVIEW_LAUNCHES = 100
