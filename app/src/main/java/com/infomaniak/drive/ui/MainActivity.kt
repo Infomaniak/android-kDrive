@@ -444,42 +444,8 @@ class MainActivity : BaseActivity() {
         startContentObserverService()
     }
 
-    private fun launchNextDeleteRequest() {
-        if (SDK_INT >= 30) {
-            pendingFilesUrisQueue.firstOrNull()
-                ?.let { runCatching { MediaStore.createDeleteRequest(contentResolver, it) }.getOrNull() }
-                ?.let { IntentSenderRequest.Builder(it.intentSender).build() }
-                ?.let(filesDeletionResult::launch)
-        }
-    }
-
-    private fun handleDeletionOfUploadedPhotos() {
-
-        fun onConfirmation(filesUriToDelete: List<Uri>) {
-            if (SDK_INT >= 30) {
-                lifecycleScope.launch {
-                    pendingFilesUrisQueue.clear()
-                    pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
-                    launchNextDeleteRequest()
-                }
-            } else {
-                mainViewModel.deleteSynchronizedFilesOnDevice(filesUriToDelete)
-            }
-        }
-        lifecycleScope.launch(Dispatchers.IO) {
-            retrieveFilesUriToDelete()?.let { uris ->
-                withContext(Dispatchers.Main) {
-                    deleteLocalMediaRequestDialog = Utils.createConfirmation(
-                        context = this@MainActivity,
-                        title = getString(R.string.modalDeletePhotosTitle),
-                        message = getString(R.string.modalDeletePhotosNumericDescription, uris.size),
-                        buttonText = getString(R.string.buttonDelete),
-                        isDeletion = true,
-                        onConfirmation = { onConfirmation(uris) }
-                    )
-                }
-            }
-        }
+    private fun handleDeletionOfUploadedPhotos() = lifecycleScope.launch(Dispatchers.IO) {
+        retrieveFilesUriToDelete()?.let { uris -> showDeleteFileConfirmation(uris) }
     }
 
     private suspend fun retrieveFilesUriToDelete(): List<Uri>? {
@@ -507,6 +473,38 @@ class MainActivity : BaseActivity() {
     private fun Uri.isFileOrDocument(): Boolean {
         return (scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this@MainActivity, this))
             .also { if (it) SentryLog.wtf("MainActivity", "That should never happen and if that happens") }
+    }
+
+    private suspend fun showDeleteFileConfirmation(uris: List<Uri>) = withContext(Dispatchers.Main) {
+        deleteLocalMediaRequestDialog = Utils.createConfirmation(
+            context = this@MainActivity,
+            title = getString(R.string.modalDeletePhotosTitle),
+            message = getString(R.string.modalDeletePhotosNumericDescription, uris.size),
+            buttonText = getString(R.string.buttonDelete),
+            isDeletion = true,
+            onConfirmation = { onDeleteFileConfirmation(uris) }
+        )
+    }
+
+    fun onDeleteFileConfirmation(filesUriToDelete: List<Uri>) {
+        if (SDK_INT >= 30) {
+            lifecycleScope.launch {
+                pendingFilesUrisQueue.clear()
+                pendingFilesUrisQueue.addAll(filesUriToDelete.chunked(MEDIASTORE_DELETE_BATCH_LIMIT))
+                launchNextDeleteRequest()
+            }
+        } else {
+            mainViewModel.deleteSynchronizedFilesOnDevice(filesUriToDelete)
+        }
+    }
+
+    private fun launchNextDeleteRequest() {
+        if (SDK_INT >= 30) {
+            pendingFilesUrisQueue.firstOrNull()
+                ?.let { runCatching { MediaStore.createDeleteRequest(contentResolver, it) }.getOrNull() }
+                ?.let { IntentSenderRequest.Builder(it.intentSender).build() }
+                ?.let(filesDeletionResult::launch)
+        }
     }
 
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
