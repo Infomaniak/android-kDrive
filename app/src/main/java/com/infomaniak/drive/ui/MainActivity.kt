@@ -455,20 +455,9 @@ class MainActivity : BaseActivity() {
     private fun handleDeletionOfUploadedPhotos() {
 
         fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
-            val filesAlreadyDeleted = mutableListOf<Uri>()
-            val filesToDelete = mutableListOf<Uri>()
-            uploadFiles.forEach { file ->
-                val fileUri = file.getUriObject()
-                if (!fileUri.doesFileExist()) filesAlreadyDeleted.add(fileUri)
-                if (fileUri.scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this, fileUri)) {
-                    SentryLog.wtf(
-                        "MainActivity",
-                        "That should never happen and if that happens, you need to keep the if statement"
-                    )
-                } else {
-                    filesToDelete.add(fileUri)
-                }
-            }
+            val (filesToDelete, filesAlreadyDeleted) = uploadFiles.map(UploadFile::getUriObject)
+                .filterNot { it.isFileOrDocument() }
+                .partition(Uri::doesFileExist)
 
             UploadFile.deleteAllFromUris(filesAlreadyDeleted)
 
@@ -518,6 +507,11 @@ class MainActivity : BaseActivity() {
         file.getUriObject().takeUnless { uri ->
             uri.scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this, uri)
         }
+    }
+
+    private fun Uri.isFileOrDocument(): Boolean {
+        return (scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this@MainActivity, this))
+            .also { if (it) SentryLog.wtf("MainActivity", "That should never happen and if that happens") }
     }
 
     private fun onDestinationChanged(destination: NavDestination, navigationArgs: Bundle?) {
