@@ -455,16 +455,6 @@ class MainActivity : BaseActivity() {
 
     private fun handleDeletionOfUploadedPhotos() {
 
-        fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
-            val (filesToDelete, filesAlreadyDeleted) = uploadFiles.map(UploadFile::getUriObject)
-                .filterNot { it.isFileOrDocument() }
-                .partition(Uri::doesFileExist)
-
-            UploadFile.deleteAllFromUris(filesAlreadyDeleted)
-
-            return filesToDelete
-        }
-
         fun onConfirmation(filesUriToDelete: List<Uri>) {
             if (SDK_INT >= 30) {
                 lifecycleScope.launch {
@@ -504,10 +494,14 @@ class MainActivity : BaseActivity() {
 
     private fun hasNoPendingUpload(): Boolean = UploadFile.getCurrentUserPendingUploadsCount() == 0
 
-    private fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> = uploadFiles.mapNotNull { file ->
-        file.getUriObject().takeUnless { uri ->
-            uri.scheme == ContentResolver.SCHEME_FILE || DocumentsContract.isDocumentUri(this, uri)
-        }
+    private fun getFilesUriToDelete(uploadFiles: List<UploadFile>): List<Uri> {
+        val (filesToDelete, filesAlreadyDeleted) = uploadFiles.map(UploadFile::getUriObject)
+            .filterNot { it.isFileOrDocument() }
+            .partition(Uri::doesFileExist)
+
+        UploadFile.deleteAllFromUris(filesAlreadyDeleted)
+
+        return filesToDelete
     }
 
     private fun Uri.isFileOrDocument(): Boolean {
