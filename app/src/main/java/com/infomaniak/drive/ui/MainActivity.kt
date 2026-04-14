@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2025 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -458,7 +458,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        fun onConfirmation(filesUploadedRecently: List<UploadFile>, filesUriToDelete: List<Uri>) {
+        fun onConfirmation(filesUriToDelete: List<Uri>) {
             if (SDK_INT >= 30) {
                 lifecycleScope.launch {
                     pendingFilesUrisQueue.clear()
@@ -466,7 +466,7 @@ class MainActivity : BaseActivity() {
                     launchNextDeleteRequest()
                 }
             } else {
-                mainViewModel.deleteSynchronizedFilesOnDevice(filesUploadedRecently)
+                mainViewModel.deleteSynchronizedFilesOnDevice(filesUriToDelete)
             }
         }
 
@@ -482,10 +482,10 @@ class MainActivity : BaseActivity() {
         deleteLocalMediaRequestDialog = Utils.createConfirmation(
             context = this,
             title = getString(R.string.modalDeletePhotosTitle),
-            message = getString(R.string.modalDeletePhotosNumericDescription, filesUploadedRecently.size),
+            message = getString(R.string.modalDeletePhotosNumericDescription, filesUriToDelete.size),
             buttonText = getString(R.string.buttonDelete),
             isDeletion = true,
-            onConfirmation = { onConfirmation(filesUploadedRecently, filesUriToDelete) }
+            onConfirmation = { onConfirmation(filesUriToDelete) }
         )
     }
 

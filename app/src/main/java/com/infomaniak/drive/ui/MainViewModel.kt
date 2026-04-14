@@ -19,6 +19,7 @@ package com.infomaniak.drive.ui
 
 import android.app.Application
 import android.content.Context
+import android.net.Uri
 import android.provider.MediaStore
 import androidx.collection.MutableIntList
 import androidx.collection.mutableIntListOf
@@ -483,17 +484,16 @@ class MainViewModel(
     }
 
     // Only for API 29 and below, otherwise use MediaStore.createDeleteRequest()
-    fun deleteSynchronizedFilesOnDevice(filesToDelete: List<UploadFile>) = viewModelScope.launch(Dispatchers.IO) {
-        val fileDeleted: MutableList<UploadFile> = mutableListOf()
+    fun deleteSynchronizedFilesOnDevice(filesToDelete: List<Uri>) = viewModelScope.launch(Dispatchers.IO) {
+        val fileDeleted: MutableList<Uri> = mutableListOf()
         val isIOFilesDeleted: MutableList<Boolean> = mutableListOf()
         val fileDeleteContentResolver: MutableIntList = mutableIntListOf()
         var inconsistenciesCount = 0
         val tag = "deleteSynchronizedFilesOnDevice"
 
         SentryLog.i(tag, "filesToDelete (size): ${filesToDelete.size}")
-        filesToDelete.forEach { uploadFile ->
+        filesToDelete.forEach { uri ->
             try {
-                val uri = uploadFile.getUriObject()
                 val query = getContext().contentResolver.query(uri, arrayOf(MediaStore.Images.Media.DATA), null, null, null)
                 query?.use { cursor ->
                     if (cursor.moveToFirst()) {
@@ -509,18 +509,18 @@ class MainViewModel(
                                 scope.setExtra("columnIndex", columnIndex.toString())
                             }
                         } finally {
-                            fileDeleted.add(uploadFile)
+                            fileDeleted.add(uri)
                         }
                     } else {
                         // The app was killed before updating `deleteAt` in the realm db
                         inconsistenciesCount++
-                        fileDeleted.add(uploadFile)
+                        fileDeleted.add(uri)
                     }
-                } ?: fileDeleted.add(uploadFile)
+                } ?: fileDeleted.add(uri)
             } catch (exception: SecurityException) {
                 Sentry.captureException(exception)
                 exception.printStackTrace()
-                fileDeleted.add(uploadFile)
+                fileDeleted.add(uri)
             }
         }
         SentryLog.i(tag, "isIOFilesDeleted[${isIOFilesDeleted.size}]: $isIOFilesDeleted")
@@ -529,7 +529,7 @@ class MainViewModel(
         SentryLog.i(tag, "file doesn't exist on device but deleteAt isn't up to date in the realm db: $inconsistenciesCount")
         Sentry.captureMessage("End deleteSynchronizedFilesOnDevice. Nb of error $inconsistenciesCount")
 
-        UploadFile.deleteAll(fileDeleted)
+        UploadFile.deleteAllFromUris(fileDeleted)
     }
 
     fun checkBulkDownloadStatus() = viewModelScope.launch {
