@@ -103,7 +103,7 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, !navigationArgs.hideActions)
+        requireActivity().setupBottomSheetFileBehavior(bottomSheetBehavior, isDraggable = true)
 
         bottomSheetView.apply {
             init(
@@ -113,15 +113,13 @@ class PreviewSliderFragment : BasePreviewSliderFragment(), FileInfoActionsView.O
                 onItemClickListener = this@PreviewSliderFragment,
                 selectFolderResultLauncher = selectFolderResultLauncher,
                 isSharedWithMe = userDrive.sharedWithMe,
-                hideActions = navigationArgs.hideActions,
+                hideActions = false,
             )
             updateCurrentFile(currentFile)
 
             previewSliderViewModel.pdfIsDownloading.observe(viewLifecycleOwner) { isDownloading ->
                 openWith.isGone = isDownloading
             }
-
-            setupActions(isVisible = !navigationArgs.hideActions)
         }
     }
 

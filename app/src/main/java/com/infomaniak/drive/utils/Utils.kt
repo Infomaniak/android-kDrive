@@ -201,7 +201,6 @@ object Utils {
         selectedFile: File,
         fileList: List<File>,
         isSharedWithMe: Boolean = false,
-        hideActions: Boolean = false,
     ) {
         mainViewModel.currentPreviewFileList = fileList.associateBy { it.id } as LinkedHashMap<Int, File>
 
@@ -217,7 +216,6 @@ object Utils {
                 fileId = selectedFile.id,
                 driveId = selectedFile.driveId,
                 isSharedWithMe = isSharedWithMe,
-                hideActions = hideActions,
             )
 
             R.id.previewSliderFragment to args.toBundle()
