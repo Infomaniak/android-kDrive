@@ -473,8 +473,8 @@ class UploadTask(
         )
 
         return ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient).also {
-            if (it.isSuccess()) it.data?.token?.let { uploadToken ->
-                uploadFile.updateUploadToken(uploadToken, it.data!!.uploadHost)
+            if (it.isSuccess()) it.data?.run {
+                uploadFile.updateUploadToken(token, uploadHost)
             } else {
                 it.manageUploadErrors()
             }
