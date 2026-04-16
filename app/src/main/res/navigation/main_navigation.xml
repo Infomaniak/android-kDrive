@@ -122,9 +122,6 @@
         <argument
             android:name="isSharedWithMe"
             app:argType="boolean" />
-        <argument
-            android:name="hideActions"
-            app:argType="boolean" />
     </fragment>
 
     <fragment

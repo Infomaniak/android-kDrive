@@ -121,7 +121,6 @@ class HomeActivitiesFragment : Fragment() {
                             navController = findNavController(),
                             selectedFile = currentFile,
                             fileList = validPreviewFiles,
-                            hideActions = true
                         )
                     }
                 }
