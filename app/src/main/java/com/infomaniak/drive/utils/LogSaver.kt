@@ -19,7 +19,7 @@ package com.infomaniak.drive.utils
 
 import android.content.Context
 import android.util.Log
-import com.infomaniak.core.cancellable
+import com.infomaniak.core.common.cancellable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
