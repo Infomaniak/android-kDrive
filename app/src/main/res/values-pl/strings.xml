@@ -675,7 +675,7 @@
     <string name="shareLinkPrivateRightTitle">Prywatny</string>
     <string name="shareLinkPublicRightDescription">Każdy, kto ma link, może %1$s ten %3$s%2$s%4$s.</string>
     <string name="shareLinkPublicRightDescriptionDate">\u0020do %s</string>
-    <string name="shareLinkPublicRightDescriptionPassword">\u0020chroniony hasłem</string>
+    <string name="shareLinkPublicRightDescriptionPassword">chroniony hasłem\u0020</string>
     <string name="shareLinkPublicRightDocumentDescriptionShort">Każdy, kto ma link, może uzyskać dostęp do dokumentu.</string>
     <string name="shareLinkPublicRightFileDescriptionShort">Każdy, kto ma link, może uzyskać dostęp do pliku.</string>
     <string name="shareLinkPublicRightFolderDescriptionShort">Każdy, kto ma link, może uzyskać dostęp do folderu.</string>

@@ -617,7 +617,7 @@
     <string name="shareLinkPrivateRightTitle">Privat</string>
     <string name="shareLinkPublicRightDescription">Alle som har linken kan %1$s denne %2$s%3$s%4$s.</string>
     <string name="shareLinkPublicRightDescriptionDate">\u0020frem til %s</string>
-    <string name="shareLinkPublicRightDescriptionPassword">%s beskyttet av et passord</string>
+    <string name="shareLinkPublicRightDescriptionPassword">\u0020beskyttet av et passord</string>
     <string name="shareLinkPublicRightDocumentDescriptionShort">Alle som har linken kan få tilgang til dokumentet.</string>
     <string name="shareLinkPublicRightFileDescriptionShort">Alle som har linken kan få tilgang til filen.</string>
     <string name="shareLinkPublicRightFolderDescriptionShort">Alle som har linken kan få tilgang til mappen.</string>
