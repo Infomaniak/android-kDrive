@@ -65,7 +65,7 @@ object FolderFilesProvider {
             val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
             val sourceRestrictionType = folderFilesProviderArgs.sourceRestrictionType
             val needToLoadFromRemote = needToLoadFromRemote(sourceRestrictionType, folderProxy)
-            Log.i(
+            SentryLog.i(
                 TAG,
                 "getFiles with folder: ${folderProxy?.id}, sourceRestrictionType: $sourceRestrictionType, needToLoadFromRemote: $needToLoadFromRemote"
             )
@@ -77,7 +77,7 @@ object FolderFilesProvider {
                     loadFromLocal(realm, folderProxy, folderFilesProviderArgs.withChildren, folderFilesProviderArgs.order)
                 }
                 else -> {
-                    Log.i(TAG, "getFiles: files is null")
+                    SentryLog.i(TAG, "getFiles: files is null")
                     null
                 }
             }
@@ -238,7 +238,7 @@ object FolderFilesProvider {
         folderFilesProviderArgs: FolderFilesProviderArgs,
     ): FolderFilesProviderResult? = with(Dispatchers.IO) {
 
-        Log.i(TAG, "loadFromRemote")
+        SentryLog.i(TAG, "loadFromRemote")
         val userDrive = folderFilesProviderArgs.userDrive
         val (okHttpClient, driveId) = runBlocking { AccountUtils.getHttpClient(userDrive.userId) } to userDrive.driveId
 
@@ -357,7 +357,7 @@ object FolderFilesProvider {
         withChildren: Boolean,
         order: SortType
     ): FolderFilesProviderResult? {
-        Log.i(TAG, "loadFromLocal")
+        SentryLog.i(TAG, "loadFromLocal")
         val localFolderWithoutChildren = folderProxy?.let { realm.copyFromRealm(it, 1) } ?: return null
         val sortedFolderFiles = if (withChildren) FileController.getLocalSortedFolderFiles(folderProxy, order) else arrayListOf()
         return FolderFilesProviderResult(folder = localFolderWithoutChildren, folderFiles = sortedFolderFiles, isComplete = true)
@@ -384,7 +384,7 @@ object FolderFilesProvider {
         cursor: String? = folderProxy.cursor,
         returnResponse: ArrayMap<Int, FileAction> = arrayMapOf(),
     ): Map<out Int, FileAction> {
-        Log.i(TAG, "loadActivitiesFromFolderRec with folderId ${folderProxy.id} cursor: ${cursor != null}")
+        SentryLog.i(TAG, "loadActivitiesFromFolderRec with folderId ${folderProxy.id} cursor: ${cursor != null}")
         val realm = folderProxy.realm
         val apiResponse = ApiRepository.getListingFiles(
             okHttpClient = okHttpClient,
@@ -402,7 +402,7 @@ object FolderFilesProvider {
 
         if (apiResponseData != null && apiResponseData.actions.isNotEmpty()) {
             val actionsFiles = apiResponseData.actionsFiles.associateBy(File::id)
-            Log.i(TAG, "loadActivitiesFromFolderRec: actions ${apiResponseData.actions.count()}")
+            SentryLog.i(TAG, "loadActivitiesFromFolderRec: actions ${apiResponseData.actions.count()}")
             apiResponseData.actions.asReversed().forEach { fileActivity ->
                 fileActivity.applyFileAction(realm, actionsFiles, returnResponse, folderProxy)
             }
@@ -418,7 +418,7 @@ object FolderFilesProvider {
         }
 
         return if (apiResponse.hasMoreAndCursorExists) {
-            Log.i(TAG, "loadActivitiesFromFolderRec: loading next page")
+            SentryLog.i(TAG, "loadActivitiesFromFolderRec: loading next page")
             // Loading the next page, then the cursor is required
             loadActivitiesFromFolderRec(
                 activitiesJob = activitiesJob,
@@ -429,7 +429,7 @@ object FolderFilesProvider {
                 returnResponse = returnResponse
             )
         } else {
-            Log.i(TAG, "loadActivitiesFromFolderRec: no more pages")
+            SentryLog.i(TAG, "loadActivitiesFromFolderRec: no more pages")
             returnResponse
         }
     }

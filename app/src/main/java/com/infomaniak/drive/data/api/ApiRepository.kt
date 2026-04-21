@@ -31,6 +31,7 @@ import com.infomaniak.core.network.api.ApiController.ApiMethod.PUT
 import com.infomaniak.core.network.api.ApiController.callApiBlocking
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -169,7 +170,7 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String? = null,
         order: SortType
     ): CursorApiResponse<ListingFiles> {
-        Log.i("ApiRepository", "getListingFiles with cursor ${cursor != null}")
+        SentryLog.i("ApiRepository", "getListingFiles with cursor ${cursor != null}")
         val url = when (cursor) {
             null -> "${ApiRoutes.getListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
             else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
