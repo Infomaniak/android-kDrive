@@ -37,7 +37,7 @@ class LogSaver(private val appContext: Context) {
 
     suspend fun saveLogsToFile(): Boolean = withContext(Dispatchers.IO) {
         return@withContext runCatching {
-            val logFilePath = IOFile(logsDir, "kDrive_logs.txt").apply {
+            val logFile = IOFile(logsDir, "kDrive_logs.txt").apply {
                 if (exists()) delete()
                 createNewFile()
             }
@@ -51,10 +51,10 @@ class LogSaver(private val appContext: Context) {
 
             // Save logs
             process.inputStream.use { inputStream ->
-                inputStream.saveTo(logFilePath)
+                inputStream.saveTo(logFile)
             }
 
-            Log.i("LogSaver", "Logs saved to ${logFilePath.absolutePath}")
+            Log.i("LogSaver", "Logs saved to ${logFile.absolutePath}")
             true
         }.cancellable().getOrElse { exception ->
             Log.e("LogSaver", "Error saving logs", exception)
