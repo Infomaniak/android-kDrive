@@ -56,13 +56,13 @@ class LogSaver(private val appContext: Context) {
             }
 
             val isSuccessfullySaved = when {
-                process.waitFor() != 0 -> {
-                    SentryLog.e("LogSaver", "Process finished error")
-                    false
-                }
-                else -> {
+                process.waitFor() == 0 -> {
                     Log.i("LogSaver", "Logs saved to ${logFile.path}")
                     true
+                }
+                else -> {
+                    SentryLog.e("LogSaver", "Process finished error")
+                    false
                 }
             }
 
