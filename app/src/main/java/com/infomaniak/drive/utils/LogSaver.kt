@@ -20,6 +20,7 @@ package com.infomaniak.drive.utils
 import android.content.Context
 import android.util.Log
 import com.infomaniak.core.common.cancellable
+import com.infomaniak.core.sentry.SentryLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -45,17 +46,27 @@ class LogSaver(private val appContext: Context) {
             ensureActive()
 
             // Exec logcat command
-            val process = Runtime.getRuntime().exec(
-                arrayOf("sh", "-c", "logcat -d --pid=$(pidof -s ${appContext.packageName})")
-            ) ?: return@runCatching false
+            val process = ProcessBuilder("logcat", "-d", "--pid=${android.os.Process.myPid()}")
+                .redirectErrorStream(true)
+                .start()
 
             // Save logs
             process.inputStream.use { inputStream ->
                 inputStream.saveTo(logFile)
             }
 
-            Log.i("LogSaver", "Logs saved to ${logFile.absolutePath}")
-            true
+            val isSuccessfullySaved = when {
+                process.waitFor() != 0 -> {
+                    SentryLog.e("LogSaver", "Process finished error")
+                    false
+                }
+                else -> {
+                    Log.i("LogSaver", "Logs saved to ${logFile.absolutePath}")
+                    true
+                }
+            }
+
+            isSuccessfullySaved
         }.cancellable().getOrElse { exception ->
             Log.e("LogSaver", "Error saving logs", exception)
             false
