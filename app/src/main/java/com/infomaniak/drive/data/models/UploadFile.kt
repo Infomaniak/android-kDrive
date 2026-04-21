@@ -74,6 +74,9 @@ open class UploadFile(
     var userId: Int = -1,
 ) : RealmObject() {
 
+    val error: DriveError?
+        get() = DriveError.find(_driveErrorKey)
+
     @delegate:Ignore
     val okHttpClient: OkHttpClient by lazy { runBlocking { AccountUtils.getHttpClient(userId = userId, timeout = 120) } }
 

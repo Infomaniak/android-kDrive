@@ -261,6 +261,7 @@ dependencies {
     androidTestRuntimeOnly(libs.android.test.runner)
 
     implementation(core.coil.gif)
+    implementation(kotlin("reflect"))
 
     // Compose
     implementation(libs.androidx.ui.android)
