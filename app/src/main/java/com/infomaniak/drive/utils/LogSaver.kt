@@ -23,10 +23,13 @@ import com.infomaniak.core.common.cancellable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.invoke
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 
 class LogSaver(private val appContext: Context) {
+
+    private val logsDir get() = IOFile(appContext.filesDir, "logs").apply { mkdirs() }
 
     init {
         require(appContext == appContext.applicationContext) { "The context must to be an applicationContext" }
@@ -34,7 +37,7 @@ class LogSaver(private val appContext: Context) {
 
     suspend fun saveLogsToFile(): Boolean = withContext(Dispatchers.IO) {
         return@withContext runCatching {
-            val logFilePath = IOFile(appContext.filesDir, "kDrive_logs.txt").apply {
+            val logFilePath = IOFile(logsDir, "kDrive_logs.txt").apply {
                 if (exists()) delete()
                 createNewFile()
             }
@@ -57,6 +60,10 @@ class LogSaver(private val appContext: Context) {
             Log.e("LogSaver", "Error saving logs", exception)
             false
         }
+    }
+
+    suspend fun deleteLogs() = Dispatchers.IO {
+        logsDir.deleteRecursively()
     }
 
     private suspend fun InputStream.saveTo(logFilePath: IOFile) {
