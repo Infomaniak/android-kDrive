@@ -77,7 +77,7 @@ class LogSaver(private val appContext: Context) {
         }
     }
 
-    private fun getLogFileUri(process: Process, logFile: IOFile): Uri? = when {
+    private suspend fun getLogFileUri(process: Process, logFile: IOFile): Uri? = when {
         process.waitFor(5, TimeUnit.SECONDS) && process.exitValue() == 0 -> {
             SentryLog.i("LogSaver", "Logs saved to ${logFile.path}")
             FileProvider.getUriForFile(
@@ -88,6 +88,7 @@ class LogSaver(private val appContext: Context) {
         }
         else -> {
             SentryLog.e("LogSaver", "Process finished error")
+            deleteLogs()
             null
         }
     }
