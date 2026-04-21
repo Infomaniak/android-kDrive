@@ -29,7 +29,7 @@ import java.io.InputStream
 
 class LogSaver(private val appContext: Context) {
 
-    private val logsDir get() = IOFile(appContext.cacheDir, "logs").apply { mkdirs() }
+    private val logsDir get() = IOFile(appContext.cacheDir, "logs").apply { if (!exists()) mkdirs() }
 
     init {
         require(appContext == appContext.applicationContext) { "The context must to be an applicationContext" }
