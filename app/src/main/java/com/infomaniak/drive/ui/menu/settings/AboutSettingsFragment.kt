@@ -35,6 +35,7 @@ import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentSettingsAboutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.LogSaver
+import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.utils.showSnackbar
 import kotlinx.coroutines.launch
 
@@ -92,12 +93,7 @@ class AboutSettingsFragment : Fragment() {
         val logsSaver = LogSaver(context)
         val logsFileUri = logsSaver.saveLogsToFile()
         if (logsFileUri != null) {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_STREAM, logsFileUri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            startActivity(Intent.createChooser(intent, context.getString(R.string.shareLogsButton)))
+            requireContext().shareFile { logsFileUri }
         } else {
             showSnackbar(R.string.anErrorHasOccurred)
         }

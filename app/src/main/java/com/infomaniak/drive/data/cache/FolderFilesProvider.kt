@@ -65,7 +65,10 @@ object FolderFilesProvider {
             val folderProxy = FileController.getFileById(realm, folderFilesProviderArgs.folderId)
             val sourceRestrictionType = folderFilesProviderArgs.sourceRestrictionType
             val needToLoadFromRemote = needToLoadFromRemote(sourceRestrictionType, folderProxy)
-            Log.i(TAG, "getFiles with folder: ${folderProxy?.id}, sourceRestrictionType: $sourceRestrictionType, needToLoadFromRemote: $needToLoadFromRemote")
+            Log.i(
+                TAG,
+                "getFiles with folder: ${folderProxy?.id}, sourceRestrictionType: $sourceRestrictionType, needToLoadFromRemote: $needToLoadFromRemote"
+            )
             val files = when {
                 needToLoadFromRemote && sourceRestrictionType != SourceRestrictionType.ONLY_FROM_LOCAL -> {
                     loadFromRemote(realm, folderProxy, folderFilesProviderArgs)
@@ -74,7 +77,7 @@ object FolderFilesProvider {
                     loadFromLocal(realm, folderProxy, folderFilesProviderArgs.withChildren, folderFilesProviderArgs.order)
                 }
                 else -> {
-                    Log.i(TAG, "getFiles files is null")
+                    Log.i(TAG, "getFiles: files is null")
                     null
                 }
             }
@@ -381,7 +384,7 @@ object FolderFilesProvider {
         cursor: String? = folderProxy.cursor,
         returnResponse: ArrayMap<Int, FileAction> = arrayMapOf(),
     ): Map<out Int, FileAction> {
-        Log.i(TAG, "loadActivitiesFromFolderRec with folderId ${folderProxy.id} cursor: $cursor")
+        Log.i(TAG, "loadActivitiesFromFolderRec with folderId ${folderProxy.id} cursor: ${cursor != null}")
         val realm = folderProxy.realm
         val apiResponse = ApiRepository.getListingFiles(
             okHttpClient = okHttpClient,

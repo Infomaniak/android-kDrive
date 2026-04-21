@@ -169,7 +169,7 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String? = null,
         order: SortType
     ): CursorApiResponse<ListingFiles> {
-        Log.i("ApiRepository", "getListingFiles with cursor $cursor")
+        Log.i("ApiRepository", "getListingFiles with cursor ${cursor != null}")
         val url = when (cursor) {
             null -> "${ApiRoutes.getListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
             else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"

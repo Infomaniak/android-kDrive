@@ -33,10 +33,14 @@ import java.io.InputStream
 
 class LogSaver(private val appContext: Context) {
 
-    private val logsDir get() = IOFile(appContext.cacheDir, "logs").apply { if (!exists()) mkdirs() }
+    private val logsDir
+        get() = IOFile(
+            appContext.cacheDir,
+            appContext.getString(R.string.EXPOSED_LOGS_DIR)
+        ).apply { if (!exists()) mkdirs() }
 
     init {
-        require(appContext == appContext.applicationContext) { "The context must be an applicationContext" }
+        require(appContext == appContext.applicationContext) { "The context must be the applicationContext" }
     }
 
     suspend fun saveLogsToFile(): Uri? = withContext(Dispatchers.IO) {

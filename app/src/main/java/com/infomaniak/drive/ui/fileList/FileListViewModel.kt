@@ -143,7 +143,10 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                             isNewSort = isNewSort,
                         )
                         emit(result)
-                        Log.i(TAG, "getFiles: Emit is complete parentFolder=${result.parentFolder} filesCount=${result.files.count()}")
+                        Log.i(
+                            TAG,
+                            "getFiles: Emit is complete parentFolder=${result.parentFolder?.id} filesCount=${result.files.count()}"
+                        )
 
                     }
                     else -> {
@@ -156,7 +159,10 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                                 isNewSort = isNewSort,
                             )
                             emit(result)
-                            Log.i(TAG, "getFiles: Emit first page ${result.parentFolder} ${result.files.count()}")
+                            Log.i(
+                                TAG,
+                                "getFiles: Emit first page, parentFolder = ${result.parentFolder?.id}, files = ${result.files.count()}"
+                            )
                         }
                         recursiveDownload(folderId, isFirstPage = false)
                     }
@@ -165,7 +171,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
             runCatching {
                 recursiveDownload(folderId, isFirstPage = true)
             }.cancellable().onFailure { t ->
-                Log.e(TAG, "getFiles: recursiveDownload failed")
+                Log.e(TAG, "getFiles: recursiveDownload failed", t)
                 SentryLog.e(TAG, "recursiveDownload failed", t)
             }.getOrNull()
         }
