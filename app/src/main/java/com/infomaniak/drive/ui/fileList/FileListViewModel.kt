@@ -171,7 +171,6 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
             runCatching {
                 recursiveDownload(folderId, isFirstPage = true)
             }.cancellable().onFailure { t ->
-                Log.e(TAG, "getFiles: recursiveDownload failed", t)
                 SentryLog.e(TAG, "recursiveDownload failed", t)
             }.getOrNull()
         }

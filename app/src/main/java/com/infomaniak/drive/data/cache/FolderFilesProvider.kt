@@ -81,6 +81,7 @@ object FolderFilesProvider {
                     null
                 }
             }
+            SentryLog.i(TAG, "Load files finished")
             return files
         } finally {
             if (folderFilesProviderArgs.realm == null) realm.close()
