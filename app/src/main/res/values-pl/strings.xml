@@ -279,6 +279,7 @@
     <string name="errorFileAlreadyExists">Plik lub folder już istnieje</string>
     <string name="errorFileLocked">Ten plik jest obecnie otwarty przez innego użytkownika i nie może być zmodyfikowany</string>
     <string name="errorFilesLimitExceeded">Osiągnięto limit plików w folderze</string>
+    <string name="errorGeneric">Wystąpił błąd</string>
     <string name="errorGetBookmarkURL">Nieodzyskiwalny link</string>
     <string name="errorLeaveShare">Błąd podczas zatrzymywania udostępniania</string>
     <string name="errorLimitExceeded">Osiągnięto limit</string>
@@ -287,6 +288,7 @@
     <string name="errorMove">Błąd przenoszenia</string>
     <string name="errorNetwork">Błąd sieci</string>
     <string name="errorNetworkDescription">Wyniki mogą być niekompletne</string>
+    <string name="errorPhotoLibraryAccessLimited">kDrive nie ma dostępu do biblioteki zdjęć</string>
     <string name="errorPreviewDeleted">Ten plik został trwale usunięty</string>
     <string name="errorPreviewTrash">Podgląd pliku w koszu nie jest możliwy</string>
     <string name="errorQuotaExceeded">Brak miejsca na Twoim kDrive</string>
@@ -834,6 +836,7 @@
     <string name="uploadNetworkErrorTitle">Przesyłanie wstrzymane</string>
     <string name="uploadNetworkErrorWifiRequired">Oczekiwanie na sieć Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Niewystarczająca ilość dostępnej pamięci RAM</string>
+    <string name="uploadOverDataRestrictedError">Oczekiwanie na Wi-Fi</string>
     <string name="uploadPausedDescription">Niektóre przesyłania są nadal w toku w kDrive. Otwórz aplikację i utrzymuj urządzenie podłączone, aby przyspieszyć przesyłanie.</string>
     <string name="uploadPausedTitle">Przesyłanie wstrzymane</string>
     <string name="uploadPermissionError">Zażądano dodatkowych uprawnień</string>

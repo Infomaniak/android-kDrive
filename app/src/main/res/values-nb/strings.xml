@@ -269,6 +269,7 @@
     <string name="errorFileAlreadyExists">Fil eller mappe finnes allerede</string>
     <string name="errorFileLocked">Denne filen er for øyeblikket åpen av en annen bruker og kan ikke endres</string>
     <string name="errorFilesLimitExceeded">Grensen for filer i mappen er nådd</string>
+    <string name="errorGeneric">En feil har oppstått</string>
     <string name="errorGetBookmarkURL">Ikke-gjenopprettbar lenke</string>
     <string name="errorLeaveShare">Feil ved avslutning av deling</string>
     <string name="errorLimitExceeded">Grensen er nådd</string>
@@ -277,6 +278,7 @@
     <string name="errorMove">Feil ved flytting</string>
     <string name="errorNetwork">Nettverksfeil</string>
     <string name="errorNetworkDescription">Resultatene kan være ufullstendige</string>
+    <string name="errorPhotoLibraryAccessLimited">kDrive har ikke tilgang til ditt bild bibliotek</string>
     <string name="errorPreviewDeleted">Denne filen har blitt permanent slettet</string>
     <string name="errorPreviewTrash">Forhåndsvisning av en fil i papirkurven er ikke mulig</string>
     <string name="errorQuotaExceeded">Ikke nok plass på din kDrive</string>
@@ -760,6 +762,7 @@
     <string name="uploadNetworkErrorTitle">Opplasting suspendert</string>
     <string name="uploadNetworkErrorWifiRequired">Venter på Wi-Fi-nettverk</string>
     <string name="uploadOutOfMemoryError">Utilstrekkelig tilgjengelig RAM-minne</string>
+    <string name="uploadOverDataRestrictedError">Venter på Wi-Fi</string>
     <string name="uploadPausedDescription">Noen opplastinger er fortsatt i gang i kDrive. Åpne appen og hold enheten tilkoblet for å øke hastigheten på opplastingen.</string>
     <string name="uploadPausedTitle">Opplasting suspendert</string>
     <string name="uploadPermissionError">Tilleggstillatelser forespurt</string>

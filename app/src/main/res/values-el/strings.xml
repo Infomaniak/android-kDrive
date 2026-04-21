@@ -269,6 +269,7 @@
     <string name="errorFileAlreadyExists">Το αρχείο ή ο φάκελος υπάρχει ήδη</string>
     <string name="errorFileLocked">Αυτό το αρχείο είναι αυτή τη στιγμή ανοιχτό από άλλον χρήστη και δεν μπορεί να τροποποιηθεί</string>
     <string name="errorFilesLimitExceeded">Έχει επιτευχθεί το όριο αρχείων στον φάκελο</string>
+    <string name="errorGeneric">Παρουσιάστηκε σφάλμα</string>
     <string name="errorGetBookmarkURL">Σύνδεσμος μη ανακτήσιμος</string>
     <string name="errorLeaveShare">Σφάλμα κατά τη διακοπή της κοινής χρήσης</string>
     <string name="errorLimitExceeded">Υπέρβαση ορίου</string>
@@ -277,6 +278,7 @@
     <string name="errorMove">Σφάλμα μετακίνησης</string>
     <string name="errorNetwork">Σφάλμα δικτύου</string>
     <string name="errorNetworkDescription">Τα αποτελέσματα ενδέχεται να είναι ελλιπή</string>
+    <string name="errorPhotoLibraryAccessLimited">Το kDrive δεν έχει πρόσβαση στη βιβλιοθήκη φωτογραφιών σας</string>
     <string name="errorPreviewDeleted">Αυτό το αρχείο διαγράφηκε οριστικά</string>
     <string name="errorPreviewTrash">Η προεπισκόπηση αρχείου στον κάδο δεν είναι δυνατή</string>
     <string name="errorQuotaExceeded">Δεν υπάρχει αρκετός χώρος στο kDrive σας</string>
@@ -760,6 +762,7 @@
     <string name="uploadNetworkErrorTitle">Η μεταφόρτωση ανεστάλη</string>
     <string name="uploadNetworkErrorWifiRequired">Αναμονή για δίκτυο Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Ανεπαρκής διαθέσιμη μνήμη RAM</string>
+    <string name="uploadOverDataRestrictedError">Αναμονή για Wi-Fi</string>
     <string name="uploadPausedDescription">Κάποιες μεταφορτώσεις εξακολουθούν να βρίσκονται σε εξέλιξη στο kDrive. Ανοίξτε την εφαρμογή και κρατήστε τη συσκευή συνδεδεμένη για να επιταχύνετε τη μεταφόρτωση.</string>
     <string name="uploadPausedTitle">Η μεταφόρτωση ανεστάλη</string>
     <string name="uploadPermissionError">Ζητούνται πρόσθετες άδειες</string>

@@ -269,6 +269,7 @@
     <string name="errorFileAlreadyExists">File or folder already exists</string>
     <string name="errorFileLocked">This file is currently opened by another user and cannot be modified</string>
     <string name="errorFilesLimitExceeded">Limit of files in folder reached</string>
+    <string name="errorGeneric">An error has occurred</string>
     <string name="errorGetBookmarkURL">Non-recoverable link</string>
     <string name="errorLeaveShare">Error when stopping sharing</string>
     <string name="errorLimitExceeded">Limit exceeded</string>
@@ -277,6 +278,7 @@
     <string name="errorMove">Move error</string>
     <string name="errorNetwork">Network error</string>
     <string name="errorNetworkDescription">Results may be incomplete</string>
+    <string name="errorPhotoLibraryAccessLimited">kDrive does not have access to your photo library</string>
     <string name="errorPreviewDeleted">This file has been permanently deleted</string>
     <string name="errorPreviewTrash">Previewing a file in the trash is not possible</string>
     <string name="errorQuotaExceeded">Not enough space on your kDrive</string>
@@ -760,6 +762,7 @@
     <string name="uploadNetworkErrorTitle">Upload suspended</string>
     <string name="uploadNetworkErrorWifiRequired">Waiting for WiFi network</string>
     <string name="uploadOutOfMemoryError">Insufficient available ram memory</string>
+    <string name="uploadOverDataRestrictedError">Waiting for Wi-Fi</string>
     <string name="uploadPausedDescription">Some uploads are still in progress in kDrive. Open the app and keep the device connected to speed up the upload.</string>
     <string name="uploadPausedTitle">Upload suspended</string>
     <string name="uploadPermissionError">Additional permissions requested</string>

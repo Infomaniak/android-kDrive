@@ -269,6 +269,7 @@
     <string name="errorFileAlreadyExists">Filen eller mappen finns redan</string>
     <string name="errorFileLocked">Denna fil är för närvarande öppen av en annan användare och kan inte ändras</string>
     <string name="errorFilesLimitExceeded">Gränsen för filer i mappen nådd</string>
+    <string name="errorGeneric">Ett fel har inträffat</string>
     <string name="errorGetBookmarkURL">Ej återvinningsbar länk</string>
     <string name="errorLeaveShare">Fel vid avslutning av delning</string>
     <string name="errorLimitExceeded">Gränsen nådd</string>
@@ -277,6 +278,7 @@
     <string name="errorMove">Flyttningsfel</string>
     <string name="errorNetwork">Nätverksfel</string>
     <string name="errorNetworkDescription">Resultaten kan vara ofullständiga</string>
+    <string name="errorPhotoLibraryAccessLimited">kDrive har inte tillgång till ditt fotobibliotek</string>
     <string name="errorPreviewDeleted">Denna fil har permanent tagits bort</string>
     <string name="errorPreviewTrash">Förhandsvisning av en fil i papperskorgen är inte möjlig</string>
     <string name="errorQuotaExceeded">Inte tillräckligt med utrymme på din kDrive</string>
@@ -760,6 +762,7 @@
     <string name="uploadNetworkErrorTitle">Uppladdning pausad</string>
     <string name="uploadNetworkErrorWifiRequired">Väntar på Wi-Fi-nätverk</string>
     <string name="uploadOutOfMemoryError">Otillräckligt RAM-minne</string>
+    <string name="uploadOverDataRestrictedError">Väntar på Wi-Fi</string>
     <string name="uploadPausedDescription">Vissa uppladdningar pågår fortfarande i kDrive. Öppna appen och håll enheten ansluten för att påskynda uppladdningen.</string>
     <string name="uploadPausedTitle">Uppladdning pausad</string>
     <string name="uploadPermissionError">Ytterligare behörigheter begärs</string>

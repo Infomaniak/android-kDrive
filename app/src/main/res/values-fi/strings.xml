@@ -269,6 +269,7 @@
     <string name="errorFileAlreadyExists">Tiedosto tai kansio on jo olemassa</string>
     <string name="errorFileLocked">Tämä tiedosto on tällä hetkellä toisen käyttäjän avaama eikä sitä voi muokata</string>
     <string name="errorFilesLimitExceeded">Kansion tiedostoraja saavutettu</string>
+    <string name="errorGeneric">Virhe on tapahtunut</string>
     <string name="errorGetBookmarkURL">Linkkiä ei voi palauttaa</string>
     <string name="errorLeaveShare">Virhe jaon lopettamisessa</string>
     <string name="errorLimitExceeded">Raja saavutettu</string>
@@ -277,6 +278,7 @@
     <string name="errorMove">Siirtovirhe</string>
     <string name="errorNetwork">Verkkovirhe</string>
     <string name="errorNetworkDescription">Tulokset voivat olla puutteellisia</string>
+    <string name="errorPhotoLibraryAccessLimited">kDrivella ei ole pääsyä valokuvakirjastoosi</string>
     <string name="errorPreviewDeleted">Tämä tiedosto on poistettu pysyvästi</string>
     <string name="errorPreviewTrash">Tiedoston esikatselu roskakorissa ei ole mahdollista</string>
     <string name="errorQuotaExceeded">Ei tarpeeksi tilaa kDrivessa</string>
@@ -760,6 +762,7 @@
     <string name="uploadNetworkErrorTitle">Lähetys keskeytetty</string>
     <string name="uploadNetworkErrorWifiRequired">Odotetaan Wi-Fi-verkkoa</string>
     <string name="uploadOutOfMemoryError">Keskusmuisti ei riitä</string>
+    <string name="uploadOverDataRestrictedError">Odotetaan Wi-Fiä</string>
     <string name="uploadPausedDescription">Joitakin lähetyksiä on vielä käynnissä kDrivessä. Avaa sovellus ja pidä laite kytkettynä nopeuttaaksesi lähetystä.</string>
     <string name="uploadPausedTitle">Lähetys keskeytetty</string>
     <string name="uploadPermissionError">Lisää käyttöoikeuksia pyydetty</string>
