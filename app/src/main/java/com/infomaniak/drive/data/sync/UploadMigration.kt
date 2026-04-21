@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,9 +116,13 @@ class UploadMigration : RealmMigration {
                 ?.addField("onlyWifiSyncMedia", Boolean::class.java, FieldAttribute.REQUIRED)
         }
 
+        if (oldVersion < 9L) {//stop use of oldVersionTemp as it is useless
+            schema.get(UploadFile::class.java.simpleName)
+                ?.addField("_driveErrorKey", String::class.java)
+        }
     }
 
     companion object {
-        const val DB_VERSION = 8L // Must be bumped when the schema changes
+        const val DB_VERSION = 9L // Must be bumped when the schema changes
     }
 }

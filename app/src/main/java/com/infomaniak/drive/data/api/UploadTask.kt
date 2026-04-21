@@ -476,6 +476,7 @@ class UploadTask(
             if (it.isSuccess()) it.data?.run {
                 uploadFile.updateUploadToken(token, uploadHost)
             } else {
+                uploadFile.updateUploadErrorKey(it.error?.code)
                 it.manageUploadErrors()
             }
         }.data?.uploadHost

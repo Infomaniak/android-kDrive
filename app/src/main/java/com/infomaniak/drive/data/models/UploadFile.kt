@@ -32,6 +32,7 @@ import com.infomaniak.drive.data.api.ApiRepository
 import com.infomaniak.drive.data.api.UploadTask
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.cache.DriveInfosController
+import com.infomaniak.drive.data.models.up.DriveError
 import com.infomaniak.drive.data.sync.UploadMigration
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.IOFile
@@ -59,6 +60,7 @@ open class UploadFile(
     @PrimaryKey var uri: String = "",
     var deletedAt: Date? = null,
     var driveId: Int = -1,
+    private var _driveErrorKey: String? = null,
     var fileCreatedAt: Date? = null,
     var fileModifiedAt: Date = Date(),
     var fileName: String = "",
@@ -136,6 +138,10 @@ open class UploadFile(
         updateCurrentInstance {
             it.uploadToken = newUploadToken
         }
+    }
+
+    fun updateUploadErrorKey(driveErrorKey: String?) {
+        update { it._driveErrorKey = driveErrorKey }
     }
 
     fun deleteIfExists(keepFile: Boolean = false, customRealm: Realm? = null) {
