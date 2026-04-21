@@ -18,25 +18,33 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.core.content.FileProvider
 import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.drive.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.withContext
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 class LogSaver(private val appContext: Context) {
 
-    private val logsDir get() = IOFile(appContext.cacheDir, "logs").apply { if (!exists()) mkdirs() }
+    private val logsDir
+        get() = IOFile(
+            appContext.cacheDir,
+            appContext.getString(R.string.EXPOSED_LOGS_DIR)
+        ).apply { if (!exists()) mkdirs() }
 
     init {
-        require(appContext == appContext.applicationContext) { "The context must be an applicationContext" }
+        require(appContext == appContext.applicationContext) { "The context must be the applicationContext" }
     }
 
-    suspend fun saveLogsToFile(): Boolean = withContext(Dispatchers.IO) {
+    suspend fun saveLogsToFile(): Uri? = withContext(Dispatchers.IO) {
         return@withContext runCatching {
             val logFile = IOFile(logsDir, "kDrive_logs.txt").apply {
                 if (exists()) delete()
@@ -50,31 +58,38 @@ class LogSaver(private val appContext: Context) {
                 .redirectErrorStream(true)
                 .start()
 
+            ensureActive()
+
             try {
                 // Save logs
                 process.inputStream.use { inputStream ->
                     inputStream.saveTo(logFile)
                 }
 
-                val isSuccessfullySaved = when {
-                    process.waitFor() == 0 -> {
-                        Log.i("LogSaver", "Logs saved to ${logFile.path}")
-                        true
-                    }
-                    else -> {
-                        SentryLog.e("LogSaver", "Process finished error")
-                        false
-                    }
-                }
-
-                isSuccessfullySaved
+                getLogFileUri(process, logFile)
             } finally {
                 process.destroy()
             }
 
         }.cancellable().getOrElse { exception ->
             Log.e("LogSaver", "Error saving logs", exception)
-            false
+            null
+        }
+    }
+
+    private suspend fun getLogFileUri(process: Process, logFile: IOFile): Uri? = when {
+        process.waitFor(5, TimeUnit.SECONDS) && process.exitValue() == 0 -> {
+            SentryLog.i("LogSaver", "Logs saved to ${logFile.path}")
+            FileProvider.getUriForFile(
+                appContext,
+                appContext.getString(R.string.FILE_AUTHORITY),
+                logFile
+            )
+        }
+        else -> {
+            SentryLog.e("LogSaver", "Process finished error")
+            deleteLogs()
+            null
         }
     }
 

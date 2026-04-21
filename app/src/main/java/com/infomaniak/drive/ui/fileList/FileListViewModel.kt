@@ -114,6 +114,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
         getFilesJob.cancel()
         getFolderActivitiesJob.cancel()
         getFilesJob = Job()
+
         return liveData(Dispatchers.IO + getFilesJob) {
             tailrec suspend fun recursiveDownload(folderId: Int, isFirstPage: Boolean) {
                 getFilesJob.ensureActive()
@@ -129,29 +130,22 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 )
 
                 when {
-                    folderFilesProviderResult == null -> emit(null)
+                    folderFilesProviderResult == null -> {
+                        SentryLog.i(TAG, "getFiles: Emit result is null")
+                        emit(null)
+                    }
                     folderFilesProviderResult.isComplete -> {
-                        emit(
-                            FolderFilesResult(
-                                parentFolder = folderFilesProviderResult.folder,
-                                files = folderFilesProviderResult.folderFiles,
-                                isComplete = true,
-                                isFirstPage = isFirstPage,
-                                isNewSort = isNewSort,
-                            )
-                        )
+                        emit(folderFilesProviderResult.toFolderFilesResult(isFirstPage, isNewSort))
+                        val parentFolder = folderFilesProviderResult.folder.id
+                        val files = folderFilesProviderResult.folderFiles.count()
+                        SentryLog.i(TAG, "getFiles: Emit is complete parentFolder=$parentFolder filesCount=$files")
                     }
                     else -> {
                         if (isFirstPage) {
-                            emit(
-                                FolderFilesResult(
-                                    parentFolder = folderFilesProviderResult.folder,
-                                    files = folderFilesProviderResult.folderFiles,
-                                    isComplete = true,
-                                    isFirstPage = true,
-                                    isNewSort = isNewSort,
-                                )
-                            )
+                            emit(folderFilesProviderResult.toFolderFilesResult(isFirstPage = true, isNewSort))
+                            val parentFolder = folderFilesProviderResult.folder.id
+                            val files = folderFilesProviderResult.folderFiles.count()
+                            SentryLog.i(TAG, "getFiles: Emit first page, parentFolder = $parentFolder, files = $files")
                         }
                         recursiveDownload(folderId, isFirstPage = false)
                     }
@@ -164,6 +158,17 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
             }.getOrNull()
         }
     }
+
+    fun FolderFilesProvider.FolderFilesProviderResult.toFolderFilesResult(
+        isFirstPage: Boolean,
+        isNewSort: Boolean
+    ): FolderFilesResult = FolderFilesResult(
+        parentFolder = folder,
+        files = folderFiles,
+        isComplete = true,
+        isFirstPage = isFirstPage,
+        isNewSort = isNewSort,
+    )
 
     fun getFavoriteFiles(order: SortType, isNewSort: Boolean, userDrive: UserDrive): LiveData<FolderFilesResult?> {
         getFilesJob.cancel()

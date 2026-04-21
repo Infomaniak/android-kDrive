@@ -1,6 +1,6 @@
 /*
  * Infomaniak kDrive - Android
- * Copyright (C) 2022-2024 Infomaniak Network SA
+ * Copyright (C) 2022-2026 Infomaniak Network SA
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,14 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
@@ -30,10 +34,18 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentSettingsAboutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.utils.LogSaver
+import com.infomaniak.drive.utils.shareFile
+import com.infomaniak.drive.utils.showSnackbar
+import io.sentry.android.fragment.FragmentLifecycleState
+import kotlinx.coroutines.launch
 
 class AboutSettingsFragment : Fragment() {
 
     private var binding: FragmentSettingsAboutBinding by safeBinding()
+    private var secretLogsButtonClickCount = 0
+    private var lastClickTime = 0L
+    private val logSaver by lazy { LogSaver(requireContext().applicationContext) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSettingsAboutBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -67,8 +79,31 @@ class AboutSettingsFragment : Fragment() {
         }
 
         appVersionLayout.description = "v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}"
+        appVersionLayout.setOnClickListener {
+            countClicksToShowSecretLogsButton()
+        }
+
+        shareLogsButton.setOnClickListener {
+            shareLogs()
+        }
 
         binding.root.enableEdgeToEdge()
+    }
+
+    private fun shareLogs() = viewLifecycleOwner.lifecycleScope.launch {
+        val logsFileUri = logSaver.saveLogsToFile()
+        if (logsFileUri == null) {
+            showSnackbar(R.string.anErrorHasOccurred)
+        } else if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            requireContext().shareFile { logsFileUri }
+        }
+    }
+
+    private fun FragmentSettingsAboutBinding.countClicksToShowSecretLogsButton() {
+        val currentTime = SystemClock.elapsedRealtime()
+        if (currentTime - lastClickTime < CLICK_INTERVAL_MILLIS) secretLogsButtonClickCount++ else secretLogsButtonClickCount = 1
+        if (secretLogsButtonClickCount == REQUIRED_SECRET_BUTTON_CLICKS) shareLogsButton.isVisible = true
+        lastClickTime = currentTime
     }
 
     companion object {
@@ -76,5 +111,7 @@ class AboutSettingsFragment : Fragment() {
         const val GITHUB_URL = "https://github.com/Infomaniak/android-kDrive"
         const val GPL_LICENSE_URL = "https://www.gnu.org/licenses/gpl-3.0.html"
         const val LICENSES_URL = "https://github.com/Infomaniak/android-kDrive/blob/main/LICENSES.md"
+        const val REQUIRED_SECRET_BUTTON_CLICKS = 5
+        const val CLICK_INTERVAL_MILLIS = 250L
     }
 }

@@ -54,6 +54,7 @@ android {
         resValue("string", "EXPOSED_UPLOAD_DIR", "upload_media")
         resValue("string", "EXPOSED_OFFLINE_DIR", "offline_storage")
         resValue("string", "EXPOSED_PUBLIC_SHARE_DIR", "public_share")
+        resValue("string", "EXPOSED_LOGS_DIR", "logs")
 
         androidResources {
             localeFilters += listOf("da", "de", "el", "en", "es", "fi", "fr", "it", "nb", "nl", "pl", "pt", "sv")

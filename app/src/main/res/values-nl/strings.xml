@@ -632,6 +632,7 @@
     <string name="shareLinkTypeDocument">document</string>
     <string name="shareLinkTypeFile">bestand</string>
     <string name="shareLinkTypeFolder">map</string>
+    <string name="shareLogsButton">Systeemlogboeken delen</string>
     <string name="shareUserExternal">Externe gebruiker van kDrive</string>
     <string name="shareUserNotAccepted">De gebruiker heeft de link nog niet geaccepteerd en is een externe gebruiker van de kDrive.</string>
     <plurals name="shareUsersCount">

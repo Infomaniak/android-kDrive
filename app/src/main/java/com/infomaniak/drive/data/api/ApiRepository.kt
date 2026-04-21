@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api
 
+import android.util.Log
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
@@ -30,6 +31,7 @@ import com.infomaniak.core.network.api.ApiController.ApiMethod.PUT
 import com.infomaniak.core.network.api.ApiController.callApiBlocking
 import com.infomaniak.core.network.models.ApiResponse
 import com.infomaniak.core.network.models.ApiResponseStatus
+import com.infomaniak.core.sentry.SentryLog
 import com.infomaniak.drive.data.api.ApiRoutes.loadCursor
 import com.infomaniak.drive.data.api.UploadTask.Companion.ConflictOption
 import com.infomaniak.drive.data.models.ArchiveUUID
@@ -168,6 +170,7 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String? = null,
         order: SortType
     ): CursorApiResponse<ListingFiles> {
+        SentryLog.i("ApiRepository", "getListingFiles with cursor ${cursor != null}")
         val url = when (cursor) {
             null -> "${ApiRoutes.getListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
             else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"

@@ -632,6 +632,7 @@
     <string name="shareLinkTypeDocument">asiakirja</string>
     <string name="shareLinkTypeFile">tiedosto</string>
     <string name="shareLinkTypeFolder">kansio</string>
+    <string name="shareLogsButton">Jaa järjestelmälokit</string>
     <string name="shareUserExternal">kDrive:n ulkoinen käyttäjä</string>
     <string name="shareUserNotAccepted">Käyttäjä ei ole vielä hyväksynyt jakoa ja on kDrive:n ulkoinen käyttäjä.</string>
     <plurals name="shareUsersCount">
