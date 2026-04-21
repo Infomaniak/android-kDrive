@@ -18,6 +18,7 @@
 package com.infomaniak.drive.ui.fileList
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -129,29 +130,33 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
                 )
 
                 when {
-                    folderFilesProviderResult == null -> emit(null)
+                    folderFilesProviderResult == null -> {
+                        Log.i("FileListViewModel", "getFiles: Emit result is null")
+                        emit(null)
+                    }
                     folderFilesProviderResult.isComplete -> {
-                        emit(
-                            FolderFilesResult(
-                                parentFolder = folderFilesProviderResult.folder,
-                                files = folderFilesProviderResult.folderFiles,
-                                isComplete = true,
-                                isFirstPage = isFirstPage,
-                                isNewSort = isNewSort,
-                            )
+                        val result = FolderFilesResult(
+                            parentFolder = folderFilesProviderResult.folder,
+                            files = folderFilesProviderResult.folderFiles,
+                            isComplete = true,
+                            isFirstPage = isFirstPage,
+                            isNewSort = isNewSort,
                         )
+                        emit(result)
+                        Log.i("FileListViewModel", "getFiles: Emit is complete $result")
+
                     }
                     else -> {
                         if (isFirstPage) {
-                            emit(
-                                FolderFilesResult(
-                                    parentFolder = folderFilesProviderResult.folder,
-                                    files = folderFilesProviderResult.folderFiles,
-                                    isComplete = true,
-                                    isFirstPage = true,
-                                    isNewSort = isNewSort,
-                                )
+                            val result = FolderFilesResult(
+                                parentFolder = folderFilesProviderResult.folder,
+                                files = folderFilesProviderResult.folderFiles,
+                                isComplete = true,
+                                isFirstPage = true,
+                                isNewSort = isNewSort,
                             )
+                            emit(result)
+                            Log.i("FileListViewModel", "getFiles: Emit first page $result")
                         }
                         recursiveDownload(folderId, isFirstPage = false)
                     }
@@ -160,6 +165,7 @@ class FileListViewModel(application: Application) : AndroidViewModel(application
             runCatching {
                 recursiveDownload(folderId, isFirstPage = true)
             }.cancellable().onFailure { t ->
+                Log.e("FileListViewModel", "getFiles: recursiveDownload failed")
                 SentryLog.e(TAG, "recursiveDownload failed", t)
             }.getOrNull()
         }

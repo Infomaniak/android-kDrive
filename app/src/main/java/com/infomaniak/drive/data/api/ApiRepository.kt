@@ -17,6 +17,7 @@
  */
 package com.infomaniak.drive.data.api
 
+import android.util.Log
 import androidx.collection.arrayMapOf
 import com.google.gson.JsonElement
 import com.infomaniak.core.auth.api.ApiRepositoryCore
@@ -168,6 +169,7 @@ object ApiRepository : ApiRepositoryCore() {
         cursor: String? = null,
         order: SortType
     ): CursorApiResponse<ListingFiles> {
+        Log.i("ApiRepository","getListingFiles with cursor $cursor")
         val url = when (cursor) {
             null -> "${ApiRoutes.getListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
             else -> "${ApiRoutes.getMoreListingFiles(driveId, parentId, order)}&${loadCursor(cursor)}"
