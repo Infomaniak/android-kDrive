@@ -23,6 +23,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.UtilsUi.openUrl
@@ -31,6 +32,8 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentSettingsAboutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.utils.LogSaver
+import kotlinx.coroutines.launch
 
 class AboutSettingsFragment : Fragment() {
 
@@ -71,6 +74,16 @@ class AboutSettingsFragment : Fragment() {
 
         appVersionLayout.description = "v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}"
         appVersionLayout.setOnClickListener { countClicksToShowSecretLogsButton() }
+
+        shareLogsButton.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val logsSaver = LogSaver(requireContext())
+                val areLogsSaved = logsSaver.saveLogsToFile()
+                if (areLogsSaved) {
+
+                }
+            }
+        }
 
         binding.root.enableEdgeToEdge()
     }
