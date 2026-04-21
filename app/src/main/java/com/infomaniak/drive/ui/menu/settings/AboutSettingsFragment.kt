@@ -92,10 +92,10 @@ class AboutSettingsFragment : Fragment() {
         val context = requireContext().applicationContext
         val logsSaver = LogSaver(context)
         val logsFileUri = logsSaver.saveLogsToFile()
-        if (logsFileUri != null) {
-            requireContext().shareFile { logsFileUri }
-        } else {
+        if (logsFileUri == null) {
             showSnackbar(R.string.anErrorHasOccurred)
+        } else {
+            requireContext().shareFile { logsFileUri }
         }
     }
 
