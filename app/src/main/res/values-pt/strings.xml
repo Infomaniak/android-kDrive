@@ -230,7 +230,7 @@
     <string name="createFolderValidUntilDescription">Após a data ter passado, os utilizadores já não poderão transferir ficheiros.</string>
     <string name="createPrivateFolderSuccess">Pasta criada com sucesso</string>
     <string name="deleteMyAccount">Eliminar a minha conta</string>
-    <string name="deletePicturesDescription">A aplicação irá pedir-lhe regularmente para eliminar fotos do seu dispositivo que já estão sincronizadas no seu kDrive. Tem sempre de autorizar manualmente a eliminação\n</string>
+    <string name="deletePicturesDescription">A aplicação irá pedir-lhe regularmente para eliminar fotos do seu dispositivo que já estão sincronizadas no seu kDrive. Tem sempre de autorizar manualmente a eliminação</string>
     <string name="deletePicturesTitle">Eliminar fotos</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">O produto expirou desde %s. Renove-o para o gerir e aceder aos seus dados.</item>
