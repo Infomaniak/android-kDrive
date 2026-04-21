@@ -18,11 +18,13 @@
 package com.infomaniak.drive.ui.menu.settings
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
@@ -35,6 +37,7 @@ import com.infomaniak.drive.extensions.enableEdgeToEdge
 import com.infomaniak.drive.utils.LogSaver
 import com.infomaniak.drive.utils.shareFile
 import com.infomaniak.drive.utils.showSnackbar
+import io.sentry.android.fragment.FragmentLifecycleState
 import kotlinx.coroutines.launch
 
 class AboutSettingsFragment : Fragment() {
@@ -42,6 +45,7 @@ class AboutSettingsFragment : Fragment() {
     private var binding: FragmentSettingsAboutBinding by safeBinding()
     private var secretLogsButtonClickCount = 0
     private var lastClickTime = 0L
+    private val logSaver by lazy { LogSaver(requireContext().applicationContext) }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return FragmentSettingsAboutBinding.inflate(inflater, container, false).also { binding = it }.root
@@ -87,18 +91,16 @@ class AboutSettingsFragment : Fragment() {
     }
 
     private fun shareLogs() = viewLifecycleOwner.lifecycleScope.launch {
-        val context = requireContext().applicationContext
-        val logsSaver = LogSaver(context)
-        val logsFileUri = logsSaver.saveLogsToFile()
+        val logsFileUri = logSaver.saveLogsToFile()
         if (logsFileUri == null) {
             showSnackbar(R.string.anErrorHasOccurred)
-        } else {
+        } else if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
             requireContext().shareFile { logsFileUri }
         }
     }
 
     private fun FragmentSettingsAboutBinding.countClicksToShowSecretLogsButton() {
-        val currentTime = System.currentTimeMillis()
+        val currentTime = SystemClock.elapsedRealtime()
         if (currentTime - lastClickTime < CLICK_INTERVAL_MILLIS) secretLogsButtonClickCount++ else secretLogsButtonClickCount = 1
         if (secretLogsButtonClickCount == REQUIRED_SECRET_BUTTON_CLICKS) shareLogsButton.isVisible = true
         lastClickTime = currentTime

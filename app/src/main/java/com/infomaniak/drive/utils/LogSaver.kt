@@ -30,6 +30,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.withContext
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 class LogSaver(private val appContext: Context) {
 
@@ -57,6 +58,8 @@ class LogSaver(private val appContext: Context) {
                 .redirectErrorStream(true)
                 .start()
 
+            ensureActive()
+
             try {
                 // Save logs
                 process.inputStream.use { inputStream ->
@@ -75,7 +78,7 @@ class LogSaver(private val appContext: Context) {
     }
 
     private fun getLogFileUri(process: Process, logFile: IOFile): Uri? = when {
-        process.waitFor() == 0 -> {
+        process.waitFor(5, TimeUnit.SECONDS) && process.exitValue() == 0 -> {
             SentryLog.i("LogSaver", "Logs saved to ${logFile.path}")
             FileProvider.getUriForFile(
                 appContext,
