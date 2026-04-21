@@ -632,6 +632,7 @@
     <string name="shareLinkTypeDocument">dokument</string>
     <string name="shareLinkTypeFile">fil</string>
     <string name="shareLinkTypeFolder">mappe</string>
+    <string name="shareLogsButton">Del systemlogger</string>
     <string name="shareUserExternal">kDrive ekstern bruger</string>
     <string name="shareUserNotAccepted">Brugeren har endnu ikke accepteret delingen og er en ekstern bruger af kDrive.</string>
     <plurals name="shareUsersCount">

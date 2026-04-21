@@ -632,6 +632,7 @@
     <string name="shareLinkTypeDocument">documento</string>
     <string name="shareLinkTypeFile">ficheiro</string>
     <string name="shareLinkTypeFolder">pasta</string>
+    <string name="shareLogsButton">Partilhar registos do sistema</string>
     <string name="shareUserExternal">Utilizador externo do kDrive</string>
     <string name="shareUserNotAccepted">O utilizador ainda não aceitou a partilha e é um utilizador externo do kDrive.</string>
     <plurals name="shareUsersCount">

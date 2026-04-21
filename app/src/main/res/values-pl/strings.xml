@@ -690,6 +690,7 @@
     <string name="shareLinkTypeDocument">dokument</string>
     <string name="shareLinkTypeFile">plik</string>
     <string name="shareLinkTypeFolder">folder</string>
+    <string name="shareLogsButton">Udostępnij dzienniki systemowe</string>
     <string name="shareUserExternal">użytkownik zewnętrzny kDrive</string>
     <string name="shareUserNotAccepted">Użytkownik nie zaakceptował jeszcze udostępnienia i jest użytkownikiem zewnętrznym kDrive.</string>
     <plurals name="shareUsersCount">

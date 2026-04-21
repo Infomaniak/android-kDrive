@@ -632,6 +632,7 @@
     <string name="shareLinkTypeDocument">έγγραφο</string>
     <string name="shareLinkTypeFile">αρχείο</string>
     <string name="shareLinkTypeFolder">φάκελο</string>
+    <string name="shareLogsButton">Κοινοποίηση αρχείων καταγραφής συστήματος</string>
     <string name="shareUserExternal">Εξωτερικός χρήστης kDrive</string>
     <string name="shareUserNotAccepted">Ο χρήστης δεν έχει ακόμη αποδεχτεί την κοινοποίηση και είναι εξωτερικός χρήστης του kDrive.</string>
     <plurals name="shareUsersCount">
