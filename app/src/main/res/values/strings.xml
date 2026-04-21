@@ -537,7 +537,7 @@
     <string name="notEnoughStorageDescription1">Your kDrive storage space is almost full. Upgrade your plan and unlock new features.</string>
     <string name="notEnoughStorageDescription2">Your kDrive storage space is almost full. Contact your administrator so they can upgrade your plan.</string>
     <string name="notEnoughStorageUsed">used</string>
-    <string name="notSupportedExtensionDescription">Would you like to create a copy of your file with a compatible extension for online editing? The original %s file will remain unchanged.\n</string>
+    <string name="notSupportedExtensionDescription">Would you like to create a copy of your file with a compatible extension for online editing? The original %s file will remain unchanged.</string>
     <string name="notSupportedExtensionTitle">The %s extension is not supported for online editing</string>
     <string name="notificationCommentChannelName">Comments</string>
     <string name="notificationGeneralChannelName">General notifications</string>

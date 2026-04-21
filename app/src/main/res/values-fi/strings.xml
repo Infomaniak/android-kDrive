@@ -572,14 +572,14 @@
     <string name="previewDownloadIndication">Lataus käynnissä, odota hetki…</string>
     <string name="previewFileProtectedError">Esikatselu ei ole saatavilla, tämä tiedosto on salasanasuojattu</string>
     <string name="previewLoadError">Esikatselua ei voi ladata</string>
-    <string name="previewNoPreview">Tällä tiedostolla ei näytä olevan esikatselua</string>
+    <string name="previewNoPreview">Tällä tiedostolla ei näytä olevan esikatselua.</string>
     <string name="previewPdfPages">%1$d / %2$d</string>
     <string name="previewVideoSourceError">Videotiedostoa ei tueta videotoistimella</string>
     <string name="privateSharedLinkTitle">Yksityinen jakamislinkki</string>
     <string name="publicShareImportationInProgress">Lataus käynnissä valitussa kansiossa</string>
     <string name="publicShareOutdatedLinkDescription">Linkki on poistettu käytöstä tai se on vanhentunut.\nPäästäksesi tiedostoihin, lähetä viesti käyttäjälle, joka jakoi linkin kanssasi, jotta hän voi aktivoida sen uudelleen.</string>
     <string name="publicShareOutdatedLinkTitle">Tiedostot eivät ole enää saatavilla</string>
-    <string name="publicSharePasswordNeededDescription">Syötä salasana päästäksesi sisältöön</string>
+    <string name="publicSharePasswordNeededDescription">Syötä salasana päästäksesi sisältöön.</string>
     <string name="publicSharePasswordNeededTitle">Suojattu sisältö</string>
     <string name="publicSharedLinkTitle">Julkinen jakolinkki</string>
     <string name="recentActivityMeTitle">Minun tekemä</string>

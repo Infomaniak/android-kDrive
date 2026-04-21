@@ -555,7 +555,7 @@
     <string name="obtainkDriveAdListing3">Automatischer Import Ihrer Dateien aus Google Drive, Dropbox, One Drive, NextCloud, Hubic und WebDav</string>
     <string name="obtainkDriveAdTitle">Erhalten Sie kDrive kostenlos</string>
     <string name="offlineFileNoFile">Keine offline Dateien</string>
-    <string name="offlineFileNoFileDescription">Wählen Sie eine Datei aus und machen Sie diese offline verfügbar, so dass Sie diese auch ohne Netzwerkverbindung hier abrufen können</string>
+    <string name="offlineFileNoFileDescription">Wählen Sie eine Datei aus und machen Sie diese offline verfügbar, so dass Sie diese auch ohne Netzwerkverbindung hier abrufen können.</string>
     <string name="offlineFileTitle">Offline</string>
     <string name="onBoardingDescription1">kDrive ist mit allen Geräten kompatibel. Ob im Büro, zu Hause oder unterwegs – Sie können alle Ihre Daten benutzerfreundlich bearbeiten, teilen und einsehen.</string>
     <string name="onBoardingDescription2">Teilen Sie Ihre Dateien und bearbeiten Sie diese gemeinsam in Echtzeit: Textdokumente, Tabellenblätter oder Präsentationen im Team.</string>
@@ -638,7 +638,7 @@
         <item quantity="one">%d Benutzer</item>
         <item quantity="other">%d Benutzer</item>
     </plurals>
-    <string name="sharedConflictDescription">Der Benutzer %1$s kann mit einem \"%2$s\" Recht bereits auf diesen Ordner zugreifen. Wenn Sie die Freigabe erteilen, greifen sie mit einem \"%3$s\" Recht auf den Ordner zu.</string>
+    <string name="sharedConflictDescription">Der Benutzer %1$s kann mit einem \"%2$s\" Recht bereits auf diesen Ordner zugreifen. Wenn Sie die Freigabe erteilen, greifen sie mit einem \"%3$s\" Recht auf den Ordner zu</string>
     <string name="sharedConflictManyUserDescription">Bestimmte Benutzer können bereits auf diesen Ordner zugreifen. Wenn Sie die Freigabe erteilen, greifen sie mit einem \"%s\" Recht auf den Ordner zu</string>
     <string name="sharedConflictTitle">Genehmigungskonflikt</string>
     <string name="sharedWithMeNoFile">Keine Datei mit mir geteilt</string>
