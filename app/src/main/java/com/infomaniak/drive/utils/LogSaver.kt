@@ -18,9 +18,12 @@
 package com.infomaniak.drive.utils
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
+import androidx.core.content.FileProvider
 import com.infomaniak.core.common.cancellable
 import com.infomaniak.core.sentry.SentryLog
+import com.infomaniak.drive.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -36,7 +39,7 @@ class LogSaver(private val appContext: Context) {
         require(appContext == appContext.applicationContext) { "The context must be an applicationContext" }
     }
 
-    suspend fun saveLogsToFile(): Boolean = withContext(Dispatchers.IO) {
+    suspend fun saveLogsToFile(): Uri? = withContext(Dispatchers.IO) {
         return@withContext runCatching {
             val logFile = IOFile(logsDir, "kDrive_logs.txt").apply {
                 if (exists()) delete()
@@ -56,25 +59,29 @@ class LogSaver(private val appContext: Context) {
                     inputStream.saveTo(logFile)
                 }
 
-                val isSuccessfullySaved = when {
-                    process.waitFor() == 0 -> {
-                        Log.i("LogSaver", "Logs saved to ${logFile.path}")
-                        true
+                val contentUri = when {
+                    process.waitFor() == 0 ->{
+                        SentryLog.i("LogSaver", "Logs saved to ${logFile.path}")
+                        FileProvider.getUriForFile(
+                            appContext,
+                            appContext.getString(R.string.FILE_AUTHORITY),
+                            logFile
+                        )
                     }
                     else -> {
                         SentryLog.e("LogSaver", "Process finished error")
-                        false
+                        null
                     }
                 }
 
-                isSuccessfullySaved
+                contentUri
             } finally {
                 process.destroy()
             }
-
+            
         }.cancellable().getOrElse { exception ->
             Log.e("LogSaver", "Error saving logs", exception)
-            false
+            null
         }
     }
 

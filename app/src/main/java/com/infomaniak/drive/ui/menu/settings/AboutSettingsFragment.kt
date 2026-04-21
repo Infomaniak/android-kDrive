@@ -17,10 +17,15 @@
  */
 package com.infomaniak.drive.ui.menu.settings
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +37,7 @@ import com.infomaniak.drive.BuildConfig
 import com.infomaniak.drive.R
 import com.infomaniak.drive.databinding.FragmentSettingsAboutBinding
 import com.infomaniak.drive.extensions.enableEdgeToEdge
+import com.infomaniak.drive.utils.IOFile
 import com.infomaniak.drive.utils.LogSaver
 import kotlinx.coroutines.launch
 
@@ -73,19 +79,31 @@ class AboutSettingsFragment : Fragment() {
         }
 
         appVersionLayout.description = "v ${BuildConfig.VERSION_NAME} build ${BuildConfig.VERSION_CODE}"
-        appVersionLayout.setOnClickListener { countClicksToShowSecretLogsButton() }
+        appVersionLayout.setOnClickListener {
+            countClicksToShowSecretLogsButton()
+        }
 
         shareLogsButton.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch {
-                val logsSaver = LogSaver(requireContext())
-                val areLogsSaved = logsSaver.saveLogsToFile()
-                if (areLogsSaved) {
-
-                }
-            }
+            shareLogs()
         }
 
         binding.root.enableEdgeToEdge()
+    }
+
+    private fun shareLogs() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val context = requireContext().applicationContext
+            val logsSaver = LogSaver(context)
+            val logsFileUri = logsSaver.saveLogsToFile()
+            if (logsFileUri != null) {
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_STREAM, logsFileUri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(Intent.createChooser(intent, "Send logs via..."))
+            }
+        }
     }
 
     private fun FragmentSettingsAboutBinding.countClicksToShowSecretLogsButton() {
