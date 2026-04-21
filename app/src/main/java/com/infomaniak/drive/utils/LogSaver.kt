@@ -61,7 +61,7 @@ class LogSaver(private val appContext: Context) {
                     false
                 }
                 else -> {
-                    Log.i("LogSaver", "Logs saved to ${logFile.absolutePath}")
+                    Log.i("LogSaver", "Logs saved to ${logFile.path}")
                     true
                 }
             }
