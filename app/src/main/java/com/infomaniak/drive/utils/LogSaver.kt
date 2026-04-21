@@ -74,7 +74,7 @@ class LogSaver(private val appContext: Context) {
     }
 
     suspend fun deleteLogs() = Dispatchers.IO {
-        logsDir.deleteRecursively()
+        if (logsDir.exists()) logsDir.deleteRecursively()
     }
 
     private suspend fun InputStream.saveTo(logFilePath: IOFile) {
