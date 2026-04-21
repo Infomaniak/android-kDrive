@@ -63,28 +63,28 @@ class LogSaver(private val appContext: Context) {
                     inputStream.saveTo(logFile)
                 }
 
-                val contentUri = when {
-                    process.waitFor() == 0 ->{
-                        SentryLog.i("LogSaver", "Logs saved to ${logFile.path}")
-                        FileProvider.getUriForFile(
-                            appContext,
-                            appContext.getString(R.string.FILE_AUTHORITY),
-                            logFile
-                        )
-                    }
-                    else -> {
-                        SentryLog.e("LogSaver", "Process finished error")
-                        null
-                    }
-                }
-
-                contentUri
+                getLogFileUri(process, logFile)
             } finally {
                 process.destroy()
             }
-            
+
         }.cancellable().getOrElse { exception ->
             Log.e("LogSaver", "Error saving logs", exception)
+            null
+        }
+    }
+
+    private fun getLogFileUri(process: Process, logFile: IOFile): Uri? = when {
+        process.waitFor() == 0 -> {
+            SentryLog.i("LogSaver", "Logs saved to ${logFile.path}")
+            FileProvider.getUriForFile(
+                appContext,
+                appContext.getString(R.string.FILE_AUTHORITY),
+                logFile
+            )
+        }
+        else -> {
+            SentryLog.e("LogSaver", "Process finished error")
             null
         }
     }
