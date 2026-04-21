@@ -537,7 +537,7 @@
     <string name="notEnoughStorageDescription1">kDrive-tallennustilasi on lähes täynnä. Päivitä pakettisi ja avaa uusia ominaisuuksia.</string>
     <string name="notEnoughStorageDescription2">kDrive-tallennustilasi on lähes täynnä. Ota yhteyttä ylläpitäjääsi, jotta hän voi päivittää pakettisi.</string>
     <string name="notEnoughStorageUsed">käytetty</string>
-    <string name="notSupportedExtensionDescription">Haluatko luoda kopion tiedostostasi yhteensopivalla laajennuksella verkkomuokkausta varten? Alkuperäinen %s-tiedosto säilyy muuttumattomana.\u0020</string>
+    <string name="notSupportedExtensionDescription">Haluatko luoda kopion tiedostostasi yhteensopivalla laajennuksella verkkomuokkausta varten? Alkuperäinen %s-tiedosto säilyy muuttumattomana.</string>
     <string name="notSupportedExtensionTitle">Laajennusta %s ei tueta verkkomuokkauksessa</string>
     <string name="notificationCommentChannelName">Kommentit</string>
     <string name="notificationGeneralChannelName">Yleiset ilmoitukset</string>

@@ -615,9 +615,9 @@
     <string name="shareLinkPasswordRightDescription">Iedereen die de link heeft moet een wachtwoord invoeren om de %s te benaderen.</string>
     <string name="shareLinkPasswordRightTitle">Met wachtwoord</string>
     <string name="shareLinkPrivateRightTitle">Privé</string>
-    <string name="shareLinkPublicRightDescription">Iedereen met de link kan dit %3$s %1$s%2$s%4$s.</string>
+    <string name="shareLinkPublicRightDescription">Iedereen met de link kan dit %3$s%2$s %1$s%4$s.</string>
     <string name="shareLinkPublicRightDescriptionDate">\u0020tot %s</string>
-    <string name="shareLinkPublicRightDescriptionPassword">wachtwoordbeveiligd\u0020</string>
+    <string name="shareLinkPublicRightDescriptionPassword">wachtwoordbeveiligde\u0020</string>
     <string name="shareLinkPublicRightDocumentDescriptionShort">Iedereen met de link kan het document benaderen.</string>
     <string name="shareLinkPublicRightFileDescriptionShort">Iedereen met de link kan het bestand benaderen.</string>
     <string name="shareLinkPublicRightFolderDescriptionShort">Iedereen met de link kan de map benaderen.</string>
