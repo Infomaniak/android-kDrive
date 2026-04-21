@@ -50,23 +50,28 @@ class LogSaver(private val appContext: Context) {
                 .redirectErrorStream(true)
                 .start()
 
-            // Save logs
-            process.inputStream.use { inputStream ->
-                inputStream.saveTo(logFile)
+            try {
+                // Save logs
+                process.inputStream.use { inputStream ->
+                    inputStream.saveTo(logFile)
+                }
+
+                val isSuccessfullySaved = when {
+                    process.waitFor() == 0 -> {
+                        Log.i("LogSaver", "Logs saved to ${logFile.path}")
+                        true
+                    }
+                    else -> {
+                        SentryLog.e("LogSaver", "Process finished error")
+                        false
+                    }
+                }
+
+                isSuccessfullySaved
+            } finally {
+                process.destroy()
             }
 
-            val isSuccessfullySaved = when {
-                process.waitFor() == 0 -> {
-                    Log.i("LogSaver", "Logs saved to ${logFile.path}")
-                    true
-                }
-                else -> {
-                    SentryLog.e("LogSaver", "Process finished error")
-                    false
-                }
-            }
-
-            isSuccessfullySaved
         }.cancellable().getOrElse { exception ->
             Log.e("LogSaver", "Error saving logs", exception)
             false
