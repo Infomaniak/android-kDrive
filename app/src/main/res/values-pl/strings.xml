@@ -593,7 +593,7 @@
     <string name="notEnoughStorageDescription1">Miejsce w pamięci kDrive jest prawie pełne. Zaktualizuj swój plan i odblokuj nowe funkcje.</string>
     <string name="notEnoughStorageDescription2">Miejsce w pamięci kDrive jest prawie pełne. Skontaktuj się z administratorem, aby mógł zaktualizować Twój plan.</string>
     <string name="notEnoughStorageUsed">wykorzystane</string>
-    <string name="notSupportedExtensionDescription">Czy chcesz utworzyć kopię swojego pliku z rozszerzeniem umożliwiającym edycję online? Oryginalny plik %s pozostanie niezmieniony.\n</string>
+    <string name="notSupportedExtensionDescription">Czy chcesz utworzyć kopię swojego pliku z rozszerzeniem umożliwiającym edycję online? Oryginalny plik %s pozostanie niezmieniony.</string>
     <string name="notSupportedExtensionTitle">Rozszerzenie %s nie jest obsługiwane przy edycji online</string>
     <string name="notificationCommentChannelName">Komentarze</string>
     <string name="notificationGeneralChannelName">Ogólne powiadomienia</string>

@@ -537,7 +537,7 @@
     <string name="notEnoughStorageDescription1">Ditt kDrive lagringsutrymme är nästan fullt. Uppgradera ditt paket och lås upp nya funktioner.</string>
     <string name="notEnoughStorageDescription2">Ditt kDrive lagringsutrymme är nästan fullt. Kontakta din administratör så att de kan uppgradera ditt paket.</string>
     <string name="notEnoughStorageUsed">använt</string>
-    <string name="notSupportedExtensionDescription">Vill du skapa en kopia av din fil med ett kompatibelt filtillägg för redigering online? Den ursprungliga %s filen kommer att förbli oförändrad.\n</string>
+    <string name="notSupportedExtensionDescription">Vill du skapa en kopia av din fil med ett kompatibelt filtillägg för redigering online? Den ursprungliga %s filen kommer att förbli oförändrad.</string>
     <string name="notSupportedExtensionTitle">Filtillägget %s stöds inte för redigering online</string>
     <string name="notificationCommentChannelName">Kommentarer</string>
     <string name="notificationGeneralChannelName">Allmänna notiser</string>

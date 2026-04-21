@@ -263,7 +263,7 @@
     <string name="errorDelete">Feil ved sletting</string>
     <string name="errorDeviceStorage">Manglende lagringsplass på enheten</string>
     <string name="errorDownloadPermission">Du må legge til minst én fil som du har tillatelse til å laste ned</string>
-    <string name="errorDropboxLimitExceeded">Du har nådd grensen for nedlastingsboks</string>
+    <string name="errorDropboxLimitExceeded">Du har nådd grensen for nedlastingsboks.</string>
     <string name="errorDuplicate">Feil ved duplisering</string>
     <string name="errorExternalImportInProgress">Kan ikke utføre handling på mappen fordi en ekstern import pågår</string>
     <string name="errorFileAlreadyExists">Fil eller mappe finnes allerede</string>
@@ -537,7 +537,7 @@
     <string name="notEnoughStorageDescription1">Lagringsplassen på kDrive er nesten full. Oppgrader abonnementet ditt og lås opp nye funksjoner.</string>
     <string name="notEnoughStorageDescription2">Lagringsplassen på kDrive er nesten full. Kontakt administratoren din slik at de kan oppgradere abonnementet ditt.</string>
     <string name="notEnoughStorageUsed">brukt</string>
-    <string name="notSupportedExtensionDescription">Ønsker du å opprette en kopi av filen din med en kompatibel utvidelse for online redigering? Den originale %s-filen vil forbli uendret.\n</string>
+    <string name="notSupportedExtensionDescription">Ønsker du å opprette en kopi av filen din med en kompatibel utvidelse for online redigering? Den originale %s-filen vil forbli uendret.</string>
     <string name="notSupportedExtensionTitle">Utvidelsen %s støttes ikke for online redigering</string>
     <string name="notificationCommentChannelName">Kommentarer</string>
     <string name="notificationGeneralChannelName">Generelle varsler</string>

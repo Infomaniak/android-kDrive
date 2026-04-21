@@ -230,7 +230,7 @@
     <string name="createFolderValidUntilDescription">Once the date has passed, users will no longer be able to transfer files.</string>
     <string name="createPrivateFolderSuccess">Folder created successfully</string>
     <string name="deleteMyAccount">Delete my account</string>
-    <string name="deletePicturesDescription">The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion\n</string>
+    <string name="deletePicturesDescription">The application will regularly ask you to delete photos from your device that are already synchronized on your kDrive. You always have to manually authorize the deletion</string>
     <string name="deletePicturesTitle">Delete photos</string>
     <plurals name="driveBlockedDescription">
         <item quantity="one">The product has expired since %s. Please renew it to manage it and access its data.</item>
@@ -537,7 +537,7 @@
     <string name="notEnoughStorageDescription1">Your kDrive storage space is almost full. Upgrade your plan and unlock new features.</string>
     <string name="notEnoughStorageDescription2">Your kDrive storage space is almost full. Contact your administrator so they can upgrade your plan.</string>
     <string name="notEnoughStorageUsed">used</string>
-    <string name="notSupportedExtensionDescription">Would you like to create a copy of your file with a compatible extension for online editing? The original %s file will remain unchanged.\n</string>
+    <string name="notSupportedExtensionDescription">Would you like to create a copy of your file with a compatible extension for online editing? The original %s file will remain unchanged.</string>
     <string name="notSupportedExtensionTitle">The %s extension is not supported for online editing</string>
     <string name="notificationCommentChannelName">Comments</string>
     <string name="notificationGeneralChannelName">General notifications</string>

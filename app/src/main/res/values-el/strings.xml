@@ -537,7 +537,7 @@
     <string name="notEnoughStorageDescription1">Ο αποθηκευτικός χώρος του kDrive σας είναι σχεδόν πλήρης. Αναβαθμίστε το πακέτο σας και ξεκλειδώστε νέες λειτουργίες.</string>
     <string name="notEnoughStorageDescription2">Ο αποθηκευτικός χώρος του kDrive σας είναι σχεδόν πλήρης. Επικοινωνήστε με τον διαχειριστή σας για να μπορέσει να αναβαθμίσει το πακέτο σας.</string>
     <string name="notEnoughStorageUsed">σε χρήση</string>
-    <string name="notSupportedExtensionDescription">Θέλετε να δημιουργήσετε ένα αντίγραφο του αρχείου σας με συμβατή επέκταση για επεξεργασία online; Το αρχικό αρχείο %s θα παραμείνει αναλλοίωτο.\n</string>
+    <string name="notSupportedExtensionDescription">Θέλετε να δημιουργήσετε ένα αντίγραφο του αρχείου σας με συμβατή επέκταση για επεξεργασία online; Το αρχικό αρχείο %s θα παραμείνει αναλλοίωτο.</string>
     <string name="notSupportedExtensionTitle">Η επέκταση %s δεν υποστηρίζεται για επεξεργασία online</string>
     <string name="notificationCommentChannelName">Σχόλια</string>
     <string name="notificationGeneralChannelName">Γενικές ειδοποιήσεις</string>
