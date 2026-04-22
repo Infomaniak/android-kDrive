@@ -269,6 +269,7 @@
     <string name="errorFileAlreadyExists">Il file o la cartella esiste già</string>
     <string name="errorFileLocked">Il file è attualmente aperto da un utente e non può essere modificato</string>
     <string name="errorFilesLimitExceeded">Limite file raggiunto nella cartella</string>
+    <string name="errorGeneric">Si è verificato un errore</string>
     <string name="errorGetBookmarkURL">Link non recuperabile</string>
     <string name="errorLeaveShare">Errore durante l’abbandono della condivisione</string>
     <string name="errorLimitExceeded">Limite raggiunto</string>
@@ -277,6 +278,7 @@
     <string name="errorMove">Errore durante lo spostamento</string>
     <string name="errorNetwork">Problema di connessione</string>
     <string name="errorNetworkDescription">I risultati possono essere incompleti</string>
+    <string name="errorPhotoLibraryAccessLimited">kDrive non ha accesso alla vostra libreria di foto</string>
     <string name="errorPreviewDeleted">Il file è stato eliminato definitivamente</string>
     <string name="errorPreviewTrash">L’anteprima di un file spostato nel cestino non è disponibile</string>
     <string name="errorQuotaExceeded">Spazio insufficiente sul kDrive</string>
@@ -760,6 +762,7 @@
     <string name="uploadNetworkErrorTitle">Importazione sospesa</string>
     <string name="uploadNetworkErrorWifiRequired">In attesa di connessione alla rete Wi-Fi</string>
     <string name="uploadOutOfMemoryError">Insufficiente RAM disponibile</string>
+    <string name="uploadOverDataRestrictedError">In attesa del Wi-Fi</string>
     <string name="uploadPausedDescription">Alcuni caricamenti sono ancora in corso in kDrive. Aprite l’app e mantenete il dispositivo connesso per accelerare il caricamento.</string>
     <string name="uploadPausedTitle">Pausa importazione</string>
     <string name="uploadPermissionError">Permessi aggiuntivi richiesti</string>

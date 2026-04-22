@@ -42,6 +42,7 @@ import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
 import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
+import com.infomaniak.drive.data.models.up.DriveError
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
@@ -225,6 +226,7 @@ class UploadTask(
                 okHttpClient = uploadFile.okHttpClient
             )
             if (!closedSessionResponse.isSuccess()) closedSessionResponse.manageUploadErrors()
+            else uploadFile.updateUploadErrorKey(null)
         }
     }
 
@@ -412,6 +414,8 @@ class UploadTask(
                 ApiResponse<Any>(error = ApiError(description = bodyResponse))
             }
             apiResponse.manageUploadErrors()
+        } else {
+            uploadFile.updateUploadErrorKey(null)
         }
     }
 
@@ -473,8 +477,9 @@ class UploadTask(
         )
 
         return ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient).also {
-            if (it.isSuccess()) it.data?.token?.let { uploadToken ->
-                uploadFile.updateUploadToken(uploadToken, it.data!!.uploadHost)
+            if (it.isSuccess()) it.data?.run {
+                uploadFile.updateUploadToken(token, uploadHost)
+                uploadFile.updateUploadErrorKey(null)
             } else {
                 it.manageUploadErrors()
             }
@@ -482,7 +487,11 @@ class UploadTask(
     }
 
     private fun <T> ApiResponse<T>.manageUploadErrors() {
-        if (error?.exception is ApiControllerNetworkException) throw NetworkException()
+        if (error?.exception is ApiControllerNetworkException) {
+            uploadFile.updateUploadErrorKey(DriveError.Network.NetworkError.key)
+            throw NetworkException()
+        }
+        uploadFile.updateUploadErrorKey(error?.code)
         when (error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()

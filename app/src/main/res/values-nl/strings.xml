@@ -269,6 +269,7 @@
     <string name="errorFileAlreadyExists">Bestand of map bestaat al</string>
     <string name="errorFileLocked">Dit bestand is momenteel geopend door een andere gebruiker en kan niet worden gewijzigd</string>
     <string name="errorFilesLimitExceeded">Limiet van bestanden in map bereikt</string>
+    <string name="errorGeneric">Er is een fout opgetreden</string>
     <string name="errorGetBookmarkURL">Link niet herstelbaar</string>
     <string name="errorLeaveShare">Fout bij het stoppen van delen</string>
     <string name="errorLimitExceeded">Limiet bereikt</string>
@@ -277,6 +278,7 @@
     <string name="errorMove">Verplaatsfout</string>
     <string name="errorNetwork">Netwerkfout</string>
     <string name="errorNetworkDescription">Resultaten kunnen onvolledig zijn</string>
+    <string name="errorPhotoLibraryAccessLimited">kDrive heeft geen toegang tot je fotobibliotheek</string>
     <string name="errorPreviewDeleted">Dit bestand is permanent verwijderd</string>
     <string name="errorPreviewTrash">Een voorbeeld van een bestand in de prullenbak is niet mogelijk</string>
     <string name="errorQuotaExceeded">Niet genoeg ruimte op uw kDrive</string>
@@ -760,6 +762,7 @@
     <string name="uploadNetworkErrorTitle">Uploaden onderbroken</string>
     <string name="uploadNetworkErrorWifiRequired">Wachten op Wi-Fi netwerk</string>
     <string name="uploadOutOfMemoryError">Onvoldoende beschikbaar ram-geheugen</string>
+    <string name="uploadOverDataRestrictedError">Wachten op Wi-Fi</string>
     <string name="uploadPausedDescription">Sommige uploads zijn nog bezig in kDrive. Open de app en houd het apparaat verbonden om de upload te versnellen.</string>
     <string name="uploadPausedTitle">Uploaden gepauzeerd</string>
     <string name="uploadPermissionError">Aanvullende toestemmingen aangevraagd</string>
