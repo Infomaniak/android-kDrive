@@ -118,16 +118,16 @@ sealed interface DriveError {
 
 
     companion object {
-        fun find(key: String?): DriveError? = key?.let { allValues.find { it.key == key } }
+        fun find(key: String?): DriveError? = key?.let { allValues[key] }
 
-        private val allValues: List<DriveError> by lazy { buildAllValuesList() }
+        private val allValues: Map<String, DriveError> by lazy { buildAllValuesList() }
 
-        private fun buildAllValuesList(): List<DriveError> {
+        private fun buildAllValuesList(): Map<String, DriveError> {
             return Local::class.values() + Network::class.values() + ServerError::class.values() + ServerPlurals::class.values()
         }
 
-        private inline fun <reified T : DriveError> KClass<T>.values(): List<DriveError> =
-            sealedSubclasses.map { it.objectInstance as DriveError }
+        private inline fun <reified T : DriveError> KClass<T>.values(): Map<String, DriveError> =
+            sealedSubclasses.map { it.objectInstance as DriveError }.associateBy { it.key }
 
     }
 }
