@@ -225,6 +225,7 @@ class UploadTask(
                 okHttpClient = uploadFile.okHttpClient
             )
             if (!closedSessionResponse.isSuccess()) closedSessionResponse.manageUploadErrors()
+            else uploadFile.updateUploadErrorKey(null)
         }
     }
 
@@ -412,6 +413,8 @@ class UploadTask(
                 ApiResponse<Any>(error = ApiError(description = bodyResponse))
             }
             apiResponse.manageUploadErrors()
+        } else {
+            uploadFile.updateUploadErrorKey(null)
         }
     }
 
@@ -475,14 +478,15 @@ class UploadTask(
         return ApiRepository.startUploadSession(driveId, sessionBody, okHttpClient).also {
             if (it.isSuccess()) it.data?.run {
                 uploadFile.updateUploadToken(token, uploadHost)
+                uploadFile.updateUploadErrorKey(null)
             } else {
-                uploadFile.updateUploadErrorKey(it.error?.code)
                 it.manageUploadErrors()
             }
         }.data?.uploadHost
     }
 
     private fun <T> ApiResponse<T>.manageUploadErrors() {
+        uploadFile.updateUploadErrorKey(error?.code)
         if (error?.exception is ApiControllerNetworkException) throw NetworkException()
         when (error?.code) {
             "file_already_exists_error" -> Unit
