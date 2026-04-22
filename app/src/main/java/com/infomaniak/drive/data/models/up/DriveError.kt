@@ -28,7 +28,7 @@ import kotlin.reflect.KClass
 sealed interface DriveError {
     val key: String
 
-    interface Plurals {
+    fun interface Plurals {
         fun message(quantity: Int): String
     }
 

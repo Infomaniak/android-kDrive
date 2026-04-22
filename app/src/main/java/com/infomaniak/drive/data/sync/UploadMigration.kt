@@ -116,7 +116,7 @@ class UploadMigration : RealmMigration {
                 ?.addField("onlyWifiSyncMedia", Boolean::class.java, FieldAttribute.REQUIRED)
         }
 
-        if (oldVersion < 9L) {//stop use of oldVersionTemp as it is useless
+        if (oldVersion < 9L) { //stop use of oldVersionTemp as it is useless
             schema.get(UploadFile::class.java.simpleName)
                 ?.addField("_driveErrorKey", String::class.java)
         }
