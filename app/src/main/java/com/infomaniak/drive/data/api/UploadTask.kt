@@ -42,6 +42,7 @@ import com.infomaniak.drive.data.api.ApiRepository.uploadEmptyFile
 import com.infomaniak.drive.data.api.ApiRoutes.uploadChunkUrl
 import com.infomaniak.drive.data.models.UploadFile
 import com.infomaniak.drive.data.models.drive.Drive.MaintenanceReason
+import com.infomaniak.drive.data.models.up.DriveError
 import com.infomaniak.drive.data.models.upload.UploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.data.services.UploadWorker
@@ -486,8 +487,11 @@ class UploadTask(
     }
 
     private fun <T> ApiResponse<T>.manageUploadErrors() {
+        if (error?.exception is ApiControllerNetworkException) {
+            uploadFile.updateUploadErrorKey(DriveError.Network.NetworkError.key)
+            throw NetworkException()
+        }
         uploadFile.updateUploadErrorKey(error?.code)
-        if (error?.exception is ApiControllerNetworkException) throw NetworkException()
         when (error?.code) {
             "file_already_exists_error" -> Unit
             "lock_error" -> throw LockErrorException()
