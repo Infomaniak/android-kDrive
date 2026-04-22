@@ -167,9 +167,9 @@ open class UploadFile(
 
     private fun updateDbInstance(transactionBlock: (UploadFile) -> Unit) {
         getRealmInstance().use { realm ->
-            uploadFileByUriQuery(realm, uri).findFirst()?.apply {
-                realm.executeTransaction { transactionBlock(this) }
-            }
+            uploadFileByUriQuery(realm, uri)
+                .findFirst()
+                ?.let { uploadFile -> realm.executeTransaction { transactionBlock(uploadFile) } }
         }
     }
 
