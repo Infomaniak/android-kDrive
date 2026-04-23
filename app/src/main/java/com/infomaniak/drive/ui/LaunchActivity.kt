@@ -26,7 +26,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
-import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.legacy.extensions.setDefaultLocaleIfNeeded
 import com.infomaniak.core.legacy.utils.showToast
 import com.infomaniak.core.network.models.ApiError
@@ -177,7 +176,7 @@ class LaunchActivity : EdgeToEdgeActivity() {
             message = "Upload notification has been clicked"
             level = SentryLevel.INFO
         })
-        deeplinkType = if (UserDatabase().userDao().findById(navArgs.destinationUserId) != null) {
+        deeplinkType = if (navArgs.areValid()) {
             DeeplinkAction.Drive(
                 userId = navArgs.destinationUserId,
                 driveId = navArgs.destinationDriveId,
@@ -186,6 +185,10 @@ class LaunchActivity : EdgeToEdgeActivity() {
         } else {
             DeeplinkType.Unmanaged.NotAccessible
         }
+    }
+
+    private suspend fun LaunchActivityArgs.areValid(): Boolean = Dispatchers.IO {
+        DriveInfosController.getDrivesCount(userId = destinationUserId, driveId = destinationDriveId) > 0
     }
 
     private suspend fun LaunchActivityArgs.getRoleFolder(): RoleFolder {
