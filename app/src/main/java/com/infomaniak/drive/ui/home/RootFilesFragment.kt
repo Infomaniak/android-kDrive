@@ -24,7 +24,9 @@ import android.view.ViewGroup
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.legacy.utils.safeBinding
@@ -128,9 +130,11 @@ class RootFilesFragment : BaseRootFolderFragment() {
 
     private fun observeDeeplink() {
         lifecycleScope.launch {
-            mainViewModel.navigateDeeplink.filterNotNull().collect {
-                retrieveDeeplinkAction(it)?.let(::safelyNavigate)
-                mainViewModel.navigateDeeplink.emit(null)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.navigateDeeplink.filterNotNull().collect {
+                    retrieveDeeplinkAction(it)?.let(::safelyNavigate)
+                    mainViewModel.navigateDeeplink.emit(null)
+                }
             }
         }
     }
