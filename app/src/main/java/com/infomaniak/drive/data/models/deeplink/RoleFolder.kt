@@ -43,7 +43,7 @@ sealed interface RoleFolder : Parcelable {
         override val isHandled: Boolean get() = false
 
         internal suspend fun attemptConvertToInternalRoleFolder(driveId: Int): RoleFolder? {
-            val drive = UserDrive(driveId)
+            val drive = UserDrive(driveId = driveId)
             return attemptConvertToFile(drive) ?: attemptConvertToSharedWithMe(drive)
         }
 
