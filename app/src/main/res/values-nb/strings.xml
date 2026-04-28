@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Filer</string>
     <string name="filePermissionTitle">Velg rettighet</string>
+    <string name="fileProviderExtensionDescription">Hvis dette alternativet er deaktivert, vil kDrive ikke lenger være tilgjengelig i Filer-appen og i tredjepartsapper.</string>
+    <string name="fileProviderExtensionError">Du har deaktivert visning av filer fra kDrive. Du kan aktivere det igjen i app-innstillingene.</string>
+    <string name="fileProviderExtensionTitle">Vis i Filer</string>
     <string name="fileShareAddMessage">Legg til en melding for gjester (valgfritt)</string>
     <string name="fileShareDetailsFileTitle">Fil %s deling og rettigheter</string>
     <string name="fileShareDetailsFolderTitle">Mappe %s deling og rettigheter</string>

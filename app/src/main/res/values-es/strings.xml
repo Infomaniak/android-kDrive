@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Archivos</string>
     <string name="filePermissionTitle">Seleccionar el derecho</string>
+    <string name="fileProviderExtensionDescription">Si se desactiva esta opción, kDrive dejará de estar disponible en la aplicación Archivos y en las aplicaciones de terceros.</string>
+    <string name="fileProviderExtensionError">Ha desactivado la visualización de archivos desde kDrive. Puede volver a activarla en la configuración de la aplicación.</string>
+    <string name="fileProviderExtensionTitle">Ver en Archivos</string>
     <string name="fileShareAddMessage">Añadir un mensaje para los invitados (opcional)</string>
     <string name="fileShareDetailsFileTitle">Uso compartido y derechos del archivo %s</string>
     <string name="fileShareDetailsFolderTitle">Uso compartido y derechos de la carpeta %s</string>

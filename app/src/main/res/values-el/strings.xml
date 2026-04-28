@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Αρχεία</string>
     <string name="filePermissionTitle">Επιλέξτε το δικαίωμα</string>
+    <string name="fileProviderExtensionDescription">Εάν αυτή η επιλογή απενεργοποιηθεί, το kDrive δεν θα είναι πλέον διαθέσιμο στην εφαρμογή Αρχεία και σε εφαρμογές τρίτων.</string>
+    <string name="fileProviderExtensionError">Έχετε απενεργοποιήσει την εμφάνιση αρχείων από το kDrive. Μπορείτε να την ενεργοποιήσετε ξανά στις ρυθμίσεις της εφαρμογής.</string>
+    <string name="fileProviderExtensionTitle">Εμφάνιση στα Αρχεία</string>
     <string name="fileShareAddMessage">Προσθήκη μηνύματος για επισκέπτες (προαιρετικό)</string>
     <string name="fileShareDetailsFileTitle">Κοινή χρήση και δικαιώματα του αρχείου %s</string>
     <string name="fileShareDetailsFolderTitle">Κοινή χρήση και δικαιώματα του φακέλου %s</string>
