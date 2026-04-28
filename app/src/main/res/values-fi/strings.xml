@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Tiedostot</string>
     <string name="filePermissionTitle">Valitse oikeus</string>
+    <string name="fileProviderExtensionDescription">Jos tämä asetus on poistettu käytöstä, kDrive ei ole enää käytettävissä Tiedostot-sovelluksessa eikä kolmannen osapuolen sovelluksissa.</string>
+    <string name="fileProviderExtensionError">Olet ottanut tiedostojen näytön pois käytöstä kDrivesta. Voit ottaa sen uudelleen käyttöön sovelluksen asetuksissa.</string>
+    <string name="fileProviderExtensionTitle">Näytä Tiedostot-sovelluksessa</string>
     <string name="fileShareAddMessage">Lisää viesti vieraille (valinnainen)</string>
     <string name="fileShareDetailsFileTitle">Tiedoston %s jakaminen ja oikeudet</string>
     <string name="fileShareDetailsFolderTitle">Kansion %s jakaminen ja oikeudet</string>

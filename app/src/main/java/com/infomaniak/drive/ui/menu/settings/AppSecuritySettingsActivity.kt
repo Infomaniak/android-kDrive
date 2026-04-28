@@ -26,9 +26,11 @@ import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.twofactorauth.front.TwoFactorAuthApprovalAutoManagedBottomSheet
 import com.infomaniak.core.twofactorauth.front.addComposeOverlay
 import com.infomaniak.drive.R
+import com.infomaniak.drive.data.documentprovider.CloudStorageProvider
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.databinding.ViewSwitchSettingsBinding
 import com.infomaniak.drive.twoFactorAuthManager
+import splitties.init.appCtx
 
 class AppSecuritySettingsActivity : AppCompatActivity() {
 
@@ -54,7 +56,10 @@ class AppSecuritySettingsActivity : AppCompatActivity() {
                 // Reverse switch (before official parameter changed) by silent click
                 silentlyReverseSwitch(this) { shouldLock ->
                     AppSettings.appSecurityLock = shouldLock
-                    if (shouldLock) AppLockManager.unlock()
+                    if (shouldLock) {
+                        CloudStorageProvider.setDisabled(appCtx, true)
+                        AppLockManager.unlock()
+                    }
                 }
             }
         }

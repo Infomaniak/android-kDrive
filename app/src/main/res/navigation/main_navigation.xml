@@ -554,6 +554,9 @@
         <action
             android:id="@+id/action_settingsFragment_to_syncOfflineSelectBottomSheetDialog"
             app:destination="@id/syncOfflineSelectBottomSheetDialog" />
+        <action
+            android:id="@+id/action_settingsFragment_to_securitySettingsFragment"
+            app:destination="@id/securitySettingsFragment" />
     </fragment>
 
     <activity
@@ -561,6 +564,13 @@
         android:name="com.infomaniak.drive.ui.menu.settings.AppSecuritySettingsActivity"
         android:label="AppSecurityActivity"
         tools:layout="@layout/view_switch_settings" />
+
+    <fragment
+        android:id="@+id/securitySettingsFragment"
+        android:name="com.infomaniak.drive.ui.menu.settings.SecuritySettingsFragment"
+        android:label="securitySettingsFragment"
+        tools:layout="@layout/fragment_settings_security">
+    </fragment>
 
     <fragment
         android:id="@+id/aboutSettingsFragment"

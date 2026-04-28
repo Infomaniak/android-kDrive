@@ -27,14 +27,12 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.collection.arrayMapOf
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.infomaniak.core.applock.AppLockManager
 import com.infomaniak.core.auth.room.UserDatabase
 import com.infomaniak.core.bugtracker.BugTrackerActivity
 import com.infomaniak.core.bugtracker.BugTrackerActivityArgs
@@ -93,17 +91,7 @@ class SettingsFragment : Fragment() {
         syncPicture.setOnClickListener { safelyNavigate(R.id.syncSettingsActivity) }
         themeSettings.setOnClickListener { openThemeSettings() }
         notifications.setOnClickListener { requireContext().openAppNotificationSettings() }
-        appSecurity.apply {
-            if (AppLockManager.hasBiometrics()) {
-                isVisible = true
-                setOnClickListener {
-                    trackSettingsEvent(MatomoName.LockApp)
-                    safelyNavigate(R.id.appSecurityActivity)
-                }
-            } else {
-                isGone = true
-            }
-        }
+        security.setOnClickListener { safelyNavigate(R.id.securitySettingsFragment) }
 
         initFileSync()
         about.setOnClickListener { safelyNavigate(R.id.aboutSettingsFragment) }
@@ -215,7 +203,6 @@ class SettingsFragment : Fragment() {
     override fun onResume() = with(binding) {
         super.onResume()
         syncPicture.endText = getString(if (AccountUtils.isEnableAppSync()) R.string.allActivated else R.string.allDisabled)
-        appSecurity.endText = getString(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
         setThemeSettingsValue()
     }
 
