@@ -37,6 +37,10 @@ sealed interface RoleFolder : Parcelable {
 
     data class Recents(val fileId: Int?) : RoleFolder
 
+    data class Redirect(val fileId: Int) : RoleFolder {
+        override val isHandled: Boolean get() = false
+    }
+
     data class SharedWithMe(val fileType: ExternalFileType?) : RoleFolder
 
     data class SharedLinks(val fileId: Int?) : RoleFolder {

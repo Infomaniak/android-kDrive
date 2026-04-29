@@ -42,4 +42,5 @@ object DeeplinkParser {
         val (actionType, action) = destructured
         return DeeplinkAction.from(actionType = actionType, action = action)
     }
+
 }
