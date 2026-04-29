@@ -23,7 +23,6 @@ import com.infomaniak.drive.data.models.deeplink.ACTION_TYPE
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged
-import com.infomaniak.drive.utils.instanceOf
 
 object DeeplinkParser {
 
@@ -44,7 +43,4 @@ object DeeplinkParser {
         return DeeplinkAction.from(actionType = actionType, action = action)
     }
 
-    suspend fun DeeplinkType.attemptResolveRedirect(): DeeplinkType {
-        return instanceOf<DeeplinkAction.Drive>()?.attemptConvertToResolveRedirect() ?: this
-    }
 }

@@ -29,7 +29,6 @@ import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.FilePr
 import com.infomaniak.drive.data.models.deeplink.DeeplinkExternalFilePath.Folder
 import com.infomaniak.drive.ui.MainActivityArgs
 import com.infomaniak.drive.utils.AccountUtils
-import com.infomaniak.drive.utils.instanceOf
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -78,6 +77,7 @@ sealed interface DeeplinkType : Parcelable {
                 is DeeplinkFolderRole.Files -> ensureHasAccess(fileId = filePath.fileId)
                 is DeeplinkFolderRole.MyShares -> ensureHasAccess(fileId = fileId)
                 is DeeplinkFolderRole.Recents -> ensureHasAccess(fileId = fileId)
+                is DeeplinkFolderRole.Redirect -> attemptToConvertToDriveFile(fileId = fileId)
                 is DeeplinkFolderRole.SharedWithMe -> externalFilePath.hasAccessTo()
                 is DeeplinkFolderRole.Trash -> ensureHasAccess(fileId = folderId)
                 else -> this@Drive
@@ -88,12 +88,6 @@ sealed interface DeeplinkType : Parcelable {
                 is FilePreviewInFolder -> ensureHasAccess(fileId, sharedWithMe = true)
                 is Folder -> ensureHasAccess(fileId = folderId, sharedWithMe = true)
                 null -> this@Drive
-            }
-
-            suspend fun attemptConvertToResolveRedirect(): Drive? {
-                return roleFolder.instanceOf<RoleFolder.Redirect>()
-                    ?.attemptConvertToInternalRoleFolder(driveId = driveId)
-                    ?.let { Drive(userId = userId, driveId = driveId, roleFolder = it) }
             }
         }
 
@@ -142,6 +136,25 @@ sealed interface DeeplinkType : Parcelable {
 
             private fun UserDrive.updateUser(deeplinkAction: DeeplinkAction) = also {
                 deeplinkAction.userId = it.userId
+            }
+
+            private fun Drive.attemptToConvertToDriveFile(fileId: Int): Drive {
+                return takeIf { roleFolder is RoleFolder.Redirect }
+                    .let { attemptConvert(fileId, false) ?: attemptConvert(fileId, true) }
+                    ?: this
+            }
+
+            private fun DeeplinkAction.attemptConvert(fileId: Int, sharedWithMe: Boolean): Drive? {
+                return getDrives(sharedWithMe)
+                    .firstNotNullOfOrNull { FileController.getFileById(fileId, userDrive = it) }
+                    ?.let { file ->
+                        val roleFolder = if (sharedWithMe) {
+                            Files(FileType.fromFile(file))
+                        } else {
+                            SharedWithMe(ExternalFileType.fromFile(file))
+                        }
+                        Drive(userId = userId, driveId = driveId, roleFolder = roleFolder)
+                    }
             }
         }
     }
