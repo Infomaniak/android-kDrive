@@ -53,13 +53,13 @@ sealed interface DeeplinkType : Parcelable {
         var userId: Int?
         val driveId: Int
 
-        suspend fun ensureHasAccess(): Boolean
+        suspend fun ensureHasAccess(): DeeplinkType
 
         data class Collaborate(override var userId: Int? = null, override val driveId: Int, val uuid: String) : DeeplinkAction {
             override val isHandled: Boolean
                 get() = false
 
-            override suspend fun ensureHasAccess(): Boolean = true
+            override suspend fun ensureHasAccess(): Collaborate = this
         }
 
         data class Drive(override var userId: Int? = null, override val driveId: Int, val roleFolder: RoleFolder) :
@@ -68,34 +68,38 @@ sealed interface DeeplinkType : Parcelable {
                 get() = roleFolder.isHandled
 
 
-            override suspend fun ensureHasAccess(): Boolean = roleFolder.hasAccessTo()
+            override suspend fun ensureHasAccess(): DeeplinkType = roleFolder.ensureHasAccess()
 
-            private suspend fun RoleFolder.hasAccessTo(): Boolean = when (this) {
-                is RoleFolder.Favorites -> hasAccessTo(fileId = fileId)
-                is RoleFolder.Files -> hasAccessTo(fileId = fileType.fileId)
-                is RoleFolder.MyShares -> hasAccessTo(fileId = fileId)
-                is RoleFolder.Recents -> hasAccessTo(fileId = fileId)
+            private suspend fun RoleFolder.ensureHasAccess(): DeeplinkType = when (this) {
+                is RoleFolder.Favorites -> ensureHasAccess(fileId = fileId)
+                is RoleFolder.Files -> ensureHasAccess(fileId = fileType.fileId)
+                is RoleFolder.MyShares -> ensureHasAccess(fileId = fileId)
+                is RoleFolder.Recents -> ensureHasAccess(fileId = fileId)
                 is RoleFolder.SharedWithMe -> fileType.hasAccessTo()
-                is RoleFolder.Trash -> hasAccessTo(fileId = folderId)
-                else -> true
+                is RoleFolder.Trash -> ensureHasAccess(fileId = folderId)
+                else -> this@Drive
             }
 
-            private suspend fun ExternalFileType?.hasAccessTo(): Boolean = when (this) {
-                is FilePreview -> hasAccessTo(fileId, sharedWithMe = true)
-                is FilePreviewInFolder -> hasAccessTo(fileId, sharedWithMe = true)
-                is Folder -> hasAccessTo(fileId = folderId, sharedWithMe = true)
-                null -> true
+            private suspend fun ExternalFileType?.hasAccessTo(): DeeplinkType = when (this) {
+                is FilePreview -> ensureHasAccess(fileId, sharedWithMe = true)
+                is FilePreviewInFolder -> ensureHasAccess(fileId, sharedWithMe = true)
+                is Folder -> ensureHasAccess(fileId = folderId, sharedWithMe = true)
+                null -> this@Drive
             }
         }
 
         data class Office(override var userId: Int? = null, override val driveId: Int, val fileId: Int) : DeeplinkAction {
-            override suspend fun ensureHasAccess(): Boolean = hasAccessTo(fileId)
+            override suspend fun ensureHasAccess(): DeeplinkType = ensureHasAccess(fileId)
         }
 
 
         companion object {
             @Throws(InvalidFormatting::class)
             fun from(actionType: String, action: String): DeeplinkAction = ActionType.from(actionType).build(action)
+
+            private suspend fun DeeplinkAction.ensureHasAccess(fileId: Int?, sharedWithMe: Boolean = false): DeeplinkType {
+                return takeIf { hasAccessTo(fileId, sharedWithMe) } ?: Unmanaged.NotAccessible
+            }
 
             private suspend fun DeeplinkAction.hasAccessTo(fileId: Int?, sharedWithMe: Boolean = false): Boolean {
                 return fileId?.let { hasAccessTo(fileId, sharedWithMe) } ?: hasDrive(sharedWithMe)
@@ -139,7 +143,7 @@ sealed interface DeeplinkType : Parcelable {
         fun Intent.putIfNeeded(deeplinkType: DeeplinkType?) = deeplinkType?.toArgsBundle()?.let { putExtras(it).clearStack() }
 
         suspend fun DeeplinkType.ensureHasAccess(): DeeplinkType {
-            return forDeeplinkAction { takeIf { ensureHasAccess() } ?: Unmanaged.NotAccessible }
+            return forDeeplinkAction { ensureHasAccess() }
         }
 
         private inline fun DeeplinkType.forDeeplinkAction(block: DeeplinkAction.() -> DeeplinkType): DeeplinkType =
