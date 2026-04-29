@@ -43,6 +43,7 @@ import com.infomaniak.drive.data.cache.DriveInfosController
 import com.infomaniak.drive.data.cache.FileMigration
 import com.infomaniak.drive.data.models.ShareLink
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType
+import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.ensureHasAccess
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Companion.putIfNeeded
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
 import com.infomaniak.drive.data.models.deeplink.ExternalFileType.Folder
@@ -227,19 +228,9 @@ class LaunchActivity : EdgeToEdgeActivity() {
         }
     }
 
-    private fun retrieveDeeplink(uri: Uri) {
+    private suspend fun retrieveDeeplink(uri: Uri) {
         deeplinkType = DeeplinkParser.parse(uri).ensureHasAccess()
         if (deeplinkType !is DeeplinkType.Unmanaged) trackDeepLink(MatomoName.Internal)
-    }
-
-    private fun DeeplinkType.ensureHasAccess(): DeeplinkType {
-        return takeUnless {
-            this is DeeplinkAction && DriveInfosController.getDrive(
-                driveId = driveId,
-                maintenance = false
-            ) == null
-        }
-            ?: DeeplinkType.Unmanaged.NotAccessible
     }
 
     private suspend fun handlePublicShareError(error: ApiError?, driveId: String, publicShareUuid: String) {
