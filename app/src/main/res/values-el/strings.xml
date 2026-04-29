@@ -600,6 +600,7 @@
     <string name="searchNoFile">Χωρίς αποτελέσματα, τροποποιήστε τα κριτήρια αναζήτησης</string>
     <string name="searchTitle">Αναζήτηση</string>
     <string name="searchViewHint">Αναζήτηση αρχείου…</string>
+    <string name="securityTitle">Ασφάλεια</string>
     <string name="selectDriveTitle">Επιλέξτε ένα kDrive</string>
     <string name="selectFolderTitle">Επιλέξτε έναν φάκελο</string>
     <string name="selectMediaFoldersDescription">Επιλέξτε τους φακέλους στη συσκευή σας που θα πρέπει να αποθηκευτούν αυτόματα στο kDrive σας.</string>

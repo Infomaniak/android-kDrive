@@ -600,6 +600,7 @@
     <string name="searchNoFile">Ingen resultater, tilpas dine søgekriterier</string>
     <string name="searchTitle">Søg</string>
     <string name="searchViewHint">Søg efter en fil …</string>
+    <string name="securityTitle">Sikkerhed</string>
     <string name="selectDriveTitle">Vælg en kDrive</string>
     <string name="selectFolderTitle">Vælg en mappe</string>
     <string name="selectMediaFoldersDescription">Vælg mapperne på din enhed, der skal gemmes automatisk i din kDrive.</string>

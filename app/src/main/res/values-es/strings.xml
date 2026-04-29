@@ -600,6 +600,7 @@
     <string name="searchNoFile">Ningún resultado. Cambia los criterios de búsqueda</string>
     <string name="searchTitle">Buscar</string>
     <string name="searchViewHint">Buscar un archivo…</string>
+    <string name="securityTitle">Seguridad</string>
     <string name="selectDriveTitle">Seleccionar un kDrive</string>
     <string name="selectFolderTitle">Seleccionar una carpeta</string>
     <string name="selectMediaFoldersDescription">Selecciona las carpetas de tu dispositivo de las que debe hacerse una copia de seguridad automática en tu kDrive.</string>
