@@ -658,6 +658,7 @@
     <string name="searchNoFile">Brak wyników, zmień kryteria wyszukiwania</string>
     <string name="searchTitle">Szukaj</string>
     <string name="searchViewHint">Szukaj pliku…</string>
+    <string name="securityTitle">Bezpieczeństwo</string>
     <string name="selectDriveTitle">Wybierz kDrive</string>
     <string name="selectFolderTitle">Wybierz folder</string>
     <string name="selectMediaFoldersDescription">Wybierz foldery na Twoim urządzeniu, które powinny być automatycznie zapisywane w Twoim kDrive.</string>

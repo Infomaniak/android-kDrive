@@ -600,6 +600,7 @@
     <string name="searchNoFile">Geen resultaten, pas uw zoekcriteria aan</string>
     <string name="searchTitle">Zoeken</string>
     <string name="searchViewHint">Zoek naar een bestand…</string>
+    <string name="securityTitle">Beveiliging</string>
     <string name="selectDriveTitle">Selecteer een kDrive</string>
     <string name="selectFolderTitle">Selecteer een map</string>
     <string name="selectMediaFoldersDescription">Selecteer de mappen op uw apparaat die automatisch moeten worden opgeslagen in uw kDrive.</string>

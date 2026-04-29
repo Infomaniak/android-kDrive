@@ -600,6 +600,7 @@
     <string name="searchNoFile">Aucun résultat, veuillez modifier vos critères de recherche</string>
     <string name="searchTitle">Rechercher</string>
     <string name="searchViewHint">Rechercher un fichier…</string>
+    <string name="securityTitle">Sécurité</string>
     <string name="selectDriveTitle">Sélectionner un kDrive</string>
     <string name="selectFolderTitle">Sélectionner un dossier</string>
     <string name="selectMediaFoldersDescription">Sélectionnez les dossiers de votre appareil qui doivent être sauvegardés automatiquement dans votre kDrive.</string>

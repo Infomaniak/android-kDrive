@@ -600,6 +600,7 @@
     <string name="searchNoFile">Ei tuloksia, muuta hakuehtoja</string>
     <string name="searchTitle">Etsi</string>
     <string name="searchViewHint">Etsi tiedostoa…</string>
+    <string name="securityTitle">Turvallisuus</string>
     <string name="selectDriveTitle">Valitse kDrive</string>
     <string name="selectFolderTitle">Valitse kansio</string>
     <string name="selectMediaFoldersDescription">Valitse laitteesi kansiot, jotka tallennetaan automaattisesti kDriveesi.</string>
