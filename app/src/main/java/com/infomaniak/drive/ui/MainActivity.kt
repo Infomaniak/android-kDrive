@@ -77,8 +77,6 @@ import com.infomaniak.core.legacy.utils.UtilsUi.getBackgroundColorBasedOnId
 import com.infomaniak.core.legacy.utils.setMargins
 import com.infomaniak.core.legacy.utils.whenResultIsOk
 import com.infomaniak.core.sentry.SentryLog
-import com.infomaniak.core.webview.ui.WebViewActivity
-import com.infomaniak.drive.BuildConfig.DEBUG
 import com.infomaniak.drive.GeniusScanUtils.scanResultProcessing
 import com.infomaniak.drive.GeniusScanUtils.startScanFlow
 import com.infomaniak.drive.MatomoDrive.MatomoCategory
@@ -89,19 +87,12 @@ import com.infomaniak.drive.MatomoDrive.trackInAppReview
 import com.infomaniak.drive.MatomoDrive.trackInAppUpdate
 import com.infomaniak.drive.MatomoDrive.trackMyKSuiteEvent
 import com.infomaniak.drive.R
-import com.infomaniak.drive.data.cache.DriveInfosController
-import com.infomaniak.drive.data.cache.FileController
 import com.infomaniak.drive.data.models.AppSettings
 import com.infomaniak.drive.data.models.File
 import com.infomaniak.drive.data.models.File.VisibilityType
 import com.infomaniak.drive.data.models.UiSettings
 import com.infomaniak.drive.data.models.UploadFile
-import com.infomaniak.drive.data.models.UserDrive
-import com.infomaniak.drive.data.models.deeplink.DeeplinkType
 import com.infomaniak.drive.data.models.deeplink.DeeplinkType.DeeplinkAction
-import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged.BrowserLaunch
-import com.infomaniak.drive.data.models.deeplink.DeeplinkType.Unmanaged.NotAccessible
-import com.infomaniak.drive.data.models.drive.Drive
 import com.infomaniak.drive.data.services.BaseDownloadWorker
 import com.infomaniak.drive.data.services.BaseDownloadWorker.Companion.HAS_SPACE_LEFT_AFTER_DOWNLOAD_KEY
 import com.infomaniak.drive.databinding.ActivityMainBinding
@@ -110,6 +101,7 @@ import com.infomaniak.drive.extensions.onApplyWindowInsetsListener
 import com.infomaniak.drive.extensions.trackDestination
 import com.infomaniak.drive.ui.addFiles.AddFileBottomSheetDialogArgs
 import com.infomaniak.drive.ui.bottomSheetDialogs.FileInfoActionsBottomSheetDialogArgs
+import com.infomaniak.drive.ui.deeplink.DeeplinkHandler
 import com.infomaniak.drive.ui.fileList.FileListFragmentArgs
 import com.infomaniak.drive.utils.AccountUtils
 import com.infomaniak.drive.utils.DownloadOfflineFileManager
@@ -119,7 +111,6 @@ import com.infomaniak.drive.utils.SyncUtils.launchAllUpload
 import com.infomaniak.drive.utils.SyncUtils.startContentObserverService
 import com.infomaniak.drive.utils.Utils
 import com.infomaniak.drive.utils.Utils.Shortcuts
-import com.infomaniak.drive.utils.openOnlyOfficeActivity
 import com.infomaniak.drive.utils.openSupport
 import com.infomaniak.drive.utils.showQuotasExceededSnackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -189,6 +180,8 @@ class MainActivity : BaseActivity() {
 
     private var inAppUpdateSnackbar: Snackbar? = null
 
+    private val deeplinkHandler = DeeplinkHandler(registryOwner = this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -205,7 +198,6 @@ class MainActivity : BaseActivity() {
         setupFabs()
         setupDrivePermissions()
         handleShortcuts()
-        handleDeeplink()
 
         initAppUpdateManager()
         initAppReviewManager()
@@ -233,6 +225,7 @@ class MainActivity : BaseActivity() {
         mainViewModel.loadRootFiles()
         myKSuiteViewModel.refreshMyKSuite()
         handleDeletionOfUploadedPhotos()
+        deeplinkHandler.handle(navigationArgs?.deeplinkType, this)
     }
 
     private fun getNavHostFragment() = supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment
@@ -272,67 +265,6 @@ class MainActivity : BaseActivity() {
                 navController.popBackStack(item.itemId, false)
             }
         }
-    }
-
-    private fun handleDeeplink() {
-        navigationArgs?.deeplinkType?.run {
-            when (this) {
-                is DeeplinkAction.Collaborate -> handleCollaborateDeeplink()
-                is DeeplinkAction.Drive -> handleDriveDeeplink()
-                is DeeplinkAction.Office -> handleOnlyOfficeDeeplink()
-                is DeeplinkType.Unmanaged -> handleUnmanagedDeeplink()
-            }
-        }
-    }
-
-    private fun DeeplinkAction.Collaborate.handleCollaborateDeeplink() {
-        if (DEBUG && isHandled) TODO("Need to implement here when Collaborate deeplink will be supported")
-    }
-
-    private fun DeeplinkAction.Drive.handleDriveDeeplink() {
-        lifecycleScope.launch(context = Dispatchers.IO) {
-            DriveInfosController.getDrive(userId = userId, driveId = driveId, maintenance = false)
-                ?.ensureRightUser()
-                ?.let {
-                    Dispatchers.Main { clickOnBottomBarFolders() }
-                    mainViewModel.navigateDeeplink.emit(this@handleDriveDeeplink)
-                }
-        }
-    }
-
-    private fun DeeplinkAction.Office.handleOnlyOfficeDeeplink() {
-        lifecycleScope.launch(context = Dispatchers.IO) {
-            DriveInfosController.getDrive(driveId = driveId, maintenance = false)
-                ?.ensureRightUser()
-                ?.run { FileController.getFileById(fileId = fileId, userDrive = UserDrive(userId = userId, driveId = id)) }
-                ?.let { Dispatchers.Main { openOnlyOfficeActivity(it) } }
-        }
-    }
-
-    private fun DeeplinkType.Unmanaged.handleUnmanagedDeeplink() {
-        when (this) {
-            is BrowserLaunch -> startWebViewActivity(url)
-            NotAccessible -> binding.mainFab.apply {
-                post { showSnackbar(title = R.string.noRightsToOfficeLink, anchor = this) }
-            }
-        }
-    }
-
-    private fun startWebViewActivity(url: String) {
-        WebViewActivity.startActivity(
-            context = this@MainActivity,
-            url = url,
-            headers = AccountUtils.currentUser?.run { mapOf("Authorization" to "Bearer ${apiToken.accessToken}") },
-            hostWhiteList = setOf("ksuite.infomaniak.com", "kdrive.infomaniak.com"),
-        )
-    }
-
-    private suspend fun Drive.ensureRightUser(): Drive = also {
-        if (userId != AccountUtils.currentUserId) {
-            AccountUtils.currentUserId = userId
-            AccountUtils.requestCurrentUser()
-        }
-        if (!sharedWithMe && id != AccountUtils.currentDriveId) AccountUtils.currentDriveId = id
     }
 
     private fun setupFabs() = with(binding) {
@@ -739,6 +671,17 @@ class MainActivity : BaseActivity() {
 
     fun clickOnBottomBarFolders() {
         binding.bottomNavigation.findViewById<View>(R.id.rootFilesFragment).performClick()
+    }
+
+    fun showSnackbarWithFabAnchor(title: Int) {
+        binding.mainFab.apply {
+            post { showSnackbar(title = title, anchor = this) }
+        }
+    }
+
+    suspend fun navigateFromDriveDeeplink(deeplink: DeeplinkAction.Drive) {
+        Dispatchers.Main { clickOnBottomBarFolders() }
+        mainViewModel.navigateDeeplink.emit(deeplink)
     }
 
     companion object {
