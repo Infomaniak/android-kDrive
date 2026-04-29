@@ -296,7 +296,7 @@ class CloudStorageProvider : DocumentsProvider() {
     override fun openDocument(documentId: String, mode: String, signal: CancellationSignal?): ParcelFileDescriptor? {
         SentryLog.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
         if (isProviderDisabled()) {
-            throw SecurityException("File provider disabled (kDrive is no longer available in the Files application and in third-party applications)")
+            throw SecurityException(context?.getString(R.string.fileProviderExtensionError))
         }
         val context = context ?: return null
 
@@ -877,7 +877,7 @@ class CloudStorageProvider : DocumentsProvider() {
         private const val MY_SHARES_FOLDER_ID = -1
         private const val SHARED_WITHME_FOLDER_ID = -2
         private const val PREFS_NAME = "cloud_storage_provider"
-        private const val KEY_DISABLED = "disabled_by_app_lock"
+        private const val KEY_PROVIDER_DISABLED = "provider_disabled"
 
         private val SHARED_URI_REGEX = Regex("\\d+/-\\d+/.+$DRIVE_SEPARATOR\\d+/\\d+")
 
@@ -980,11 +980,11 @@ class CloudStorageProvider : DocumentsProvider() {
             )
 
         fun isDisabled(context: Context): Boolean {
-            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(KEY_DISABLED, false)
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(KEY_PROVIDER_DISABLED, false)
         }
 
         fun setDisabled(context: Context, disabled: Boolean) {
-            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit { putBoolean(KEY_DISABLED, disabled) }
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit { putBoolean(KEY_PROVIDER_DISABLED, disabled) }
             notifyRootsChanged(context)
         }
 
