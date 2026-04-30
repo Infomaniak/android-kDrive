@@ -75,7 +75,10 @@ class SecuritySettingsFragment : Fragment() {
     override fun onResume() = with(binding) {
         super.onResume()
         appSecurity.endText = getString(if (AppSettings.appSecurityLock) R.string.allActivated else R.string.allDisabled)
-        contentProviderSwitch.isChecked = !CloudStorageProvider.isDisabled(appCtx)
+        val isContentProviderEnabled = !CloudStorageProvider.isDisabled(appCtx)
+        if (contentProviderSwitch.isChecked != isContentProviderEnabled) {
+            contentProviderSwitch.isChecked = isContentProviderEnabled
+        }
     }
 
 }

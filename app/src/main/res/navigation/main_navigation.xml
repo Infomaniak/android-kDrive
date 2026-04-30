@@ -568,7 +568,7 @@
     <fragment
         android:id="@+id/securitySettingsFragment"
         android:name="com.infomaniak.drive.ui.menu.settings.SecuritySettingsFragment"
-        android:label="securitySettingsFragment"
+        android:label="SecuritySettingsFragment"
         tools:layout="@layout/fragment_settings_security">
     </fragment>
 
