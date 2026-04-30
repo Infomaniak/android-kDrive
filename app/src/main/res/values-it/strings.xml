@@ -723,7 +723,7 @@
     </plurals>
     <plurals name="trashedFileRestoreFileInSuccess">
         <item quantity="one">%1$s ripristinato in %2$s</item>
-        <item quantity="other">%1$s elementi ripristinati in %2$s</item>
+        <item quantity="other">%1$d elementi ripristinati in %2$s</item>
     </plurals>
     <plurals name="trashedFileRestoreFileToOriginalPlaceSuccess">
         <item quantity="one">%s ripristinato nell’ubicazione di origine</item>
