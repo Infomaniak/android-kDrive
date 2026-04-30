@@ -142,12 +142,11 @@
                         app:title="@string/notificationTitle" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
-                        android:id="@+id/appSecurity"
+                        android:id="@+id/security"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:endText="@string/allDisabled"
-                        app:itemAction="text"
-                        app:title="@string/appSecurityTitle" />
+                        app:itemAction="chevron"
+                        app:title="@string/securityTitle" />
 
                     <com.infomaniak.drive.ui.menu.settings.ItemSettingView
                         android:id="@+id/fileSync"

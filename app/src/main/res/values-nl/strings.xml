@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Bestanden</string>
     <string name="filePermissionTitle">Selecteer het recht</string>
+    <string name="fileProviderExtensionDescription">Als deze optie is uitgeschakeld, is kDrive niet meer beschikbaar in de Bestanden-applicatie en in applicaties van derden.</string>
+    <string name="fileProviderExtensionError">U heeft de weergave van bestanden vanuit kDrive uitgeschakeld. U kunt dit opnieuw inschakelen in de app-instellingen.</string>
+    <string name="fileProviderExtensionTitle">Weergeven in Bestanden</string>
     <string name="fileShareAddMessage">Voeg een bericht toe voor gasten (optioneel)</string>
     <string name="fileShareDetailsFileTitle">Delen en rechten van bestand %s</string>
     <string name="fileShareDetailsFolderTitle">Delen en rechten van map %s</string>
@@ -597,6 +600,7 @@
     <string name="searchNoFile">Geen resultaten, pas uw zoekcriteria aan</string>
     <string name="searchTitle">Zoeken</string>
     <string name="searchViewHint">Zoek naar een bestand…</string>
+    <string name="securityTitle">Beveiliging</string>
     <string name="selectDriveTitle">Selecteer een kDrive</string>
     <string name="selectFolderTitle">Selecteer een map</string>
     <string name="selectMediaFoldersDescription">Selecteer de mappen op uw apparaat die automatisch moeten worden opgeslagen in uw kDrive.</string>

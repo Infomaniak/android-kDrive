@@ -449,6 +449,9 @@
     </plurals>
     <string name="fileListTitle">Files</string>
     <string name="filePermissionTitle">Select the right</string>
+    <string name="fileProviderExtensionDescription">If this option is disabled, kDrive will no longer be available in the Files application and in third-party applications.</string>
+    <string name="fileProviderExtensionError">You have disabled file display from kDrive. You can re-enable it in the app settings.</string>
+    <string name="fileProviderExtensionTitle">Show in Files</string>
     <string name="fileShareAddMessage">Add a message for guests (optional)</string>
     <string name="fileShareDetailsFileTitle">File %s sharing and rights</string>
     <string name="fileShareDetailsFolderTitle">Folder %s sharing and rights</string>
@@ -597,6 +600,7 @@
     <string name="searchNoFile">No results, please amend your search criteria</string>
     <string name="searchTitle">Search</string>
     <string name="searchViewHint">Search for a file…</string>
+    <string name="securityTitle">Security</string>
     <string name="selectDriveTitle">Select a kDrive</string>
     <string name="selectFolderTitle">Select a folder</string>
     <string name="selectMediaFoldersDescription">Select the folders on your device that should be automatically saved to your kDrive.</string>

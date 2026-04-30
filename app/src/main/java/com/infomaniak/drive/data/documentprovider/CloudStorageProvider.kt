@@ -34,6 +34,7 @@ import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import com.infomaniak.core.common.cancellable
@@ -89,6 +90,10 @@ class CloudStorageProvider : DocumentsProvider() {
     private val cloudScope = CoroutineScope(
         CoroutineName("CloudStorage") + Executors.newSingleThreadExecutor().asCoroutineDispatcher()
     )
+    private fun isProviderDisabled(): Boolean {
+        val ctx = context ?: return true
+        return isDisabled(ctx)
+    }
 
     /**
      * Indicates whether the current platform is Chrome OS.
@@ -175,6 +180,11 @@ class CloudStorageProvider : DocumentsProvider() {
 
     override fun queryChildDocuments(parentDocumentId: String, projection: Array<out String>?, sortOrder: String?): Cursor {
         val cursor = DocumentCursor(projection ?: DEFAULT_DOCUMENT_PROJECTION, isAutoCloseableJob = false)
+
+        if (isProviderDisabled()) {
+            cursor.extras = bundleOf(DocumentsContract.EXTRA_ERROR to (context?.getString(R.string.fileProviderExtensionError)))
+            return cursor
+        }
 
         val uri = DocumentCursor.createUri(context, parentDocumentId)
         val isNewJob = uri != oldQueryChildUri || needRefresh
@@ -285,6 +295,9 @@ class CloudStorageProvider : DocumentsProvider() {
 
     override fun openDocument(documentId: String, mode: String, signal: CancellationSignal?): ParcelFileDescriptor? {
         SentryLog.d(TAG, "openDocument(), id=$documentId, mode=$mode, signalIsCancelled: ${signal?.isCanceled}")
+        if (isProviderDisabled()) {
+            throw SecurityException(context?.getString(R.string.fileProviderExtensionError))
+        }
         val context = context ?: return null
 
         fun getRemoteFile(localFile: File?, fileId: Int, driveId: Int): File? {
@@ -863,6 +876,8 @@ class CloudStorageProvider : DocumentsProvider() {
         private const val DRIVE_SEPARATOR = "@"
         private const val MY_SHARES_FOLDER_ID = -1
         private const val SHARED_WITHME_FOLDER_ID = -2
+        private const val PREFS_NAME = "cloud_storage_provider"
+        private const val KEY_PROVIDER_DISABLED = "provider_disabled"
 
         private val SHARED_URI_REGEX = Regex("\\d+/-\\d+/.+$DRIVE_SEPARATOR\\d+/\\d+")
 
@@ -963,6 +978,15 @@ class CloudStorageProvider : DocumentsProvider() {
                 getDriveFromDocId(documentId).id,
                 comeFromSharedWithMe(documentId)
             )
+
+        fun isDisabled(context: Context): Boolean {
+            return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(KEY_PROVIDER_DISABLED, false)
+        }
+
+        fun setDisabled(context: Context, disabled: Boolean) {
+            context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit { putBoolean(KEY_PROVIDER_DISABLED, disabled) }
+            notifyRootsChanged(context)
+        }
 
         fun notifyRootsChanged(context: Context) {
             val authority = context.getString(R.string.CLOUD_STORAGE_AUTHORITY)
