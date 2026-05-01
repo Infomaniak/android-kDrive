@@ -157,7 +157,7 @@ open class UploadFile(
     fun getLastModified(): Long {
         val currentTimeMillis = System.currentTimeMillis()
         val lastModifiedAt = if (fileModifiedAt.time > currentTimeMillis) currentTimeMillis else fileModifiedAt.time
-        return lastModifiedAt / 1_000L
+        return lastModifiedAt
     }
 
     private fun deleteIfExistsInternal(keepFile: Boolean = false, realm: Realm) {
