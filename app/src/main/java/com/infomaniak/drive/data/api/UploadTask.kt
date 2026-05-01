@@ -79,6 +79,7 @@ import splitties.experimental.ExperimentalSplittiesApi
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
+import java.util.Date
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.concurrent.atomics.minusAssign
@@ -170,7 +171,7 @@ class UploadTask(
                 fileSize = uploadFile.fileSize,
                 conflictOption = uploadFile.uploadConflictOption(),
                 createdAt = uploadFile.fileCreatedAt,
-                lastModifiedAt = uploadFile.fileModifiedAt,
+                lastModifiedAt = Date(uploadFile.getLastModified()),
             )
             uploadChunkUnchecked(inputStream, httpClient, url = url, length = uploadFile.fileSize)
         }
@@ -459,14 +460,12 @@ class UploadTask(
     }
 
     private fun UploadFile.prepareUploadSession(totalChunks: Int): String? {
-        val currentTimeMillis = System.currentTimeMillis()
-        val lastModifiedAt = if (fileModifiedAt.time > currentTimeMillis) currentTimeMillis else fileModifiedAt.time
         val sessionBody = UploadSession.StartSessionBody(
             conflict = uploadConflictOption(),
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1_000L,
             directoryId = remoteFolder,
             fileName = fileName,
-            lastModifiedAt = lastModifiedAt / 1_000L,
+            lastModifiedAt = getLastModified(),
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
             totalSize = fileSize,
