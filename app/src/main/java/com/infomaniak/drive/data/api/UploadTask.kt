@@ -465,7 +465,7 @@ class UploadTask(
             createdAt = if (fileCreatedAt == null) null else fileCreatedAt!!.time / 1_000L,
             directoryId = remoteFolder,
             fileName = fileName,
-            lastModifiedAt = getLastModified(),
+            lastModifiedAt = getLastModified() / 1_000L,
             subDirectoryPath = remoteSubFolder ?: "",
             totalChunks = totalChunks,
             totalSize = fileSize,
