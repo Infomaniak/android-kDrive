@@ -78,7 +78,7 @@ open class UploadFile(
     fun isSchemeFile() = getUriObject().scheme.equals(ContentResolver.SCHEME_FILE)
 
     fun createSubFolder(parent: String, createDatedSubFolders: Boolean) {
-        remoteSubFolder = parent + if (createDatedSubFolders) "/${fileModifiedAt.format("yyyy/MM")}" else ""
+        remoteSubFolder = parent + if (createDatedSubFolders) "/${Date(getLastModified()).format("yyyy/MM")}" else ""
     }
 
     fun store(coroutineContext: CoroutineContext = EmptyCoroutineContext, customRealm: Realm? = null) {
@@ -152,6 +152,12 @@ open class UploadFile(
             null -> getRealmInstance().use { deleteIfExistsInternal(keepFile = keepFile, it) }
             else -> deleteIfExistsInternal(keepFile = keepFile, customRealm)
         }
+    }
+
+    fun getLastModified(): Long {
+        val currentTimeMillis = System.currentTimeMillis()
+        val lastModifiedAt = if (fileModifiedAt.time > currentTimeMillis) currentTimeMillis else fileModifiedAt.time
+        return lastModifiedAt
     }
 
     private fun deleteIfExistsInternal(keepFile: Boolean = false, realm: Realm) {

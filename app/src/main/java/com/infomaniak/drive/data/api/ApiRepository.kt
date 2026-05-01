@@ -66,6 +66,7 @@ import com.infomaniak.drive.data.models.upload.UploadSession.StartUploadSession
 import com.infomaniak.drive.data.models.upload.ValidChunks
 import com.infomaniak.drive.utils.AccountUtils
 import okhttp3.OkHttpClient
+import java.util.Date
 import com.infomaniak.core.auth.networking.HttpClient.okHttpClientLongTimeoutWithTokenInterceptor as okHttpClientLongTimeout
 import com.infomaniak.core.ksuite.myksuite.ui.network.ApiRoutes as MyKSuiteApiRoutes
 
@@ -242,7 +243,7 @@ object ApiRepository : ApiRepositoryCore() {
             conflictOption = ConflictOption.RENAME,
             directoryPath = remoteSubFolder,
             createdAt = uploadFile.fileCreatedAt,
-            lastModifiedAt = uploadFile.fileModifiedAt,
+            lastModifiedAt = Date(uploadFile.getLastModified()),
         )
 
         ApiController.callApi<ApiResponse<File>>(uploadUrl, POST)
