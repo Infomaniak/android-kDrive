@@ -49,14 +49,14 @@ sealed class FileType(open val fileId: Int) : Parcelable {
         const val GROUP_PREVIEW_IN_FOLDER = "previewFolder"
 
         /**
-         * FOLDER_PROPERTIES filters this kind of paths :
+         * PATH_IDS_PATTERN filters this kind of paths :
          *      <folderId>/<fileId>
          *      <folderId>/preview/<type:string>/<fileId>
          *  It find one of them and assign it to a named group
          *
-         *  Order in this Regex implies index for each parsing in ExternalFileType constructors
+         *  Order in this Regex implies index for each parsing in FileType constructors
          */
-        val FOLDER_PROPERTIES = arrayOf(
+        val PATH_IDS_PATTERN = arrayOf(
             "$START_OF_REGEX(?<$GROUP_FILE>${File.PATTERN})$END_OF_REGEX",
             "$START_OF_REGEX(?<$GROUP_PREVIEW_IN_FOLDER>${FilePreviewInFolder.PATTERN})$END_OF_REGEX",
         )

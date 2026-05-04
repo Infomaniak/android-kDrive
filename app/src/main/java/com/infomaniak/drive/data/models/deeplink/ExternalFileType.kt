@@ -64,7 +64,7 @@ sealed interface ExternalFileType : Parcelable {
         private const val GROUP_FOLDER = "folder"
         private const val GROUP_PREVIEW_FILE_IN_FOLDER = "fileInFolder"
         /**
-         * SHARED_WITH_ME_FOLDER_PROPERTIES filters this kind of paths :
+         * PATH_IDS_PATTERN filters this kind of paths :
          *       <sourceDriveId>/preview/<type:string>/<fileId>
          *       <sourceDriveId>/<folderId>
          *       <sourceDriveId>/<folderId>/preview/<type:string>/<fileId>
@@ -72,7 +72,7 @@ sealed interface ExternalFileType : Parcelable {
          *
          *  Order in this Regex implies index for each parsing in ExternalFileType constructors
          */
-        val SHARED_WITH_ME_FOLDER_PROPERTIES = arrayOf(
+        val PATH_IDS_PATTERN = arrayOf(
             "$START_OF_REGEX(?<$GROUP_PREVIEW_FILE>${FilePreview.PATTERN})$END_OF_REGEX",
             "$START_OF_REGEX(?<$GROUP_FOLDER>${Folder.PATTERN})$END_OF_REGEX",
             "$START_OF_REGEX(?<$GROUP_PREVIEW_FILE_IN_FOLDER>${FilePreviewInFolder.PATTERN})$END_OF_REGEX",

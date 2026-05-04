@@ -23,12 +23,12 @@ import com.infomaniak.drive.data.models.deeplink.FileType.Companion.extractFileT
 
 enum class FolderType(val type: String, vararg val propertiesPattern: String) {
     Collaboratives(type = "collaboratives"),
-    Favorites(type = "favorites", PREVIEW),
-    Files(type = "files", *FileType.FOLDER_PROPERTIES),
-    MyShares(type = "my-shares", PREVIEW),
-    SharedWithMe(type = "shared-with-me", *ExternalFileType.SHARED_WITH_ME_FOLDER_PROPERTIES),
-    SharedLinks(type = "shared-links", PREVIEW),
-    Recents(type = "recents", PREVIEW),
+    Favorites(type = "favorites", PREVIEW_PATTERN),
+    Files(type = "files", *FileType.PATH_IDS_PATTERN),
+    MyShares(type = "my-shares", PREVIEW_PATTERN),
+    SharedWithMe(type = "shared-with-me", *ExternalFileType.PATH_IDS_PATTERN),
+    SharedLinks(type = "shared-links", PREVIEW_PATTERN),
+    Recents(type = "recents", PREVIEW_PATTERN),
     Trash(type = "trash", FOLDER_ID);
 
     fun build(folderProperties: String): RoleFolder = folderProperties.optionalFind(*propertiesPattern).run {
