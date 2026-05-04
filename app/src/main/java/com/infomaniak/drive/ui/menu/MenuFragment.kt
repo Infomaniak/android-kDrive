@@ -35,6 +35,7 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.infomaniak.core.coil.loadAvatar
 import com.infomaniak.core.common.FormatterFileSize.formatShortFileSize
+import com.infomaniak.core.common.observe
 import com.infomaniak.core.fragmentnavigation.safelyNavigate
 import com.infomaniak.core.ksuite.data.KSuite
 import com.infomaniak.core.legacy.utils.safeBinding
@@ -71,6 +72,12 @@ class MenuFragment : Fragment() {
         userName.text = user.displayName
         userEmail.text = user.email
         userImage.loadAvatar(id = user.id, avatarUrl = user.avatar, initials = user.getInitials())
+
+        AccountUtils.currentUserAvatar.observe(viewLifecycleOwner) { avatar ->
+            AccountUtils.currentUser?.let { user ->
+                userImage.loadAvatar(id = user.id, avatarUrl = avatar, initials = user.getInitials())
+            }
+        }
 
         if (DriveInfosController.hasSingleDrive(user.id)) {
             driveIcon.isGone = true

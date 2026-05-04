@@ -121,6 +121,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import com.infomaniak.core.legacy.R as RCore
 
@@ -205,6 +206,7 @@ class MainActivity : BaseActivity() {
         observeBulkDownloadRunning()
         observeDownloadCancellation()
         observeFailureDownloadWorkerOffline()
+        observeCurrentUserAvatar()
 
         AppLockManager.scheduleLockIfNeeded(
             targetActivity = this,
@@ -344,6 +346,12 @@ class MainActivity : BaseActivity() {
                     WorkManager.getInstance(this@MainActivity).pruneWork()
                 }
             }
+    }
+
+    private fun observeCurrentUserAvatar() {
+        AccountUtils.currentUserAvatar.observe(this){
+            setBottomNavigationUserAvatar(this@MainActivity)
+        }
     }
 
     private fun canDisplayInAppSnackbar() = inAppUpdateSnackbar?.isShown != true && getMainFab().isShown

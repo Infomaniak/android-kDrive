@@ -50,6 +50,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.invoke
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -81,10 +83,14 @@ object AccountUtils : CredentialManager() {
             AppSettings.updateAppSettings(scope) { if (isValid) _currentDriveId = driveId }
         }
 
+    private val _currentUserAvatar = MutableStateFlow<String?>(null)
+    val currentUserAvatar: StateFlow<String?> = _currentUserAvatar
+
     override var currentUser: User? = null
         set(user) {
             field = user
             currentUserId = user?.id ?: -1
+            _currentUserAvatar.value = user?.avatar
             getCurrentDrive()
             Sentry.setUser(io.sentry.protocol.User().apply {
                 id = currentUserId.toString()
